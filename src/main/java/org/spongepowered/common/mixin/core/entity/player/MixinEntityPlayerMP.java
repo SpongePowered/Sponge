@@ -42,7 +42,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketBlockChange;
+import net.minecraft.network.play.server.SPacketChangeGameState;
 import net.minecraft.network.play.server.SPacketChat;
+import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
@@ -50,11 +52,16 @@ import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
+import net.minecraft.stats.Achievement;
+import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.StatBase;
+import net.minecraft.stats.StatisticsManagerServer;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -76,6 +83,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -94,6 +102,7 @@ import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -155,10 +164,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int lastExperience;
     @Shadow private EntityPlayer.EnumChatVisibility chatVisibility = EntityPlayer.EnumChatVisibility.FULL;
     @Shadow private boolean chatColours;
+    @Shadow public boolean playerConqueredTheEnd;
+    @Shadow private float lastHealth;
+    @Shadow private int lastFoodLevel;
 
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
     @Shadow public abstract void takeStat(StatBase stat);
+    @Shadow public abstract StatisticsManagerServer getStatFile();
+    @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -187,6 +201,59 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public IMixinWorldServer getMixinWorld() {
         return ((IMixinWorldServer) this.worldObj);
+    }
+
+    /**
+     * @author blood - May 30th, 2016
+     * @author gabizou - May 31st, 2016 - Update for 1.9.4 changes
+     *
+     * @reason - adjusted to support {@link MoveEntityEvent.Position.Teleport}
+     *
+     * @param dimensionId The id of target dimension.
+     */
+    @Nullable
+    @Override
+    @Overwrite
+    public Entity changeDimension(int dimensionId) {
+        // If leaving The End via End's Portal
+        // Sponge Start - Check the provider, not the world's dimension
+        if (this.worldObj.provider instanceof WorldProviderEnd && dimensionId == 1) { // if (this.dimension == 1 && dimensionIn == 1)
+            // Sponge End
+            this.worldObj.removeEntity((EntityPlayerMP) (Object) this);
+            if (!this.playerConqueredTheEnd) {
+                this.playerConqueredTheEnd = true;
+                if (this.hasAchievement(AchievementList.THE_END2)) {
+                    this.connection.sendPacket(new SPacketChangeGameState(4, 0.0F));
+                } else {
+                    this.addStat(AchievementList.THE_END2);
+                    this.connection.sendPacket(new SPacketChangeGameState(4, 1.0F));
+                }
+            }
+            return (EntityPlayerMP) (Object) this;
+        } // else { // Sponge - Remove unecessary
+
+        // Sponge Start - Rewrite for vanilla mechanics since multiworlds can change world providers and
+        // dimension id's
+        if (this.worldObj.provider instanceof WorldProviderSurface) {
+            if (dimensionId == 1) {
+                this.addStat(AchievementList.THE_END);
+            } else if (dimensionId == -1) {
+                this.addStat(AchievementList.PORTAL);
+            }
+        }
+        // Sponge End
+
+        this.mcServer.getPlayerList().changePlayerDimension((EntityPlayerMP) (Object) this, dimensionId);
+        this.connection.sendPacket(new SPacketEffect(1032, BlockPos.ORIGIN, 0, false));
+
+        // Sponge Start - This has been moved below to refreshXpHealthAndFood
+        /*
+        this.lastExperience = -1;
+        this.lastHealth = -1.0F;
+        this.lastFoodLevel = -1;
+        */
+        // Sponge End
+        return (EntityPlayerMP) (Object) this;
     }
 
     @Override
@@ -307,6 +374,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    public void refreshXpHealthAndFood() {
+        this.lastExperience = -1;
+        this.lastHealth = -1.0F;
+        this.lastFoodLevel = -1;
+    }
+
+    @Override
     public void reset() {
         float experience = 0;
         boolean keepInventory = this.worldObj.getGameRules().getBoolean("keepInventory");
@@ -352,7 +426,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (scoreboard == null) {
             scoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
         }
-        ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this);
+        ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this, true);
         this.spongeScoreboard = scoreboard;
         ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this);
     }

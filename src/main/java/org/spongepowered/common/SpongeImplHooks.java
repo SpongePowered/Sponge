@@ -42,6 +42,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
+import net.minecraft.world.Teleporter;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -54,6 +55,8 @@ import org.spongepowered.api.world.World;
 
 import java.util.Collection;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 /**
  * Utility that fires events that normally Forge fires at (in spots). Typically
@@ -144,4 +147,7 @@ public final class SpongeImplHooks {
         return "";
     }
 
+    public static void registerPortalAgentType(@Nullable Teleporter teleporter) {
+        // plugins are required to register types
+    }
 }

@@ -49,6 +49,7 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.NextTickListEntry;
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
@@ -60,6 +61,7 @@ import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -88,9 +90,13 @@ import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.PortalAgent;
+import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
@@ -178,6 +184,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
+    @Shadow private Teleporter worldTeleporter;
     @Shadow private WorldServer.ServerBlockEventList[] blockEventQueue;
     @Shadow private int blockEventCacheIndex;
 
@@ -189,6 +196,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.prevWeather = getWeather();
         this.weatherStartTime = this.worldInfo.getWorldTotalTime();
         ((World) (Object) this).getWorldBorder().addListener(new PlayerBorderListener(this.getMinecraftServer(), dimensionId));
+        PortalAgentType portalAgentType = ((WorldProperties) this.worldInfo).getPortalAgentType();
+        if (!portalAgentType.equals(PortalAgentTypes.DEFAULT)) {
+            try {
+                this.worldTeleporter = (Teleporter) portalAgentType.getPortalAgentClass().getConstructor(new Class[] {WorldServer.class})
+                        .newInstance(new Object[] {this});
+            } catch (Exception e) {
+                SpongeImpl.getLogger().log(Level.ERROR, "Could not create PortalAgent of type " + portalAgentType.getId()
+                        + " for world " + this.getName() + ": " + e.getMessage() + ". Falling back to default...");
+            }
+        }
 
         // Turn on capturing
         updateWorldGenerator();
@@ -956,6 +973,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return (WorldStorage) ((WorldServer) (Object) this).getChunkProvider();
     }
 
+    @Override
+    public PortalAgent getPortalAgent() {
+        return (PortalAgent) this.worldTeleporter;
+    }
+
     /**************************** TIMINGS ***************************************/
     /*
     The remaining of these overridden methods are all injectors into World#updateEntities() to where
@@ -1036,6 +1058,62 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     protected void endPendingTileEntities() {
         this.timings.tileEntityPending.stopTiming();
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickPending") )
+    private void onBeginTickBlockUpdate(CallbackInfo ci) {
+        this.timings.scheduledBlocks.startTiming();
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickBlocks") )
+    private void onAfterTickBlockUpdate(CallbackInfo ci) {
+        this.timings.scheduledBlocks.stopTiming();
+        this.timings.chunkTicks.startTiming();
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=chunkMap") )
+    private void onBeginUpdateBlocks(CallbackInfo ci) {
+        this.timings.chunkTicks.stopTiming();
+        this.timings.doChunkMap.startTiming();
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=village") )
+    private void onBeginUpdateVillage(CallbackInfo ci) {
+        this.timings.doChunkMap.stopTiming();
+        this.timings.doVillages.startTiming();
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=portalForcer") )
+    private void onBeginUpdatePortal(CallbackInfo ci) {
+        this.timings.doVillages.stopTiming();
+        this.timings.doPortalForcer.startTiming();
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/profiler/Profiler;endSection()V") )
+    private void onEndUpdatePortal(CallbackInfo ci) {
+        this.timings.doPortalForcer.stopTiming();
+    }
+    // TIMINGS
+    @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=cleaning"))
+    private void onTickUpdatesCleanup(boolean flag, CallbackInfoReturnable<Boolean> cir) {
+        this.timings.scheduledBlocksCleanup.startTiming();
+
+    }
+
+    @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=ticking"))
+    private void onTickUpdatesTickingStart(boolean flag, CallbackInfoReturnable<Boolean> cir) {
+        this.timings.scheduledBlocksCleanup.stopTiming();
+        this.timings.scheduledBlocksTicking.startTiming();
+    }
+
+    @Inject(method = "tickUpdates", at = @At("RETURN"))
+    private void onTickUpdatesTickingEnd(CallbackInfoReturnable<Boolean> cir) {
+        this.timings.scheduledBlocksTicking.stopTiming();
+    }
+
+    @Override
+    public WorldTimingsHandler getTimingsHandler() {
+        return this.timings;
     }
 
     /**************************** EFFECT ****************************************/
@@ -1175,65 +1253,4 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.weatherStartTime = weatherStartTime;
     }
 
-    // TIMINGS
-    @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=cleaning"))
-    private void onTickUpdatesCleanup(boolean flag, CallbackInfoReturnable<Boolean> cir) {
-        this.timings.scheduledBlocksCleanup.startTiming();
-
-    }
-
-    @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=ticking"))
-    private void onTickUpdatesTickingStart(boolean flag, CallbackInfoReturnable<Boolean> cir) {
-        this.timings.scheduledBlocksCleanup.stopTiming();
-        this.timings.scheduledBlocksTicking.startTiming();
-    }
-
-    @Inject(method = "tickUpdates", at = @At("RETURN"))
-    private void onTickUpdatesTickingEnd(CallbackInfoReturnable<Boolean> cir) {
-        this.timings.scheduledBlocksTicking.stopTiming();
-    }
-
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickPending") )
-    private void onBeginTickBlockUpdate(CallbackInfo ci) {
-        if (!this.isRemote) {
-            this.timings.scheduledBlocks.startTiming();
-        }
-    }
-
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickBlocks") )
-    private void onAfterTickBlockUpdate(CallbackInfo ci) {
-        if (!this.isRemote) {
-            this.timings.scheduledBlocks.stopTiming();
-            this.timings.chunkTicks.startTiming();
-        }
-    }
-
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=chunkMap") )
-    private void onBeginUpdateBlocks(CallbackInfo ci) {
-        if (!this.isRemote) {
-            this.timings.chunkTicks.stopTiming();
-            this.timings.doChunkMap.startTiming();
-        }
-    }
-
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=village") )
-    private void onBeginUpdateVillage(CallbackInfo ci) {
-        if (!this.isRemote) {
-            this.timings.doChunkMap.stopTiming();
-            this.timings.doVillages.startTiming();
-        }
-    }
-
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=portalForcer") )
-    private void onBeginUpdatePortal(CallbackInfo ci) {
-        if (!this.isRemote) {
-            this.timings.doVillages.stopTiming();
-            this.timings.doPortalForcer.startTiming();
-        }
-    }
-
-    @Override
-    public WorldTimingsHandler getTimingsHandler() {
-        return this.timings;
-    }
 }

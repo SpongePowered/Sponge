@@ -39,6 +39,8 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
+import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
@@ -70,6 +72,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
     private boolean generateBonusChest;
     private DataContainer generatorSettings;
     private ImmutableList<WorldGeneratorModifier> generatorModifiers;
+    private PortalAgentType portalAgentType;
 
     public SpongeWorldArchetypeBuilder() {
         reset();
@@ -148,6 +151,12 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
     }
 
     @Override
+    public WorldArchetype.Builder portalAgent(PortalAgentType type) {
+        this.portalAgentType = checkNotNull(type);
+        return this;
+    }
+
+    @Override
     public SpongeWorldArchetypeBuilder generatorModifiers(WorldGeneratorModifier... modifiers) {
         ImmutableList<WorldGeneratorModifier> defensiveCopy = ImmutableList.copyOf(modifiers);
         WorldGeneratorModifierRegistryModule.getInstance().checkAllRegistered(defensiveCopy);
@@ -199,6 +208,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.generateSpawnOnLoad = value.doesGenerateSpawnOnLoad();
         this.commandsAllowed = value.areCommandsAllowed();
         this.generateBonusChest = value.doesGenerateBonusChest();
+        this.portalAgentType = value.getPortalAgentType();
         return this;
     }
 
@@ -222,6 +232,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.generateSpawnOnLoad = value.doesGenerateSpawnOnLoad();
         this.commandsAllowed = value.areCommandsAllowed();
         this.generateBonusChest = value.doesGenerateBonusChest();
+        this.portalAgentType = value.getPortalAgentType();
         return this;
     }
 
@@ -249,6 +260,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         spongeSettings.setCommandsAllowed(this.commandsAllowed);
         spongeSettings.setGenerateBonusChest(this.generateBonusChest);
         spongeSettings.fromBuilder(true);
+        spongeSettings.setPortalAgentType(this.portalAgentType);
         Sponge.getRegistry().register(WorldArchetype.class, (WorldArchetype) (Object) settings);
         return (WorldArchetype) (Object) settings;
     }
@@ -272,6 +284,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.pvpEnabled = true;
         this.commandsAllowed = true;
         this.generateBonusChest = false;
+        this.portalAgentType = PortalAgentTypes.DEFAULT;
         return this;
     }
 }

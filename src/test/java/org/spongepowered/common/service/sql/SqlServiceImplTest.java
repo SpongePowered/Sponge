@@ -35,7 +35,7 @@ public class SqlServiceImplTest {
     @Test
     public void testMysqlConnectionInfo() throws SQLException {
         final String jdbcUrl = "jdbc:mysql://zml:totallymypassword@localhost/sponge";
-        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(jdbcUrl);
+        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
 
         assertEquals("zml", subject.getUser());
         assertEquals("totallymypassword", subject.getPassword());
@@ -46,7 +46,7 @@ public class SqlServiceImplTest {
     @Test
     public void testH2ConnectionInfo() throws SQLException {
         final String jdbcUrl = "jdbc:h2:sparkles.db";
-        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(jdbcUrl);
+        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
 
         assertNull(subject.getUser());
         assertNull(subject.getPassword());
@@ -57,7 +57,7 @@ public class SqlServiceImplTest {
     @Test
     public void testSqliteConnectionInfo() throws SQLException {
         final String jdbcUrl = "jdbc:sqlite:glitter.db";
-        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(jdbcUrl);
+        final SqlServiceImpl.ConnectionInfo subject = SqlServiceImpl.ConnectionInfo.fromUrl(null, jdbcUrl);
 
         assertNull(subject.getUser());
         assertNull(subject.getPassword());

@@ -56,6 +56,8 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -82,6 +84,7 @@ import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
@@ -89,12 +92,14 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -224,6 +229,9 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isOnSameTeam(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract double getDistanceSqToEntity(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract void addToPlayerScore(net.minecraft.entity.Entity entityIn, int amount);
+    @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
+
 
     // @formatter:on
 
@@ -339,22 +347,45 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
-    public void setLocation(Location<World> location) {
+    public boolean setLocationAndRotation(Location<World> location, Vector3d rotation) {
+        boolean result = setLocation(location);
+        if (result) {
+            setRotation(rotation);
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public boolean setLocation(Location<World> location) {
         checkNotNull(location, "The location was null!");
-        checkState(location.getExtent().isLoaded(), "World is no longer loaded!");
-        checkState(!isRemoved(), "Trying to set location of removed entity!");
+        if (isRemoved()) {
+            return false;
+        }
+
+        MoveEntityEvent.Position.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
+        if (event.isCancelled()) {
+            return false;
+        } else {
+            this.setLocationAndAngles(event.getToTransform());
+        }
+
+        // detach passengers
         final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
         final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
 
-        if (thisEntity instanceof EntityPlayerMP) {
-            // Close open containers
-            if (((EntityPlayerMP) thisEntity).openContainer != ((EntityPlayerMP) thisEntity).inventoryContainer) {
-                ((EntityPlayerMP) thisEntity).closeContainer();
+        net.minecraft.world.World nmsWorld = null;
+        if (location.getExtent().getUniqueId() != ((World) this.worldObj).getUniqueId()) {
+            nmsWorld = (net.minecraft.world.World) location.getExtent();
+            if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
+                // Close open containers
+                final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) (net.minecraft.entity.Entity) (Object) this;
+                if (entityPlayerMP.openContainer != entityPlayerMP.inventoryContainer) {
+                    entityPlayerMP.closeContainer();
+                }
             }
-        }
-
-        if (!location.getExtent().getUniqueId().equals(((World) this.worldObj).getUniqueId())) {
-            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, getTransform().setLocation(location));
+            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.worldObj).getDimensionId(), ((IMixinWorldServer) nmsWorld).getDimensionId());
         } else {
             if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
                 ((EntityPlayerMP) thisEntity).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
@@ -364,22 +395,42 @@ public abstract class MixinEntity implements IMixinEntity {
             }
         }
 
-        // Re-attach passengers
-        for (net.minecraft.entity.Entity passenger : passengers) {
-            passenger.startRiding(thisEntity, true);
+        // re-attach passengers
+            // Re-attach passengers
+            for (net.minecraft.entity.Entity passenger : passengers) {
+                passenger.startRiding(thisEntity, true);
+            }
+        return true;
+    }
+
+    // always use these methods internally when setting locations from a transform or location
+    // to avoid firing a DisplaceEntityEvent.Teleport
+    @Override
+    public void setLocationAndAngles(Location<World> location) {
+        this.setPosition(location.getX(), location.getY(), location.getZ());
+        if (this.worldObj != location.getExtent()) {
+            this.worldObj = (net.minecraft.world.World) location.getExtent();
         }
     }
 
     @Override
-    public void setLocationAndRotation(Location<World> location, Vector3d rotation) {
-        setLocation(location);
-        setRotation(rotation);
+    public void setLocationAndAngles(Transform<World> transform) {
+        Vector3d position = transform.getPosition();
+        this.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
+        if (this.worldObj != transform.getExtent()) {
+            this.worldObj = (net.minecraft.world.World) transform.getExtent();
+        }
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public void setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
+    public boolean setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
+        boolean relocated = true;
+
         if (relativePositions.isEmpty()) {
-            setLocationAndRotation(location, rotation);
+            // This is just a normal teleport that happens to set both.
+            relocated = setLocation(location);
+            setRotation(rotation);
         } else {
             if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).connection != null) {
                 // Players use different logic, as they support real relative movement.
@@ -432,10 +483,11 @@ public abstract class MixinEntity implements IMixinEntity {
                 }
 
                 // From here just a normal teleport is needed.
-                setLocation(resultantLocation);
+                relocated = setLocation(resultantLocation);
                 setRotation(resultantRotation);
             }
         }
+        return relocated;
     }
 
     @Inject(method = "onUpdate", at = @At("RETURN"))
@@ -492,18 +544,23 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
-    public void setTransform(Transform<World> transform) {
+    public boolean setTransform(Transform<World> transform) {
         checkNotNull(transform, "The transform cannot be null!");
-        setLocation(transform.getLocation());
-        setRotation(transform.getRotation());
-        setScale(transform.getScale());
+        boolean result = setLocation(transform.getLocation());
+        if (result) {
+            setRotation(transform.getRotation());
+            setScale(transform.getScale());
+            return true;
+        }
+
+        return false;
     }
 
     @Override
-    public void transferToWorld(World world, Vector3d position) {
+    public boolean transferToWorld(World world, Vector3d position) {
         checkNotNull(world, "World was null!");
         checkNotNull(position, "Position was null!");
-        setLocation(new Location<>(world, position));
+        return setLocation(new Location<>(world, position));
     }
 
     @Override
@@ -646,6 +703,126 @@ public abstract class MixinEntity implements IMixinEntity {
             builder.from(entity.addPassenger(this));
         }
         return builder.result(DataTransactionResult.Type.SUCCESS).build();
+    }
+
+
+    /**
+     * @author blood - May 28th, 2016
+     * @author gabizou - May 31st, 2016 - Update for 1.9.4
+     *
+     * @reason - rewritten to support {@link MoveEntityEvent.Position.Teleport.Portal}
+     *
+     * @param toDimensionId The id of target dimension.
+     */
+    @Nullable
+    @Overwrite
+    public net.minecraft.entity.Entity changeDimension(int toDimensionId)
+    {
+        if (!this.worldObj.isRemote && !this.isDead) {
+            // Sponge Start - Throw an event really quickly before changing anything
+            MoveEntityEvent.Position.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent((net.minecraft.entity.Entity) (Object) this, toDimensionId, null);
+            if (event.isCancelled()) {
+                return null;
+            }
+            // Sponge End
+
+            this.worldObj.theProfiler.startSection("changeDimension");
+            // Sponge Start - use the worlds from event
+            // Vanilla - This is handled in the SpongeCommonEventFactory
+//            MinecraftServer minecraftserver = MinecraftServer.getServer();
+//            int i = this.dimension;
+//            WorldServer worldserver = minecraftserver.worldServerForDimension(i);
+//            WorldServer worldserver1 = minecraftserver.worldServerForDimension(dimensionId);
+//            this.dimension = dimensionId;
+//
+//            if (i == 1 && dimensionId == 1)
+//            {
+//                worldserver1 = minecraftserver.worldServerForDimension(0);
+//                this.dimension = 0;
+//            }
+            WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
+            // Sponge End
+
+            this.worldObj.removeEntity((net.minecraft.entity.Entity) (Object) this);
+            this.isDead = false;
+            this.worldObj.theProfiler.startSection("reposition");
+            // Sponge Start - Remove code from Vanilla and handle it directly with our
+            //                multiworld changes
+//            BlockPos blockpos;
+//
+//            if (dimensionIn == 1)
+//            {
+//                blockpos = worldserver1.getSpawnCoordinate();
+//            }
+//            else
+//            {
+//                double d0 = this.posX;
+//                double d1 = this.posZ;
+//                double d2 = 8.0D;
+//
+//                if (dimensionIn == -1)
+//                {
+//                    d0 = MathHelper.clamp_double(d0 / d2, worldserver1.getWorldBorder().minX() + 16.0D, worldserver1.getWorldBorder().maxX() - 16.0D);
+//                    d1 = MathHelper.clamp_double(d1 / d2, worldserver1.getWorldBorder().minZ() + 16.0D, worldserver1.getWorldBorder().maxZ() - 16.0D);
+//                }
+//                else if (dimensionIn == 0)
+//                {
+//                    d0 = MathHelper.clamp_double(d0 * d2, worldserver1.getWorldBorder().minX() + 16.0D, worldserver1.getWorldBorder().maxX() - 16.0D);
+//                    d1 = MathHelper.clamp_double(d1 * d2, worldserver1.getWorldBorder().minZ() + 16.0D, worldserver1.getWorldBorder().maxZ() - 16.0D);
+//                }
+//
+//                d0 = (double)MathHelper.clamp_int((int)d0, -29999872, 29999872);
+//                d1 = (double)MathHelper.clamp_int((int)d1, -29999872, 29999872);
+//                float f = this.rotationYaw;
+//                this.setLocationAndAngles(d0, this.posY, d1, 90.0F, 0.0F);
+//                Teleporter teleporter = worldserver1.getDefaultTeleporter();
+//                teleporter.placeInExistingPortal(this, f);
+//                blockpos = new BlockPos(this);
+//            }
+//
+            // Up to here is what Vanilla required.
+            // Only need to update the entity location here as the portal is handled in SpongeCommonEventFactory
+            this.setLocationAndAngles(event.getToTransform().getPosition().getX(), event.getToTransform().getPosition().getY(), event.getToTransform().getPosition().getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+            toWorld.spawnEntityInWorld((net.minecraft.entity.Entity) (Object) this);
+            this.worldObj = toWorld; // Sponge - Set the this worldObj to the toWorld to avoid re-creating entities
+
+            // Sponge End
+            toWorld.updateEntityWithOptionalForce((net.minecraft.entity.Entity) (Object) this, false);
+            this.worldObj.theProfiler.endStartSection("reloading");
+            // Sponge Start - Disable recreation of entities when traveling through portals
+//            this.worldObj.theProfiler.endStartSection("reloading");
+//            net.minecraft.entity.Entity entity = EntityList.createEntityByName(EntityList.getEntityString(this.mcEntity), toWorld);
+//
+//            if (entity != null)
+//            {
+//                entity.copyDataFromOld(this);
+//
+//                if (i == 1 && dimensionIn == 1)
+//                {
+//                    BlockPos blockpos1 = worldserver1.getTopSolidOrLiquidBlock(worldserver1.getSpawnPoint());
+//                    entity.moveToBlockPosAndAngles(blockpos1, entity.rotationYaw, entity.rotationPitch);
+//                }
+//                else
+//                {
+//                    entity.moveToBlockPosAndAngles(blockpos, entity.rotationYaw, entity.rotationPitch);
+//                }
+//
+//                boolean flag = entity.forceSpawn;
+//                entity.forceSpawn = true;
+//                worldserver1.spawnEntityInWorld(entity);
+//                entity.forceSpawn = flag;
+//                worldserver1.updateEntityWithOptionalForce(entity, false);
+//            }
+            // Sponge End
+
+            // this.isDead = true; // Sponge - Since we don't re-create entities when teleporting, don't kill it!
+            this.worldObj.theProfiler.endSection();
+            //fromWorld.resetUpdateEntityTick(); // Sponge - No need to re-do this
+            //toWorld.resetUpdateEntityTick(); // Sponge - No need to re-do this
+            this.worldObj.theProfiler.endSection();
+            return (net.minecraft.entity.Entity) (Object) this;
+        } // Sponge remove unnecessary else
+        return null;
     }
 
     /**

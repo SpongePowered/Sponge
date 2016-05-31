@@ -59,6 +59,10 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.*;
 import org.spongepowered.api.event.cause.entity.spawn.*;
+import org.spongepowered.api.event.cause.entity.teleport.EntityTeleportCause;
+import org.spongepowered.api.event.cause.entity.teleport.PortalTeleportCause;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
@@ -92,6 +96,7 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -115,6 +120,10 @@ import org.spongepowered.common.entity.ai.*;
 import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.damage.*;
+import org.spongepowered.common.event.*;
+import org.spongepowered.common.event.entity.teleport.SpongeEntityTeleportCauseBuilder;
+import org.spongepowered.common.event.entity.teleport.SpongePortalTeleportCauseBuilder;
+import org.spongepowered.common.event.entity.teleport.SpongeTeleportCauseBuilder;
 import org.spongepowered.common.event.spawn.*;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
@@ -140,6 +149,7 @@ import org.spongepowered.common.registry.type.event.DamageModifierTypeRegistryMo
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.registry.type.event.DamageTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
+import org.spongepowered.common.registry.type.event.TeleportTypeRegistryModule;
 import org.spongepowered.common.registry.type.extra.FluidTypeRegistryModule;
 import org.spongepowered.common.registry.type.item.*;
 import org.spongepowered.common.registry.type.scoreboard.CriteriaRegistryModule;
@@ -266,6 +276,9 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
             .registerBuilderSupplier(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
             .registerBuilderSupplier(WeatherSpawnCause.Builder.class, SpongeWeatherSpawnCauseBuilder::new)
+            .registerBuilderSupplier(TeleportCause.Builder.class, SpongeTeleportCauseBuilder::new)
+            .registerBuilderSupplier(EntityTeleportCause.Builder.class, SpongeEntityTeleportCauseBuilder::new)
+            .registerBuilderSupplier(PortalTeleportCause.Builder.class, SpongePortalTeleportCauseBuilder::new)
             .registerBuilderSupplier(ServerBossBar.Builder.class, ServerBossBarBuilder::new)
         ;
     }
@@ -349,6 +362,7 @@ public final class CommonModuleRegistry {
             .registerModule(SoundCategory.class, new SoundCategoryRegistryModule())
             .registerModule(StairShape.class, new StairShapeRegistryModule())
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
+            .registerModule(TeleportType.class, TeleportTypeRegistryModule.getInstance())
             .registerModule(TextColor.class, new TextColorRegistryModule())
             .registerModule(new TextSerializerRegistryModule())
             .registerModule(TextStyle.Base.class, new TextStyleRegistryModule())
@@ -365,6 +379,7 @@ public final class CommonModuleRegistry {
             .registerModule(WorldArchetype.class, WorldArchetypeRegistryModule.getInstance())
             .registerModule(BossBarColor.class, new BossBarColorRegistryModule())
             .registerModule(BossBarOverlay.class, new BossBarOverlayRegistryModule())
+            .registerModule(PortalAgentType.class, PortalAgentRegistryModule.getInstance())
             ;
     }
 

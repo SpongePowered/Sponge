@@ -22,25 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.entityactivation;
+package org.spongepowered.common.event.entity.teleport;
 
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.mixin.plugin.entityactivation.ActivationRange;
+import com.google.common.base.Objects;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
+import org.spongepowered.api.event.cause.entity.teleport.common.AbstractTeleportCause;
 
-@NonnullByDefault
-@Mixin(value = net.minecraft.world.World.class, priority = 1005)
-public abstract class MixinWorld_Activation {
+public class SpongeTeleportCause extends AbstractTeleportCause implements TeleportCause {
 
-    @Inject(method = "updateEntities()V", at = @At(value = "INVOKE_STRING",
-            target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = {"ldc=regular"}, shift = At.Shift.BY, by = -2))
-    private void onInvokeProfiler(CallbackInfo ci) {
-        if (!((net.minecraft.world.World) (Object) this).isRemote) {
-            ActivationRange.activateEntities(((net.minecraft.world.World) (Object) this));
-        }
+    public SpongeTeleportCause(SpongeTeleportCauseBuilder type) {
+        super(type);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SpongeTeleportCause that = (SpongeTeleportCause) o;
+        return Objects.equal(this.teleportType, that.teleportType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.teleportType);
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper("TeleportCause")
+                .add("TeleportType", this.teleportType)
+                .toString();
+    }
 }

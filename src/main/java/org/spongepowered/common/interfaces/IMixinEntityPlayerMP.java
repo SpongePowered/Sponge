@@ -51,4 +51,6 @@ public interface IMixinEntityPlayerMP {
 
     IMixinWorldServer getMixinWorld();
 
+    void refreshXpHealthAndFood();
+
 }

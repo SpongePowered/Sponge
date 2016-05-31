@@ -49,6 +49,7 @@ import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
@@ -143,6 +144,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     private Long lastPacket;
     // Store the last block right-clicked
+    private boolean allowClientLocationUpdate = true;
     @Nullable private Item lastItem;
 
 
@@ -208,6 +210,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
+    @Override
+    public void setAllowClientLocationUpdate(boolean flag) {
+        this.allowClientLocationUpdate = flag;
+    }
+
     /**
      * @param manager The player network connection
      * @param packet The original packet to be sent
@@ -215,6 +222,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
      */
     @Redirect(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkManager;sendPacket(Lnet/minecraft/network/Packet;)V"))
     public void onSendPacket(NetworkManager manager, Packet<?> packet) {
+        if (!this.allowClientLocationUpdate && packet instanceof SPacketPlayerPosLook) {
+            return;
+        }
         manager.sendPacket(this.rewritePacket(packet));
     }
 
@@ -383,6 +393,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     public void processPlayerMoved(CPacketPlayer packetIn, CallbackInfo ci){
         if (packetIn.moving || packetIn.rotating && !this.playerEntity.isDead) {
             Player player = (Player) this.playerEntity;
+            IMixinEntity spongeEntity = (IMixinEntity) this.playerEntity;
             Vector3d fromrot = player.getRotation();
 
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
@@ -424,12 +435,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         SpongeEventFactory.createDisplaceEntityEventMoveTargetPlayer(Cause.of(NamedCause.source(player)), fromTransform, toTransform, player);
                 SpongeImpl.postEvent(event);
                 if (event.isCancelled()) {
-                    player.setTransform(fromTransform);
+                    spongeEntity.setLocationAndAngles(fromTransform);
                     this.lastMoveLocation = from;
                     ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
                     ci.cancel();
                 } else if (!event.getToTransform().equals(toTransform)) {
-                    player.setTransform(event.getToTransform());
+                    spongeEntity.setLocationAndAngles(event.getToTransform());
                     this.lastMoveLocation = event.getToTransform().getLocation();
                     ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
                     ci.cancel();
@@ -502,38 +513,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
         interactionManager.onBlockClicked(pos, side);
     }
-
-    // These are now told to capture within PacketPhase and properly told to uncapture in PacketFunction
-//    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IILnet/minecraft/inventory/ClickType;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))
-//    public void onBeforeSlotClick(CPacketClickWindow packetIn, CallbackInfo ci) {
-//        ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(true);
-//    }
-//
-//    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;updateCraftingInventory(Lnet/minecraft/inventory/Container;Ljava/util/List;)V", shift = At.Shift.AFTER))
-//    public void onAfterSecondUpdateCraftingInventory(CPacketClickWindow packetIn, CallbackInfo ci) {
-//        ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(false);
-//    }
-//
-//    @Inject(method = "processClickWindow", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isChangingQuantityOnly:Z", shift = At.Shift.AFTER, ordinal = 1))
-//    public void onThirdUpdateCraftingInventory(CPacketClickWindow packetIn, CallbackInfo ci) {
-//        ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(false);
-//    }
-
-//    @Inject(method = "processCreativeInventoryAction", at = @At(value = "HEAD"))
-//    public void onProcessCreativeInventoryActionHead(CPacketCreativeInventoryAction packetIn, CallbackInfo ci) {
-//        ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(true);
-//    }
-//
-//    @Inject(method = "processCreativeInventoryAction", at = @At(value = "RETURN"))
-//    public void onProcessCreativeInventoryActionReturn(CPacketCreativeInventoryAction packetIn, CallbackInfo ci) {
-//        ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(false);
-//    }
-
-//    @Inject(method = "processHeldItemChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CPacketHeldItemChange;getSlotId()I", ordinal = 2), cancellable = true)
-//    public void onGetSlotId(CPacketHeldItemChange packetIn, CallbackInfo ci) {
-//        SpongeCommonEventFactory.callChangeInventoryHeldEvent(this.playerEntity, packetIn);
-//        ci.cancel();
-//    }
 
     /**
      * @author blood - April 5th, 2016

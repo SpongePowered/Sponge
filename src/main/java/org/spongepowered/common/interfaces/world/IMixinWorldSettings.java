@@ -29,6 +29,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 
 public interface IMixinWorldSettings {
@@ -62,6 +63,8 @@ public interface IMixinWorldSettings {
     void setCommandsAllowed(boolean state);
 
     void setGenerateBonusChest(boolean state);
+
+    void setPortalAgentType(PortalAgentType type);
 
     void fromBuilder(boolean state);
 }

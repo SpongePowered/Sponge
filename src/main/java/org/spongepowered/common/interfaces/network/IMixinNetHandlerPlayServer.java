@@ -32,4 +32,6 @@ public interface IMixinNetHandlerPlayServer {
 
     Map<String, ResourcePack> getSentResourcePacks();
 
+    void setAllowClientLocationUpdate(boolean flag);
+
 }

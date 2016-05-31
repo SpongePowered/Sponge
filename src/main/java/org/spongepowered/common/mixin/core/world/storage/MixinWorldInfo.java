@@ -42,22 +42,16 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
@@ -83,6 +77,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
+import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.FunctionalUtil;
 import org.spongepowered.common.util.SpongeHooks;
@@ -95,11 +90,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(WorldInfo.class)
@@ -157,6 +148,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private int trackedUniqueIdCount = 0;
     private SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
     private ServerScoreboard scoreboard;
+    private PortalAgentType portalAgentType;
 
     //     protected WorldInfo()
     @Inject(method = "<init>", at = @At("RETURN") )
@@ -206,6 +198,12 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     public void onConstruction(WorldInfo worldInformation, CallbackInfo ci) {
         // TODO Since we're making a WorldInfo from a WorldInfo, perhaps we should clone the Sponge data here? Currently this is done in WorldManager.
         onConstruction(ci);
+
+        // TODO Zidane needs to fix this
+        MixinWorldInfo info = (MixinWorldInfo) (Object) worldInformation;
+        this.portalAgentType = info.portalAgentType;
+        this.dimensionType = info.dimensionType;
+
     }
 
     @Override
@@ -286,6 +284,19 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setDimensionType(DimensionType type) {
         this.dimensionType = type;
+    }
+
+    @Override
+    public PortalAgentType getPortalAgentType() {
+        if (this.portalAgentType == null) {
+            this.portalAgentType = PortalAgentTypes.DEFAULT;
+        }
+        return this.portalAgentType;
+    }
+
+    @Override
+    public void setPortalAgentType(PortalAgentType type) {
+        this.portalAgentType = type;
     }
 
     @Intrinsic
@@ -709,6 +720,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
                 .orElseThrow(FunctionalUtil.invalidArgument("Could not find a DimensionType by id: " + dimensionTypeId));
         this.isMod = nbt.getBoolean(NbtDataUtil.IS_MOD);
         this.generateBonusChest = nbt.getBoolean(NbtDataUtil.GENERATE_BONUS_CHEST);
+        this.portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(nbt.getString(NbtDataUtil.PORTAL_AGENT_TYPE), this.levelName);
         this.trackedUniqueIdCount = 0;
         if (nbt.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_LIST)) {
             final NBTTagList playerIdList = nbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
@@ -728,6 +740,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
         this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, this.isMod);
         this.spongeNbt.setBoolean(NbtDataUtil.GENERATE_BONUS_CHEST, this.generateBonusChest);
+        if (this.portalAgentType == null) {
+            this.portalAgentType = PortalAgentTypes.DEFAULT;
+        }
+        this.spongeNbt.setString(NbtDataUtil.PORTAL_AGENT_TYPE, this.portalAgentType.getPortalAgentClass().getName());
         final Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
         final NBTTagList playerIdList = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
         while (iterator.hasNext()) {

@@ -59,6 +59,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
@@ -409,7 +410,6 @@ public class ExtentViewTransform implements DefaultedExtent {
         return tileEntities;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
@@ -428,7 +428,8 @@ public class ExtentViewTransform implements DefaultedExtent {
     @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
         final Location<World> location = entity.getLocation();
-        entity.setLocation(new Location<>(location.getExtent(), inverseTransform(location.getPosition())));
+        IMixinEntity spongeEntity = (IMixinEntity) entity;
+        spongeEntity.setLocationAndAngles(new Location<>(location.getExtent(), inverseTransform(location.getPosition())));
         return this.extent.spawnEntity(entity, cause);
     }
 

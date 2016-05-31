@@ -46,6 +46,7 @@ import net.minecraft.world.ServerWorldEventHandler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
@@ -69,6 +70,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.world.storage.WorldServerMultiAdapterWorldInfo;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -667,8 +669,14 @@ public final class WorldManager {
     public static WorldServer createWorldFromProperties(int dimensionId, ISaveHandler saveHandler, WorldInfo worldInfo, @Nullable WorldSettings
             worldSettings, boolean prepareSpawn) {
         final MinecraftServer server = SpongeImpl.getServer();
-        final WorldServer worldServer = (WorldServer) new WorldServer(server, saveHandler, worldInfo, dimensionId, server.theProfiler)
-                .init();
+        final WorldServer worldServer;
+        if (dimensionId == 0) {
+            worldServer = new WorldServer(server, saveHandler, worldInfo, dimensionId, server.theProfiler);
+        } else {
+            final WorldServerMultiAdapterWorldInfo info = new WorldServerMultiAdapterWorldInfo(saveHandler, worldInfo);
+            worldServer = new WorldServerMulti(server, info, dimensionId, worldByDimensionId.get(0), server.theProfiler);
+        }
+        worldServer.init();
 
         // WorldSettings is only non-null here if this is a newly generated WorldInfo and therefore we need to initialize to calculate spawn.
         if (worldSettings != null) {

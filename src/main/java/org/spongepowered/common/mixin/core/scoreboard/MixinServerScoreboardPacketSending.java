@@ -91,9 +91,11 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     }
 
     @Override
-    public void removePlayer(EntityPlayerMP player) {
+    public void removePlayer(EntityPlayerMP player, boolean sendPackets) {
         this.players.remove(player);
-        this.removeScoreboard(player);
+        if (sendPackets) {
+            this.removeScoreboard(player);
+        }
     }
 
     void removeScoreboard(EntityPlayerMP player) {

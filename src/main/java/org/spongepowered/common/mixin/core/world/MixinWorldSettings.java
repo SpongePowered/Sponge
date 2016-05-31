@@ -44,6 +44,8 @@ import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Implements;
@@ -70,13 +72,13 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
 
     @Shadow private boolean commandsAllowed;
 
-    @Shadow(prefix = "settings$") abstract long settings$getSeed();
+    @Shadow abstract long shadow$getSeed();
     @Shadow abstract boolean isBonusChestEnabled();
     @Shadow abstract WorldSettings.GameType getGameType();
     @Shadow abstract boolean getHardcoreEnabled();
     @Shadow abstract boolean isMapFeaturesEnabled();
     @Shadow abstract WorldType getTerrainType();
-    @Shadow(prefix = "settings$") abstract boolean settings$areCommandsAllowed();
+    @Shadow abstract boolean shadow$areCommandsAllowed();
     @Shadow abstract String getGeneratorOptions();
 
     private String id, name;
@@ -91,6 +93,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     private boolean pvpEnabled = true;
     private boolean generateBonusChest = false;
     private boolean fromBuilder = false;
+    private PortalAgentType portalAgentType;
     private Collection<WorldGeneratorModifier> generatorModifiers = ImmutableList.of();
 
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
@@ -116,7 +119,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
 
     @Intrinsic
     public long archetype$getSeed() {
-        return this.settings$getSeed();
+        return this.shadow$getSeed();
     }
 
     @Inject(method = "setGeneratorOptions", at = @At(value = "RETURN"))
@@ -157,7 +160,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
 
     @Intrinsic
     public boolean archetype$areCommandsAllowed() {
-        return this.settings$areCommandsAllowed();
+        return this.shadow$areCommandsAllowed();
     }
 
     @Override
@@ -173,6 +176,19 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     @Override
     public Difficulty getDifficulty() {
         return this.difficulty;
+    }
+
+    @Override
+    public PortalAgentType getPortalAgentType() {
+        if (this.portalAgentType == null) {
+            this.portalAgentType = PortalAgentTypes.DEFAULT;
+        }
+        return this.portalAgentType;
+    }
+
+    @Override
+    public void setPortalAgentType(PortalAgentType type) {
+        this.portalAgentType = type;
     }
 
     @Override

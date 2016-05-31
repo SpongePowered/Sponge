@@ -44,7 +44,9 @@ import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.network.play.server.SPacketJoinGame;
 import net.minecraft.network.play.server.SPacketPlayerAbilities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.network.play.server.SPacketServerDifficulty;
+import net.minecraft.network.play.server.SPacketSetExperience;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.network.play.server.SPacketUpdateHealth;
 import net.minecraft.potion.PotionEffect;
@@ -52,10 +54,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
@@ -69,6 +75,10 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
@@ -90,9 +100,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.IMixinPlayerList;
+import org.spongepowered.common.interfaces.IMixinServerScoreboard;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -112,7 +125,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(PlayerList.class)
-public abstract class MixinPlayerList {
+public abstract class MixinPlayerList implements IMixinPlayerList {
 
     private static final String WRITE_PLAYER_DATA =
             "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData(Lnet/minecraft/entity/player/EntityPlayer;)V";
@@ -135,6 +148,7 @@ public abstract class MixinPlayerList {
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
     @Shadow public abstract void updateTimeAndWeatherForPlayer(EntityPlayerMP playerIn, WorldServer worldIn);
     @Shadow public abstract void updatePermissionLevel(EntityPlayerMP p_187243_1_);
+    @Shadow public abstract void syncPlayerInventory(EntityPlayerMP playerIn);
     @Nullable @Shadow public abstract String allowUserToConnect(SocketAddress address, GameProfile profile);
 
     /**
@@ -413,13 +427,43 @@ public abstract class MixinPlayerList {
             entityPlayerMP.dismountRidingEntity();
         }
 
-        if (!conqueredEnd) { // don't reset player if returning from conquering the end
-            ((IMixinEntityPlayerMP) entityPlayerMP).reset();
+        final Player player = (Player) entityPlayerMP;
+        final Transform<World> fromTransform = player.getTransform();
+        final WorldServer worldServer = this.mcServer.worldServerForDimension(targetDimension);
+        Transform<World> toTransform = new Transform<>(this.getPlayerRespawnLocation(entityPlayerMP, worldServer), Vector3d.ZERO, Vector3d.ZERO);
+        Location<World> location = toTransform.getLocation();
+
+        // If coming from end, fire a teleport event for plugins
+        if (conqueredEnd) {
+            // When leaving the end, players are never placed inside the teleporter but instead "respawned" in the target world
+            MoveEntityEvent.Position.Teleport teleportEvent = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entityPlayerMP, location);
+            if (teleportEvent.isCancelled()) {
+                entityPlayerMP.playerConqueredTheEnd = false;
+                return entityPlayerMP;
+            }
+
+            toTransform = teleportEvent.getToTransform();
+            location = toTransform.getLocation();
+        }
+        // Keep players out of blocks
+        Vector3d tempPos = player.getLocation().getPosition();
+        entityPlayerMP.setPosition(location.getX(), location.getY(), location.getZ());
+        while (!((WorldServer) location.getExtent()).getCollisionBoxes(entityPlayerMP, entityPlayerMP.getEntityBoundingBox()).isEmpty()) {
+            entityPlayerMP.setPosition(entityPlayerMP.posX, entityPlayerMP.posY + 1.0D, entityPlayerMP.posZ);
+            location = location.add(0, 1, 0);
         }
 
-        final Transform<World> fromTransform = ((Player) entityPlayerMP).getTransform();
-        Transform<World> toTransform = new Transform<>(this.getPlayerRespawnLocation(entityPlayerMP, WorldManager.getWorldByDimensionId
-                (targetDimension).orElse(null)), ((Player) entityPlayerMP).getRotation(), Vector3d.ZERO);
+        // ### PHASE 2 ### Remove player from current dimension
+        entityPlayerMP.getServerWorld().getEntityTracker().removePlayerFromTrackers(entityPlayerMP);
+        entityPlayerMP.getServerWorld().getPlayerChunkMap().removePlayer(entityPlayerMP);
+        this.playerEntityList.remove(entityPlayerMP);
+        this.mcServer.worldServerForDimension(entityPlayerMP.dimension).removeEntityDangerously(entityPlayerMP);
+
+        // ### PHASE 3 ### Reset player (if applicable)
+        entityPlayerMP.playerConqueredTheEnd = false;
+        if (!conqueredEnd) { // don't reset player if returning from end
+            ((IMixinEntityPlayerMP) entityPlayerMP).reset();
+        }
 
         ((IMixinEntityPlayerMP) entityPlayerMP).resetAttributeMap();
         entityPlayerMP.isDead = false;
@@ -428,6 +472,9 @@ public abstract class MixinPlayerList {
                 toTransform, (Player) entityPlayerMP, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
+        ((IMixinEntity) player).setLocationAndAngles(event.getToTransform());
+        toTransform = event.getToTransform();
+        location = toTransform.getLocation();
 
         toTransform = event.getToTransform();
 
@@ -436,9 +483,37 @@ public abstract class MixinPlayerList {
             toTransform = event.getFromTransform();
         }
 
-        EntityUtil.changeWorld(entityPlayerMP, toTransform);
+        worldServer.getChunkProvider().loadChunk((int) location.getX() >> 4, (int) location.getZ() >> 4);
 
-        // TODO Following still needed?
+        // ### PHASE 5 ### Respawn player in new world
+
+        // Support vanilla clients logging into custom dimensions
+        final DimensionType dimensionType = WorldManager.getClientDimensionType(worldServer.provider.getDimensionType());
+        if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
+            WorldManager.sendDimensionRegistration(entityPlayerMP, dimensionType);
+        }
+
+        entityPlayerMP.connection.sendPacket(new SPacketRespawn(dimensionType.getId(), worldServer.getDifficulty(), worldServer
+                .getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
+        entityPlayerMP.isDead = false;
+        entityPlayerMP.connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
+                (float) toTransform.getYaw(), (float) toTransform.getPitch());
+
+        final BlockPos spawnLocation = worldServer.getSpawnPoint();
+        entityPlayerMP.connection.sendPacket(new SPacketSpawnPosition(spawnLocation));
+        entityPlayerMP.connection.sendPacket(new SPacketSetExperience(entityPlayerMP.experience, entityPlayerMP.experienceTotal,
+                entityPlayerMP.experienceLevel));
+        this.updateTimeAndWeatherForPlayer(entityPlayerMP, worldServer);
+        worldServer.getPlayerChunkMap().addPlayer(entityPlayerMP);
+        org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) player;
+        SpawnCause spawnCause = EntitySpawnCause.builder()
+                .entity(spongeEntity)
+                .type(SpawnTypes.PLACEMENT)
+                .build();
+        ((org.spongepowered.api.world.World) worldServer).spawnEntity(spongeEntity, Cause.of(NamedCause.source(spawnCause)));
+        this.playerEntityList.add(entityPlayerMP);
+        entityPlayerMP.addSelfToInternalCraftingInventory();
+
         // Reset the health.
         final MutableBoundedValue<Double> maxHealth = ((Player) entityPlayerMP).maxHealth();
         final MutableBoundedValue<Integer> food = ((Player) entityPlayerMP).foodLevel();
@@ -490,6 +565,135 @@ public abstract class MixinPlayerList {
         return new Location<>((World) targetWorld, targetSpawnVec);
     }
 
+    /**
+     * @author blood - May 21st, 2016
+     *
+     * @reason - adjusted to support {@link MoveEntityEvent.Position.Teleport.Portal}
+     *
+     * @param playerIn The player teleporting to another dimension
+     * @param targetDimensionId The id of target dimension.
+     * @param teleporter The teleporter used to transport and create the portal
+     */
+    @Overwrite
+    public void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter) {
+        MoveEntityEvent.Position.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, teleporter);
+        if (event.isCancelled()) {
+            return;
+        }
+
+        WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
+        WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
+        playerIn.dimension = toWorld.provider.getDimensionType().getId();
+        // Support vanilla clients teleporting to custom dimensions
+        final DimensionType dimensionType = WorldManager.getClientDimensionType(toWorld.provider.getDimensionType());
+        if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
+            WorldManager.sendDimensionRegistration(playerIn, dimensionType);
+        }
+        playerIn.connection.sendPacket(new SPacketRespawn(playerIn.dimension, fromWorld.getDifficulty(), fromWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
+        fromWorld.removeEntityDangerously(playerIn);
+        playerIn.isDead = false;
+        // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
+        ((IMixinEntity) playerIn).setLocationAndAngles(event.getToTransform());
+        toWorld.spawnEntityInWorld(playerIn);
+        toWorld.updateEntityWithOptionalForce(playerIn, false);
+        playerIn.setWorld(toWorld);
+        this.preparePlayer(playerIn, fromWorld);
+        playerIn.connection.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
+        playerIn.interactionManager.setWorld(toWorld);
+        this.updateTimeAndWeatherForPlayer(playerIn, toWorld);
+        this.syncPlayerInventory(playerIn);
+
+        for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
+            playerIn.connection.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
+        }
+        ((IMixinEntityPlayerMP) playerIn).refreshXpHealthAndFood();
+    }
+
+    // copy of transferEntityToWorld but only contains code to apply the location on entity before being placed into a portal
+    @Override
+    public void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn) {
+        oldWorldIn.theProfiler.startSection("moving");
+        WorldProvider pOld = oldWorldIn.provider;
+        WorldProvider pNew = toWorldIn.provider;
+        double moveFactor = getMovementFactor(pOld) / getMovementFactor(pNew);
+        double x = entityIn.posX * moveFactor;
+        double y = entityIn.posY;
+        double z = entityIn.posZ * moveFactor;
+
+        if (!(pNew instanceof WorldProviderEnd)) {
+            x = MathHelper.clamp_double(x, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
+            z = MathHelper.clamp_double(z, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
+            entityIn.setLocationAndAngles(x, entityIn.posY, z, entityIn.rotationYaw, entityIn.rotationPitch);
+        }
+
+        if (pNew instanceof WorldProviderEnd) {
+            BlockPos blockpos;
+
+            if (pOld instanceof WorldProviderEnd) {
+                blockpos = toWorldIn.getSpawnPoint();
+            } else {
+                blockpos = toWorldIn.getSpawnCoordinate();
+            }
+
+            x = (double)blockpos.getX();
+            y = (double)blockpos.getY();
+            z = (double)blockpos.getZ();
+            entityIn.setLocationAndAngles(x, y, z, 90.0F, 0.0F);
+        }
+
+        if (!(pOld instanceof WorldProviderEnd)) {
+            x = (double)MathHelper.clamp_int((int)x, -29999872, 29999872);
+            z = (double)MathHelper.clamp_int((int)z, -29999872, 29999872);
+
+            if (entityIn.isEntityAlive()) {
+                entityIn.setLocationAndAngles(x, y, z, entityIn.rotationYaw, entityIn.rotationPitch);
+            }
+        }
+
+        if (entityIn.isEntityAlive()) {
+            oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
+        }
+
+        oldWorldIn.theProfiler.endSection();
+    }
+
+    /**
+     * @author blood - May 21st, 2016
+     *
+     * @reason - overwritten to redirect to our method that accepts a teleporter
+     */
+    @Overwrite
+    public void transferEntityToWorld(Entity entityIn, int p_82448_2_, WorldServer oldWorldIn, WorldServer toWorldIn) {
+        transferEntityToWorld(entityIn, p_82448_2_, oldWorldIn, toWorldIn, toWorldIn.getDefaultTeleporter());
+    }
+
+    /**
+     * @author blood - May 21st, 2016
+     *
+     * @reason - rewritten to capture a plugin or mod that attempts to call this method directly.
+     */
+    @Overwrite
+    public void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world.Teleporter teleporter) {
+        // rewritten completely to handle our portal event
+        MoveEntityEvent.Position.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(entityIn, toWorld.provider.getDimensionType().getId(), teleporter);
+        if (event.isCancelled()) {
+            return;
+        }
+
+        entityIn.setLocationAndAngles(event.getToTransform().getPosition().getX(), event.getToTransform().getPosition().getY(), event.getToTransform().getPosition().getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+        toWorld.spawnEntityInWorld(entityIn);
+        toWorld.updateEntityWithOptionalForce(entityIn, false);
+        entityIn.setWorld(toWorld);
+    }
+
+    // forge utility method
+    private double getMovementFactor(WorldProvider provider) {
+        if (provider instanceof WorldProviderHell) {
+            return 8.0;
+        }
+        return 1.0;
+    }
+
     @Inject(method = "setPlayerManager", at = @At("HEAD"), cancellable = true)
     private void onSetPlayerManager(WorldServer[] worldServers, CallbackInfo callbackInfo) {
         if (this.playerNBTManagerObj == null) {
@@ -511,6 +715,9 @@ public abstract class MixinPlayerList {
         NBTTagCompound nbt = new NBTTagCompound();
         player.writeToNBT(nbt);
         ((SpongeUser) ((IMixinEntityPlayerMP) player).getUserObject()).readFromNbt(nbt);
+
+        // Remove player reference from scoreboard
+        ((IMixinServerScoreboard) ((Player) player).getScoreboard()).removePlayer(player, false);
     }
 
     @Inject(method = "saveAllPlayerData()V", at = @At("RETURN"))

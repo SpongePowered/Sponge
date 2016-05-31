@@ -142,11 +142,14 @@ public final class NbtDataUtil {
     public static final String BOAT_UNOCCUPIED_DECELERATION_SPEED = "unoccupiedDecelerationSpeed";
     public static final String CAN_GRIEF = "CanGrief";
     public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";
+    public static final String PORTAL_AGENT_TYPE = "portalAgentType";
 
     // Compatibility tags for Forge
     public static final String FORGE_DATA = "ForgeData";
     public static final String DIMENSION_TYPE = "dimensionType";
     public static final String DIMENSION_ID = "dimensionId";
+    public static final String UUID_MOST = "UUIDMost";
+    public static final String UUID_LEAST = "UUIDLeast";
     public static final String INVALID_TITLE = "invalid";
     public static final String IS_MOD = "isMod";
     public static final String FORGE_ENTITY_TYPE = "entity_name";
@@ -382,6 +385,5 @@ public final class NbtDataUtil {
         }
         compound.setTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST, newList);
     }
-
 
 }

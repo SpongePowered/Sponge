@@ -22,25 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.entityactivation;
+package org.spongepowered.common.event.entity.teleport;
 
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.mixin.plugin.entityactivation.ActivationRange;
+import com.google.common.base.Objects;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 
-@NonnullByDefault
-@Mixin(value = net.minecraft.world.World.class, priority = 1005)
-public abstract class MixinWorld_Activation {
+import java.util.Locale;
 
-    @Inject(method = "updateEntities()V", at = @At(value = "INVOKE_STRING",
-            target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = {"ldc=regular"}, shift = At.Shift.BY, by = -2))
-    private void onInvokeProfiler(CallbackInfo ci) {
-        if (!((net.minecraft.world.World) (Object) this).isRemote) {
-            ActivationRange.activateEntities(((net.minecraft.world.World) (Object) this));
-        }
+public class SpongeTeleportType implements TeleportType {
+
+    private String name;
+    private String id;
+
+    public SpongeTeleportType(String id, String name) {
+        this.name = name;
+        this.id = id.toLowerCase(Locale.ENGLISH);
     }
 
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeTeleportType other = (SpongeTeleportType) obj;
+        return this.id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.id, this.name);
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", this.id)
+                .add("name", this.name)
+                .toString();
+    }
 }

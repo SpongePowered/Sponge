@@ -102,47 +102,78 @@ public class SpongeTeleportHelper implements TeleportHelper {
     private Optional<Vector3i> checkAroundSpecificDiameter(Location<World> checkLoc, final int radius) {
         World world = checkLoc.getExtent();
         Vector3i blockPos = checkLoc.getBlockPosition();
+        //example at radius 2
+        //..c..
+        //.....
+        //..o..
+        //.....
+        //.....
         // Check out at the radius provided.
         blockPos = blockPos.add(radius, 0, 0);
         if (isSafeLocation(world, blockPos)) {
             return Optional.of(blockPos);
         }
-
+        //example at radius 2
+        //..c01
+        //.....
+        //..o..
+        //.....
+        //.....
         // Move up to the first corner..
         for (int i = 0; i < radius; i++) {
-            blockPos = blockPos.add(radius, 0, 0);
+            blockPos = blockPos.add(0, 0, i);
             if (isSafeLocation(world, blockPos)) {
                 return Optional.of(blockPos);
             }
         }
-
+        //example at radius 2
+        //....c
+        //....0
+        //..o.1
+        //....2
+        //....3
         // Move to the second corner..
         for (int i = 0; i < radius * 2; i++) {
-            blockPos = blockPos.add(radius, 0, 0);
+            blockPos = blockPos.add(-i, 0, 0);
             if (isSafeLocation(world, blockPos)) {
                 return Optional.of(blockPos);
             }
         }
-
+        //example at radius 2
+        //.....
+        //.....
+        //..o..
+        //.....
+        //3210c
         // Move to the third corner..
         for (int i = 0; i < radius * 2; i++) {
-            blockPos = blockPos.add(radius, 0, 0);
+            blockPos = blockPos.add(0, 0, -i);
             if (isSafeLocation(world, blockPos)) {
                 return Optional.of(blockPos);
             }
         }
-
+        //example at radius 2
+        //3....
+        //2....
+        //1.o..
+        //0....
+        //c....
         // Move to the last corner..
         for (int i = 0; i < radius * 2; i++) {
-            blockPos = blockPos.add(radius, 0, 0);
+            blockPos = blockPos.add(i, 0, 0);
             if (isSafeLocation(world, blockPos)) {
                 return Optional.of(blockPos);
             }
         }
-
+        //example at radius 2
+        //c0...
+        //.....
+        //..o..
+        //.....
+        //.....
         // Move back to just before the starting point.
         for (int i = 0; i < radius - 1; i++) {
-            blockPos = blockPos.add(radius, 0, 0);
+            blockPos = blockPos.add(0, 0, i);
             if (isSafeLocation(world, blockPos)) {
                 return Optional.of(blockPos);
             }

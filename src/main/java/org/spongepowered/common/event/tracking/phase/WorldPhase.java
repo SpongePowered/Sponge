@@ -232,8 +232,8 @@ public final class WorldPhase extends TrackingPhase {
                 Cause entityCause = Cause.of(NamedCause.source(entity));
 
                 this.firePositionEvent(entity, entityCause);
-                this.fireRotationEvent(entity, entityCause);
-                this.fireRotationHeadEvent(entity, entityCause);
+//                this.fireRotationEvent(entity, entityCause);
+//                this.fireRotationHeadEvent(entity, entityCause);
             }
 
             private void firePositionEvent(net.minecraft.entity.Entity entity, Cause cause) {
@@ -250,16 +250,16 @@ public final class WorldPhase extends TrackingPhase {
                     final Vector3d oldPositionVector = new Vector3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ);
                     final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
 
-                    MoveEntityEvent.Position event = SpongeEventFactory.createMoveEntityEventPosition(cause, currentPositionVector, currentPositionVector, oldPositionVector, spongeEntity);
+                    MoveEntityEvent.Position event = null;
 
-                    if (SpongeImpl.postEvent(event)) {
+                    if (false && SpongeImpl.postEvent(event)) {
                         entity.posX = entity.lastTickPosX;
                         entity.posY = entity.lastTickPosY;
                         entity.posZ = entity.lastTickPosZ;
 
                     } else {
-                        Vector3d newPosition = event.getToPosition();
-                        if (!newPosition.equals(currentPositionVector)) {
+                        Vector3d newPosition = null; // event.getToTransform().getPosition();
+                        if (false && !newPosition.equals(currentPositionVector)) {
                             entity.posX = newPosition.getX();
                             entity.posY = newPosition.getY();
                             entity.posZ = newPosition.getZ();
@@ -286,18 +286,17 @@ public final class WorldPhase extends TrackingPhase {
 
                     Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
                     Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
-                    MoveEntityEvent.Rotation event =
-                            SpongeEventFactory.createMoveEntityEventRotation(cause, currentRotationVector, currentRotationVector, oldRotationVector, (Entity) entity);
+                    MoveEntityEvent.Rotation event = null;
 
-                    if (SpongeImpl.postEvent(event)) {
+                    if (false && SpongeImpl.postEvent(event)) {
                         entity.rotationPitch = entity.prevRotationPitch;
                         entity.rotationYaw = entity.prevRotationYaw;
                     } else {
-                        Vector3d eventVector = event.getToRotation();
-                        if (!eventVector.equals(currentRotationVector)) {
-                            entity.rotationPitch = (float) currentRotationVector.getX();
-                            entity.rotationYaw = (float) currentRotationVector.getY();
-                        }
+//                        Vector3d eventVector = event.getToTransform().getRotation();
+//                        if (!eventVector.equals(currentRotationVector)) {
+//                            entity.rotationPitch = (float) currentRotationVector.getX();
+//                            entity.rotationYaw = (float) currentRotationVector.getY();
+//                        }
                     }
                 }
             }
@@ -314,17 +313,17 @@ public final class WorldPhase extends TrackingPhase {
 
                     Vector3d oldHeadRotation = new Vector3d(living.prevRotationPitch, living.prevRotationYawHead, 0);
                     Vector3d currentHeadRotation = new Vector3d(living.rotationPitch, living.rotationYawHead, 0);
-                    MoveEntityEvent.Rotation.Head event = SpongeEventFactory.createMoveEntityEventRotationHead(cause, currentHeadRotation, currentHeadRotation, oldHeadRotation, (Entity) entity);
+                    MoveEntityEvent.Rotation.Head event = null; // SpongeEventFactory.createMoveEntityEventRotationHead(cause, currentHeadRotation, currentHeadRotation, oldHeadRotation, (Entity) entity);
 
-                    if (SpongeImpl.postEvent(event)) {
-                        ((EntityLivingBase) entity).rotationYawHead = ((EntityLivingBase) entity).prevRotationYawHead;
-                    } else {
-                        Vector3d eventVector = event.getToRotation();
-                        if (!eventVector.equals(currentHeadRotation)) {
-                            living.rotationPitch = (float) eventVector.getX();
-                            living.rotationYawHead = (float) eventVector.getY();
-                        }
-                    }
+//                    if (SpongeImpl.postEvent(event)) {
+//                        ((EntityLivingBase) entity).rotationYawHead = ((EntityLivingBase) entity).prevRotationYawHead;
+//                    } else {
+//                        Vector3d eventVector = event.getToTransform().getRotation();
+//                        if (!eventVector.equals(currentHeadRotation)) {
+//                            living.rotationPitch = (float) eventVector.getX();
+//                            living.rotationYawHead = (float) eventVector.getY();
+//                        }
+//                    }
                 }
             }
 
