@@ -27,6 +27,7 @@ package org.spongepowered.common.world.gen.populators;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Location;
@@ -35,6 +36,8 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.RandomBlock;
+import org.spongepowered.common.block.BlockUtil;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Random;
 import java.util.function.Predicate;
@@ -76,6 +79,7 @@ public class RandomBlockPopulator implements RandomBlock {
             Location<World> pos = chunkMin.add(random.nextInt(size.getX()), this.height.getFlooredAmount(random), random.nextInt(size.getZ()));
             if (this.check.test(pos)) {
                 world.setBlock(pos.getBlockPosition(), this.state);
+                ((WorldServer) world).immediateBlockTick(VecHelper.toBlockPos(pos), BlockUtil.toNative(this.state), random);
             }
         }
     }
