@@ -507,7 +507,7 @@ public abstract class MixinEntity implements IMixinEntity {
                 } else {
                     this.visibilityTicks = 1;
                     this.pendingVisibilityUpdate = false;
-                    for (EntityPlayerMP entityPlayerMP : worldObj.getMinecraftServer().getPlayerList().getPlayerList()) {
+                    for (EntityPlayerMP entityPlayerMP : SpongeImpl.getServer().getPlayerList().getPlayerList()) {
                         if (((Object) this) == entityPlayerMP) {
                             continue;
                         }
