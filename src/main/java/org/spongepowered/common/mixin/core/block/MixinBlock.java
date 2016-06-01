@@ -206,7 +206,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Redirect(method = "spawnAsEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
     private static boolean onSpawnAsEntity(net.minecraft.world.World worldIn, Entity entityitem) {
         final CauseTracker causeTracker = ((IMixinWorld) worldIn).getCauseTracker();
-        if (causeTracker.isRestoringBlocks() || causeTracker.isCapturingTerrainGen()) {
+        if (!causeTracker.isCapturingBlocks()) {
             return worldIn.spawnEntityInWorld(entityitem);
         }
 

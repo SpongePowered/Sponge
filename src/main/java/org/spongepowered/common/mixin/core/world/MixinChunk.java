@@ -411,8 +411,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
             CallbackInfo ci) {
         final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
-        if (this.worldObj.isRemote || causeTracker.getCurrentCause() == null || causeTracker.isProcessingVanillaBlockEvent() || causeTracker.isRestoringBlocks() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()
-                || causeTracker.isCapturingTerrainGen()) {
+        if (this.worldObj.isRemote || causeTracker.getCurrentCause() == null || !causeTracker.isCapturingBlocks()) {
             return;
         }
 
@@ -435,8 +434,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
             CallbackInfo ci) {
         final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
-        if (this.worldObj.isRemote || causeTracker.getCurrentCause() == null || causeTracker.isProcessingVanillaBlockEvent() || causeTracker.isRestoringBlocks() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()
-                || causeTracker.isCapturingTerrainGen()) {
+        if (this.worldObj.isRemote || causeTracker.getCurrentCause() == null || !causeTracker.isCapturingBlocks()) {
             return;
         }
 
@@ -506,6 +504,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             flag = j >= i1;
         }
 
+        final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
         int j1 = SpongeImplHooks.getBlockLightOpacity(block, this.worldObj, pos);
 
         extendedblockstorage.set(i, j & 15, k, newState);
@@ -515,8 +514,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             if (!this.worldObj.isRemote) {
                 // Only fire block breaks when the block changes.
                 if (currentState.getBlock() != newState.getBlock()) {
-                    final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
-                    if (causeTracker.isRestoringBlocks() || causeTracker.isCapturingTerrainGen()) {
+                    if (!causeTracker.isCapturingBlocks()) {
                         block1.breakBlock(this.worldObj, pos, currentState);
                     } else {
                         // Make sure to capture spawned items during block breaks so we can handle them properly after events
@@ -568,7 +566,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                 // Sponge start - Ignore block activations during block placement captures unless it's
                 // a BlockContainer. Prevents blocks such as TNT from activating when
                 // cancelled.
-                if (!((IMixinWorld) this.worldObj).getCauseTracker().isCapturingBlocks() || SpongeImplHooks.blockHasTileEntity(block, newState)) {
+                if (!causeTracker.isCapturingBlocks() || SpongeImplHooks.blockHasTileEntity(block, newState)) {
                     block.onBlockAdded(this.worldObj, pos, newState);
                 }
                 // Sponge end
@@ -598,8 +596,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             return;
         } else {
             IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
-            if (spongeWorld.getCauseTracker().isCapturingTerrainGen()) {
-                // Don't track chunk gen
+            if (!spongeWorld.getCauseTracker().isCapturingBlocks()) {
                 return;
             }
         }

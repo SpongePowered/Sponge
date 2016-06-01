@@ -78,6 +78,7 @@ public abstract class MixinSpawnerAnimals {
     private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
 
     private static boolean spawnerStart;
+    private static boolean captureBlocks;
     private static EntityType spawnerEntityType;
     private static Class<? extends Entity> spawnerEntityClass;
 
@@ -93,8 +94,10 @@ public abstract class MixinSpawnerAnimals {
     @Inject(method = "findChunksForSpawning", at = @At(value = "HEAD"))
     public void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
-        CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        captureBlocks = causeTracker.isCapturingBlocks();
         causeTracker.addCause(Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build())));
+        causeTracker.setCaptureBlocks(false);
         causeTracker.setWorldSpawnerRunning(true);
         causeTracker.setCaptureSpawnedEntities(true);
         spawnerStart = true;
@@ -109,6 +112,7 @@ public abstract class MixinSpawnerAnimals {
         causeTracker.setWorldSpawnerRunning(false);
         causeTracker.setCaptureSpawnedEntities(false);
         causeTracker.removeCurrentCause();
+        causeTracker.setCaptureBlocks(captureBlocks);
         if (spawnerStart) {
             spawnerStart = false;
             spawnerEntityClass = null;
@@ -121,7 +125,9 @@ public abstract class MixinSpawnerAnimals {
     private static void onPerformWorldGenSpawningHead(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        captureBlocks = causeTracker.isCapturingBlocks();
         causeTracker.addCause(Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build()), NamedCause.of("Biome", biome)));
+        causeTracker.setCaptureBlocks(false);
         causeTracker.setChunkSpawnerRunning(true);
         causeTracker.setCaptureSpawnedEntities(true);
         spawnerStart = true;
@@ -134,6 +140,7 @@ public abstract class MixinSpawnerAnimals {
         causeTracker.handleSpawnedEntities();
         causeTracker.setChunkSpawnerRunning(false);
         causeTracker.setCaptureSpawnedEntities(false);
+        causeTracker.setCaptureBlocks(captureBlocks);
         causeTracker.removeCurrentCause();
         if (spawnerStart) {
             spawnerStart = false;

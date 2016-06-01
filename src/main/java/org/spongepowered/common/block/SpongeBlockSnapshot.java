@@ -170,7 +170,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
 
         net.minecraft.world.World world = (net.minecraft.world.World) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
-        CauseTracker causeTracker = ((IMixinWorld) world).getCauseTracker();
+        final CauseTracker causeTracker = ((IMixinWorld) world).getCauseTracker();
+        boolean captureBlocks = causeTracker.isCapturingBlocks();
+        causeTracker.setCaptureBlocks(false);
         causeTracker.setRestoringBlocks(true);
         BlockPos pos = VecHelper.toBlockPos(this.pos);
         IBlockState current = world.getBlockState(pos);
@@ -178,6 +180,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         if (!force && (current.getBlock() != replaced.getBlock()
             || current.getBlock().getMetaFromState(current) != replaced.getBlock().getMetaFromState(replaced))) {
             causeTracker.setRestoringBlocks(false);
+            causeTracker.setCaptureBlocks(captureBlocks);
             return false;
         }
 
@@ -192,6 +195,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
 
         causeTracker.setRestoringBlocks(false);
+        causeTracker.setCaptureBlocks(captureBlocks);
         return true;
     }
 

@@ -167,8 +167,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateBlocks(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (causeTracker.hasTickingBlock() || causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker
-                .isChunkSpawnerRunning()) {
+        if (causeTracker.hasTickingBlock() || !causeTracker.isCapturingBlocks()) {
             block.randomTick(worldIn, pos, state, rand);
             return;
         }
@@ -194,7 +193,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     public boolean onQueueScheduledBlockUpdate(Set<NextTickListEntry> pendingSet, Object obj) {
         final CauseTracker causeTracker = this.getCauseTracker();
         // If we don't have a notifier or the nextticklistentry has one, skip
-        if (!causeTracker.hasNotifier() || ((IMixinNextTickListEntry) obj).hasSourceUser()) {
+        if (!causeTracker.isCapturingBlocks()|| !causeTracker.hasNotifier() || ((IMixinNextTickListEntry) obj).hasSourceUser()) {
             pendingSet.add((NextTickListEntry) obj);
             return true;
         }
@@ -217,8 +216,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker
-                .isChunkSpawnerRunning()) {
+        if (!causeTracker.isCapturingBlocks()) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
@@ -255,8 +253,7 @@ public abstract class MixinWorldServer extends MixinWorld {
             + "Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker
-                .isChunkSpawnerRunning()) {
+        if (!causeTracker.isCapturingBlocks()) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
@@ -283,7 +280,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         }
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
+        if (!causeTracker.isCapturingBlocks()) {
             this.blockEventQueue[this.blockEventCacheIndex].add(blockeventdata);
             return;
         }
@@ -326,7 +323,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         IBlockState currentState = ((WorldServer)(Object)this).getBlockState(event.getPosition());
         boolean result = false;
         if (currentState.getBlock() == event.getBlock()) {
-            if (causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
+            if (!causeTracker.isCapturingBlocks()) {
                 return currentState.getBlock().onBlockEventReceived(((WorldServer)(Object) this), event.getPosition(), currentState, event.getEventID(), event.getEventParameter());
             }
 
@@ -340,9 +337,10 @@ public abstract class MixinWorldServer extends MixinWorld {
                 causeTracker.setCurrentNotifier(blockEvent.getSourceUser().get());
             }
 
-            causeTracker.setProcessingVanillaBlockEvent(true);
+            boolean captureBlocks = causeTracker.isCapturingBlocks();
+            causeTracker.setCaptureBlocks(false);
             result = currentState.getBlock().onBlockEventReceived(((WorldServer)(Object) this), event.getPosition(), currentState, event.getEventID(), event.getEventParameter());
-            causeTracker.setProcessingVanillaBlockEvent(false);
+            causeTracker.setCaptureBlocks(captureBlocks);
             causeTracker.setCurrentTickTileEntity(null);
             causeTracker.setCurrentTickBlock(null);
             causeTracker.setCurrentNotifier(null);
@@ -657,7 +655,7 @@ public abstract class MixinWorldServer extends MixinWorld {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
+        if (!causeTracker.isCapturingBlocks()) {
             this.tmpScheduledObj = sbu;
             return;
         }

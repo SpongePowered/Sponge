@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -86,11 +87,15 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
             if (this.serverChunkGenerator != null) {
                 IMixinWorld world = (IMixinWorld) this.worldObj;
-                boolean capturingTerrain = world.getCauseTracker().isCapturingTerrainGen();
-                world.getCauseTracker().setCapturingTerrainGen(true);
+                final CauseTracker causeTracker = world.getCauseTracker();
+                boolean capturingTerrain = causeTracker.isCapturingTerrainGen();
+                boolean captureBlocks = causeTracker.isCapturingBlocks();
+                causeTracker.setCapturingTerrainGen(true);
+                causeTracker.setCaptureBlocks(false);
                 this.serverChunkGenerator.populate(chunkProvider, x, z);
                 chunk.setChunkModified();
-                world.getCauseTracker().setCapturingTerrainGen(capturingTerrain);
+                causeTracker.setCapturingTerrainGen(capturingTerrain);
+                causeTracker.setCaptureBlocks(captureBlocks);
             }
         }
     }

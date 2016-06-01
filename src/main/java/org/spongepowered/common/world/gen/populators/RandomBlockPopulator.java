@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
@@ -36,6 +37,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.RandomBlock;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Random;
 
@@ -67,6 +69,7 @@ public class RandomBlockPopulator implements RandomBlock {
 
     @Override
     public void populate(Chunk chunk, Random random) {
+        net.minecraft.world.World mcWorld = (net.minecraft.world.World) chunk.getWorld();
         int n = this.count.getFlooredAmount(random);
         Location<World> chunkMin =
                 new Location<World>(chunk.getWorld(), chunk.getBlockMin().getX(), chunk.getBlockMin().getY(), chunk.getBlockMin().getZ());
@@ -74,6 +77,8 @@ public class RandomBlockPopulator implements RandomBlock {
             Location<World> pos = chunkMin.add(random.nextInt(16) + 8, this.height.getFlooredAmount(random), random.nextInt(16) + 8);
             if (this.check.apply(pos)) {
                 chunk.getWorld().setBlock(pos.getBlockPosition(), this.state);
+                // Liquids force a block update tick so they may flow during world gen
+                mcWorld.forceBlockUpdateTick((Block) this.state.getType(), VecHelper.toBlockPos(pos), random);
             }
         }
     }

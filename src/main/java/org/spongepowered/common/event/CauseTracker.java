@@ -120,8 +120,6 @@ import javax.annotation.Nullable;
 public final class CauseTracker {
 
     private final net.minecraft.world.World targetWorld;
-    private boolean processingBlockRandomTicks = false;
-    private boolean processingVanillaBlockEvent = false;
     private boolean captureSpawnedEntities = false;
     private boolean captureBlockDecay = false;
     private boolean captureTerrainGen = false;
@@ -179,22 +177,6 @@ public final class CauseTracker {
 
     public void setIgnoreSpawnEvents(boolean ignoreSpawnEvents) {
         this.ignoreSpawnEvents = ignoreSpawnEvents;
-    }
-
-    public boolean isProcessingBlockRandomTicks() {
-        return this.processingBlockRandomTicks;
-    }
-
-    public void setProcessingBlockRandomTicks(boolean processingBlockRandomTicks) {
-        this.processingBlockRandomTicks = processingBlockRandomTicks;
-    }
-
-    public boolean isProcessingVanillaBlockEvent() {
-        return this.processingVanillaBlockEvent;
-    }
-
-    public void setProcessingVanillaBlockEvent(boolean processingVanillaBlockEvent) {
-        this.processingVanillaBlockEvent = processingVanillaBlockEvent;
     }
 
     public boolean isCapturingSpawnedEntities() {
@@ -1122,11 +1104,9 @@ public final class CauseTracker {
     }
 
     public void randomTickBlock(Block block, BlockPos pos, IBlockState state, Random random) {
-        this.processingBlockRandomTicks = true;
         this.preTrackBlock(state, pos);
         block.randomTick(this.getMinecraftWorld(), pos, state, random);
         this.postTrackBlock();
-        this.processingBlockRandomTicks = false;
     }
 
     // By this point, currentPending(NextTickListEntry) should always be available
@@ -1161,8 +1141,7 @@ public final class CauseTracker {
     public void notifyBlockOfStateChange(BlockPos notifyPos, final Block sourceBlock, BlockPos sourcePos) {
         if (!this.getMinecraftWorld().isRemote) {
             IBlockState iblockstate = this.getMinecraftWorld().getBlockState(notifyPos);
-            if (iblockstate == Blocks.air.getDefaultState() || this.isRestoringBlocks() || this.isWorldSpawnerRunning() || this.isChunkSpawnerRunning()
-                    || this.isCapturingTerrainGen()) {
+            if (iblockstate == Blocks.air.getDefaultState() || !this.isCapturingBlocks()) {
                 iblockstate.getBlock().onNeighborBlockChange(this.getMinecraftWorld(), notifyPos, iblockstate, sourceBlock);
                 return;
             }
@@ -1206,9 +1185,7 @@ public final class CauseTracker {
             }
             // Handle custom replacements
             if (transaction.getCustom().isPresent()) {
-                this.setRestoringBlocks(true);
                 transaction.getFinal().restore(true, false);
-                this.setRestoringBlocks(false);
             }
 
             Cause cause = this.getCurrentCause();

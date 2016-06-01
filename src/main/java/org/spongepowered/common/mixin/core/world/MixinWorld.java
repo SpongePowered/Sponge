@@ -1127,8 +1127,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Don't capture if we are restoring blocks
             final CauseTracker causeTracker = this.getCauseTracker();
-            if (!this.isRemote && !causeTracker.isProcessingVanillaBlockEvent() && !causeTracker.isRestoringBlocks() && !causeTracker.isWorldSpawnerRunning() && !causeTracker.isChunkSpawnerRunning()
-                    && !causeTracker.isCapturingTerrainGen()) {
+            if (!this.isRemote && causeTracker.isCapturingBlocks()) {
                 originalBlockSnapshot = null;
                 originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
                         (IBlockAccess) this, pos), pos, flags);
@@ -1288,7 +1287,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         // do not drop any items while restoring blocksnapshots. Prevents dupes
         if (!this.isRemote && (entity == null || (entity instanceof net.minecraft.entity.item.EntityItem && this.causeTracker.isRestoringBlocks()))) {
             return false;
-        } else if (!(entity instanceof EntityPlayer) && ((this.causeTracker.isCapturingSpawnedEntities() && !this.causeTracker.isCapturingTerrainGen()))) {
+        } else if (!(entity instanceof EntityPlayer) && ((this.causeTracker.isCapturingSpawnedEntities()))) {
             if (entity instanceof EntityItem) {
                 this.causeTracker.getCapturedSpawnedEntityItems().add((Item) entity);
             } else {
@@ -1312,8 +1311,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (causeTracker.isRestoringBlocks() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()
-                || causeTracker.isCapturingTerrainGen()) {
+        if (!causeTracker.isCapturingBlocks()) {
             for (EnumFacing facing : EnumFacing.values()) {
                 causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
             }
@@ -1350,8 +1348,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         directions.remove(skipSide);
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (causeTracker.isRestoringBlocks() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()
-                || causeTracker.isCapturingTerrainGen()) {
+        if (!causeTracker.isCapturingBlocks()) {
             for (Object obj : directions) {
                 EnumFacing facing = (EnumFacing) obj;
                 causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
