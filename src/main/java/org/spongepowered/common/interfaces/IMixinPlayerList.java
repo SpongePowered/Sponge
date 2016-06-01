@@ -25,9 +25,15 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.world.WorldServer;
 
 public interface IMixinPlayerList {
 
     void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn);
+
+    void changePlayerDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter);
+
+    void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world
+            .Teleporter teleporter);
 }

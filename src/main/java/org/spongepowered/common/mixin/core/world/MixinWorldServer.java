@@ -199,7 +199,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         PortalAgentType portalAgentType = ((WorldProperties) this.worldInfo).getPortalAgentType();
         if (!portalAgentType.equals(PortalAgentTypes.DEFAULT)) {
             try {
-                this.worldTeleporter = (Teleporter) portalAgentType.getPortalAgentClass().getConstructor(new Class[] {WorldServer.class})
+                this.worldTeleporter = (Teleporter) portalAgentType.getPortalAgentClass().getConstructor(new Class<?>[] {WorldServer.class})
                         .newInstance(new Object[] {this});
             } catch (Exception e) {
                 SpongeImpl.getLogger().log(Level.ERROR, "Could not create PortalAgent of type " + portalAgentType.getId()

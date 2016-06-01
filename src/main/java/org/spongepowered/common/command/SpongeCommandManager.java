@@ -111,6 +111,7 @@ public class SpongeCommandManager implements CommandManager {
         return register(plugin, callable, aliases, Function.identity());
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Optional<CommandMapping> register(Object plugin, CommandCallable callable, List<String> aliases,
             Function<List<String>, List<String>> callback) {

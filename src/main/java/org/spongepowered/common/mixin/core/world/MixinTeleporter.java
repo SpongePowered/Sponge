@@ -90,6 +90,14 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         return this;
     }
 
+    /**
+     * @author blood - May 21st, 2016
+     *
+     * @reason - rewritten to handle {@link DisplaceEntityEvent.Teleport.Portal}
+     *
+     * @param entityIn The entity being placed into the portal
+     * @param rotationYaw The yaw of entity
+     */
     @Overwrite
     public void placeInPortal(Entity entityIn, float rotationYaw) {
         Location<World> targetLocation = ((org.spongepowered.api.entity.Entity) entityIn).getLocation();
@@ -141,6 +149,14 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         return foundTeleporter;
     }
 
+    /**
+     * @author blood - May 21st, 2016
+     *
+     * @reason - rewritten to handle {@link DisplaceEntityEvent.Teleport.Portal}
+     *
+     * @param entityIn The entity being placed into the portal
+     * @param rotationYaw The yaw of entity
+     */
     @Overwrite
     public boolean placeInExistingPortal(Entity entityIn, float rotationYaw) {
         if (entityIn == null) {
@@ -266,6 +282,13 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         entityIn.setLocationAndAngles(xTarget, yTarget, zTarget, entityIn.rotationYaw, entityIn.rotationPitch);
     }
 
+    /**
+     * @author blood - May 21st, 2016
+     *
+     * @reason - rewritten to handle {@link DisplaceEntityEvent.Teleport.Portal}
+     *
+     * @param entityIn The entity being placed into the portal
+     */
     @Overwrite
     public boolean makePortal(Entity entityIn) {
         if (createPortal(((org.spongepowered.api.entity.Entity) entityIn).getLocation()).isPresent()) {

@@ -721,7 +721,7 @@ public abstract class MixinEntity implements IMixinEntity {
         if (!this.worldObj.isRemote && !this.isDead) {
             // Sponge Start - Throw an event really quickly before changing anything
             MoveEntityEvent.Position.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent((net.minecraft.entity.Entity) (Object) this, toDimensionId, null);
-            if (event.isCancelled()) {
+            if (event == null || event.isCancelled()) {
                 return null;
             }
             // Sponge End
