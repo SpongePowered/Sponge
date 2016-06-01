@@ -778,11 +778,6 @@ public class SpongeCommonEventFactory {
     }
 
     public static DisplaceEntityEvent.Teleport handleDisplaceEntityTeleportEvent(net.minecraft.entity.Entity entityIn, Transform<World> fromTransform, Transform<World> toTransform, boolean apiCall) {
-        // Don't allow non-player entities to load chunks
-        if (!(entityIn instanceof EntityPlayerMP) && !((net.minecraft.world.World) toTransform.getExtent()).isChunkLoaded((int) toTransform.getPosition().getX() >> 4, (int) toTransform.getPosition().getZ() >> 4, false)) {
-            return null;
-        }
-
         // Use origin world to get correct cause
         IMixinWorld spongeWorld = (IMixinWorld) fromTransform.getExtent();
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
@@ -856,15 +851,9 @@ public class SpongeCommonEventFactory {
         }
 
         scm.prepareEntityForPortal(entityIn, fromWorld, toWorld);
-        Transform<World> portalEnterTransform = spongeEntity.getTransform().setExtent((World) toWorld);
         if (entityIn instanceof EntityPlayerMP) {
             // disable packets from being sent to clients to avoid syncing issues, this is re-enabled before the event
             ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) entityIn).playerNetServerHandler).setAllowClientLocationUpdate(false);
-        } else {
-            // Don't allow non-player entities to load chunks
-            if (!(entityIn instanceof EntityPlayerMP) && !toWorld.isChunkLoaded((int) portalEnterTransform.getPosition().getX() >> 4, (int) portalEnterTransform.getPosition().getZ() >> 4, false)) {
-                return null;
-            }
         }
 
         Cause teleportCause = Cause.of(NamedCause.source(PortalTeleportCause.builder().agent((PortalAgent) teleporter).type(TeleportTypes.PORTAL).build()));
