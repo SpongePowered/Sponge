@@ -394,7 +394,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         if (event.isCancelled()) {
             return false;
         } else {
-            this.setLocationAndAngles(event.getToTransform());
+            location = event.getToTransform().getLocation();
+            this.mcEntity.rotationPitch = (float) event.getToTransform().getPitch();
+            this.mcEntity.rotationYaw = (float) event.getToTransform().getYaw();
         }
 
         // detach passengers
