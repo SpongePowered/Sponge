@@ -374,6 +374,7 @@
         "tileentity.MixinTileEntitySign",
         "tileentity.MixinTileEntitySkull",
         "util.MixinClassInheritanceMultiMap",
+        "util.MixinEnumHand",
         "util.MixinPacketThreadUtil",
         "util.datafix.MixinDataFixer",
         "whitelist.MixinUserListWhitelist",

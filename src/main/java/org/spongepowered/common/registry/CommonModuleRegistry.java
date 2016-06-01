@@ -139,6 +139,7 @@ import org.spongepowered.common.registry.type.block.*;
 import org.spongepowered.common.registry.type.boss.BossBarColorRegistryModule;
 import org.spongepowered.common.registry.type.boss.BossBarOverlayRegistryModule;
 import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
+import org.spongepowered.common.registry.type.data.HandTypeRegistryModule;
 import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.ParticleRegistryModule;
 import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
@@ -380,6 +381,7 @@ public final class CommonModuleRegistry {
             .registerModule(BossBarColor.class, new BossBarColorRegistryModule())
             .registerModule(BossBarOverlay.class, new BossBarOverlayRegistryModule())
             .registerModule(PortalAgentType.class, PortalAgentRegistryModule.getInstance())
+            .registerModule(HandType.class, HandTypeRegistryModule.getInstance())
             ;
     }
 

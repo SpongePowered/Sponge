@@ -455,7 +455,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event);
     }
 
-    @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"))
+    @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     private int onGetDimensionIdForBlockEvents(DimensionType dimensionType) {
         return this.getDimensionId();
     }
@@ -602,7 +602,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * @param id The world provider's dimension id
      * @return True if the spawn was successful and the effect is played.
      */
-    @Redirect(method = "addWeatherEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"))
+    // We expect 0 because forge patches it correctly
+    @Redirect(method = "addWeatherEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     public int getDimensionIdForWeatherEffect(DimensionType id) {
         return this.getDimensionId();
     }

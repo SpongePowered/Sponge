@@ -37,6 +37,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.entity.Tamer;
 import org.spongepowered.api.entity.living.player.Player;
@@ -60,6 +61,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 /**
  * Implements things that are not implemented by mixins into this class. <p>This
@@ -237,12 +240,12 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     @Override
-    public Optional<ItemStack> getItemInHand() {
+    public Optional<ItemStack> getItemInHand(HandType handType) {
         throw new UnsupportedOperationException(); // TODO Inventory API
     }
 
     @Override
-    public void setItemInHand(ItemStack itemInHand) {
+    public void setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
         throw new UnsupportedOperationException(); // TODO Inventory API
     }
 

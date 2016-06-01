@@ -24,12 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.monster.EntityGiantZombie;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.EntityEquipmentSlot;
+import net.minecraft.util.EnumHand;
+import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Implements;
@@ -98,16 +102,18 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
         }
     }
 
-    public Optional<ItemStack> equipable$getItemInHand() {
-        @Nullable final net.minecraft.item.ItemStack itemStack = this.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
+    public Optional<ItemStack> equipable$getItemInHand(HandType handType) {
+        checkNotNull(handType, "HandType cannot be null!");
+        @Nullable final net.minecraft.item.ItemStack itemStack = this.getHeldItem((EnumHand) (Object) handType);
         return Optional.ofNullable(itemStack == null ? null : ((ItemStack) itemStack.copy()));
     }
 
-    public void equipable$setItemInHand(ItemStack itemInHand) {
+    public void equipable$setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
+        checkNotNull(handType, "HandType cannot be null!");
         if (itemInHand == null) {
-            this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, null);
+            this.setHeldItem((EnumHand) (Object) handType, null);
         } else {
-            this.setItemStackToSlot(EntityEquipmentSlot.MAINHAND, ((net.minecraft.item.ItemStack) itemInHand.copy()));
+            this.setHeldItem((EnumHand) (Object) handType, ((net.minecraft.item.ItemStack) itemInHand.copy()));
         }
     }
 }
