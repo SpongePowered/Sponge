@@ -26,6 +26,7 @@ package co.aikar.timings;
 
 import co.aikar.util.LoadingIntMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.common.SpongeImpl;
 
 class TimingHandler implements Timing {
@@ -87,7 +88,7 @@ class TimingHandler implements Timing {
             return;
         }
 
-        if (SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+        if (Sponge.isServerAvailable() && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             startTiming();
         }
     }
@@ -98,7 +99,7 @@ class TimingHandler implements Timing {
             return;
         }
 
-        if (SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+        if (Sponge.isServerAvailable() && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             stopTiming();
         }
     }
