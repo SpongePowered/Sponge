@@ -118,4 +118,9 @@ public class GlobalConfig extends ConfigBase {
     public GlobalWorldCategory getWorld() {
         return this.world;
     }
+
+    public boolean isConfigEnabled() {
+        // always return true as there is only 1 global config
+        return true;
+    }
 }

@@ -34,12 +34,4 @@ public class DimensionConfig extends ConfigBase {
     public DimensionConfig() {
         super();
     }
-
-    public boolean isConfigEnabled() {
-        return this.configEnabled;
-    }
-
-    public void setConfigEnabled(boolean configEnabled) {
-        this.configEnabled = configEnabled;
-    }
 }

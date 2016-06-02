@@ -41,14 +41,6 @@ public class WorldConfig extends ConfigBase {
         super();
     }
 
-    public boolean isConfigEnabled() {
-        return this.configEnabled;
-    }
-
-    public void setConfigEnabled(boolean configEnabled) {
-        this.configEnabled = configEnabled;
-    }
-
     public List<String> getWorldGenModifiers() {
         return this.worldModifiers;
     }

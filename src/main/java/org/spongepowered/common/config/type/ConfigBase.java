@@ -56,6 +56,8 @@ public abstract class ConfigBase {
     @Setting
     private TimingsCategory timings = new TimingsCategory();
 
+    protected boolean configEnabled = false;
+
     public ConfigBase() {
         
     }
@@ -96,4 +98,11 @@ public abstract class ConfigBase {
         return this.timings;
     }
 
+    public boolean isConfigEnabled() {
+        return this.configEnabled;
+    }
+
+    public void setConfigEnabled(boolean configEnabled) {
+        this.configEnabled = configEnabled;
+    }
 }
