@@ -22,15 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.category;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-public interface IMixinDimensionType {
+@ConfigSerializable
+public class BungeeCordCategory extends ConfigCategory {
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
+    @Setting(value = "ip-forwarding", comment = "If enabled, allows BungeeCord to forward IP address, UUID, and Game Profile to this server")
+    private boolean ipForwarding = false;
 
-    Context getContext();
+    public boolean getIpForwarding() {
+        return this.ipForwarding;
+    }
 }

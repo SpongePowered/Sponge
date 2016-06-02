@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.world.WorldManager;
 
@@ -51,7 +52,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     @Shadow public abstract String getName();
 
     private String sanitizedId;
-    private SpongeConfig<SpongeConfig.DimensionConfig> config;
+    private SpongeConfig<DimensionConfig> config;
     private volatile Context context;
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -78,7 +79,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     }
 
     @Override
-    public SpongeConfig<SpongeConfig.DimensionConfig> getDimensionConfig() {
+    public SpongeConfig<DimensionConfig> getDimensionConfig() {
         return this.config;
     }
 

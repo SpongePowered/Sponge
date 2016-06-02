@@ -34,11 +34,13 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -76,13 +78,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Surrogate;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -125,6 +130,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private int tickCounter;
     @Shadow private String motd;
     @Shadow public WorldServer[] worldServers;
+    @Shadow private boolean serverStopped;
 
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void addChatMessage(ITextComponent message);
@@ -147,6 +153,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow public abstract DataFixer getDataFixer();
     @Shadow public abstract int getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
+    @Shadow public abstract boolean isDedicatedServer();
 
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
@@ -575,6 +582,70 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @ModifyArg(method = "addServerStatsToSnooper", at = @At(value = "INVOKE", target = "Ljava/lang/Integer;valueOf(I)Ljava/lang/Integer;", ordinal = 5))
     private int onValueOfInteger(int dimensionId) {
         return this.dimensionId;
+    }
+
+    @ModifyConstant(method = "tick", constant = @Constant(intValue = 900))
+    private int getSaveTickInterval(int tickInterval) {
+        int autoPlayerSaveInterval = SpongeImpl.getGlobalConfig().getConfig().getWorld().getAutoPlayerSaveInterval();
+        if (autoPlayerSaveInterval > 0 && (this.tickCounter % autoPlayerSaveInterval == 0)) {
+            this.getPlayerList().saveAllPlayerData();
+        }
+
+        this.saveAllWorlds(true);
+        // force check to fail as we handle everything above
+        return this.tickCounter + 1;
+    }
+
+    /**
+     * @author blood - June 2nd, 2016
+     *
+     * @reason To allow per-world auto-save tick intervals or disable auto-saving entirely
+     *
+     * @param dontLog Whether to log during saving
+     */
+    @Overwrite
+    protected void saveAllWorlds(boolean dontLog)
+    {
+        for (WorldServer worldserver : this.worldServers)
+        {
+            if (worldserver != null)
+            {
+                // Sponge start - check auto save interval in world config
+                if (this.isDedicatedServer() && !this.serverStopped) {
+                    final IMixinWorldServer spongeWorld = (IMixinWorldServer) worldserver;
+                    final int autoSaveInterval = spongeWorld.getActiveConfig().getConfig().getWorld().getAutoSaveInterval();
+                    final boolean logAutoSave = spongeWorld.getActiveConfig().getConfig().getLogging().worldAutoSaveLogging();
+                    if (autoSaveInterval <= 0) {
+                        if (logAutoSave) {
+                            LOG.warn("Auto-saving has been disabled for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
+                                        + worldserver.provider.getDimensionType().getName() + ". "
+                                        + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than zero in the corresponding world config.");
+                        }
+                        continue;
+                    }
+                    if (this.tickCounter % autoSaveInterval != 0) {
+                        continue;
+                    }
+                    if (logAutoSave) {
+                        LOG.info("Auto-saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
+                                    + worldserver.provider.getDimensionType().getName());
+                    }
+                } else if (!dontLog) {
+                    LOG.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
+                                + worldserver.provider.getDimensionType().getName());
+                }
+                // Sponge end
+
+                try
+                {
+                    worldserver.saveAllChunks(true, (IProgressUpdate)null);
+                }
+                catch (MinecraftException minecraftexception)
+                {
+                    LOG.warn(minecraftexception.getMessage());
+                }
+            }
+        }
     }
 
     @Override

@@ -113,6 +113,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -231,7 +232,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig() {
+    public SpongeConfig<WorldConfig> getWorldConfig() {
         return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
     }
 

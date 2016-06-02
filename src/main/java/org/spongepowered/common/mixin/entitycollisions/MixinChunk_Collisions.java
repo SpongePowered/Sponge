@@ -41,8 +41,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.SpongeConfig.CollisionModNode;
-import org.spongepowered.common.config.SpongeConfig.EntityCollisionCategory;
+import org.spongepowered.common.config.category.CollisionModCategory;
+import org.spongepowered.common.config.category.EntityCollisionCategory;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
@@ -128,9 +129,9 @@ public class MixinChunk_Collisions {
         String[] ids = type.getId().split(":");
         String modId = ids[0];
         String name = ids[1];
-        CollisionModNode collisionMod = collisionCat.getModList().get(modId);
+        CollisionModCategory collisionMod = collisionCat.getModList().get(modId);
         if (collisionMod == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-            collisionMod = new CollisionModNode(modId);
+            collisionMod = new CollisionModCategory(modId);
             collisionCat.getModList().put(modId, collisionMod);
             collisionMod.getBlockList().put(name, spongeBlock.getMaxCollisions());
             if (activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {

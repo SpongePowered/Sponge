@@ -22,15 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.category;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-public interface IMixinDimensionType {
+import java.util.ArrayList;
+import java.util.List;
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
+@ConfigSerializable
+public class BlockTrackingCategory extends ConfigCategory {
 
-    Context getContext();
+    @Setting(value = "enabled", comment = "If enabled, adds player tracking support for block positions. Note: This should only be disabled if you do not care who caused a block to change.")
+    private boolean enabled = true;
+
+    @Setting(value = "block-blacklist", comment = "Add block ids you wish to blacklist for player block placement tracking.")
+    private List<String> blockBlacklist = new ArrayList<>();
+
+    public boolean isEnabled() {
+        return this.enabled;
+    }
+
+    public void setEnabled(boolean flag) {
+        this.enabled = flag;
+    }
+
+    public List<String> getBlockBlacklist() {
+        return this.blockBlacklist;
+    }
 }

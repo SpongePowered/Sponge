@@ -22,15 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.category;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-public interface IMixinDimensionType {
+import java.util.HashMap;
+import java.util.Map;
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
+@ConfigSerializable
+public class CommandsCategory extends ConfigCategory {
 
-    Context getContext();
+    @Setting(comment = "A mapping from unqualified command alias to plugin id of the plugin that should handle a certain command")
+    private Map<String, String> aliases = new HashMap<>();
+
+    public Map<String, String> getAliases() {
+        return this.aliases;
+    }
 }

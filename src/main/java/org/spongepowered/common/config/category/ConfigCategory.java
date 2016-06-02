@@ -22,15 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.category;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-public interface IMixinDimensionType {
+@ConfigSerializable
+public abstract class ConfigCategory {
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
-
-    Context getContext();
 }

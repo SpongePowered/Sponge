@@ -50,7 +50,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.entity.projectile.EntityThrowable;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -60,11 +59,10 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.SpongeConfig.EntityActivationModNode;
-import org.spongepowered.common.config.SpongeConfig.EntityActivationRangeCategory;
+import org.spongepowered.common.config.category.EntityActivationModCategory;
+import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.entity.projectile.IMixinEntityArrow;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
@@ -154,7 +152,7 @@ public class ActivationRange {
             return true;
         }
 
-        SpongeConfig.EntityActivationRangeCategory config = ((IMixinWorldServer) entity.worldObj).getActiveConfig().getConfig().getEntityActivationRange();
+        EntityActivationRangeCategory config = ((IMixinWorldServer) entity.worldObj).getActiveConfig().getConfig().getEntityActivationRange();
         SpongeEntityType type = (SpongeEntityType) ((org.spongepowered.api.entity.Entity) entity).getType();
         IModData_Activation spongeEntity = (IModData_Activation) entity;
         if (type == null) {
@@ -163,7 +161,7 @@ public class ActivationRange {
 
         spongeEntity.setModDataId(type.getModId());
         byte activationType = spongeEntity.getActivationType();
-        EntityActivationModNode entityMod = config.getModList().get(type.getModId());
+        EntityActivationModCategory entityMod = config.getModList().get(type.getModId());
         int defaultActivationRange = config.getDefaultRanges().get(activationTypeMappings.get(activationType));
         if (entityMod == null) {
             // use default activation range
@@ -433,9 +431,9 @@ public class ActivationRange {
         entityType = ActivationRange.activationTypeMappings.get(activationType);
         boolean requiresSave = false;
         EntityActivationRangeCategory activationCategory = config.getConfig().getEntityActivationRange();
-        EntityActivationModNode entityMod = activationCategory.getModList().get(type.getModId());
+        EntityActivationModCategory entityMod = activationCategory.getModList().get(type.getModId());
         if (entityMod == null) {
-            entityMod = new EntityActivationModNode();
+            entityMod = new EntityActivationModCategory();
             activationCategory.getModList().put(type.getModId(), entityMod);
             requiresSave = true;
         }

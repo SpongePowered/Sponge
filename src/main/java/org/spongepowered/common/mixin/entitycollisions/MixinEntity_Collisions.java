@@ -34,8 +34,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.SpongeConfig.CollisionModNode;
-import org.spongepowered.common.config.SpongeConfig.EntityCollisionCategory;
+import org.spongepowered.common.config.category.CollisionModCategory;
+import org.spongepowered.common.config.category.EntityCollisionCategory;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
@@ -113,9 +113,9 @@ public class MixinEntity_Collisions implements IModData_Collisions {
         EntityCollisionCategory collisionCat = activeConfig.getConfig().getEntityCollisionCategory();
         this.maxCollisions = collisionCat.getMaxEntitiesWithinAABB();
         boolean requiresSave = false;
-        CollisionModNode collisionMod = collisionCat.getModList().get(this.entityModId);
+        CollisionModCategory collisionMod = collisionCat.getModList().get(this.entityModId);
         if (collisionMod == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-            collisionMod = new CollisionModNode(this.entityModId);
+            collisionMod = new CollisionModCategory(this.entityModId);
             collisionCat.getModList().put(this.entityModId, collisionMod);
             collisionMod.getEntityList().put(this.entityName, maxCollisions);
             activeConfig.save();

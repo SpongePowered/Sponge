@@ -34,6 +34,7 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
@@ -45,7 +46,7 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     SpongeConfig<?> getActiveConfig();
 
-    SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
+    SpongeConfig<WorldConfig> getWorldConfig();
 
     void setActiveConfig(SpongeConfig<?> config);
 

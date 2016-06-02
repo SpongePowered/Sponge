@@ -73,6 +73,9 @@ import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.DimensionConfig;
+import org.spongepowered.common.config.type.GlobalConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -181,17 +184,17 @@ public class SpongeCommand {
             return CommandResult.builder().successCount(successes).build(); // TODO: How do we handle results?
         }
 
-        protected Text processGlobal(SpongeConfig<SpongeConfig.GlobalConfig> config, CommandSource source, CommandContext args)
+        protected Text processGlobal(SpongeConfig<GlobalConfig> config, CommandSource source, CommandContext args)
                 throws CommandException {
             return process(config, source, args);
         }
 
-        protected Text processDimension(SpongeConfig<SpongeConfig.DimensionConfig> config, DimensionType dim, CommandSource source,
+        protected Text processDimension(SpongeConfig<DimensionConfig> config, DimensionType dim, CommandSource source,
                 CommandContext args) throws CommandException {
             return process(config, source, args);
         }
 
-        protected Text processWorld(SpongeConfig<SpongeConfig.WorldConfig> config, World world, CommandSource source,
+        protected Text processWorld(SpongeConfig<WorldConfig> config, World world, CommandSource source,
                 CommandContext args) throws CommandException {
             return process(config, source, args);
         }
@@ -223,7 +226,7 @@ public class SpongeCommand {
                     }
 
                     @Override
-                    protected Text processGlobal(SpongeConfig<SpongeConfig.GlobalConfig> config, CommandSource source, CommandContext args)
+                    protected Text processGlobal(SpongeConfig<GlobalConfig> config, CommandSource source, CommandContext args)
                             throws CommandException {
                         for (World world : SpongeImpl.getGame().getServer().getWorlds()) {
                             source.sendMessage(Text.of("World ", Text.of(TextStyles.BOLD, world.getName()),
@@ -233,7 +236,7 @@ public class SpongeCommand {
                     }
 
                     @Override
-                    protected Text processDimension(SpongeConfig<SpongeConfig.DimensionConfig> config, DimensionType dim, CommandSource source,
+                    protected Text processDimension(SpongeConfig<DimensionConfig> config, DimensionType dim, CommandSource source,
                             CommandContext args)
                             throws CommandException {
                         SpongeImpl.getGame().getServer().getWorlds().stream().filter(world -> world.getDimension().getType().equals(dim))
@@ -243,7 +246,7 @@ public class SpongeCommand {
                     }
 
                     @Override
-                    protected Text processWorld(SpongeConfig<SpongeConfig.WorldConfig> config, World world, CommandSource source, CommandContext args)
+                    protected Text processWorld(SpongeConfig<WorldConfig> config, World world, CommandSource source, CommandContext args)
                             throws CommandException {
                         return getChunksInfo((WorldServer) world);
                     }

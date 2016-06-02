@@ -22,15 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.type;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
 
-public interface IMixinDimensionType {
+public class DimensionConfig extends ConfigBase {
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
+    @Setting(value = "config-enabled", comment = "Enabling config will override Global.")
+    protected boolean configEnabled = false;
 
-    Context getContext();
+    public DimensionConfig() {
+        super();
+    }
 }

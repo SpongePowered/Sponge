@@ -22,15 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.category;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-public interface IMixinDimensionType {
+import java.util.HashMap;
+import java.util.Map;
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
+@ConfigSerializable
+public class EntityActivationModCategory extends ConfigCategory {
 
-    Context getContext();
+    @Setting(value = "enabled", comment = "Set to false if you want mod to ignore entity activation rules and always tick.")
+    private boolean isEnabled = true;
+    @Setting(value = "defaults")
+    private Map<String, Integer> defaultRanges = new HashMap<>();
+    @Setting(value = "entities")
+    private Map<String, Integer> entityList = new HashMap<>();
+
+    public boolean isEnabled() {
+        return this.isEnabled;
+    }
+
+    public Map<String, Integer> getDefaultRanges() {
+        return this.defaultRanges;
+    }
+
+    public Map<String, Integer>  getEntityList() {
+        return this.entityList;
+    }
 }

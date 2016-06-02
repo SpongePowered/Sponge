@@ -29,7 +29,7 @@ import net.minecraft.scoreboard.ServerScoreboard;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.SpongeConfig.WorldConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 
 import java.util.Optional;
 import java.util.UUID;

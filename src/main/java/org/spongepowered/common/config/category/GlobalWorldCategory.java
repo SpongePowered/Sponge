@@ -22,15 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.category;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-public interface IMixinDimensionType {
+@ConfigSerializable
+public class GlobalWorldCategory extends WorldCategory {
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
+    @Setting(value = "auto-player-save-interval", comment = "The auto-save tick interval used when saving global player data. Set to 0 to disable. (Default: 900) Note: 20 ticks is equivalent to 1 second.")
+    private int autoPlayerSaveInterval = 900;
 
-    Context getContext();
+    public int getAutoPlayerSaveInterval() {
+        return this.autoPlayerSaveInterval;
+    }
 }

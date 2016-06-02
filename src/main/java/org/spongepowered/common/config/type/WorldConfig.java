@@ -22,15 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.type;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
 
-public interface IMixinDimensionType {
+import java.util.ArrayList;
+import java.util.List;
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
+public class WorldConfig extends ConfigBase {
 
-    Context getContext();
+    @Setting(value = "config-enabled", comment = "Enabling config will override Dimension and Global.")
+    protected boolean configEnabled = false;
+
+    @Setting(value = "world-generation-modifiers", comment = "World Generation Modifiers to apply to the world")
+    private List<String> worldModifiers = new ArrayList<>();
+
+    public WorldConfig() {
+        super();
+    }
+
+    public List<String> getWorldGenModifiers() {
+        return this.worldModifiers;
+    }
 }

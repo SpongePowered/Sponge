@@ -22,15 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.category;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-public interface IMixinDimensionType {
+@ConfigSerializable
+public class GeneralCategory extends ConfigCategory {
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
+    @Setting(value = "disable-warnings", comment = "Disable warning messages to server admins")
+    private boolean disableWarnings = false;
+    @Setting(value = "chunk-load-override",
+            comment = "Forces Chunk Loading on provide requests (speedup for mods that don't check if a chunk is loaded)")
+    private boolean chunkLoadOverride = false;
 
-    Context getContext();
+    public boolean disableWarnings() {
+        return this.disableWarnings;
+    }
+
+    public void setDisableWarnings(boolean disableWarnings) {
+        this.disableWarnings = disableWarnings;
+    }
+
+    public boolean chunkLoadOverride() {
+        return this.chunkLoadOverride;
+    }
+
+    public void setChunkLoadOverride(boolean chunkLoadOverride) {
+        this.chunkLoadOverride = chunkLoadOverride;
+    }
 }
