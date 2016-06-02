@@ -367,8 +367,13 @@ public final class CauseTracker {
 
     public void preTrackTileEntity(TileEntity tile) {
         this.currentTickTileEntity = tile;
-        this.addCause(Cause.of(NamedCause.source(tile)));
         this.trackBlockPositionCausePreTick(((net.minecraft.tileentity.TileEntity) tile).getPos());
+        List<NamedCause> namedCauses = new ArrayList<>();
+        namedCauses.add(NamedCause.source(this.currentTickTileEntity));
+        if (this.currentNotifier != null) {
+            namedCauses.add(NamedCause.notifier(this.currentNotifier));
+        }
+        this.addCause(Cause.of(namedCauses));
     }
 
     public void postTrackTileEntity() {
@@ -380,8 +385,13 @@ public final class CauseTracker {
 
     public void preTrackBlock(IBlockState state, BlockPos pos) {
         this.currentTickBlock = this.getMixinWorld().createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, this.getMinecraftWorld(), pos), pos, 0);
-        this.addCause(Cause.of(NamedCause.source(this.currentTickBlock)));
         this.trackBlockPositionCausePreTick(pos);
+        List<NamedCause> namedCauses = new ArrayList<>();
+        namedCauses.add(NamedCause.source(this.currentTickBlock));
+        if (this.currentNotifier != null) {
+            namedCauses.add(NamedCause.notifier(this.currentNotifier));
+        }
+        this.addCause(Cause.of(namedCauses));
     }
 
     public void postTrackBlock() {
@@ -1124,14 +1134,16 @@ public final class CauseTracker {
         }
 
         if (!this.currentPendingBlockUpdate.hasSourceUser()) {
-            this.addCause(Cause.of(namedCauses));
-            this.currentNotifier = this.trackBlockPositionCausePreTick(pos).orElse(null);
+            this.trackBlockPositionCausePreTick(pos);
+            if (this.currentNotifier != null) {
+                namedCauses.add(NamedCause.notifier(this.currentNotifier));
+            }
         } else {
             this.currentNotifier = this.currentPendingBlockUpdate.getSourceUser().get();
             namedCauses.add(NamedCause.notifier(this.currentNotifier));
-            this.addCause(Cause.of(namedCauses));
         }
 
+        this.addCause(Cause.of(namedCauses));
         block.updateTick(this.getMinecraftWorld(), pos, state, rand);
         this.postTrackBlock();
         this.currentPendingBlockUpdate = null;
@@ -1326,7 +1338,7 @@ public final class CauseTracker {
 
     public Optional<User> trackBlockPositionCausePreTick(BlockPos pos) {
         net.minecraft.world.World world = this.getMinecraftWorld();
-        if (pos == null || this.causeStack.isEmpty() || !world.isBlockLoaded(pos)) {
+        if (pos == null || !world.isBlockLoaded(pos)) {
             return Optional.empty();
         }
 
@@ -1337,14 +1349,10 @@ public final class CauseTracker {
             if (notifier.isPresent()) {
                 User user = notifier.get();
                 this.currentNotifier = user;
-                Cause cause = this.causeStack.pop();
-                this.addCause(cause.merge(Cause.of(NamedCause.notifier(user))));
                 return notifier;
             } else if (owner.isPresent()) {
                 User user = owner.get();
                 this.currentNotifier = user;
-                Cause cause = this.causeStack.pop();
-                this.addCause(cause.merge(Cause.of(NamedCause.notifier(user))));
                 return owner;
             }
             if (notifier.isPresent()) {
