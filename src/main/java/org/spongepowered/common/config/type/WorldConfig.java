@@ -22,56 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.type;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.scoreboard.ServerScoreboard;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 
-public interface IMixinWorldInfo {
+public class WorldConfig extends ConfigBase {
 
-    NBTTagCompound getSpongeRootLevelNbt();
+    @Setting(value = "config-enabled", comment = "Enabling config will override Dimension and Global.")
+    protected boolean configEnabled = false;
 
-    NBTTagCompound getSpongeNbt();
+    @Setting(value = "world-generation-modifiers", comment = "World Generation Modifiers to apply to the world")
+    private List<String> worldModifiers = new ArrayList<>();
 
-    int getIndexForUniqueId(UUID uuid);
+    public WorldConfig() {
+        super();
+    }
 
-    Optional<UUID> getUniqueIdForIndex(int index);
+    public boolean isConfigEnabled() {
+        return this.configEnabled;
+    }
 
-    int getDimensionId();
+    public void setConfigEnabled(boolean configEnabled) {
+        this.configEnabled = configEnabled;
+    }
 
-    boolean getIsMod();
-
-    SpongeConfig<WorldConfig> getWorldConfig();
-
-    void setDimensionId(int id);
-
-    void setSpongeRootLevelNBT(NBTTagCompound nbt);
-
-    void setUUID(UUID uuid);
-
-    void setDimensionType(DimensionType type);
-
-    void setPortalAgentType(PortalAgentType type);
-
-    void setSeed(long seed);
-
-    void setWorldName(String name);
-
-    void readSpongeNbt(NBTTagCompound spongeNbt);
-
-    void setIsMod(boolean isMod);
-
-    void createWorldConfig();
-
-    void setScoreboard(ServerScoreboard scoreboard);
-
-    boolean isValid();
-
+    public List<String> getWorldGenModifiers() {
+        return this.worldModifiers;
+    }
 }

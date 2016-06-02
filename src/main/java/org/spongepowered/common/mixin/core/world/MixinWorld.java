@@ -134,6 +134,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -519,7 +520,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig() {
+    public SpongeConfig<WorldConfig> getWorldConfig() {
         return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
     }
 

@@ -65,15 +65,15 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.SpongeConfig.DimensionConfig;
-import org.spongepowered.common.config.SpongeConfig.WorldConfig;
+import org.spongepowered.common.config.category.LoggingCategory;
+import org.spongepowered.common.config.type.DimensionConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.MinecraftBlockDamageSource;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.mixin.plugin.interfaces.IModData;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
-import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.world.CaptureType;
 import org.spongepowered.common.world.DimensionManager;
 
@@ -192,7 +192,7 @@ public class SpongeHooks {
 
         SpongeConfig<?> config = getActiveConfig(world);
         Optional<User> user = cause.first(User.class);
-        SpongeConfig.LoggingCategory logging = config.getConfig().getLogging();
+        LoggingCategory logging = config.getConfig().getLogging();
         if (logging.blockBreakLogging() && type == CaptureType.BREAK
             || logging.blockModifyLogging() && type == CaptureType.MODIFY
             || logging.blockPlaceLogging() && type == CaptureType.PLACE
@@ -482,35 +482,7 @@ public class SpongeHooks {
 
             // If this is a loaded world then we only return configs on the loaded objects. Don't go to disk.
             if (optWorld.isPresent()) {
-                final World world = (World) optWorld.get();
-                final SpongeConfig<WorldConfig> worldConfig = ((IMixinWorld) world).getWorldConfig();
-
-                if (worldConfig != null) {
-                    // Return world config if its present and enabled
-                    if (worldConfig.getConfig().isConfigEnabled()) {
-                        return worldConfig;
-                    }
-
-                    // If we've gotten here, see if this world's dimension's config is enabled.
-                    final SpongeConfig<DimensionConfig> dimensionConfig =
-                            DimensionRegistryModule.getInstance().getConfig(world.provider.getDimensionId());
-                    if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
-                        return dimensionConfig;
-                    }
-
-                    // Default to global
-                    return SpongeImpl.getGlobalConfig();
-                } else {
-                    // If we've gotten here, we have no world config so see if this world's dimension's config is enabled.
-                    final SpongeConfig<DimensionConfig> dimensionConfig =
-                            DimensionRegistryModule.getInstance().getConfig(world.provider.getDimensionId());
-                    if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
-                        return dimensionConfig;
-                    }
-
-                    // Default to global
-                    return SpongeImpl.getGlobalConfig();
-                }
+                return ((IMixinWorld) optWorld.get()).getActiveConfig();
             }
         }
 

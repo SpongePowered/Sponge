@@ -66,7 +66,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.SpongeConfig.WorldConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -104,7 +104,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
     private List<UUID> pendingUniqueIds = new ArrayList<>();
     private int trackedUniqueIdCount = 0;
-    private SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
+    private SpongeConfig<WorldConfig> worldConfig;
     @SuppressWarnings("unused")
     private ServerScoreboard scoreboard;
     private boolean isValid = true;

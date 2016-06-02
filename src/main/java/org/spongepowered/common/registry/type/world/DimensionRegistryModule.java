@@ -34,6 +34,7 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
@@ -51,7 +52,7 @@ public final class DimensionRegistryModule implements SpongeAdditionalCatalogReg
 
     @RegisterCatalog(DimensionTypes.class)
     private final Map<String, DimensionType> dimensionTypeMappings = Maps.newHashMap();
-    private final Map<Integer, SpongeConfig<SpongeConfig.DimensionConfig>> dimensionConfigs = Maps.newHashMap();
+    private final Map<Integer, SpongeConfig<DimensionConfig>> dimensionConfigs = Maps.newHashMap();
     private final Map<Integer, DimensionType> providerIdMappings = Maps.newHashMap();
     private final Map<Integer, String> worldFolderDimensionIdMappings = Maps.newHashMap();
     private final Map<UUID, String> worldFolderUniqueIdMappings = Maps.newHashMap();
@@ -123,11 +124,11 @@ public final class DimensionRegistryModule implements SpongeAdditionalCatalogReg
         return this.dimensionConfigs.containsKey(id);
     }
 
-    public void registerConfig(int id, SpongeConfig<SpongeConfig.DimensionConfig> config) {
+    public void registerConfig(int id, SpongeConfig<DimensionConfig> config) {
         this.dimensionConfigs.put(id, config);
     }
 
-    public SpongeConfig<SpongeConfig.DimensionConfig> getConfig(int id) {
+    public SpongeConfig<DimensionConfig> getConfig(int id) {
         return this.dimensionConfigs.get(id);
     }
 
@@ -136,7 +137,7 @@ public final class DimensionRegistryModule implements SpongeAdditionalCatalogReg
             int providerId = DimensionManager.getProviderType(provider.getDimensionId());
             if (!isConfigRegistered(providerId)) {
                 String providerName = provider.getDimensionName().toLowerCase(Locale.ENGLISH).replace(" ", "_").replace("[^A-Za-z0-9_]", "");
-                SpongeConfig<SpongeConfig.DimensionConfig> config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION,
+                SpongeConfig<DimensionConfig> config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION,
                         SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(providerName).resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
                 registerConfig(providerId, config);
             }

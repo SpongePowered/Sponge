@@ -22,56 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.category;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.scoreboard.ServerScoreboard;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-import java.util.Optional;
-import java.util.UUID;
+@ConfigSerializable
+public class OptimizationCategory extends ConfigCategory {
 
-public interface IMixinWorldInfo {
+    @Setting(value = "fast-blockstate-lookup", comment = "A simple patch to reduce a few sanity checks for the sake of speed when performing block state operations")
+    private boolean blockStateLookup = true;
 
-    NBTTagCompound getSpongeRootLevelNbt();
+    @Setting(value = "ignore-unloaded-chunks-on-get-light", comment = "This prevents chunks being loaded for getting light values at specific block positions. May have side effects.")
+    private boolean ignoreUnloadedChunkLighting = true;
 
-    NBTTagCompound getSpongeNbt();
+    @Setting(value = "chunk-map-caching", comment = "Caches chunks internally for faster returns when querying at various positions")
+    private boolean useCachedChunkMap = true;
 
-    int getIndexForUniqueId(UUID uuid);
+    public boolean useBlockStateLookupPatch() {
+        return this.blockStateLookup;
+    }
 
-    Optional<UUID> getUniqueIdForIndex(int index);
+    public boolean useIgnoreUloadedChunkLightingPatch() {
+        return this.ignoreUnloadedChunkLighting;
+    }
 
-    int getDimensionId();
-
-    boolean getIsMod();
-
-    SpongeConfig<WorldConfig> getWorldConfig();
-
-    void setDimensionId(int id);
-
-    void setSpongeRootLevelNBT(NBTTagCompound nbt);
-
-    void setUUID(UUID uuid);
-
-    void setDimensionType(DimensionType type);
-
-    void setPortalAgentType(PortalAgentType type);
-
-    void setSeed(long seed);
-
-    void setWorldName(String name);
-
-    void readSpongeNbt(NBTTagCompound spongeNbt);
-
-    void setIsMod(boolean isMod);
-
-    void createWorldConfig();
-
-    void setScoreboard(ServerScoreboard scoreboard);
-
-    boolean isValid();
-
+    public boolean isUseCachedChunkMap() {
+        return this.useCachedChunkMap;
+    }
 }

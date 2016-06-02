@@ -47,6 +47,8 @@ import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.DimensionConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -154,12 +156,12 @@ public class DimensionManager {
     public static boolean shouldLoadSpawn(int dim) {
         if (dim != 0) {
             final WorldServer worldServer = getWorldFromDimId(dim);
-            final SpongeConfig<SpongeConfig.WorldConfig> worldConfig = ((IMixinWorld) worldServer).getWorldConfig();
+            final SpongeConfig<WorldConfig> worldConfig = ((IMixinWorld) worldServer).getWorldConfig();
 
             if (worldConfig.getConfig().isConfigEnabled()) {
                 return worldConfig.getConfig().getWorld().getKeepSpawnLoaded();
             } else {
-                final SpongeConfig<SpongeConfig.DimensionConfig> dimensionConfig = ((IMixinWorldProvider) worldServer.provider)
+                final SpongeConfig<DimensionConfig> dimensionConfig = ((IMixinWorldProvider) worldServer.provider)
                         .getDimensionConfig();
                 if (dimensionConfig.getConfig().isConfigEnabled()) {
                     return dimensionConfig.getConfig().getWorld().getKeepSpawnLoaded();

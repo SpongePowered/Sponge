@@ -29,13 +29,13 @@ import org.spongepowered.asm.lib.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.OptimizationCategory;
+import org.spongepowered.common.config.type.GlobalConfig;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class OptimizationPlugin implements IMixinConfigPlugin {
 
@@ -50,7 +50,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        final SpongeConfig.GlobalConfig globalConfig = SpongeImpl.getGlobalConfig().getConfig();
+        final GlobalConfig globalConfig = SpongeImpl.getGlobalConfig().getConfig();
         if (globalConfig.getModules().useOptimizations()) {
             return mixinEnabledMappings.get(mixinClassName).apply(globalConfig.getOptimizations());
         }
@@ -75,17 +75,17 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
     }
 
     // So that any additional optimizations can be added in succession.
-    private static final Map<String, Function<SpongeConfig.OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<SpongeConfig.OptimizationCategory, Boolean >> builder()
+    private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean >> builder()
             .put("org.spongepowered.common.mixin.optimization.block.state.MixinStateImplementation",
-                    SpongeConfig.OptimizationCategory::useBlockStateLookupPatch)
+                    OptimizationCategory::useBlockStateLookupPatch)
             .put("org.spongepowered.common.mixin.optimization.world.MixinWorld_Lighting",
-                    SpongeConfig.OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
+                    OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
             .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Lighting",
-                    SpongeConfig.OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
+                    OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
             .put("org.spongepowered.common.mixin.optimization.world.gen.MixinChunkProviderServer_Chunk_Cache",
-                    SpongeConfig.OptimizationCategory::isUseCachedChunkMap)
+                    OptimizationCategory::isUseCachedChunkMap)
             .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Chunk_Cache",
-                    SpongeConfig.OptimizationCategory::isUseCachedChunkMap)
+                    OptimizationCategory::isUseCachedChunkMap)
             .build();
 
 }

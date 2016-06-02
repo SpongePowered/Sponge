@@ -43,6 +43,7 @@ import org.spongepowered.api.event.game.state.GameStoppedEvent;
 import org.spongepowered.api.event.game.state.GameStoppingEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
@@ -82,7 +83,7 @@ public final class SpongeImpl {
     @Nullable
     private static SpongeImpl instance;
 
-    @Nullable private static SpongeConfig<SpongeConfig.GlobalConfig> globalConfig;
+    @Nullable private static SpongeConfig<GlobalConfig> globalConfig;
 
     private final Injector injector;
     private final Game game;
@@ -160,7 +161,7 @@ public final class SpongeImpl {
         return SpongeLaunch.getSpongeConfigDir();
     }
 
-    public static SpongeConfig<SpongeConfig.GlobalConfig> getGlobalConfig() {
+    public static SpongeConfig<GlobalConfig> getGlobalConfig() {
         if (globalConfig == null) {
             globalConfig = new SpongeConfig<>(GLOBAL, getSpongeConfigDir().resolve("global.conf"), ECOSYSTEM_ID);
         }

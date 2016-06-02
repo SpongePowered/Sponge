@@ -22,56 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.type;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.scoreboard.ServerScoreboard;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
 
-import java.util.Optional;
-import java.util.UUID;
+public class DimensionConfig extends ConfigBase {
 
-public interface IMixinWorldInfo {
+    @Setting(value = "config-enabled", comment = "Enabling config will override Global.")
+    protected boolean configEnabled = false;
 
-    NBTTagCompound getSpongeRootLevelNbt();
+    public DimensionConfig() {
+        super();
+    }
 
-    NBTTagCompound getSpongeNbt();
+    public boolean isConfigEnabled() {
+        return this.configEnabled;
+    }
 
-    int getIndexForUniqueId(UUID uuid);
-
-    Optional<UUID> getUniqueIdForIndex(int index);
-
-    int getDimensionId();
-
-    boolean getIsMod();
-
-    SpongeConfig<WorldConfig> getWorldConfig();
-
-    void setDimensionId(int id);
-
-    void setSpongeRootLevelNBT(NBTTagCompound nbt);
-
-    void setUUID(UUID uuid);
-
-    void setDimensionType(DimensionType type);
-
-    void setPortalAgentType(PortalAgentType type);
-
-    void setSeed(long seed);
-
-    void setWorldName(String name);
-
-    void readSpongeNbt(NBTTagCompound spongeNbt);
-
-    void setIsMod(boolean isMod);
-
-    void createWorldConfig();
-
-    void setScoreboard(ServerScoreboard scoreboard);
-
-    boolean isValid();
-
+    public void setConfigEnabled(boolean configEnabled) {
+        this.configEnabled = configEnabled;
+    }
 }

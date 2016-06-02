@@ -37,12 +37,12 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
@@ -55,7 +55,7 @@ import javax.annotation.Nullable;
 public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvider {
 
     private boolean allowPlayerRespawns;
-    private SpongeConfig<SpongeConfig.DimensionConfig> dimensionConfig;
+    private SpongeConfig<DimensionConfig> dimensionConfig;
     private volatile Context dimContext;
 
     @Shadow protected World worldObj;
@@ -137,12 +137,12 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     }
 
     @Override
-    public void setDimensionConfig(SpongeConfig<SpongeConfig.DimensionConfig> config) {
+    public void setDimensionConfig(SpongeConfig<DimensionConfig> config) {
         this.dimensionConfig = config;
     }
 
     @Override
-    public SpongeConfig<SpongeConfig.DimensionConfig> getDimensionConfig() {
+    public SpongeConfig<DimensionConfig> getDimensionConfig() {
         return this.dimensionConfig;
     }
 

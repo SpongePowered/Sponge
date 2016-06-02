@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.interfaces.world;
 
-import co.aikar.timings.Timing;
 import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
@@ -34,6 +33,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.world.CaptureType;
 import org.spongepowered.common.world.gen.SpongeChunkProvider;
@@ -45,7 +45,7 @@ import javax.annotation.Nullable;
 
 public interface IMixinWorld {
 
-    SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
+    SpongeConfig<WorldConfig> getWorldConfig();
 
     CauseTracker getCauseTracker();
 

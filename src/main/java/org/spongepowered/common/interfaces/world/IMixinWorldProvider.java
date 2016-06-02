@@ -28,6 +28,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.DimensionConfig;
 
 public interface IMixinWorldProvider {
 
@@ -35,9 +36,9 @@ public interface IMixinWorldProvider {
 
     void setDimension(int dim);
 
-    void setDimensionConfig(SpongeConfig<SpongeConfig.DimensionConfig> config);
+    void setDimensionConfig(SpongeConfig<DimensionConfig> config);
 
-    SpongeConfig<SpongeConfig.DimensionConfig> getDimensionConfig();
+    SpongeConfig<DimensionConfig> getDimensionConfig();
 
     int getAverageGroundLevel();
 

@@ -39,6 +39,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.*;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
@@ -79,7 +80,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -141,6 +144,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private String motd;
     @Shadow private ServerConfigurationManager serverConfigManager;
     @Shadow public WorldServer[] worldServers;
+    @Shadow private boolean serverStopped;
 
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void addChatMessage(IChatComponent message);
@@ -162,6 +166,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow public abstract boolean getAllowNether();
     @Shadow public abstract int getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
+    @Shadow public abstract boolean isDedicatedServer();
 
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
@@ -1090,6 +1095,73 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
         StaticMixinHelper.lastAnimationPacketTick = 0;
         TimingsManager.FULL_SERVER_TICK.stopTiming();
+    }
+
+    @ModifyConstant(method = "tick", constant = @Constant(intValue = 900))
+    private int getSaveTickInterval(int tickInterval) {
+        int autoPlayerSaveInterval = SpongeImpl.getGlobalConfig().getConfig().getWorld().getAutoPlayerSaveInterval();
+        if (autoPlayerSaveInterval > 0 && (this.tickCounter % autoPlayerSaveInterval == 0)) {
+            this.serverConfigManager.saveAllPlayerData();
+        }
+
+        this.saveAllWorlds(true);
+        // force check to fail as we handle everything above
+        return this.tickCounter + 1;
+    }
+
+    /**
+     * @author blood - June 2nd, 2016
+     *
+     * @reason To allow per-world auto-save tick intervals or disable auto-saving entirely
+     *
+     * @param dontLog Whether to log during saving
+     */
+    @Overwrite
+    protected void saveAllWorlds(boolean dontLog)
+    {
+        if (!this.worldIsBeingDeleted)
+        {
+            for (WorldServer worldserver : this.worldServers)
+            {
+                if (worldserver != null)
+                {
+                    // Sponge start - check auto save interval in world config
+                    if (this.isDedicatedServer() && !this.serverStopped) {
+                        IMixinWorld spongeWorld = (IMixinWorld) worldserver;
+                        int autoSaveInterval = spongeWorld.getActiveConfig().getConfig().getWorld().getAutoSaveInterval();
+                        boolean logAutoSave = spongeWorld.getActiveConfig().getConfig().getLogging().worldAutoSaveLogging();
+                        if (autoSaveInterval <= 0) {
+                            if (logAutoSave) {
+                                logger.warn("Auto-saving has been disabled for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
+                                        + worldserver.provider.getDimensionName() + ". "
+                                        + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than zero in the corresponding world config.");
+                            }
+                            continue;
+                        }
+                        if (this.tickCounter % autoSaveInterval != 0) {
+                            continue;
+                        }
+                         if (logAutoSave) {
+                            logger.info("Auto-saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
+                                    + worldserver.provider.getDimensionName());
+                         }
+                    } else if (!dontLog) {
+                        logger.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
+                                + worldserver.provider.getDimensionName());
+                    }
+                    // Sponge end
+
+                    try
+                    {
+                        worldserver.saveAllChunks(true, (IProgressUpdate)null);
+                    }
+                    catch (MinecraftException minecraftexception)
+                    {
+                        logger.warn(minecraftexception.getMessage());
+                    }
+                }
+            }
+        }
     }
 
     @Override

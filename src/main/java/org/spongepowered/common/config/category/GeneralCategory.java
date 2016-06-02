@@ -22,56 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.category;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.scoreboard.ServerScoreboard;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-import java.util.Optional;
-import java.util.UUID;
+@ConfigSerializable
+public class GeneralCategory extends ConfigCategory {
 
-public interface IMixinWorldInfo {
+    @Setting(value = "disable-warnings", comment = "Disable warning messages to server admins")
+    private boolean disableWarnings = false;
+    @Setting(value = "chunk-load-override",
+            comment = "Forces Chunk Loading on provide requests (speedup for mods that don't check if a chunk is loaded)")
+    private boolean chunkLoadOverride = false;
 
-    NBTTagCompound getSpongeRootLevelNbt();
+    public boolean disableWarnings() {
+        return this.disableWarnings;
+    }
 
-    NBTTagCompound getSpongeNbt();
+    public void setDisableWarnings(boolean disableWarnings) {
+        this.disableWarnings = disableWarnings;
+    }
 
-    int getIndexForUniqueId(UUID uuid);
+    public boolean chunkLoadOverride() {
+        return this.chunkLoadOverride;
+    }
 
-    Optional<UUID> getUniqueIdForIndex(int index);
-
-    int getDimensionId();
-
-    boolean getIsMod();
-
-    SpongeConfig<WorldConfig> getWorldConfig();
-
-    void setDimensionId(int id);
-
-    void setSpongeRootLevelNBT(NBTTagCompound nbt);
-
-    void setUUID(UUID uuid);
-
-    void setDimensionType(DimensionType type);
-
-    void setPortalAgentType(PortalAgentType type);
-
-    void setSeed(long seed);
-
-    void setWorldName(String name);
-
-    void readSpongeNbt(NBTTagCompound spongeNbt);
-
-    void setIsMod(boolean isMod);
-
-    void createWorldConfig();
-
-    void setScoreboard(ServerScoreboard scoreboard);
-
-    boolean isValid();
-
+    public void setChunkLoadOverride(boolean chunkLoadOverride) {
+        this.chunkLoadOverride = chunkLoadOverride;
+    }
 }

@@ -22,56 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.category;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.scoreboard.ServerScoreboard;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
-public interface IMixinWorldInfo {
+@ConfigSerializable
+public class SqlCategory extends ConfigCategory {
 
-    NBTTagCompound getSpongeRootLevelNbt();
+    @Setting(comment = "Aliases for SQL connections, in the format jdbc:protocol://[username[:password]@]host/database")
+    private Map<String, String> aliases = new HashMap<>();
 
-    NBTTagCompound getSpongeNbt();
-
-    int getIndexForUniqueId(UUID uuid);
-
-    Optional<UUID> getUniqueIdForIndex(int index);
-
-    int getDimensionId();
-
-    boolean getIsMod();
-
-    SpongeConfig<WorldConfig> getWorldConfig();
-
-    void setDimensionId(int id);
-
-    void setSpongeRootLevelNBT(NBTTagCompound nbt);
-
-    void setUUID(UUID uuid);
-
-    void setDimensionType(DimensionType type);
-
-    void setPortalAgentType(PortalAgentType type);
-
-    void setSeed(long seed);
-
-    void setWorldName(String name);
-
-    void readSpongeNbt(NBTTagCompound spongeNbt);
-
-    void setIsMod(boolean isMod);
-
-    void createWorldConfig();
-
-    void setScoreboard(ServerScoreboard scoreboard);
-
-    boolean isValid();
-
+    public Map<String, String> getAliases() {
+        return this.aliases;
+    }
 }

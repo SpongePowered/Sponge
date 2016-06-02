@@ -59,8 +59,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.SpongeConfig.EntityActivationModNode;
-import org.spongepowered.common.config.SpongeConfig.EntityActivationRangeCategory;
+import org.spongepowered.common.config.category.EntityActivationModCategory;
+import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.entity.projectile.IMixinEntityArrow;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -152,7 +152,7 @@ public class ActivationRange {
             return true;
         }
 
-        SpongeConfig.EntityActivationRangeCategory config = ((IMixinWorld) entity.worldObj).getActiveConfig().getConfig().getEntityActivationRange();
+        EntityActivationRangeCategory config = ((IMixinWorld) entity.worldObj).getActiveConfig().getConfig().getEntityActivationRange();
         SpongeEntityType type = (SpongeEntityType) ((org.spongepowered.api.entity.Entity) entity).getType();
         IModData_Activation spongeEntity = (IModData_Activation) entity;
         if (type == null) {
@@ -161,7 +161,7 @@ public class ActivationRange {
 
         spongeEntity.setModDataId(type.getModId());
         byte activationType = spongeEntity.getActivationType();
-        EntityActivationModNode entityMod = config.getModList().get(type.getModId());
+        EntityActivationModCategory entityMod = config.getModList().get(type.getModId());
         int defaultActivationRange = config.getDefaultRanges().get(activationTypeMappings.get(activationType));
         if (entityMod == null) {
             // use default activation range
@@ -431,9 +431,9 @@ public class ActivationRange {
         entityType = ActivationRange.activationTypeMappings.get(activationType);
         boolean requiresSave = false;
         EntityActivationRangeCategory activationCategory = config.getConfig().getEntityActivationRange();
-        EntityActivationModNode entityMod = activationCategory.getModList().get(type.getModId());
+        EntityActivationModCategory entityMod = activationCategory.getModList().get(type.getModId());
         if (entityMod == null) {
-            entityMod = new EntityActivationModNode();
+            entityMod = new EntityActivationModCategory();
             activationCategory.getModList().put(type.getModId(), entityMod);
             requiresSave = true;
         }

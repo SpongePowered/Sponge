@@ -22,56 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.config.category;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.scoreboard.ServerScoreboard;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.WorldConfig;
+import ninja.leaping.configurate.objectmapping.Setting;
+import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
-import java.util.Optional;
-import java.util.UUID;
+@ConfigSerializable
+public class BungeeCordCategory extends ConfigCategory {
 
-public interface IMixinWorldInfo {
+    @Setting(value = "ip-forwarding", comment = "If enabled, allows BungeeCord to forward IP address, UUID, and Game Profile to this server")
+    private boolean ipForwarding = false;
 
-    NBTTagCompound getSpongeRootLevelNbt();
-
-    NBTTagCompound getSpongeNbt();
-
-    int getIndexForUniqueId(UUID uuid);
-
-    Optional<UUID> getUniqueIdForIndex(int index);
-
-    int getDimensionId();
-
-    boolean getIsMod();
-
-    SpongeConfig<WorldConfig> getWorldConfig();
-
-    void setDimensionId(int id);
-
-    void setSpongeRootLevelNBT(NBTTagCompound nbt);
-
-    void setUUID(UUID uuid);
-
-    void setDimensionType(DimensionType type);
-
-    void setPortalAgentType(PortalAgentType type);
-
-    void setSeed(long seed);
-
-    void setWorldName(String name);
-
-    void readSpongeNbt(NBTTagCompound spongeNbt);
-
-    void setIsMod(boolean isMod);
-
-    void createWorldConfig();
-
-    void setScoreboard(ServerScoreboard scoreboard);
-
-    boolean isValid();
-
+    public boolean getIpForwarding() {
+        return this.ipForwarding;
+    }
 }
