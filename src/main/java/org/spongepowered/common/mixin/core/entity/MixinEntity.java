@@ -74,7 +74,9 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
@@ -107,6 +109,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
@@ -270,6 +273,22 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public void firePostConstructEvents() {
         this.isConstructing = false;
+    }
+
+    @Inject(method = "addPassenger(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"), cancellable = true)
+    public void onAddPassenger(net.minecraft.entity.Entity passenger, CallbackInfo ci) {
+        if (!this.worldObj.isRemote && ShouldFire.MOUNT_ENTITY_EVENT) {
+            if (SpongeImpl.postEvent(SpongeEventFactory.createMountEntityEvent(Cause.of(NamedCause.source(passenger)), this))) {
+                ci.cancel();
+            }
+        }
+    }
+
+    @Inject(method = "removePassenger(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"))
+    public void onRemovePassenger(net.minecraft.entity.Entity passenger, CallbackInfo ci) {
+        if (!this.worldObj.isRemote && ShouldFire.DISMOUNT_ENTITY_EVENT) {
+            SpongeImpl.postEvent(SpongeEventFactory.createDismountEntityEvent(Cause.of(NamedCause.source(passenger)), this));
+        }
     }
 
     @Inject(method = "setSize", at = @At("RETURN"))
