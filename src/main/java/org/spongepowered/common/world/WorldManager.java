@@ -35,7 +35,6 @@ import com.google.common.collect.MapMaker;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
-import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -104,15 +103,15 @@ public final class WorldManager {
             entry -> Files.isDirectory(entry) && Files.exists(entry.resolve("level.dat")) && Files.exists(entry.resolve("level_sponge.dat"));
 
     private static final Int2ObjectMap<DimensionType> dimensionTypeByTypeId = new Int2ObjectOpenHashMap<>(3);
-    public static final Int2ObjectMap<DimensionType> dimensionTypeByDimensionId = new Int2ObjectOpenHashMap<>(3);
+    private static final Int2ObjectMap<DimensionType> dimensionTypeByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Int2ObjectMap<Path> dimensionPathByDimensionId = new Int2ObjectOpenHashMap<>(3);
-    public static final Int2ObjectOpenHashMap<WorldServer> worldByDimensionId = new Int2ObjectOpenHashMap<>(3);
+    private static final Int2ObjectOpenHashMap<WorldServer> worldByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>(3);
     private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid =  new HashMap<>(3);
     private static final BiMap<String, UUID> worldUuidByFolderName =  HashBiMap.create(3);
     private static final BitSet dimensionBits = new BitSet(Long.SIZE << 4);
     private static final Map<World, World> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
-    private static final Queue<WorldServer> unloadQueue = new ArrayDeque<>();
+    private static final Queue<WorldUnloadQueueEntry> unloadQueue = new ArrayDeque<>();
     private static final Comparator<WorldServer>
             WORLD_SERVER_COMPARATOR =
             (world1, world2) -> ((IMixinWorldServer) world1).getDimensionId() - ((IMixinWorldServer) world2).getDimensionId();
@@ -204,6 +203,10 @@ public final class WorldManager {
         return dimensionTypeByTypeId.values();
     }
 
+    public static int[] getRegisteredDimensionIds() {
+        return dimensionTypeByTypeId.keySet().toIntArray();
+    }
+
     public static Optional<Path> getWorldFolder(int dimensionId) {
         return Optional.ofNullable(dimensionPathByDimensionId.get(dimensionId));
     }
@@ -241,6 +244,10 @@ public final class WorldManager {
 
     public static Optional<WorldServer> getWorldByDimensionId(int dimensionId) {
         return Optional.ofNullable(worldByDimensionId.get(dimensionId));
+    }
+
+    public static int[] getLoadedWorldDimensionIds() {
+        return worldByDimensionId.keySet().toIntArray();
     }
 
     public static Optional<WorldServer> getWorld(String worldName) {
@@ -353,26 +360,33 @@ public final class WorldManager {
 
     public static void unloadQueuedWorlds() {
         while (unloadQueue.peek() != null) {
-            final WorldServer worldServer = unloadQueue.poll();
-            unloadWorld(worldServer);
+            final WorldUnloadQueueEntry worldUnloadQueueEntry = unloadQueue.poll();
+            unloadWorld(worldUnloadQueueEntry.worldServer, worldUnloadQueueEntry.fromAPI);
         }
 
         unloadQueue.clear();
     }
 
-    public static void queueWorldToUnload(WorldServer worldServer) {
+    public static void queueWorldToUnload(WorldServer worldServer, boolean fromAPI) {
         checkNotNull(worldServer);
-        unloadQueue.add(worldServer);
+        unloadQueue.add(new WorldUnloadQueueEntry(worldServer, fromAPI));
     }
 
     // TODO Result
-    public static boolean unloadWorld(WorldServer worldServer) {
+    public static boolean unloadWorld(WorldServer worldServer, boolean fromAPI) {
         checkNotNull(worldServer);
         final MinecraftServer server = SpongeImpl.getServer();
 
         if (worldByDimensionId.containsValue(worldServer)) {
             if (!worldServer.playerEntities.isEmpty()) {
                 return false;
+            }
+
+            // If API says unload, we unload. Otherwise, check config
+            if (!fromAPI) {
+                if (((IMixinWorldServer) worldServer).getActiveConfig().getConfig().getWorld().getKeepSpawnLoaded()) {
+                    return false;
+                }
             }
 
             try {
@@ -387,7 +401,7 @@ public final class WorldManager {
                 worldByDimensionId.remove(dimensionId);
                 ((IMixinMinecraftServer) server).getWorldTickTimes().remove(dimensionId);
                 SpongeImpl.getLogger().info("Unloading dimension {} ({})", dimensionId, worldServer.getWorldInfo().getWorldName());
-                server.worldServers = reorderWorldsVanillaFirst();
+                reorderWorldsVanillaFirst();
             }
 
             SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
@@ -521,7 +535,7 @@ public final class WorldManager {
 
         ((IMixinMinecraftServer) SpongeImpl.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
 
-        server.worldServers = reorderWorldsVanillaFirst();
+        reorderWorldsVanillaFirst();
         return Optional.of(worldServer);
     }
 
@@ -645,7 +659,7 @@ public final class WorldManager {
                     (dimensionId).get().getName());
         }
 
-        server.worldServers = reorderWorldsVanillaFirst();
+        reorderWorldsVanillaFirst();
     }
 
     public static WorldInfo createWorldInfoFromSettings(Path currentSaveRoot, org.spongepowered.api.world.DimensionType dimensionType, int
@@ -699,7 +713,19 @@ public final class WorldManager {
         return worldServer;
     }
 
-    private static WorldServer[] reorderWorldsVanillaFirst() {
+    /**
+     * Internal use only - Namely for SpongeForge.
+     * @param dimensionId The world instance dimension id
+     * @param worldServer The world server
+     */
+    public static void forceAddWorld(int dimensionId, WorldServer worldServer) {
+        worldByDimensionId.put(dimensionId, worldServer);
+        weakWorldByWorld.put(worldServer, worldServer);
+
+        ((IMixinMinecraftServer) SpongeImpl.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
+    }
+
+    public static void reorderWorldsVanillaFirst() {
         final List<WorldServer> sorted = new ArrayList<>(worldByDimensionId.values());
 
         int count = 0;
@@ -722,14 +748,14 @@ public final class WorldManager {
 
         sorted.subList(count, sorted.size()).sort(WORLD_SERVER_COMPARATOR);
 
-        return sorted.toArray(new WorldServer[sorted.size()]);
+        SpongeImpl.getServer().worldServers = sorted.toArray(new WorldServer[sorted.size()]);
     }
 
     /**
      * Parses a {@link UUID} from disk from other known plugin platforms and sets it on the
      * {@link WorldProperties}. Currently only Bukkit is supported.
      */
-    private static UUID setUuidOnProperties(Path savesRoot, WorldProperties properties) {
+    public static UUID setUuidOnProperties(Path savesRoot, WorldProperties properties) {
         checkNotNull(properties);
 
         UUID uuid;
@@ -975,11 +1001,7 @@ public final class WorldManager {
     public static void loadDimensionDataMap(@Nullable NBTTagCompound compound) {
         dimensionBits.clear();
         if (compound == null) {
-            for (int dimensionId : dimensionTypeByDimensionId.keySet()) {
-                if (dimensionId >= 0) {
-                    dimensionBits.set(dimensionId);
-                }
-            }
+            dimensionTypeByDimensionId.keySet().stream().filter(dimensionId -> dimensionId >= 0).forEach(dimensionBits::set);
         } else {
             final int[] intArray = compound.getIntArray("DimensionArray");
             for (int i = 0; i < intArray.length; i++) {
@@ -1012,5 +1034,15 @@ public final class WorldManager {
         }
 
         return Optional.empty();
+    }
+
+    public static class WorldUnloadQueueEntry {
+        public final WorldServer worldServer;
+        public final boolean fromAPI;
+
+        public WorldUnloadQueueEntry(WorldServer worldServer, boolean fromAPI) {
+            this.worldServer = worldServer;
+            this.fromAPI = fromAPI;
+        }
     }
 }

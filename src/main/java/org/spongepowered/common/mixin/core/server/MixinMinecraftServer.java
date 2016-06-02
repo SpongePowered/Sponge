@@ -401,7 +401,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public boolean unloadWorld(World world) {
-        return WorldManager.unloadWorld((WorldServer) world);
+        return WorldManager.unloadWorld((WorldServer) world, true);
     }
 
     @SuppressWarnings("unchecked")
@@ -587,15 +587,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         this.shadow$setPlayerIdleTimeout(timeout);
     }
 
-    @Nullable
     @Overwrite
-    public WorldServer worldServerForDimension(int dimension) {
-        WorldServer worldServer = WorldManager.worldByDimensionId.get(dimension);
-        if (worldServer == null) {
-            // TODO Zidane needs to create a world here....
-        }
-        return worldServer;
+    public WorldServer worldServerForDimension(int dimensionId) {
+        return WorldManager.getWorldByDimensionId(dimensionId).orElse(WorldManager.getWorldByDimensionId(0).orElseThrow(() -> new RuntimeException
+                ("Attempt made to get world before overworld is loaded!")));
     }
-
-
 }
