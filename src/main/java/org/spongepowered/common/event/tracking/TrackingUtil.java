@@ -569,8 +569,9 @@ public final class TrackingUtil {
         final Vector3d position = event.getToTransform().getPosition();
         minecraftEntity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(),
                 (float) event.getToTransform().getPitch());
-        toWorld.spawnEntityInWorld(minecraftEntity);
+        // Tracker is using the entity worldobject so we need to set it before they are "added" to the other world.
         minecraftEntity.worldObj = toWorld;
+        toWorld.spawnEntityInWorld(minecraftEntity);
 
         toWorld.updateEntityWithOptionalForce(minecraftEntity, false);
         minecraftEntity.worldObj.theProfiler.endStartSection("reloading");
