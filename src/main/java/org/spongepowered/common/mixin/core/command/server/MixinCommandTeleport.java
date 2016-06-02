@@ -139,11 +139,10 @@ public abstract class MixinCommandTeleport extends CommandBase {
                         }
 
                         // Sponge start
-                        EntityPlayerMP player = (EntityPlayerMP) sender;
                         double x = commandbase$coordinatearg.func_179629_b();
                         double y = commandbase$coordinatearg1.func_179629_b();
                         double z = commandbase$coordinatearg2.func_179629_b();
-                        DisplaceEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(player, x, y, z, f, f1);
+                        DisplaceEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entity, x, y, z, f, f1);
                         if (event.isCancelled()) {
                             return;
                         }
@@ -198,14 +197,13 @@ public abstract class MixinCommandTeleport extends CommandBase {
                     if (entity instanceof EntityPlayerMP)
                     {
                         // Sponge start
-                        EntityPlayerMP player = (EntityPlayerMP) sender;
                         DisplaceEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
                         if (event.isCancelled()) {
                             return;
                         }
 
                         Vector3d position = event.getToTransform().getPosition();
-                        player.playerNetServerHandler.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                        ((EntityPlayerMP)entity).playerNetServerHandler.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
                         // Sponge end
                     }
                     else
