@@ -1231,7 +1231,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || StaticMixinHelper.packetPlayer != null) {
+        if (this.isRemote || causeTracker.hasTickingEntity() || StaticMixinHelper.packetPlayer != null) {
             entity.onUpdate();
             return;
         }
@@ -1246,7 +1246,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;updateRidden()V"))
     public void onUpdateRidden(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || StaticMixinHelper.packetPlayer != null) {
+        if (this.isRemote || causeTracker.hasTickingEntity() || StaticMixinHelper.packetPlayer != null) {
             entity.updateRidden();
             return;
         }
