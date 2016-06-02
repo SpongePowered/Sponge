@@ -50,9 +50,4 @@ public abstract class AbstractPluginContainer implements PluginContainer {
         return toStringHelper().toString();
     }
 
-    public static String getUnqualifiedId(String id) {
-        int pos = id.lastIndexOf('.');
-        return pos >= 0 ? id.substring(pos + 1) : id;
-    }
-
 }
