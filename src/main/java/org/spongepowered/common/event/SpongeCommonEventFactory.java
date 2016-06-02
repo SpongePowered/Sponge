@@ -87,6 +87,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -358,49 +359,36 @@ public class SpongeCommonEventFactory {
         return cancelled;
     }
 
-    public static MoveEntityEvent.Position.Teleport handleDisplaceEntityTeleportEvent(net.minecraft.entity.Entity entityIn, Location<World> location) {
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(net.minecraft.entity.Entity entityIn, Location<World> location) {
         Transform<World> fromTransform = ((IMixinEntity) entityIn).getTransform();
         Transform<World> toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform, false);
     }
 
-    public static MoveEntityEvent.Position.Teleport handleDisplaceEntityTeleportEvent(net.minecraft.entity.Entity entityIn, double posX, double posY, double posZ, float yaw, float pitch) {
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(net.minecraft.entity.Entity entityIn, double posX, double posY, double posZ, float yaw, float pitch) {
         Transform<World> fromTransform = ((IMixinEntity) entityIn).getTransform();
         Transform<World> toTransform = fromTransform.setPosition(new Vector3d(posX, posY, posZ)).setRotation(new Vector3d(pitch, yaw, 0));
         return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform, false);
     }
 
-    public static MoveEntityEvent.Position.Teleport handleDisplaceEntityTeleportEvent(net.minecraft.entity.Entity entityIn, Transform<World> fromTransform, Transform<World> toTransform, boolean apiCall) {
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(net.minecraft.entity.Entity entityIn, Transform<World> fromTransform, Transform<World> toTransform, boolean apiCall) {
 
         // Use origin world to get correct cause
         IMixinWorldServer spongeWorld = (IMixinWorldServer) fromTransform.getExtent();
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        Cause teleportCause = null;
-//        Cause currentCause = causeTracker.getCurrentCause();
-//        if (currentCause != null) {
-//            Object rootCause = currentCause.root();
-//            if (apiCall || currentCause.first(PluginContainer.class).isPresent()) {
-//                teleportCause = Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.PLUGIN).build()));
-//            } else if (rootCause instanceof CommandSource) {
-//                teleportCause = Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.COMMAND).build()));
-//            } else if (rootCause instanceof Entity) {
-//                teleportCause = Cause.of(NamedCause.source(EntityTeleportCause.builder().entity((Entity) currentCause.root()).type(TeleportTypes.ENTITY_TELEPORT).build()));
-//            } else {
-//                teleportCause = Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.UNKNOWN).build()));
-//            }
-//            teleportCause = teleportCause.merge(currentCause);
-//        }
+        final PhaseData peek = causeTracker.getStack().peek();
+        final IPhaseState state = peek.getState();
+        final PhaseContext context = peek.getContext();
 
-        if (teleportCause == null) {
-            teleportCause = Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.UNKNOWN).build()));
-        }
+        final Cause teleportCause = state.getPhase().generateTeleportCause(state, context);
 
-        MoveEntityEvent.Position.Teleport event = SpongeEventFactory.createMoveEntityEventPositionTeleport(teleportCause, fromTransform, toTransform, (Entity) entityIn);
+        MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(teleportCause, fromTransform, toTransform, (Entity) entityIn);
         SpongeImpl.postEvent(event);
         return event;
     }
 
-    public static MoveEntityEvent.Position.Teleport.Portal handleDisplaceEntityPortalEvent(net.minecraft.entity.Entity entityIn, int targetDimensionId, @Nullable Teleporter teleporter) {
+    @Nullable
+    public static MoveEntityEvent.Teleport.Portal handleDisplaceEntityPortalEvent(net.minecraft.entity.Entity entityIn, int targetDimensionId, @Nullable Teleporter teleporter) {
         SpongeImplHooks.registerPortalAgentType(teleporter);
         MinecraftServer mcServer = SpongeImpl.getServer();
         IMixinPlayerList scm = (IMixinPlayerList) mcServer.getPlayerList();
@@ -468,7 +456,7 @@ public class SpongeCommonEventFactory {
         }
         // Grab the exit location of entity after being placed into portal
         Transform<World> portalExitTransform = spongeEntity.getTransform().setExtent((World) toWorld);
-        MoveEntityEvent.Position.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventPositionTeleportPortal(teleportCause, fromTransform, portalExitTransform, (PortalAgent) teleporter, spongeEntity, true);
+        MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(teleportCause, fromTransform, portalExitTransform, (PortalAgent) teleporter, spongeEntity, true);
         SpongeImpl.postEvent(event);
         if (entityIn instanceof EntityPlayerMP) {
             ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) entityIn).connection).setAllowClientLocationUpdate(true);
@@ -509,7 +497,7 @@ public class SpongeCommonEventFactory {
         }
 
         // Attempt to create the portal
-        boolean portalResult = true; //causeTracker.handleBlockCaptures();
+        boolean portalResult = false; //causeTracker.handleBlockCaptures();
         // if portal ChangeBlockEvent was allowed, continue
         if (portalResult && event.getUsePortalAgent()) {
 //            causeTracker.handleDroppedItems();

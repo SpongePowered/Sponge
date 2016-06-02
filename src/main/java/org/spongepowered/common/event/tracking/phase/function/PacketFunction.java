@@ -42,6 +42,7 @@ import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.world.IInteractionObject;
+import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -435,7 +436,7 @@ public interface PacketFunction {
                         }
                         if (creativeInventoryEvent instanceof CreativeInventoryEvent.Drop) {
                             for (Entity entity : ((CreativeInventoryEvent.Drop) creativeInventoryEvent).getEntities()) {
-                                TrackingUtil.associateEntityCreator(context, EntityUtil.toNative(entity), player.worldObj);
+                                TrackingUtil.associateEntityCreator(context, EntityUtil.toNative(entity), (WorldServer) player.worldObj);
                                 ((IMixinWorldServer) player.worldObj).forceSpawnEntity(entity);
                             }
                         }

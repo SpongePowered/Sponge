@@ -97,4 +97,14 @@ public final class InternalNamedCauses {
         }
 
     }
+
+    public static final class Teleporting {
+
+        public static final String FROM_WORLD = "FromWorld";
+        public static final String TARGET_WORLD = "TargetWorld";
+        public static final String TARGET_TELEPORTER = "TargetTeleporter";
+        public static final String FROM_TRANSFORM = "FromTransform";
+        public static final String TELEPORT_EVENT = "TeleportEvent";
+        public static final String TARGET_TRANSFORM = "TargetTransform";
+    }
 }

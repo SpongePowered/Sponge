@@ -436,7 +436,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // If coming from end, fire a teleport event for plugins
         if (conqueredEnd) {
             // When leaving the end, players are never placed inside the teleporter but instead "respawned" in the target world
-            MoveEntityEvent.Position.Teleport teleportEvent = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entityPlayerMP, location);
+            MoveEntityEvent.Teleport teleportEvent = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entityPlayerMP, location);
             if (teleportEvent.isCancelled()) {
                 entityPlayerMP.playerConqueredTheEnd = false;
                 return entityPlayerMP;
@@ -576,7 +576,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
      */
     @Override
     public void changePlayerDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter) {
-        MoveEntityEvent.Position.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, teleporter);
+        MoveEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, teleporter);
         if (event != null || event.isCancelled()) {
             return;
         }
@@ -681,7 +681,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Override
     public void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world.Teleporter teleporter) {
         // rewritten completely to handle our portal event
-        MoveEntityEvent.Position.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(entityIn, toWorld.provider.getDimensionType().getId(), teleporter);
+        MoveEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(entityIn, toWorld.provider.getDimensionType().getId(), teleporter);
         if (event == null || event.isCancelled()) {
             return;
         }

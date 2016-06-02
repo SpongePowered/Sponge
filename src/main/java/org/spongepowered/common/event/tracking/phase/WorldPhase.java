@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
@@ -37,8 +36,6 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.living.Humanoid;
-import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -47,8 +44,10 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.teleport.EntityTeleportCause;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -72,13 +71,11 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -222,26 +219,17 @@ public final class WorldPhase extends TrackingPhase {
                 phaseContext.getCapturedBlockSupplier()
                         .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
 
-                this.fireMovementEvents(EntityUtil.toNative(tickingEntity));
+                this.fireMovementEvents(EntityUtil.toNative(tickingEntity), Cause.source(tickingEntity).build());
             }
 
-            private void fireMovementEvents(net.minecraft.entity.Entity entity) {
-                if (entity instanceof Player) {
-                    return; // this is handled elsewhere
-                }
-                Cause entityCause = Cause.of(NamedCause.source(entity));
-
-                this.firePositionEvent(entity, entityCause);
-//                this.fireRotationEvent(entity, entityCause);
-//                this.fireRotationHeadEvent(entity, entityCause);
-            }
-
-            private void firePositionEvent(net.minecraft.entity.Entity entity, Cause cause) {
+            private void fireMovementEvents(net.minecraft.entity.Entity entity, Cause cause) {
                 Entity spongeEntity = (Entity) entity;
 
                 if (entity.lastTickPosX != entity.posX
                         || entity.lastTickPosY != entity.posY
-                        || entity.lastTickPosZ != entity.posZ) {
+                        || entity.lastTickPosZ != entity.posZ
+                        || entity.rotationPitch != entity.prevRotationPitch
+                        || entity.rotationYaw != entity.prevRotationYaw) {
                     // yes we have a move event.
                     final double currentPosX = entity.posX;
                     final double currentPosY = entity.posY;
@@ -250,19 +238,31 @@ public final class WorldPhase extends TrackingPhase {
                     final Vector3d oldPositionVector = new Vector3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ);
                     final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
 
-                    MoveEntityEvent.Position event = null;
+                    Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
+                    Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
+                    final Transform<World> oldTransform = new Transform<>(spongeEntity.getWorld(), oldPositionVector, oldRotationVector,
+                            spongeEntity.getScale());
+                    final Transform<World> newTransform = new Transform<>(spongeEntity.getWorld(), currentPositionVector, currentRotationVector,
+                            spongeEntity.getScale());
+                    final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(cause, oldTransform, newTransform, spongeEntity);
 
-                    if (false && SpongeImpl.postEvent(event)) {
+                    if (SpongeImpl.postEvent(event)) {
                         entity.posX = entity.lastTickPosX;
                         entity.posY = entity.lastTickPosY;
                         entity.posZ = entity.lastTickPosZ;
+                        entity.rotationPitch = entity.prevRotationPitch;
+                        entity.rotationYaw = entity.prevRotationYaw;
 
                     } else {
-                        Vector3d newPosition = null; // event.getToTransform().getPosition();
-                        if (false && !newPosition.equals(currentPositionVector)) {
+                        Vector3d newPosition = event.getToTransform().getPosition();
+                        if (!newPosition.equals(currentPositionVector)) {
                             entity.posX = newPosition.getX();
                             entity.posY = newPosition.getY();
                             entity.posZ = newPosition.getZ();
+                        }
+                        if (!event.getToTransform().getRotation().equals(currentRotationVector)) {
+                            entity.rotationPitch = (float) currentRotationVector.getX();
+                            entity.rotationYaw = (float) currentRotationVector.getY();
                         }
                         //entity.setPositionAndRotation(position.getX(), position.getY(), position.getZ(), rotation.getFloorX(), rotation.getFloorY());
                         /*
@@ -280,51 +280,17 @@ public final class WorldPhase extends TrackingPhase {
                 }
             }
 
-            private void fireRotationEvent(net.minecraft.entity.Entity entity, Cause cause) {
-                if (entity.rotationPitch != entity.prevRotationPitch
-                        || entity.rotationYaw != entity.prevRotationYaw) {
-
-                    Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
-                    Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
-                    MoveEntityEvent.Rotation event = null;
-
-                    if (false && SpongeImpl.postEvent(event)) {
-                        entity.rotationPitch = entity.prevRotationPitch;
-                        entity.rotationYaw = entity.prevRotationYaw;
-                    } else {
-//                        Vector3d eventVector = event.getToTransform().getRotation();
-//                        if (!eventVector.equals(currentRotationVector)) {
-//                            entity.rotationPitch = (float) currentRotationVector.getX();
-//                            entity.rotationYaw = (float) currentRotationVector.getY();
-//                        }
-                    }
-                }
-            }
-
-            private void fireRotationHeadEvent(net.minecraft.entity.Entity entity, Cause cause) {
-                boolean livingRotate = false;
-                if (entity instanceof EntityLivingBase) {
-                    EntityLivingBase living = (EntityLivingBase) entity;
-                    livingRotate = living.rotationYawHead != living.prevRotationYawHead;
-                }
-
-                if (livingRotate) {
-                    EntityLivingBase living = (EntityLivingBase) entity;
-
-                    Vector3d oldHeadRotation = new Vector3d(living.prevRotationPitch, living.prevRotationYawHead, 0);
-                    Vector3d currentHeadRotation = new Vector3d(living.rotationPitch, living.rotationYawHead, 0);
-                    MoveEntityEvent.Rotation.Head event = null; // SpongeEventFactory.createMoveEntityEventRotationHead(cause, currentHeadRotation, currentHeadRotation, oldHeadRotation, (Entity) entity);
-
-//                    if (SpongeImpl.postEvent(event)) {
-//                        ((EntityLivingBase) entity).rotationYawHead = ((EntityLivingBase) entity).prevRotationYawHead;
-//                    } else {
-//                        Vector3d eventVector = event.getToTransform().getRotation();
-//                        if (!eventVector.equals(currentHeadRotation)) {
-//                            living.rotationPitch = (float) eventVector.getX();
-//                            living.rotationYawHead = (float) eventVector.getY();
-//                        }
-//                    }
-                }
+            @Override
+            public Cause generateTeleportCause(PhaseContext context) {
+                final Entity entity = context.firstNamed(NamedCause.SOURCE, Entity.class)
+                                .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking an entity!", context));
+                return Cause
+                        .source(EntityTeleportCause.builder()
+                                .entity(entity)
+                                .type(TeleportTypes.ENTITY_TELEPORT)
+                                .build()
+                        )
+                        .build();
             }
 
             @Override
@@ -865,6 +831,11 @@ public final class WorldPhase extends TrackingPhase {
         }
 
         @Override
+        public Cause generateTeleportCause(PhaseContext context) {
+            return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.UNKNOWN).build()));
+        }
+
+        @Override
         public TrackingPhase getPhase() {
             return TrackingPhases.WORLD;
         }
@@ -1013,6 +984,11 @@ public final class WorldPhase extends TrackingPhase {
         super.processPostEntitySpawns(causeTracker, unwindingState, entities);
     }
 
+    @Override
+    public Cause generateTeleportCause(IPhaseState state, PhaseContext context) {
+        return state instanceof ITickingState ? ((ITickingState) state).generateTeleportCause(context) : super.generateTeleportCause(state, context);
+    }
+
     /**
      * A specialized state that signifies that it is a "master" state that
      * can have multiple state side effects, such as spawning other entities,
@@ -1021,6 +997,8 @@ public final class WorldPhase extends TrackingPhase {
     interface ITickingState extends IPhaseState {
 
         void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext);
+
+        Cause generateTeleportCause(PhaseContext context);
 
     }
 }

@@ -120,9 +120,9 @@ public class GeneralFunctions {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void processBlockCaptures(List<BlockSnapshot> snapshots, CauseTracker causeTracker, IPhaseState state, PhaseContext context) {
+    public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, CauseTracker causeTracker, IPhaseState state, PhaseContext context) {
         if (snapshots.isEmpty()) {
-            return;
+            return false;
         }
         ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[GeneralFunctions.EVENT_COUNT];
         ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[GeneralFunctions.EVENT_COUNT];
@@ -147,13 +147,16 @@ public class GeneralFunctions {
         final ChangeBlockEvent.Post postEvent = throwMultiEventsAndCreatePost(transactionArrays, blockEvents, mainEvents, builder, world);
 
         if (postEvent == null) { // Means that we have had no actual block changes apparently?
-            return;
+            return false;
         }
 
         final List<Transaction<BlockSnapshot>> invalid = new ArrayList<>();
 
+        boolean noCancelledTransactions = true;
+
         for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
             if (blockEvent.isCancelled()) {
+                noCancelledTransactions = false;
                 // Restore original blocks and add to invalid transactions
                 for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
                     transaction.setValid(false);
@@ -168,6 +171,7 @@ public class GeneralFunctions {
         }
 
         if (!invalid.isEmpty()) {
+            noCancelledTransactions = false;
             for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
                 transaction.getOriginal().restore(true, false);
                 if (state.tracksBlockSpecificDrops()) {
@@ -177,8 +181,7 @@ public class GeneralFunctions {
                 }
             }
         }
-        performBlockAdditions(causeTracker, postEvent.getTransactions(), builder, state, context);
-
+        return performBlockAdditions(causeTracker, postEvent.getTransactions(), builder, state, context, noCancelledTransactions);
     }
 
     public static void iterateChangeBlockEvents(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,
@@ -206,7 +209,7 @@ public class GeneralFunctions {
         }
     }
 
-    private static void performBlockAdditions(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, Cause.Builder builder, IPhaseState phaseState, PhaseContext phaseContext) {
+    private static boolean performBlockAdditions(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, Cause.Builder builder, IPhaseState phaseState, PhaseContext phaseContext, boolean noCancelledTransactions) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
@@ -214,6 +217,7 @@ public class GeneralFunctions {
         final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemStack> capturedBlockDrops = phaseContext.getBlockDropSupplier();
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
+                noCancelledTransactions = false;
                 continue; // Don't use invalidated block transactions during notifications, these only need to be restored
             }
             // Handle custom replacements
@@ -256,6 +260,7 @@ public class GeneralFunctions {
                 peek.getState().getPhase().unwind(causeTracker, peek.getState(), peek.getContext());
             }
         }
+        return noCancelledTransactions;
     }
 
     public static void spawnItemStacksForBlockDrop(Collection<ItemStack> itemStacks, SpongeBlockSnapshot oldBlockSnapshot, CauseTracker causeTracker,

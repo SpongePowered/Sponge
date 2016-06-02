@@ -112,6 +112,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+import javax.annotation.Nullable;
+
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
         IMixinMinecraftServer {
@@ -584,5 +586,16 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     public void server$setPlayerIdleTimeout(int timeout) {
         this.shadow$setPlayerIdleTimeout(timeout);
     }
+
+    @Nullable
+    @Overwrite
+    public WorldServer worldServerForDimension(int dimension) {
+        WorldServer worldServer = WorldManager.worldByDimensionId.get(dimension);
+        if (worldServer == null) {
+            // TODO Zidane needs to create a world here....
+        }
+        return worldServer;
+    }
+
 
 }
