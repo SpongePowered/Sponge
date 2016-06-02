@@ -99,6 +99,8 @@ import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -121,6 +123,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.IMixinEntityBackwardsCompatible;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
@@ -143,6 +146,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.entity.Entity.class)
+@Implements(@Interface(iface = IMixinEntityBackwardsCompatible.class, prefix = "backwards$"))
 public abstract class MixinEntity implements Entity, IMixinEntity {
 
     private static final String LAVA_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;lava:Lnet/minecraft/util/DamageSource;";
@@ -383,6 +387,26 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
         return setLocationAndRotation(safeLocation.get(), rotation, relativePositions);
     }
+
+    // ********************************************* END OF BACKWARDS COMPATIBILITY ADDITIONS ************************************
+
+    public void backwards$setLocation(Location<World> location) {
+        this.setLocation(location);
+    }
+
+    public void backwards$setLocationAndRotation(Location<World> location, Vector3d rotation) {
+        this.setLocationAndRotation(location, rotation);
+    }
+
+    public void backwards$setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
+        this.setLocationAndRotation(location, rotation, relativePositions);
+    }
+
+    public void backwards$setTransform(Transform<World> transform) {
+        this.setTransform(transform);
+    }
+
+    // ********************************************* END OF BACKWARDS COMPATIBILITY ADDITIONS ************************************
 
     public boolean setLocation(Location<World> location) {
         checkNotNull(location, "The location was null!");
