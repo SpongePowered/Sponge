@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import net.minecraft.util.DamageSource;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.event.tracking.phase.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.world.BlockChange;
 
@@ -74,6 +76,18 @@ public interface IPhaseState {
         return false;
     }
 
+    /**
+     * A simple boolean switch to whether an {@link net.minecraft.entity.EntityLivingBase#onDeath(DamageSource)}
+     * should enter a specific phase to handle the destructed drops until either after this current phase
+     * has completed (if returning {@code true}) or whether the entity is going to enter a specific
+     * phase directly to handle entity drops (if returning {@code false}). Most all phases should
+     * return true, except certain few that require it. The reasoning for a phase to return
+     * {@code false} would be if it's own phase can handle entity drops with appropriate causes
+     * on it's own.
+     *
+     * @return True if this phase is aware enough to handle entity death drops per entity, or will
+     *     cause {@link EntityPhase.State#DEATH} to be entered and handle it's own drops
+     */
     default boolean tracksEntitySpecificDrops() {
         return false;
     }

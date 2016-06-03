@@ -28,15 +28,14 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 
@@ -93,6 +92,7 @@ public class PhaseContext {
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, new BlockItemDropsSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, new CapturedItemsSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, new CapturedItemStackSupplier()));
         return this;
     }
 
@@ -100,12 +100,14 @@ public class PhaseContext {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, new CapturedItemsSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, new CapturedItemStackSupplier()));
         return this;
     }
 
     public PhaseContext addEntityDropCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, new EntityItemDropsSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, new EntityItemDropsSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_ITEM_DROPS, new EntityItemEntityDropsSupplier()));
         return this;
     }
 
@@ -152,15 +154,15 @@ public class PhaseContext {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public List<Entity> getCapturedItems() throws IllegalStateException {
+    public List<EntityItem> getCapturedItems() throws IllegalStateException {
         return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEMS, CapturedItemsSupplier.class)
                 .map(CapturedItemsSupplier::get)
                 .orElseThrow(PhaseUtil.throwWithContext("Intended to capture dropped item entities!", this));
     }
 
     @SuppressWarnings("unchecked")
-    public CapturedSupplier<Entity> getCapturedItemsSupplier() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEMS, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedItemsSupplier.class)
+    public CapturedSupplier<EntityItem> getCapturedItemsSupplier() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEMS, (Class<CapturedSupplier<EntityItem>>) (Class<?>) CapturedItemsSupplier.class)
                 .orElseThrow(PhaseUtil.throwWithContext("Intended to capture dropped item entities!", this));
     }
 
@@ -197,22 +199,34 @@ public class PhaseContext {
     }
 
     public Multimap<UUID, ItemStack> getCapturedEntityDrops() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, EntityItemDropsSupplier.class)
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, EntityItemDropsSupplier.class)
                 .map(EntityItemDropsSupplier::get)
                 .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
     }
 
     public Collection<ItemStack> getCapturedEntityDrops(UUID entityId) throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, EntityItemDropsSupplier.class)
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, EntityItemDropsSupplier.class)
                 .map(supplier -> supplier.get().get(entityId))
                 .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
     }
 
     @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<UUID, ItemStack> getCapturedEntityDropSupplier() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS,
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS,
                 (Class<CapturedMultiMapSupplier<UUID, ItemStack>>) (Class<?>) EntityItemDropsSupplier.class)
                 .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
+    }
+
+    public CapturedMultiMapSupplier<UUID, EntityItem> getCapturedEntityItemDropSupplier() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_ITEM_DROPS,
+                (Class<CapturedMultiMapSupplier<UUID, EntityItem>>) (Class<?>) EntityItemEntityDropsSupplier.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
+    }
+
+    @SuppressWarnings("unchecked")
+    public CapturedSupplier<ItemStack> getCapturedItemStackSupplier() throws IllegalStateException {
+        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, (Class<CapturedSupplier<ItemStack>>) (Class<?>) CapturedItemStackSupplier.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing ItemStack drops from entities, but we're not capturing them!", this));
     }
 
     public void forEach(Consumer<NamedCause> consumer) {
@@ -390,9 +404,15 @@ public class PhaseContext {
         }
     }
 
-    static final class CapturedItemsSupplier extends CapturedSupplier<Entity> {
+    static final class CapturedItemsSupplier extends CapturedSupplier<EntityItem> {
 
         CapturedItemsSupplier() {
+        }
+    }
+
+    static final class CapturedItemStackSupplier extends CapturedSupplier<ItemStack> {
+
+        CapturedItemStackSupplier() {
         }
     }
 
@@ -405,6 +425,12 @@ public class PhaseContext {
     static final class CapturedEntitiesSupplier extends CapturedSupplier<Entity> {
 
         CapturedEntitiesSupplier() {
+        }
+    }
+
+    static final class EntityItemEntityDropsSupplier extends CapturedMultiMapSupplier<UUID, EntityItem> {
+
+        EntityItemEntityDropsSupplier() {
         }
     }
 

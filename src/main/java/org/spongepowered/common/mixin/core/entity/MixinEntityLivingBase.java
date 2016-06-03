@@ -25,10 +25,13 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
@@ -68,10 +71,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
-import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -105,9 +107,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public int hurtTime;
     @Shadow public int maxHurtTime;
     @Shadow public int deathTime;
+    @Shadow protected int scoreValue;
     @Shadow public float attackedAtYaw;
     @Shadow public float limbSwingAmount;
     @Shadow public boolean potionsNeedUpdate;
+    @Shadow public boolean dead;
     @Shadow public CombatTracker _combatTracker;
     @Shadow public EntityLivingBase entityLivingToAttack;
     @Shadow protected AbstractAttributeMap attributeMap;
@@ -147,7 +151,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow @Nullable public abstract ItemStack getHeldItemMainhand();
     @Shadow public abstract boolean isHandActive();
     @Shadow protected abstract void onDeathUpdate();
-    @Shadow public abstract void onDeath(DamageSource cause);
     @Shadow public abstract void knockBack(net.minecraft.entity.Entity entityIn, float p_70653_2_, double p_70653_3_, double p_70653_5_);
     @Shadow public abstract void setRevengeTarget(EntityLivingBase livingBase);
     @Shadow public abstract void setAbsorptionAmount(float amount);
@@ -155,6 +158,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract CombatTracker getCombatTracker();
     @Shadow public abstract void setSprinting(boolean sprinting);
     @Shadow public abstract boolean isOnLadder();
+    @Shadow @Nullable public abstract EntityLivingBase getAttackingEntity();
+    @Shadow protected abstract void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source);
+    @Shadow protected abstract boolean canDropLoot();
 
     @Override
     public Vector3d getHeadRotation() {
@@ -207,13 +213,51 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return Text.of(this.getUniqueID().toString());
     }
 
-    @Inject(method = "onDeath(Lnet/minecraft/util/DamageSource;)V", at = @At("HEAD"), cancellable = true)
-    private void enterDeathState(DamageSource source, CallbackInfo callbackInfo) {
-        if (!this.worldObj.isRemote) {
-            if (!SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, source)) {
-                callbackInfo.cancel();
-            }
+    @Overwrite
+    public void onDeath(DamageSource cause) {
+        // Sponge Start - Call our event, and forge's event
+        // This will transitively call the forge event
+        if (!SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause)) {
+            return;
         }
+        // Sponge End
+        if (this.dead) {
+            return;
+        }
+
+        Entity entity = cause.getEntity();
+        EntityLivingBase entitylivingbase = this.getAttackingEntity();
+
+        if (this.scoreValue >= 0 && entitylivingbase != null) {
+            entitylivingbase.addToPlayerScore((EntityLivingBase) (Object) this, this.scoreValue);
+        }
+
+        if (entity != null) {
+            entity.onKillEntity((EntityLivingBase) (Object) this);
+        }
+
+        this.dead = true;
+        this.getCombatTracker().reset();
+
+        if (!this.worldObj.isRemote) {
+            int i = 0;
+
+            if (entity instanceof EntityPlayer) {
+                i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
+            }
+
+            if (this.canDropLoot() && this.worldObj.getGameRules().getBoolean("doMobLoot")) {
+                boolean flag = this.recentlyHit > 0;
+                this.dropLoot(flag, i, cause);
+            }
+
+        }
+
+        // Sponge Start - Don't send the state if this is a human. Fixes ghost items on client.
+        if (!((EntityLivingBase) (Object) this instanceof EntityHuman)) {
+            this.worldObj.setEntityState((EntityLivingBase) (Object) this, (byte) 3);
+        }
+        // Sponge End
     }
 
     @Redirect(method = "onDeath(Lnet/minecraft/util/DamageSource;)V", at = @At(value = "INVOKE", target =
@@ -390,7 +434,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     // Sponge Start - notify the cause tracker
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
                     final boolean tracksEntitySpecificDrops = causeTracker.getStack().peekState().tracksEntitySpecificDrops();
-                    if (tracksEntitySpecificDrops) {
+                    if (!tracksEntitySpecificDrops) {
                         causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH, PhaseContext.start()
                                 .add(NamedCause.source(this))
                                 .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, source))
@@ -401,7 +445,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                                 .complete());
                     }
                     this.onDeath(source);
-                    if (tracksEntitySpecificDrops) {
+                    if (!tracksEntitySpecificDrops) {
                         causeTracker.completePhase();
                     }
                     // Sponge End

@@ -65,6 +65,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
                     .add(NamedCause.source(sender))
                     .add(NamedCause.of(InternalNamedCauses.General.COMMAND, command))
                     .addCaptures()
+                    .addEntityDropCaptures()
                     .complete());
         });
 

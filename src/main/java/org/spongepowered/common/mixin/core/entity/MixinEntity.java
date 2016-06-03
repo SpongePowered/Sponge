@@ -31,6 +31,7 @@ import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -38,6 +39,7 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -104,6 +106,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -115,11 +118,15 @@ import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -1109,24 +1116,40 @@ public abstract class MixinEntity implements IMixinEntity {
         return (!optional.isPresent() || !optional.get()) && !((IMixinEntity) entity).isVanished();
     }
 
-    @Nullable private ItemStackSnapshot custom;
-
     /**
      * @author gabizou - January 30th, 2016
+     * @author blood - May 12th, 2016
+     * @author gabizou - June 2nd, 2016
      *
-     * This redirects the call to get the Item of an item stack so we can
-     * throw an event and short circuit with a ConstructEntityEvent.PRE.
+     * @reason Rewrites the method entirely for several reasons:
+     * 1) If we are in a forge environment, we do NOT want forge to be capturing the item entities, because we handle them ourselves
+     * 2) If we are in a client environment, we should not perform any sort of processing whatsoever.
+     * 3) This method is entirely managed from the standpoint where our events have final say, as per usual.
      *
-     * @param itemStack The item stack coming in
-     * @param itemStackIn The originally passed item stack
-     * @param offsetY The offset
-     * @return The item type, if no events cancelled
+     * @param itemStackIn
+     * @param offsetY
+     * @return
      */
-    @Redirect(method = "entityDropItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getItem()Lnet/minecraft/item/Item;"))
-    private Item onGetItem(ItemStack itemStack, ItemStack itemStackIn, float offsetY) {
-        if (itemStack.getItem() != null) {
-            // First we want to throw the DropItemEvent.PRE
-            ItemStackSnapshot snapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot();
+    @Overwrite
+    @Nullable
+    public EntityItem entityDropItem(net.minecraft.item.ItemStack itemStackIn, float offsetY) {
+        // Gotta stick with the client side handling things
+        if (this.worldObj.isRemote) {
+            if (itemStackIn.stackSize != 0 && itemStackIn.getItem() != null) {
+                EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY + (double)offsetY, this.posZ, itemStackIn);
+                entityitem.setDefaultPickupDelay();
+                this.worldObj.spawnEntityInWorld(entityitem);
+                return entityitem;
+            } else {
+                return null;
+            }
+        }
+
+        // Now the real fun begins.
+        final net.minecraft.item.ItemStack item;
+        if (itemStackIn.getItem() != null) {
+            // FIRST we want to throw the DropItemEvent.PRE
+            ItemStackSnapshot snapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemStackIn).createSnapshot();
             List<ItemStackSnapshot> original = new ArrayList<>();
             original.add(snapshot);
             DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(this)),
@@ -1134,34 +1157,50 @@ public abstract class MixinEntity implements IMixinEntity {
             if (dropEvent.isCancelled()) {
                 return null;
             }
-            this.custom = dropEvent.getDroppedItems().get(0);
 
-            // Then throw the ConstructEntityEvent
-            Transform<World> suggested = new Transform<>(this.getWorld(), new Vector3d(this.posX, this.posY + (double) offsetY, this.posZ));
+            // SECOND throw the ConstructEntityEvent
+            Transform<org.spongepowered.api.world.World>
+                    suggested = new Transform<>(this.getWorld(), new Vector3d(this.posX, this.posY + (double) offsetY, this.posZ));
             SpawnCause cause = EntitySpawnCause.builder().entity(this).type(SpawnTypes.DROPPED_ITEM).build();
             ConstructEntityEvent.Pre event = SpongeEventFactory
                     .createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, suggested);
             SpongeImpl.postEvent(event);
-            return event.isCancelled() ? null : itemStack.getItem();
+            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
+        } else {
+            return null;
+        }
+        if (item == null) {
+            return null;
+        }
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.worldObj;
+        final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
+        final IPhaseState currentState = peek.getState();
+        final PhaseContext phaseContext = peek.getContext();
+
+        if (item.stackSize != 0 && item.getItem() != null) {
+
+            EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY + (double) offsetY, this.posZ, itemStackIn);
+            entityitem.setDefaultPickupDelay();
+
+            // FIFTH - Capture the entity maybe?
+            if (currentState.getPhase().doesCaptureEntityDrops()) {
+                if (currentState.tracksEntitySpecificDrops()) {
+                    // We are capturing per entity drop
+                    phaseContext.getCapturedEntityItemDropSupplier().get().put(this.getUniqueID(), entityitem);
+                } else {
+                    // We are adding to a general list - usually for EntityPhase.State.DEATH
+                    phaseContext.getCapturedItemsSupplier().get().add(entityitem);
+                }
+                // Return the item, even if it wasn't spawned in the world.
+                return entityitem;
+            }
+            // FINALLY - Spawn the entity in the world if all else didn't fail
+            this.worldObj.spawnEntityInWorld(entityitem);
+            return entityitem;
         }
         return null;
     }
 
-    /**
-     * @author gabizou - January 30th, 2016
-     *
-     * Creates the argument where we can override the item stack being used to create
-     * the entity item. based on the previous event.
-     *
-     * @param itemStack The supposed item stack to drop, originally the original argument passed in
-     * @return The actual itemstack
-     */
-    @ModifyArg(method = "entityDropItem", at = @At(value = "INVOKE", target = ENTITY_ITEM_INIT))
-    private ItemStack onItemCreationFroDrop(ItemStack itemStack) {
-        ItemStack stack = this.custom == null ? itemStack : ((ItemStack) this.custom.createStack());
-        this.custom = null;
-        return stack;
-    }
     @Override
     public void setCurrentCollidingBlock(BlockState state) {
         this.currentCollidingBlock = state;

@@ -246,11 +246,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             final IPhaseState currentState = currentPhase.getState();
             if (currentState.tracksBlockSpecificDrops()) {
                 final PhaseContext context = currentPhase.getContext();
-                final IBlockState currentBlockState = worldIn.getBlockState(pos);
-                final IBlockState currentActualBlockState = currentBlockState.getBlock().getActualState(currentBlockState, worldIn, pos);
-                final BlockSnapshot blockSnapshot = mixin.createSpongeBlockSnapshot(currentBlockState, currentActualBlockState, pos, 3);
-                final Multimap<BlockPos, org.spongepowered.api.item.inventory.ItemStack> multimap =
-                        context.getCapturedBlockDrops();
+                final Multimap<BlockPos, org.spongepowered.api.item.inventory.ItemStack> multimap = context.getCapturedBlockDrops();
                 final Collection<org.spongepowered.api.item.inventory.ItemStack> itemStacks = multimap.get(pos);
                 SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemStackUtil.fromNative(stack));
                 return false;

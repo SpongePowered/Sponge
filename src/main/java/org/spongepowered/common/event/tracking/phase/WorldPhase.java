@@ -81,6 +81,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -127,9 +128,9 @@ public final class WorldPhase extends TrackingPhase {
         }
 
         public boolean captureEntitySpawn(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
-            final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
+            final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
             if (minecraftEntity instanceof EntityItem) {
-                return context.getCapturedItems().add(entity);
+                return context.getCapturedItems().add((EntityItem) minecraftEntity);
             } else {
                 return context.getCapturedEntities().add(entity);
             }
@@ -197,6 +198,10 @@ public final class WorldPhase extends TrackingPhase {
                         });
                 phaseContext.getCapturedItemsSupplier()
                         .ifPresentAndNotEmpty(entities -> {
+                            final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                            for (EntityItem entity : entities) {
+                                capturedEntities.add(EntityUtil.fromNative(entity));
+                            }
                             final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                                     .entity(tickingEntity)
                                     .type(InternalSpawnTypes.DROPPED_ITEM)
@@ -206,7 +211,7 @@ public final class WorldPhase extends TrackingPhase {
                             EntityUtil.toMixin(tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
                                     .ifPresent(creator -> builder.named(NamedCause.owner(creator)));
                             EventConsumer.event(SpongeEventFactory
-                                    .createDropItemEventCustom(builder.build(), entities, causeTracker.getWorld()))
+                                    .createDropItemEventCustom(builder.build(), capturedEntities, causeTracker.getWorld()))
                                     .nonCancelled(event -> {
                                         for (Entity entity : event.getEntities()) {
                                             TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity),
@@ -357,7 +362,11 @@ public final class WorldPhase extends TrackingPhase {
                                     .type(InternalSpawnTypes.PLACEMENT)
                                     .build())
                                     .build();
-                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
+                            final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                            for (EntityItem entity : entities) {
+                                capturedEntities.add(EntityUtil.fromNative(entity));
+                            }
+                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld()))
                                     .nonCancelled(event -> {
                                         for (Entity entity : event.getEntities()) {
                                             causeTracker.getMixinWorld().forceSpawnEntity(entity);
@@ -421,7 +430,11 @@ public final class WorldPhase extends TrackingPhase {
                                     .type(InternalSpawnTypes.PLACEMENT)
                                     .build())
                                     .build();
-                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
+                            final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                            for (EntityItem entity : entities) {
+                                capturedEntities.add(EntityUtil.fromNative(entity));
+                            }
+                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld()))
                                     .nonCancelled(event -> {
                                         for (Entity entity : event.getEntities()) {
                                             TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity),
@@ -522,7 +535,11 @@ public final class WorldPhase extends TrackingPhase {
                                     .type(InternalSpawnTypes.DROPPED_ITEM)
                                     .build())
                                     .build();
-                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, items, world))
+                            final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                            for (EntityItem entity : items) {
+                                capturedEntities.add(EntityUtil.fromNative(entity));
+                            }
+                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld()))
                                     .nonCancelled(event -> {
                                         for (Entity entity : event.getEntities()) {
                                             TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), minecraftWorld);
@@ -608,7 +625,11 @@ public final class WorldPhase extends TrackingPhase {
                         .ifPresentAndNotEmpty(items -> {
                             final Cause cause = Cause.source(InternalSpawnTypes.CUSTOM_SPAWN)
                                     .build();
-                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, items, world))
+                            final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                            for (EntityItem entity : items) {
+                                capturedEntities.add(EntityUtil.fromNative(entity));
+                            }
+                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld()))
                                     .nonCancelled(event -> {
                                         for (Entity entity : event.getEntities()) {
                                             TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), minecraftWorld);
@@ -770,7 +791,12 @@ public final class WorldPhase extends TrackingPhase {
                             .entity(tickingEntity)
                             .type(InternalSpawnTypes.DROPPED_ITEM)
                             .build());
-                    EventConsumer.event(SpongeEventFactory.createDropItemEventCustom(builder.build(), entities, causeTracker.getWorld()))
+                    final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                    for (EntityItem entity : entities) {
+                        capturedEntities.add(EntityUtil.fromNative(entity));
+                    }
+
+                    EventConsumer.event(SpongeEventFactory.createDropItemEventCustom(builder.build(), capturedEntities, causeTracker.getWorld()))
                             .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                             .process();
                 });
@@ -809,7 +835,12 @@ public final class WorldPhase extends TrackingPhase {
                     final Cause.Builder builder = Cause.source(SpawnCause.builder()
                             .type(InternalSpawnTypes.WEATHER)
                             .build());
-                    EventConsumer.event(SpongeEventFactory.createDropItemEventCustom(builder.build(), entities, causeTracker.getWorld()))
+                    final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                    for (EntityItem entity : entities) {
+                        capturedEntities.add(EntityUtil.fromNative(entity));
+                    }
+
+                    EventConsumer.event(SpongeEventFactory.createDropItemEventCustom(builder.build(), capturedEntities, causeTracker.getWorld()))
                             .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                             .process();
                 });
@@ -867,7 +898,11 @@ public final class WorldPhase extends TrackingPhase {
             ((ITickingState) state).processPostTick(causeTracker, context);
         } else if (state == State.TERRAIN_GENERATION) {
             final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
-            final List<Entity> spawnedItems = context.getCapturedItemsSupplier().orEmptyList();
+            final List<Entity> spawnedItems = context.getCapturedItemsSupplier()
+                    .orEmptyList()
+                    .stream()
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
             if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
                 return;
             }
@@ -884,7 +919,11 @@ public final class WorldPhase extends TrackingPhase {
         } else if (state == State.POPULATOR_RUNNING) {
             final PopulatorType runningGenerator = context.firstNamed(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
             final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
-            final List<Entity> spawnedItems = context.getCapturedItemsSupplier().orEmptyList();
+            final List<Entity> spawnedItems = context.getCapturedItemsSupplier()
+                    .orEmptyList()
+                    .stream()
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
             if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
                 return;
             }
@@ -903,7 +942,11 @@ public final class WorldPhase extends TrackingPhase {
             // Blocks do not matter one bit.
         } else if (state == State.WORLD_SPAWNER_SPAWNING) {
             final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
-            final List<Entity> spawnedItems = context.getCapturedItemsSupplier().orEmptyList();
+            final List<Entity> spawnedItems = context.getCapturedItemsSupplier()
+                    .orEmptyList()
+                    .stream()
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());;
             if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
                 return;
             }

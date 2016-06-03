@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.function;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -83,7 +84,6 @@ import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.util.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -117,61 +117,113 @@ public interface PacketFunction {
         EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_NOTIFIER, player.getUniqueID());
 
         if (state == PacketPhase.General.ATTACK_ENTITY) {
-            if (entity.isDead) {
-                // We only have to throw the destruction event now. everything else should be already handled separately as they are processed.
-                MessageChannel originalChannel = MessageChannel.TO_NONE;
-                final DestructEntityEvent destructEntityEvent;
-                final Cause.Builder builder = Cause.source(player);
-                itemStack.map(ItemStack::createSnapshot).ifPresent(item -> builder.named(InternalNamedCauses.EventNamedKeys.ITEM_USED, item));
-                if (!(entity instanceof EntityLivingBase)) {
-                    destructEntityEvent =
-                            SpongeEventFactory.createDestructEntityEvent(builder.build(), originalChannel, Optional.of(originalChannel),
-                                    new MessageEvent.MessageFormatter(), EntityUtil.fromNative(entity), true);
-                } else {
-                    destructEntityEvent =
-                            SpongeEventFactory.createDestructEntityEventDeath(builder.build(), originalChannel, Optional.of(originalChannel),
-                                    new MessageEvent.MessageFormatter(), EntityUtil.fromNativeToLiving(entity), true);
-                }
+            // We only have to throw the destruction event now. everything else should be already handled separately as they are processed.
+            MessageChannel originalChannel = MessageChannel.TO_NONE;
+            final DestructEntityEvent destructEntityEvent;
+            final Cause.Builder builder = Cause.source(player);
+            itemStack.map(ItemStack::createSnapshot).ifPresent(item -> builder.named(InternalNamedCauses.EventNamedKeys.ITEM_USED, item));
+            if (!(entity instanceof EntityLivingBase)) {
+                destructEntityEvent =
+                        SpongeEventFactory.createDestructEntityEvent(builder.build(), originalChannel, Optional.of(originalChannel),
+                                new MessageEvent.MessageFormatter(), EntityUtil.fromNative(entity), true);
+            } else {
+                destructEntityEvent =
+                        SpongeEventFactory.createDestructEntityEventDeath(builder.build(), originalChannel, Optional.of(originalChannel),
+                                new MessageEvent.MessageFormatter(), EntityUtil.fromNativeToLiving(entity), true);
+            }
 
-                EventConsumer.event(destructEntityEvent)
-                        .nonCancelled(event -> {
-                            if (!event.isMessageCancelled()) {
-                                event.getChannel().ifPresent(channel -> channel.send(entity, event.getMessage()));
-                            }
-                        })
-                        .process();
-                context.getCapturedItemsSupplier()
-                        .ifPresentAndNotEmpty(items -> {
-                            // For destruction, this should be empty, however, some times, it may not be?
-                            final PrettyPrinter printer = new PrettyPrinter(60);
-                            printer.add("Processing Attack Entity").centre().hr();
-                            printer.add("There are some captured items after the entity was destructed!");
-                            printer.addWrapped(60, "%s : %s", "Items captured", items);
-                            printer.add("Stacktrace:");
-                            printer.add(new Exception("Stack trace"));
-                            printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
-                        });
-                context.getCapturedBlockSupplier()
-                        .ifPresentAndNotEmpty(blocks ->
-                                GeneralFunctions.processBlockCaptures(blocks, mixinWorldServer.getCauseTracker(), state, context));
-                context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
-                    if (map.isEmpty()) {
+            EventConsumer.event(destructEntityEvent)
+                    .nonCancelled(event -> {
+                        if (!event.isMessageCancelled()) {
+                            event.getChannel().ifPresent(channel -> channel.send(entity, event.getMessage()));
+                        }
+                    })
+                    .process();
+            context.getCapturedItemsSupplier()
+                    .ifPresentAndNotEmpty(items -> {
+                        // For destruction, this should be empty, however, some times, it may not be?
+                        final PrettyPrinter printer = new PrettyPrinter(60);
+                        printer.add("Processing Attack Entity").centre().hr();
+                        printer.add("There are some captured items after the entity was destructed!");
+                        printer.addWrapped(60, "%s : %s", "Items captured", items);
+                        printer.add("Stacktrace:");
+                        printer.add(new Exception("Stack trace"));
+                        printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+                    });
+            context.getCapturedBlockSupplier()
+                    .ifPresentAndNotEmpty(blocks ->
+                            GeneralFunctions.processBlockCaptures(blocks, mixinWorldServer.getCauseTracker(), state, context));
+            final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
+            context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
+                for (Map.Entry<UUID, Collection<ItemStack>> entry : map.asMap().entrySet()) {
+                    final UUID key = entry.getKey();
+                    final Optional<Entity> affectedEntity = causeTracker.getWorld().getEntity(key);
+                    if (!affectedEntity.isPresent()) {
+                        continue;
+                    }
+                    final Collection<ItemStack> itemStacks = entry.getValue();
+                    if (itemStacks.isEmpty()) {
                         return;
                     }
-                    final PrettyPrinter printer = new PrettyPrinter(80);
-                    printer.add("Processing Attack Entity").centre().hr();
-                    printer.add("The item stacks captured are: ");
-                    for (Map.Entry<UUID, Collection<ItemStack>> entry : map.asMap().entrySet()) {
-                        printer.add("  - Entity with UUID: %s", entry.getKey());
-                        for (ItemStack stack : entry.getValue()) {
-                            printer.add("    - %s", stack);
-                        }
+                    final List<ItemStack> items = new ArrayList<>();
+                    items.addAll(itemStacks);
+
+                    if (!items.isEmpty()) {
+                        final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(affectedEntity.get());
+                        final List<Entity> itemEntities = items.stream()
+                                .map(ItemStackUtil::toNative)
+                                .map(item -> new EntityItem(causeTracker.getMinecraftWorld(), minecraftEntity.posX, minecraftEntity.posY, minecraftEntity.posZ, item))
+                                .map(EntityUtil::fromNative)
+                                .collect(Collectors.toList());
+                        final Cause cause = Cause.source(EntitySpawnCause.builder()
+                                .entity(affectedEntity.get())
+                                .type(InternalSpawnTypes.DROPPED_ITEM)
+                                .build()
+                        )
+                                .named(NamedCause.of("Attacker", player))
+                                .build();
+                        EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld()))
+                                .nonCancelled(event -> {
+                                            for (Entity item : event.getEntities()) {
+                                                TrackingUtil.associateEntityCreator(context, item, causeTracker.getMinecraftWorld());
+                                                causeTracker.getMixinWorld().forceSpawnEntity(item);
+                                            }
+                                        }
+                                )
+                                .process();
+
                     }
-                    printer.trace(System.err);
-                });
+                }
+            });
+            context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {
+                for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                    final UUID key = entry.getKey();
+                    final Optional<Entity> attackedEntities = causeTracker.getWorld().getEntity(key);
+                    if (!attackedEntities.isPresent()) {
+                        continue;
+                    }
+                    final List<Entity> items = entry.getValue().stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                    final Cause cause = Cause.source(EntitySpawnCause.builder()
+                            .entity(EntityUtil.fromNative(player))
+                            .type(InternalSpawnTypes.DROPPED_ITEM)
+                            .build()
+                    )
+                            .named(NamedCause.of("Attacker", player))
+                            .build();
+                    EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld()))
+                            .nonCancelled(event -> {
+                                        for (Entity item : event.getEntities()) {
+                                            TrackingUtil.associateEntityCreator(context, item, causeTracker.getMinecraftWorld());
+                                            causeTracker.getMixinWorld().forceSpawnEntity(item);
+                                        }
+                                    }
+                            )
+                            .process();
+
+                }
+            });
 
 
-            }
         } else if (state == PacketPhase.General.INTERACT_ENTITY) {
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks -> {
@@ -198,7 +250,7 @@ public interface PacketFunction {
                         final PrettyPrinter printer = new PrettyPrinter(80);
                         printer.add("Processing Interact Entity").centre().hr();
                         printer.add("The items captured are:");
-                        for (Entity capturedEntity : entities) {
+                        for (EntityItem capturedEntity : entities) {
                             printer.add("  Item: %s", capturedEntity);
                         }
                         printer.trace(System.err);
@@ -244,7 +296,7 @@ public interface PacketFunction {
                         final PrettyPrinter printer = new PrettyPrinter(80);
                         printer.add("Processing Interact At Entity").centre().hr();
                         printer.add("The items captured are:");
-                        for (Entity capturedEntity : entities) {
+                        for (EntityItem capturedEntity : entities) {
                             printer.add("  Item: %s", capturedEntity);
                         }
                         printer.trace(System.err);
@@ -284,7 +336,11 @@ public interface PacketFunction {
                                 .type(InternalSpawnTypes.DROPPED_ITEM)
                                 .build())
                                 .build();
-                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld()))
+                        final ArrayList<Entity> entities = new ArrayList<>();
+                        for (EntityItem item : items) {
+                            entities.add(EntityUtil.fromNative(item));
+                        }
+                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld()))
                                 .nonCancelled(event -> {
                                     for (Entity entity : event.getEntities()) {
                                         EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
@@ -310,7 +366,11 @@ public interface PacketFunction {
                                 .type(InternalSpawnTypes.DROPPED_ITEM)
                                 .build())
                                 .build();
-                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld()))
+                        final ArrayList<Entity> entities = new ArrayList<>();
+                        for (EntityItem item : items) {
+                            entities.add(EntityUtil.fromNative(item));
+                        }
+                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld()))
                                 .nonCancelled(event -> {
                                     for (Entity entity : event.getEntities()) {
                                         EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
@@ -331,13 +391,16 @@ public interface PacketFunction {
                         if (items.isEmpty()) {
                             return;
                         }
-                        final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
                         final Cause cause = Cause.source(EntitySpawnCause.builder()
                                 .entity(EntityUtil.fromNative(player))
                                 .type(InternalSpawnTypes.DROPPED_ITEM)
                                 .build())
                                 .build();
-                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld()))
+                        final ArrayList<Entity> entities = new ArrayList<>();
+                        for (EntityItem item : items) {
+                            entities.add(EntityUtil.fromNative(item));
+                        }
+                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld()))
                                 .nonCancelled(event -> {
                                     for (Entity entity : event.getEntities()) {
                                         EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
@@ -391,21 +454,28 @@ public interface PacketFunction {
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing the cursor item in use, but found none.", context));
             final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-            final List<Entity> capturedEntityItems = context.getCapturedItems();
+            final List<EntityItem> capturedEntityItems = context.getCapturedItems();
             final Cause cause;
             final Container openContainer = player.openContainer;
             final List<SlotTransaction> capturedTransactions = ((IMixinContainer) openContainer).getCapturedTransactions();
             final CreativeInventoryEvent event;
             if (packetIn.getSlotId() == -1 && capturedEntityItems.size() > 0) {
-                Iterator<Entity> iterator = capturedEntityItems.iterator();
+                Iterator<EntityItem> iterator = capturedEntityItems.iterator();
                 while (iterator.hasNext()) {
-                    Entity currentEntity = iterator.next();
-                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                    EntityUtil.toMixin(iterator.next()).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                 }
-                cause =
-                        Cause.source(EntitySpawnCause.builder().entity(EntityUtil.fromNative(player)).type(InternalSpawnTypes.DROPPED_ITEM).build())
-                                .build();
-                event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, capturedEntityItems,
+                cause = Cause.source(
+                        EntitySpawnCause.builder()
+                                .entity(EntityUtil.fromNative(player))
+                                .type(InternalSpawnTypes.DROPPED_ITEM)
+                                .build())
+                        .build();
+
+                final ArrayList<Entity> entities = new ArrayList<>();
+                for (EntityItem capturedEntityItem : capturedEntityItems) {
+                    entities.add(EntityUtil.fromNative(capturedEntityItem));
+                }
+                event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, entities,
                         ContainerUtil.fromNative(openContainer), (World) player.worldObj,
                         capturedTransactions);
             } else {
@@ -460,7 +530,10 @@ public interface PacketFunction {
         final List<SlotTransaction> slotTransactions = ContainerUtil.toMixin(openContainer).getCapturedTransactions();
         PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, slotTransactions);
         final int usedButton = packetIn.getUsedButton();
-        final List<Entity> capturedItems = context.getCapturedItems();
+        final List<Entity> capturedItems = new ArrayList<>();
+        for (EntityItem entityItem : context.getCapturedItems()) {
+            capturedItems.add(EntityUtil.fromNative(entityItem));
+        }
         final Cause cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", openContainer));
         final InteractInventoryEvent inventoryEvent;
         if (state instanceof PacketPhase.Inventory) {

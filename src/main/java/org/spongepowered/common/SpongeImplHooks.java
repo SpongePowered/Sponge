@@ -107,9 +107,11 @@ public final class SpongeImplHooks {
         return null;
     }
 
-    public static void addItemStackToListForSpawning(Collection<org.spongepowered.api.item.inventory.ItemStack> itemStacks, org.spongepowered.api.item.inventory.ItemStack itemStack) {
+    public static void addItemStackToListForSpawning(Collection<org.spongepowered.api.item.inventory.ItemStack> itemStacks, @Nullable org.spongepowered.api.item.inventory.ItemStack itemStack) {
         // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
-        itemStacks.add(itemStack);
+        if (itemStack != null) {
+            itemStacks.add(itemStack);
+        }
     }
 
     /**

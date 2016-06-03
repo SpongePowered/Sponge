@@ -300,4 +300,8 @@ public abstract class TrackingPhase {
     public Cause generateTeleportCause(IPhaseState state, PhaseContext context) {
         return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.UNKNOWN).build()));
     }
+
+    public boolean doesCaptureEntityDrops() {
+        return false;
+    }
 }

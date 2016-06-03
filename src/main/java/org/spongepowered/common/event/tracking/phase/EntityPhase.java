@@ -25,19 +25,9 @@
 package org.spongepowered.common.event.tracking.phase;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.Teleporter;
-import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -45,11 +35,8 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Identifiable;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.EventConsumer;
@@ -59,11 +46,10 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.function.EntityFunction;
+import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -91,45 +77,46 @@ public final class EntityPhase extends TrackingPhase {
 
             @Override
             void unwind(CauseTracker causeTracker, PhaseContext context) {
-                final Entity
-                        dyingEntity =
+                final Entity dyingEntity =
                         context.firstNamed(NamedCause.SOURCE, Entity.class)
                                 .orElseThrow(PhaseUtil.throwWithContext("Dying entity not found!", context));
+                final DamageSource damageSource = context.firstNamed(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class).get();
+                final Cause cause = Cause.source(
+                        EntitySpawnCause.builder()
+                                .entity(dyingEntity)
+                                .type(InternalSpawnTypes.DROPPED_ITEM)
+                                .build())
+                        .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
+                        .build();
                 context.getCapturedItemsSupplier()
-                        .ifPresentAndNotEmpty(items -> EntityFunction.Drops.DEATH_DROPS.process(dyingEntity, causeTracker, context, items));
+                        .ifPresentAndNotEmpty(items -> {
+                            final ArrayList<Entity> entities = new ArrayList<>();
+                            for (EntityItem item : items) {
+                                entities.add(EntityUtil.fromNative(item));
+                            }
+                            EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld()))
+                                    .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                                    .process();
+                        });
                 context.getCapturedEntitySupplier()
                         .ifPresentAndNotEmpty(entities -> EntityFunction.Entities.DEATH_DROPS.process(dyingEntity, causeTracker, context, entities));
+                // Note that this is only used if and when item pre-merging is enabled.
                 context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
                     final Collection<ItemStack> itemStacks = map.get(dyingEntity.getUniqueId());
                     if (itemStacks.isEmpty()) {
                         return;
                     }
                     final List<ItemStack> items = new ArrayList<>();
-                    final List<ItemStackSnapshot> snapshots = itemStacks.stream().map(ItemStack::createSnapshot).collect(Collectors.toList());
-                    final ImmutableList<ItemStackSnapshot> originals = ImmutableList.copyOf(snapshots);
-                    final DamageSource damageSource = context.firstNamed(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class).get();
+                    items.addAll(itemStacks);
 
-                    final Cause preCause = Cause.source(dyingEntity).named("Attacker", damageSource).build();
-                    EventConsumer.event(SpongeEventFactory.createDropItemEventPre(preCause, originals, snapshots))
-                            .nonCancelled(event -> {
-                                for (ItemStackSnapshot snapshot : event.getDroppedItems()) {
-                                    items.add(snapshot.createStack());
-                                }
-                            })
-                            .process();
                     if (!items.isEmpty()) {
                         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(dyingEntity);
                         final List<Entity> itemEntities = items.stream()
                                 .map(ItemStackUtil::toNative)
-                                .map(item -> new EntityItem(causeTracker.getMinecraftWorld(), minecraftEntity.posX, minecraftEntity.posY,
-                                        minecraftEntity.posZ, item))
+                                .map(item -> new EntityItem(causeTracker.getMinecraftWorld(), minecraftEntity.posX, minecraftEntity.posY, minecraftEntity.posZ, item))
                                 .map(EntityUtil::fromNative)
                                 .collect(Collectors.toList());
-                        final Cause cause = Cause.source(EntitySpawnCause.builder().entity(dyingEntity)
-                                .type(InternalSpawnTypes.ENTITY_DEATH)
-                                .build())
-                                .named(NamedCause.of("Attacker", damageSource))
-                                .build();
+
                         EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld()))
                                 .nonCancelled(event -> {
                                             for (Entity entity : event.getEntities()) {
@@ -151,7 +138,23 @@ public final class EntityPhase extends TrackingPhase {
                 final Entity dyingEntity = context.firstNamed(NamedCause.SOURCE, Entity.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Dying entity not found!", context));
                 context.getCapturedItemsSupplier()
-                        .ifPresentAndNotEmpty(items -> EntityFunction.Drops.DEATH_UPDATES.process(dyingEntity, causeTracker, context, items));
+                        .ifPresentAndNotEmpty(items -> {
+                            final DamageSource damageSource = context.firstNamed(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class).get();
+                            final Cause cause = Cause.source(
+                                    EntitySpawnCause.builder()
+                                            .entity(dyingEntity)
+                                            .type(InternalSpawnTypes.DROPPED_ITEM)
+                                            .build())
+                                    .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
+                                    .build();
+                            final ArrayList<Entity> entities = new ArrayList<>();
+                            for (EntityItem item : items) {
+                                entities.add(EntityUtil.fromNative(item));
+                            }
+                            EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld()))
+                                    .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                                    .process();
+                        });
                 context.getCapturedEntitySupplier()
                         .ifPresentAndNotEmpty(entities ->
                                 EntityFunction.Entities.DEATH_UPDATES.process(dyingEntity, causeTracker, context, entities));
@@ -352,6 +355,10 @@ public final class EntityPhase extends TrackingPhase {
         return super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
     }
 
+    @Override
+    public boolean doesCaptureEntityDrops() {
+        return true;
+    }
 
 
     EntityPhase(TrackingPhase parent) {

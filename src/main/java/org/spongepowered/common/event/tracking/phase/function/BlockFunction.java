@@ -24,17 +24,20 @@
  */
 package org.spongepowered.common.event.tracking.phase.function;
 
+import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -51,7 +54,11 @@ public final class BlockFunction {
                     .type(InternalSpawnTypes.DROPPED_ITEM)
                     .build())
                 .build();
-            EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld()))
+            final ArrayList<Entity> entities = new ArrayList<>();
+            for (EntityItem item : items) {
+                entities.add(EntityUtil.fromNative(item));
+            }
+            EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld()))
                     .nonCancelled(event ->  {
                         for (Entity entity : event.getEntities()) {
                             causeTracker.getMixinWorld().forceSpawnEntity(entity);
@@ -65,7 +72,11 @@ public final class BlockFunction {
                         .type(InternalSpawnTypes.DISPENSE)
                         .build())
                     .build();
-            EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld()))
+            final ArrayList<Entity> entities = new ArrayList<>();
+            for (EntityItem item : items) {
+                entities.add(EntityUtil.fromNative(item));
+            }
+            EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld()))
                     .nonCancelled(event -> {
                         for (Entity entity : event.getEntities()) {
                             causeTracker.getMixinWorld().forceSpawnEntity(entity);
@@ -74,7 +85,7 @@ public final class BlockFunction {
                     .process();
         };
 
-        void processItemSpawns(BlockSnapshot blockSnapshot, CauseTracker causeTracker, PhaseContext phaseContext, List<Entity> items);
+        void processItemSpawns(BlockSnapshot blockSnapshot, CauseTracker causeTracker, PhaseContext phaseContext, List<EntityItem> items);
 
     }
 

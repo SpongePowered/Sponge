@@ -32,6 +32,8 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.Collection;
 
+import javax.annotation.Nullable;
+
 @Mixin(SpongeImplHooks.class)
 public class MixinSpongeImplHooks_Item_Pre_Merge {
 
@@ -43,7 +45,10 @@ public class MixinSpongeImplHooks_Item_Pre_Merge {
      * @param itemStack The item stack being merged in
      */
     @Overwrite
-    public static void addItemStackToListForSpawning(Collection<ItemStack> itemStacks, ItemStack itemStack) {
+    public static void addItemStackToListForSpawning(Collection<ItemStack> itemStacks, @Nullable ItemStack itemStack) {
+        if (itemStack == null) {
+            return;
+        }
         boolean addToList = true;
         final net.minecraft.item.ItemStack addingMinecraftStack = ItemStackUtil.toNative(itemStack);
         if (addingMinecraftStack == null) {
