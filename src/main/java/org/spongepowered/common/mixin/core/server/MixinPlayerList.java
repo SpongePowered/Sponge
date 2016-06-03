@@ -567,17 +567,18 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
     /**
      * @author blood - May 21st, 2016
+     * @author gabizou - June 2nd, 2016 - Update for 1.9.4 and cause tracker changes
      *
-     * @reason - adjusted to support {@link MoveEntityEvent.Position.Teleport.Portal}
+     * @reason - adjusted to support {@link MoveEntityEvent.Teleport.Portal}
      *
      * @param playerIn The player teleporting to another dimension
      * @param targetDimensionId The id of target dimension.
      * @param teleporter The teleporter used to transport and create the portal
      */
     @Override
-    public void changePlayerDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter) {
+    public void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter) {
         MoveEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, teleporter);
-        if (event != null || event.isCancelled()) {
+        if (event == null || event.isCancelled()) {
             return;
         }
 
@@ -594,9 +595,9 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         playerIn.isDead = false;
         // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
         ((IMixinEntity) playerIn).setLocationAndAngles(event.getToTransform());
+        playerIn.setWorld(toWorld);
         toWorld.spawnEntityInWorld(playerIn);
         toWorld.updateEntityWithOptionalForce(playerIn, false);
-        playerIn.setWorld(toWorld);
         this.preparePlayer(playerIn, fromWorld);
         playerIn.connection.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
         playerIn.interactionManager.setWorld(toWorld);
@@ -607,6 +608,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             playerIn.connection.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
         }
         ((IMixinEntityPlayerMP) playerIn).refreshXpHealthAndFood();
+
+        SpongeImplHooks.handlePostChangeDimensionEvent(playerIn, fromWorld, toWorld);
     }
 
     // copy of transferEntityToWorld but only contains code to apply the location on entity before being placed into a portal
@@ -620,11 +623,11 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         double y = entityIn.posY;
         double z = entityIn.posZ * moveFactor;
 
-        if (!(pNew instanceof WorldProviderEnd)) {
-            x = MathHelper.clamp_double(x, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
-            z = MathHelper.clamp_double(z, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
-            entityIn.setLocationAndAngles(x, entityIn.posY, z, entityIn.rotationYaw, entityIn.rotationPitch);
-        }
+//        if (!(pNew instanceof WorldProviderEnd)) {
+//            x = MathHelper.clamp_double(x, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
+//            z = MathHelper.clamp_double(z, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
+//            entityIn.setLocationAndAngles(x, entityIn.posY, z, entityIn.rotationYaw, entityIn.rotationPitch);
+//        }
 
         if (pNew instanceof WorldProviderEnd) {
             BlockPos blockpos;
@@ -642,12 +645,14 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         if (!(pOld instanceof WorldProviderEnd)) {
+            oldWorldIn.theProfiler.startSection("placing");
             x = (double)MathHelper.clamp_int((int)x, -29999872, 29999872);
             z = (double)MathHelper.clamp_int((int)z, -29999872, 29999872);
 
             if (entityIn.isEntityAlive()) {
                 entityIn.setLocationAndAngles(x, y, z, entityIn.rotationYaw, entityIn.rotationPitch);
             }
+            oldWorldIn.theProfiler.endSection();
         }
 
         if (entityIn.isEntityAlive()) {
@@ -693,7 +698,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     }
 
     // forge utility method
-    private double getMovementFactor(WorldProvider provider) {
+    @Override
+    public double getMovementFactor(WorldProvider provider) {
         if (provider instanceof WorldProviderHell) {
             return 8.0;
         }

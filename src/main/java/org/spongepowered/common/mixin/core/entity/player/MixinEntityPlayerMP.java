@@ -119,6 +119,7 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
@@ -207,7 +208,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
      * @author blood - May 30th, 2016
      * @author gabizou - May 31st, 2016 - Update for 1.9.4 changes
      *
-     * @reason - adjusted to support {@link MoveEntityEvent.Position.Teleport}
+     * @reason - adjusted to support {@link MoveEntityEvent.Teleport}
      *
      * @param dimensionId The id of target dimension.
      */
@@ -215,45 +216,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     @Overwrite
     public Entity changeDimension(int dimensionId) {
-        // If leaving The End via End's Portal
-        // Sponge Start - Check the provider, not the world's dimension
-        if (this.worldObj.provider instanceof WorldProviderEnd && dimensionId == 1) { // if (this.dimension == 1 && dimensionIn == 1)
-            // Sponge End
-            this.worldObj.removeEntity((EntityPlayerMP) (Object) this);
-            if (!this.playerConqueredTheEnd) {
-                this.playerConqueredTheEnd = true;
-                if (this.hasAchievement(AchievementList.THE_END2)) {
-                    this.connection.sendPacket(new SPacketChangeGameState(4, 0.0F));
-                } else {
-                    this.addStat(AchievementList.THE_END2);
-                    this.connection.sendPacket(new SPacketChangeGameState(4, 1.0F));
-                }
-            }
-            return (EntityPlayerMP) (Object) this;
-        } // else { // Sponge - Remove unecessary
-
-        // Sponge Start - Rewrite for vanilla mechanics since multiworlds can change world providers and
-        // dimension id's
-        if (this.worldObj.provider instanceof WorldProviderSurface) {
-            if (dimensionId == 1) {
-                this.addStat(AchievementList.THE_END);
-            } else if (dimensionId == -1) {
-                this.addStat(AchievementList.PORTAL);
-            }
-        }
-        // Sponge End
-
-        this.mcServer.getPlayerList().changePlayerDimension((EntityPlayerMP) (Object) this, dimensionId);
-        this.connection.sendPacket(new SPacketEffect(1032, BlockPos.ORIGIN, 0, false));
-
-        // Sponge Start - This has been moved below to refreshXpHealthAndFood
-        /*
-        this.lastExperience = -1;
-        this.lastHealth = -1.0F;
-        this.lastFoodLevel = -1;
-        */
-        // Sponge End
-        return (EntityPlayerMP) (Object) this;
+        return TrackingUtil.teleportPlayerToDimension(this, dimensionId);
     }
 
     @Override

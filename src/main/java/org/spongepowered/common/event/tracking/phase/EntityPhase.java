@@ -85,6 +85,11 @@ public final class EntityPhase extends TrackingPhase {
     public enum State implements IPhaseState {
         DEATH() {
             @Override
+            public boolean tracksBlockSpecificDrops() {
+                return true;
+            }
+
+            @Override
             void unwind(CauseTracker causeTracker, PhaseContext context) {
                 final Entity
                         dyingEntity =
@@ -254,6 +259,11 @@ public final class EntityPhase extends TrackingPhase {
 //                }
             }
 
+            @Override
+            public boolean tracksBlockSpecificDrops() {
+                return true;
+            }
+
             @Nullable
             @Override
             public net.minecraft.entity.Entity returnTeleportResult(PhaseContext context, MoveEntityEvent.Teleport.Portal event) {
@@ -341,6 +351,8 @@ public final class EntityPhase extends TrackingPhase {
         }
         return super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
     }
+
+
 
     EntityPhase(TrackingPhase parent) {
         super(parent);

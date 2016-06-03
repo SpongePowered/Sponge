@@ -44,10 +44,13 @@ import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
 import org.spongepowered.api.Sponge;
@@ -58,6 +61,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
@@ -309,6 +313,13 @@ public final class EntityUtil {
         return (EntityPlayerMP) player;
     }
 
+    public static EntityPlayerMP toNative(IMixinEntityPlayerMP playerMP) {
+        if (!(playerMP instanceof EntityPlayerMP)) {
+            throw new IllegalArgumentException("Player entity is not compatible with this implementation: " + playerMP);
+        }
+        return (EntityPlayerMP) playerMP;
+    }
+
     public static IMixinEntity toMixin(Entity entity) {
         if (!(entity instanceof IMixinEntity)) {
             throw new IllegalArgumentException("Not a mixin Entity for this implementation!");
@@ -399,5 +410,53 @@ public final class EntityUtil {
         fromWorld.resetUpdateEntityTick();
         toWorld.resetUpdateEntityTick();
         return true;
+    }
+
+    public static void adjustEntityPostionForTeleport(IMixinPlayerList playerList, Entity entity, WorldServer fromWorld, WorldServer toWorld) {
+        fromWorld.theProfiler.startSection("moving");
+        WorldProvider pOld = fromWorld.provider;
+        WorldProvider pNew = toWorld.provider;
+        double moveFactor = playerList.getMovementFactor(pOld) / playerList.getMovementFactor(pNew);
+        double x = entity.posX * moveFactor;
+        double y = entity.posY;
+        double z = entity.posZ * moveFactor;
+
+//        if (!(pNew instanceof WorldProviderEnd)) {
+//            x = MathHelper.clamp_double(x, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
+//            z = MathHelper.clamp_double(z, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
+//            entityIn.setLocationAndAngles(x, entityIn.posY, z, entityIn.rotationYaw, entityIn.rotationPitch);
+//        }
+
+        if (pNew instanceof WorldProviderEnd) {
+            BlockPos blockpos;
+
+            if (pOld instanceof WorldProviderEnd) {
+                blockpos = toWorld.getSpawnPoint();
+            } else {
+                blockpos = toWorld.getSpawnCoordinate();
+            }
+
+            x = (double)blockpos.getX();
+            y = (double)blockpos.getY();
+            z = (double)blockpos.getZ();
+            entity.setLocationAndAngles(x, y, z, 90.0F, 0.0F);
+        }
+
+        if (!(pOld instanceof WorldProviderEnd)) {
+            fromWorld.theProfiler.startSection("placing");
+            x = (double) MathHelper.clamp_int((int)x, -29999872, 29999872);
+            z = (double)MathHelper.clamp_int((int)z, -29999872, 29999872);
+
+            if (entity.isEntityAlive()) {
+                entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
+            }
+            fromWorld.theProfiler.endSection();
+        }
+
+        if (entity.isEntityAlive()) {
+            fromWorld.updateEntityWithOptionalForce(entity, false);
+        }
+
+        fromWorld.theProfiler.endSection();
     }
 }

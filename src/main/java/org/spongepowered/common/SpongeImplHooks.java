@@ -36,10 +36,12 @@ import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.entity.passive.EntityAmbientCreature;
 import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import net.minecraft.world.Teleporter;
@@ -149,5 +151,15 @@ public final class SpongeImplHooks {
 
     public static void registerPortalAgentType(@Nullable Teleporter teleporter) {
         // plugins are required to register types
+    }
+
+    /**
+     * Targeted specifically for a mixin to throw a method for Forge events.
+     * @param playerIn
+     * @param fromWorld
+     * @param toWorld
+     */
+    public static void handlePostChangeDimensionEvent(EntityPlayerMP playerIn, WorldServer fromWorld, WorldServer toWorld) {
+
     }
 }
