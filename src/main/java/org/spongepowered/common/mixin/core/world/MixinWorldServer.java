@@ -586,7 +586,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public boolean spawnEntities(Iterable<? extends Entity> entities, Cause cause) {
         checkArgument(cause != null, "Cause cannot be null!");
-        checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
+        checkArgument(cause.root() instanceof SpawnCause, "SpawnCause must be at the ROOT of a cause!");
+        checkArgument(cause.containsType(PluginContainer.class), "PluginContainer must be within the cause!");
         List<Entity> entitiesToSpawn = new ArrayList<>();
         entities.forEach(entitiesToSpawn::add);
         return !EventConsumer.event(SpongeEventFactory.createSpawnEntityEventCustom(cause, entitiesToSpawn, this))
