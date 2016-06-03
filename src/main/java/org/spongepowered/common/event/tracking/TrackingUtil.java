@@ -433,32 +433,12 @@ public final class TrackingUtil {
         entity.worldObj.theProfiler.startSection("reposition");
         // Only need to update the entity location here as the portal is handled in SpongeCommonEventFactory
         entity.setLocationAndAngles(event.getToTransform().getPosition().getX(), event.getToTransform().getPosition().getY(), event.getToTransform().getPosition().getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+        entity.worldObj = toWorld;
         toWorld.spawnEntityInWorld(entity);
         toWorld.updateEntityWithOptionalForce(entity, false);
         entity.worldObj.theProfiler.endSection();
-        entity.worldObj = toWorld;
 
-        // Disable recreation of entities when traveling through portals
-            /*entity.worldObj.theProfiler.endStartSection("reloading");
-            net.minecraft.entity.Entity entity = EntityList.createEntityByName(EntityList.getEntityString(entity.mcEntity), toWorld);
-
-            if (entity != null)
-            {
-                entity.copyDataFromOld(entity.mcEntity);
-
-                if (toWorld.provider instanceof WorldProviderEnd)
-                {
-                    BlockPos blockpos = entity.worldObj.getTopSolidOrLiquidBlock(toWorld.getSpawnPoint());
-                    entity.moveToBlockPosAndAngles(blockpos, entity.rotationYaw, entity.rotationPitch);
-                }
-
-                toWorld.spawnEntityInWorld(entity);
-            }
-
-            entity.isDead = true;*/
         entity.worldObj.theProfiler.endSection();
-        //fromWorld.resetUpdateEntityTick();
-        //toWorld.resetUpdateEntityTick();
         entity.worldObj.theProfiler.endSection();
         return entity;
     }
@@ -504,7 +484,9 @@ public final class TrackingUtil {
         }
         // Sponge End
 
-        ((IMixinPlayerList) entityPlayerMP.mcServer.getPlayerList()).transferPlayerToDimension(entityPlayerMP, suggestedDimensionId, fromWorldServer.getDefaultTeleporter());
+        final WorldServer toWorldServer = SpongeImpl.getServer().worldServerForDimension(suggestedDimensionId);
+
+        ((IMixinPlayerList) entityPlayerMP.mcServer.getPlayerList()).transferPlayerToDimension(entityPlayerMP, suggestedDimensionId, toWorldServer.getDefaultTeleporter());
         entityPlayerMP.connection.sendPacket(new SPacketEffect(1032, BlockPos.ORIGIN, 0, false));
 
         // Sponge Start - entityPlayerMP has been moved below to refreshXpHealthAndFood

@@ -38,6 +38,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
@@ -152,7 +153,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     /**
      * @author blood - May 21st, 2016
      *
-     * @reason - rewritten to handle {@link DisplaceEntityEvent.Teleport.Portal}
+     * @reason - rewritten to handle {@link MoveEntityEvent.Teleport.Portal}
      *
      * @param entityIn The entity being placed into the portal
      * @param rotationYaw The yaw of entity
