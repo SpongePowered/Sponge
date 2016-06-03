@@ -73,6 +73,7 @@ import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -302,12 +303,18 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public BlockState getBlock(int x, int y, int z) {
+        if (!containsBlock(x, y, z)) {
+            return BlockTypes.AIR.getDefaultState();
+        }
         checkBlockBounds(x, y, z);
         return (BlockState) getBlockState(new BlockPos(x, y, z));
     }
 
     @Override
     public BlockType getBlockType(int x, int y, int z) {
+        if (!containsBlock(x, y, z)) {
+            return BlockTypes.AIR;
+        }
         checkBlockBounds(x, y, z);
         // avoid intermediate object creation from using BlockState
         return (BlockType) getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(new BlockPos(x, y, z)).getBlock();
@@ -620,7 +627,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public BlockSnapshot createSnapshot(int x, int y, int z) {
-        if (!this.isValid(new BlockPos(x, y, z))) {
+        if (!containsBlock(x, y, z)) {
             return BlockSnapshot.NONE;
         }
         World world = this;

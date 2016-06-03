@@ -544,6 +544,9 @@ public interface PacketFunction {
 
     });
     PacketFunction PLACE_BLOCK = (packet, state, player, context) -> {
+        if (state == PacketPhase.General.INVALID_PLACE) { // This basically is an out of world place, and nothing should occur here.
+            return;
+        }
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.worldObj;
         final World spongeWorld = (World) mixinWorld;
         // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement

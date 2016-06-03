@@ -62,7 +62,6 @@ public final class InternalNamedCauses {
         public static final String CAPTURED_BLOCKS = "CapturedBlocks";
         public static final String CAPTURED_ENTITIES = "CapturedEntities";
         public static final String CAPTURED_ITEMS = "CapturedItems";
-        public static final String INVALID_TRANSACTIONS = "InvalidTransactions";
         public static final String UNWINDING_STATE = "UnwindingState";
         public static final String UNWINDING_CONTEXT = "UnwindingContext";
         public static final String CAPTURED_BLOCK_DROPS = "CapturedBlockDropMap";
@@ -104,7 +103,6 @@ public final class InternalNamedCauses {
         public static final String TARGET_WORLD = "TargetWorld";
         public static final String TARGET_TELEPORTER = "TargetTeleporter";
         public static final String FROM_TRANSFORM = "FromTransform";
-        public static final String TELEPORT_EVENT = "TeleportEvent";
         public static final String TARGET_TRANSFORM = "TargetTransform";
     }
 }
