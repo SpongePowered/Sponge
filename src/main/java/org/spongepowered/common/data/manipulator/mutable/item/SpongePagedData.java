@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.item;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
@@ -39,22 +38,18 @@ import java.util.List;
 
 public class SpongePagedData extends AbstractListData<Text, PagedData, ImmutablePagedData> implements PagedData {
 
-    private List<Text> pages;
-
     public SpongePagedData() {
         this(new ArrayList<>());
     }
 
     public SpongePagedData(List<Text> pages) {
         super(PagedData.class, pages, Keys.BOOK_PAGES, ImmutableSpongePagedData.class);
-        this.pages = Lists.newArrayList(pages);
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(this.pages));
+            .set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(getValue()));
     }
-
 
 }
