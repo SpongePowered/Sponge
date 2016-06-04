@@ -54,6 +54,7 @@ public abstract class MixinCommandTeleport extends CommandBase {
      * @param sender The command source
      * @param args The command arguments
      */
+    @Override
     @Overwrite
     public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
     {
@@ -136,7 +137,7 @@ public abstract class MixinCommandTeleport extends CommandBase {
 
 
                         // Sponge start
-                        EntityPlayerMP player = (EntityPlayerMP) sender;
+                        EntityPlayerMP player = (EntityPlayerMP) entity;
                         double x = commandbase$coordinatearg.getAmount();
                         double y = commandbase$coordinatearg1.getAmount();
                         double z = commandbase$coordinatearg2.getAmount();
@@ -191,7 +192,7 @@ public abstract class MixinCommandTeleport extends CommandBase {
                     if (entity instanceof EntityPlayerMP)
                     {
                         // Sponge start
-                        EntityPlayerMP player = (EntityPlayerMP) sender;
+                        EntityPlayerMP player = (EntityPlayerMP) entity;
                         MoveEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
                         if (event.isCancelled()) {
                             return;
