@@ -207,9 +207,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Overwrite
     public void onDeath(DamageSource cause) {
-        if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase)(Object) this, cause) == null) {
-            return;
-        }
 
         super.onDeath(cause);
         this.setSize(0.2F, 0.2F);
