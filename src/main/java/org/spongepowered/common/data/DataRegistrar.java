@@ -204,6 +204,9 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(ScreamingData.class, SpongeScreamingData.class, ImmutableScreamingData.class,
                 ImmutableSpongeScreamingData.class, new ScreamingDataProcessor());
 
+        dataManager.registerDualProcessor(SilentData.class, SpongeSilentData.class, ImmutableSilentData.class,
+                ImmutableSpongeSilentData.class, new SilentDataProcessor());
+
         dataManager.registerDualProcessor(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
                 ImmutableSpongeRepresentedItemData.class, new RepresentedItemDataProcessor());
 

@@ -138,6 +138,7 @@ public class KeyRegistry {
         keyMap.put("fire_damage_delay", makeSingleKey(Integer.class, MutableBoundedValue.class, of("FireDamageDelay")));
         keyMap.put("game_mode", makeSingleKey(GameMode.class, Value.class, of("GameMode")));
         keyMap.put("is_screaming", makeSingleKey(Boolean.class, Value.class, of("IsScreaming")));
+        keyMap.put("is_silent", makeSingleKey(Boolean.class, Value.class, of("IsSilent")));
         keyMap.put("can_fly", makeSingleKey(Boolean.class, Value.class, of("CanFly")));
         keyMap.put("can_grief", makeSingleKey(Boolean.class, Value.class, of("CanGrief")));
         keyMap.put("shrub_type", makeSingleKey(ShrubType.class, Value.class, of("ShrubType")));
