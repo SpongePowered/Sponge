@@ -31,6 +31,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -39,17 +40,18 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 @Implements(@Interface(iface = DyeColor.class, prefix = "dye$"))
 public abstract class MixinEnumDyeColor implements DyeColor {
 
-    @Shadow @Final private String name;
-    @Shadow @Final private String unlocalizedName;
+    @Shadow public abstract String shadow$getUnlocalizedName();
+    @Shadow public abstract String shadow$getName();
 
     private Translation translation;
 
+    @Intrinsic
     public String dye$getName() {
-        return this.name;
+        return this.shadow$getUnlocalizedName();
     }
 
     public String dye$getId() {
-        return getName();
+        return shadow$getName();
     }
 
     public Color dye$getColor() {
@@ -59,7 +61,7 @@ public abstract class MixinEnumDyeColor implements DyeColor {
     public Translation dye$getTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("item.dyePowder." + this.unlocalizedName + ".name");
+            this.translation = new SpongeTranslation("item.dyePowder." + this.shadow$getUnlocalizedName() + ".name");
         }
         return this.translation;
     }
