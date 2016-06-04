@@ -5,6 +5,7 @@
     "refmap": "mixins.common.refmap.json",
     "mixins": [
         "ai.MixinAbstractAITask",
+        "entity.MixinEntityBackwardsCompatible",
         "event.cause.damage.MixinAbstractDamageSource",
         "event.cause.damage.MixinAbstractEntityDamageSource",
         "text.MixinText",
