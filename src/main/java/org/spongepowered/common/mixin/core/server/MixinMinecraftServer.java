@@ -678,8 +678,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         final File file = new File(getFolderName(), worldName);
-        if ((file.exists()) && (!file.isDirectory())) {
-            throw new IllegalArgumentException("File exists with the name '" + worldName + "' and isn't a folder");
+        if (!file.exists() || !file.isDirectory()) {
+            return Optional.empty();
         }
 
         int dim;
