@@ -94,7 +94,12 @@ public interface IPhaseState {
     default boolean ignoresEntityCollisions() {
         return false;
     }
+
     default boolean isExpectedForReEntrance() {
+        return false;
+    }
+
+    default boolean tracksEntityDeaths() {
         return false;
     }
 }

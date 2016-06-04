@@ -73,6 +73,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -246,9 +247,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             final IPhaseState currentState = currentPhase.getState();
             if (currentState.tracksBlockSpecificDrops()) {
                 final PhaseContext context = currentPhase.getContext();
-                final Multimap<BlockPos, org.spongepowered.api.item.inventory.ItemStack> multimap = context.getCapturedBlockDrops();
-                final Collection<org.spongepowered.api.item.inventory.ItemStack> itemStacks = multimap.get(pos);
-                SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemStackUtil.fromNative(stack));
+                final Multimap<BlockPos, ItemDropData> multimap = context.getCapturedBlockDrops();
+                final Collection<ItemDropData> itemStacks = multimap.get(pos);
+                SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(stack).position(VecHelper.toVector3d(pos)).build());
                 return false;
             }
         }

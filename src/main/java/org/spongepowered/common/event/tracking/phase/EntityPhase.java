@@ -26,15 +26,16 @@ package org.spongepowered.common.event.tracking.phase;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -45,13 +46,11 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.function.EntityFunction;
 import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
@@ -88,37 +87,90 @@ public final class EntityPhase extends TrackingPhase {
                                 .build())
                         .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
                         .build();
-                context.getCapturedItemsSupplier()
-                        .ifPresentAndNotEmpty(items -> {
-                            final ArrayList<Entity> entities = new ArrayList<>();
-                            for (EntityItem item : items) {
-                                entities.add(EntityUtil.fromNative(item));
-                            }
-                            EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld()))
-                                    .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
-                                    .process();
-                        });
+                final boolean isPlayer = dyingEntity instanceof EntityPlayer;
+                final EntityPlayer entityPlayer = isPlayer ? (EntityPlayer) dyingEntity : null;
                 context.getCapturedEntitySupplier()
-                        .ifPresentAndNotEmpty(entities -> EntityFunction.Entities.DEATH_DROPS.process(dyingEntity, causeTracker, context, entities));
+                        .ifPresentAndNotEmpty(entities -> {
+                            // Separate experience orbs from other entity drops
+                            final List<Entity> experience = entities.stream()
+                                    .filter(entity -> entity instanceof ExperienceOrb)
+                                    .collect(Collectors.toList());
+                            if (!experience.isEmpty()) {
+                                final Cause experienceCause = Cause.source(
+                                        EntitySpawnCause.builder()
+                                                .entity(dyingEntity)
+                                                .type(InternalSpawnTypes.EXPERIENCE)
+                                                .build())
+                                        .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
+                                        .build();
+                                EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(experienceCause, experience, causeTracker.getWorld()))
+                                        .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                                        .process();
+                            }
+
+                            // Now process other entities, this is separate from item drops specifically
+                            final List<Entity> other = entities.stream()
+                                            .filter(entity -> !(entity instanceof ExperienceOrb))
+                                            .collect(Collectors.toList());
+                            if (!other.isEmpty()) {
+                                final Cause otherCause = Cause.source(
+                                        EntitySpawnCause.builder()
+                                                .entity(dyingEntity)
+                                                .type(InternalSpawnTypes.ENTITY_DEATH)
+                                                .build())
+                                        .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
+                                        .build();
+                                EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(otherCause, experience, causeTracker.getWorld()))
+                                        .nonCancelled(event -> {
+                                            for (Entity entity : event.getEntities()) {
+                                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                            }
+                                        })
+                                        .process();
+                            }
+                        });
+                context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {
+                    final Collection<EntityItem> items = map.get(dyingEntity.getUniqueId());
+                    final ArrayList<Entity> entities = new ArrayList<>();
+                    for (EntityItem item : items) {
+                        entities.add(EntityUtil.fromNative(item));
+                    }
+                    EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld()))
+                            .nonCancelled(event -> {
+                                if (isPlayer) {
+                                    if (!entityPlayer.worldObj.getGameRules().getBoolean("keepInventory")) {
+                                        entityPlayer.inventory.clear();
+                                    }
+                                }
+                                for (Entity entity : event.getEntities()) {
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                }
+                            })
+                            .process();
+                });
                 // Note that this is only used if and when item pre-merging is enabled.
                 context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
-                    final Collection<ItemStack> itemStacks = map.get(dyingEntity.getUniqueId());
+                    final Collection<ItemDropData> itemStacks = map.get(dyingEntity.getUniqueId());
                     if (itemStacks.isEmpty()) {
                         return;
                     }
-                    final List<ItemStack> items = new ArrayList<>();
+                    final List<ItemDropData> items = new ArrayList<>();
                     items.addAll(itemStacks);
 
                     if (!items.isEmpty()) {
                         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(dyingEntity);
                         final List<Entity> itemEntities = items.stream()
-                                .map(ItemStackUtil::toNative)
-                                .map(item -> new EntityItem(causeTracker.getMinecraftWorld(), minecraftEntity.posX, minecraftEntity.posY, minecraftEntity.posZ, item))
+                                .map(data -> data.create((WorldServer) minecraftEntity.worldObj))
                                 .map(EntityUtil::fromNative)
                                 .collect(Collectors.toList());
 
                         EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld()))
                                 .nonCancelled(event -> {
+                                            if (isPlayer) {
+                                                if (!entityPlayer.worldObj.getGameRules().getBoolean("keepInventory")) {
+                                                    entityPlayer.inventory.clear();
+                                                }
+                                            }
                                             for (Entity entity : event.getEntities()) {
                                                 TrackingUtil.associateEntityCreator(context, entity, causeTracker.getMinecraftWorld());
                                                 causeTracker.getMixinWorld().forceSpawnEntity(entity);
@@ -130,6 +182,7 @@ public final class EntityPhase extends TrackingPhase {
                     }
 
                 });
+
             }
         },
         DEATH_UPDATE() {
@@ -152,12 +205,51 @@ public final class EntityPhase extends TrackingPhase {
                                 entities.add(EntityUtil.fromNative(item));
                             }
                             EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld()))
-                                    .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                                    .nonCancelled(event -> {
+                                        for (Entity entity : event.getEntities()) {
+                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                            final net.minecraft.entity.Entity
+                                                    entityFromUuid =
+                                                    causeTracker.getMinecraftWorld().getEntityFromUuid(entity.getUniqueId());
+                                            System.err.printf("Entity that was spawned is available in the world: %s%n", entityFromUuid == null);
+                                        }
+                                    })
                                     .process();
                         });
                 context.getCapturedEntitySupplier()
-                        .ifPresentAndNotEmpty(entities ->
-                                EntityFunction.Entities.DEATH_UPDATES.process(dyingEntity, causeTracker, context, entities));
+                        .ifPresentAndNotEmpty(entities -> {
+                                    final List<Entity> experience = entities.stream()
+                                            .filter(entity -> entity instanceof ExperienceOrb)
+                                            .collect(Collectors.toList());
+                                    if (!experience.isEmpty()) {
+                                        final Cause cause = Cause.source(
+                                                EntitySpawnCause.builder()
+                                                        .entity(dyingEntity)
+                                                        .type(InternalSpawnTypes.EXPERIENCE)
+                                                        .build())
+                                                .build();
+                                        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, experience, causeTracker.getWorld()))
+                                                .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                                                .process();
+                                    }
+
+                                    final List<Entity> other = entities.stream()
+                                                    .filter(entity -> !(entity instanceof ExperienceOrb))
+                                                    .collect(Collectors.toList());
+                                    if (!other.isEmpty()) {
+                                        final Cause cause = Cause.source(
+                                                EntitySpawnCause.builder()
+                                                        .entity(dyingEntity)
+                                                        .type(InternalSpawnTypes.ENTITY_DEATH)
+                                                        .build())
+                                                .build();
+                                        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, other, causeTracker.getWorld()))
+                                                .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                                                .process();
+                                    }
+
+                                }
+                        );
                 context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
                     if (map.isEmpty()) {
                         return;
@@ -166,9 +258,9 @@ public final class EntityPhase extends TrackingPhase {
                     printer.add("Processing Entity Death Updates Spawning").centre().hr();
                     printer.add("Entity Dying: " + dyingEntity);
                     printer.add("The item stacks captured are: ");
-                    for (Map.Entry<UUID, Collection<ItemStack>> entry : map.asMap().entrySet()) {
+                    for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                         printer.add("  - Entity with UUID: %s", entry.getKey());
-                        for (ItemStack stack : entry.getValue()) {
+                        for (ItemDropData stack : entry.getValue()) {
                             printer.add("    - %s", stack);
                         }
                     }
@@ -356,7 +448,7 @@ public final class EntityPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean doesCaptureEntityDrops() {
+    public boolean doesCaptureEntityDrops(IPhaseState currentState) {
         return true;
     }
 

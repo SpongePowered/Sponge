@@ -33,6 +33,8 @@ import com.google.common.collect.Sets;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -43,16 +45,21 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
+import net.minecraft.network.play.server.SPacketCombatEvent;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.stats.Achievement;
 import net.minecraft.stats.StatBase;
+import net.minecraft.stats.StatList;
 import net.minecraft.stats.StatisticsManagerServer;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -115,6 +122,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
@@ -133,7 +141,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.time.Instant;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -166,7 +173,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
-    @Shadow public abstract void takeStat(StatBase stat);
+    @Shadow @Override public abstract void takeStat(StatBase stat);
     @Shadow public abstract StatisticsManagerServer getStatFile();
     @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
 
@@ -188,10 +195,61 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    @Redirect(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getObjectivesFromCriteria(Lnet/minecraft/scoreboard/IScoreCriteria;)Ljava/util/Collection;"))
-    public Collection onGetObjectivesFromCriteria(net.minecraft.scoreboard.Scoreboard this$0, IScoreCriteria criteria) {
-        return this.getWorldScoreboard().getObjectivesFromCriteria(criteria);
+
+    /**
+     * @author blood - May 12th, 2016
+     * @author gabizou - June 3rd, 2016
+     *
+     * @reason SpongeForge requires an overwrite so we do it here instead. This handles player death events.
+     */
+    @Override
+    @Overwrite
+    public void onDeath(DamageSource cause) {
+        if (!SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause)) {
+            return;
+        }
+
+        boolean flag = this.worldObj.getGameRules().getBoolean("showDeathMessages");
+        this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
+
+        if (flag) {
+            Team team = this.getTeam();
+
+            if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
+                if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
+                    this.mcServer.getPlayerList().sendMessageToAllTeamMembers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
+                } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
+                    this.mcServer.getPlayerList().sendMessageToTeamOrAllPlayers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
+                }
+            } else {
+                this.mcServer.getPlayerList().sendChatMsg(this.getCombatTracker().getDeathMessage());
+            }
+        }
+
+        if (!this.worldObj.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+            this.inventory.dropAllItems();
+        }
+
+        for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
+            Score score = this.getWorldScoreboard().getOrCreateScore(this.getName(), scoreobjective);
+            score.incrementScore();
+        }
+
+        EntityLivingBase entitylivingbase = this.getAttackingEntity();
+
+        if (entitylivingbase != null) {
+            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getEntityString(entitylivingbase));
+
+            if (entitylist$entityegginfo != null) {
+                this.addStat(entitylist$entityegginfo.entityKilledByStat);
+            }
+
+            entitylivingbase.addToPlayerScore((EntityPlayerMP) (Object) this, this.scoreValue);
+        }
+
+        this.addStat(StatList.DEATHS);
+        this.takeStat(StatList.TIME_SINCE_DEATH);
+        this.getCombatTracker().reset();
     }
 
     @Override

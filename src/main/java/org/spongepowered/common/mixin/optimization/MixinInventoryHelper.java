@@ -38,8 +38,10 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 
@@ -61,12 +63,15 @@ public class MixinInventoryHelper {
             final IPhaseState currentState = currentPhase.getState();
             if (currentState.tracksBlockSpecificDrops()) {
                 final PhaseContext context = currentPhase.getContext();
-                final Multimap<BlockPos, ItemStack> multimap = context.getBlockDropSupplier().get();
-                final Collection<ItemStack> itemStacks = multimap.get(new BlockPos(x, y, z));
+                final Multimap<BlockPos, ItemDropData> multimap = context.getBlockDropSupplier().get();
+                final BlockPos pos = new BlockPos(x, y, z);
+                final Collection<ItemDropData> itemStacks = multimap.get(pos);
                 for (int i = 0; i < inventory.getSizeInventory(); i++) {
                     final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(i);
                     if (itemStack != null) {
-                        SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemStackUtil.fromNative(itemStack));
+                        SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(itemStack)
+                                .position(VecHelper.toVector3d(pos))
+                                .build());
                     }
                 }
             }

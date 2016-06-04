@@ -161,12 +161,24 @@ public final class PacketPhase extends TrackingPhase {
         default boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
             return false;
         }
+
+        default boolean ignoresItemPreMerges() {
+            return false;
+        }
+        default boolean doesCaptureEntityDrops() {
+            return false;
+        }
     }
 
     public enum Inventory implements IPacketState, IPhaseState {
 
         INVENTORY,
         DROP_ITEM(MODE_CLICK | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_OUTSIDE_WINDOW) {
+            @Override
+            public boolean doesCaptureEntityDrops() {
+                return true;
+            }
+
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 super.populateContext(playerMP, packet, context);
@@ -192,11 +204,23 @@ public final class PacketPhase extends TrackingPhase {
                 final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
                 return SpongeEventFactory.createClickInventoryEventDropFull(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
             }
+
+            @Override
+            public boolean ignoresItemPreMerges() {
+                return true;
+            }
         },
-        DROP_ITEMS,
+        DROP_ITEMS() {
+
+        },
         DROP_INVENTORY() {
         },
         DROP_SINGLE_ITEM_FROM_INVENTORY(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_OUTSIDE_WINDOW) {
+            @Override
+            public boolean doesCaptureEntityDrops() {
+                return true;
+            }
+
             @Override
             public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
@@ -254,6 +278,11 @@ public final class PacketPhase extends TrackingPhase {
             }
         },
         SECONDARY_INVENTORY_CLICK_DROP(MODE_DROP | BUTTON_SECONDARY, MASK_NORMAL) {
+            @Override
+            public boolean doesCaptureEntityDrops() {
+                return true;
+            }
+
             @Override
             public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
@@ -412,6 +441,11 @@ public final class PacketPhase extends TrackingPhase {
             }
 
             @Override
+            public boolean doesCaptureEntityDrops() {
+                return true;
+            }
+
+            @Override
             public boolean canSwitchTo(IPhaseState state) {
                 return state == BlockPhase.State.BLOCK_DECAY || state == BlockPhase.State.BLOCK_DROP_ITEMS;
             }
@@ -452,6 +486,11 @@ public final class PacketPhase extends TrackingPhase {
 
             @Override
             public boolean tracksEntitySpecificDrops() {
+                return true;
+            }
+
+            @Override
+            public boolean doesCaptureEntityDrops() {
                 return true;
             }
         },
@@ -504,6 +543,11 @@ public final class PacketPhase extends TrackingPhase {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
                 }
                 context.addEntityDropCaptures();
+            }
+
+            @Override
+            public boolean doesCaptureEntityDrops() {
+                return true;
             }
         },
         CHAT() {
@@ -651,8 +695,18 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
+    public boolean doesCaptureEntityDrops(IPhaseState currentState) {
+        return ((IPacketState) currentState).doesCaptureEntityDrops();
+    }
+
+    @Override
     public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
         return currentState == General.INTERACTION;
+    }
+
+    @Override
+    public boolean ignoresItemPreMerging(IPhaseState currentState) {
+        return ((IPacketState) currentState).ignoresItemPreMerges();
     }
 
     @SuppressWarnings("unchecked")

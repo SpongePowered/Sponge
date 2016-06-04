@@ -8,7 +8,6 @@
         "world.MixinWorldServer_Lighting",
         "world.MixinChunk_Chunk_Cache",
         "world.gen.MixinChunkProviderServer_Chunk_Cache",
-        "MixinEntity_Item_Pre_Merge",
         "MixinSpongeImplHooks_Item_Pre_Merge",
         "MixinInventoryHelper",
         "MixinWorldServer_Explosion",

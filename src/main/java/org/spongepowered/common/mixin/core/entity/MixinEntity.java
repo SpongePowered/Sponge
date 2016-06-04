@@ -1142,65 +1142,10 @@ public abstract class MixinEntity implements IMixinEntity {
                 entityitem.setDefaultPickupDelay();
                 this.worldObj.spawnEntityInWorld(entityitem);
                 return entityitem;
-            } else {
-                return null;
             }
-        }
-
-        // Now the real fun begins.
-        final net.minecraft.item.ItemStack item;
-        if (itemStackIn.getItem() != null) {
-            // FIRST we want to throw the DropItemEvent.PRE
-            ItemStackSnapshot snapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemStackIn).createSnapshot();
-            List<ItemStackSnapshot> original = new ArrayList<>();
-            original.add(snapshot);
-            DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(this)),
-                    ImmutableList.of(snapshot), original);
-            if (dropEvent.isCancelled()) {
-                return null;
-            }
-
-            // SECOND throw the ConstructEntityEvent
-            Transform<org.spongepowered.api.world.World>
-                    suggested = new Transform<>(this.getWorld(), new Vector3d(this.posX, this.posY + (double) offsetY, this.posZ));
-            SpawnCause cause = EntitySpawnCause.builder().entity(this).type(SpawnTypes.DROPPED_ITEM).build();
-            ConstructEntityEvent.Pre event = SpongeEventFactory
-                    .createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, suggested);
-            SpongeImpl.postEvent(event);
-            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
-        } else {
             return null;
         }
-        if (item == null) {
-            return null;
-        }
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.worldObj;
-        final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
-        final IPhaseState currentState = peek.getState();
-        final PhaseContext phaseContext = peek.getContext();
-
-        if (item.stackSize != 0 && item.getItem() != null) {
-
-            EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY + (double) offsetY, this.posZ, itemStackIn);
-            entityitem.setDefaultPickupDelay();
-
-            // FIFTH - Capture the entity maybe?
-            if (currentState.getPhase().doesCaptureEntityDrops()) {
-                if (currentState.tracksEntitySpecificDrops()) {
-                    // We are capturing per entity drop
-                    phaseContext.getCapturedEntityItemDropSupplier().get().put(this.getUniqueID(), entityitem);
-                } else {
-                    // We are adding to a general list - usually for EntityPhase.State.DEATH
-                    phaseContext.getCapturedItemsSupplier().get().add(entityitem);
-                }
-                // Return the item, even if it wasn't spawned in the world.
-                return entityitem;
-            }
-            // FINALLY - Spawn the entity in the world if all else didn't fail
-            this.worldObj.spawnEntityInWorld(entityitem);
-            return entityitem;
-        }
-        return null;
+        return EntityUtil.entityOnDropItem((net.minecraft.entity.Entity) (Object) this, itemStackIn, offsetY);
     }
 
     @Override

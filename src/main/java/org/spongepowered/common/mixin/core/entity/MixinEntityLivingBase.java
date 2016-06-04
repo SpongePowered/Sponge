@@ -31,7 +31,6 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
@@ -341,23 +340,21 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                 boolean flag = false;
 
-if (amount > 0.0F && this.canBlockDamageSource(source)) {
-    this.damageShield(amount);
+                if (amount > 0.0F && this.canBlockDamageSource(source)) {
+                    this.damageShield(amount);
 
-    if (source.isProjectile()) {
-        amount = 0.0F;
-    } else {
-        amount *= 0.33F;
+                    if (source.isProjectile()) {
+                        amount = 0.0F;
+                    } else {
+                        amount *= 0.33F;
 
-        if (source.getSourceOfDamage() instanceof EntityLivingBase) {
-            ((EntityLivingBase) source.getSourceOfDamage())
-                    .knockBack((EntityLivingBase) (Object) this, 0.5F, this.posX - source.getSourceOfDamage().posX, this
-                            .posZ - source.getSourceOfDamage().posZ);
-        }
-    }
+                        if (source.getSourceOfDamage() instanceof EntityLivingBase) {
+                            ((EntityLivingBase) source.getSourceOfDamage()).knockBack((EntityLivingBase) (Object) this, 0.5F, this.posX - source.getSourceOfDamage().posX, this.posZ - source.getSourceOfDamage().posZ);
+                        }
+                    }
 
-    flag = true;
-}
+                    flag = true;
+                }
 
                 this.limbSwingAmount = 1.5F;
                 boolean flag1 = true;
@@ -445,7 +442,8 @@ if (amount > 0.0F && this.canBlockDamageSource(source)) {
 
                     // Sponge Start - notify the cause tracker
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
-                    final boolean tracksEntitySpecificDrops = causeTracker.getStack().peekState().tracksEntitySpecificDrops();
+                    final boolean tracksEntitySpecificDrops = causeTracker.getStack().peekState().tracksEntityDeaths();
+                    System.err.printf("Specific drops is %s%n", tracksEntitySpecificDrops);
                     if (!tracksEntitySpecificDrops) {
                         causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH, PhaseContext.start()
                                 .add(NamedCause.source(this))

@@ -24,16 +24,21 @@
  */
 package org.spongepowered.common.entity;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketChangeGameState;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketEffect;
@@ -43,6 +48,7 @@ import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.stats.AchievementList;
+import net.minecraft.stats.StatList;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -51,28 +57,49 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DimensionType;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -332,7 +359,7 @@ public final class EntityUtil {
                                         + " when the expected contain: " + professions);
     }
 
-    public static List<EntityHanging> findHangingEntities(World worldIn, BlockPos pos) {
+    public static List<EntityHanging> findHangingEntities(WorldServer worldIn, BlockPos pos) {
         return worldIn.getEntitiesWithinAABB(EntityHanging.class, new AxisAlignedBB(pos, pos).expand(1.1D, 1.1D, 1.1D),
                 entityIn -> {
                     if (entityIn == null) {
@@ -366,6 +393,13 @@ public final class EntityUtil {
             throw new IllegalArgumentException("Not a native Entity for this implementation!");
         }
         return (Entity) tickingEntity;
+    }
+
+    public static EntityPlayer toNative(IMixinEntityPlayer player) {
+        if (!(player instanceof EntityPlayer)) {
+            throw new IllegalArgumentException("Not a native EntityPlayer for this implementation!");
+        }
+        return (EntityPlayer) player;
     }
 
     @Nullable
@@ -432,7 +466,7 @@ public final class EntityUtil {
         return (org.spongepowered.api.entity.Entity) mixinEntity;
     }
 
-    public static boolean changeWorld(net.minecraft.entity.Entity entity, Location<org.spongepowered.api.world.World> location, int currentDim, int targetDim) {
+    public static boolean changeWorld(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim) {
         final MinecraftServer mcServer = SpongeImpl.getServer();
         final WorldServer fromWorld = mcServer.worldServerForDimension(currentDim);
         final WorldServer toWorld = mcServer.worldServerForDimension(targetDim);
@@ -549,5 +583,236 @@ public final class EntityUtil {
         }
 
         fromWorld.theProfiler.endSection();
+    }
+
+    /**
+     * A simple redirected static util method for {@link Entity#entityDropItem(ItemStack, float)}
+     * for easy debugging.
+     * @param entity
+     * @param itemStack
+     * @param offsetY
+     * @return
+     */
+    public static EntityItem entityOnDropItem(Entity entity, ItemStack itemStack, float offsetY) {
+        final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
+
+        // Now the real fun begins.
+        final ItemStack item;
+        final double posX = entity.posX;
+        final double posY = entity.posY + offsetY;
+        final double posZ = entity.posZ;
+        if (itemStack.getItem() != null) {
+            // FIRST we want to throw the DropItemEvent.PRE
+            final ItemStackSnapshot snapshot = ItemStackUtil.createSnapshot(itemStack);
+            final List<ItemStackSnapshot> original = new ArrayList<>();
+            original.add(snapshot);
+            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(entity)),
+                    ImmutableList.of(snapshot), original);
+            if (dropEvent.isCancelled()) {
+                return null;
+            }
+
+            // SECOND throw the ConstructEntityEvent
+            Transform<World> suggested = new Transform<>(mixinEntity.getWorld(), new Vector3d(posX, entity.posY + (double) offsetY, posZ));
+            SpawnCause cause = EntitySpawnCause.builder().entity(mixinEntity).type(SpawnTypes.DROPPED_ITEM).build();
+            ConstructEntityEvent.Pre event = SpongeEventFactory
+                    .createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, suggested);
+            SpongeImpl.postEvent(event);
+            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
+        } else {
+            return null;
+        }
+        if (item == null) {
+            return null;
+        }
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) entity.worldObj;
+        final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
+        final IPhaseState currentState = peek.getState();
+        final PhaseContext phaseContext = peek.getContext();
+
+        if (item.stackSize != 0 && item.getItem() != null) {
+            if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+                if (currentState.tracksEntitySpecificDrops()) {
+                    final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
+                    final Collection<ItemDropData> itemStacks = multimap.get(entity.getUniqueID());
+                    SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(item)
+                            .position(new Vector3d(posX, posY, posZ))
+                            .build());
+                    return null;
+                } else {
+                    final List<ItemDropData> itemStacks = phaseContext.getCapturedItemStackSupplier().get();
+                    SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(item)
+                            .position(new Vector3d(posX, posY, posZ))
+                            .build());
+                    return null;
+                }
+            }
+            EntityItem entityitem = new EntityItem(entity.worldObj, posX, entity.posY + (double) offsetY, posZ, itemStack);
+            entityitem.setDefaultPickupDelay();
+
+            // FIFTH - Capture the entity maybe?
+            if (currentState.getPhase().doesCaptureEntityDrops(currentState)) {
+                if (currentState.tracksEntitySpecificDrops()) {
+                    // We are capturing per entity drop
+                    phaseContext.getCapturedEntityItemDropSupplier().get().put(entity.getUniqueID(), entityitem);
+                } else {
+                    // We are adding to a general list - usually for EntityPhase.State.DEATH
+                    phaseContext.getCapturedItemsSupplier().get().add(entityitem);
+                }
+                // Return the item, even if it wasn't spawned in the world.
+                return entityitem;
+            }
+            // FINALLY - Spawn the entity in the world if all else didn't fail
+            entity.worldObj.spawnEntityInWorld(entityitem);
+            return entityitem;
+        }
+        return null;
+    }
+
+    @Nullable
+    public static EntityItem playerDropItem(IMixinEntityPlayer mixinPlayer, ItemStack droppedItem, boolean dropAround, boolean traceItem) {
+        final EntityPlayer player = EntityUtil.toNative(mixinPlayer);
+
+        final double posX = player.posX;
+        final double adjustedPosY = player.posY - 0.30000001192092896D + (double) player.getEyeHeight();
+        final double posZ = player.posZ;
+        // Now the real fun begins.
+        final ItemStack item;
+        if (droppedItem.getItem() != null) {
+            // FIRST we want to throw the DropItemEvent.PRE
+            final ItemStackSnapshot snapshot = ItemStackUtil.createSnapshot(droppedItem);
+            final List<ItemStackSnapshot> original = new ArrayList<>();
+            original.add(snapshot);
+            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(player)),
+                    ImmutableList.of(snapshot), original);
+            if (dropEvent.isCancelled()) {
+                return null;
+            }
+
+            // SECOND throw the ConstructEntityEvent
+            Transform<World> suggested = new Transform<>(mixinPlayer.getWorld(), new Vector3d(posX, adjustedPosY, posZ));
+            SpawnCause cause = EntitySpawnCause.builder().entity(mixinPlayer).type(SpawnTypes.DROPPED_ITEM).build();
+            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, suggested);
+            SpongeImpl.postEvent(event);
+            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
+        } else {
+            return null;
+        }
+        if (item == null) {
+            return null;
+        }
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
+        final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
+        final IPhaseState currentState = peek.getState();
+        final PhaseContext phaseContext = peek.getContext();
+
+        if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+            if (currentState.tracksEntitySpecificDrops()) {
+                final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
+                final Collection<ItemDropData> itemStacks = multimap.get(player.getUniqueID());
+                SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.Player.player(player)
+                        .stack(item)
+                        .trace(traceItem)
+                        .motion(createDropMotion(dropAround, player, mixinPlayer.getRandom()))
+                        .dropAround(dropAround)
+                        .position(new Vector3d(posX, adjustedPosY, posZ))
+                        .build());
+                return null;
+            } else {
+                final List<ItemDropData> itemStacks = phaseContext.getCapturedItemStackSupplier().get();
+                SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.Player.player(player)
+                        .stack(item)
+                        .trace(traceItem)
+                        .motion(createDropMotion(dropAround, player, mixinPlayer.getRandom()))
+                        .dropAround(dropAround)
+                        .position(new Vector3d(posX, adjustedPosY, posZ))
+                        .build());
+                return null;
+            }
+        }
+
+        EntityItem entityitem = new EntityItem(player.worldObj, posX, adjustedPosY, posZ, droppedItem);
+        entityitem.setPickupDelay(40);
+
+        if (traceItem) {
+            entityitem.setThrower(player.getName());
+        }
+
+        final Random random = mixinPlayer.getRandom();
+        if (dropAround) {
+            float f = random.nextFloat() * 0.5F;
+            float f1 = random.nextFloat() * ((float) Math.PI * 2F);
+            entityitem.motionX = (double) (-MathHelper.sin(f1) * f);
+            entityitem.motionZ = (double) (MathHelper.cos(f1) * f);
+            entityitem.motionY = 0.20000000298023224D;
+        } else {
+            float f2 = 0.3F;
+            entityitem.motionX =
+                    (double) (-MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2);
+            entityitem.motionZ =
+                    (double) (MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2);
+            entityitem.motionY = (double) ( - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F);
+            float f3 = random.nextFloat() * ((float) Math.PI * 2F);
+            f2 = 0.02F * random.nextFloat();
+            entityitem.motionX += Math.cos((double) f3) * (double) f2;
+            entityitem.motionY += (double) ((random.nextFloat() - random.nextFloat()) * 0.1F);
+            entityitem.motionZ += Math.sin((double) f3) * (double) f2;
+        }
+        // FIFTH - Capture the entity maybe?
+        if (currentState.getPhase().doesCaptureEntityDrops(currentState)) {
+            if (currentState.tracksEntitySpecificDrops()) {
+                // We are capturing per entity drop
+                phaseContext.getCapturedEntityItemDropSupplier().get().put(player.getUniqueID(), entityitem);
+            } else {
+                // We are adding to a general list - usually for EntityPhase.State.DEATH
+                phaseContext.getCapturedItemsSupplier().get().add(entityitem);
+            }
+            // Return the item, even if it wasn't spawned in the world.
+            return entityitem;
+        }
+        ItemStack itemstack = dropItemAndGetStack(player, entityitem);
+
+        if (traceItem) {
+            if (itemstack != null) {
+                player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.stackSize);
+            }
+
+            player.addStat(StatList.DROP);
+        }
+
+        return entityitem;
+    }
+
+    private static Vector3d createDropMotion(boolean dropAround, EntityPlayer player, Random random) {
+        double x;
+        double y;
+        double z;
+        if (dropAround) {
+            float f = random.nextFloat() * 0.5F;
+            float f1 = random.nextFloat() * ((float) Math.PI * 2F);
+            x = (double) (-MathHelper.sin(f1) * f);
+            z = (double) (MathHelper.cos(f1) * f);
+            y = 0.20000000298023224D;
+        } else {
+            float f2 = 0.3F;
+            x = (double) (-MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2);
+            z = (double) (MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2);
+            y = (double) ( - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F);
+            float f3 = random.nextFloat() * ((float) Math.PI * 2F);
+            f2 = 0.02F * random.nextFloat();
+            x += Math.cos((double) f3) * (double) f2;
+            y += (double) ((random.nextFloat() - random.nextFloat()) * 0.1F);
+            z += Math.sin((double) f3) * (double) f2;
+        }
+        return new Vector3d(x, y, z);
+    }
+
+    private static ItemStack dropItemAndGetStack(EntityPlayer player, EntityItem item) {
+        final ItemStack stack = item.getEntityItem();
+        if (stack != null) {
+            player.worldObj.spawnEntityInWorld(item);
+            return stack;
+        }
+        return null;
     }
 }

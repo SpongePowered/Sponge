@@ -194,6 +194,15 @@ public abstract class TrackingPhase {
         return false;
     }
 
+    public boolean ignoresItemPreMerging(IPhaseState currentState) {
+        return false;
+    }
+
+
+    public boolean doesCaptureEntityDrops(IPhaseState currentState) {
+        return false;
+    }
+
     public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
 
     }
@@ -300,7 +309,5 @@ public abstract class TrackingPhase {
         return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.UNKNOWN).build()));
     }
 
-    public boolean doesCaptureEntityDrops() {
-        return false;
-    }
+
 }

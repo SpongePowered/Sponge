@@ -1,0 +1,330 @@
+/*
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package org.spongepowered.common.event.tracking.phase;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.flowpowered.math.vector.Vector3d;
+import com.google.common.base.Objects;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.common.entity.EntityUtil;
+
+import java.util.Random;
+
+public class ItemDropData {
+
+    public static Builder item(ItemStack stack) {
+        return new Builder(stack);
+    }
+
+    private final ItemStack stack;
+    final Vector3d position;
+    private final double pitch;
+    private final double yaw;
+    private final Vector3d motion;
+
+    ItemDropData(Builder builder) {
+        this.stack = builder.stack;
+        this.position = builder.position;
+        this.pitch = builder.pitch;
+        this.yaw = builder.yaw;
+        this.motion = builder.motion;
+    }
+
+    public ItemStack getStack() {
+        return this.stack;
+    }
+
+    public Vector3d getPosition() {
+        return this.position;
+    }
+
+    public double getPitch() {
+        return this.pitch;
+    }
+
+    public double getYaw() {
+        return this.yaw;
+    }
+
+    public Vector3d getMotion() {
+        return this.motion;
+    }
+
+    public EntityItem create(WorldServer worldServer) {
+        final EntityItem entityItem = new EntityItem(worldServer);
+        entityItem.posX = this.position.getX();
+        entityItem.posY = this.position.getY();
+        entityItem.posZ = this.position.getZ();
+        entityItem.motionX = this.position.getX();
+        entityItem.motionY = this.position.getY();
+        entityItem.motionZ = this.motion.getZ();
+        return entityItem;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.stack, this.position, this.pitch, this.yaw, this.motion);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final ItemDropData other = (ItemDropData) obj;
+        return Objects.equal(this.stack, other.stack)
+               && Objects.equal(this.position, other.position)
+               && Objects.equal(this.pitch, other.pitch)
+               && Objects.equal(this.yaw, other.yaw)
+               && Objects.equal(this.motion, other.motion);
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("stack", this.stack)
+                .add("position", this.position)
+                .add("pitch", this.pitch)
+                .add("yaw", this.yaw)
+                .add("motion", this.motion)
+                .toString();
+    }
+
+    public static class Builder {
+
+        ItemStack stack;
+        Vector3d position;
+        double pitch;
+        double yaw;
+        Vector3d motion;
+
+        Builder() {
+        }
+
+        Builder(ItemStack itemStack) {
+            this.stack = itemStack;
+        }
+
+        public Builder position(Vector3d position) {
+            this.position = position;
+            return this;
+        }
+
+        public Builder pitch(double pitch) {
+            this.pitch = pitch;
+            return this;
+        }
+
+        public Builder yaw(double yaw) {
+            this.yaw = yaw;
+            return this;
+        }
+
+        public Builder motion(Vector3d motion) {
+            this.motion = motion;
+            return this;
+        }
+
+        public ItemDropData build() {
+            if (this.motion == null) {
+                this.motion = Vector3d.ZERO;
+            }
+            checkNotNull(this.stack, "ItemStack cannot be null!");
+            checkNotNull(this.position, "Position cannot be null!");
+            return new ItemDropData(this);
+        }
+
+    }
+
+    public static final class Player extends ItemDropData {
+
+        public static Builder player(EntityPlayer player) {
+            return new Builder(player);
+        }
+
+        private final boolean trace;
+        private final String playerName;
+        private final boolean dropAround;
+        private final Random random;
+
+        Player(Builder builder) {
+            super(builder);
+            this.trace = builder.trace;
+            this.playerName = builder.playerName;
+            this.dropAround = builder.dropAround;
+            this.random = builder.random;
+        }
+
+        public boolean isTrace() {
+            return this.trace;
+        }
+
+        public String getPlayerName() {
+            return this.playerName;
+        }
+
+        public boolean isDropAround() {
+            return this.dropAround;
+        }
+
+        public Random getRandom() {
+            return this.random;
+        }
+
+
+        @Override
+        public EntityItem create(WorldServer worldServer) {
+            final EntityItem entityItem = new EntityItem(worldServer);
+            entityItem.setEntityItemStack(this.getStack());
+            entityItem.setPickupDelay(40);
+            entityItem.posX = this.position.getX();
+            entityItem.posY = this.position.getY();
+            entityItem.posZ = this.position.getZ();
+            if (this.dropAround) {
+                float f = this.random.nextFloat() * 0.5F;
+                float f1 = this.random.nextFloat() * ((float) Math.PI * 2F);
+                entityItem.motionX = (double) (-MathHelper.sin(f1) * f);
+                entityItem.motionZ = (double) (MathHelper.cos(f1) * f);
+                entityItem.motionY = 0.20000000298023224D;
+            } else {
+                float f2 = 0.3F;
+                entityItem.motionX =
+                        (double) (-MathHelper.sin((float) this.getYaw() * 0.017453292F) * MathHelper.cos((float) this.getPitch() * 0.017453292F) * f2);
+                entityItem.motionZ =
+                        (double) (MathHelper.cos((float) this.getYaw() * 0.017453292F) * MathHelper.cos((float) this.getPitch() * 0.017453292F) * f2);
+                entityItem.motionY = (double) ( - MathHelper.sin((float) this.getPitch() * 0.017453292F) * f2 + 0.1F);
+                float f3 = this.random.nextFloat() * ((float) Math.PI * 2F);
+                f2 = 0.02F * this.random.nextFloat();
+                entityItem.motionX += Math.cos((double) f3) * (double) f2;
+                entityItem.motionY += (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
+                entityItem.motionZ += Math.sin((double) f3) * (double) f2;
+            }
+            if (this.trace) {
+                entityItem.setThrower(this.playerName);
+            }
+            return entityItem;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            if (!super.equals(o)) {
+                return false;
+            }
+            Player player = (Player) o;
+            return this.trace == player.trace &&
+                   this.dropAround == player.dropAround &&
+                   Objects.equal(this.playerName, player.playerName) &&
+                   Objects.equal(this.random, player.random);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(super.hashCode(), this.trace, this.playerName, this.dropAround, this.random);
+        }
+
+        @Override
+        public String toString() {
+            return Objects.toStringHelper(this)
+                    .add("trace", this.trace)
+                    .add("playerName", this.playerName)
+                    .add("dropAround", this.dropAround)
+                    .add("random", this.random)
+                    .toString();
+        }
+
+        public static final class Builder extends ItemDropData.Builder {
+
+            boolean trace;
+            String playerName;
+            boolean dropAround;
+            Random random;
+
+            Builder(EntityPlayer player) {
+                this.playerName = player.getName();
+                this.random = EntityUtil.fromNative(player).getRandom();
+            }
+
+            public Builder stack(ItemStack stack) {
+                this.stack = stack;
+                return this;
+            }
+
+            public Builder trace(boolean trace) {
+                this.trace = trace;
+                return this;
+            }
+
+            public Builder dropAround(boolean dropAround) {
+                this.dropAround = dropAround;
+                return this;
+            }
+
+            @Override
+            public Builder position(Vector3d position) {
+                super.position(position);
+                return this;
+            }
+
+            @Override
+            public Builder pitch(double pitch) {
+                super.pitch(pitch);
+                return this;
+            }
+
+            @Override
+            public Builder yaw(double yaw) {
+                super.yaw(yaw);
+                return this;
+            }
+
+            @Override
+            public Builder motion(Vector3d motion) {
+                super.motion(motion);
+                return this;
+            }
+
+            @Override
+            public ItemDropData.Player build() {
+                return new Player(this);
+            }
+
+
+        }
+    }
+}

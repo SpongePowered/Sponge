@@ -80,6 +80,7 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.util.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
@@ -112,33 +113,14 @@ public interface PacketFunction {
     PacketFunction USE_ENTITY = (packet, state, player, context) -> {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
         final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.worldObj);
+        if (entity == null) {
+            // Something happened?
+        }
         final Optional<ItemStack> itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
         EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_NOTIFIER, player.getUniqueID());
 
         if (state == PacketPhase.General.ATTACK_ENTITY) {
-            // We only have to throw the destruction event now. everything else should be already handled separately as they are processed.
-            MessageChannel originalChannel = MessageChannel.TO_NONE;
-            final DestructEntityEvent destructEntityEvent;
-            final Cause.Builder builder = Cause.source(player);
-            itemStack.map(ItemStack::createSnapshot).ifPresent(item -> builder.named(InternalNamedCauses.EventNamedKeys.ITEM_USED, item));
-            if (!(entity instanceof EntityLivingBase)) {
-                destructEntityEvent =
-                        SpongeEventFactory.createDestructEntityEvent(builder.build(), originalChannel, Optional.of(originalChannel),
-                                new MessageEvent.MessageFormatter(), EntityUtil.fromNative(entity), true);
-            } else {
-                destructEntityEvent =
-                        SpongeEventFactory.createDestructEntityEventDeath(builder.build(), originalChannel, Optional.of(originalChannel),
-                                new MessageEvent.MessageFormatter(), EntityUtil.fromNativeToLiving(entity), true);
-            }
-
-            EventConsumer.event(destructEntityEvent)
-                    .nonCancelled(event -> {
-                        if (!event.isMessageCancelled()) {
-                            event.getChannel().ifPresent(channel -> channel.send(entity, event.getMessage()));
-                        }
-                    })
-                    .process();
             context.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
                         // For destruction, this should be empty, however, some times, it may not be?
@@ -155,24 +137,23 @@ public interface PacketFunction {
                             GeneralFunctions.processBlockCaptures(blocks, mixinWorldServer.getCauseTracker(), state, context));
             final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
             context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
-                for (Map.Entry<UUID, Collection<ItemStack>> entry : map.asMap().entrySet()) {
+                for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                     final UUID key = entry.getKey();
                     final Optional<Entity> affectedEntity = causeTracker.getWorld().getEntity(key);
                     if (!affectedEntity.isPresent()) {
                         continue;
                     }
-                    final Collection<ItemStack> itemStacks = entry.getValue();
+                    final Collection<ItemDropData> itemStacks = entry.getValue();
                     if (itemStacks.isEmpty()) {
                         return;
                     }
-                    final List<ItemStack> items = new ArrayList<>();
+                    final List<ItemDropData> items = new ArrayList<>();
                     items.addAll(itemStacks);
 
                     if (!items.isEmpty()) {
                         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(affectedEntity.get());
                         final List<Entity> itemEntities = items.stream()
-                                .map(ItemStackUtil::toNative)
-                                .map(item -> new EntityItem(causeTracker.getMinecraftWorld(), minecraftEntity.posX, minecraftEntity.posY, minecraftEntity.posZ, item))
+                                .map(data -> data.create(causeTracker.getMinecraftWorld()))
                                 .map(EntityUtil::fromNative)
                                 .collect(Collectors.toList());
                         final Cause cause = Cause.source(EntitySpawnCause.builder()
@@ -261,9 +242,9 @@ public interface PacketFunction {
                         printer.add("Processing Interact Entity").centre().hr();
                         printer.add("The item stacks captured are: ");
 
-                        for (Map.Entry<UUID, Collection<ItemStack>> entry : map.asMap().entrySet()) {
+                        for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                             printer.add("  - Entity with UUID: %s", entry.getKey());
-                            for (ItemStack stack : entry.getValue()) {
+                            for (ItemDropData stack : entry.getValue()) {
                                 printer.add("    - %s", stack);
                             }
                         }
@@ -307,9 +288,9 @@ public interface PacketFunction {
                         printer.add("Processing Interact At Entity").centre().hr();
                         printer.add("The item stacks captured are: ");
 
-                        for (Map.Entry<UUID, Collection<ItemStack>> entry : map.asMap().entrySet()) {
+                        for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                             printer.add("  - Entity with UUID: %s", entry.getKey());
-                            for (ItemStack stack : entry.getValue()) {
+                            for (ItemDropData stack : entry.getValue()) {
                                 printer.add("    - %s", stack);
                             }
                         }
@@ -417,9 +398,9 @@ public interface PacketFunction {
                         final PrettyPrinter printer = new PrettyPrinter(80);
                         printer.add("Processing Interaction").centre().hr();
                         printer.add("The item stacks captured are: ");
-                        for (Map.Entry<UUID, Collection<ItemStack>> entry : map.asMap().entrySet()) {
+                        for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                             printer.add("  - Entity with UUID: %s", entry.getKey());
-                            for (ItemStack stack : entry.getValue()) {
+                            for (ItemDropData stack : entry.getValue()) {
                                 printer.add("    - %s", stack);
                             }
                         }

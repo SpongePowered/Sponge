@@ -57,6 +57,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.GeneralPhase;
+import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -103,7 +104,7 @@ public class GeneralFunctions {
                     }
             ;
 
-    public static void processUserBreakage(@Nullable BlockChange change, net.minecraft.world.World minecraftWorld,
+    public static void processUserBreakage(@Nullable BlockChange change, WorldServer minecraftWorld,
             Transaction<BlockSnapshot> transaction, @Nullable Entity tickingEntity) {
         if (change == BlockChange.BREAK) {
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
@@ -176,7 +177,7 @@ public class GeneralFunctions {
                 transaction.getOriginal().restore(true, false);
                 if (state.tracksBlockSpecificDrops()) {
                     final BlockPos position = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-                    final Multimap<BlockPos, ItemStack> multiMap = context.getBlockDropSupplier().get();
+                    final Multimap<BlockPos, ItemDropData> multiMap = context.getBlockDropSupplier().get();
                     multiMap.get(position).clear();
                 }
             }
@@ -214,7 +215,7 @@ public class GeneralFunctions {
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(minecraftWorld, transactions);
-        final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemStack> capturedBlockDrops = phaseContext.getBlockDropSupplier();
+        final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemDropData> capturedBlockDrops = phaseContext.getBlockDropSupplier();
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 noCancelledTransactions = false;
@@ -263,10 +264,13 @@ public class GeneralFunctions {
         return noCancelledTransactions;
     }
 
-    public static void spawnItemStacksForBlockDrop(Collection<ItemStack> itemStacks, SpongeBlockSnapshot oldBlockSnapshot, CauseTracker causeTracker,
+    public static void spawnItemStacksForBlockDrop(Collection<ItemDropData> itemStacks, SpongeBlockSnapshot oldBlockSnapshot, CauseTracker causeTracker,
             PhaseContext phaseContext, IPhaseState state) {
         final Vector3i position = oldBlockSnapshot.getPosition();
-        final List<ItemStackSnapshot> itemSnapshots = itemStacks.stream().map(ItemStack::createSnapshot).collect(Collectors.toList());
+        final List<ItemStackSnapshot> itemSnapshots = itemStacks.stream()
+                .map(ItemDropData::getStack)
+                .map(ItemStackUtil::createSnapshot)
+                .collect(Collectors.toList());
         final ImmutableList<ItemStackSnapshot> originalSnapshots = ImmutableList.copyOf(itemSnapshots);
         final Cause cause = Cause.source(oldBlockSnapshot).build();
         EventConsumer.event(SpongeEventFactory.createDropItemEventPre(cause, originalSnapshots, itemSnapshots))
@@ -278,7 +282,7 @@ public class GeneralFunctions {
         }
         // Now we can spawn the entity items appropriately
         final List<Entity> itemDrops = itemStacks.stream().map(itemStack -> {
-                    final net.minecraft.item.ItemStack minecraftStack = ItemStackUtil.toNative(itemStack);
+                    final net.minecraft.item.ItemStack minecraftStack = itemStack.getStack();
                     final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
                     float f = 0.5F;
                     double offsetX = (double) (minecraftWorld.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;

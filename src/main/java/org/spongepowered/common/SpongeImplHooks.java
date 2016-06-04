@@ -54,6 +54,7 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.event.tracking.phase.ItemDropData;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -107,7 +108,7 @@ public final class SpongeImplHooks {
         return null;
     }
 
-    public static void addItemStackToListForSpawning(Collection<org.spongepowered.api.item.inventory.ItemStack> itemStacks, @Nullable org.spongepowered.api.item.inventory.ItemStack itemStack) {
+    public static void addItemStackToListForSpawning(Collection<ItemDropData> itemStacks, @Nullable ItemDropData itemStack) {
         // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
         if (itemStack != null) {
             itemStacks.add(itemStack);

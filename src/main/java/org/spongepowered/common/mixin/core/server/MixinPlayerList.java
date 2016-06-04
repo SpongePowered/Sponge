@@ -533,6 +533,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         entityPlayerMP.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(1.0F);
         entityPlayerMP.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(maxHealth.get().floatValue());
         entityPlayerMP.connection.sendPacket(new SPacketUpdateHealth(maxHealth.get().floatValue(), food.get(), saturation.get().floatValue()));
+        ((IMixinEntityPlayerMP) entityPlayerMP).refreshXpHealthAndFood();
 
         return entityPlayerMP;
     }

@@ -42,11 +42,13 @@ import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
@@ -132,7 +134,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract Scoreboard getWorldScoreboard();
     @Shadow public abstract boolean isSpectator();
     @Shadow public abstract EntityItem dropItem(boolean dropAll);
-    @Shadow public abstract EntityItem dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem);
     @Shadow public abstract void onCriticalHit(net.minecraft.entity.Entity entityHit);
     @Shadow public abstract void onEnchantmentCritical(net.minecraft.entity.Entity entityHit);
     @Shadow public abstract void addExhaustion(float p_71020_1_);
@@ -142,6 +143,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract void resetCooldown();
     @Shadow public abstract float getAIMoveSpeed();
     @Shadow public abstract void spawnSweepParticles();
+    @Shadow @Nullable public abstract Team getTeam();
+    @Shadow public abstract String getName();
+    @Shadow public abstract void takeStat(StatBase stat);
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
@@ -205,6 +209,38 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         this.capabilities.isFlying = flying;
     }
 
+    /**
+     * @author blood - May 12th, 2016
+     *
+     * @reason SpongeForge requires an overwrite so we do it here instead. This handles player death events.
+     */
+    @Overwrite
+    @Override
+    public void onDeath(DamageSource cause) {
+        super.onDeath(cause);
+        this.setSize(0.2F, 0.2F);
+        this.setPosition(this.posX, this.posY, this.posZ);
+        this.motionY = 0.10000000149011612D;
+
+        if (this.getName().equals("Notch")) {
+            this.dropItem(new ItemStack(Items.APPLE, 1), true, false);
+        }
+
+        if (!this.worldObj.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+            this.inventory.dropAllItems();
+        }
+
+        if (cause != null) {
+            this.motionX = (double) (-MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F);
+            this.motionZ = (double) (-MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * 0.017453292F) * 0.1F);
+        } else {
+            this.motionX = this.motionZ = 0.0D;
+        }
+
+        this.addStat(StatList.DEATHS);
+        this.takeStat(StatList.TIME_SINCE_DEATH);
+    }
+
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
     public boolean onIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
@@ -253,23 +289,88 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
     }
 
+    /**
+     * @author gabizou - June 13th, 2016
+     * @reason Reverts the method to flow through our systems, Forge patches
+     * this to throw an ItemTossEvent, but we'll be throwing it regardless in
+     * SpongeForge's handling.
+     *
+     * @param itemStackIn
+     * @param unused
+     * @return
+     */
+    @Overwrite
+    @Nullable
+    public EntityItem dropItem(@Nullable ItemStack itemStackIn, boolean unused) {
+        return this.dropItem(itemStackIn, false, false);
+    }
 
-    @Inject(method = "dropItem(Lnet/minecraft/item/ItemStack;ZZ)Lnet/minecraft/entity/item/EntityItem;",
-            at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/entity/player/EntityPlayer;posY:D"), cancellable = true)
-    private void onDropTop(ItemStack itemStack, boolean a, boolean b, CallbackInfoReturnable<EntityItem> callbackInfoReturnable) {
-        final double height = this.posY - 0.3D + (double)this.getEyeHeight();
-        Transform<org.spongepowered.api.world.World> transform = new Transform<>(this.getWorld(), new Vector3d(this.posX, height, this.posZ));
-        SpawnCause cause = EntitySpawnCause.builder()
-                .entity(this)
-                .type(SpawnTypes.DROPPED_ITEM)
-                .build();
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, transform);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            callbackInfoReturnable.setReturnValue(null);
+    /**
+     * @author gabizou - June 4th, 2016
+     * @reason When a player drops an item, all methods flow through here instead of {@link Entity#dropItem(Item, int)}
+     * because of the idea of {@code dropAround} and {@code traceItem}.
+     *
+     * @param droppedItem
+     * @param dropAround
+     * @param traceItem
+     * @return
+     */
+    @Nullable
+    @Overwrite
+    public EntityItem dropItem(@Nullable ItemStack droppedItem, boolean dropAround, boolean traceItem) {
+        if (droppedItem == null || droppedItem.stackSize == 0) {
+            return null;
+        } else if (this.worldObj.isRemote) {
+            double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
+            EntityItem entityitem = new EntityItem(this.worldObj, this.posX, d0, this.posZ, droppedItem);
+            entityitem.setPickupDelay(40);
+
+            if (traceItem) {
+                entityitem.setThrower(this.getName());
+            }
+
+            if (dropAround) {
+                float f = this.rand.nextFloat() * 0.5F;
+                float f1 = this.rand.nextFloat() * ((float) Math.PI * 2F);
+                entityitem.motionX = (double) (-MathHelper.sin(f1) * f);
+                entityitem.motionZ = (double) (MathHelper.cos(f1) * f);
+                entityitem.motionY = 0.20000000298023224D;
+            } else {
+                float f2 = 0.3F;
+                entityitem.motionX =
+                        (double) (-MathHelper.sin(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
+                entityitem.motionZ =
+                        (double) (MathHelper.cos(this.rotationYaw * 0.017453292F) * MathHelper.cos(this.rotationPitch * 0.017453292F) * f2);
+                entityitem.motionY = (double) (-MathHelper.sin(this.rotationPitch * 0.017453292F) * f2 + 0.1F);
+                float f3 = this.rand.nextFloat() * ((float) Math.PI * 2F);
+                f2 = 0.02F * this.rand.nextFloat();
+                entityitem.motionX += Math.cos((double) f3) * (double) f2;
+                entityitem.motionY += (double) ((this.rand.nextFloat() - this.rand.nextFloat()) * 0.1F);
+                entityitem.motionZ += Math.sin((double) f3) * (double) f2;
+            }
+
+            ItemStack itemstack = this.dropItemAndGetStack(entityitem);
+
+            if (traceItem) {
+                if (itemstack != null) {
+                    this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.stackSize);
+                }
+
+                this.addStat(StatList.DROP);
+            }
+
+            return entityitem;
+        } else {
+            return EntityUtil.playerDropItem(this, droppedItem, dropAround, traceItem);
         }
     }
 
+    @Overwrite
+    @Nullable
+    protected ItemStack dropItemAndGetStack(EntityItem p_184816_1_) {
+        this.worldObj.spawnEntityInWorld(p_184816_1_);
+        return p_184816_1_.getEntityItem();
+    }
 
     @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY))
     public void onPlayerCollideEntity(net.minecraft.entity.Entity entity, EntityPlayer player) {

@@ -171,24 +171,23 @@ public final class GeneralPhase extends TrackingPhase {
                     });
             phaseContext.getCapturedEntityDropSupplier()
                     .ifPresentAndNotEmpty(uuidItemStackMultimap -> {
-                        for (Map.Entry<UUID, Collection<ItemStack>> entry : uuidItemStackMultimap.asMap().entrySet()) {
+                        for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
                             final UUID key = entry.getKey();
                             final Optional<Entity> affectedEntity = causeTracker.getWorld().getEntity(key);
                             if (!affectedEntity.isPresent()) {
                                 continue;
                             }
-                            final Collection<ItemStack> itemStacks = entry.getValue();
+                            final Collection<ItemDropData> itemStacks = entry.getValue();
                             if (itemStacks.isEmpty()) {
                                 return;
                             }
-                            final List<ItemStack> items = new ArrayList<>();
+                            final List<ItemDropData> items = new ArrayList<>();
                             items.addAll(itemStacks);
 
                             if (!items.isEmpty()) {
                                 final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(affectedEntity.get());
                                 final List<Entity> itemEntities = items.stream()
-                                        .map(ItemStackUtil::toNative)
-                                        .map(item -> new EntityItem(causeTracker.getMinecraftWorld(), minecraftEntity.posX, minecraftEntity.posY, minecraftEntity.posZ, item))
+                                        .map(data -> data.create(causeTracker.getMinecraftWorld()))
                                         .map(EntityUtil::fromNative)
                                         .collect(Collectors.toList());
                                 final Cause cause = Cause.source(EntitySpawnCause.builder()
@@ -307,7 +306,7 @@ public final class GeneralPhase extends TrackingPhase {
                 transaction.getOriginal().restore(true, false);
                 if (unwindingState.tracksBlockSpecificDrops()) {
                     final BlockPos position = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-                    final Multimap<BlockPos, ItemStack> multiMap = postContext.getBlockDropSupplier().get();
+                    final Multimap<BlockPos, ItemDropData> multiMap = postContext.getBlockDropSupplier().get();
                     multiMap.get(position).clear();
                 }
             }
@@ -321,7 +320,7 @@ public final class GeneralPhase extends TrackingPhase {
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(minecraftWorld, transactions);
-        final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemStack> capturedBlockDrops = postContext.getBlockDropSupplier();
+        final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemDropData> capturedBlockDrops = postContext.getBlockDropSupplier();
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 continue; // Don't use invalidated block transactions during notifications, these only need to be restored

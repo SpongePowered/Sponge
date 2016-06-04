@@ -26,10 +26,8 @@ package org.spongepowered.common.mixin.optimization;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Multimap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.item.Item;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.EntityTypes;
@@ -48,7 +46,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -56,7 +53,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
@@ -131,24 +127,24 @@ public abstract class MixinEntity_Item_Pre_Merge implements org.spongepowered.ap
             // offset of 0F, and if it is a normal offset, that means the mod that is calling this method is not expecting
             // an entity back.
             if (offsetY == 0.0F && this.worldObj instanceof WorldServer) {
-
-                if (currentState.tracksEntitySpecificDrops()) {
-                    final Multimap<UUID, ItemStack> multimap = phaseContext.getCapturedEntityDropSupplier().get();
-                    final Collection<ItemStack> itemStacks = multimap.get(this.getUniqueID());
-                    SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemStackUtil.fromNative(item));
-                    return null;
-                } else {
-                    final List<ItemStack> itemStacks = phaseContext.getCapturedItemStackSupplier().get();
-                    SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemStackUtil.fromNative(item));
-                    return null;
-                }
+//
+//                if (currentState.tracksEntitySpecificDrops()) {
+//                    final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
+//                    final Collection<ItemDropData> itemStacks = multimap.get(this.getUniqueID());
+//                    SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemStackUtil.fromNative(item));
+//                    return null;
+//                } else {
+//                    final List<ItemStack> itemStacks = phaseContext.getCapturedItemStackSupplier().get();
+//                    SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemStackUtil.fromNative(item));
+//                    return null;
+//                }
             }
             // FOURTH - Spawn the entity finally, this time to either capture or pass through
             EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY + (double) offsetY, this.posZ, itemStackIn);
             entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
-            if (currentState.getPhase().doesCaptureEntityDrops()) {
+            if (currentState.getPhase().doesCaptureEntityDrops(currentState)) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     // We are capturing per entity drop
                     phaseContext.getCapturedEntityItemDropSupplier().get().put(this.getUniqueID(), entityitem);
