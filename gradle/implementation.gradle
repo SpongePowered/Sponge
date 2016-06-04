@@ -38,9 +38,8 @@ shadowJar {
     classifier = ''
 
     // Exclude ForgeGradle classes from shaded JAR
-    exclude 'GradleStart**'
-    exclude 'net/minecraftforge/**'
     exclude 'dummyThing'
+    exclude 'Version.java.template'
 
     // Wait for reobf task to be fully configured
     afterEvaluate {
