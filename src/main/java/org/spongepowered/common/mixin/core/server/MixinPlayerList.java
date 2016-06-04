@@ -466,7 +466,6 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         ((IMixinEntityPlayerMP) entityPlayerMP).resetAttributeMap();
-        entityPlayerMP.isDead = false;
 
         final RespawnPlayerEvent event = SpongeImplHooks.createRespawnPlayerEvent(Cause.of(NamedCause.source(entityPlayerMP)), fromTransform,
                 toTransform, (Player) entityPlayerMP, this.tempIsBedSpawn);
