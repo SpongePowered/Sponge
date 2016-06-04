@@ -94,17 +94,17 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow protected abstract void initEntityAI();
     @Shadow protected abstract boolean canDespawn();
 
-    boolean hasInitAI = false;
+    boolean initAI = false;
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
     public void onInitAi(EntityLiving this$0) {
-        if (!hasInitAI) {
+        if (!initAI) {
             ((IMixinEntityAITasks) this.tasks).setOwner((EntityLiving) (Object) this);
             ((IMixinEntityAITasks) this.tasks).setType(GoalTypes.NORMAL);
             ((IMixinEntityAITasks) this.targetTasks).setOwner((EntityLiving) (Object) this);
             ((IMixinEntityAITasks) this.targetTasks).setType(GoalTypes.TARGET);
             this.initEntityAI();
-            hasInitAI = true;
+            initAI = true;
         }
     }
 
