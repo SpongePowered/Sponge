@@ -115,6 +115,7 @@ public class PacketUtil {
                     context.complete();
                     causeTracker.switchToPhase(TrackingPhases.PACKET, packetState, context);
                 } else {
+                    context.complete();
                     causeTracker.switchToPhase(TrackingPhases.PACKET, PacketPhase.General.INVALID, EMPTY_INVALID);
                 }
                 packetIn.processPacket(netHandler);
