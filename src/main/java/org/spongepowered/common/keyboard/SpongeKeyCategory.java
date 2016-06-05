@@ -33,6 +33,7 @@ import org.spongepowered.api.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class SpongeKeyCategory implements KeyCategory {
 
@@ -45,10 +46,10 @@ public class SpongeKeyCategory implements KeyCategory {
     private int internalId = -1;
 
     private SpongeKeyCategory(String id, Text title, String name, boolean def) {
+        this.id = id.toLowerCase(Locale.ENGLISH);
         this.title = title;
         this.name = name;
         this.def = def;
-        this.id = id;
     }
 
     public SpongeKeyCategory(String pluginId, String name, Text title, boolean def) {

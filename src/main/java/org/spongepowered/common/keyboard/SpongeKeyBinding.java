@@ -28,6 +28,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.keyboard.KeyBinding;
 import org.spongepowered.api.text.Text;
 
+import java.util.Locale;
 import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
@@ -50,6 +51,7 @@ public class SpongeKeyBinding implements KeyBinding {
             @Nullable BiConsumer<Player, KeyBinding> pressExecutor,
             @Nullable BiConsumer<Player, KeyBinding> releaseExecutor,
             @Nullable BiConsumer<Player, KeyBinding> tickExecutor) {
+        this.id = id.toLowerCase(Locale.ENGLISH);
         this.releaseExecutor = releaseExecutor;
         this.pressExecutor = pressExecutor;
         this.tickExecutor = tickExecutor;
@@ -57,7 +59,6 @@ public class SpongeKeyBinding implements KeyBinding {
         this.displayName = displayName;
         this.name = name;
         this.def = def;
-        this.id = id;
     }
 
     public SpongeKeyBinding(String pluginId, String name, SpongeKeyCategory keyCategory, Text displayName, boolean def) {
