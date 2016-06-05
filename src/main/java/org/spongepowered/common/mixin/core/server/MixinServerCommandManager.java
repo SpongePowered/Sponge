@@ -38,13 +38,16 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.command.WrapperCommandSource;
 import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.service.permission.SpongePermissionService;
+import org.spongepowered.common.util.VecHelper;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -55,7 +58,6 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
 
     private List<MinecraftCommandWrapper> lowPriorityCommands = Lists.newArrayList();
     private List<MinecraftCommandWrapper> earlyRegisterCommands = Lists.newArrayList();
-    private BlockPos tabBlockPos;
 
     private void updateStat(ICommandSender sender, CommandResultStats.Type type, Optional<Integer> count) {
         if (count.isPresent()) {
@@ -150,11 +152,6 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         registerCommandsList(this.earlyRegisterCommands, game);
     }
 
-    @Override
-    public BlockPos getTabBlockPos() {
-        return this.tabBlockPos;
-    }
-
     /**
      * @author zml
      *
@@ -163,11 +160,11 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
      */
     @Override
     @SuppressWarnings("rawtypes")
-    public List<String> getTabCompletionOptions(ICommandSender sender, String input, BlockPos pos) {
-        this.tabBlockPos = pos;
-        List<String> suggestions = SpongeImpl.getGame().getCommandManager().getSuggestions((CommandSource) sender, input);
-        this.tabBlockPos = null;
-
-        return suggestions;
+    public List<String> getTabCompletionOptions(ICommandSender sender, String input, @Nullable BlockPos pos) {
+        @Nullable Location<org.spongepowered.api.world.World> targetPos = null;
+        if (pos != null) {
+            targetPos = new Location<>((org.spongepowered.api.world.World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
+        }
+        return SpongeImpl.getGame().getCommandManager().getSuggestions((CommandSource) sender, input, targetPos);
     }
 }

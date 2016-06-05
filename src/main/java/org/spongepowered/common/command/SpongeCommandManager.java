@@ -54,6 +54,8 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TextMessageException;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -306,10 +308,10 @@ public class SpongeCommandManager implements CommandManager {
     }
 
     @Override
-    public List<String> getSuggestions(CommandSource src, String arguments) {
+    public List<String> getSuggestions(CommandSource src, String arguments, @Nullable Location<World> targetPosition) {
         try {
             final String[] argSplit = arguments.split(" ", 2);
-            List<String> suggestions = new ArrayList<>(this.dispatcher.getSuggestions(src, arguments));
+            List<String> suggestions = new ArrayList<>(this.dispatcher.getSuggestions(src, arguments, targetPosition));
             final TabCompleteEvent.Command event = SpongeEventFactory.createTabCompleteEventCommand(Cause.source(src).build(),
                     ImmutableList.copyOf(suggestions), suggestions, argSplit.length > 1 ? argSplit[1] : "", argSplit[0], arguments);
             Sponge.getGame().getEventManager().post(event);

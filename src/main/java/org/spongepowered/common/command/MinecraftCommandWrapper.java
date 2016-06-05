@@ -46,12 +46,16 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.util.VecHelper;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -214,13 +218,13 @@ public class MinecraftCommandWrapper implements CommandCallable {
     }
 
     @Override
-    public List<String> getSuggestions(CommandSource source, String arguments) throws CommandException {
+    public List<String> getSuggestions(CommandSource source, String arguments, @Nullable Location<World> targetPosition) throws CommandException {
         if (!testPermission(source)) {
             return ImmutableList.of();
         }
         @SuppressWarnings("unchecked")
-        List<String> suggestions = this.command.getTabCompletionOptions((MinecraftServer) Sponge.getServer(), WrapperICommandSender.of(source),
-                arguments.split(" ", -1), ((IMixinServerCommandManager) ((MinecraftServer) Sponge.getServer()).getCommandManager()).getTabBlockPos());
+        List<String> suggestions = this.command.getTabCompletionOptions((MinecraftServer) Sponge.getServer(),
+                WrapperICommandSender.of(source), arguments.split(" ", -1), targetPosition == null ? null : VecHelper.toBlockPos(targetPosition));
         if (suggestions == null) {
             return ImmutableList.of();
         }
