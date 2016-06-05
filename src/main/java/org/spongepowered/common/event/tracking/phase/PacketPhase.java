@@ -821,4 +821,8 @@ public final class PacketPhase extends TrackingPhase {
         return currentState instanceof General;
     }
 
+    @Override
+    public boolean requiresPost(IPhaseState state) {
+        return state != General.INVALID;
+    }
 }
