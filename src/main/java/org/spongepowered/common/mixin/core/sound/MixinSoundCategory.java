@@ -25,7 +25,9 @@
 package org.spongepowered.common.mixin.core.sound;
 
 import net.minecraft.util.SoundCategory;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,8 +35,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(SoundCategory.class)
+@Implements(@Interface(iface = org.spongepowered.api.effect.sound.SoundCategory.class, prefix = "category$"))
 public abstract class MixinSoundCategory implements org.spongepowered.api.effect.sound.SoundCategory {
 
+    @Shadow public abstract String shadow$getName();
     private String id;
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -47,8 +51,8 @@ public abstract class MixinSoundCategory implements org.spongepowered.api.effect
         return this.id;
     }
 
-    @Override
-    public String getName() {
-        return this.id;
+    @Intrinsic
+    public String category$getName() {
+        return this.shadow$getName();
     }
 }
