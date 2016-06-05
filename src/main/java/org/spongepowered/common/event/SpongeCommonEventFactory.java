@@ -401,7 +401,7 @@ public class SpongeCommonEventFactory {
         final IMixinEntity mixinEntity = (IMixinEntity) entityIn;
         final Transform<World> fromTransform = mixinEntity.getTransform();
         final int fromDimensionId = entityIn.dimension;
-        final WorldServer fromWorld = mcServer.worldServerForDimension(fromDimensionId);
+        final WorldServer fromWorld = ((WorldServer) entityIn.worldObj);
         final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
         // handle the end
         if (targetDimensionId == 1 && fromWorld.provider instanceof WorldProviderEnd) {

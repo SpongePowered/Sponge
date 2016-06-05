@@ -401,6 +401,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
      * @author Zidane - June 13th, 2015
      * @author simon816 - June 24th, 2015
      * @author Zidane - March 29th, 2016
+     * @author gabizou - June 5th, 2016 - Update for teleportation changes to keep the same player.
      *
      * @reason - Direct respawning players to use Sponge events
      * and process appropriately.
@@ -412,9 +413,10 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
      */
     @Overwrite
     public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP entityPlayerMP, int targetDimension, boolean conqueredEnd) {
+        // ### PHASE 1 ### Get the location to spawn
 
         // Vanilla will always use overworld, set to the world the player was in
-        // UNLESS coming back from conquering the end.
+        // UNLESS comming back from the end.
         if (!conqueredEnd && targetDimension == 0) {
             targetDimension = entityPlayerMP.dimension;
         }
@@ -429,7 +431,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         final Player player = (Player) entityPlayerMP;
         final Transform<World> fromTransform = player.getTransform();
-        final WorldServer worldServer = this.mcServer.worldServerForDimension(targetDimension);
+        WorldServer worldServer = this.mcServer.worldServerForDimension(targetDimension);
         Transform<World> toTransform = new Transform<>(this.getPlayerRespawnLocation(entityPlayerMP, worldServer), Vector3d.ZERO, Vector3d.ZERO);
         Location<World> location = toTransform.getLocation();
 
@@ -452,6 +454,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             entityPlayerMP.setPosition(entityPlayerMP.posX, entityPlayerMP.posY + 1.0D, entityPlayerMP.posZ);
             location = location.add(0, 1, 0);
         }
+        entityPlayerMP.setPosition(tempPos.getX(), tempPos.getY(), tempPos.getZ());
 
         // ### PHASE 2 ### Remove player from current dimension
         entityPlayerMP.getServerWorld().getEntityTracker().removePlayerFromTrackers(entityPlayerMP);
@@ -464,9 +467,13 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         if (!conqueredEnd) { // don't reset player if returning from end
             ((IMixinEntityPlayerMP) entityPlayerMP).reset();
         }
+        entityPlayerMP.setSneaking(false);
+        // update to safe location
+        toTransform = toTransform.setLocation(location);
 
         ((IMixinEntityPlayerMP) entityPlayerMP).resetAttributeMap();
 
+        // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event = SpongeImplHooks.createRespawnPlayerEvent(Cause.of(NamedCause.source(entityPlayerMP)), fromTransform,
                 toTransform, (Player) entityPlayerMP, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
@@ -475,12 +482,16 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         toTransform = event.getToTransform();
         location = toTransform.getLocation();
 
-        toTransform = event.getToTransform();
-
-        if (!(toTransform.getExtent() instanceof WorldServer)) {
+        if (!(location.getExtent() instanceof WorldServer)) {
             SpongeImpl.getLogger().warn("Location set in PlayerRespawnEvent was invalid, using original location instead");
-            toTransform = event.getFromTransform();
+            location = event.getFromTransform().getLocation();
         }
+        worldServer = (WorldServer) location.getExtent();
+
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
+        entityPlayerMP.dimension = mixinWorldServer.getDimensionId();
+        entityPlayerMP.setWorld(worldServer);
+        entityPlayerMP.interactionManager.setWorld(worldServer);
 
         worldServer.getChunkProvider().loadChunk((int) location.getX() >> 4, (int) location.getZ() >> 4);
 
@@ -504,7 +515,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
                 entityPlayerMP.experienceLevel));
         this.updateTimeAndWeatherForPlayer(entityPlayerMP, worldServer);
         worldServer.getPlayerChunkMap().addPlayer(entityPlayerMP);
-        org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) player;
+        org.spongepowered.api.entity.Entity spongeEntity = player;
         SpawnCause spawnCause = EntitySpawnCause.builder()
                 .entity(spongeEntity)
                 .type(SpawnTypes.PLACEMENT)

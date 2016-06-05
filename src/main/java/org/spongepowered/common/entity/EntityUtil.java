@@ -34,12 +34,15 @@ import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.SPacketChangeGameState;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
+import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.network.play.server.SPacketEntityEffect;
 import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.stats.AchievementList;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -51,6 +54,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
 import org.spongepowered.api.Sponge;
@@ -58,12 +62,15 @@ import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.world.WorldManager;
 
@@ -95,6 +102,100 @@ public final class EntityUtil {
             return entity != null && entity.canBeCollidedWith();
         }
     });
+
+    /**
+     * Called specifically from {@link MixinEntity#changeDimension(int)} to overwrite
+     * {@link Entity#changeDimension(int)}. This is mostly for debugging
+     * purposes, but as well as ensuring that the phases are entered and exited correctly.
+     *
+     * @param mixinEntity The mixin entity being called
+     * @param toSuggestedDimension The target dimension id suggested by mods and vanilla alike. The suggested
+     *     dimension id can be erroneous and Vanilla will re-assign the variable to the overworld for
+     *     silly things like entering an end portal while in the end.
+     * @return The entity, if the teleport was not cancelled or something.
+     */
+    @Nullable
+    public static Entity transferEntityToDimension(IMixinEntity mixinEntity, int toSuggestedDimension) {
+        final Entity entity = toNative(mixinEntity);
+        // handle portal event
+        MoveEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(entity, toSuggestedDimension, null);
+        if (event == null || event.isCancelled()) {
+            return null;
+        }
+
+        entity.worldObj.theProfiler.startSection("changeDimension");
+        // use the world from event
+        WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
+        entity.worldObj.removeEntity(entity);
+        entity.isDead = false;
+        entity.worldObj.theProfiler.startSection("reposition");
+        // Only need to update the entity location here as the portal is handled in SpongeCommonEventFactory
+        entity.setLocationAndAngles(event.getToTransform().getPosition().getX(), event.getToTransform().getPosition().getY(), event.getToTransform().getPosition().getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+        entity.worldObj = toWorld;
+        toWorld.spawnEntityInWorld(entity);
+        toWorld.updateEntityWithOptionalForce(entity, false);
+        entity.worldObj.theProfiler.endSection();
+
+        entity.worldObj.theProfiler.endSection();
+        entity.worldObj.theProfiler.endSection();
+        return entity;
+    }
+
+    /**
+     * A relative copy paste of {@link EntityPlayerMP#changeDimension(int)} where instead we direct all processing
+     * to the appropriate areas for throwing events and capturing world changes during the transfer.
+     *
+     * @param mixinEntityPlayerMP The player being teleported
+     * @param suggestedDimensionId The suggested dimension
+     * @return The player object, not re-created
+     */
+    @Nullable
+    public static Entity teleportPlayerToDimension(IMixinEntityPlayerMP mixinEntityPlayerMP, int suggestedDimensionId) {
+        final EntityPlayerMP entityPlayerMP = toNative(mixinEntityPlayerMP);
+        // If leaving The End via End's Portal
+        // Sponge Start - Check the provider, not the world's dimension
+        final WorldServer fromWorldServer = ((WorldServer) entityPlayerMP.worldObj);
+        final IMixinWorldServer fromMixinWorldServer = (IMixinWorldServer) fromWorldServer;
+        if (fromWorldServer.provider instanceof WorldProviderEnd && suggestedDimensionId == 1) { // if (this.dimension == 1 && dimensionIn == 1)
+            // Sponge End
+            fromWorldServer.removeEntity(entityPlayerMP);
+            if (!entityPlayerMP.playerConqueredTheEnd) {
+                entityPlayerMP.playerConqueredTheEnd = true;
+                if (entityPlayerMP.hasAchievement(AchievementList.THE_END2)) {
+                    entityPlayerMP.connection.sendPacket(new SPacketChangeGameState(4, 0.0F));
+                } else {
+                    entityPlayerMP.addStat(AchievementList.THE_END2);
+                    entityPlayerMP.connection.sendPacket(new SPacketChangeGameState(4, 1.0F));
+                }
+            }
+            return entityPlayerMP;
+        } // else { // Sponge - Remove unecessary
+
+        // Sponge Start - Rewrite for vanilla mechanics since multiworlds can change world providers and
+        // dimension id's
+        if (fromWorldServer.provider instanceof WorldProviderSurface) {
+            if (suggestedDimensionId == 1) {
+                entityPlayerMP.addStat(AchievementList.THE_END);
+            } else if (suggestedDimensionId == -1) {
+                entityPlayerMP.addStat(AchievementList.PORTAL);
+            }
+        }
+        // Sponge End
+
+        final WorldServer toWorldServer = SpongeImpl.getServer().worldServerForDimension(suggestedDimensionId);
+
+        ((IMixinPlayerList) entityPlayerMP.mcServer.getPlayerList()).transferPlayerToDimension(entityPlayerMP, suggestedDimensionId, toWorldServer.getDefaultTeleporter());
+        entityPlayerMP.connection.sendPacket(new SPacketEffect(1032, BlockPos.ORIGIN, 0, false));
+
+        // Sponge Start - entityPlayerMP has been moved below to refreshXpHealthAndFood
+        /*
+        entityPlayerMP.lastExperience = -1;
+        entityPlayerMP.lastHealth = -1.0F;
+        entityPlayerMP.lastFoodLevel = -1;
+        */
+        // Sponge End
+        return entityPlayerMP;
+    }
 
     static final class EntityTrace {
 
