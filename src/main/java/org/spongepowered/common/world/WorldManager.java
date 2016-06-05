@@ -42,7 +42,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.ServerWorldEventHandler;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
@@ -94,6 +93,7 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -110,8 +110,8 @@ public final class WorldManager {
     private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid =  new HashMap<>(3);
     private static final BiMap<String, UUID> worldUuidByFolderName =  HashBiMap.create(3);
     private static final BitSet dimensionBits = new BitSet(Long.SIZE << 4);
-    private static final Map<World, World> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
-    private static final Queue<WorldUnloadQueueEntry> unloadQueue = new ArrayDeque<>();
+    private static final Map<WorldServer, WorldServer> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
+    private static final Queue<WorldServer> unloadQueue = new ArrayDeque<>();
     private static final Comparator<WorldServer>
             WORLD_SERVER_COMPARATOR =
             (world1, world2) -> ((IMixinWorldServer) world1).getDimensionId() - ((IMixinWorldServer) world2).getDimensionId();
@@ -178,7 +178,15 @@ public final class WorldManager {
         return true;
     }
 
-    public static void registerDimensionPath(int dimensionId, DimensionType type, Path dimensionDataRoot) {
+    public static void unregisterDimension(int dimensionId) {
+        if (!dimensionTypeByDimensionId.containsKey(dimensionId))
+        {
+            throw new IllegalArgumentException("Failed to unregister dimension [" + dimensionId + "] as it is not registered!");
+        }
+        dimensionTypeByDimensionId.remove(dimensionId);
+    }
+
+    public static void registerDimensionPath(int dimensionId, Path dimensionDataRoot) {
         checkNotNull(dimensionDataRoot);
         dimensionPathByDimensionId.put(dimensionId, dimensionDataRoot);
     }
@@ -201,6 +209,11 @@ public final class WorldManager {
 
     public static Collection<DimensionType> getDimensionTypes() {
         return dimensionTypeByTypeId.values();
+    }
+
+    public static Integer[] getRegisteredDimensionIdsFor(DimensionType type) {
+        return (Integer[]) dimensionTypeByDimensionId.entrySet().stream().filter(entry -> entry.getValue().equals(type))
+                .map(Map.Entry::getKey).collect(Collectors.toList()).toArray();
     }
 
     public static int[] getRegisteredDimensionIds() {
@@ -360,59 +373,60 @@ public final class WorldManager {
 
     public static void unloadQueuedWorlds() {
         while (unloadQueue.peek() != null) {
-            final WorldUnloadQueueEntry worldUnloadQueueEntry = unloadQueue.poll();
-            unloadWorld(worldUnloadQueueEntry.worldServer, worldUnloadQueueEntry.fromAPI);
+            unloadWorld(unloadQueue.poll(), false, true);
         }
 
         unloadQueue.clear();
     }
 
-    public static void queueWorldToUnload(WorldServer worldServer, boolean fromAPI) {
+    public static void queueWorldToUnload(WorldServer worldServer) {
         checkNotNull(worldServer);
-        unloadQueue.add(new WorldUnloadQueueEntry(worldServer, fromAPI));
+        unloadQueue.add(worldServer);
     }
 
     // TODO Result
-    public static boolean unloadWorld(WorldServer worldServer, boolean fromAPI) {
+    public static boolean unloadWorld(WorldServer worldServer, boolean checkConfig, boolean save) {
         checkNotNull(worldServer);
         final MinecraftServer server = SpongeImpl.getServer();
 
-        if (worldByDimensionId.containsValue(worldServer)) {
-            if (!worldServer.playerEntities.isEmpty()) {
+        if (!worldByDimensionId.containsValue(worldServer)) {
+            return false;
+        }
+
+        if (!worldServer.playerEntities.isEmpty()) {
+            return false;
+        }
+
+        if (checkConfig) {
+            if (((IMixinWorldServer) worldServer).getActiveConfig().getConfig().getWorld().getKeepSpawnLoaded()) {
                 return false;
             }
-
-            // If API says unload, we unload. Otherwise, check config
-            if (!fromAPI) {
-                if (((IMixinWorldServer) worldServer).getActiveConfig().getConfig().getWorld().getKeepSpawnLoaded()) {
-                    return false;
-                }
-            }
-
-            try {
-                saveWorld(worldServer);
-            } catch (MinecraftException e) {
-                e.printStackTrace();
-            }
-            finally {
-                final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
-                final int dimensionId = mixinWorldServer.getDimensionId();
-                mixinWorldServer.getActiveConfig().save();
-                worldByDimensionId.remove(dimensionId);
-                ((IMixinMinecraftServer) server).getWorldTickTimes().remove(dimensionId);
-                SpongeImpl.getLogger().info("Unloading dimension {} ({})", dimensionId, worldServer.getWorldInfo().getWorldName());
-                reorderWorldsVanillaFirst();
-            }
-
-            SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
-                    worldServer));
-
-            return true;
         }
-        return false;
+
+        try {
+            if (save) {
+                saveWorld(worldServer);
+            }
+        } catch (MinecraftException e) {
+            e.printStackTrace();
+        } finally {
+            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
+            final int dimensionId = mixinWorldServer.getDimensionId();
+            mixinWorldServer.getActiveConfig().save();
+            worldByDimensionId.remove(dimensionId);
+            weakWorldByWorld.remove(worldServer);
+            ((IMixinMinecraftServer) server).getWorldTickTimes().remove(dimensionId);
+            SpongeImpl.getLogger().info("Unloading world [{}] (DIM{})", worldServer.getWorldInfo().getWorldName(), dimensionId);
+            reorderWorldsVanillaFirst();
+        }
+
+        SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
+                worldServer));
+
+        return true;
     }
 
-    private static void saveWorld(WorldServer worldServer) throws MinecraftException {
+    public static void saveWorld(WorldServer worldServer) throws MinecraftException {
         final MinecraftServer server = SpongeImpl.getServer();
         final org.spongepowered.api.world.World apiWorld = (org.spongepowered.api.world.World) worldServer;
 
@@ -444,8 +458,15 @@ public final class WorldManager {
 
     public static Optional<WorldServer> loadWorld(UUID uuid) {
         checkNotNull(uuid);
-        // TODO UUID check
-        return Optional.empty();
+        // If someone tries to load loaded world, return it
+        Sponge.getServer().getWorld(uuid).ifPresent(Optional::of);
+        // Check if we even know of this UUID's folder
+        final String worldFolder = worldUuidByFolderName.inverse().get(uuid);
+        // We don't know of this UUID at all. TODO Search files?
+        if (worldFolder == null) {
+            return Optional.empty();
+        }
+        return loadWorld(worldFolder, null, null);
     }
 
     public static Optional<WorldServer> loadWorld(String worldName) {
@@ -486,26 +507,22 @@ public final class WorldManager {
 
         // We weren't given a properties, see if one is cached
         if (properties == null) {
-            properties = worldPropertiesByFolderName.get(worldName);
+            properties = (WorldProperties) saveHandler.loadWorldInfo();
 
-            // One wasn't cached, lets load one
+            // We tried :'(
             if (properties == null) {
-                properties = (WorldProperties) saveHandler.loadWorldInfo();
-
-                // We tried :'(
-                if (properties == null) {
-                    SpongeImpl.getLogger().error("Unable to load world [{}]. No world properties was found!", worldName);
-                    return Optional.empty();
-                }
-
-                if (((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
-                    ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
-                }
-
-                registerWorldProperties(properties);
+                SpongeImpl.getLogger().error("Unable to load world [{}]. No world properties was found!", worldName);
+                return Optional.empty();
             }
+
+            if (((IMixinWorldInfo) properties).getDimensionId() == null || ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
+                ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
+            }
+
+            registerWorldProperties(properties);
+
         } else {
-            if (((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
+            if (((IMixinWorldInfo) properties).getDimensionId() == null || ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
                 ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
             }
         }
@@ -523,7 +540,7 @@ public final class WorldManager {
 
         final int dimensionId = ((IMixinWorldInfo) properties).getDimensionId();
         registerDimension(dimensionId, (DimensionType) (Object) properties.getDimensionType());
-        registerDimensionPath(dimensionId, (DimensionType) (Object) properties.getDimensionType(), worldFolder);
+        registerDimensionPath(dimensionId, worldFolder);
         SpongeImpl.getLogger().info("Loading world [{}] ({})", properties.getWorldName(), getDimensionType
                 (dimensionId).get().getName());
 
@@ -550,9 +567,9 @@ public final class WorldManager {
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
-        registerDimensionPath(0, DimensionType.OVERWORLD, currentSavesDir);
-        registerDimensionPath(-1, DimensionType.NETHER, currentSavesDir.resolve("DIM-1"));
-        registerDimensionPath(1, DimensionType.THE_END, currentSavesDir.resolve("DIM1"));
+        registerDimensionPath(0, currentSavesDir);
+        registerDimensionPath(-1, currentSavesDir.resolve("DIM-1"));
+        registerDimensionPath(1, currentSavesDir.resolve("DIM1"));
 
         WorldMigrator.migrateWorldsTo(currentSavesDir);
 
@@ -852,7 +869,7 @@ public final class WorldManager {
                 }
 
                 registerDimension(dimensionId, dimensionType);
-                registerDimensionPath(dimensionId, dimensionType, rootPath.resolve(worldFolderName));
+                registerDimensionPath(dimensionId, rootPath.resolve(worldFolderName));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -864,7 +881,7 @@ public final class WorldManager {
         checkArgument(worldPropertiesByFolderName.containsKey(copyName), "Destination world name already is registered!");
         final WorldInfo info = (WorldInfo) worldProperties;
 
-        final WorldServer worldServer = worldByDimensionId.get(((IMixinWorldInfo) info).getDimensionId());
+        final WorldServer worldServer = worldByDimensionId.get(((IMixinWorldInfo) info).getDimensionId().intValue());
         if (worldServer != null) {
             try {
                 saveWorld(worldServer);
@@ -1036,13 +1053,7 @@ public final class WorldManager {
         return Optional.empty();
     }
 
-    public static class WorldUnloadQueueEntry {
-        public final WorldServer worldServer;
-        public final boolean fromAPI;
-
-        public WorldUnloadQueueEntry(WorldServer worldServer, boolean fromAPI) {
-            this.worldServer = worldServer;
-            this.fromAPI = fromAPI;
-        }
+    public static Map<WorldServer, WorldServer> getWeakWorldMap() {
+        return weakWorldByWorld;
     }
 }

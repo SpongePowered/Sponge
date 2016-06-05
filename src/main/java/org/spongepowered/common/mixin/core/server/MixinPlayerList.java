@@ -471,7 +471,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
                 toTransform, (Player) entityPlayerMP, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
-        ((IMixinEntity) player).setLocationAndAngles(event.getToTransform());
+        ((IMixinEntity) (Object) player).setLocationAndAngles(event.getToTransform());
         toTransform = event.getToTransform();
         location = toTransform.getLocation();
 

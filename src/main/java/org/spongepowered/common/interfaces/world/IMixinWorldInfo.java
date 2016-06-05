@@ -34,6 +34,8 @@ import org.spongepowered.common.config.type.WorldConfig;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 public interface IMixinWorldInfo {
 
     NBTTagCompound getSpongeRootLevelNbt();
@@ -48,6 +50,7 @@ public interface IMixinWorldInfo {
 
     Optional<UUID> getUniqueIdForIndex(int index);
 
+    @Nullable
     Integer getDimensionId();
 
     void setDimensionId(int id);

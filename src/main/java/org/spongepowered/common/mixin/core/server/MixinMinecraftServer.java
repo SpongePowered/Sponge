@@ -34,7 +34,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -81,9 +80,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Surrogate;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -116,8 +115,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
@@ -408,7 +405,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public boolean unloadWorld(World world) {
-        return WorldManager.unloadWorld((WorldServer) world, true);
+        return WorldManager.unloadWorld((WorldServer) world, false, true);
     }
 
     @SuppressWarnings("unchecked")
@@ -635,14 +632,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                                 + worldserver.provider.getDimensionType().getName());
                 }
                 // Sponge end
-
-                try
-                {
-                    worldserver.saveAllChunks(true, (IProgressUpdate)null);
-                }
-                catch (MinecraftException minecraftexception)
-                {
-                    LOG.warn(minecraftexception.getMessage());
+                try {
+                    WorldManager.saveWorld(worldserver);
+                } catch (MinecraftException ex) {
+                    ex.printStackTrace();
                 }
             }
         }
