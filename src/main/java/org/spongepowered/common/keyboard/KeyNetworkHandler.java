@@ -25,6 +25,8 @@
 package org.spongepowered.common.keyboard;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.NetHandlerPlayServer;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
@@ -55,11 +57,18 @@ public class KeyNetworkHandler {
     @Listener
     public void onRegisterChannel(ChannelRegistrationEvent.Register event, @First PlayerConnection connection) {
         if (event.getChannel().equals(SpongeMessageHandler.CHANNEL_NAME)) {
-            handleKeyRegistration(connection.getPlayer());
+            handleKeyRegistration(connection);
         }
     }
 
-    public static void handleKeyRegistration(Player player) {
+    public static void handleKeyRegistration(PlayerConnection connection) {
+        final Player player = connection.getPlayer();
+        // TODO: Why is the connection still null at this point, is this normal in sp (SpongeForge) ???
+        // TODO: A way to avoid this would be a sendTo(PlayerConnection, Message) method
+        boolean connectionNull = ((EntityPlayerMP) player).connection == null;
+        if (connectionNull) {
+            ((EntityPlayerMP) player).connection = (NetHandlerPlayServer) connection;
+        }
         // Check if the key bindings were already initialized
         if (!player.getKeyBindings().isEmpty()) {
             return;
@@ -90,6 +99,9 @@ public class KeyNetworkHandler {
             // Register the custom client bindings on the client
             if (!finalKeyBindings.isEmpty()) {
                 SpongeMessageHandler.getChannel().sendTo(player, new MessageKeyboardData(keyCategories, finalKeyBindings));
+                if (connectionNull) {
+                    ((EntityPlayerMP) player).connection = null;
+                }
             }
 
             // All the key bindings that can be used by the player, custom and defaults

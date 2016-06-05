@@ -28,8 +28,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.keyboard.KeyCategories;
 import org.spongepowered.api.keyboard.KeyCategory;
@@ -53,7 +53,7 @@ public class KeyCategoryRegistryModule implements AlternateCatalogRegistryModule
     }
 
     @RegisterCatalog(KeyCategories.class) private final Map<String, KeyCategory> keyCategories = new HashMap<>();
-    private final TIntObjectMap<KeyCategory> keyCategoriesByInternalId = new TIntObjectHashMap<>();
+    private final Int2ObjectMap<KeyCategory> keyCategoriesByInternalId = new Int2ObjectOpenHashMap<>();
 
     private int internalIdCounter = 20;
 

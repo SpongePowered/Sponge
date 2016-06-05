@@ -87,7 +87,7 @@ public class MessageKeyboardData implements Message {
                         .orElseThrow(() -> new IllegalArgumentException("Received key binding with unknown category"));
             }
             SpongeKeyBinding keyBinding = new SpongeKeyBinding(id, keyCategory, displayName);
-            keyCategory.setInternalId(internalId);
+            keyBinding.setInternalId(internalId);
 
             this.keyBindings.add(keyBinding);
         }

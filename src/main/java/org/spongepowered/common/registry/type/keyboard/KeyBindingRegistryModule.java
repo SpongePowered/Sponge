@@ -28,8 +28,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.keyboard.KeyBinding;
 import org.spongepowered.api.keyboard.KeyBindings;
@@ -57,7 +57,7 @@ public class KeyBindingRegistryModule implements CatalogRegistryModule<KeyBindin
     }
 
     private final Map<String, KeyBinding> keyBindings = new HashMap<>();
-    private final TIntObjectMap<KeyBinding> keyBindingsByInternalId = new TIntObjectHashMap<>();
+    private final Int2ObjectMap<KeyBinding> keyBindingsByInternalId = new Int2ObjectOpenHashMap<>();
 
     private int internalIdCounter = 50;
 

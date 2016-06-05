@@ -31,8 +31,8 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import gnu.trove.map.TIntLongMap;
-import gnu.trove.map.hash.TIntLongHashMap;
+import it.unimi.dsi.fastutil.ints.Int2LongMap;
+import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
@@ -168,6 +168,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -215,7 +216,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
     private Collection<KeyBinding> keyBindings = Collections.emptySet();
-    private TIntLongMap keyPressedTimes = new TIntLongHashMap();
+    private Int2LongMap keyPressedTimes = new Int2LongOpenHashMap();
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -849,8 +850,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             return;
         }
         Cause cause = Cause.source(this).build();
-        this.keyPressedTimes.forEachEntry((key, value) -> {
+        for (Map.Entry<Integer, Long> entry : this.keyPressedTimes.entrySet()) {
+            long value = entry.getValue();
             if (value != -1) {
+                int key = entry.getKey();
                 KeyBinding keyBinding = KeyBindingRegistryModule.getInstance().getByInternalId(key).orElse(null);
                 if (keyBinding != null) {
                     int pressedTime = (int) ((System.currentTimeMillis() - value) / 50);
@@ -868,8 +871,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                     }
                 }
             }
-            return true;
-        });
+        }
     }
 
     @Override
