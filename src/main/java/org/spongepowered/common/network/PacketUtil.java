@@ -47,6 +47,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 public class PacketUtil {
 
+    private static final PhaseContext EMPTY_INVALID = PhaseContext.start().complete();
     @SuppressWarnings({"rawtypes", "unchecked"})
     private static long lastInventoryOpenPacketTimeStamp = 0;
 
@@ -109,9 +110,13 @@ public class PacketUtil {
                 if (packetState == null) {
                     throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
                 }
-                TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
-                context.complete();
-                causeTracker.switchToPhase(TrackingPhases.PACKET, packetState, context);
+                if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
+                    TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
+                    context.complete();
+                    causeTracker.switchToPhase(TrackingPhases.PACKET, packetState, context);
+                } else {
+                    causeTracker.switchToPhase(TrackingPhases.PACKET, PacketPhase.General.INVALID, EMPTY_INVALID);
+                }
                 packetIn.processPacket(netHandler);
                 causeTracker.completePhase();
             }

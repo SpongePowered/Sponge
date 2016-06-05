@@ -31,12 +31,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
-import net.minecraft.entity.monster.EntityMob;
-import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
@@ -48,11 +43,8 @@ import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.effect.potion.PotionEffect;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
@@ -72,10 +64,8 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
@@ -407,7 +397,8 @@ public class DamageEventHandler {
         }
     }
 
-    public static List<Tuple<DamageModifier, Function<? super Double, Double>>> createAttackEnchamntmentFunction(@Nullable net.minecraft.item.ItemStack heldItem, EnumCreatureAttribute creatureAttribute) {
+    public static List<Tuple<DamageModifier, Function<? super Double, Double>>> createAttackEnchamntmentFunction(
+            @Nullable net.minecraft.item.ItemStack heldItem, EnumCreatureAttribute creatureAttribute, float attackStrength) {
         final List<Tuple<DamageModifier, Function<? super Double, Double>>> damageModifierFunctions = new ArrayList<>();
         if (heldItem != null) {
             Supplier<ItemStackSnapshot> supplier = new Supplier<ItemStackSnapshot>() {
@@ -437,7 +428,7 @@ public class DamageEventHandler {
                                         .build())
                                 .build();
                         Function<? super Double, Double> enchantmentFunction = (damage) ->
-                                (double) enchantment.calcDamageByCreature(enchantmentLevel, creatureAttribute);
+                                (double) enchantment.calcDamageByCreature(enchantmentLevel, creatureAttribute) * attackStrength;
                         damageModifierFunctions.add(new Tuple<>(enchantmentModifier, enchantmentFunction));
                     }
                 }
@@ -467,5 +458,17 @@ public class DamageEventHandler {
             return peek.getState().getPhase().createDestructionDamageSource(peek.getState(), peek.getContext(), entity).orElse(null);
         }
         return null;
+    }
+
+    public static Tuple<DamageModifier, Function<? super Double, Double>> provideCooldownAttackStrengthFunction(EntityPlayer player,
+            float attackStrength) {
+        final DamageModifier modifier = DamageModifier.builder()
+                .cause(Cause.source(player).build())
+                .type(DamageModifierTypes.ATTACK_COOLDOWN)
+                .build();
+        // The formula is as follows:
+        // Since damage needs to be "multiplied", this needs to basically add negative damage but re-add the "reduced" damage.
+        Function<? super Double, Double> function = (damage) -> - damage + (damage * (0.2F + attackStrength * attackStrength * 0.8F));
+        return new Tuple<>(modifier, function);
     }
 }

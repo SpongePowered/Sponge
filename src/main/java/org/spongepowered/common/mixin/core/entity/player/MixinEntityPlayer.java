@@ -336,12 +336,14 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 // } else {
                 //     enchantmentDamage = EnchantmentHelper.getModifierForCreature(this.getHeldItemMainhand(), EnumCreatureAttribute.UNDEFINED);
                 // }
+                float attackStrength = this.getCooledAttackStrength(0.5F);
+
                 final List<Tuple<DamageModifier, Function<? super Double, Double>>> originalFunctions = new ArrayList<>();
 
                 final EnumCreatureAttribute creatureAttribute = targetEntity instanceof EntityLivingBase
                                                                 ? ((EntityLivingBase) targetEntity).getCreatureAttribute()
                                                                 : EnumCreatureAttribute.UNDEFINED;
-                final List<Tuple<DamageModifier, Function<? super Double, Double>>> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchamntmentFunction(this.getHeldItemMainhand(), creatureAttribute);
+                final List<Tuple<DamageModifier, Function<? super Double, Double>>> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchamntmentFunction(this.getHeldItemMainhand(), creatureAttribute, attackStrength);
                 // This is kept for the post-damage event handling
                 final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream().map(Tuple::getFirst).collect(Collectors.toList());
 
@@ -352,7 +354,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 originalFunctions.addAll(enchantmentModifierFunctions);
                 // Sponge End
 
-                float attackStrength = this.getCooledAttackStrength(0.5F);
+                originalFunctions.add(DamageEventHandler.provideCooldownAttackStrengthFunction((EntityPlayer) (Object) this, attackStrength));
                 damage = damage * (0.2F + attackStrength * attackStrength * 0.8F);
                 enchantmentDamage = enchantmentDamage * attackStrength;
                 this.resetCooldown();

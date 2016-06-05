@@ -146,6 +146,10 @@ public final class PacketPhase extends TrackingPhase {
     final static int BUTTON_SECONDARY       = 0x01 << 0 << 1;
     final static int BUTTON_MIDDLE          = 0x01 << 0 << 2;
 
+    public boolean isPacketInvalid(Packet packetIn, EntityPlayerMP packetPlayer, IPacketState packetState) {
+        return packetState.isPacketIgnored(packetIn, packetPlayer);
+    }
+
     public interface IPacketState extends IPhaseState {
 
         boolean matches(int packetState);
@@ -154,6 +158,9 @@ public final class PacketPhase extends TrackingPhase {
 
         }
 
+        default boolean isPacketIgnored(Packet packetIn, EntityPlayerMP packetPlayer) {
+            return false;
+        }
     }
 
     public enum Inventory implements IPacketState, IPhaseState {
@@ -427,6 +434,14 @@ public final class PacketPhase extends TrackingPhase {
         IGNORED,
         INTERACT_ENTITY {
             @Override
+            public boolean isPacketIgnored(Packet packetIn, EntityPlayerMP packetPlayer) {
+                final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
+                // There are cases where a player is interacting with an entity that doesn't exist on the server.
+                @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.worldObj);
+                return entity == null;
+            }
+
+            @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
                 net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.worldObj);
@@ -447,6 +462,14 @@ public final class PacketPhase extends TrackingPhase {
         },
         ATTACK_ENTITY() {
             @Override
+            public boolean isPacketIgnored(Packet packetIn, EntityPlayerMP packetPlayer) {
+                final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
+                // There are cases where a player is interacting with an entity that doesn't exist on the server.
+                @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.worldObj);
+                return entity == null;
+            }
+
+            @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
                 net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.worldObj);
@@ -465,6 +488,14 @@ public final class PacketPhase extends TrackingPhase {
             }
         },
         INTERACT_AT_ENTITY {
+            @Override
+            public boolean isPacketIgnored(Packet packetIn, EntityPlayerMP packetPlayer) {
+                final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
+                // There are cases where a player is interacting with an entity that doesn't exist on the server.
+                @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.worldObj);
+                return entity == null;
+            }
+
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
@@ -551,7 +582,12 @@ public final class PacketPhase extends TrackingPhase {
                 }
             }
         },
-        INVALID_PLACE,
+        INVALID() {
+            @Override
+            public boolean isPacketIgnored(Packet packetIn, EntityPlayerMP packetPlayer) {
+                return true;
+            }
+        },
         CLIENT_SETTINGS,
         START_RIDING_JUMP,
         ANIMATION,
@@ -637,6 +673,9 @@ public final class PacketPhase extends TrackingPhase {
         final Packet<?> packetIn = phaseContext.firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, Packet.class).get();
         final EntityPlayerMP player = phaseContext.firstNamed(NamedCause.SOURCE, EntityPlayerMP.class).get();
         final Class<? extends Packet<?>> packetInClass = (Class<? extends Packet<?>>) packetIn.getClass();
+        if (phaseState == General.INVALID) {
+            return;
+        }
         final PacketFunction unwindFunction = this.packetUnwindMap.get(packetInClass);
         checkArgument(phaseState instanceof IPacketState, "PhaseState passed in is not an instance of IPacketState! Got %s", phaseState);
         if (unwindFunction != null) {
@@ -668,7 +707,7 @@ public final class PacketPhase extends TrackingPhase {
             } else if (action == CPacketUseEntity.Action.INTERACT_AT) {
                 return PacketPhase.General.INTERACT_AT_ENTITY;
             } else {
-                return PacketPhase.General.UNKNOWN;
+                return PacketPhase.General.INVALID;
             }
         });
         this.packetTranslationMap.put(CPacketPlayer.class, packet -> PacketPhase.General.MOVEMENT);
@@ -690,7 +729,7 @@ public final class PacketPhase extends TrackingPhase {
             if (blockPos.getY() < server.getBuildLimit() - 1 || front != EnumFacing.UP && blockPos.getY() < server.getBuildLimit()) {
                 return PacketPhase.General.PLACE_BLOCK;
             } else {
-                return PacketPhase.General.INVALID_PLACE;
+                return PacketPhase.General.INVALID;
             }
         });
         this.packetTranslationMap.put(CPacketPlayerTryUseItem.class, packet -> PacketPhase.General.USE_ITEM);
