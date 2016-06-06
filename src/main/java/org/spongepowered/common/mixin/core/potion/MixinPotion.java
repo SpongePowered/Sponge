@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.potion;
 
 import net.minecraft.potion.Potion;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -32,27 +33,29 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(Potion.class)
 @Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
 public abstract class MixinPotion implements PotionEffectType {
 
-    @Shadow private String name;
-
-    @Override
-    @Shadow
-    public abstract boolean isInstant();
+    @Shadow public abstract String shadow$getName();
+    @Shadow public abstract boolean shadow$isInstant();
 
     private Translation translation;
     private Translation potionTranslation;
+    private String spongeResourceID;
 
-    public String potion$getId() {
-        return this.name;
+    @Inject(method = "<init>(ILnet/minecraft/util/ResourceLocation;ZI)V", at = @At("RETURN"))
+    private void onConstruct(int potionID, ResourceLocation location, boolean badEffect, int potionColor, CallbackInfo callbackInfo) {
+        this.spongeResourceID = location.toString();
     }
 
-    public String potion$getName() {
-        return this.name;
+    public String potion$getId() {
+        return this.spongeResourceID;
     }
 
     @Intrinsic
@@ -60,8 +63,10 @@ public abstract class MixinPotion implements PotionEffectType {
         return this.isInstant();
     }
 
-    @Shadow(prefix = "shadow$")
-    public abstract String shadow$getName();
+    @Intrinsic
+    public String potion$getName() {
+        return this.shadow$getName();
+    }
 
     @Override
     public Translation getTranslation() {
@@ -72,7 +77,6 @@ public abstract class MixinPotion implements PotionEffectType {
         return this.translation;
     }
 
-    @Intrinsic
     @Override
     public Translation getPotionTranslation() {
         // Maybe move this to a @Inject at the end of the constructor

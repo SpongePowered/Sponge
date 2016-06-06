@@ -22,34 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.item;
+package org.spongepowered.common.event.listener;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
-import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePagedData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.entity.DisplaceEntityEvent;
+import org.spongepowered.api.event.filter.Getter;
+import org.spongepowered.common.event.EventFilterTest;
 
-import java.util.ArrayList;
-import java.util.List;
+public class GetterListener {
 
-public class SpongePagedData extends AbstractListData<Text, PagedData, ImmutablePagedData> implements PagedData {
+    public boolean normalCalled;
+    public boolean subClassCalled;
 
-    public SpongePagedData() {
-        this(new ArrayList<>());
+    @Listener
+    public void normalListener(EventFilterTest.GetterEvent event, @Getter("getTestObject") EventFilterTest.TestObject testObject) {
+        this.normalCalled = true;
     }
 
-    public SpongePagedData(List<Text> pages) {
-        super(PagedData.class, pages, Keys.BOOK_PAGES, ImmutableSpongePagedData.class);
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        return super.toContainer()
-            .set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(getValue()));
+    @Listener
+    public void subClassListener(EventFilterTest.GetterEvent event, @Getter("getTestObject") EventFilterTest.SubObject subObject) {
+        this.subClassCalled = true;
     }
 
 }

@@ -22,34 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.item;
+package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
-import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePagedData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSilentData;
+import org.spongepowered.api.data.manipulator.mutable.entity.SilentData;
+import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeSilentData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
-import java.util.ArrayList;
-import java.util.List;
+public class SpongeSilentData extends AbstractBooleanData<SilentData, ImmutableSilentData> implements SilentData {
 
-public class SpongePagedData extends AbstractListData<Text, PagedData, ImmutablePagedData> implements PagedData {
-
-    public SpongePagedData() {
-        this(new ArrayList<>());
+    public SpongeSilentData() {
+        this(false);
     }
 
-    public SpongePagedData(List<Text> pages) {
-        super(PagedData.class, pages, Keys.BOOK_PAGES, ImmutableSpongePagedData.class);
+    public SpongeSilentData(boolean value) {
+        super(SilentData.class, value, Keys.IS_SILENT, ImmutableSpongeSilentData.class, false);
     }
 
     @Override
-    public DataContainer toContainer() {
-        return super.toContainer()
-            .set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(getValue()));
+    public Value<Boolean> silent() {
+        return this.getValueGetter();
     }
-
 }

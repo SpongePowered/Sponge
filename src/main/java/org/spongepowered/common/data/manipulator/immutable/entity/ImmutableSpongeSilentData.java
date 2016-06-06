@@ -22,34 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.item;
+package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
-import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePagedData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSilentData;
+import org.spongepowered.api.data.manipulator.mutable.entity.SilentData;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSilentData;
 
-import java.util.ArrayList;
-import java.util.List;
+public class ImmutableSpongeSilentData extends AbstractImmutableBooleanData<ImmutableSilentData, SilentData> implements ImmutableSilentData {
 
-public class SpongePagedData extends AbstractListData<Text, PagedData, ImmutablePagedData> implements PagedData {
-
-    public SpongePagedData() {
-        this(new ArrayList<>());
+    public ImmutableSpongeSilentData() {
+        this(false);
     }
 
-    public SpongePagedData(List<Text> pages) {
-        super(PagedData.class, pages, Keys.BOOK_PAGES, ImmutableSpongePagedData.class);
+    public ImmutableSpongeSilentData(boolean value) {
+        super(ImmutableSilentData.class, value, Keys.IS_SILENT, SpongeSilentData.class, false);
     }
 
     @Override
-    public DataContainer toContainer() {
-        return super.toContainer()
-            .set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(getValue()));
+    public ImmutableValue<Boolean> silent() {
+        return this.getValueGetter();
     }
-
 }

@@ -72,7 +72,7 @@ public class GetterFilterSourceDelegate implements ParameterFilterSourceDelegate
                     throw new IllegalArgumentException(
                             "Method " + mth.toGenericString() + " specified by getter annotation has non-zero parameter count");
                 }
-                if (!mth.getReturnType().equals(Optional.class) && !mth.getReturnType().equals(targetType)) {
+                if (!mth.getReturnType().equals(Optional.class) && !mth.getReturnType().isAssignableFrom(targetType)) {
                     throw new IllegalArgumentException("Method " + mth.toGenericString() + " does not return the correct type. Expected: "
                             + targetType.getName() + " Found: " + mth.getReturnType().getName());
                 }

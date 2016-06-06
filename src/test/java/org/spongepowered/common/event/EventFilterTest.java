@@ -38,6 +38,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
@@ -52,6 +53,7 @@ import org.spongepowered.common.event.listener.DataHasListener;
 import org.spongepowered.common.event.listener.DataSupportsListener;
 import org.spongepowered.common.event.listener.DoubleListener;
 import org.spongepowered.common.event.listener.FirstLastCauseListener;
+import org.spongepowered.common.event.listener.GetterListener;
 import org.spongepowered.common.event.listener.IncludeExcludeListener;
 import org.spongepowered.common.event.listener.InvalidCancelledListener;
 import org.spongepowered.common.event.listener.InvalidIncludeExcludeListener;
@@ -377,6 +379,35 @@ public class EventFilterTest {
         Assert.assertFalse("Listener with @First with exclusions was called when an improper Cause was provided!", listener.namedCauseListenerCalledEx);
     }
 
+    @Test
+    public void testGetter() throws Exception {
+        GetterListener listener = new GetterListener();
+        AnnotatedEventListener normalListener = this.getListener(listener, "normalListener", GetterEvent.class, TestObject.class);
+        AnnotatedEventListener subClassListener = this.getListener(listener, "subClassListener", GetterEvent.class, SubObject.class);
+
+        Cause cause = Cause.of(NamedCause.owner(Text.of()));
+
+        GetterEvent normalEvent = new GetterEvent(cause, new TestObject());
+        GetterEvent subClassEvent = new GetterEvent(cause, new SubObject());
+
+        normalListener.handle(normalEvent);
+        Assert.assertTrue("Listener with @Getter was not called when the targeted getter returned the same type!", listener.normalCalled);
+
+        listener.normalCalled = false;
+
+        normalListener.handle(subClassEvent);
+        Assert.assertTrue("Listener with @Getter was not called when the targeted getter returned a subtype of the expected type!", listener.normalCalled);
+
+        subClassListener.handle(normalEvent);
+        Assert.assertFalse("Listener with @Getter was called when the targeted getter returned a supertype! How is this even possible???", listener.subClassCalled);
+
+        listener.subClassCalled = false;
+
+        subClassListener.handle(subClassEvent);
+        Assert.assertTrue("Listener with @Getter was not called when the targeted getter returned a subtype of the expected type, which matched the parameter type!", listener.normalCalled);
+
+    }
+
     public static class TestEvent implements Event, Cancellable {
 
         private final Cause cause;
@@ -403,6 +434,20 @@ public class EventFilterTest {
 
     }
 
+    public static class GetterEvent extends TestEvent {
+
+        private TestObject testObject;
+
+        public GetterEvent(Cause cause, TestObject testObject) {
+            super(cause);
+            this.testObject = testObject;
+        }
+
+        public TestObject getTestObject() {
+            return this.testObject;
+        }
+    }
+
     public static class SubEvent extends TestEvent {
 
         public SubEvent(Cause cause) {
@@ -416,6 +461,14 @@ public class EventFilterTest {
         public Cause getCause() {
             return Cause.source(this).build();
         }
+    }
+
+    public static class TestObject {
+
+    }
+
+    public static class SubObject extends TestObject {
+
     }
 
     private AnnotatedEventListener getListener(Object listener, String method) throws Exception {
