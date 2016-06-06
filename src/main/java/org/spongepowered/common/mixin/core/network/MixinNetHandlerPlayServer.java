@@ -475,8 +475,23 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
-    @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropOneItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
-    public EntityItem onPlayerDropItem(EntityPlayerMP player, boolean dropAll) {
+    @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropOneItem(Z)Lnet/minecraft/entity/item/EntityItem;", ordinal = 0))
+    public EntityItem onPlayerDropOneItem(EntityPlayerMP player, boolean dropAll) {
+        EntityItem item = null;
+        ItemStack stack = this.playerEntity.inventory.getCurrentItem();
+        if (stack != null) {
+            item = this.playerEntity.dropOneItem(dropAll);
+            // force client itemstack update if drop event was cancelled
+            if (item == null) {
+                ((IMixinEntityPlayerMP) player).restorePacketItem();
+            }
+        }
+
+        return item;
+    }
+
+    @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropOneItem(Z)Lnet/minecraft/entity/item/EntityItem;", ordinal = 1))
+    public EntityItem onPlayerDropAllItems(EntityPlayerMP player, boolean dropAll) {
         EntityItem item = null;
         ItemStack stack = this.playerEntity.inventory.getCurrentItem();
         if (stack != null) {
