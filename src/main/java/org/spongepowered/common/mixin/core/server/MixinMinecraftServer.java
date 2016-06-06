@@ -692,7 +692,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             worldInfo = savehandler.loadWorldInfo();
         }
 
+
         if (worldInfo != null) {
+            setUuidForProperties((WorldProperties) worldInfo);
+
             ((IMixinWorldInfo) worldInfo).createWorldConfig();
             // check if enabled
             if (!((WorldProperties) worldInfo).isEnabled()) {
