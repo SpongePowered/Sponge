@@ -32,6 +32,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
@@ -48,6 +49,8 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.CauseTracker;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -58,7 +61,9 @@ public class PacketUtil {
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
             StaticMixinHelper.packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
+            EntityPlayerMP player = StaticMixinHelper.packetPlayer;
             IMixinWorld world = (IMixinWorld) StaticMixinHelper.packetPlayer.worldObj;
+            IMixinEntityPlayerMP spongePlayer = (IMixinEntityPlayerMP) player;
             final CauseTracker causeTracker = world.getCauseTracker();
             causeTracker.setCurrentPlayerPacket(packetIn);
 
@@ -69,7 +74,7 @@ public class PacketUtil {
             //
             // This is done in order to sync client inventory to server and would be fine if the C10 packet
             // included an Enum of some sort that defined what type of sync was happening.
-            if (StaticMixinHelper.packetPlayer.theItemInWorldManager.isCreative() && (packetIn instanceof C16PacketClientStatus
+            if (player.theItemInWorldManager.isCreative() && (packetIn instanceof C16PacketClientStatus
                   && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT)) {
                 StaticMixinHelper.lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
             } else if (creativeCheck(packetIn)) {
@@ -77,7 +82,7 @@ public class PacketUtil {
                 long packetDiff = System.currentTimeMillis() - StaticMixinHelper.lastInventoryOpenPacketTimeStamp;
                 // If the time between packets is small enough, mark the current packet to be ignored for our event handler.
                 if (packetDiff < 100) {
-                    StaticMixinHelper.ignoreCreativeInventoryPacket = true;
+                    ((IMixinNetHandlerPlayServer) netHandler).setIgnoreCreativeInventoryEvent(true);
                 }
             }
 
@@ -96,31 +101,31 @@ public class PacketUtil {
 
             }*/
 
-            StaticMixinHelper.lastOpenContainer = StaticMixinHelper.packetPlayer.openContainer;
-            ItemStackSnapshot cursor = StaticMixinHelper.packetPlayer.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
-                                                                                                       : ((org.spongepowered.api.item.inventory.ItemStack) StaticMixinHelper.packetPlayer.inventory
-                                                                                                               .getItemStack()).createSnapshot();
-            StaticMixinHelper.lastCursor = cursor;
+            StaticMixinHelper.lastOpenContainer = player.openContainer;
 
-            if (StaticMixinHelper.packetPlayer.getHeldItem() != null
+            // if inventory packet
+            if (packetIn instanceof C0EPacketClickWindow || packetIn instanceof C0DPacketCloseWindow || packetIn instanceof C10PacketCreativeInventoryAction) {
+                spongePlayer.setPacketCursor(player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
+                       : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory
+                               .getItemStack()).createSnapshot());
+            }
+
+            if (player.getHeldItem() != null
                 && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
-                StaticMixinHelper.prePacketProcessItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem());
+                ((IMixinEntityPlayerMP) player).setPacketItem(ItemStack.copyItemStack(player.getHeldItem()));
             }
 
-            if (packetIn instanceof C0EPacketClickWindow || packetIn instanceof C10PacketCreativeInventoryAction) {
-                causeTracker.setCaptureSpawnedEntities(true);
-            }
-            causeTracker.addCause(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
-            causeTracker.setCurrentNotifier((User) StaticMixinHelper.packetPlayer);
+            causeTracker.addCause(Cause.of(NamedCause.source(player)));
+            causeTracker.setCurrentNotifier((User) player);
             packetIn.processPacket(netHandler);
             causeTracker.handlePostTickCaptures();
             causeTracker.removeCurrentCause();
             causeTracker.setCurrentNotifier(null);
             causeTracker.setCurrentPlayerPacket(null);
-            if (packetIn instanceof C0EPacketClickWindow || packetIn instanceof C10PacketCreativeInventoryAction) {
-                causeTracker.setCaptureSpawnedEntities(false);
-            }
             resetStaticData();
+            if (packetIn instanceof C10PacketCreativeInventoryAction) {
+                ((IMixinNetHandlerPlayServer) netHandler).setIgnoreCreativeInventoryEvent(false);
+            }
         } else { // client
             packetIn.processPacket(netHandler);
         }
@@ -131,11 +136,10 @@ public class PacketUtil {
     }
 
     public static void resetStaticData() {
+        ((IMixinEntityPlayerMP) StaticMixinHelper.packetPlayer).setPacketItem(null);
+        ((IMixinEntityPlayerMP) StaticMixinHelper.packetPlayer).setPacketCursor(null);
         StaticMixinHelper.packetPlayer = null;
-        StaticMixinHelper.lastCursor = null;
         StaticMixinHelper.lastOpenContainer = null;
-        StaticMixinHelper.prePacketProcessItem = null;
-        StaticMixinHelper.ignoreCreativeInventoryPacket = false;
     }
 
     public static boolean processSignPacket(C12PacketUpdateSign packetIn, CallbackInfo ci, TileEntitySign tileentitysign, EntityPlayerMP playerEntity) {

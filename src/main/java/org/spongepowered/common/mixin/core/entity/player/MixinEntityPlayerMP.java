@@ -38,6 +38,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.ServersideAttributeMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -47,6 +48,7 @@ import net.minecraft.network.play.server.S05PacketSpawnPosition;
 import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.network.play.server.S2BPacketChangeGameState;
+import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Score;
@@ -89,6 +91,7 @@ import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -126,11 +129,11 @@ import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
-import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinTeam;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.text.SpongeTexts;
@@ -160,6 +163,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public int newTotalExperience = 0;
     public boolean keepsLevel = false;
     private boolean sleepingIgnored;
+    // Used to restore original item received in a packet after canceling an event
+    private ItemStack packetItem;
+    // Used to restore current cursor to the state when packet was received
+    private ItemStackSnapshot packetCursor;
 
     private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
@@ -173,11 +180,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public boolean playerConqueredTheEnd;
     @Shadow private float lastHealth;
     @Shadow private int lastFoodLevel;
+    @Shadow public boolean isChangingQuantityOnly;
 
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
     @Shadow public abstract void func_175145_a(StatBase p_175145_1_);
     @Shadow public abstract StatisticsFile getStatFile();
+    @Shadow public abstract void updateHeldItem();
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -741,4 +750,38 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.playerNetServerHandler.sendPacket(packet);
     }
 
+    @Override
+    public ItemStack getPacketItem() {
+        return this.packetItem;
+    }
+
+    @Override
+    public void setPacketItem(ItemStack itemstack) {
+        this.packetItem = itemstack;
+    }
+
+    @Override
+    public ItemStackSnapshot getPacketCursor() {
+        return this.packetCursor;
+    }
+
+    @Override
+    public void setPacketCursor(ItemStackSnapshot cursor) {
+        this.packetCursor = cursor;
+    }
+
+    @Override
+    public void restorePacketItem() {
+        if (this.packetItem == null) {
+            return;
+        }
+
+        this.isChangingQuantityOnly = true;
+        this.inventory.mainInventory[this.inventory.currentItem] = this.packetItem;
+        Slot slot = this.openContainer.getSlotFromInventory(this.inventory, this.inventory.currentItem);
+        this.openContainer.detectAndSendChanges();
+        this.isChangingQuantityOnly = false;
+        // force client itemstack update if place event was cancelled
+        this.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(this.openContainer.windowId, slot.slotNumber, this.packetItem));
+    }
 }

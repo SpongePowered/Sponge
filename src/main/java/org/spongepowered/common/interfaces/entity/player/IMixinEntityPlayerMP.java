@@ -22,10 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.interfaces.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.channel.MessageChannel;
 
 import javax.annotation.Nullable;
@@ -43,6 +45,16 @@ public interface IMixinEntityPlayerMP {
     void setVelocityOverride(@Nullable Vector3d velocity);
 
     MessageChannel getDeathMessageChannel();
+
+    ItemStack getPacketItem();
+
+    ItemStackSnapshot getPacketCursor();
+
+    void setPacketItem(ItemStack itemstack);
+
+    void setPacketCursor(ItemStackSnapshot cursor);
+
+    void restorePacketItem();
 
     void initScoreboard();
 

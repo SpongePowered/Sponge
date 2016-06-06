@@ -384,7 +384,7 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     @Inject(method = "tick", at = @At("RETURN"))
     public void onTickEnd(CallbackInfo ci) {
-        // clear some things
+        // Make sure we clear our current notifier
         this.getCauseTracker().setCurrentNotifier(null);
     }
 

@@ -30,10 +30,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.gen.PopulatorType;
 
 import java.util.Arrays;
@@ -50,16 +48,13 @@ public class StaticMixinHelper {
     public static boolean processingInternalForgeEvent = false;
     // Set before firing an internal Forge BlockBreak event to handle extended blockstate
     public static IBlockState breakEventExtendedState = null;
-    public static ItemStack prePacketProcessItem = null;
     @SuppressWarnings("rawtypes")
     public static Class lastPopulatorClass = null;
-    public static ItemStackSnapshot lastCursor = null;
     public static Container lastOpenContainer = null;
     public static IInventory lastOpenInventory = null;
     public static EntityLivingBase currentTargetEntity = null;
     public static PopulatorType runningGenerator = null;
     public static long lastInventoryOpenPacketTimeStamp = 0;
-    public static boolean ignoreCreativeInventoryPacket = false;
     public static boolean convertingMapFormat = false;
     public static UUID INVALID_WORLD_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     public static boolean setCustomNameTagSkip = false;

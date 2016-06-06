@@ -42,7 +42,7 @@ import java.util.EnumSet;
  * THESE METHODS ARE IMPLEMENTED ONLY FOR OLDER PLUGINS. THESE METHODS AND
  * INTERFACE SHOULD NEVER BE USED IN THE IMPLEMENTATION OTHERWISE.
  */
-@Mixin(Entity.class)
+@Mixin(value = Entity.class, remap = false)
 public interface MixinEntityBackwardsCompatible {
 
     @Shadow boolean shadow$setLocation(Location<World> location);

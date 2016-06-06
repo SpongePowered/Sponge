@@ -33,10 +33,12 @@ import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -86,6 +88,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
+import org.spongepowered.api.event.item.inventory.CreativeInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
@@ -108,14 +111,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
-import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
@@ -137,6 +142,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow @Final public NetworkManager netManager;
     @Shadow @Final private MinecraftServer serverController;
     @Shadow public EntityPlayerMP playerEntity;
+    @Shadow private int itemDropThreshold;
 
     @Shadow public abstract void sendPacket(final Packet<?> packetIn);
     @Shadow public abstract void kickPlayerFromServer(String reason);
@@ -150,6 +156,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     // Store the last block right-clicked
     private Item lastItem;
     private boolean allowClientLocationUpdate = true;
+    private boolean ignoreCreativeInventoryEvent = false;
 
     @Override
     public Player getPlayer() {
@@ -473,14 +480,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         EntityItem item = null;
         ItemStack stack = this.playerEntity.inventory.getCurrentItem();
         if (stack != null) {
-            int size = stack.stackSize;
             item = this.playerEntity.dropOneItem(dropAll);
             // force client itemstack update if drop event was cancelled
             if (item == null) {
-                Slot slot = this.playerEntity.openContainer.getSlotFromInventory(this.playerEntity.inventory, this.playerEntity.inventory.currentItem);
-                int windowId = this.playerEntity.openContainer.windowId;
-                stack.stackSize = size;
-                this.sendPacket(new S2FPacketSetSlot(windowId, slot.slotNumber, stack));
+                ((IMixinEntityPlayerMP) player).restorePacketItem();
             }
         }
 
@@ -616,9 +619,119 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(false);
     }
 
-    @Inject(method = "processCreativeInventoryAction", at = @At(value = "HEAD"))
+    /**
+     * @author blood - June 6th, 2016
+     * @reason Since mojang handles creative packets different than survival, we need to
+     * restructure this method to prevent any packets being sent to client as we will
+     * not be able to properly revert them during drops.
+     *
+     * @param packetIn The creative inventory packet
+     */
+    @Overwrite
+    public void processCreativeInventoryAction(C10PacketCreativeInventoryAction packetIn)
+    {
+        PacketThreadUtil.checkThreadAndEnqueue(packetIn, this.netHandlerPlayServer, this.playerEntity.getServerForPlayer());
+
+        if (this.playerEntity.theItemInWorldManager.isCreative())
+        {
+            boolean clickedOutside = packetIn.getSlotId() < 0;
+            ItemStack itemstack = packetIn.getStack();
+
+            if (itemstack != null && itemstack.hasTagCompound() && itemstack.getTagCompound().hasKey("BlockEntityTag", 10))
+            {
+                NBTTagCompound nbttagcompound = itemstack.getTagCompound().getCompoundTag("BlockEntityTag");
+
+                if (nbttagcompound.hasKey("x") && nbttagcompound.hasKey("y") && nbttagcompound.hasKey("z"))
+                {
+                    BlockPos blockpos = new BlockPos(nbttagcompound.getInteger("x"), nbttagcompound.getInteger("y"), nbttagcompound.getInteger("z"));
+                    TileEntity tileentity = this.playerEntity.worldObj.getTileEntity(blockpos);
+
+                    if (tileentity != null)
+                    {
+                        NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+                        tileentity.writeToNBT(nbttagcompound1);
+                        nbttagcompound1.removeTag("x");
+                        nbttagcompound1.removeTag("y");
+                        nbttagcompound1.removeTag("z");
+                        itemstack.setTagInfo("BlockEntityTag", nbttagcompound1);
+                    }
+                }
+            }
+
+            boolean clickedHotbar = packetIn.getSlotId() >= 1 && packetIn.getSlotId() < 36 + InventoryPlayer.getHotbarSize();
+            boolean itemValidCheck = itemstack == null || itemstack.getItem() != null;
+            boolean itemValidCheck2 = itemstack == null || itemstack.getMetadata() >= 0 && itemstack.stackSize <= 64 && itemstack.stackSize > 0;
+
+            // Sponge start - handle CreativeInventoryEvent
+            if (itemValidCheck && itemValidCheck2)
+            {
+                CreativeInventoryEvent.Drop dropEvent = null;
+                if (!this.ignoreCreativeInventoryEvent) {
+                    CreativeInventoryEvent clickEvent = SpongeCommonEventFactory.callCreativeClickInventoryEvent(this.playerEntity, packetIn);
+                    if (clickEvent.isCancelled()) {
+                        // Reset slot on client
+                        if (packetIn.getSlotId() >= 0) {
+                            this.playerEntity.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(this.playerEntity.inventoryContainer.windowId, packetIn.getSlotId(), this.playerEntity.inventoryContainer.getSlot(packetIn.getSlotId()).getStack()));
+                            this.playerEntity.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, null));
+                        }
+                        return;
+                    }
+    
+                    // This must be fired here since we are unable to properly revert a cursor in creative mode due to how mojang handles it
+                    dropEvent = SpongeCommonEventFactory.callCreativeDropInventoryEvent(this.playerEntity, itemstack, packetIn);
+                    if (dropEvent.isCancelled()) {
+                        // Reset slot on client
+                        if (packetIn.getSlotId() >= 0) {
+                            this.playerEntity.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(this.playerEntity.inventoryContainer.windowId, packetIn.getSlotId(), this.playerEntity.inventoryContainer.getSlot(packetIn.getSlotId()).getStack()));
+                            this.playerEntity.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, null));
+                        }
+                        return;
+                    }
+                }
+    
+                if (clickedHotbar) {
+                    if (itemstack == null)
+                    {
+                        this.playerEntity.inventoryContainer.putStackInSlot(packetIn.getSlotId(), (ItemStack)null);
+                    }
+                    else
+                    {
+                        this.playerEntity.inventoryContainer.putStackInSlot(packetIn.getSlotId(), itemstack);
+                    }
+    
+                    this.playerEntity.inventoryContainer.setCanCraft(this.playerEntity, true);
+                } else if (clickedOutside && this.itemDropThreshold < 200) {
+                    this.itemDropThreshold += 20;
+                    if (dropEvent != null) {
+                        for (org.spongepowered.api.entity.Entity entity : dropEvent.getEntities()) {
+                            if (entity instanceof EntityItem) {
+                                EntityItem entityitem = (EntityItem) entity;
+                                entityitem.setAgeToCreativeDespawnTime();
+                                final CauseTracker causeTracker = ((IMixinWorld) this.playerEntity.worldObj).getCauseTracker();
+                                // Ignore spawn event as we handle this above
+                                causeTracker.setIgnoreSpawnEvents(true);
+                                this.playerEntity.worldObj.spawnEntityInWorld(entityitem);
+                                causeTracker.setIgnoreSpawnEvents(false);
+                            }
+                        }
+                    }
+                    // Sponge - handled above
+                    /*EntityItem entityitem = this.playerEntity.dropPlayerItemWithRandomChoice(itemstack, true);
+
+                    if (entityitem != null)
+                    {
+                        entityitem.setAgeToCreativeDespawnTime();
+                    }*/
+                }
+            }
+            // Sponge end
+        }
+    }
+
+    @Inject(method = "processCreativeInventoryAction", at = @At(value = "HEAD"), cancellable = true)
     public void onProcessCreativeInventoryActionHead(C10PacketCreativeInventoryAction packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(true);
+        //ci.cancel();
     }
 
     @Inject(method = "processCreativeInventoryAction", at = @At(value = "RETURN"))
@@ -718,5 +831,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             StaticMixinHelper.lastAnimationPacketTick = MinecraftServer.getServer().getTickCounter();
             StaticMixinHelper.lastAnimationPlayer = this.playerEntity;
         }
+    }
+
+    @Override
+    public void setIgnoreCreativeInventoryEvent(boolean flag) {
+        this.ignoreCreativeInventoryEvent = flag;
     }
 }

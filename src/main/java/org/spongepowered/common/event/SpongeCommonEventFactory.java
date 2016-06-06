@@ -130,6 +130,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -215,13 +216,15 @@ public class SpongeCommonEventFactory {
 
     // Open/Close
     public static void handleInteractInventoryOpenCloseEvent(Cause cause, EntityPlayerMP player, Packet<?> packetIn) {
+        IMixinEntityPlayerMP spongePlayer = (IMixinEntityPlayerMP) player;
+
         if ((!(player.openContainer instanceof ContainerPlayer) && (StaticMixinHelper.lastOpenContainer instanceof ContainerPlayer)
                 || (packetIn instanceof C16PacketClientStatus
                 && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT))) {
             ItemStackSnapshot newCursor =
                     player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
+            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(spongePlayer.getPacketCursor(), newCursor);
             InteractInventoryEvent.Open event =
                     SpongeEventFactory.createInteractInventoryEventOpen(cause, cursorTransaction,
                             (org.spongepowered.api.item.inventory.Container) player.openContainer);
@@ -238,7 +241,7 @@ public class SpongeCommonEventFactory {
             ItemStackSnapshot newCursor =
                     player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
+            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(spongePlayer.getPacketCursor(), newCursor);
             InteractInventoryEvent.Close event =
                     SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction,
                             (org.spongepowered.api.item.inventory.Container) StaticMixinHelper.lastOpenContainer);
@@ -266,65 +269,60 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static void handleCreativeClickInventoryEvent(Cause cause, EntityPlayerMP player, C10PacketCreativeInventoryAction packetIn) {
-        IMixinWorld world = ((IMixinWorld) player.worldObj);
+    public static CreativeInventoryEvent.Click callCreativeClickInventoryEvent(EntityPlayerMP player, C10PacketCreativeInventoryAction packetIn) {
+        Cause cause = Cause.of(NamedCause.owner(player));
+        IMixinEntityPlayerMP spongePlayer = (IMixinEntityPlayerMP) player;
         ItemStackSnapshot newCursor =
                 player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
-        CauseTracker causeTracker = world.getCauseTracker();
-        CreativeInventoryEvent event = null;
-        if (packetIn.getSlotId() == -1 && causeTracker.getCapturedSpawnedEntityItems().size() > 0) {
-            Iterator<Entity> iterator = causeTracker.getCapturedSpawnedEntityItems().iterator();
-            ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
-            while (iterator.hasNext()) {
-                Entity currentEntity = iterator.next();
-                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                entitySnapshotBuilder.add(currentEntity.createSnapshot());
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(spongePlayer.getPacketCursor(), newCursor);
+        if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0
+                && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
+            Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
+            if (slot != null) {
+                SlotTransaction slotTransaction =
+                        new SlotTransaction(new SlotAdapter(slot), ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+                ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
             }
-
-            SpawnCause spawnCause = EntitySpawnCause.builder()
-                    .entity((Entity) player)
-                    .type(SpawnTypes.DROPPED_ITEM)
-                    .build();
-            event = SpongeEventFactory.createCreativeInventoryEventDrop(Cause.of(NamedCause.source(spawnCause)), cursorTransaction, causeTracker.getCapturedSpawnedEntityItems(),
-                    entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) player.worldObj,
-                    ((IMixinContainer) player.openContainer).getCapturedTransactions());
-        } else {
-            if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0
-                    && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
-                Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
-                if (slot != null) {
-                    SlotTransaction slotTransaction =
-                            new SlotTransaction(new SlotAdapter(slot), ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
-                    ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
-                }
-            }
-            event = SpongeEventFactory.createCreativeInventoryEventClick(cause, cursorTransaction,
-                    (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                    ((IMixinContainer) player.openContainer).getCapturedTransactions());
         }
+        CreativeInventoryEvent.Click event = SpongeEventFactory.createCreativeInventoryEventClick(cause, cursorTransaction,
+                (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                ((IMixinContainer) player.openContainer).getCapturedTransactions());
         SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            if (event instanceof CreativeInventoryEvent.Drop) {
-                causeTracker.getCapturedSpawnedEntityItems().clear();
-            }
+        return event;
+    }
 
-            // Restore cursor
-            handleCustomCursor(player, ((ClickInventoryEvent) event).getCursorTransaction().getOriginal());
+    public static CreativeInventoryEvent.Drop callCreativeDropInventoryEvent(EntityPlayerMP player, ItemStack itemstack, C10PacketCreativeInventoryAction packetIn) {
+        Cause cause = Cause.of(NamedCause.owner(player));
+        IMixinEntityPlayerMP spongePlayer = (IMixinEntityPlayerMP) player;
+        ItemStackSnapshot newCursor =
+                player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
+                        : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(spongePlayer.getPacketCursor(), newCursor);
 
-            // Restore target slots
-            handleSlotRestore(player, event.getTransactions());
+        EntityItem entityitem = null;
+        if (itemstack == null) {
+            // create dummy item
+            entityitem = new EntityItem(player.worldObj, player.posX, player.posY, player.posZ, (net.minecraft.item.ItemStack) ItemStackSnapshot.NONE.createStack());
         } else {
-            handleCustomSlot(player, event.getTransactions());
-
-            // Custom cursor
-            if (((ClickInventoryEvent) event).getCursorTransaction().getCustom().isPresent()) {
-                handleCustomCursor(player, ((ClickInventoryEvent) event).getCursorTransaction().getFinal());
-            }
+            entityitem = player.dropPlayerItemWithRandomChoice(itemstack, true);
         }
 
-        ((IMixinContainer) player.openContainer).getCapturedTransactions().clear();
+        ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
+        entitySnapshotBuilder.add(((Entity) entityitem).createSnapshot());
+        List<Entity> entityList = new ArrayList<>();
+        entityList.add((Entity) entityitem);
+
+        SpawnCause spawnCause = EntitySpawnCause.builder()
+                .entity((Entity) player)
+                .type(SpawnTypes.DROPPED_ITEM)
+                .build();
+        cause = Cause.of(NamedCause.source(spawnCause)).merge(cause);
+        CreativeInventoryEvent.Drop event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, entityList,
+                entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) player.worldObj,
+                ((IMixinContainer) player.openContainer).getCapturedTransactions());
+        SpongeImpl.postEvent(event);
+        return event;
     }
 
     public static void handleClickInteractInventoryEvent(Cause cause, EntityPlayerMP player, C0EPacketClickWindow packetIn) {
@@ -332,7 +330,7 @@ public class SpongeCommonEventFactory {
         CauseTracker causeTracker = world.getCauseTracker();
         ItemStackSnapshot newCursor = player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(((IMixinEntityPlayerMP) player).getPacketCursor(), newCursor);
         ClickInventoryEvent clickEvent = null;
         // Handle empty slot clicks
         if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0
@@ -1017,6 +1015,10 @@ public class SpongeCommonEventFactory {
         if (nmsEntity.worldObj.isRemote || nmsEntity instanceof EntityPlayer || causeTracker.isWorldSpawnerRunning()) {
             return Cause.of(NamedCause.source(SpawnCause.builder().type(InternalSpawnTypes.CUSTOM).build()));
         }
+        IMixinEntityPlayerMP player = null;
+        if (StaticMixinHelper.packetPlayer != null) {
+            player = (IMixinEntityPlayerMP) StaticMixinHelper.packetPlayer;
+        }
         if (StaticMixinHelper.runningGenerator != null) {
             PopulatorType type = StaticMixinHelper.runningGenerator;
             if (InternalPopulatorTypes.ANIMAL.equals(type)) {
@@ -1134,14 +1136,14 @@ public class SpongeCommonEventFactory {
                             .build();
                     list.add(NamedCause.source(spawnCause));
                 }
-            } else if (StaticMixinHelper.prePacketProcessItem != null) {
+            } else if (player != null && player.getPacketItem() != null) {
                 SpawnCause cause;
                 if (entity instanceof Projectile || entity instanceof EntityThrowable) {
                     cause = EntitySpawnCause.builder()
                             .entity(((Entity) StaticMixinHelper.packetPlayer))
                             .type(InternalSpawnTypes.PROJECTILE)
                             .build();
-                } else if (StaticMixinHelper.prePacketProcessItem.getItem() == Items.spawn_egg) {
+                } else if (player.getPacketItem().getItem() == Items.spawn_egg) {
                     cause = EntitySpawnCause.builder()
                             .entity((Entity) StaticMixinHelper.packetPlayer)
                             .type(InternalSpawnTypes.SPAWN_EGG)
@@ -1153,7 +1155,7 @@ public class SpongeCommonEventFactory {
                             .build();
                 }
                 list.add(NamedCause.source(cause));
-                list.add(NamedCause.of("UsedItem", ItemStackUtil.fromNative(StaticMixinHelper.prePacketProcessItem).createSnapshot()));
+                list.add(NamedCause.of("UsedItem", ItemStackUtil.fromNative(player.getPacketItem()).createSnapshot()));
                 list.add(NamedCause.owner(StaticMixinHelper.packetPlayer));
             } else if (currentTickBlock.isPresent()) { // We've exhausted our possibilities, now we just associate blindly
                 BlockSpawnCause cause = BlockSpawnCause.builder().block(currentTickBlock.get())

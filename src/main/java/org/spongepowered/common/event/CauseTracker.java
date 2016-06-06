@@ -48,15 +48,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.init.Blocks;
-import net.minecraft.inventory.Slot;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C01PacketChatMessage;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
-import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.server.S23PacketBlockChange;
-import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -99,6 +97,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -431,10 +430,7 @@ public final class CauseTracker {
 
         // Inventory Events
         if (player != null && player.getHealth() > 0 && StaticMixinHelper.lastOpenContainer != null) {
-            if (this.currentPlayerPacket instanceof C10PacketCreativeInventoryAction && !StaticMixinHelper.ignoreCreativeInventoryPacket) {
-                SpongeCommonEventFactory.handleCreativeClickInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                    (C10PacketCreativeInventoryAction) this.currentPlayerPacket);
-            } else {
+            if (this.currentPlayerPacket instanceof C0EPacketClickWindow || this.currentPlayerPacket instanceof C0DPacketCloseWindow){
                 SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(NamedCause.source(player)), player, this.currentPlayerPacket);
                 if (this.currentPlayerPacket instanceof C0EPacketClickWindow) {
                     SpongeCommonEventFactory.handleClickInteractInventoryEvent(Cause.of(NamedCause.source(player)), player,
@@ -586,7 +582,9 @@ public final class CauseTracker {
                 this.causeTrackerEntityItemTimer.stopTiming();
                 DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(cause, entityItemList, entityItemSnapshotBuilder.build(), this.getWorld());
                 if (handlePostEntityEvent(cause, event)) {
-                    sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
+                    if (StaticMixinHelper.packetPlayer != null) {
+                        ((IMixinEntityPlayerMP) StaticMixinHelper.packetPlayer).restorePacketItem();
+                    }
                 }
                 this.causeTrackerEntityItemTimer.startTiming();
                 iter.remove();
@@ -615,9 +613,11 @@ public final class CauseTracker {
         }
 
         this.causeTrackerEntityItemTimer.stopTiming();
-        DropItemEvent event = SpongeEventFactory.createDropItemEventDispense(cause, capturedEntityItemList, entitySnapshots, this.getWorld());
+        DropItemEvent.Dispense event = SpongeEventFactory.createDropItemEventDispense(cause, capturedEntityItemList, entitySnapshots, this.getWorld());
         if (handlePostEntityEvent(cause, event)) {
-            sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
+            if (StaticMixinHelper.packetPlayer != null) {
+                ((IMixinEntityPlayerMP) StaticMixinHelper.packetPlayer).restorePacketItem();
+            }
             capturedEntityItemList.clear();
         }
     }
@@ -956,7 +956,9 @@ public final class CauseTracker {
             }
         }
 
-        sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
+        if (StaticMixinHelper.packetPlayer != null) {
+            ((IMixinEntityPlayerMP) StaticMixinHelper.packetPlayer).restorePacketItem();
+        }
     }
 
     public void handleNonLivingEntityDestruct(net.minecraft.entity.Entity entityIn) {
@@ -992,22 +994,6 @@ public final class CauseTracker {
                 event.getChannel().ifPresent(channel -> channel.send(entityIn, event.getMessage()));
             }
         }
-    }
-
-    private void sendItemChangeToPlayer(EntityPlayerMP player) {
-        if (StaticMixinHelper.prePacketProcessItem == null) {
-            return;
-        }
-
-        // handle revert
-        player.isChangingQuantityOnly = true;
-        player.inventory.mainInventory[player.inventory.currentItem] = StaticMixinHelper.prePacketProcessItem;
-        Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
-        player.openContainer.detectAndSendChanges();
-        player.isChangingQuantityOnly = false;
-        // force client itemstack update if place event was cancelled
-        player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber,
-            StaticMixinHelper.prePacketProcessItem));
     }
 
     private void processList(ListIterator<Transaction<BlockSnapshot>> listIterator) {

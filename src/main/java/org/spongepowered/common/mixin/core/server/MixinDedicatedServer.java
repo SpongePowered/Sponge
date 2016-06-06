@@ -30,6 +30,7 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
@@ -79,6 +81,8 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
      */
     @Override
     public boolean isBlockProtected(World worldIn, BlockPos pos, EntityPlayer playerIn) {
+        // Mods such as Thaumcraft may check this method during a server tick before attempting to set a blockstate.
+        ((IMixinWorld) worldIn).getCauseTracker().setCurrentNotifier((User) playerIn);
         BlockPos spawnPoint = worldIn.getSpawnPoint();
         int protectionRadius = getSpawnProtectionSize();
 

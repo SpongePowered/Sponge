@@ -39,7 +39,10 @@ import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
+import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -127,9 +130,13 @@ public final class SpongeImplHooks {
     }
 
     public static boolean onDroppedByPlayer(Item item, ItemStack stack, EntityPlayer player) {
+        if (item == null) {
+            return false;
+        }
         return true;
     }
 
+    // Handles all drops directly from player
     public static EntityItem onPlayerToss(EntityPlayer player, ItemStack item, boolean includeName)  {
         IMixinEntity spongeEntity = (IMixinEntity) player;
         spongeEntity.setCaptureItemDrops(true);
@@ -143,21 +150,27 @@ public final class SpongeImplHooks {
 
         IMixinWorld spongeWorld = (IMixinWorld) player.worldObj;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        // We handle container drops in SpongeCommonEventFactory.handleClickInteractInventoryEvent
-        if (!(causeTracker.getCurrentPlayerPacket() instanceof C0EPacketClickWindow)) {
+        Packet<?> currentPlayerPacket = causeTracker.getCurrentPlayerPacket();
+        if (currentPlayerPacket instanceof C10PacketCreativeInventoryAction) {
+            // We handle creative container drops in MixinNetHandlerPlayerServer
+            return ret;
+        } else if (currentPlayerPacket instanceof C0EPacketClickWindow || currentPlayerPacket instanceof C0DPacketCloseWindow) {
+            // We handle survival container drops in SpongeCommonEventFactory
+            causeTracker.setCaptureSpawnedEntities(true);
+            player.worldObj.spawnEntityInWorld(ret);
+            causeTracker.setCaptureSpawnedEntities(false);
+            return ret;
+        } else {
             DropItemEvent.Dispense event = SpongeCommonEventFactory.callDropItemEventDispenseSingle(player, ret);
             if (event.isCancelled()) {
                 return null;
             }
-
+    
             EntityItem eventItem = (EntityItem) event.getEntities().get(0);
             spongeWorld.getCauseTracker().setIgnoreSpawnEvents(true);
             player.worldObj.spawnEntityInWorld(eventItem);
             spongeWorld.getCauseTracker().setIgnoreSpawnEvents(false);
             return eventItem;
-        } else {
-            player.worldObj.spawnEntityInWorld(ret);
-            return ret;
         }
     }
 

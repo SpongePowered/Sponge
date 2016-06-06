@@ -1271,6 +1271,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             } else if (!this.causeTracker.isIgnoringSpawnEvents()) {
                 cir.setReturnValue(spawnEntity((Entity) entity, SpongeCommonEventFactory.getEntitySpawnCause(entity)));
             } else {
+                // track entity and proceed with spawn bypassing events
                 this.causeTracker.trackEntityOwner((Entity) entity);
             }
         }
