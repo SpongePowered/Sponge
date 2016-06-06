@@ -26,8 +26,11 @@ package org.spongepowered.common.world.border;
 
 import net.minecraft.network.play.server.S44PacketWorldBorder;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.WorldProviderHell;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
+import org.spongepowered.common.interfaces.network.play.server.IMixinS44PacketWorldBorder;
 
 public final class PlayerBorderListener implements IBorderListener {
 
@@ -51,8 +54,13 @@ public final class PlayerBorderListener implements IBorderListener {
 
     @Override
     public void onCenterChanged(WorldBorder border, double x, double z) {
+        final WorldServer worldServer = MinecraftServer.getServer().worldServerForDimension(this.dimensionId);
+        final S44PacketWorldBorder packet = new S44PacketWorldBorder(border, S44PacketWorldBorder.Action.SET_CENTER);
+        if (worldServer != null && worldServer.provider instanceof WorldProviderHell) {
+            ((IMixinS44PacketWorldBorder) packet).netherifyCenterCoordinates();
+        }
         MinecraftServer.getServer().getConfigurationManager()
-                .sendPacketToAllPlayersInDimension(new S44PacketWorldBorder(border, S44PacketWorldBorder.Action.SET_CENTER), this.dimensionId);
+                .sendPacketToAllPlayersInDimension(packet, this.dimensionId);
     }
 
     @Override

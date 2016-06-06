@@ -22,29 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.play.server;
+package org.spongepowered.common.interfaces.network.play.server;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.network.play.server.S38PacketPlayerListItem;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.world.WorldSettings;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketPlayerListItem;
+public interface IMixinS44PacketWorldBorder {
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
-@Mixin(S38PacketPlayerListItem.class)
-public abstract class MixinS38PacketPlayerListItem implements IMixinSPacketPlayerListItem {
-
-    @Shadow @Final public List<S38PacketPlayerListItem.AddPlayerData> players;
-
-    @Override
-    public void addEntry(GameProfile profile, int latency, WorldSettings.GameType gameMode, @Nullable IChatComponent displayName) {
-        this.players.add(((S38PacketPlayerListItem) (Object) this).new AddPlayerData(profile, latency, gameMode, displayName));
-    }
-
+    void netherifyCenterCoordinates();
 }

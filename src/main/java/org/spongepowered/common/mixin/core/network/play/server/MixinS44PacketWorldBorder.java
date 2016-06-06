@@ -24,27 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.network.play.server;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.network.play.server.S38PacketPlayerListItem;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.world.WorldSettings;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.network.play.server.S44PacketWorldBorder;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketPlayerListItem;
+import org.spongepowered.common.interfaces.network.play.server.IMixinS44PacketWorldBorder;
 
-import java.util.List;
+@Mixin(S44PacketWorldBorder.class)
+public abstract class MixinS44PacketWorldBorder implements IMixinS44PacketWorldBorder {
 
-import javax.annotation.Nullable;
-
-@Mixin(S38PacketPlayerListItem.class)
-public abstract class MixinS38PacketPlayerListItem implements IMixinSPacketPlayerListItem {
-
-    @Shadow @Final public List<S38PacketPlayerListItem.AddPlayerData> players;
+    @Shadow private double centerX;
+    @Shadow private double centerZ;
 
     @Override
-    public void addEntry(GameProfile profile, int latency, WorldSettings.GameType gameMode, @Nullable IChatComponent displayName) {
-        this.players.add(((S38PacketPlayerListItem) (Object) this).new AddPlayerData(profile, latency, gameMode, displayName));
+    public void netherifyCenterCoordinates() {
+        this.centerX *= 8;
+        this.centerZ *= 8;
     }
-
 }

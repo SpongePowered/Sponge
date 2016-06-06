@@ -100,11 +100,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
+import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.network.play.server.IMixinS44PacketWorldBorder;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -429,7 +430,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
                     (Player) playerIn, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
-        ((IMixinEntity) player).setLocationAndAngles(event.getToTransform());
+        ((IMixinEntity) (Object) player).setLocationAndAngles(event.getToTransform());
         toTransform = event.getToTransform();
         location = toTransform.getLocation();
 
@@ -672,6 +673,16 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
     @Redirect(method = "updateTimeAndWeatherForPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
     private WorldBorder onUpdateTimeGetWorldBorder(WorldServer worldServer, EntityPlayerMP entityPlayerMP, WorldServer worldServerIn) {
         return worldServerIn.getWorldBorder();
+    }
+
+    @Redirect(method = "updateTimeAndWeatherForPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket"
+            + "(Lnet/minecraft/network/Packet;)V", ordinal = 0))
+    public void onWorldBorderInitializePacket(NetHandlerPlayServer invoker, Packet packet, EntityPlayerMP playerMP, WorldServer worldServer) {
+        if (worldServer.provider instanceof WorldProviderHell) {
+            ((IMixinS44PacketWorldBorder) packet).netherifyCenterCoordinates();
+        }
+
+        invoker.sendPacket(packet);
     }
 
     @Inject(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At("HEAD"))
