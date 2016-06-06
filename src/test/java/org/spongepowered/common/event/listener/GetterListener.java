@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.event.listener;
 
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.common.event.EventFilterTest;
 

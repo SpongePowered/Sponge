@@ -25,7 +25,9 @@
 package org.spongepowered.common.mixin.core.potion;
 
 import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionAttackDamage;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.registry.RegistryNamespaced;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -35,12 +37,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.potion.IMixinPotion;
+import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+
+import java.util.Locale;
 
 @Mixin(Potion.class)
 @Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion implements PotionEffectType {
+public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
 
     @Shadow public abstract String shadow$getName();
     @Shadow public abstract boolean shadow$isInstant();
@@ -49,11 +56,7 @@ public abstract class MixinPotion implements PotionEffectType {
     private Translation potionTranslation;
     private String spongeResourceID;
 
-    @Inject(method = "<init>(ILnet/minecraft/util/ResourceLocation;ZI)V", at = @At("RETURN"))
-    private void onConstruct(int potionID, ResourceLocation location, boolean badEffect, int potionColor, CallbackInfo callbackInfo) {
-        this.spongeResourceID = location.toString();
-    }
-
+    @Intrinsic
     public String potion$getId() {
         return this.spongeResourceID;
     }
@@ -84,6 +87,21 @@ public abstract class MixinPotion implements PotionEffectType {
             this.potionTranslation = new SpongeTranslation(shadow$getName() + ".postfix");
         }
         return this.potionTranslation;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.spongeResourceID = id;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Redirect(method = "registerPotions", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/RegistryNamespaced;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
+    private static void onPotionRegister(RegistryNamespaced registry, int id, Object location, Object potion) {
+        final ResourceLocation resource = (ResourceLocation) location;
+        final Potion mcPotion = (Potion) potion;
+        ((IMixinPotion) mcPotion).setId(resource.toString().toLowerCase(Locale.ENGLISH));
+        PotionEffectTypeRegistryModule.getInstance().registerFromGameData(resource.toString(), (PotionEffectType) mcPotion);
+        registry.register(id, location, potion);
     }
 
 }
