@@ -1099,6 +1099,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 900))
     private int getSaveTickInterval(int tickInterval) {
+        if (!this.isDedicatedServer()) {
+            return tickInterval;
+        }
+
         int autoPlayerSaveInterval = SpongeImpl.getGlobalConfig().getConfig().getWorld().getAutoPlayerSaveInterval();
         if (autoPlayerSaveInterval > 0 && (this.tickCounter % autoPlayerSaveInterval == 0)) {
             this.serverConfigManager.saveAllPlayerData();
