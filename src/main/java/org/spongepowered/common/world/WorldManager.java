@@ -405,7 +405,7 @@ public final class WorldManager {
 
         try {
             if (save) {
-                saveWorld(worldServer);
+                saveWorld(worldServer, true);
             }
         } catch (MinecraftException e) {
             e.printStackTrace();
@@ -426,14 +426,16 @@ public final class WorldManager {
         return true;
     }
 
-    public static void saveWorld(WorldServer worldServer) throws MinecraftException {
+    public static void saveWorld(WorldServer worldServer, boolean flush) throws MinecraftException {
         final MinecraftServer server = SpongeImpl.getServer();
         final org.spongepowered.api.world.World apiWorld = (org.spongepowered.api.world.World) worldServer;
 
         Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPre(Cause.of(NamedCause.source(server)), apiWorld));
 
         worldServer.saveAllChunks(true, null);
-        worldServer.flush();
+        if (flush) {
+            worldServer.flush();
+        }
 
         Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPost(Cause.of(NamedCause.source(server)), apiWorld));
     }
@@ -884,7 +886,7 @@ public final class WorldManager {
         final WorldServer worldServer = worldByDimensionId.get(((IMixinWorldInfo) info).getDimensionId().intValue());
         if (worldServer != null) {
             try {
-                saveWorld(worldServer);
+                saveWorld(worldServer, true);
             } catch (MinecraftException e) {
                 Throwables.propagate(e);
             }
