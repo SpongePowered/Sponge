@@ -91,7 +91,7 @@ public class WorldMigrator {
                 entry -> !entry.getFileName().equals(worldContainer.getFileName()) && Files.exists(entry.resolve("level.dat")) && !Files.exists(entry
                         .resolve("level_sponge.dat")))) {
             for (Path oldWorldPath : stream) {
-                Path worldPath = worldContainer.resolve(oldWorldPath.getFileName());
+                Path worldPath = worldContainer.resolve(getVanillaNetherOrEndName(oldWorldPath));
 
                 // Only copy over the old world files if we don't have it already.
                 if (Files.notExists(worldPath)) {
@@ -137,21 +137,18 @@ public class WorldMigrator {
     /**
      * Gets the name we should rename the incoming world folder to. Either "DIM-1" or "DIM1".
      *
-     * @param worldContainer The old world container where our world is coming from
-     * @param oldWorldPath The old world path
+     * @param worldPath The world path to check
      * @return The rename or the same name otherwise
      */
-    private static String getVanillaNetherOrEndName(Path worldContainer, Path oldWorldPath) {
-        String newName = oldWorldPath.getFileName().toString();
-        final String[] split = oldWorldPath.getFileName().toString().split(worldContainer.getFileName().toString());
-        if (split.length > 1) {
-            if (split[1].equals("_nether")) {
-                newName = "DIM-1";
-            } else if (split[1].equals("_the_end")) {
-                newName = "DIM1";
-            }
+    private static String getVanillaNetherOrEndName(Path worldPath) {
+        final String newName = worldPath.getFileName().toString();
+        if (newName.endsWith("_nether")) {
+            return "DIM-1";
+        } else if (newName.endsWith("_the_end")) {
+            return "DIM1";
+        } else {
+            return newName;
         }
-        return newName;
     }
 
     /**
@@ -163,7 +160,7 @@ public class WorldMigrator {
      * @return The corrected path or the original path if un-needed
      */
     private static Path renameToVanillaNetherOrEnd(Path worldContainer, Path oldWorldPath, Path worldPath) {
-        final String newName = getVanillaNetherOrEndName(worldContainer, oldWorldPath);
+        final String newName = getVanillaNetherOrEndName(oldWorldPath);
         final Path newWorldPath = worldContainer.resolve(newName);
 
         // We only rename the Nether/The_End folder if the prefix matches the worldContainer directory name
