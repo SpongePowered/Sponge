@@ -728,17 +728,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
-    @Inject(method = "processCreativeInventoryAction", at = @At(value = "HEAD"), cancellable = true)
-    public void onProcessCreativeInventoryActionHead(C10PacketCreativeInventoryAction packetIn, CallbackInfo ci) {
-        ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(true);
-        //ci.cancel();
-    }
-
-    @Inject(method = "processCreativeInventoryAction", at = @At(value = "RETURN"))
-    public void onProcessCreativeInventoryActionReturn(C10PacketCreativeInventoryAction packetIn, CallbackInfo ci) {
-        ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(false);
-    }
-
     @Inject(method = "processHeldItemChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C09PacketHeldItemChange;getSlotId()I", ordinal = 2), cancellable = true)
     public void onGetSlotId(C09PacketHeldItemChange packetIn, CallbackInfo ci) {
         SpongeCommonEventFactory.callChangeInventoryHeldEvent(this.playerEntity, packetIn);
