@@ -90,7 +90,7 @@ public class SpongeHelpCommand {
 
     private static Text getDescription(CommandSource source, CommandMapping mapping) {
         @SuppressWarnings("unchecked")
-        final Optional<Text> description = (Optional<Text>) mapping.getCallable().getShortDescription(source);
+        final Optional<Text> description = mapping.getCallable().getShortDescription(source);
         Text.Builder text = Text.builder("/" + mapping.getPrimaryAlias());
         text.color(TextColors.GREEN);
         text.style(TextStyles.UNDERLINE);

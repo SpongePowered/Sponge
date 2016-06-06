@@ -74,6 +74,7 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
         return new SpongeTreeData();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack stack, TreeType value) {
         if (stack.getItem() == ItemTypes.LOG || stack.getItem() == ItemTypes.LEAVES) {

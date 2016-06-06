@@ -80,6 +80,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.DamageObject;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -213,6 +214,17 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return Text.of(this.getUniqueID().toString());
     }
 
+    /**
+     * @author blood - May 12th, 2016
+     * @author gabizou - June 4th, 2016 - Update for 1.9.4 and Cause Tracker changes
+     *
+     * @reason SpongeForge requires an overwrite so we do it here instead. This handles all living entity death events
+     * (except players). Note should be taken that normally, there are lists for drops captured, however, the drops
+     * are retroactively captured by the CauseTracker and associated through the different phases, depending on
+     * how they are handled, so no lists and flags on the entities themselves are needed as they are tracked through
+     * the {@link PhaseContext} of the current {@link IPhaseState} at which this method is called. The compatibility
+     * for Forge's events to throw are handled specially in SpongeForge.
+     */
     @Overwrite
     public void onDeath(DamageSource cause) {
         // Sponge Start - Call our event, and forge's event

@@ -161,7 +161,7 @@ public final class TrackingUtil {
     public static void updateTickBlock(CauseTracker causeTracker, Block block, BlockPos pos, IBlockState state, Random random) {
         final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
-        BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, minecraftWorld, pos), pos, 0);
+        BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state.getActualState(minecraftWorld, pos), pos, 0);
         final PhaseContext phaseContext = PhaseContext.start()
                 .add(NamedCause.source(snapshot))
                 .addBlockCaptures()
@@ -179,8 +179,7 @@ public final class TrackingUtil {
     public static void randomTickBlock(CauseTracker causeTracker, Block block, BlockPos pos, IBlockState state, Random random) {
         final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
-        final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state.getBlock().getActualState(state,
-                minecraftWorld, pos), pos, 0);
+        final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state.getActualState(minecraftWorld, pos), pos, 0);
         final PhaseContext phaseContext = PhaseContext.start()
                 .add(NamedCause.source(currentTickBlock))
                 .addEntityCaptures()
@@ -225,7 +224,7 @@ public final class TrackingUtil {
 
         phaseContext.complete();
         causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.BLOCK_EVENT, phaseContext);
-        boolean result = currentState.getBlock().eventReceived(currentState, worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
+        boolean result = currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         causeTracker.completePhase();
         return result;
     }

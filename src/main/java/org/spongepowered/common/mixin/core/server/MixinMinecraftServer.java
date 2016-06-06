@@ -655,9 +655,21 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         this.shadow$setPlayerIdleTimeout(timeout);
     }
 
+    /**
+     * @author Zidane - June 2nd
+     * @reason Tells the server to use our WorldManager instead of the arrays, this will
+     * work in Forge as well as our WorldManagement system is intended to work with Forge
+     * modded worlds.
+     *
+     * @param dimensionId The dimension id requested
+     * @return The world server, or else the overworld.
+     */
     @Overwrite
     public WorldServer worldServerForDimension(int dimensionId) {
-        return WorldManager.getWorldByDimensionId(dimensionId).orElse(WorldManager.getWorldByDimensionId(0).orElseThrow(() -> new RuntimeException
-                ("Attempt made to get world before overworld is loaded!")));
+        return WorldManager.getWorldByDimensionId(dimensionId)
+                .orElse(WorldManager.getWorldByDimensionId(0)
+                        .orElseThrow(() -> new RuntimeException("Attempt made to get world before overworld is loaded!")
+                        )
+                );
     }
 }

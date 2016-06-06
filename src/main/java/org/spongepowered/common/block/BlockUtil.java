@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.block;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
@@ -33,6 +34,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.trait.BlockTrait;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Comparator;
 import java.util.List;
@@ -87,6 +89,13 @@ public final class BlockUtil {
             // implementing classes.
             throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
         }
+    }
+
+    public static IBlockState getBlockState(org.spongepowered.api.world.World world, Vector3i blockPos) {
+        if (!(world instanceof World)) {
+            throw new IllegalArgumentException("World : " + world.getName() + " is not appropriate for this implementation!");
+        }
+        return ((World) world).getBlockState(VecHelper.toBlockPos(blockPos));
     }
 
     private static final class BlockStateComparator implements Comparator<BlockState> {

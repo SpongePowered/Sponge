@@ -51,8 +51,8 @@ public class HardnessPropertyStore extends AbstractBlockPropertyStore<HardnessPr
 
     @Override
     public Optional<HardnessProperty> getFor(Location<World> location) {
-        final Block block = (Block) location.getBlockType();
-        final float hardness = block.getBlockHardness((IBlockState) location.getBlock(), (net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
+        final IBlockState blockState = (IBlockState) location.getBlock();
+        final float hardness = blockState.getBlockHardness((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
         if (hardness > 0) {
             return Optional.of(new HardnessProperty(hardness));
         }

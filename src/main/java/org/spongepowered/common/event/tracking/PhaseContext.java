@@ -217,6 +217,7 @@ public class PhaseContext {
                 .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
     }
 
+    @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<UUID, EntityItem> getCapturedEntityItemDropSupplier() throws IllegalStateException {
         return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_ITEM_DROPS,
                 (Class<CapturedMultiMapSupplier<UUID, EntityItem>>) (Class<?>) EntityItemEntityDropsSupplier.class)

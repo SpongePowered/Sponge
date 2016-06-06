@@ -233,9 +233,9 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
     private void handleEntityPortalExit(Entity entityIn, Location<World> portalLocation, float rotationYaw) {
         BlockPos blockPos = VecHelper.toBlockPos(portalLocation);
-        double xTarget = (double) portalLocation.getX() + 0.5D;
-        double yTarget = (double) portalLocation.getY() + 0.5D;
-        double zTarget = (double) portalLocation.getZ() + 0.5D;
+        double xTarget = portalLocation.getX() + 0.5D;
+        double yTarget = portalLocation.getY() + 0.5D;
+        double zTarget = portalLocation.getZ() + 0.5D;
         BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.PORTAL.createPatternHelper(this.worldServerInstance, blockPos);
         boolean flag1 = blockpattern$patternhelper.getForwards().rotateY().getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE;
         double d2 = blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X ? (double) blockpattern$patternhelper.getFrontTopLeft().getZ()

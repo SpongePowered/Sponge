@@ -27,9 +27,12 @@ package org.spongepowered.common.util;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.spongepowered.common.interfaces.IMixinCachable;
 
+import javax.annotation.Nullable;
+
 public class CachedLong2ObjectMap<V extends IMixinCachable> extends Long2ObjectOpenHashMap<V> {
 
-    private V lastRetrievedValue = null;
+    private static final long serialVersionUID = 190617916448550012L;
+    @Nullable private V lastRetrievedValue = null;
 
     @Override
     public V get(long key) {

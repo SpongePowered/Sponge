@@ -34,7 +34,7 @@ import java.util.Collection;
 
 import javax.annotation.Nullable;
 
-@Mixin(SpongeImplHooks.class)
+@Mixin(value = SpongeImplHooks.class, remap = false)
 public class MixinSpongeImplHooks_Item_Pre_Merge {
 
     /**

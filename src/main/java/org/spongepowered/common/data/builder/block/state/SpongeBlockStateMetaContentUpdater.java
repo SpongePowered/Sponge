@@ -50,6 +50,7 @@ public class SpongeBlockStateMetaContentUpdater implements DataContentUpdater {
         return DataVersions.BlockState.STATE_AS_CATALOG_ID;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public DataView update(DataView content) {
         // Right, so we have to get the block type id

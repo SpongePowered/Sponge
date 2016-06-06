@@ -273,7 +273,7 @@ public abstract class MixinEntity implements IMixinEntity {
             this.originalLava = DamageSource.lava;
             AxisAlignedBB bb = this.getEntityBoundingBox().expand(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block.getBlock().getMaterial(block) == Material.LAVA);
+                block.getMaterial() == Material.LAVA);
             DamageSource.lava = new MinecraftBlockDamageSource("lava", location).setFireDamage();
         }
     }

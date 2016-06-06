@@ -50,8 +50,8 @@ public class UnbreakablePropertyStore extends AbstractBlockPropertyStore<Unbreak
 
     @Override
     public Optional<UnbreakableProperty> getFor(Location<World> location) {
-        final Block block = (Block) location.getBlockType();
-        final float hardness = block.getBlockHardness((IBlockState) location.getBlock(), (net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
+        final IBlockState blockState = (IBlockState) location.getBlock();
+        final float hardness = blockState.getBlockHardness((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
         return Optional.of(hardness < 0 ? TRUE : FALSE);
     }
 

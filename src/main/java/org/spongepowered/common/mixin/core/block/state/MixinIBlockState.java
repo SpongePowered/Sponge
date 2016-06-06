@@ -70,7 +70,7 @@ public interface MixinIBlockState extends IBlockState, BlockState {
 
     @Override
     default BlockState withExtendedProperties(Location<World> location) {
-        return (BlockState) getBlock().getActualState(this, (net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
+        return (BlockState) this.getActualState((net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
 
     }
 

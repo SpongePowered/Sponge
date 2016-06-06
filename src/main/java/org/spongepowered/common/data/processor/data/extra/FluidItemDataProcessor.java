@@ -56,6 +56,7 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
         super((item) -> item.getItem() == Items.BUCKET || item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.LAVA_BUCKET, Keys.FLUID_ITEM_STACK);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack dataHolder, FluidStackSnapshot value) {
         FluidType fluidType = value.getFluid();
@@ -95,6 +96,7 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
         return new SpongeFluidItemData();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof ItemStack) {

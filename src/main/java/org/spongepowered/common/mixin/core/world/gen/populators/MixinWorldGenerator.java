@@ -42,15 +42,15 @@ public abstract class MixinWorldGenerator {
     
     //These are overridden in forge to call the forge added Block.isAir/isLeaves
     public boolean isAir(IBlockState state, World worldIn, BlockPos pos) {
-        return state.getBlock().getMaterial(state) == Material.AIR;
+        return state.getMaterial() == Material.AIR;
     }
 
     public boolean isLeaves(IBlockState state, World worldIn, BlockPos pos) {
-        return state.getBlock().getMaterial(state) == Material.LEAVES;
+        return state.getMaterial() == Material.LEAVES;
     }
 
     public boolean isWood(IBlockState state, World worldIn, BlockPos pos) {
-        return state.getBlock().getMaterial(state) == Material.WOOD;
+        return state.getMaterial() == Material.WOOD;
     }
     
     public boolean canSustainPlant(Block block, World worldIn, BlockPos pos, EnumFacing direction, Block plant) {

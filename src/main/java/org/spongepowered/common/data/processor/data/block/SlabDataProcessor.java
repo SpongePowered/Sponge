@@ -61,6 +61,7 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
         return new SpongeSlabData();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack stack, SlabType value) {
         if (stack.getItem() == ItemTypes.STONE_SLAB) {

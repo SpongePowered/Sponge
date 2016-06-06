@@ -146,7 +146,7 @@ public final class PacketPhase extends TrackingPhase {
     final static int BUTTON_SECONDARY       = 0x01 << 0 << 1;
     final static int BUTTON_MIDDLE          = 0x01 << 0 << 2;
 
-    public boolean isPacketInvalid(Packet packetIn, EntityPlayerMP packetPlayer, IPacketState packetState) {
+    public boolean isPacketInvalid(Packet<?> packetIn, EntityPlayerMP packetPlayer, IPacketState packetState) {
         return packetState.isPacketIgnored(packetIn, packetPlayer);
     }
 
@@ -158,7 +158,7 @@ public final class PacketPhase extends TrackingPhase {
 
         }
 
-        default boolean isPacketIgnored(Packet packetIn, EntityPlayerMP packetPlayer) {
+        default boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
             return false;
         }
     }
@@ -434,7 +434,7 @@ public final class PacketPhase extends TrackingPhase {
         IGNORED,
         INTERACT_ENTITY {
             @Override
-            public boolean isPacketIgnored(Packet packetIn, EntityPlayerMP packetPlayer) {
+            public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
                 final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
                 // There are cases where a player is interacting with an entity that doesn't exist on the server.
                 @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.worldObj);
@@ -462,7 +462,7 @@ public final class PacketPhase extends TrackingPhase {
         },
         ATTACK_ENTITY() {
             @Override
-            public boolean isPacketIgnored(Packet packetIn, EntityPlayerMP packetPlayer) {
+            public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
                 final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
                 // There are cases where a player is interacting with an entity that doesn't exist on the server.
                 @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.worldObj);
@@ -489,7 +489,7 @@ public final class PacketPhase extends TrackingPhase {
         },
         INTERACT_AT_ENTITY {
             @Override
-            public boolean isPacketIgnored(Packet packetIn, EntityPlayerMP packetPlayer) {
+            public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
                 final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
                 // There are cases where a player is interacting with an entity that doesn't exist on the server.
                 @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.worldObj);
@@ -584,7 +584,7 @@ public final class PacketPhase extends TrackingPhase {
         },
         INVALID() {
             @Override
-            public boolean isPacketIgnored(Packet packetIn, EntityPlayerMP packetPlayer) {
+            public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
                 return true;
             }
         },

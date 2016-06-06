@@ -67,6 +67,7 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
         return true;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     protected Optional<BlockState> getVal(ItemStack stack) {
         final Block block = ((ItemBlock) stack.getItem()).getBlock();

@@ -27,7 +27,6 @@ package org.spongepowered.common.text.translation;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import net.minecraft.util.text.translation.I18n;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
@@ -47,14 +46,16 @@ public class SpongeTranslation implements Translation {
         return this.id;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public String get(Locale locale) {
-        return I18n.translateToLocal(this.id);
+        return net.minecraft.util.text.translation.I18n.translateToLocal(this.id);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public String get(Locale locale, Object... args) {
-        return I18n.translateToLocalFormatted(this.id, args);
+        return net.minecraft.util.text.translation.I18n.translateToLocalFormatted(this.id, args);
     }
 
     @Override

@@ -89,7 +89,7 @@ public class GeneralFunctions {
     public static final BiFunction<WorldServer, BlockSnapshot, Transaction<BlockSnapshot>> TRANSACTION_CREATION = ((worldServer, blockSnapshot) -> {
         final BlockPos blockPos = VecHelper.toBlockPos(blockSnapshot.getPosition());
         final IBlockState newState = worldServer.getBlockState(blockPos);
-        final IBlockState newActualState = newState.getBlock().getActualState(newState, worldServer, blockPos);
+        final IBlockState newActualState = newState.getActualState(worldServer, blockPos);
         final BlockSnapshot newSnapshot = ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, 0);
         return new Transaction<>(blockSnapshot, newSnapshot);
     });

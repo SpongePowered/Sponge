@@ -28,11 +28,14 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.block.BlockUtil;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
@@ -198,35 +201,35 @@ public class SpongeTeleportHelper implements TeleportHelper {
             return false;
         }
 
-        final BlockType block = world.getBlockType(blockPos);
+        final IBlockState blockState = BlockUtil.getBlockState(world, blockPos);
 
         if (floorBlock) {
             // Floor is air so we'll fall, need to make sure we fall safely.
-            if (block == BlockTypes.AIR) {
-                final BlockType typeBelowPos = world.getBlockType(blockPos.sub(0, 1, 0));
-                final BlockType typeBelowPos2 = world.getBlockType(blockPos.sub(0, 2, 0));
+            if (blockState.getBlock() == BlockTypes.AIR) {
+                final BlockState typeBelowPos = world.getBlock(blockPos.sub(0, 1, 0));
+                final BlockState typeBelowPos2 = world.getBlock(blockPos.sub(0, 2, 0));
 
                 // We'll fall too far, not safe
-                if (typeBelowPos == BlockTypes.AIR && typeBelowPos2 == BlockTypes.AIR) {
+                if (typeBelowPos.getType() == BlockTypes.AIR && typeBelowPos2.getType() == BlockTypes.AIR) {
                     return false;
                 }
 
                 // We'll fall onto a block, need to make sure its safe
-                if (typeBelowPos != BlockTypes.AIR && !isSafeFloorMaterial(((Block) typeBelowPos).getMaterial((IBlockState) typeBelowPos.getDefaultState()))) {
+                if (typeBelowPos.getType() != BlockTypes.AIR && !isSafeFloorMaterial(BlockUtil.toNative(typeBelowPos).getMaterial())) {
                     return false;
                 }
 
                 // We'll fall through an air block to another, need to make sure
                 // its safe
-                return isSafeFloorMaterial(((Block) typeBelowPos2).getMaterial((IBlockState) typeBelowPos2.getDefaultState()));
+                return isSafeFloorMaterial(BlockUtil.toNative(typeBelowPos2).getMaterial());
             }
 
             // We have a non-air floor, need to ensure its safe
-            return isSafeFloorMaterial(((Block) block).getMaterial((IBlockState) block.getDefaultState()));
+            return isSafeFloorMaterial(blockState.getMaterial());
         }
 
         // We need to make sure the block at our torso or head is safe
-        return isSafeBodyMaterial(((Block) block).getMaterial((IBlockState) block.getDefaultState()));
+        return isSafeBodyMaterial(blockState.getMaterial());
     }
 
     private boolean isSafeFloorMaterial(Material material) {
