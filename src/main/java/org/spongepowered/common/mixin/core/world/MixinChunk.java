@@ -791,6 +791,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                     .add(sourceCause)
                     .add(chunkProviderCause)
+                    .add(NamedCause.of("ChunkPos", new Vector2i(x, z)))
                     .addCaptures()
                     .complete());
             generator.populate(x, z);

@@ -96,6 +96,8 @@ public final class CauseTracker {
 
     @Nullable private PhaseData currentProcessingState = null;
 
+    private final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().isCauseTrackerVerbose();
+
     public CauseTracker(WorldServer targetWorld) {
         if (((IMixinWorldServer) targetWorld).getCauseTracker() != null) {
             throw new IllegalArgumentException("Attempting to create a new CauseTracker for a world that already has a CauseTracker!!");
@@ -110,7 +112,8 @@ public final class CauseTracker {
         checkNotNull(state, "State cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
-        if (this.stack.size() > 6) {
+        final IPhaseState currentState = this.stack.peek().getState();
+        if (this.stack.size() > 6 && currentState.isExpectedForReEntrance() && this.isVerbose) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumilation.
             PrettyPrinter printer = new PrettyPrinter(60);
@@ -124,7 +127,6 @@ public final class CauseTracker {
             printer.add(new Exception("Stack trace"));
             printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
         }
-        IPhaseState currentState = this.stack.peekState();
         if (!currentState.canSwitchTo(state) && (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING)) {
             // This is to detect incompatible phase switches.
             PrettyPrinter printer = new PrettyPrinter(80);
@@ -147,7 +149,7 @@ public final class CauseTracker {
     public void completePhase() {
         final PhaseData currentPhaseData = this.stack.peek();
         IPhaseState state = currentPhaseData.getState();
-        if (this.stack.size() > 6) {
+        if (this.stack.size() > 6 && state.isExpectedForReEntrance() && this.isVerbose) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumulation.
             PrettyPrinter printer = new PrettyPrinter(60);

@@ -72,6 +72,9 @@ public class GlobalConfig extends ConfigBase {
     @Setting
     protected GlobalWorldCategory world = new GlobalWorldCategory();
 
+    @Setting("cause-tracker-verbose")
+    private boolean isCauseTrackerVerbose = false;
+
     public GlobalConfig() {
         super();
     }
@@ -115,12 +118,18 @@ public class GlobalConfig extends ConfigBase {
         return this.ipSets.containsKey(name) ? Predicates.and(this.ipSets.get(name)) : null;
     }
 
+    @Override
     public GlobalWorldCategory getWorld() {
         return this.world;
     }
 
+    @Override
     public boolean isConfigEnabled() {
         // always return true as there is only 1 global config
         return true;
+    }
+
+    public boolean isCauseTrackerVerbose() {
+        return this.isCauseTrackerVerbose;
     }
 }

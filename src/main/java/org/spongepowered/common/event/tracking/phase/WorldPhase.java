@@ -127,6 +127,11 @@ public final class WorldPhase extends TrackingPhase {
             return this.compatibleStates.contains(state);
         }
 
+        @Override
+        public boolean isExpectedForReEntrance() {
+            return true;
+        }
+
         public boolean captureEntitySpawn(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
             final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
             if (minecraftEntity instanceof EntityItem) {
@@ -135,6 +140,8 @@ public final class WorldPhase extends TrackingPhase {
                 return context.getCapturedEntities().add(entity);
             }
         }
+
+
     }
 
     public enum Tick implements ITickingState {
