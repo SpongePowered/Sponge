@@ -373,7 +373,7 @@ public final class WorldManager {
 
     public static void unloadQueuedWorlds() {
         while (unloadQueue.peek() != null) {
-            unloadWorld(unloadQueue.poll(), false, true);
+            unloadWorld(unloadQueue.poll(), false, true, false);
         }
 
         unloadQueue.clear();
@@ -385,25 +385,31 @@ public final class WorldManager {
     }
 
     // TODO Result
-    public static boolean unloadWorld(WorldServer worldServer, boolean checkConfig, boolean save) {
+    public static boolean unloadWorld(WorldServer worldServer, boolean checkConfig, boolean save, boolean force) {
         checkNotNull(worldServer);
         final MinecraftServer server = SpongeImpl.getServer();
 
+        // Likely leaked, don't want to drop leaked world data
         if (!worldByDimensionId.containsValue(worldServer)) {
             return false;
         }
 
-        if (!worldServer.playerEntities.isEmpty()) {
-            return false;
-        }
-
-        if (checkConfig) {
-            if (((IMixinWorldServer) worldServer).getActiveConfig().getConfig().getWorld().getKeepSpawnLoaded()) {
+        // Force is only true if we're stopping server. Vanilla sometimes doesn't remove player entities from world first
+        if (!force) {
+            if (!worldServer.playerEntities.isEmpty()) {
                 return false;
+            }
+
+            // We only check config if base game wants to unload world. If mods/plugins say unload, we unload
+            if (checkConfig) {
+                if (((IMixinWorldServer) worldServer).getActiveConfig().getConfig().getWorld().getKeepSpawnLoaded()) {
+                    return false;
+                }
             }
         }
 
         try {
+            // We do not perform a save when stopping server as that happens before the actual unload call
             if (save) {
                 saveWorld(worldServer, true);
             }
