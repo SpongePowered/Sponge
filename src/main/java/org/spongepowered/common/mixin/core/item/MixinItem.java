@@ -60,11 +60,6 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     @Shadow
     public abstract String getUnlocalizedName();
 
-    @Inject(method = "registerItem(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V", at = @At("RETURN"))
-    private static void registerMinecraftItem(int id, ResourceLocation name, Item item, CallbackInfo ci) {
-        ItemTypeRegistryModule.getInstance().registerAdditionalCatalog((ItemType) item);
-    }
-
     @Override
     public String getId() {
         if ((Object) this == ItemTypeRegistryModule.NONE_ITEM) {
