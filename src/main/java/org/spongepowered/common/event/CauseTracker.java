@@ -1100,9 +1100,12 @@ public final class CauseTracker {
     }
 
     public void randomTickBlock(Block block, BlockPos pos, IBlockState state, Random random) {
+        boolean captureBlocks = this.isCapturingBlocks();
+        this.setCaptureBlocks(true);
         this.preTrackBlock(state, pos);
         block.randomTick(this.getMinecraftWorld(), pos, state, random);
         this.postTrackBlock();
+        this.setCaptureBlocks(captureBlocks);
     }
 
     // By this point, currentPending(NextTickListEntry) should always be available
@@ -1130,8 +1133,11 @@ public final class CauseTracker {
         }
 
         this.addCause(Cause.of(namedCauses));
+        boolean captureBlocks = this.isCapturingBlocks();
+        this.setCaptureBlocks(true);
         block.updateTick(this.getMinecraftWorld(), pos, state, rand);
         this.postTrackBlock();
+        this.setCaptureBlocks(captureBlocks);
         this.currentPendingBlockUpdate = null;
         this.currentTickTileEntity = null;
     }

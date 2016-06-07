@@ -1236,11 +1236,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
             return;
         }
 
+        boolean captureBlocks = this.causeTracker.isCapturingBlocks();
+        this.causeTracker.setCaptureBlocks(true);
         causeTracker.preTrackEntity((org.spongepowered.api.entity.Entity) entity);
         entity.onUpdate();
         updateRotation(entity);
         SpongeCommonEventFactory.handleEntityMovement(entity);
         causeTracker.postTrackEntity();
+        this.causeTracker.setCaptureBlocks(captureBlocks);
     }
 
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;updateRidden()V"))
@@ -1251,9 +1254,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
             return;
         }
 
+        boolean captureBlocks = this.causeTracker.isCapturingBlocks();
+        this.causeTracker.setCaptureBlocks(true);
         causeTracker.preTrackEntity((org.spongepowered.api.entity.Entity) entity);
         entity.updateRidden();
         causeTracker.postTrackEntity();
+        this.causeTracker.setCaptureBlocks(captureBlocks);
     }
 
     @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))

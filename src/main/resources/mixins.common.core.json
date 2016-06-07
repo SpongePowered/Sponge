@@ -40,7 +40,6 @@
         "block.MixinBlockDoubleWoodSlab",
         "block.MixinBlockEnderChest",
         "block.MixinBlockEndPortalFrame",
-        "block.MixinBlockEventData",
         "block.MixinBlockFalling",
         "block.MixinBlockFarmland",
         "block.MixinBlockFence",

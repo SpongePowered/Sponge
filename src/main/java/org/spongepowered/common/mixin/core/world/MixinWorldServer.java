@@ -31,7 +31,6 @@ import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -40,6 +39,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
+import net.minecraft.tileentity.TileEntityPiston;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ReportedException;
@@ -50,7 +50,6 @@ import net.minecraft.world.WorldServer.ServerBlockEventList;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.apache.logging.log4j.Level;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -89,15 +88,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -264,90 +260,6 @@ public abstract class MixinWorldServer extends MixinWorld {
         spongeBlock.getTimingsHandler().stopTiming();
     }
 
-    /**
-     * @author bloodmc - May 5th, 2016
-     *
-     * @reason Used for tracking players when vanilla blocks such as pistons add an event to queue
-     */
-    @Overwrite
-    public void addBlockEvent(BlockPos pos, Block blockIn, int eventID, int eventParam) {
-        BlockEventData blockeventdata = new BlockEventData(pos, blockIn, eventID, eventParam);
-
-        for (BlockEventData blockeventdata1 : this.blockEventQueue[this.blockEventCacheIndex]) {
-            if (blockeventdata1.equals(blockeventdata)) {
-                return;
-            }
-        }
-
-        final CauseTracker causeTracker = this.getCauseTracker();
-        if (!causeTracker.isCapturingBlocks()) {
-            this.blockEventQueue[this.blockEventCacheIndex].add(blockeventdata);
-            return;
-        }
-
-        IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockeventdata;
-        Block block = blockEvent.getEventBlock();
-        BlockPos targetPos = blockEvent.getEventBlockPosition();
-        Optional<User> sourceUser = causeTracker.tryAndTrackActiveUser(targetPos, PlayerTracker.Type.NOTIFIER);
-
-        if (!sourceUser.isPresent()) {
-            if (causeTracker.hasTickingTileEntity()) {
-                TileEntity tileEntity = causeTracker.getCurrentTickTileEntity().get();
-                blockEvent.setCurrentTickTileEntity(tileEntity);
-                if (!causeTracker.hasNotifier()) {
-                    sourceUser = causeTracker.trackTargetBlockFromSource(tileEntity, ((net.minecraft.tileentity.TileEntity) tileEntity).getPos(), block, targetPos, PlayerTracker.Type.NOTIFIER);
-                }
-            } else if (causeTracker.hasTickingBlock()) {
-                BlockSnapshot blockSnapshot = causeTracker.getCurrentTickBlock().get();
-                blockEvent.setCurrentTickBlock(blockSnapshot);
-                if (!causeTracker.hasNotifier()) {
-                    sourceUser = causeTracker.trackTargetBlockFromSource(blockSnapshot, ((SpongeBlockSnapshot) blockSnapshot).getBlockPos(), block, targetPos, PlayerTracker.Type.NOTIFIER);
-                }
-            }
-        }
-        if (sourceUser.isPresent()) {
-            blockEvent.setSourceUser(sourceUser.get());
-        }
-
-        this.blockEventQueue[this.blockEventCacheIndex].add(blockeventdata);
-    }
-
-    /**
-     * @author bloodmc - May 5th, 2016
-     *
-     * @reason Used to set proper tracking info before block event is processed
-     */
-    @Overwrite
-    private boolean fireBlockEvent(BlockEventData event) {
-        final CauseTracker causeTracker = this.getCauseTracker();
-        IBlockState currentState = ((WorldServer)(Object)this).getBlockState(event.getPosition());
-        boolean result = false;
-        if (currentState.getBlock() == event.getBlock()) {
-            if (!causeTracker.isCapturingBlocks()) {
-                return currentState.getBlock().onBlockEventReceived(((WorldServer)(Object) this), event.getPosition(), currentState, event.getEventID(), event.getEventParameter());
-            }
-
-            IMixinBlockEventData blockEvent = (IMixinBlockEventData) event;
-            if (blockEvent.hasTickingBlock()) {
-                causeTracker.setCurrentTickBlock(blockEvent.getCurrentTickBlock().get());
-            } else if (!causeTracker.hasTickingTileEntity() && blockEvent.hasTickingTileEntity()) {
-                causeTracker.setCurrentTickTileEntity(blockEvent.getCurrentTickTileEntity().get());
-            }
-            if (blockEvent.hasSourceUser()) {
-                causeTracker.setCurrentNotifier(blockEvent.getSourceUser().get());
-            }
-
-            boolean captureBlocks = causeTracker.isCapturingBlocks();
-            causeTracker.setCaptureBlocks(false);
-            result = currentState.getBlock().onBlockEventReceived(((WorldServer)(Object) this), event.getPosition(), currentState, event.getEventID(), event.getEventParameter());
-            causeTracker.setCaptureBlocks(captureBlocks);
-            causeTracker.setCurrentTickTileEntity(null);
-            causeTracker.setCurrentTickBlock(null);
-            causeTracker.setCurrentNotifier(null);
-        }
-        return result;
-    }
-
     @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickPending") )
     private void onBeginTickBlockUpdate(CallbackInfo ci) {
         this.timings.scheduledBlocks.startTiming();
@@ -419,6 +331,8 @@ public abstract class MixinWorldServer extends MixinWorld {
             {
                 ++entity.ticksExisted;
                 // Sponge start - handle tracking and timings
+                boolean captureBlocks = this.causeTracker.isCapturingBlocks();
+                this.causeTracker.setCaptureBlocks(true);
                 this.causeTracker.preTrackEntity(spongeEntity);
                 spongeEntity.getTimingsHandler().startTiming();
                 entity.onUpdate();
@@ -426,6 +340,7 @@ public abstract class MixinWorldServer extends MixinWorld {
                 updateRotation(entity);
                 SpongeCommonEventFactory.handleEntityMovement(entity);
                 this.causeTracker.postTrackEntity();
+                this.causeTracker.setCaptureBlocks(captureBlocks);
                 // Sponge end
             }
             catch (Throwable throwable2)
@@ -564,11 +479,19 @@ public abstract class MixinWorldServer extends MixinWorld {
                     try
                     {
                         // Sponge start - handle captures and timings
-                        spongeTile.getTimingsHandler().startTiming();
-                        this.causeTracker.preTrackTileEntity((TileEntity) tileentity);
-                        ((ITickable)tileentity).update();
-                        this.causeTracker.postTrackTileEntity();
-                        spongeTile.getTimingsHandler().stopTiming();
+                        // pistons are handled in MixinBlockPistonBase doMove method since they recreate TE's during move
+                        if (tileentity instanceof TileEntityPiston || this.causeTracker.hasTickingTileEntity()) {
+                            ((ITickable)tileentity).update();
+                        } else {
+                            spongeTile.getTimingsHandler().startTiming();
+                            boolean captureBlocks = this.causeTracker.isCapturingBlocks();
+                            this.causeTracker.setCaptureBlocks(true);
+                            this.causeTracker.preTrackTileEntity((TileEntity) tileentity);
+                            ((ITickable)tileentity).update();
+                            this.causeTracker.postTrackTileEntity();
+                            this.causeTracker.setCaptureBlocks(captureBlocks);
+                            spongeTile.getTimingsHandler().stopTiming();
+                        }
                         // Sponge end
                     }
                     catch (Throwable throwable)
