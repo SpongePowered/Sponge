@@ -148,6 +148,9 @@ public final class SpongePlayerDataHandler {
         try {
             final String pathString = instance.playerDir.toString() + File.separator + id;
             File newFile = new File(pathString + "_new.dat");
+            if (!newFile.exists()) {
+                newFile.createNewFile();
+            }
             File finalFile = new File(pathString + ".dat");
             try (FileOutputStream stream = new FileOutputStream(newFile)) {
                 CompressedStreamTools.writeCompressed(compound, stream);
