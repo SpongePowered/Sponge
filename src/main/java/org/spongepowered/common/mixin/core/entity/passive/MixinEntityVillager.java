@@ -74,7 +74,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Shadow private int careerLevel;
     @Shadow @Nullable private MerchantRecipeList buyingList;
 
-    @Shadow public abstract int getProfession();
+    @Shadow public abstract int shadow$getProfession();
     @Shadow public abstract void setProfession(int professionId);
     @Shadow public abstract void setCustomer(EntityPlayer player);
     @Shadow public abstract boolean shadow$isTrading();
@@ -111,6 +111,11 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         }
         this.getRecipes(null);
         return careers.get(this.careerId - 1);
+    }
+
+    @Override
+    public Profession getProfession() {
+        return this.profession;
     }
 
     @Override

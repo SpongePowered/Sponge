@@ -65,10 +65,13 @@ public class ProfessionRegistryModule implements SpongeAdditionalCatalogRegistry
 
     @Override
     public void registerAdditionalCatalog(Profession extraCatalog) {
-        if (extraCatalog.getId().toLowerCase(Locale.ENGLISH).equals("smith")) {
+        final String catalogId = extraCatalog.getId().toLowerCase(Locale.ENGLISH);
+        if (catalogId.equals("smith")) {
             return;
         }
-        this.professionMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
+        if (!this.professionMap.containsKey(catalogId)) {
+            this.professionMap.put(catalogId, extraCatalog);
+        }
     }
 
     @Override
@@ -86,18 +89,18 @@ public class ProfessionRegistryModule implements SpongeAdditionalCatalogRegistry
         SpongeProfession profession = (SpongeProfession) checkNotNull(career).getProfession();
         List<SpongeCareer> careers = (List<SpongeCareer>) (List) profession.getUnderlyingCareers();
         boolean isRegistered = false;
+        final SpongeCareer spongeCareer = (SpongeCareer) career;
         for (SpongeCareer professionCareer : careers) {
-            if (((SpongeCareer) career).type == professionCareer.type) {
+            if (spongeCareer.type == professionCareer.type) {
                 isRegistered = true;
             }
         }
         if (!isRegistered) {
-            if (!careers.contains((SpongeCareer) career)) {
-                careers.add((SpongeCareer) career);
+            if (!careers.contains(spongeCareer)) {
+                careers.add(spongeCareer);
+                Collections.sort(careers, CareerRegistryModule.CAREER_COMPARATOR);
             }
         }
-        Collections.sort(careers, CareerRegistryModule.CAREER_COMPARATOR);
-
     }
 
     @Override

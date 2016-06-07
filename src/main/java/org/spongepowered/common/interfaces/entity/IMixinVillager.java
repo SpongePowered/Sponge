@@ -25,12 +25,17 @@
 package org.spongepowered.common.interfaces.entity;
 
 import org.spongepowered.api.data.type.Career;
+import org.spongepowered.api.data.type.Profession;
 
 public interface IMixinVillager {
 
     void setCareer(Career career);
 
     Career getCareer();
+
+    Profession getProfession();
+
+    void setProfession(Profession profession);
 
     boolean isPlaying();
 

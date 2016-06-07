@@ -267,7 +267,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Player> getPlayers() {
-        return (Collection<Player>) (Object) playerEntities;
+        return (Collection<Player>) (Object) this.playerEntities;
     }
 
     @Override
