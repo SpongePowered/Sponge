@@ -50,6 +50,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -404,6 +405,16 @@ public final class GeneralPhase extends TrackingPhase {
     @Override
     public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
         return currentState == Post.UNWINDING;
+    }
+
+    @Override
+    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+        final IPhaseState unwindingState = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to be unwinding a phase but no phase unwinding found!", context));
+        final PhaseContext unwindingContext = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to be unwinding a phase with a context, but no context found!", context));
+        unwindingState.getPhase().associateNeighborStateNotifier(unwindingState, unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
     }
 
     @Override

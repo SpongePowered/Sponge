@@ -217,6 +217,7 @@ public final class TrackingUtil {
         Stream.<Supplier<Optional<?>>>of(blockEvent::getCurrentTickBlock, blockEvent::getCurrentTickTileEntity, () -> Optional.of(blockEvent))
                 .map(Supplier::get)
                 .filter(Optional::isPresent)
+                .map(Optional::get)
                 .findFirst()
                 .ifPresent(obj -> phaseContext.add(NamedCause.source(obj)));
 

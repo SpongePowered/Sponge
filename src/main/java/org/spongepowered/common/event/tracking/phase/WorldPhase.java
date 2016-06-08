@@ -28,7 +28,6 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -68,7 +67,6 @@ import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -311,25 +309,6 @@ public final class WorldPhase extends TrackingPhase {
                 GeneralFunctions.processUserBreakage(blockChange, minecraftWorld, snapshotTransaction, context.firstNamed(NamedCause.SOURCE, Entity.class).get());
             }
 
-            @Override
-            public void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context, Transaction<BlockSnapshot> transaction) {
-                context.firstNamed(NamedCause.SOURCE, Entity.class).ifPresent(tickingEntity -> {
-                    final IMixinEntity mixinEntity = EntityUtil.toMixin(tickingEntity);
-                    Stream.<Supplier<Optional<User>>>of(() -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER),
-                            () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR))
-                            .map(Supplier::get)
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .findFirst()
-                            .ifPresent(user -> {
-                                final BlockPos notification = VecHelper.toBlockPos(transaction.getFinal().getPosition());
-                                final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notification);
-                                final Block notificationBlock = (Block) transaction.getFinal().getState().getType();
-                                mixinChunk.addTrackedBlockPosition(notificationBlock, notification, user, PlayerTracker.Type.NOTIFIER);
-                            });
-                });
-            }
-
 
             @Override
             public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
@@ -388,6 +367,46 @@ public final class WorldPhase extends TrackingPhase {
             }
         },
         TILE_ENTITY() {
+
+            @Override
+            public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                    WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+                context.firstNamed(NamedCause.SOURCE, TileEntity.class).ifPresent(tileEntity -> {
+                    final Vector3d position = tileEntity.getLocation().getPosition();
+                    final BlockPos blockPos = VecHelper.toBlockPos(position);
+                    final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(blockPos);
+                    Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
+                            .map(Supplier::get)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .findFirst()
+                            .ifPresent(user -> {
+                                mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
+                            });
+                });
+            }
+
+            @Override
+            public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
+                final TileEntity tileEntity = context.firstNamed(NamedCause.SOURCE, TileEntity.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking over a tile entity, but no tile entity found!", context));
+                final Location<World> location = tileEntity.getLocation();
+                final Vector3d position = location.getPosition();
+                final BlockPos sourcePos = VecHelper.toBlockPos(position);
+                final IMixinChunk sourceChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(sourcePos);
+                final Block changedBlock = (Block) snapshotTransaction.getOriginal().getState().getType();
+                final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
+                final Vector3d changedPosition = changedLocation.getPosition();
+                final BlockPos changedBlockPos = VecHelper.toBlockPos(changedPosition);
+                final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunkFromBlockCoords(changedBlockPos);
+                Stream.<Supplier<Optional<User>>>of(() -> sourceChunk.getBlockNotifier(sourcePos), () -> sourceChunk.getBlockOwner(sourcePos))
+                        .map(Supplier::get)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                        .ifPresent(user -> changedMixinChunk.addTrackedBlockPosition(changedBlock, changedBlockPos, user, PlayerTracker.Type.NOTIFIER));
+            }
+
             @Override
             public void assignEntityCreator(PhaseContext context, Entity entity) {
                 final TileEntity tickingTile = context.firstNamed(NamedCause.SOURCE, TileEntity.class)
@@ -454,25 +473,6 @@ public final class WorldPhase extends TrackingPhase {
             }
 
             @Override
-            public void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context, Transaction<BlockSnapshot> transaction) {
-                context.firstNamed(NamedCause.SOURCE, TileEntity.class).ifPresent(tileEntity -> {
-                    final Vector3d position = tileEntity.getLocation().getPosition();
-                    final BlockPos blockPos = VecHelper.toBlockPos(position);
-                    final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(blockPos);
-                    Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
-                            .map(Supplier::get)
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .findFirst()
-                            .ifPresent(user -> {
-                                final BlockPos notification = VecHelper.toBlockPos(transaction.getFinal().getPosition());
-                                final Block notificationBlock = (Block) transaction.getFinal().getState().getType();
-                                mixinChunk.addTrackedBlockPosition(notificationBlock, notification, user, PlayerTracker.Type.NOTIFIER);
-                            });
-                });
-            }
-
-            @Override
             public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
                 final TileEntity tickingTile = context.firstNamed(NamedCause.SOURCE, TileEntity.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a TileEntity!", context));
@@ -490,6 +490,47 @@ public final class WorldPhase extends TrackingPhase {
             }
         },
         BLOCK() {
+
+            @Override
+            public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                    WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+                context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).ifPresent(snapshot -> {
+                    final Vector3d position = snapshot.getLocation().get().getPosition();
+                    final BlockPos blockPos = VecHelper.toBlockPos(position);
+                    final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(blockPos);
+                    Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
+                            .map(Supplier::get)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .findFirst()
+                            .ifPresent(user -> {
+                                mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
+                            });
+                });
+            }
+
+            @Override
+            public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
+                final BlockSnapshot snapshot = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking over a tile entity, but no tile entity found!", context));
+                final Location<World> location = snapshot.getLocation().get();
+                final Vector3d position = location.getPosition();
+                final BlockPos sourcePos = VecHelper.toBlockPos(position);
+                final IMixinChunk sourceChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(sourcePos);
+                final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
+                final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
+                final Vector3d changedPosition = changedLocation.getPosition();
+                final BlockPos changedBlockPos = VecHelper.toBlockPos(changedPosition);
+                final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunkFromBlockCoords(changedBlockPos);
+                Stream.<Supplier<Optional<User>>>of(() -> sourceChunk.getBlockNotifier(sourcePos), () -> sourceChunk.getBlockOwner(sourcePos))
+                        .map(Supplier::get)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                        .ifPresent(user -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER));
+            }
+
+
             @Override
             public void assignEntityCreator(PhaseContext context, Entity entity) {
                 final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
@@ -556,24 +597,6 @@ public final class WorldPhase extends TrackingPhase {
                                     .process();
                         });
             }
-            @Override
-            public void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context, Transaction<BlockSnapshot> transaction) {
-                context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).ifPresent(snapshot -> {
-                    final Vector3d position = snapshot.getLocation().get().getPosition();
-                    final BlockPos blockPos = VecHelper.toBlockPos(position);
-                    final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(blockPos);
-                    Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
-                            .map(Supplier::get)
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .findFirst()
-                            .ifPresent(user -> {
-                                final BlockPos notification = VecHelper.toBlockPos(transaction.getFinal().getPosition());
-                                final Block notificationBlock = (Block) transaction.getFinal().getState().getType();
-                                mixinChunk.addTrackedBlockPosition(notificationBlock, notification, user, PlayerTracker.Type.NOTIFIER);
-                            });
-                });
-            }
 
             @Override
             public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
@@ -593,6 +616,55 @@ public final class WorldPhase extends TrackingPhase {
             }
         },
         BLOCK_EVENT() {
+            @Override
+            public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                    WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+                context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).ifPresent(snapshot -> {
+                    final Vector3d position = snapshot.getLocation().get().getPosition();
+                    final BlockPos blockPos = VecHelper.toBlockPos(position);
+                    final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(blockPos);
+                    Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
+                            .map(Supplier::get)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .findFirst()
+                            .ifPresent(user -> {
+                                mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
+                            });
+                });
+            }
+
+            @Override
+            public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
+                final Location location = Stream.<Supplier<Optional<Location>>>
+                        of(
+                        () -> context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).map(snapshot -> snapshot.getLocation().get()),
+                        () -> context.firstNamed(NamedCause.SOURCE, TileEntity.class).map(tile -> tile.getLocation()),
+                        () -> context.firstNamed(NamedCause.SOURCE, IMixinBlockEventData.class).map(data ->
+                                new Location<>((World) minecraftWorld, VecHelper.toVector3d(data.getEventBlockPosition())))
+                )
+                        .map(Supplier::get)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be throwing a block event for a tile entity or a snapshot but got none!",
+                                        context));
+                final Vector3d position = location.getPosition();
+                final BlockPos sourcePos = VecHelper.toBlockPos(position);
+                final IMixinChunk sourceChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(sourcePos);
+                final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
+                final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
+                final Vector3d changedPosition = changedLocation.getPosition();
+                final BlockPos changedBlockPos = VecHelper.toBlockPos(changedPosition);
+                final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunkFromBlockCoords(changedBlockPos);
+                Stream.<Supplier<Optional<User>>>of(() -> sourceChunk.getBlockNotifier(sourcePos), () -> sourceChunk.getBlockOwner(sourcePos))
+                        .map(Supplier::get)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                        .ifPresent(user -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER));
+            }
+
             @Override
             public void assignEntityCreator(PhaseContext context, Entity entity) {
                 final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
@@ -646,37 +718,6 @@ public final class WorldPhase extends TrackingPhase {
                                     .process();
                         });
             }
-            @Override
-            public void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context, Transaction<BlockSnapshot> transaction) {
-
-                Stream.<Supplier<Optional<Vector3d>>>of(
-                        () -> context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
-                                .map(blockSnapshot -> blockSnapshot.getLocation().get().getPosition()),
-                        () -> context.firstNamed(NamedCause.SOURCE, TileEntity.class)
-                                .map(tileEntity -> tileEntity.getLocation().getPosition())
-                )
-                        .map(Supplier::get)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .findFirst()
-                        .map(vector3d -> VecHelper.toBlockPos(vector3d))
-                        .ifPresent(blockPos -> {
-                            final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(blockPos);
-                            Stream.<Supplier<Optional<User>>>of(
-                                    () -> mixinChunk.getBlockNotifier(blockPos),
-                                    () -> mixinChunk.getBlockOwner(blockPos)
-                            )
-                                    .map(Supplier::get)
-                                    .filter(Optional::isPresent)
-                                    .map(Optional::get)
-                                    .findFirst()
-                                    .ifPresent(user -> {
-                                        final BlockPos notification = VecHelper.toBlockPos(transaction.getFinal().getPosition());
-                                        final Block notificationBlock = (Block) transaction.getFinal().getState().getType();
-                                        mixinChunk.addTrackedBlockPosition(notificationBlock, notification, user, PlayerTracker.Type.NOTIFIER);
-                                    });
-                        });
-            }
 
             @Override
             public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
@@ -691,6 +732,45 @@ public final class WorldPhase extends TrackingPhase {
             }
         },
         RANDOM_BLOCK() {
+            @Override
+            public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                    WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+                context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).ifPresent(snapshot -> {
+                    final Vector3d position = snapshot.getLocation().get().getPosition();
+                    final BlockPos blockPos = VecHelper.toBlockPos(position);
+                    final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(blockPos);
+                    Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
+                            .map(Supplier::get)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .findFirst()
+                            .ifPresent(user -> {
+                                mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
+                            });
+                });
+            }
+
+            @Override
+            public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
+                final BlockSnapshot snapshot = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking over a tile entity, but no tile entity found!", context));
+                final Location<World> location = snapshot.getLocation().get();
+                final Vector3d position = location.getPosition();
+                final BlockPos sourcePos = VecHelper.toBlockPos(position);
+                final IMixinChunk sourceChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(sourcePos);
+                final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
+                final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
+                final Vector3d changedPosition = changedLocation.getPosition();
+                final BlockPos changedBlockPos = VecHelper.toBlockPos(changedPosition);
+                final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunkFromBlockCoords(changedBlockPos);
+                Stream.<Supplier<Optional<User>>>of(() -> sourceChunk.getBlockNotifier(sourcePos), () -> sourceChunk.getBlockOwner(sourcePos))
+                        .map(Supplier::get)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                        .ifPresent(user -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER));
+            }
+
             @Override
             public void assignEntityCreator(PhaseContext context, Entity entity) {
                 final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
@@ -730,24 +810,6 @@ public final class WorldPhase extends TrackingPhase {
                                     })
                                     .process();
                         });
-            }
-            @Override
-            public void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context, Transaction<BlockSnapshot> transaction) {
-                context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).ifPresent(snapshot -> {
-                    final Vector3d position = snapshot.getLocation().get().getPosition();
-                    final BlockPos blockPos = VecHelper.toBlockPos(position);
-                    final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(blockPos);
-                    Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
-                            .map(Supplier::get)
-                            .filter(Optional::isPresent)
-                            .map(Optional::get)
-                            .findFirst()
-                            .ifPresent(user -> {
-                                final BlockPos notification = VecHelper.toBlockPos(transaction.getFinal().getPosition());
-                                final Block notificationBlock = (Block) transaction.getFinal().getState().getType();
-                                mixinChunk.addTrackedBlockPosition(notificationBlock, notification, user, PlayerTracker.Type.NOTIFIER);
-                            });
-                });
             }
 
             @Override
@@ -810,15 +872,6 @@ public final class WorldPhase extends TrackingPhase {
                 phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
                     GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
                 });
-            }
-
-            @Override
-            public void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context,
-                    Transaction<BlockSnapshot> transaction) {
-                final BlockPos notification = VecHelper.toBlockPos(transaction.getFinal().getPosition());
-                final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notification);
-                final Block notificationBlock = (Block) transaction.getFinal().getState().getType();
-                mixinChunk.addTrackedBlockPosition(notificationBlock, notification, context.first(Player.class).get(), PlayerTracker.Type.NOTIFIER);
             }
 
             @Override
@@ -886,15 +939,11 @@ public final class WorldPhase extends TrackingPhase {
 
         public abstract void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker);
 
-        public void appendNotifier(ITickable tile, PhaseContext phaseContext) {
-
-        }
-
         public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
 
         }
 
-        public void associateTickNotifier(PhaseContext context, IMixinNextTickListEntry obj) {
+        public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos, WorldServer minecraftWorld, PlayerTracker.Type notifier) {
 
         }
     }
@@ -985,7 +1034,7 @@ public final class WorldPhase extends TrackingPhase {
 
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return currentState instanceof Tick && currentState != Tick.BLOCK_EVENT;
+        return currentState instanceof Tick;
     }
 
     @Override
@@ -1018,6 +1067,14 @@ public final class WorldPhase extends TrackingPhase {
             PhaseContext newContext) {
         if (currentState == Tick.BLOCK || currentState == Tick.RANDOM_BLOCK) {
 
+        }
+    }
+
+    @Override
+    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+        if (state instanceof Tick) {
+            ((Tick) state).associateNeighborBlockNotifier(context, sourcePos, block, notifyPos, minecraftWorld, notifier);
         }
     }
 

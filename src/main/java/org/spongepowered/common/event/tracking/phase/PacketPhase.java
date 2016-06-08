@@ -400,11 +400,6 @@ public final class PacketPhase extends TrackingPhase {
                 context.addBlockCaptures().addEntityCaptures();
             }
 
-            @Override
-            public void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context,
-                    Transaction<BlockSnapshot> snapshotTransaction) {
-
-            }
         },
         INTERACTION() {
             @Override
@@ -547,17 +542,10 @@ public final class PacketPhase extends TrackingPhase {
                 Player player = context.first(Player.class).get();
                 BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
                 IMixinChunk spongeChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(pos);
-                spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.OWNER);
+                if (blockChange == BlockChange.PLACE) {
+                    spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.OWNER);
+                }
                 spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.NOTIFIER);
-            }
-
-            @Override
-            public void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context, Transaction<BlockSnapshot> transaction) {
-                final Player player = context.first(Player.class).get();
-                final BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
-                final IMixinChunk spongeChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(pos);
-                spongeChunk.addTrackedBlockPosition(((Block) transaction.getFinal().getState().getType()), pos, player, PlayerTracker.Type.NOTIFIER);
-
             }
 
             @Override
