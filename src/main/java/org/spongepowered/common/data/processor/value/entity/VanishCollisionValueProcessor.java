@@ -37,15 +37,15 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Optional;
 
-public class InvisibilityTargetValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
+public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
 
-    public InvisibilityTargetValueProcessor() {
-        super(Entity.class, Keys.INVISIBILITY_PREVENTS_TARGETING);
+    public VanishCollisionValueProcessor() {
+        super(Entity.class, Keys.VANISH_IGNORES_COLLISION);
     }
 
     @Override
     protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<Boolean>(Keys.INVISIBILITY_PREVENTS_TARGETING, false, actualValue);
+        return new SpongeValue<Boolean>(Keys.VANISH_IGNORES_COLLISION, false, actualValue);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class InvisibilityTargetValueProcessor extends AbstractSpongeValueProcess
             if (!((IMixinEntity) container).isVanished()) {
                 return false;
             }
-            ((IMixinEntity) container).setUntargetable(value);
+            ((IMixinEntity) container).setIgnoresCollision(value);
             return true;
         }
         return false;
@@ -62,12 +62,12 @@ public class InvisibilityTargetValueProcessor extends AbstractSpongeValueProcess
 
     @Override
     protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(((IMixinEntity) container).isUntargetable());
+        return Optional.of(((IMixinEntity) container).ignoresCollision());
     }
 
     @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.INVISIBILITY_PREVENTS_TARGETING, false, value);
+        return ImmutableSpongeValue.cachedOf(Keys.VANISH_IGNORES_COLLISION, false, value);
     }
 
     @Override

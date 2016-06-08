@@ -319,13 +319,6 @@ public final class EntityUtil {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
-    public static boolean toggleInvisibility(Entity entity, boolean vanish) {
-        entity.setInvisible(vanish);
-        ((IMixinEntity) entity).setVanished(vanish);
-        return true;
-    }
-
     public static Profession validateProfession(int professionId) {
         List<Profession> professions = (List<Profession>) ProfessionRegistryModule.getInstance().getAll();
         for (Profession profession : professions) {

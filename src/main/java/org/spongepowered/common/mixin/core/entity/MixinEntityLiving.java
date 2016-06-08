@@ -213,7 +213,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     /**
      * @author gabizou - January 4th, 2016
      *
-     * This is to instill the check that if the entity is invisible, check whether they're untargetable
+     * This is to instill the check that if the entity is vanish, check whether they're untargetable
      * as well.
      *
      * @param entitylivingbaseIn The entity living base coming in
@@ -230,7 +230,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     /**
      * @author gabizou - January 4th, 2016
      * @reason This will still check if the current attack target
-     * is invisible and is untargetable.
+     * is vanish and is untargetable.
      *
      * @return The current attack target, if not null
      */

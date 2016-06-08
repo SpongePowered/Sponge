@@ -32,25 +32,27 @@ import org.spongepowered.api.data.manipulator.mutable.entity.InvisibilityData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeInvisibilityData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
+import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeInvisibilityData extends AbstractData<InvisibilityData, ImmutableInvisibilityData> implements InvisibilityData {
 
-    private boolean invisible;
+    private boolean vanish;
     private boolean collision;
     private boolean untargetable;
+    private boolean invisible;
 
     public SpongeInvisibilityData() {
-        this(false, false, false);
+        this(false, false, false, false);
     }
 
-    public SpongeInvisibilityData(boolean invisible, boolean collision, boolean untargetable) {
+    public SpongeInvisibilityData(boolean vanish, boolean collision, boolean untargetable, boolean invisible) {
         super(InvisibilityData.class);
-        this.invisible = invisible;
+        this.vanish = vanish;
         this.collision = collision;
         this.untargetable = untargetable;
+        this.invisible = invisible;
     }
 
     @Override
@@ -59,38 +61,53 @@ public class SpongeInvisibilityData extends AbstractData<InvisibilityData, Immut
     }
 
     @Override
+    public Value<Boolean> vanish() {
+        return new SpongeValue<>(Keys.VANISH, false, this.vanish);
+    }
+
+    @Override
     public Value<Boolean> ignoresCollisionDetection() {
-        return new SpongeValue<>(Keys.INVISIBILITY_IGNORES_COLLISION, false, this.collision);
+        return new SpongeValue<>(Keys.VANISH_IGNORES_COLLISION, false, this.collision);
     }
 
     @Override
     public Value<Boolean> untargetable() {
-        return new SpongeValue<>(Keys.INVISIBILITY_PREVENTS_TARGETING, false, this.untargetable);
+        return new SpongeValue<>(Keys.VANISH_PREVENTS_TARGETING, false, this.untargetable);
     }
 
     @Override
     protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.INVISIBLE, this::isInvisible);
+        registerFieldGetter(Keys.VANISH, this::isVanish);
+        registerFieldSetter(Keys.VANISH, (value) -> this.vanish = value);
+        registerKeyValue(Keys.VANISH, this::vanish);
+
+        registerFieldGetter(Keys.VANISH_IGNORES_COLLISION, this::isCollision);
+        registerKeyValue(Keys.VANISH_IGNORES_COLLISION, this::ignoresCollisionDetection);
+
+        registerFieldGetter(Keys.VANISH_PREVENTS_TARGETING, this::isUntargetable);
+        registerKeyValue(Keys.VANISH_PREVENTS_TARGETING, this::untargetable);
+
+        registerFieldGetter(Keys.INVISIBLE, () -> this.invisible);
         registerFieldSetter(Keys.INVISIBLE, (value) -> this.invisible = value);
         registerKeyValue(Keys.INVISIBLE, this::invisible);
+    }
 
-        registerFieldGetter(Keys.INVISIBILITY_IGNORES_COLLISION, this::isCollision);
-        registerKeyValue(Keys.INVISIBILITY_IGNORES_COLLISION, this::ignoresCollisionDetection);
-
-        registerFieldGetter(Keys.INVISIBILITY_PREVENTS_TARGETING, this::isUntargetable);
-        registerKeyValue(Keys.INVISIBILITY_PREVENTS_TARGETING, this::untargetable);
+    @Override
+    public int getContentVersion() {
+        return DataVersions.Data.INVISIBILITY_DATA_WITH_VANISH;
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.INVISIBLE, this.invisible)
-                .set(Keys.INVISIBILITY_IGNORES_COLLISION, this.collision)
-                .set(Keys.INVISIBILITY_PREVENTS_TARGETING, this.untargetable);
+                .set(Keys.VANISH, this.vanish)
+                .set(Keys.VANISH_IGNORES_COLLISION, this.collision)
+                .set(Keys.VANISH_PREVENTS_TARGETING, this.untargetable);
     }
 
-    private boolean isInvisible() {
-        return this.invisible;
+    private boolean isVanish() {
+        return this.vanish;
     }
 
     private boolean isCollision() {
@@ -106,18 +123,19 @@ public class SpongeInvisibilityData extends AbstractData<InvisibilityData, Immut
         return ComparisonChain.start()
                 .compare(o.ignoresCollisionDetection().get(), this.collision)
                 .compare(o.invisible().get(), this.invisible)
+                .compare(o.vanish().get(), this.vanish)
                 .compare(o.untargetable().get(), this.untargetable)
                 .result();
     }
 
     @Override
     public InvisibilityData copy() {
-        return new SpongeInvisibilityData(this.invisible, this.collision, this.untargetable);
+        return new SpongeInvisibilityData(this.vanish, this.collision, this.untargetable, this.invisible);
     }
 
     @Override
     public ImmutableInvisibilityData asImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeInvisibilityData.class, this.invisible, this.collision, this.untargetable);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeInvisibilityData.class, this.vanish, this.collision, this.untargetable, this.invisible);
     }
 
 }

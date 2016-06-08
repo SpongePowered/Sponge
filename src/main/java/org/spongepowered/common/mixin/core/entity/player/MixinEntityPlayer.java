@@ -221,7 +221,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     /**
      * @author gabizou - January 4th, 2016
      *
-     * This prevents sounds from being sent to the server by players who are invisible.
+     * This prevents sounds from being sent to the server by players who are vanish.
      */
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
     public void playSound(World world, EntityPlayer player, double d1, double d2, double d3, SoundEvent sound, SoundCategory category, float volume, float pitch) {

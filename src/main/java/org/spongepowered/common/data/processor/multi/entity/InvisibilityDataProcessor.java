@@ -62,15 +62,17 @@ public class InvisibilityDataProcessor
     protected boolean set(Entity dataHolder, Map<Key<?>, Object> keyValues) {
         if (!dataHolder.worldObj.isRemote) {
             final boolean invis = (Boolean) keyValues.get(Keys.INVISIBLE);
-            final boolean collision = (Boolean) keyValues.get(Keys.INVISIBILITY_IGNORES_COLLISION);
-            final boolean untargetable = (Boolean) keyValues.get(Keys.INVISIBILITY_PREVENTS_TARGETING);
+            final boolean collision = (Boolean) keyValues.get(Keys.VANISH_IGNORES_COLLISION);
+            final boolean untargetable = (Boolean) keyValues.get(Keys.VANISH_PREVENTS_TARGETING);
+            final boolean vanish = (Boolean) keyValues.get(Keys.VANISH);
             dataHolder.setInvisible(invis);
-            if (invis) {
-                EntityUtil.toggleInvisibility(dataHolder, invis);
-                ((IMixinEntity) dataHolder).setIgnoresCollision(collision);
-                ((IMixinEntity) dataHolder).setUntargetable(untargetable);
+            if (vanish) {
+                final IMixinEntity mixinEntity = EntityUtil.toMixin(dataHolder);
+                mixinEntity.setVanished(true);
+                mixinEntity.setIgnoresCollision(collision);
+                mixinEntity.setUntargetable(untargetable);
             } else {
-                return EntityUtil.toggleInvisibility(dataHolder, invis);
+                EntityUtil.toMixin(dataHolder).setVanished(false);
             }
             return true;
         }
@@ -79,15 +81,23 @@ public class InvisibilityDataProcessor
 
     @Override
     protected Map<Key<?>, ?> getValues(Entity dataHolder) {
-        return ImmutableMap.of(Keys.INVISIBLE, ((IMixinEntity) dataHolder).isVanished(),
-                Keys.INVISIBILITY_IGNORES_COLLISION, ((IMixinEntity) dataHolder).ignoresCollision(),
-                Keys.INVISIBILITY_PREVENTS_TARGETING, ((IMixinEntity) dataHolder).isUntargetable());
+        return ImmutableMap.of(Keys.INVISIBLE, dataHolder.isInvisible(),
+                Keys.VANISH, ((IMixinEntity) dataHolder).isVanished(),
+                Keys.VANISH_IGNORES_COLLISION, ((IMixinEntity) dataHolder).ignoresCollision(),
+                Keys.VANISH_PREVENTS_TARGETING, ((IMixinEntity) dataHolder).isUntargetable());
     }
 
     @Override
     public Optional<InvisibilityData> fill(DataContainer container, InvisibilityData invisibilityData) {
-
-        return Optional.empty();
+        final boolean vanished = container.getBoolean(Keys.VANISH.getQuery()).orElse(false);
+        final boolean invisible = container.getBoolean(Keys.INVISIBLE.getQuery()).orElse(false);
+        final boolean collision = container.getBoolean(Keys.VANISH_IGNORES_COLLISION.getQuery()).orElse(false);
+        final boolean targeting = container.getBoolean(Keys.VANISH_PREVENTS_TARGETING.getQuery()).orElse(false);
+        return Optional.of(invisibilityData
+                .set(Keys.VANISH, vanished)
+                .set(Keys.INVISIBLE, invisible)
+                .set(Keys.VANISH_IGNORES_COLLISION, collision)
+                .set(Keys.VANISH_PREVENTS_TARGETING, targeting));
     }
 
     @Override

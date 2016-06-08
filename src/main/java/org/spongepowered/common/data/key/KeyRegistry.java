@@ -145,7 +145,7 @@ public class KeyRegistry {
         keyMap.put("plant_type", makeSingleKey(PlantType.class, Value.class, of("PlantType")));
         keyMap.put("tree_type", makeSingleKey(TreeType.class, Value.class, of("TreeType")));
         keyMap.put("log_axis", makeSingleKey(LogAxis.class, Value.class, of("LogAxis")));
-        keyMap.put("invisible", makeSingleKey(Boolean.class, Value.class, of("Invisible")));
+        keyMap.put("vanish", makeSingleKey(Boolean.class, Value.class, of("Vanish")));
         keyMap.put("powered", makeSingleKey(Boolean.class, Value.class, of("Powered")));
         keyMap.put("layer", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Layer")));
         keyMap.put("represented_item", makeSingleKey(ItemStackSnapshot.class, Value.class, of("ItemStackSnapshot")));
@@ -282,8 +282,9 @@ public class KeyRegistry {
         keyMap.put("stored_enchantments", makeListKey(ItemEnchantment.class, of("StoredEnchantments")));
         keyMap.put("is_sprinting", makeSingleKey(Boolean.class, Value.class, of("Sprinting")));
         keyMap.put("stuck_arrows", makeSingleKey(Integer.class, MutableBoundedValue.class, of("StuckArrows")));
-        keyMap.put("invisibility_ignores_collision", makeSingleKey(Boolean.class, Value.class, of("InvisiblityIgnoresCollision")));
-        keyMap.put("invisibility_prevents_targeting", makeSingleKey(Boolean.class, Value.class, of("InvisibilityPreventsTargeting")));
+        keyMap.put("vanish_ignores_collision", makeSingleKey(Boolean.class, Value.class, of("VanishIgnoresCollision")));
+        keyMap.put("vanish_prevents_targeting", makeSingleKey(Boolean.class, Value.class, of("VanishPreventsTargeting")));
+        keyMap.put("invisible", makeSingleKey(Boolean.class, Value.class, of("Invisible")));
         keyMap.put("is_aflame", makeSingleKey(Boolean.class, Value.class, of("IsAflame")));
         keyMap.put("can_breed", makeSingleKey(Boolean.class, Value.class, of("CanBreed")));
         keyMap.put("fluid_item_stack", makeSingleKey(FluidStackSnapshot.class, Value.class, of("FluidItemContainerSnapshot")));

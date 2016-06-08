@@ -31,28 +31,29 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Optional;
 
-public class InvisibilityValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
+public class VanishValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
 
-    public InvisibilityValueProcessor() {
-        super(Entity.class, Keys.INVISIBLE);
+    public VanishValueProcessor() {
+        super(Entity.class, Keys.VANISH);
     }
 
     @Override
     protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.INVISIBLE, false, actualValue);
+        return new SpongeValue<>(Keys.VANISH, false, actualValue);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected boolean set(Entity container, Boolean value) {
         if (!container.worldObj.isRemote) {
-            container.setInvisible(value);
+            EntityUtil.toMixin(container).setVanished(value);
             return true;
         }
         return false;
@@ -60,12 +61,12 @@ public class InvisibilityValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(container.isInvisible());
+        return Optional.of(((IMixinEntity) container).isVanished());
     }
 
     @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.INVISIBLE, false, value);
+        return ImmutableSpongeValue.cachedOf(Keys.VANISH, false, value);
     }
 
     @Override

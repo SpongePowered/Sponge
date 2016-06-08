@@ -1016,8 +1016,8 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
-    public void setVanished(boolean invisible) {
-        this.isVanished = invisible;
+    public void setVanished(boolean vanished) {
+        this.isVanished = vanished;
         this.pendingVisibilityUpdate = true;
         this.visibilityTicks = 20;
     }
@@ -1046,7 +1046,7 @@ public abstract class MixinEntity implements IMixinEntity {
      * @author gabizou - January 4th, 2016
      * @updated gabizou - January 27th, 2016 - Rewrite to a redirect
      *
-     * This prevents sounds from being sent to the server by entities that are invisible
+     * This prevents sounds from being sent to the server by entities that are vanished
      */
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
     public boolean checkIsSilentOrInvis(net.minecraft.entity.Entity entity) {
@@ -1106,7 +1106,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public boolean canSee(Entity entity) {
         // note: this implementation will be changing with contextual data
-        Optional<Boolean> optional = entity.get(Keys.INVISIBLE);
+        Optional<Boolean> optional = entity.get(Keys.VANISH);
         return (!optional.isPresent() || !optional.get()) && !((IMixinEntity) entity).isVanished();
     }
 

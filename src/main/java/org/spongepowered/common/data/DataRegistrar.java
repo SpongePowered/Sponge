@@ -66,6 +66,7 @@ import org.spongepowered.common.data.builder.block.tileentity.*;
 import org.spongepowered.common.data.builder.item.SpongeFireworkEffectDataBuilder;
 import org.spongepowered.common.data.builder.data.meta.*;
 import org.spongepowered.common.data.builder.item.*;
+import org.spongepowered.common.data.builder.manipulator.InvisibilityDataAddVanishUpdater;
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
 import org.spongepowered.common.data.builder.util.weighted.BaseAndAdditionBuilder;
@@ -166,6 +167,11 @@ public class DataRegistrar {
 
         // Content Updaters
         dataManager.registerContentUpdater(BlockState.class, new SpongeBlockStateMetaContentUpdater());
+        final InvisibilityDataAddVanishUpdater invisibilityUpdater = new InvisibilityDataAddVanishUpdater();
+        dataManager.registerContentUpdater(InvisibilityData.class, invisibilityUpdater);
+        dataManager.registerContentUpdater(ImmutableInvisibilityData.class, invisibilityUpdater);
+        dataManager.registerContentUpdater(SpongeInvisibilityData.class, invisibilityUpdater);
+        dataManager.registerContentUpdater(ImmutableSpongeInvisibilityData.class, invisibilityUpdater);
 
         // Data Manipulators
 
@@ -685,8 +691,9 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.TRACKS_OUTPUT, new EntityTracksOutputValueProcessor());
         dataManager.registerValueProcessor(Keys.TRACKS_OUTPUT, new TileEntityTracksOutputValueProcessor());
         dataManager.registerValueProcessor(Keys.INVISIBLE, new InvisibilityValueProcessor());
-        dataManager.registerValueProcessor(Keys.INVISIBILITY_IGNORES_COLLISION, new InvisibilityCollisionValueProcessor());
-        dataManager.registerValueProcessor(Keys.INVISIBILITY_PREVENTS_TARGETING, new InvisibilityTargetValueProcessor());
+        dataManager.registerValueProcessor(Keys.VANISH, new VanishValueProcessor());
+        dataManager.registerValueProcessor(Keys.VANISH_IGNORES_COLLISION, new VanishCollisionValueProcessor());
+        dataManager.registerValueProcessor(Keys.VANISH_PREVENTS_TARGETING, new VanishTargetValueProcessor());
         dataManager.registerValueProcessor(Keys.DYE_COLOR, new WolfDyeColorValueProcessor());
         dataManager.registerValueProcessor(Keys.DYE_COLOR, new SheepDyeColorValueProcessor());
         dataManager.registerValueProcessor(Keys.DYE_COLOR, new ItemDyeColorValueProcessor());

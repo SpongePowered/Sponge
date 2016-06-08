@@ -341,23 +341,23 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                 boolean flag = false;
 
-                if (amount > 0.0F && this.canBlockDamageSource(source)) {
-                    this.damageShield(amount);
+if (amount > 0.0F && this.canBlockDamageSource(source)) {
+    this.damageShield(amount);
 
-                    if (source.isProjectile()) {
-                        amount = 0.0F;
-                    } else {
-                        amount *= 0.33F;
+    if (source.isProjectile()) {
+        amount = 0.0F;
+    } else {
+        amount *= 0.33F;
 
-                        if (source.getSourceOfDamage() instanceof EntityLivingBase) {
-                            ((EntityLivingBase) source.getSourceOfDamage())
-                                    .knockBack((EntityLivingBase) (Object) this, 0.5F, this.posX - source.getSourceOfDamage().posX, this
-                                            .posZ - source.getSourceOfDamage().posZ);
-                        }
-                    }
+        if (source.getSourceOfDamage() instanceof EntityLivingBase) {
+            ((EntityLivingBase) source.getSourceOfDamage())
+                    .knockBack((EntityLivingBase) (Object) this, 0.5F, this.posX - source.getSourceOfDamage().posX, this
+                            .posZ - source.getSourceOfDamage().posZ);
+        }
+    }
 
-                    flag = true;
-                }
+    flag = true;
+}
 
                 this.limbSwingAmount = 1.5F;
                 boolean flag1 = true;
@@ -472,7 +472,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     /**
      * @author gabizou - January 4th, 2016
-     * This is necessary for invisibility checks so that invisible players don't actually send the particle stuffs.
+     * This is necessary for invisibility checks so that vanish players don't actually send the particle stuffs.
      */
     @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
     public void spawnItemParticle(World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,

@@ -97,7 +97,7 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     boolean isVanished();
 
-    void setVanished(boolean invisible);
+    void setVanished(boolean vanished);
 
     boolean ignoresCollision();
 
