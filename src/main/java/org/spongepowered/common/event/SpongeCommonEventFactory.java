@@ -44,6 +44,7 @@ import net.minecraft.init.Items;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.C09PacketHeldItemChange;
+import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.server.S09PacketHeldItemChange;
@@ -1163,6 +1164,11 @@ public class SpongeCommonEventFactory {
             if (currentUser != null) {
                 list.add(NamedCause.owner(currentUser));
             }
+        }
+
+        // Add a special named cause to inform plugins that this drop was caused by an inventory close and cancelling it will not restore the items
+        if (causeTracker.getCurrentPlayerPacket() instanceof C0DPacketCloseWindow) {
+            list.add(NamedCause.of("InventoryClose", StaticMixinHelper.packetPlayer.openContainer));
         }
 
         return Cause.of(list);

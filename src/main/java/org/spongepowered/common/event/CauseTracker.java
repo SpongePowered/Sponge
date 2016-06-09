@@ -591,18 +591,18 @@ public final class CauseTracker {
             return;
         }
 
+        List<EntitySnapshot> entitySnapshots = entitySnapshotBuilder.build();
+        if (entitySnapshots.isEmpty()) {
+            this.causeTrackerEntityItemTimer.stopTiming();
+            return;
+        }
+
         Cause cause = this.getCurrentCause();
         if (cause != null && !cause.first(SpawnCause.class).isPresent()) {
             Cause spawnCause = SpongeCommonEventFactory.getEntitySpawnCause((net.minecraft.entity.Entity) capturedEntityItemList.get(0));
             cause = spawnCause.merge(cause);
         } else if (cause == null) {
             cause = SpongeCommonEventFactory.getEntitySpawnCause((net.minecraft.entity.Entity) capturedEntityItemList.get(0));
-        }
-
-        List<EntitySnapshot> entitySnapshots = entitySnapshotBuilder.build();
-        if (entitySnapshots.isEmpty()) {
-            this.causeTrackerEntityItemTimer.stopTiming();
-            return;
         }
 
         this.causeTrackerEntityItemTimer.stopTiming();
