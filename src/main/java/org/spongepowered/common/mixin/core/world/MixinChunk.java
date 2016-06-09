@@ -596,7 +596,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             return;
         } else {
             IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
-            if (!spongeWorld.getCauseTracker().isCapturingBlocks()) {
+            if (spongeWorld.getCauseTracker().isCapturingTerrainGen()) {
                 return;
             }
         }
