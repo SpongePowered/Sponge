@@ -117,8 +117,11 @@ public class PacketUtil {
 
             causeTracker.addCause(Cause.of(NamedCause.source(player)));
             causeTracker.setCurrentNotifier((User) player);
+            boolean captureBlocks = causeTracker.isCapturingBlocks();
+            causeTracker.setCaptureBlocks(true);
             packetIn.processPacket(netHandler);
             causeTracker.handlePostTickCaptures();
+            causeTracker.setCaptureBlocks(captureBlocks);
             causeTracker.removeCurrentCause();
             causeTracker.setCurrentNotifier(null);
             causeTracker.setCurrentPlayerPacket(null);

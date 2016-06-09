@@ -1101,11 +1101,11 @@ public final class CauseTracker {
 
     public void randomTickBlock(Block block, BlockPos pos, IBlockState state, Random random) {
         boolean captureBlocks = this.isCapturingBlocks();
-        this.setCaptureBlocks(true);
+        this.captureBlocks = true;
         this.preTrackBlock(state, pos);
         block.randomTick(this.getMinecraftWorld(), pos, state, random);
         this.postTrackBlock();
-        this.setCaptureBlocks(captureBlocks);
+        this.captureBlocks = captureBlocks;
     }
 
     // By this point, currentPending(NextTickListEntry) should always be available
@@ -1134,10 +1134,10 @@ public final class CauseTracker {
 
         this.addCause(Cause.of(namedCauses));
         boolean captureBlocks = this.isCapturingBlocks();
-        this.setCaptureBlocks(true);
+        this.captureBlocks = true;
         block.updateTick(this.getMinecraftWorld(), pos, state, rand);
         this.postTrackBlock();
-        this.setCaptureBlocks(captureBlocks);
+        this.captureBlocks = captureBlocks;
         this.currentPendingBlockUpdate = null;
         this.currentTickTileEntity = null;
     }
@@ -1216,24 +1216,30 @@ public final class CauseTracker {
 
                 this.addCause(Cause.of(namedCauses));
                 this.causeTrackerBlockTimer.stopTiming();
+                boolean captureBlocks = this.captureBlocks;
+                this.captureBlocks = true;
                 newState.getBlock().onBlockAdded(this.getMinecraftWorld(), pos, newState);
                 // Handle any additional captures during onBlockAdded
                 // This is to ensure new captures do not leak into next tick with wrong cause
                 if (this.getCapturedSpongeBlockSnapshots().size() > 0) {
                     this.handlePostTickCaptures();
                 }
+                this.captureBlocks = captureBlocks;
                 this.causeTrackerBlockTimer.startTiming();
                 this.removeCurrentCause();
             }
 
             proxyBlockAccess.proceed();
             this.causeTrackerBlockTimer.stopTiming();
+            boolean captureBlocks = this.captureBlocks;
+            this.captureBlocks = true;
             this.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
             // Handle any additional captures during notify
             // This is to ensure new captures do not leak into next tick with wrong cause
             if (this.getCapturedSpongeBlockSnapshots().size() > 0) {
                 this.handlePostTickCaptures();
             }
+            this.captureBlocks = captureBlocks;
             this.setCurrentTickBlock(currentTickingBlock);
         }
     }

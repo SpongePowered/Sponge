@@ -46,6 +46,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorld;
 public abstract class MixinCommandHandler implements IMixinCommandHandler {
 
     private boolean expandedSelector;
+    private boolean captureBlocks;
 
     @Inject(method = "tryExecute", at = @At(value = "HEAD"))
     public void onExecuteCommandHead(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
@@ -55,6 +56,8 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
             final CauseTracker causeTracker = world.getCauseTracker();
             causeTracker.setCapturingCommand(true);
             causeTracker.addCause(Cause.source(sender).named("Command", command).build());
+            this.captureBlocks = causeTracker.isCapturingBlocks();
+            causeTracker.setCaptureBlocks(true);
         }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
@@ -69,6 +72,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
             causeTracker.handlePostTickCaptures();
             causeTracker.removeCurrentCause();
             causeTracker.setCapturingCommand(false);
+            causeTracker.setCaptureBlocks(this.captureBlocks);
         }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(false);
