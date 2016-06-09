@@ -144,10 +144,8 @@ public abstract class MixinWorldServer extends MixinWorld {
             }
         }
 
-        // Turn on capturing
         this.timings = new WorldTimingsHandler((net.minecraft.world.World) (Object) this);
         this.causeTracker = new CauseTracker((net.minecraft.world.World) (Object) this);
-        this.causeTracker.setCaptureBlocks(true);
         updateWorldGenerator();
     }
 
@@ -480,17 +478,19 @@ public abstract class MixinWorldServer extends MixinWorld {
                     {
                         // Sponge start - handle captures and timings
                         // pistons are handled in MixinBlockPistonBase doMove method since they recreate TE's during move
-                        if (tileentity instanceof TileEntityPiston || this.causeTracker.hasTickingTileEntity()) {
-                            ((ITickable)tileentity).update();
-                        } else {
+                        if (tileentity instanceof TileEntityPiston) {
                             spongeTile.getTimingsHandler().startTiming();
+                            ((ITickable)tileentity).update();
+                            spongeTile.getTimingsHandler().stopTiming();
+                        } else {
                             boolean captureBlocks = this.causeTracker.isCapturingBlocks();
                             this.causeTracker.setCaptureBlocks(true);
                             this.causeTracker.preTrackTileEntity((TileEntity) tileentity);
+                            spongeTile.getTimingsHandler().startTiming();
                             ((ITickable)tileentity).update();
+                            spongeTile.getTimingsHandler().stopTiming();
                             this.causeTracker.postTrackTileEntity();
                             this.causeTracker.setCaptureBlocks(captureBlocks);
-                            spongeTile.getTimingsHandler().stopTiming();
                         }
                         // Sponge end
                     }

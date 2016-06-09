@@ -54,6 +54,8 @@ import java.util.Optional;
 @Mixin(BlockPistonBase.class)
 public abstract class MixinBlockPistonBase extends MixinBlock {
 
+    private boolean captureBlocks;
+
     /**
      * Tracks all blocks during a piston move sequence.
      * 
@@ -69,8 +71,9 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
     public void onDoMoveHead(World worldIn, BlockPos pos, EnumFacing direction, boolean extending, CallbackInfoReturnable<Boolean> ci) {
         if (!worldIn.isRemote) {
             final CauseTracker causeTracker = ((IMixinWorld) worldIn).getCauseTracker();
+            this.captureBlocks = causeTracker.isCapturingBlocks();
+            causeTracker.setCaptureBlocks(true);
             causeTracker.preTrackBlock(worldIn.getBlockState(pos), pos);
-            causeTracker.setSpecificCapture(true);
         }
     }
 
@@ -86,7 +89,7 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
             causeTracker.removeCurrentCause();
             causeTracker.setCurrentTickBlock(null);
             causeTracker.setCurrentNotifier(null);
-            causeTracker.setSpecificCapture(false);
+            causeTracker.setCaptureBlocks(this.captureBlocks);
             if (!result) {
                 causeTracker.getCapturedSpawnedEntities().clear();
                 causeTracker.getCapturedSpawnedEntityItems().clear();
