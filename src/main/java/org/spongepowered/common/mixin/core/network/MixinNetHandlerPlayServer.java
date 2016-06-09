@@ -51,9 +51,11 @@ import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.network.play.client.C0APacketAnimation;
+import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
+import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.network.play.server.S02PacketChat;
@@ -632,6 +634,20 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Inject(method = "processClickWindow", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isChangingQuantityOnly:Z", shift = At.Shift.AFTER, ordinal = 1))
     public void onThirdUpdateCraftingInventory(C0EPacketClickWindow packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(false);
+    }
+
+    @Inject(method = "processClientStatus", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;triggerAchievement(Lnet/minecraft/stats/StatBase;)V"), cancellable = true)
+    public void onProcessClientStatus(C16PacketClientStatus packetIn, CallbackInfo ci) {
+        if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(Cause.of(NamedCause.source(this.playerEntity)), (EntityPlayerMP) this.playerEntity)) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "processCloseWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;closeContainer()V"), cancellable = true)
+    public void onProcessCloseWindow(C0DPacketCloseWindow packetIn, CallbackInfo ci) {
+        if (!SpongeCommonEventFactory.callInteractInventoryCloseEvent(Cause.of(NamedCause.source(this.playerEntity)), (EntityPlayerMP) this.playerEntity)) {
+            ci.cancel();
+        }
     }
 
     /**

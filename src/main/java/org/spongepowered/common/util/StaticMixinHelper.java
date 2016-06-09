@@ -50,8 +50,6 @@ public class StaticMixinHelper {
     public static IBlockState breakEventExtendedState = null;
     @SuppressWarnings("rawtypes")
     public static Class lastPopulatorClass = null;
-    public static Container lastOpenContainer = null;
-    public static IInventory lastOpenInventory = null;
     public static EntityLivingBase currentTargetEntity = null;
     public static PopulatorType runningGenerator = null;
     public static long lastInventoryOpenPacketTimeStamp = 0;

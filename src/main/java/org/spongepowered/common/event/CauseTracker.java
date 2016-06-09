@@ -52,7 +52,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C01PacketChatMessage;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.stats.StatList;
@@ -429,14 +428,8 @@ public final class CauseTracker {
         }
 
         // Inventory Events
-        if (player != null && player.getHealth() > 0 && StaticMixinHelper.lastOpenContainer != null) {
-            if (this.currentPlayerPacket instanceof C0EPacketClickWindow || this.currentPlayerPacket instanceof C0DPacketCloseWindow){
-                SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(NamedCause.source(player)), player, this.currentPlayerPacket);
-                if (this.currentPlayerPacket instanceof C0EPacketClickWindow) {
-                    SpongeCommonEventFactory.handleClickInteractInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                        (C0EPacketClickWindow) this.currentPlayerPacket);
-                }
-            }
+        if (this.currentPlayerPacket instanceof C0EPacketClickWindow){
+            SpongeCommonEventFactory.handleClickInteractInventoryEvent(Cause.of(NamedCause.source(player)), player, (C0EPacketClickWindow) this.currentPlayerPacket);
         }
 
         // Handle Entity captures

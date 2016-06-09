@@ -41,16 +41,12 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Items;
-import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
-import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.network.play.server.S09PacketHeldItemChange;
-import net.minecraft.network.play.server.S2DPacketOpenWindow;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
@@ -61,7 +57,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderHell;
@@ -214,58 +209,44 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    // Open/Close
-    public static void handleInteractInventoryOpenCloseEvent(Cause cause, EntityPlayerMP player, Packet<?> packetIn) {
-        IMixinEntityPlayerMP spongePlayer = (IMixinEntityPlayerMP) player;
+    public static boolean callInteractInventoryOpenEvent(Cause cause, EntityPlayerMP player) {
+        ItemStackSnapshot newCursor =
+                player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
+                        : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, newCursor);
+        InteractInventoryEvent.Open event =
+                SpongeEventFactory.createInteractInventoryEventOpen(cause, cursorTransaction,
+                        (org.spongepowered.api.item.inventory.Container) player.openContainer);
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            player.closeScreen();
+            return false;
+        } else {
+            // Custom cursor
+            if (event.getCursorTransaction().getCustom().isPresent()) {
+                handleCustomCursor(player, event.getCursorTransaction().getFinal());
+            }
+            return true;
+        }
+    }
 
-        if ((!(player.openContainer instanceof ContainerPlayer) && (StaticMixinHelper.lastOpenContainer instanceof ContainerPlayer)
-                || (packetIn instanceof C16PacketClientStatus
-                && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT))) {
-            ItemStackSnapshot newCursor =
-                    player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
-                            : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(spongePlayer.getPacketCursor(), newCursor);
-            InteractInventoryEvent.Open event =
-                    SpongeEventFactory.createInteractInventoryEventOpen(cause, cursorTransaction,
-                            (org.spongepowered.api.item.inventory.Container) player.openContainer);
-            SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
-                player.closeScreen();
-            } else {
-                // Custom cursor
-                if (event.getCursorTransaction().getCustom().isPresent()) {
-                    handleCustomCursor(player, event.getCursorTransaction().getFinal());
-                }
+    public static boolean callInteractInventoryCloseEvent(Cause cause, EntityPlayerMP player) {
+        ItemStackSnapshot currentCursor = (player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
+                : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory
+                        .getItemStack()).createSnapshot());
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(currentCursor, ItemStackSnapshot.NONE);
+        InteractInventoryEvent.Close event =
+                SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction,
+                        (org.spongepowered.api.item.inventory.Container) player.openContainer);
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            return false;
+        } else {
+            // Custom cursor
+            if (event.getCursorTransaction().getCustom().isPresent()) {
+                handleCustomCursor(player, event.getCursorTransaction().getFinal());
             }
-        } else if (player.openContainer instanceof ContainerPlayer && !(StaticMixinHelper.lastOpenContainer instanceof ContainerPlayer)) {
-            ItemStackSnapshot newCursor =
-                    player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
-                            : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(spongePlayer.getPacketCursor(), newCursor);
-            InteractInventoryEvent.Close event =
-                    SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction,
-                            (org.spongepowered.api.item.inventory.Container) StaticMixinHelper.lastOpenContainer);
-            SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
-                if (StaticMixinHelper.lastOpenContainer.getSlot(0) != null) {
-                    player.openContainer = StaticMixinHelper.lastOpenContainer;
-                    Slot slot = player.openContainer.getSlot(0);
-                    String guiId = "unknown";
-                    if (slot.inventory instanceof IInteractionObject) {
-                        guiId = ((IInteractionObject) slot.inventory).getGuiID();
-                    }
-                    slot.inventory.openInventory(player);
-                    player.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(player.openContainer.windowId, guiId, slot.inventory
-                            .getDisplayName(), slot.inventory.getSizeInventory()));
-                    // resync data to client
-                    player.sendContainerToPlayer(player.openContainer);
-                }
-            } else {
-                // Custom cursor
-                if (event.getCursorTransaction().getCustom().isPresent()) {
-                    handleCustomCursor(player, event.getCursorTransaction().getFinal());
-                }
-            }
+            return true;
         }
     }
 

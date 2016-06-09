@@ -32,6 +32,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemDoor;
 import net.minecraft.item.ItemDoublePlant;
@@ -135,7 +136,14 @@ public abstract class MixinItemInWorldManager {
             if (!player.isSneaking() || player.getHeldItem() == null) {
                 if (event.getUseBlockResult() != Tristate.FALSE) {
                     IBlockState iblockstate = worldIn.getBlockState(pos);
+                    // Handle Inventory open event
+                    Container lastOpenContainer = player.openContainer;
                     result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, side, offsetX, offsetY, offsetZ);
+                    if (lastOpenContainer != player.openContainer) {
+                        if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(Cause.of(NamedCause.source(player)), (EntityPlayerMP) player)) {
+                            result = false;
+                        }
+                    }
                     // update notification for block
                     IMixinWorld spongeWorld = (IMixinWorld) this.theWorld;
                     spongeWorld.getCauseTracker().tryAndTrackActiveUser(pos, PlayerTracker.Type.NOTIFIER);

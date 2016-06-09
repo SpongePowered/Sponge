@@ -101,10 +101,7 @@ public class PacketUtil {
 
             }*/
 
-            StaticMixinHelper.lastOpenContainer = player.openContainer;
-
-            // if inventory packet
-            if (packetIn instanceof C0EPacketClickWindow || packetIn instanceof C0DPacketCloseWindow || packetIn instanceof C10PacketCreativeInventoryAction) {
+            if (packetIn instanceof C0EPacketClickWindow) {
                 spongePlayer.setPacketCursor(player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                        : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory
                                .getItemStack()).createSnapshot());
@@ -142,7 +139,6 @@ public class PacketUtil {
         ((IMixinEntityPlayerMP) StaticMixinHelper.packetPlayer).setPacketItem(null);
         ((IMixinEntityPlayerMP) StaticMixinHelper.packetPlayer).setPacketCursor(null);
         StaticMixinHelper.packetPlayer = null;
-        StaticMixinHelper.lastOpenContainer = null;
     }
 
     public static boolean processSignPacket(C12PacketUpdateSign packetIn, CallbackInfo ci, TileEntitySign tileentitysign, EntityPlayerMP playerEntity) {
