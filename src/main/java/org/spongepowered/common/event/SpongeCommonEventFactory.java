@@ -252,11 +252,8 @@ public class SpongeCommonEventFactory {
 
     public static CreativeInventoryEvent.Click callCreativeClickInventoryEvent(EntityPlayerMP player, C10PacketCreativeInventoryAction packetIn) {
         Cause cause = Cause.of(NamedCause.owner(player));
-        IMixinEntityPlayerMP spongePlayer = (IMixinEntityPlayerMP) player;
-        ItemStackSnapshot newCursor =
-                player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
-                        : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(spongePlayer.getPacketCursor(), newCursor);
+        // Creative doesn't inform server of cursor status
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
         if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0
                 && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
             Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
@@ -275,11 +272,8 @@ public class SpongeCommonEventFactory {
 
     public static CreativeInventoryEvent.Drop callCreativeDropInventoryEvent(EntityPlayerMP player, ItemStack itemstack, C10PacketCreativeInventoryAction packetIn) {
         Cause cause = Cause.of(NamedCause.owner(player));
-        IMixinEntityPlayerMP spongePlayer = (IMixinEntityPlayerMP) player;
-        ItemStackSnapshot newCursor =
-                player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
-                        : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(spongePlayer.getPacketCursor(), newCursor);
+        // Creative doesn't inform server of cursor status
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
 
         EntityItem entityitem = null;
         if (itemstack == null) {
