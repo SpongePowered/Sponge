@@ -1402,6 +1402,11 @@ public final class CauseTracker {
                     ((IMixinEntity) entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, notifier.get().getUniqueId());
                 }
             }
+        } else if (entity instanceof EntityTameable) {
+            EntityTameable tameable = (EntityTameable) entity;
+            if (tameable.getOwner() != null) {
+                ((IMixinEntity) entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, tameable.getOwner().getUniqueID());
+            }
         }
     }
 }
