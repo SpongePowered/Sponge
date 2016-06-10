@@ -39,6 +39,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.ServerWorldEventHandler;
@@ -61,6 +62,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
@@ -114,7 +116,16 @@ public final class WorldManager {
     private static final Queue<WorldServer> unloadQueue = new ArrayDeque<>();
     private static final Comparator<WorldServer>
             WORLD_SERVER_COMPARATOR =
-            (world1, world2) -> ((IMixinWorldServer) world1).getDimensionId() - ((IMixinWorldServer) world2).getDimensionId();
+            (world1, world2) -> {
+                final Integer world1DimId = ((IMixinWorldServer) world1).getDimensionId();
+
+                if (world2 == null) {
+                    return world1DimId;
+                }
+
+                final Integer world2DimId = ((IMixinWorldServer) world2).getDimensionId();
+                return world1DimId - world2DimId;
+            };
 
     static {
         registerDimensionType(0, DimensionType.OVERWORLD);
@@ -757,8 +768,10 @@ public final class WorldManager {
 
         // Ensure that we'll load in Vanilla order then plugins
         WorldServer worldServer = worldByDimensionId.get(0);
-        sorted.remove(worldServer);
-        sorted.add(count, worldServer);
+        if (worldServer != null) {
+            sorted.remove(worldServer);
+            sorted.add(count, worldServer);
+        }
 
         worldServer = worldByDimensionId.get(-1);
         if (worldServer != null) {
@@ -824,7 +837,7 @@ public final class WorldManager {
                     continue;
                 }
 
-                final NBTTagCompound spongeDataCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+                NBTTagCompound spongeDataCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
 
                 if (!compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
                     SpongeImpl.getLogger()
@@ -845,6 +858,8 @@ public final class WorldManager {
                 if (dimensionId == 0 || dimensionId == -1 || dimensionId == 1) {
                     continue;
                 }
+
+                spongeDataCompound = DataUtil.spongeDataFixer.process(FixTypes.LEVEL, spongeDataCompound);
 
                 String dimensionTypeId = "overworld";
 

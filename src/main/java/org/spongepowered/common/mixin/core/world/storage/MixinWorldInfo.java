@@ -736,9 +736,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private void writeSpongeNbt() {
         this.spongeNbt.setInteger(NbtDataUtil.DATA_VERSION, DataUtil.DATA_VERSION);
         this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
-        System.err.printf("SpongeNBT is: %s%n", this.spongeNbt == null ? "null" : "not null");
-        System.err.printf("Dimension id is: %s%n", this.dimensionId == null ? "null" : this.dimensionId);
-        System.err.printf("DimensionType is: %s%n", this.dimensionType == null ? "null" : this.dimensionType);
         this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimensionId);
         this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
 
