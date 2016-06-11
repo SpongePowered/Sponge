@@ -170,17 +170,13 @@ public abstract class MixinPlayerInteractionManager {
                          ? EnumActionResult.SUCCESS
                          : EnumActionResult.PASS;
                 if (result != EnumActionResult.PASS) {
-                    // Only set the tracked active user if the activated block was successful,
-                    // right clicking a block that fails to do anything will not mark as notified
-                    // for the player. If mods do logic regardless and still return false,
-                    // that is their fault.
-                    TrackingUtil.tryAndTrackActiveUser((IMixinWorldServer) worldIn, pos, PlayerTracker.Type.NOTIFIER);
+
                     return result;
                 }
             } else {
                 // Need to send a block change to the client, because otherwise, they are not
                 // going to be told about the block change.
-                playerMP.connection.sendPacket(new SPacketBlockChange(theWorld, pos));
+                playerMP.connection.sendPacket(new SPacketBlockChange(this.theWorld, pos));
                 // Since the event was explicitly set to fail, we need to respect it and treat it as if
                 // it wasn't cancelled, but perform no further processing.
                 return EnumActionResult.FAIL;

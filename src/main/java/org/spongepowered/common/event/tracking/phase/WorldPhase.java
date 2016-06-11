@@ -52,7 +52,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -142,7 +141,7 @@ public final class WorldPhase extends TrackingPhase {
 
     }
 
-    public enum Tick implements ITickingState {
+    public enum Tick implements IPhaseState {
         ENTITY() {
             @Override
             public void assignEntityCreator(PhaseContext context, Entity entity) {
@@ -484,9 +483,13 @@ public final class WorldPhase extends TrackingPhase {
                 final TileEntity tickingTile = context.firstNamed(NamedCause.SOURCE, TileEntity.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
                 blockEvent.setCurrentTickTileEntity(tickingTile);
+                final Location<World> blockLocation = tickingTile.getLocation();
+                final WorldServer worldServer = (WorldServer) blockLocation.getExtent();
+                final Vector3d blockPosition = blockLocation.getPosition();
+                final BlockPos blockPos = VecHelper.toBlockPos(blockPosition);
+                final IMixinChunk mixinChunk = (IMixinChunk) worldServer.getChunkFromBlockCoords(blockPos);
+                mixinChunk.getBlockNotifier(blockPos).ifPresent(blockEvent::setSourceUser);
                 context.firstNamed(NamedCause.NOTIFIER, User.class).ifPresent(blockEvent::setSourceUser);
-                TrackingUtil.trackTargetBlockFromSource(causeTracker, tickingTile, ((net.minecraft.tileentity.TileEntity) tickingTile).getPos(),
-                        blockEvent.getEventBlock(), blockEvent.getEventBlockPosition(), PlayerTracker.Type.NOTIFIER);
             }
         },
         BLOCK() {
@@ -610,9 +613,13 @@ public final class WorldPhase extends TrackingPhase {
                 final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
                 blockEvent.setCurrentTickBlock(tickingBlock);
+                final Location<World> blockLocation = tickingBlock.getLocation().get();
+                final WorldServer worldServer = (WorldServer) blockLocation.getExtent();
+                final Vector3d blockPosition = blockLocation.getPosition();
+                final BlockPos blockPos = VecHelper.toBlockPos(blockPosition);
+                final IMixinChunk mixinChunk = (IMixinChunk) worldServer.getChunkFromBlockCoords(blockPos);
+                mixinChunk.getBlockNotifier(blockPos).ifPresent(blockEvent::setSourceUser);
                 context.firstNamed(NamedCause.NOTIFIER, User.class).ifPresent(blockEvent::setSourceUser);
-                TrackingUtil.trackTargetBlockFromSource(causeTracker, tickingBlock, ((SpongeBlockSnapshot) tickingBlock).getBlockPos(), blockEvent.getEventBlock(),
-                        blockEvent.getEventBlockPosition(), PlayerTracker.Type.NOTIFIER);
             }
         },
         BLOCK_EVENT() {
@@ -824,9 +831,13 @@ public final class WorldPhase extends TrackingPhase {
                 final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
                 blockEvent.setCurrentTickBlock(tickingBlock);
+                final Location<World> blockLocation = tickingBlock.getLocation().get();
+                final WorldServer worldServer = (WorldServer) blockLocation.getExtent();
+                final Vector3d blockPosition = blockLocation.getPosition();
+                final BlockPos blockPos = VecHelper.toBlockPos(blockPosition);
+                final IMixinChunk mixinChunk = (IMixinChunk) worldServer.getChunkFromBlockCoords(blockPos);
+                mixinChunk.getBlockNotifier(blockPos).ifPresent(blockEvent::setSourceUser);
                 context.firstNamed(NamedCause.NOTIFIER, User.class).ifPresent(blockEvent::setSourceUser);
-                TrackingUtil.trackTargetBlockFromSource(causeTracker, tickingBlock, ((SpongeBlockSnapshot) tickingBlock).getBlockPos(), blockEvent.getEventBlock(),
-                        blockEvent.getEventBlockPosition(), PlayerTracker.Type.NOTIFIER);
             }
         },
         PLAYER() {
@@ -916,12 +927,10 @@ public final class WorldPhase extends TrackingPhase {
         ;
 
 
-        @Override
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
 
         }
 
-        @Override
         public Cause generateTeleportCause(PhaseContext context) {
             return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.UNKNOWN).build()));
         }
@@ -950,8 +959,8 @@ public final class WorldPhase extends TrackingPhase {
 
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext context) {
-        if (state instanceof ITickingState) {
-            ((ITickingState) state).processPostTick(causeTracker, context);
+        if (state instanceof Tick) {
+            ((Tick) state).processPostTick(causeTracker, context);
         } else if (state == State.TERRAIN_GENERATION) {
             final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
             final List<Entity> spawnedItems = context.getCapturedItemsSupplier()
@@ -1056,7 +1065,7 @@ public final class WorldPhase extends TrackingPhase {
     }
 
     @Override
-    public void associateNotifier(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
         if (phaseState instanceof Tick) {
             ((Tick) phaseState).associateBlockEventNotifier(context, causeTracker, pos, blockEvent);
         }
@@ -1093,19 +1102,7 @@ public final class WorldPhase extends TrackingPhase {
 
     @Override
     public Cause generateTeleportCause(IPhaseState state, PhaseContext context) {
-        return state instanceof ITickingState ? ((ITickingState) state).generateTeleportCause(context) : super.generateTeleportCause(state, context);
+        return state instanceof Tick ? ((Tick) state).generateTeleportCause(context) : super.generateTeleportCause(state, context);
     }
 
-    /**
-     * A specialized state that signifies that it is a "master" state that
-     * can have multiple state side effects, such as spawning other entities,
-     * changing other blocks, calling other populators, etc.
-     */
-    interface ITickingState extends IPhaseState {
-
-        void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext);
-
-        Cause generateTeleportCause(PhaseContext context);
-
-    }
 }

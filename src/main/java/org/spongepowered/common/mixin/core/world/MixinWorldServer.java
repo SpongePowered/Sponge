@@ -440,7 +440,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseContext context = currentPhase.getContext();
 
         IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
-        phaseState.getPhase().associateNotifier(phaseState, context, causeTracker, pos, blockEvent);
+        phaseState.getPhase().addNotifierToBlockEvent(phaseState, context, causeTracker, pos, blockEvent);
         return list.add(blockEventData);
     }
 
