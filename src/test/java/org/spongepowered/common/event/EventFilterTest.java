@@ -49,6 +49,7 @@ import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.event.listener.AllCauseListener;
 import org.spongepowered.common.event.listener.BeforeAfterCauseListener;
 import org.spongepowered.common.event.listener.CancelledListener;
+import org.spongepowered.common.event.listener.CovariantGetterListener;
 import org.spongepowered.common.event.listener.DataHasListener;
 import org.spongepowered.common.event.listener.DataSupportsListener;
 import org.spongepowered.common.event.listener.DoubleListener;
@@ -408,6 +409,16 @@ public class EventFilterTest {
 
     }
 
+    @Test
+    public void testCovariantGetter() throws Exception {
+        CovariantGetterListener listener = new CovariantGetterListener();
+        AnnotatedEventListener covariantListener = this.getListener(listener, "covariantListener", CovariantEvent.OverloadedEvent.class, SubObject.class);
+
+        covariantListener.handle(new CovariantEvent.OverloadedEvent(Cause.of(NamedCause.owner(Text.of())), new SubObject()));
+        Assert.assertTrue("Listener with @Getter targeting a method with a covariant return type was not called!", listener.covariantListenerCalled);
+
+    }
+
     public static class TestEvent implements Event, Cancellable {
 
         private final Cause cause;
@@ -469,6 +480,38 @@ public class EventFilterTest {
 
     public static class SubObject extends TestObject {
 
+    }
+
+    public static class CovariantEvent implements Event {
+
+        protected final Cause cause;
+        protected final TestObject testObject;
+
+        public CovariantEvent(Cause cause, TestObject testObject) {
+            this.cause = cause;
+            this.testObject = testObject;
+        }
+
+        @Override
+        public Cause getCause() {
+            return this.cause;
+        }
+
+        public TestObject getTestObject() {
+            return this.testObject;
+        }
+
+        public static class OverloadedEvent extends CovariantEvent {
+
+            public OverloadedEvent(Cause cause, SubObject subObject) {
+                super(cause, subObject);
+            }
+
+            @Override
+            public SubObject getTestObject() {
+                return (SubObject) this.testObject;
+            }
+        }
     }
 
     private AnnotatedEventListener getListener(Object listener, String method) throws Exception {

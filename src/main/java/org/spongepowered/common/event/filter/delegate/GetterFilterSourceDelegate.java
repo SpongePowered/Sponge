@@ -63,22 +63,22 @@ public class GetterFilterSourceDelegate implements ParameterFilterSourceDelegate
         Class<?> eventClass = method.getParameterTypes()[0];
         String targetMethod = this.anno.value();
         Method targetMethodObj = null;
-        for (Method mth : eventClass.getMethods()) {
-            if (targetMethod.equals(mth.getName())) {
-                if (targetMethodObj != null) {
-                    throw new IllegalArgumentException("Multiple matches found for getter " + targetMethod + " in type " + eventClass.getName());
-                }
-                if (mth.getParameterCount() != 0) {
-                    throw new IllegalArgumentException(
-                            "Method " + mth.toGenericString() + " specified by getter annotation has non-zero parameter count");
-                }
-                if (!mth.getReturnType().equals(Optional.class) && !mth.getReturnType().isAssignableFrom(targetType)) {
-                    throw new IllegalArgumentException("Method " + mth.toGenericString() + " does not return the correct type. Expected: "
-                            + targetType.getName() + " Found: " + mth.getReturnType().getName());
-                }
-                targetMethodObj = mth;
-            }
+
+        try {
+            targetMethodObj = eventClass.getMethod(targetMethod);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException(String.format("Method %s specified by getter annotation was not found in type %s", targetMethod, eventClass.getName()));
         }
+
+        if (targetMethodObj.getParameterCount() != 0) {
+            throw new IllegalArgumentException(
+                    "Method " + targetMethodObj.toGenericString() + " specified by getter annotation has non-zero parameter count");
+        }
+        if (!targetMethodObj.getReturnType().equals(Optional.class) && !targetMethodObj.getReturnType().isAssignableFrom(targetType)) {
+            throw new IllegalArgumentException("Method " + targetMethodObj.toGenericString() + " does not return the correct type. Expected: "
+                    + targetType.getName() + " Found: " + targetMethodObj.getReturnType().getName());
+        }
+
         Type returnType = Type.getReturnType(targetMethodObj);
         Class<?> declaringClass = targetMethodObj.getDeclaringClass();
         mv.visitVarInsn(ALOAD, 1);
