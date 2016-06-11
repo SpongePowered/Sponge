@@ -47,10 +47,6 @@ import java.util.Collection;
 public abstract class MixinBossInfoServer extends MixinBossInfo {
 
     @Shadow private boolean visible;
-    @Shadow public abstract void setPercent(float percent);
-    @Shadow public abstract BossInfo setDarkenSky(boolean darkenSky);
-    @Shadow public abstract BossInfo setPlayEndBossMusic(boolean playEndBossMusic);
-    @Shadow public abstract BossInfo setCreateFog(boolean createFog);
     @Shadow abstract void sendUpdate(SPacketUpdateBossInfo.Operation operation);
     @Shadow public abstract void addPlayer(EntityPlayerMP player);
     @Shadow public abstract void removePlayer(EntityPlayerMP player);
