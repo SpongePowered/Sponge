@@ -22,35 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.network.play.server;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import net.minecraft.network.play.server.SPacketWorldBorder;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketWorldBorder;
 
-import javax.annotation.Nullable;
+@Mixin(SPacketWorldBorder.class)
+public abstract class MixinSPacketWorldBorder implements IMixinSPacketWorldBorder {
 
-public interface IMixinEntityPlayerMP {
+    @Shadow private double centerX;
+    @Shadow private double centerZ;
 
-    void reset();
-
-    default boolean usesCustomClient() {
-        return false;
+    @Override
+    public void netherifyCenterCoordinates() {
+        this.centerX *= 8;
+        this.centerZ *= 8;
     }
-
-    User getUserObject();
-
-    void setVelocityOverride(@Nullable Vector3d velocity);
-
-    MessageChannel getDeathMessageChannel();
-
-    void initScoreboard();
-
-    void resetAttributeMap();
-
-    IMixinWorldServer getMixinWorld();
-
-    void refreshXpHealthAndFood();
-
 }

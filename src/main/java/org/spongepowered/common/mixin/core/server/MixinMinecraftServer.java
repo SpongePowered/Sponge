@@ -586,7 +586,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (!isDedicatedServer()) {
             return tickInterval;
         }
-        
+
         int autoPlayerSaveInterval = SpongeImpl.getGlobalConfig().getConfig().getWorld().getAutoPlayerSaveInterval();
         if (autoPlayerSaveInterval > 0 && (this.tickCounter % autoPlayerSaveInterval == 0)) {
             this.getPlayerList().saveAllPlayerData();

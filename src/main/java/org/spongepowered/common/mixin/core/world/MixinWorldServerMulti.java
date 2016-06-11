@@ -27,15 +27,21 @@ package org.spongepowered.common.mixin.core.world;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.MinecraftException;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
+import net.minecraft.world.border.IBorderListener;
+import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.world.storage.WorldServerMultiAdapterWorldInfo;
 
 @NonnullByDefault
@@ -44,6 +50,11 @@ public abstract class MixinWorldServerMulti extends WorldServer {
 
     public MixinWorldServerMulti(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn) {
         super(server, saveHandlerIn, info, dimensionId, profilerIn);
+    }
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;addListener"
+            + "(Lnet/minecraft/world/border/IBorderListener;)V"))
+    public void nullRouteBindToDelegateWorldBorder(WorldBorder invoker, IBorderListener listener) {
     }
 
     private static WorldInfo realWorldInfo;
@@ -83,5 +94,25 @@ public abstract class MixinWorldServerMulti extends WorldServer {
         // use a seperate save handler for each world. Each world folder needs to generate a corresponding
         // level.dat for plugins that require it such as MultiVerse.
         super.saveLevel();
+    }
+
+    /**
+     * @author Zidane - June 5th 2016
+     * @reason For Sponge multi-world, each world gets its own WorldBorder
+     */
+    @Inject(method = "init", at = @At("RETURN"))
+    public void onInit(CallbackInfoReturnable<World> cir) {
+        this.getWorldBorder().setCenter(this.worldInfo.getBorderCenterX(), this.worldInfo.getBorderCenterZ());
+        this.getWorldBorder().setDamageAmount(this.worldInfo.getBorderDamagePerBlock());
+        this.getWorldBorder().setDamageBuffer(this.worldInfo.getBorderSafeZone());
+        this.getWorldBorder().setWarningDistance(this.worldInfo.getBorderWarningDistance());
+        this.getWorldBorder().setWarningTime(this.worldInfo.getBorderWarningTime());
+
+        if (this.worldInfo.getBorderLerpTime() > 0L) {
+            this.getWorldBorder().setTransition(this.worldInfo.getBorderSize(), this.worldInfo.getBorderLerpTarget(), this.worldInfo.getBorderLerpTime());
+        }
+        else {
+            this.getWorldBorder().setTransition(this.worldInfo.getBorderSize());
+        }
     }
 }

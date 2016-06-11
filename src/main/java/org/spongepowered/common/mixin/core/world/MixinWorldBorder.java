@@ -35,8 +35,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.SpongeChunkPreGenerate;
 
-import java.util.List;
-
 @NonnullByDefault
 @Mixin(net.minecraft.world.border.WorldBorder.class)
 @Implements(@Interface(iface = WorldBorder.class, prefix = "border$"))
@@ -66,10 +64,6 @@ public abstract class MixinWorldBorder implements WorldBorder {
     public abstract void shadow$setWarningDistance(int distance);
     @Shadow(prefix = "shadow$")
     public abstract double shadow$getDiameter();
-
-    @SuppressWarnings("rawtypes")
-    @Shadow
-    public abstract List getListeners();
 
     @Intrinsic
     public int border$getWarningTime() {
