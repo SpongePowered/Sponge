@@ -56,10 +56,11 @@ public abstract class ConfigBase {
     @Setting
     private TimingsCategory timings = new TimingsCategory();
 
+    @Setting(value = "config-enabled", comment =  "This setting does nothing in the global config. In dimension/world configs, it allows the config to override config(s) that it inherits from")
     protected boolean configEnabled = false;
 
     public ConfigBase() {
-        
+
     }
 
     public BlockTrackingCategory getBlockTracking() {

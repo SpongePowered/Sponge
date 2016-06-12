@@ -28,9 +28,6 @@ import ninja.leaping.configurate.objectmapping.Setting;
 
 public class DimensionConfig extends ConfigBase {
 
-    @Setting(value = "config-enabled", comment = "Enabling config will override Global.")
-    protected boolean configEnabled = false;
-
     public DimensionConfig() {
         super();
     }
