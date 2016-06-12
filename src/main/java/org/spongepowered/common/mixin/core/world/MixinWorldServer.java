@@ -57,6 +57,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.gen.ChunkProviderEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -236,9 +237,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.createBonusChest();
         }
 
-        if (generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) {
-            System.out.println("Setting end spawn!");
-            this.worldInfo.setSpawn(new BlockPos(55, 60, 0));
+        if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) || ((((WorldServer) (Object) this)).getChunkProvider().chunkGenerator instanceof ChunkProviderEnd)) {
+            this.worldInfo.setSpawn(new BlockPos(100, 50, 0));
             ci.cancel();
         }
     }

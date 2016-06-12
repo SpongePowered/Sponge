@@ -544,8 +544,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean isEnabled() {
-        System.out.println(String.format("Dimension type: %s World name: %s", this.dimensionType.getId(), this.getWorldName()));
-        System.out.println(String.format("Config: %s",  SpongeHooks.getActiveConfig(this.dimensionType.getId(), this.getWorldName()) == null));
         if (!this.worldConfig.getConfig().isConfigEnabled()) {
             return SpongeHooks.getActiveConfig(this.dimensionType.getId(), this.getWorldName()).getConfig().getWorld().isWorldEnabled();
         }
