@@ -460,7 +460,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     // to avoid firing a DisplaceEntityEvent.Teleport
     @Override
     public void setLocationAndAngles(Location<World> location) {
-        this.setPosition(location.getX(), location.getY(), location.getZ());
+        if (this.mcEntity instanceof EntityPlayerMP) {
+            ((EntityPlayerMP) this.mcEntity).playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
+        } else {
+            this.setPosition(location.getX(), location.getY(), location.getZ());
+        }
         if (this.worldObj != location.getExtent()) {
             this.worldObj = (net.minecraft.world.World) location.getExtent();
         }
@@ -469,7 +473,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public void setLocationAndAngles(Transform<World> transform) {
         Vector3d position = transform.getPosition();
-        this.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
+        if (this.mcEntity instanceof EntityPlayerMP) {
+            ((EntityPlayerMP) this.mcEntity).playerNetServerHandler.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
+        } else {
+            this.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
+        }
         if (this.worldObj != transform.getExtent()) {
             this.worldObj = (net.minecraft.world.World) transform.getExtent();
         }
