@@ -178,7 +178,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         final WorldArchetype archetype = (WorldArchetype) (Object) settings;
         setDimensionType(archetype.getDimensionType());
 
-        boolean configPreviouslyExisted = createWorldConfig();
+        boolean configNewlyCreated = createWorldConfig();
         setEnabled(archetype.isEnabled());
         setLoadOnStartup(archetype.loadOnStartup());
         setKeepSpawnLoaded(archetype.doesKeepSpawnLoaded());
@@ -187,7 +187,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         setGeneratorModifiers(archetype.getGeneratorModifiers());
         setSerializationBehavior(archetype.getSerializationBehavior());
         // Mark configs enabled if coming from WorldCreationSettings builder and config didn't previously exist.
-        if (!configPreviouslyExisted && ((IMixinWorldSettings) (Object) settings).isFromBuilder()) {
+        if (configNewlyCreated && ((IMixinWorldSettings) (Object) settings).isFromBuilder()) {
             this.worldConfig.getConfig().setConfigEnabled(true);
         }
         this.worldConfig.save();

@@ -553,7 +553,7 @@ public final class WorldManager {
                 (dimensionId).get().getName());
 
         final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, null,
-                true);
+                properties.doesGenerateSpawnOnLoad());
 
         worldByDimensionId.put(dimensionId, worldServer);
         weakWorldByWorld.put(worldServer, worldServer);
