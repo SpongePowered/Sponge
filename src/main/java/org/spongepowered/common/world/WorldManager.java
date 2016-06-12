@@ -770,6 +770,9 @@ public final class WorldManager {
             ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
         }
 
+        // Ensure that config is initialized
+        SpongeHooks.getActiveConfig(worldServer, true);
+
         return worldServer;
     }
 
