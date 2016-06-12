@@ -653,23 +653,31 @@ public final class WorldManager {
             }
 
             WorldInfo worldInfo = saveHandler.loadWorldInfo();
-            WorldSettings worldSettings = null;
+            WorldSettings worldSettings;
+
+            // If this is integrated server, we need to use the WorldSettings from the client's Single Player menu to construct the worlds
+            if (server instanceof IMixinIntegratedServer) {
+                worldSettings = ((IMixinIntegratedServer) server).getSettings();
+
+                // If this is overworld and a new save, the WorldInfo has already been made but we want to still fire the construct event.
+                if (dimensionId == 0 && ((IMixinIntegratedServer) server).isNewSave()) {
+                    SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(server)), (WorldArchetype)
+                            (Object) worldSettings, (WorldProperties) worldInfo));
+                }
+            } else {
+                // WorldSettings will be null here on dedicated server so we need to build one
+                worldSettings = new WorldSettings(defaultSeed, server.getGameType(), server.canStructuresSpawn(), server.isHardcore(),
+                        defaultWorldType);
+            }
 
             if (worldInfo == null) {
-                // If this is integrated server, we need to use the WorldSettings from the client's Single Player menu to construct the worlds
-                if (server instanceof IMixinIntegratedServer) {
-                    worldSettings = ((IMixinIntegratedServer) server).getSettings();
-                } else {
-                    // WorldSettings will be null here on dedicated server so we need to build one
-                    worldSettings = new WorldSettings(defaultSeed, server.getGameType(), server.canStructuresSpawn(), server.isHardcore(),
-                            defaultWorldType);
-                }
-
                 // Step 4 - At this point, we have either have the WorldInfo or we have none. If we have none, we'll use the settings built above to
                 // create the WorldInfo
                 worldInfo = createWorldInfoFromSettings(currentSavesDir, (org.spongepowered.api.world.DimensionType) (Object) dimensionType,
                         dimensionId, worldFolderName, worldSettings, generatorOptions);
             }
+
+            final WorldProperties properties = (WorldProperties) worldInfo;
 
             // Safety check to ensure we'll get a unique id no matter what
             if (((WorldProperties) worldInfo).getUniqueId() == null) {
@@ -820,7 +828,7 @@ public final class WorldManager {
                 (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
             // Check if Bukkit's uid.dat file is here and use it
             final Path uidPath = savesRoot.resolve(properties.getWorldName()).resolve("uid.dat");
-            if (!Files.exists(uidPath)) {
+            if (Files.notExists(uidPath)) {
                 uuid = UUID.randomUUID();
             } else {
                 try(final DataInputStream dis = new DataInputStream(Files.newInputStream(uidPath))) {

@@ -713,7 +713,11 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public void readSpongeNbt(NBTTagCompound nbt) {
-        this.uuid = nbt.getUniqueId(NbtDataUtil.UUID);
+        final UUID nbtUniqueId = nbt.getUniqueId(NbtDataUtil.UUID);
+        if (nbtUniqueId.equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
+            return;
+        }
+        this.uuid = nbtUniqueId;
         this.dimensionId = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
         final String dimensionTypeId = nbt.getString(NbtDataUtil.DIMENSION_TYPE);
         this.dimensionType = DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)

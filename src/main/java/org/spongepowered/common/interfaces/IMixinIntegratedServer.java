@@ -30,4 +30,7 @@ public interface IMixinIntegratedServer {
 
     WorldSettings getSettings();
 
+    void markNewSave();
+
+    boolean isNewSave();
 }
