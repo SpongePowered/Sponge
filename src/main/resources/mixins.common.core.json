@@ -314,6 +314,7 @@
         "network.packet.MixinSPacketScoreboardObjective",
         "network.packet.MixinSPacketResourcePackSend",
         "network.play.server.MixinSPacketPlayerListItem",
+        "network.play.server.MixinSPacketWorldBorder",
         "potion.MixinPotion",
         "potion.MixinPotionEffect",
         "scoreboard.MixinCriterion",

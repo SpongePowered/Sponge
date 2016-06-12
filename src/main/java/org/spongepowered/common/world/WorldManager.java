@@ -565,7 +565,8 @@ public final class WorldManager {
         SpongeImpl.getLogger().info("Loading world [{}] ({})", properties.getWorldName(), getDimensionType
                 (dimensionId).get().getName());
 
-        final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, null,
+        final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, new WorldSettings((WorldInfo)
+                        properties),
                 properties.doesGenerateSpawnOnLoad());
 
         reorderWorldsVanillaFirst();

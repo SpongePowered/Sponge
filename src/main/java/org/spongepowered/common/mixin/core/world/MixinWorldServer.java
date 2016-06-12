@@ -190,6 +190,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow private int blockEventCacheIndex;
 
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
+    @Shadow public abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -212,13 +213,39 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         updateWorldGenerator();
     }
 
+    @Inject(method = "createBonusChest", at = @At(value = "HEAD"))
+    public void onCreateBonusChest(CallbackInfo ci) {
+        this.getCauseTracker().switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+                .add(NamedCause.source(this))
+                .addCaptures()
+                .complete());
+    }
+
+
+    @Inject(method = "createBonusChest", at = @At(value = "RETURN"))
+    public void onCreateBonusChestEnd(CallbackInfo ci) {
+        this.getCauseTracker().completePhase();
+    }
+
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
     public void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {
         GeneratorType generatorType = (GeneratorType) settings.getTerrainType();
+
+        // Allow bonus chest generation for non-Overworld worlds
+        if (!this.provider.canRespawnHere() && this.getProperties().doesGenerateBonusChest()) {
+            this.createBonusChest();
+        }
+
         if (generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) {
+            System.out.println("Setting end spawn!");
             this.worldInfo.setSpawn(new BlockPos(55, 60, 0));
             ci.cancel();
         }
+    }
+
+    @Redirect(method = "createSpawnPosition", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldSettings;isBonusChestEnabled()Z"))
+    public boolean onIsBonusChestEnabled(WorldSettings settings) {
+        return this.getProperties().doesGenerateBonusChest();
     }
 
     @Override
