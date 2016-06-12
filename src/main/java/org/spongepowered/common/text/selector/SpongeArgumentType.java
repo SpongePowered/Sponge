@@ -29,7 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.CatalogKey;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
@@ -48,6 +51,26 @@ public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>>
         converters.put(String.class.getName(), Function.<String>identity());
         converters.put(EntityType.class.getName(),
                        (Function<String, EntityType>) input -> EntityTypeRegistryModule.getInstance().getById(input.toLowerCase()).orElse(null));
+        converters.put(GameMode.class.getName(), input -> {
+            try {
+                int mode = Integer.parseInt(input);
+                switch (mode) {
+                    case -1:
+                        return GameModes.NOT_SET;
+                    case 0:
+                        return GameModes.SURVIVAL;
+                    case 1:
+                        return GameModes.CREATIVE;
+                    case 2:
+                        return GameModes.ADVENTURE;
+                    case 3:
+                        return GameModes.SPECTATOR;
+                }
+            } catch (NumberFormatException e) {
+                // ignore
+            }
+            return Sponge.getRegistry().getType(GameMode.class, input);
+        });
     }
 
     @SuppressWarnings("unchecked")

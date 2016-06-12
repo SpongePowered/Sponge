@@ -64,7 +64,7 @@ public final class ArgumentRegistryModule implements RegistryModule {
         this.argumentTypeMap.put("radius", radius);
 
         // GAME_MODE
-        this.argumentTypeMap.put("game_mode", factory.createArgumentType("m", GameMode.class));
+        this.argumentTypeMap.put("game_mode", factory.createInvertibleArgumentType("m", GameMode.class));
 
         // COUNT
         this.argumentTypeMap.put("count", factory.createArgumentType("c", Integer.class));
