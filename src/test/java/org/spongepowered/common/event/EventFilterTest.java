@@ -125,8 +125,12 @@ public class EventFilterTest {
     @Test
     public void testIncludeExcludeListener() throws Exception {
         IncludeExcludeListener listener = new IncludeExcludeListener();
-        AnnotatedEventListener includeListener = this.getListener(listener, "includeListener", TestEvent.class);
-        AnnotatedEventListener excludeListener = this.getListener(listener, "excludeListener", TestEvent.class);
+
+        AnnotatedEventListener includeListener       = this.getListener(listener, "includeListener", TestEvent.class);
+        AnnotatedEventListener multiIncludeListener  = this.getListener(listener, "multiIncludeListener", TestEvent.class);
+
+        AnnotatedEventListener excludeListener       = this.getListener(listener, "excludeListener", TestEvent.class);
+        AnnotatedEventListener multiExcludeListener  = this.getListener(listener, "multiExcludeListener", TestEvent.class);
 
         TestEvent testEvent = new TestEvent(Cause.source(this).build());
         SubEvent subEvent = new SubEvent(Cause.source(this).build());
@@ -142,6 +146,18 @@ public class EventFilterTest {
 
         excludeListener.handle(testEvent);
         Assert.assertTrue("Listener annotated with @Exclude was not called!", listener.exlcudeListenerCalled);
+
+        multiIncludeListener.handle(testEvent);
+        Assert.assertFalse("Listener annotated with multi-target @Include was called!", listener.multiIncludeListenerCalled);
+
+        multiIncludeListener.handle(subEvent);
+        Assert.assertTrue("Listener annotated with multi-target @Include was not called!", listener.multiIncludeListenerCalled);
+
+        multiExcludeListener.handle(subEvent);
+        Assert.assertFalse("Listener annotated with multi-target @Exclude was called!", listener.multiExcludeListenerCalled);
+
+        multiExcludeListener.handle(testEvent);
+        Assert.assertTrue("Listener annotated with multi-target @Exclude was not called!", listener.multiExcludeListenerCalled);
     }
 
     @Test(expected = RuntimeException.class)
@@ -460,6 +476,13 @@ public class EventFilterTest {
     public static class SubEvent extends TestEvent {
 
         public SubEvent(Cause cause) {
+            super(cause);
+        }
+    }
+
+    public static class OtherSubEvent extends TestEvent {
+
+        public OtherSubEvent(Cause cause) {
             super(cause);
         }
     }
