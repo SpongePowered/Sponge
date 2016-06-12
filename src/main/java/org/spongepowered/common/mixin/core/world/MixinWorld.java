@@ -1319,7 +1319,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (!causeTracker.isCapturingBlocks()) {
+        if (causeTracker.isIgnoringCaptures()) {
             for (EnumFacing facing : EnumFacing.values()) {
                 causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
             }
@@ -1356,7 +1356,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         directions.remove(skipSide);
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (!causeTracker.isCapturingBlocks()) {
+        if (causeTracker.isIgnoringCaptures()) {
             for (Object obj : directions) {
                 EnumFacing facing = (EnumFacing) obj;
                 causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);

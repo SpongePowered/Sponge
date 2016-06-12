@@ -411,7 +411,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
             CallbackInfo ci) {
         final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
-        if (this.worldObj.isRemote || causeTracker.getCurrentCause() == null || !causeTracker.isCapturingBlocks()) {
+        if (this.worldObj.isRemote || causeTracker.getCurrentCause() == null || causeTracker.isIgnoringCaptures()) {
             return;
         }
 
@@ -434,7 +434,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
             CallbackInfo ci) {
         final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
-        if (this.worldObj.isRemote || causeTracker.getCurrentCause() == null || !causeTracker.isCapturingBlocks()) {
+        if (this.worldObj.isRemote || causeTracker.getCurrentCause() == null || causeTracker.isIgnoringCaptures()) {
             return;
         }
 

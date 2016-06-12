@@ -169,6 +169,13 @@ public final class CauseTracker {
         return (IMixinWorld) this.targetWorld;
     }
 
+    public boolean isIgnoringCaptures() {
+        if (this.isCapturingTerrainGen() || this.isRestoringBlocks()) {
+            return true;
+        }
+        return false;
+    }
+
     public boolean isIgnoringSpawnEvents() {
         return this.ignoreSpawnEvents;
     }
