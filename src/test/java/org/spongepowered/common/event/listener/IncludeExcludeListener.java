@@ -32,7 +32,10 @@ import org.spongepowered.common.event.EventFilterTest;
 public class IncludeExcludeListener {
 
     public boolean includeListenerCalled;
+    public boolean multiIncludeListenerCalled;
+
     public boolean exlcudeListenerCalled;
+    public boolean multiExcludeListenerCalled;
 
     @Listener
     @Include(EventFilterTest.SubEvent.class)
@@ -41,9 +44,21 @@ public class IncludeExcludeListener {
     }
 
     @Listener
+    @Include({EventFilterTest.SubEvent.class, EventFilterTest.OtherSubEvent.class})
+    public void multiIncludeListener(EventFilterTest.TestEvent event) {
+        this.multiIncludeListenerCalled = true;
+    }
+
+    @Listener
     @Exclude(EventFilterTest.SubEvent.class)
     public void excludeListener(EventFilterTest.TestEvent event) {
         this.exlcudeListenerCalled = true;
+    }
+
+    @Listener
+    @Exclude({EventFilterTest.SubEvent.class, EventFilterTest.OtherSubEvent.class})
+    public void multiExcludeListener(EventFilterTest.TestEvent event) {
+        this.multiExcludeListenerCalled = true;
     }
 
 }
