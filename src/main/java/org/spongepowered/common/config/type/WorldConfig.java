@@ -31,9 +31,6 @@ import java.util.List;
 
 public class WorldConfig extends ConfigBase {
 
-    @Setting(value = "config-enabled", comment = "Enabling config will override Dimension and Global.")
-    protected boolean configEnabled = false;
-
     @Setting(value = "world-generation-modifiers", comment = "World Generation Modifiers to apply to the world")
     private List<String> worldModifiers = new ArrayList<>();
 

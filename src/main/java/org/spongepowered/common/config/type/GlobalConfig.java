@@ -115,10 +115,12 @@ public class GlobalConfig extends ConfigBase {
         return this.ipSets.containsKey(name) ? Predicates.and(this.ipSets.get(name)) : null;
     }
 
+    @Override
     public GlobalWorldCategory getWorld() {
         return this.world;
     }
 
+    @Override
     public boolean isConfigEnabled() {
         // always return true as there is only 1 global config
         return true;
