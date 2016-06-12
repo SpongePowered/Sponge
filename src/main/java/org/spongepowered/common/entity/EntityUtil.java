@@ -464,7 +464,7 @@ public final class EntityUtil {
             // Support vanilla clients going into custom dimensions
             final Integer worldDimensionId = ((IMixinWorldServer) toWorld).getDimensionId();
             if (((IMixinEntityPlayerMP) entityplayermp1).usesCustomClient()) {
-                WorldManager.sendDimensionRegistration(entityplayermp1, toClientDimensionType);
+                WorldManager.sendDimensionRegistration(entityplayermp1, toWorld.provider);
             } else {
                 final int fromClientDimensionTypeId = fromClientDimensionType.getId();
                 final int toClientDimensionTypeId = toClientDimensionType.getId();

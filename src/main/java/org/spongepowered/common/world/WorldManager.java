@@ -1019,7 +1019,7 @@ public final class WorldManager {
         }
     }
 
-    public static void sendDimensionRegistration(EntityPlayerMP playerMP, DimensionType dimensionType) {
+    public static void sendDimensionRegistration(EntityPlayerMP playerMP, WorldProvider provider) {
         // Do nothing in Common
     }
 

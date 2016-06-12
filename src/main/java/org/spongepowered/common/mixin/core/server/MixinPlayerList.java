@@ -277,9 +277,9 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         // Support vanilla clients logging into custom dimensions
         final DimensionType clientDimensionType = WorldManager.getClientDimensionType(worldServer.provider.getDimensionType());
-        if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
-            WorldManager.sendDimensionRegistration(playerIn, clientDimensionType);
-        }
+
+        // Send dimension registration
+        WorldManager.sendDimensionRegistration(playerIn, worldServer.provider);
 
         handler.sendPacket(new SPacketJoinGame(playerIn.getEntityId(), playerIn.interactionManager.getGameType(), worldinfo
                 .isHardcoreModeEnabled(), clientDimensionType.getId(), worldServer.getDifficulty(), this.getMaxPlayers(), worldinfo
@@ -500,9 +500,9 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         // Support vanilla clients logging into custom dimensions
         final DimensionType dimensionType = WorldManager.getClientDimensionType(worldServer.provider.getDimensionType());
-        if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
-            WorldManager.sendDimensionRegistration(entityPlayerMP, dimensionType);
-        }
+
+        // Send dimension registration
+        WorldManager.sendDimensionRegistration(entityPlayerMP, worldServer.provider);
 
         entityPlayerMP.connection.sendPacket(new SPacketRespawn(dimensionType.getId(), worldServer.getDifficulty(), worldServer
                 .getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
@@ -598,9 +598,10 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         playerIn.dimension = toWorld.provider.getDimensionType().getId();
         // Support vanilla clients teleporting to custom dimensions
         final DimensionType dimensionType = WorldManager.getClientDimensionType(toWorld.provider.getDimensionType());
-        if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
-            WorldManager.sendDimensionRegistration(playerIn, dimensionType);
-        }
+
+        // Send dimension registration
+        WorldManager.sendDimensionRegistration(playerIn, toWorld.provider);
+
         playerIn.connection.sendPacket(new SPacketRespawn(playerIn.dimension, fromWorld.getDifficulty(), fromWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
         fromWorld.removeEntityDangerously(playerIn);
         playerIn.isDead = false;
