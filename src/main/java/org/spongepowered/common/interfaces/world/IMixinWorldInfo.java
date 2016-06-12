@@ -68,7 +68,7 @@ public interface IMixinWorldInfo {
      */
     boolean createWorldConfig();
 
-    void setUUID(UUID uuid);
+    void setUniqueId(UUID uniqueId);
 
     void setDimensionType(DimensionType type);
 

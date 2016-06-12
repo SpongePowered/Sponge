@@ -601,8 +601,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
-    public void setUUID(UUID uuid) {
-        this.uuid = uuid;
+    public void setUniqueId(UUID uniqueId) {
+        this.uuid = uniqueId;
     }
 
     @Override
@@ -734,24 +734,27 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     private void writeSpongeNbt() {
-        this.spongeNbt.setInteger(NbtDataUtil.DATA_VERSION, DataUtil.DATA_VERSION);
-        this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
-        this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimensionId);
-        this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
+        // Never save Sponge data if we have no UUID
+        if (this.uuid != null) {
+            this.spongeNbt.setInteger(NbtDataUtil.DATA_VERSION, DataUtil.DATA_VERSION);
+            this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
+            this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimensionId);
+            this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
 
-        this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, this.isMod);
-        this.spongeNbt.setBoolean(NbtDataUtil.GENERATE_BONUS_CHEST, this.generateBonusChest);
-        if (this.portalAgentType == null) {
-            this.portalAgentType = PortalAgentTypes.DEFAULT;
-        }
-        this.spongeNbt.setString(NbtDataUtil.PORTAL_AGENT_TYPE, this.portalAgentType.getPortalAgentClass().getName());
-        final Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
-        final NBTTagList playerIdList = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
-        while (iterator.hasNext()) {
-            final NBTTagCompound compound = new NBTTagCompound();
-            compound.setUniqueId(NbtDataUtil.UUID, iterator.next());
-            playerIdList.appendTag(compound);
-            iterator.remove();
+            this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, this.isMod);
+            this.spongeNbt.setBoolean(NbtDataUtil.GENERATE_BONUS_CHEST, this.generateBonusChest);
+            if (this.portalAgentType == null) {
+                this.portalAgentType = PortalAgentTypes.DEFAULT;
+            }
+            this.spongeNbt.setString(NbtDataUtil.PORTAL_AGENT_TYPE, this.portalAgentType.getPortalAgentClass().getName());
+            final Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
+            final NBTTagList playerIdList = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
+            while (iterator.hasNext()) {
+                final NBTTagCompound compound = new NBTTagCompound();
+                compound.setUniqueId(NbtDataUtil.UUID, iterator.next());
+                playerIdList.appendTag(compound);
+                iterator.remove();
+            }
         }
     }
 

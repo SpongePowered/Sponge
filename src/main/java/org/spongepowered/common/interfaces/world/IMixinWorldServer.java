@@ -29,7 +29,6 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -51,8 +50,6 @@ public interface IMixinWorldServer extends IMixinWorld {
     void setActiveConfig(SpongeConfig<?> config);
 
     Integer getDimensionId();
-
-    void setDimensionId(int dimensionId);
 
     void updateWorldGenerator();
 
