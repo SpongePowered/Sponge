@@ -243,6 +243,9 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(TameableData.class, SpongeTameableData.class, ImmutableTameableData.class,
                 ImmutableSpongeTameableData.class, new TameableDataProcessor());
 
+        dataManager.registerDualProcessor(TameableData.class, SpongeTameableData.class, ImmutableTameableData.class,
+                ImmutableSpongeTameableData.class, new HorseTameableDataProcessor());
+
         dataManager.registerDualProcessor(WetData.class, SpongeWetData.class, ImmutableWetData.class, ImmutableSpongeWetData.class,
                 new WolfWetDataProcessor());
 
