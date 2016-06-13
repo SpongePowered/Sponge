@@ -144,7 +144,8 @@ public abstract class MixinEntity implements IMixinEntity {
     private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
     private static final String FIRE_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;inFire:Lnet/minecraft/util/DamageSource;";
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
-    private static final String
+    @SuppressWarnings("unused")
+	private static final String
             ENTITY_ITEM_INIT =
             "Lnet/minecraft/entity/item/EntityItem;<init>(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V";
     // @formatter:off
@@ -407,8 +408,8 @@ public abstract class MixinEntity implements IMixinEntity {
     // to avoid firing a DisplaceEntityEvent.Teleport
     @Override
     public void setLocationAndAngles(Location<World> location) {
-        if (this.mcEntity instanceof EntityPlayerMP) {
-            ((EntityPlayerMP) this.mcEntity).playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
+        if (((Entity) this) instanceof EntityPlayerMP) {
+            ((EntityPlayerMP)(Object) this).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
         } else {
             this.setPosition(location.getX(), location.getY(), location.getZ());
         }
@@ -420,8 +421,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public void setLocationAndAngles(Transform<World> transform) {
         Vector3d position = transform.getPosition();
-        if (this.mcEntity instanceof EntityPlayerMP) {
-            ((EntityPlayerMP) this.mcEntity).playerNetServerHandler.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
+        if (((Entity) this) instanceof EntityPlayerMP) {
+        	((EntityPlayerMP)(Object) this).connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
         } else {
             this.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
         }
@@ -430,7 +431,6 @@ public abstract class MixinEntity implements IMixinEntity {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public boolean setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
         boolean relocated = true;
