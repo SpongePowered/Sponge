@@ -51,11 +51,7 @@ public class HorseTameableDataProcessor
 
     @Override
     protected Optional<Optional<UUID>> getVal(EntityHorse tameable) {
-        String uuid = tameable.getOwnerId();
-        if (uuid == null || uuid.equals("")) {
-            return Optional.of(Optional.empty());
-        }
-        return Optional.of(Optional.of(UUID.fromString(uuid)));
+        return Optional.of(Optional.ofNullable(tameable.getOwnerUniqueId()));
     }
 
     @Override
@@ -74,11 +70,10 @@ public class HorseTameableDataProcessor
 
     @Override
     protected boolean set(EntityHorse horse, Optional<UUID> uuidOptional) {
+        horse.setOwnerUniqueId(uuidOptional.orElse(null));
         if (uuidOptional.isPresent()) {
-            horse.setOwnerId(uuidOptional.get().toString());
             horse.setHorseTamed(true);
         } else {
-            horse.setOwnerId("");
             horse.setHorseTamed(false);
         }
         return true;
