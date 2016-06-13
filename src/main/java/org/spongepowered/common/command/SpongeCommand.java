@@ -29,6 +29,7 @@ import static org.spongepowered.api.command.args.GenericArguments.firstParsing;
 import static org.spongepowered.api.command.args.GenericArguments.flags;
 import static org.spongepowered.api.command.args.GenericArguments.literal;
 import static org.spongepowered.api.command.args.GenericArguments.optional;
+import static org.spongepowered.api.command.args.GenericArguments.optionalWeak;
 import static org.spongepowered.api.command.args.GenericArguments.plugin;
 import static org.spongepowered.api.command.args.GenericArguments.seq;
 import static org.spongepowered.api.command.args.GenericArguments.string;
@@ -372,7 +373,7 @@ public class SpongeCommand {
         return CommandSpec.builder()
                 .description(Text.of("List currently installed plugins"))
                 .permission("sponge.command.plugins")
-                .arguments(optional(literal(Text.of("reload"), "reload")), optional(plugin(Text.of("plugin"))))
+                .arguments(optionalWeak(literal(Text.of("reload"), "reload")), optional(plugin(Text.of("plugin"))))
                 .executor((src, args) -> {
                     if (args.hasAny("reload") && src.hasPermission("sponge.command.plugins.reload")) {
                         src.sendMessage(Text.of("Sending reload event to all plugins. Please wait."));
