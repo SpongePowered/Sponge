@@ -47,6 +47,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Surrogate;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
@@ -81,6 +82,14 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
 
         }
         return 1;
+    }
+
+    @Inject(method = "setupTamedAI", at = @At(value = "HEAD"), cancellable = true)
+    public void onSetupTamedAi(CallbackInfo ci) {
+        if (this.worldObj.isRemote) {
+            // Because ocelot AI tasks are added on the client, for whatever reason
+            ci.cancel();
+        }
     }
 
     // Data delegated methods
