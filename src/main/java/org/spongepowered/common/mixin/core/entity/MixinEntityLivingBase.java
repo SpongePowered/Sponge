@@ -629,6 +629,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     .complete());
             ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
             causeTracker.completePhase();
+        } else {
+            ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
         }
     }
 
