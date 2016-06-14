@@ -30,17 +30,21 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class OptimizationCategory extends ConfigCategory {
 
+    private static final String PRE_MERGE_COMMENT = "If enabled, block item drops are pre-processed to avoid \n"
+                                                    + "having to spawn extra entities that will be merged post spawning.\n"
+                                                    + "Usually, Sponge is smart enough to determine when to attempt an item pre-merge\n"
+                                                    + "and when not to, however, in certain cases, some mods rely on items not being\n"
+                                                    + "pre-merged and actually spawned, in which case, the items will flow right through\n"
+                                                    + "without being merged.";
+
     @Setting(value = "ignore-unloaded-chunks-on-get-light", comment = "This prevents chunks being loaded for getting light values at specific block positions. May have side effects.")
     private boolean ignoreUnloadedChunkLighting = true;
 
     @Setting(value = "chunk-map-caching", comment = "Caches chunks internally for faster returns when querying at various positions")
     private boolean useCachedChunkMap = true;
 
-    @Setting(value = "block-drops-pre-merge", comment = "If enabled, block item drops are pre-processed to avoid having to spawn extra entities that will be merged post spawning.")
-    private boolean preBlockItemDropMerge = true;
-
-    @Setting(value = "entity-drops-pre-merge", comment = "If enabled, entity drops are pre-processed to merge item stacks before spawning the related entities.")
-    private boolean preEntityItemDropMerge = true;
+    @Setting(value = "drops-pre-merge", comment = PRE_MERGE_COMMENT)
+    private boolean preItemDropMerge = true;
 
     public boolean useIgnoreUloadedChunkLightingPatch() {
         return this.ignoreUnloadedChunkLighting;
@@ -51,10 +55,7 @@ public class OptimizationCategory extends ConfigCategory {
     }
 
     public boolean doDropsPreMergeItemDrops() {
-        return this.preBlockItemDropMerge;
+        return this.preItemDropMerge;
     }
 
-    public boolean doEntityDropsPreMerge() {
-        return this.preEntityItemDropMerge;
-    }
 }

@@ -43,11 +43,11 @@ public class ItemDropData {
         return new Builder(stack);
     }
 
-    private final ItemStack stack;
+    final ItemStack stack;
     final Vector3d position;
-    private final double pitch;
-    private final double yaw;
-    private final Vector3d motion;
+    final double pitch;
+    final double yaw;
+    final Vector3d motion;
 
     ItemDropData(Builder builder) {
         this.stack = builder.stack;
@@ -79,6 +79,7 @@ public class ItemDropData {
 
     public EntityItem create(WorldServer worldServer) {
         final EntityItem entityItem = new EntityItem(worldServer);
+        entityItem.setEntityItemStack(this.stack);
         entityItem.posX = this.position.getX();
         entityItem.posY = this.position.getY();
         entityItem.posZ = this.position.getZ();
@@ -210,25 +211,9 @@ public class ItemDropData {
             entityItem.posX = this.position.getX();
             entityItem.posY = this.position.getY();
             entityItem.posZ = this.position.getZ();
-            if (this.dropAround) {
-                float f = this.random.nextFloat() * 0.5F;
-                float f1 = this.random.nextFloat() * ((float) Math.PI * 2F);
-                entityItem.motionX = (double) (-MathHelper.sin(f1) * f);
-                entityItem.motionZ = (double) (MathHelper.cos(f1) * f);
-                entityItem.motionY = 0.20000000298023224D;
-            } else {
-                float f2 = 0.3F;
-                entityItem.motionX =
-                        (double) (-MathHelper.sin((float) this.getYaw() * 0.017453292F) * MathHelper.cos((float) this.getPitch() * 0.017453292F) * f2);
-                entityItem.motionZ =
-                        (double) (MathHelper.cos((float) this.getYaw() * 0.017453292F) * MathHelper.cos((float) this.getPitch() * 0.017453292F) * f2);
-                entityItem.motionY = (double) ( - MathHelper.sin((float) this.getPitch() * 0.017453292F) * f2 + 0.1F);
-                float f3 = this.random.nextFloat() * ((float) Math.PI * 2F);
-                f2 = 0.02F * this.random.nextFloat();
-                entityItem.motionX += Math.cos((double) f3) * (double) f2;
-                entityItem.motionY += (double) ((this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
-                entityItem.motionZ += Math.sin((double) f3) * (double) f2;
-            }
+            entityItem.motionX = this.motion.getX();
+            entityItem.motionY = this.motion.getY();
+            entityItem.motionZ = this.motion.getZ();
             if (this.trace) {
                 entityItem.setThrower(this.playerName);
             }
@@ -265,6 +250,11 @@ public class ItemDropData {
                     .add("playerName", this.playerName)
                     .add("dropAround", this.dropAround)
                     .add("random", this.random)
+                    .add("stack", this.stack)
+                    .add("position", this.position)
+                    .add("pitch", this.pitch)
+                    .add("yaw", this.yaw)
+                    .add("motion", this.motion)
                     .toString();
         }
 

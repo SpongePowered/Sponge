@@ -88,8 +88,6 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::doDropsPreMergeItemDrops)
             .put("org.spongepowered.common.mixin.optimization.MixinInventoryHelper",
                     OptimizationCategory::doDropsPreMergeItemDrops)
-            .put("org.spongepowered.common.mixin.optimization.MixinEntity_Item_Pre_Merge",
-                    OptimizationCategory::doEntityDropsPreMerge)
             .put("org.spongepowered.common.mixin.optimization.MixinWorldServer_Explosion",
                     (module) -> false) // TODO the velocity changes need to be sent to the client
             .put("org.spongepowered.common.mixin.optimization.MixinExplosion_Explosion",
