@@ -86,7 +86,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::isUseCachedChunkMap)
             .put("org.spongepowered.common.mixin.optimization.MixinSpongeImplHooks_Item_Pre_Merge",
                     OptimizationCategory::doDropsPreMergeItemDrops)
-            .put("org.spongepowered.common.mixin.optimization.MixinInventoryHelper",
+            .put("org.spongepowered.common.mixin.optimization.MixinInventoryHelper_Item_Pre_Merge",
                     OptimizationCategory::doDropsPreMergeItemDrops)
             .put("org.spongepowered.common.mixin.optimization.MixinWorldServer_Explosion",
                     (module) -> false) // TODO the velocity changes need to be sent to the client

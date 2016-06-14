@@ -290,6 +290,7 @@
         "event.cause.entity.damage.MixinMinecraftBlockDamageSource",
         "event.cause.entity.damage.MixinMinecraftFallingBlockDamageSource",
         "event.cause.entity.damage.MixinIndirectEntityDamageSource",
+        "inventory.MixinInventoryHelper",
         "item.MixinEnchantment",
         "item.MixinItem",
         "item.MixinItemArmorMaterial",

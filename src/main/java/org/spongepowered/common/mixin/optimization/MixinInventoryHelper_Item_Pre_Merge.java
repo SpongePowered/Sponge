@@ -30,7 +30,6 @@ import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -40,13 +39,12 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 
-@Mixin(InventoryHelper.class)
-public class MixinInventoryHelper {
+@Mixin(value = InventoryHelper.class, priority = 1001)
+public class MixinInventoryHelper_Item_Pre_Merge {
 
     private static final String
             DROP_INVENTORY_ITEMS_BLOCK_POS =

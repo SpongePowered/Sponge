@@ -83,6 +83,7 @@ public class PhaseContext {
     public PhaseContext addBlockCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, new BlockItemEntityDropsSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, new BlockItemDropsSupplier()));
         return this;
     }
@@ -91,6 +92,7 @@ public class PhaseContext {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, new BlockItemDropsSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, new BlockItemEntityDropsSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, new CapturedItemsSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, new CapturedItemStackSupplier()));
@@ -196,6 +198,13 @@ public class PhaseContext {
     public CapturedMultiMapSupplier<BlockPos, ItemDropData> getBlockDropSupplier() throws IllegalStateException {
         return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS,
                 (Class<CapturedMultiMapSupplier<BlockPos, ItemDropData>>) (Class<?>) BlockItemDropsSupplier.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to track block item drops!", this));
+    }
+
+    @SuppressWarnings("unchecked")
+    public CapturedMultiMapSupplier<BlockPos, EntityItem> getBlockItemDropSupplier() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS,
+                (Class<CapturedMultiMapSupplier<BlockPos, EntityItem>>) (Class<?>) BlockItemEntityDropsSupplier.class)
                 .orElseThrow(PhaseUtil.throwWithContext("Intended to track block item drops!", this));
     }
 
@@ -433,6 +442,11 @@ public class PhaseContext {
     static final class EntityItemEntityDropsSupplier extends CapturedMultiMapSupplier<UUID, EntityItem> {
 
         EntityItemEntityDropsSupplier() {
+        }
+    }
+
+    static final class BlockItemEntityDropsSupplier extends CapturedMultiMapSupplier<BlockPos, EntityItem> {
+        BlockItemEntityDropsSupplier() {
         }
     }
 

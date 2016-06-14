@@ -40,7 +40,7 @@ public final class BlockPhase extends TrackingPhase {
         RESTORING_BLOCKS,
         DISPENSE,
         BLOCK_DROP_ITEMS,
-        BLOCK_ADDED;
+        BLOCK_ADDED, BLOCK_BREAK;
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {

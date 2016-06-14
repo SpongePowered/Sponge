@@ -51,6 +51,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
@@ -191,6 +192,25 @@ public final class TrackingUtil {
         boolean result = currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         causeTracker.completePhase();
         return result;
+    }
+
+    public static void performBlockDrop(Block block, IMixinWorldServer mixinWorld, BlockPos pos, IBlockState state, float chance, int fortune) {
+        final CauseTracker causeTracker = mixinWorld.getCauseTracker();
+        final IPhaseState currentState = causeTracker.getStack().peekState();
+        final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState);
+        if (shouldEnterBlockDropPhase) {
+            causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DROP_ITEMS, PhaseContext.start()
+                    .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
+                    .addBlockCaptures()
+                    .addEntityCaptures()
+                    .add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_FORTUNE, fortune))
+                    .add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_POSITION, pos))
+                    .complete());
+        }
+        block.dropBlockAsItemWithChance((WorldServer) mixinWorld, pos, state, chance, fortune);
+        if (shouldEnterBlockDropPhase) {
+            causeTracker.completePhase();
+        }
     }
 
     public static void associateEntityCreator(PhaseContext context, Entity spongeEntity, WorldServer world) {

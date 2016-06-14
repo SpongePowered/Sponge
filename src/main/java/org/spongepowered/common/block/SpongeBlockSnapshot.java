@@ -179,7 +179,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         net.minecraft.world.World world = (net.minecraft.world.World) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
         CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
         final IPhaseState currentState = causeTracker.getStack().peekState();
-        if (currentState.tracksBlockRestores()) {
+        if (!currentState.tracksBlockRestores()) {
             causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS,
                     PhaseContext.start()
                             .add(NamedCause.of(InternalNamedCauses.General.RESTORING_BLOCK, this))
@@ -205,7 +205,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 te.markDirty();
             }
         }
-        if (currentState.tracksBlockRestores()) {
+        if (!currentState.tracksBlockRestores()) {
             causeTracker.completePhase();
         }
         return true;

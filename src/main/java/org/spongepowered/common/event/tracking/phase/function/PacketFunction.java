@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.function;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -42,6 +43,7 @@ import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.network.play.server.SPacketOpenWindow;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
@@ -61,6 +63,7 @@ import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackSta
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CreativeInventoryEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -70,6 +73,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatVisibility;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
@@ -93,6 +97,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -407,7 +412,6 @@ public interface PacketFunction {
                         printer.trace(System.err);
                     });
             context.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
-                final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
                 final Cause cause = Cause.source(EntitySpawnCause.builder()
                         .entity(EntityUtil.fromNative(player))
                         .type(InternalSpawnTypes.PLACEMENT)
@@ -421,6 +425,32 @@ public interface PacketFunction {
                             }
                         })
                         .process();
+            });
+
+            context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
+                final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
+                final Cause cause = Cause.source(EntitySpawnCause.builder()
+                        .entity(EntityUtil.fromNative(player))
+                        .type(InternalSpawnTypes.DROPPED_ITEM)
+                        .build())
+                        .build();
+                for (BlockSnapshot blockChange : capturedBlocks) {
+                    final Location<World> location = blockChange.getLocation().get();
+                    final Vector3d position = location.getPosition();
+                    final BlockPos blockPos = VecHelper.toBlockPos(position);
+                    final Collection<EntityItem> entityItems = map.get(blockPos);
+                    if (!entityItems.isEmpty()) {
+                        final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                        final DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld());
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            for (Entity entity : event.getEntities()) {
+                                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        }
+                    }
+                }
             });
 
         }

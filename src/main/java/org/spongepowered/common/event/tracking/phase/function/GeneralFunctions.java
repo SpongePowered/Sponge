@@ -168,6 +168,11 @@ public class GeneralFunctions {
         for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
             if (!transaction.isValid()) {
                 invalid.add(transaction);
+                // Cancel any block drops performed, avoids any item drops, regardless
+                context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
+                    final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
+                    map.get(blockPos).clear();
+                });
             }
         }
 

@@ -47,6 +47,7 @@ import org.spongepowered.api.event.cause.entity.teleport.EntityTeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -73,6 +74,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -165,6 +167,7 @@ public final class WorldPhase extends TrackingPhase {
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final Entity tickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
+                final IMixinEntity mixinEntity = EntityUtil.toMixin(tickingEntity);
                 phaseContext.getCapturedEntitySupplier()
                         .ifPresentAndNotEmpty(entities -> {
                             final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
@@ -227,7 +230,34 @@ public final class WorldPhase extends TrackingPhase {
                         });
                 phaseContext.getCapturedBlockSupplier()
                         .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
+                phaseContext.getBlockItemDropSupplier()
+                        .ifPresentAndNotEmpty(map -> {
+                            final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
+                            for (BlockSnapshot snapshot : capturedBlocks) {
+                                final BlockPos blockPos = VecHelper.toBlockPos(snapshot.getPosition());
+                                final Collection<EntityItem> entityItems = map.get(blockPos);
+                                if (!entityItems.isEmpty()) {
+                                    final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
+                                            .block(snapshot)
+                                            .type(InternalSpawnTypes.DROPPED_ITEM)
+                                            .build());
+                                    mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).ifPresent(user -> builder.named(NamedCause.notifier(user)));
+                                    mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).ifPresent(user -> builder.named(NamedCause.owner(user)));
+                                    builder.build();
+                                    final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                                    final DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(builder.build(), items, causeTracker.getWorld());
+                                    SpongeImpl.postEvent(event);
+                                    if (!event.isCancelled()) {
+                                        for (Entity entity : event.getEntities()) {
+                                            mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).ifPresent(creator ->
+                                                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.getUniqueId()));
+                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                        }
+                                    }
+                                }
+                            }
 
+                        });
                 this.fireMovementEvents(EntityUtil.toNative(tickingEntity), Cause.source(tickingEntity).build());
             }
 

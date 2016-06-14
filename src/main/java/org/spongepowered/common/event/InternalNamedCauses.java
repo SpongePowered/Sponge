@@ -68,6 +68,7 @@ public final class InternalNamedCauses {
         public static final String CAPTURED_ENTITY_STACK_DROPS = "CapturedEntityItemDropMap";
         public static final String CAPTURED_ITEM_STACKS = "CapturedItemStacks";
         public static final String CAPTURED_ENTITY_ITEM_DROPS = "CapturedEntityItemDrops";
+        public static final String CAPTURED_BLOCK_ITEM_DROPS = "CapturedBlockITemDrops";
 
         private Tracker() {
 

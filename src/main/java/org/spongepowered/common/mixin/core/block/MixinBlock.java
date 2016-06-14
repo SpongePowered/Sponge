@@ -67,17 +67,14 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.EventConsumer;
-import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.ItemDropData;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
@@ -194,22 +191,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Redirect(method = "dropBlockAsItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;dropBlockAsItemWithChance(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;FI)V"))
     private void onDropItemWithFortuneChances(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, float chance, int fortune) {
         if (world instanceof IMixinWorldServer) {
-            final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
-            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
-            final IPhaseState currentState = causeTracker.getStack().peekState();
-            if (!currentState.getPhase().alreadyCapturingItemSpawns(currentState)) {
-                causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DROP_ITEMS, PhaseContext.start()
-                        .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
-                        .addBlockCaptures()
-                        .addEntityCaptures()
-                        .add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_FORTUNE, fortune))
-                        .add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_POSITION, pos))
-                        .complete());
-            }
-            block.dropBlockAsItemWithChance(world, pos, state, chance, fortune);
-            if (!currentState.getPhase().alreadyCapturingItemSpawns(currentState)) {
-                causeTracker.completePhase();
-            }
+            TrackingUtil.performBlockDrop(block, (IMixinWorldServer) world, pos, state, chance, fortune);
             return;
         }
         block.dropBlockAsItemWithChance(world, pos, state, chance, fortune);
