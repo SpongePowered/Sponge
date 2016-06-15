@@ -1,8 +1,10 @@
 {
-    "minVersion": "0.5.1",
+    "minVersion": "0.5.7",
     "package": "org.spongepowered.common.mixin.entityactivation",
     "plugin": "org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRangePlugin",
     "refmap": "mixins.common.refmap.json",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
     "mixins": [
         "MixinEntity_Activation",
         "MixinEntityAgeable_Activation",

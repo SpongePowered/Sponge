@@ -29,6 +29,7 @@ import static org.spongepowered.common.SpongeImpl.ECOSYSTEM_ID;
 
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.common.launch.transformer.SpongeSuperclassRegistry;
 
 import java.nio.file.Path;
@@ -62,23 +63,20 @@ public class SpongeLaunch {
         return spongeConfigDir;
     }
 
-    public static MixinEnvironment setupMixinEnvironment() {
+    public static void setupMixinEnvironment() {
         MixinBootstrap.init();
-        MixinEnvironment.setCompatibilityLevel(JAVA_8);
 
         // Register common mixin configurations
-        return MixinEnvironment.getDefaultEnvironment()
-                .addConfiguration("mixins.common.api.json")
-                .addConfiguration("mixins.common.core.json")
-                .addConfiguration("mixins.common.bungeecord.json")
-                .addConfiguration("mixins.common.entityactivation.json")
-                .addConfiguration("mixins.common.entitycollisions.json")
-                .addConfiguration("mixins.common.exploit.json")
-                .addConfiguration("mixins.common.tracking.json")
-                .addConfiguration("mixins.common.tostring.json")
-                .addConfiguration("mixins.common.optimization.json")
-                .addConfiguration("mixins.common.realtime.json")
-                ;
+        Mixins.addConfiguration("mixins.common.api.json");
+        Mixins.addConfiguration("mixins.common.core.json");
+        Mixins.addConfiguration("mixins.common.bungeecord.json");
+        Mixins.addConfiguration("mixins.common.entityactivation.json");
+        Mixins.addConfiguration("mixins.common.entitycollisions.json");
+        Mixins.addConfiguration("mixins.common.exploit.json");
+        Mixins.addConfiguration("mixins.common.tracking.json");
+        Mixins.addConfiguration("mixins.common.tostring.json");
+        Mixins.addConfiguration("mixins.common.optimization.json");
+        Mixins.addConfiguration("mixins.common.realtime.json");
     }
 
     public static void setupSuperClassTransformer() {

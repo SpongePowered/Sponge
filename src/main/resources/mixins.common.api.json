@@ -1,8 +1,10 @@
 {
     "required": true,
-    "minVersion": "0.5.1",
+    "minVersion": "0.5.7",
     "package": "org.spongepowered.common.mixin.api",
     "refmap": "mixins.common.refmap.json",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
     "mixins": [
         "ai.MixinAbstractAITask",
         "event.cause.damage.MixinAbstractDamageSource",

@@ -58,7 +58,7 @@ configurations {
 
 dependencies {
     compile api
-    compile('org.spongepowered:mixin:0.5.5-SNAPSHOT') {
+    compile('org.spongepowered:mixin:0.5.7-SNAPSHOT') {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }

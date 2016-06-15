@@ -1,8 +1,10 @@
 {
-    "minVersion": "0.5.3",
+    "minVersion": "0.5.7",
     "package": "org.spongepowered.common.mixin.optimization",
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.OptimizationPlugin",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
     "mixins": [
         "world.MixinWorld_Lighting",
         "world.MixinWorldServer_Lighting",
