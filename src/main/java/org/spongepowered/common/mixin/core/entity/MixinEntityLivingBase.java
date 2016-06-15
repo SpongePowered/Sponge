@@ -443,7 +443,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     // Sponge Start - notify the cause tracker
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
                     final boolean tracksEntitySpecificDrops = causeTracker.getStack().peekState().tracksEntityDeaths();
-                    System.err.printf("Specific drops is %s%n", tracksEntitySpecificDrops);
                     if (!tracksEntitySpecificDrops) {
                         causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH, PhaseContext.start()
                                 .add(NamedCause.source(this))
