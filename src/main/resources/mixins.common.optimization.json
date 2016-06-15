@@ -9,7 +9,6 @@
         "world.MixinChunk_Chunk_Cache",
         "world.gen.MixinChunkProviderServer_Chunk_Cache",
         "MixinSpongeImplHooks_Item_Pre_Merge",
-        "MixinInventoryHelper_Item_Pre_Merge",
         "MixinWorldServer_Explosion",
         "MixinExplosion_Explosion"
     ],

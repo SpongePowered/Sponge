@@ -24,10 +24,32 @@
  */
 package org.spongepowered.common.item.inventory.util;
 
+import com.google.common.collect.Multimap;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.mixin.core.inventory.MixinInventoryHelper;
+import org.spongepowered.common.util.VecHelper;
+
+import java.util.Collection;
+import java.util.Random;
 
 public final class ContainerUtil {
+
+    private static final Random RANDOM = new Random();
 
     private ContainerUtil() {
     }
@@ -49,6 +71,72 @@ public final class ContainerUtil {
 
     public static net.minecraft.inventory.Container fromMixin(IMixinContainer container) {
         return (net.minecraft.inventory.Container) container;
+    }
+
+    /**
+     * Replacement helper method for {@link MixinInventoryHelper#spongeDropInventoryItems(World, double, double, double, IInventory)}
+     * to perform cause tracking related drops. This is specific for blocks, not for any other cases.
+     *
+     * @param worldServer The world server
+     * @param x the x position
+     * @param y the y position
+     * @param z the z position
+     * @param inventory The inventory to drop items from
+     */
+    public static void performBlockInventoryDrops(WorldServer worldServer, double x, double y, double z, IInventory inventory) {
+        final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldServer;
+        final PhaseData currentPhase = mixinWorld.getCauseTracker().getStack().peek();
+        final IPhaseState currentState = currentPhase.getState();
+        if (currentState.tracksBlockSpecificDrops()) {
+            final PhaseContext context = currentPhase.getContext();
+            if (currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+                final Multimap<BlockPos, EntityItem> multimap = context.getBlockItemDropSupplier().get();
+                final BlockPos pos = new BlockPos(x, y, z);
+                final Collection<EntityItem> itemStacks = multimap.get(pos);
+                for (int i = 0; i < inventory.getSizeInventory(); i++) {
+                    final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(i);
+                    if (itemStack != null) {
+                        float f = RANDOM.nextFloat() * 0.8F + 0.1F;
+                        float f1 = RANDOM.nextFloat() * 0.8F + 0.1F;
+                        float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
+                        int stackSize = RANDOM.nextInt(21) + 10;
+
+                        if (stackSize > itemStack.stackSize) {
+                            stackSize = itemStack.stackSize;
+                        }
+
+                        itemStack.stackSize -= stackSize;
+                        final double posX = x + (double) f;
+                        final double posY = y + (double) f1;
+                        final double posZ = z + (double) f2;
+                        EntityItem entityitem = new EntityItem(worldServer, posX, posY, posZ, new ItemStack(itemStack.getItem(), stackSize, itemStack.getMetadata()));
+
+                        if (itemStack.hasTagCompound()) {
+                            entityitem.getEntityItem().setTagCompound((NBTTagCompound) itemStack.getTagCompound().copy());
+                        }
+
+                        float f3 = 0.05F;
+                        entityitem.motionX = RANDOM.nextGaussian() * (double) f3;
+                        entityitem.motionY = RANDOM.nextGaussian() * (double) f3 + 0.20000000298023224D;
+                        entityitem.motionZ = RANDOM.nextGaussian() * (double) f3;
+                        itemStacks.add(entityitem);
+                    }
+                }
+            } else {
+                final Multimap<BlockPos, ItemDropData> multimap = context.getBlockDropSupplier().get();
+                final BlockPos pos = new BlockPos(x, y, z);
+                final Collection<ItemDropData> itemStacks = multimap.get(pos);
+                for (int i = 0; i < inventory.getSizeInventory(); i++) {
+                    final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(i);
+                    if (itemStack != null) {
+                        SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(itemStack)
+                                .position(VecHelper.toVector3d(pos))
+                                .build());
+                    }
+                }
+            }
+
+        }
     }
 
 }
