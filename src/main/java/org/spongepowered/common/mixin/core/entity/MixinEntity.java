@@ -60,6 +60,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -399,6 +400,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             this.mcEntity.rotationYaw = (float) event.getToTransform().getYaw();
         }
 
+        ChunkProviderServer chunkProviderServer = ((WorldServer) location.getExtent()).theChunkProviderServer;
+        boolean chunkLoadOverride = chunkProviderServer.chunkLoadOverride;
+        chunkProviderServer.chunkLoadOverride = true;
         // detach passengers
         net.minecraft.entity.Entity passenger = this.mcEntity.riddenByEntity;
         ArrayDeque<net.minecraft.entity.Entity> passengers = new ArrayDeque<>();
@@ -453,6 +457,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             lastPassenger = passengerEntity;
         }
 
+        chunkProviderServer.chunkLoadOverride = chunkLoadOverride;
         return true;
     }
 

@@ -32,9 +32,6 @@ public class GeneralCategory extends ConfigCategory {
 
     @Setting(value = "disable-warnings", comment = "Disable warning messages to server admins")
     private boolean disableWarnings = false;
-    @Setting(value = "chunk-load-override",
-            comment = "Forces Chunk Loading on provide requests (speedup for mods that don't check if a chunk is loaded)")
-    private boolean chunkLoadOverride = false;
 
     public boolean disableWarnings() {
         return this.disableWarnings;
@@ -42,13 +39,5 @@ public class GeneralCategory extends ConfigCategory {
 
     public void setDisableWarnings(boolean disableWarnings) {
         this.disableWarnings = disableWarnings;
-    }
-
-    public boolean chunkLoadOverride() {
-        return this.chunkLoadOverride;
-    }
-
-    public void setChunkLoadOverride(boolean chunkLoadOverride) {
-        this.chunkLoadOverride = chunkLoadOverride;
     }
 }
