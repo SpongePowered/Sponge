@@ -90,7 +90,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
@@ -352,7 +351,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
-        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+        causeTracker.switchToPhase(WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                 .add(NamedCause.source(worldServer))
                 .addCaptures()
                 .complete());

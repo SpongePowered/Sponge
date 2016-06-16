@@ -31,7 +31,6 @@ import com.google.common.base.Objects;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.common.entity.EntityUtil;
 
@@ -78,13 +77,9 @@ public class ItemDropData {
     }
 
     public EntityItem create(WorldServer worldServer) {
-        final EntityItem entityItem = new EntityItem(worldServer);
-        entityItem.setEntityItemStack(this.stack);
-        entityItem.posX = this.position.getX();
-        entityItem.posY = this.position.getY();
-        entityItem.posZ = this.position.getZ();
-        entityItem.motionX = this.position.getX();
-        entityItem.motionY = this.position.getY();
+        final EntityItem entityItem = new EntityItem(worldServer, this.position.getX(), this.position.getY(), this.position.getZ(), this.stack);
+        entityItem.motionX = this.motion.getX();
+        entityItem.motionY = this.motion.getY();
         entityItem.motionZ = this.motion.getZ();
         return entityItem;
     }

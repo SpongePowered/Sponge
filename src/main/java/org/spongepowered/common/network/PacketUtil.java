@@ -113,10 +113,10 @@ public class PacketUtil {
                 if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
                     TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
                     context.complete();
-                    causeTracker.switchToPhase(TrackingPhases.PACKET, packetState, context);
+                    causeTracker.switchToPhase(packetState, context);
                 } else {
                     context.complete();
-                    causeTracker.switchToPhase(TrackingPhases.PACKET, PacketPhase.General.INVALID, EMPTY_INVALID);
+                    causeTracker.switchToPhase(PacketPhase.General.INVALID, EMPTY_INVALID);
                 }
                 packetIn.processPacket(netHandler);
                 causeTracker.completePhase();

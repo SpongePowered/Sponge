@@ -36,7 +36,6 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 /**
  * A simple stack that couples a {@link IPhaseState} and
@@ -54,11 +53,6 @@ public final class CauseStack {
 
     CauseStack(int size) {
         this.states = new ArrayDeque<>(size);
-    }
-
-
-    public Iterable<IPhaseState> currentStates() {
-        return this.states.stream().map(PhaseData::getState).collect(Collectors.toList());
     }
 
     public PhaseData peek() {

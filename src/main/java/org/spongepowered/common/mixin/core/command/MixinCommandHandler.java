@@ -30,9 +30,7 @@ import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -41,15 +39,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.GeneralPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.command.IMixinCommandBase;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-
-import java.util.Collection;
 
 @Mixin(CommandHandler.class)
 public abstract class MixinCommandHandler implements IMixinCommandHandler {
@@ -61,7 +55,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
         SpongeTimings.playerCommandTimer.startTiming();
         Sponge.getServer().getWorlds().forEach(world -> {
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
-            mixinWorld.getCauseTracker().switchToPhase(TrackingPhases.GENERAL, GeneralPhase.State.COMMAND, PhaseContext.start()
+            mixinWorld.getCauseTracker().switchToPhase(GeneralPhase.State.COMMAND, PhaseContext.start()
                     .add(NamedCause.source(sender))
                     .add(NamedCause.of(InternalNamedCauses.General.COMMAND, command))
                     .addCaptures()

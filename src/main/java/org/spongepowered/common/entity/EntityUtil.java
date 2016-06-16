@@ -647,7 +647,7 @@ public final class EntityUtil {
                     return null;
                 }
             }
-            EntityItem entityitem = new EntityItem(entity.worldObj, posX, entity.posY + (double) offsetY, posZ, itemStack);
+            EntityItem entityitem = new EntityItem(entity.worldObj, posX, posY, posZ, itemStack);
             entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
@@ -747,10 +747,8 @@ public final class EntityUtil {
             entityitem.motionY = 0.20000000298023224D;
         } else {
             float f2 = 0.3F;
-            entityitem.motionX =
-                    (double) (-MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2);
-            entityitem.motionZ =
-                    (double) (MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2);
+            entityitem.motionX = (double) (-MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2);
+            entityitem.motionZ = (double) (MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2);
             entityitem.motionY = (double) ( - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F);
             float f3 = random.nextFloat() * ((float) Math.PI * 2F);
             f2 = 0.02F * random.nextFloat();

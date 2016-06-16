@@ -60,7 +60,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.VecHelper;
@@ -180,7 +179,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
         final IPhaseState currentState = causeTracker.getStack().peekState();
         if (!currentState.tracksBlockRestores()) {
-            causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS,
+            causeTracker.switchToPhase(BlockPhase.State.RESTORING_BLOCKS,
                     PhaseContext.start()
                             .add(NamedCause.of(InternalNamedCauses.General.RESTORING_BLOCK, this))
                             .complete());

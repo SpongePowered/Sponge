@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.function;
 import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
@@ -39,7 +38,6 @@ import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public final class BlockFunction {
 

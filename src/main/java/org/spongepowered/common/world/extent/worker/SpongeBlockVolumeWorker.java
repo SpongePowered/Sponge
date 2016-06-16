@@ -41,8 +41,6 @@ import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.function.BiFunction;
@@ -86,7 +84,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         }
         if (mixinWorld != null) {
             final CauseTracker causeTracker = mixinWorld.getCauseTracker();
-            causeTracker.switchToPhase(TrackingPhases.PLUGIN, PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
+            causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
                     .add(NamedCause.source(this))
                     .addCaptures()
                     .complete());
@@ -128,7 +126,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         // a single go, requiring only one event
         if (destination instanceof IMixinWorldServer) {
             final CauseTracker causeTracker = ((IMixinWorldServer) destination).getCauseTracker();
-            causeTracker.switchToPhase(TrackingPhases.PLUGIN, PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
+            causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
                     .add(NamedCause.source(this))
                     .complete());
         }

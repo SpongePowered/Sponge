@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
@@ -41,19 +40,13 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
-import org.spongepowered.common.data.util.DirectionChecker;
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.event.tracking.phase.WorldPhase;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.Optional;
 import java.util.Random;
@@ -97,7 +90,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
 
     @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM))
     private void onDispenseHead(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
-        ((IMixinWorldServer) worldIn).getCauseTracker().switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.DISPENSE, PhaseContext.start()
+        ((IMixinWorldServer) worldIn).getCauseTracker().switchToPhase(BlockPhase.State.DISPENSE, PhaseContext.start()
             .add(NamedCause.source(((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(state, state, pos, 3)))
                 .addBlockCaptures()
                 .addCaptures()

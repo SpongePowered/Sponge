@@ -28,32 +28,26 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
-import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
@@ -62,7 +56,6 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -79,7 +72,7 @@ public final class TrackingUtil {
     public static void tickEntity(CauseTracker causeTracker, net.minecraft.entity.Entity entityIn) {
         checkArgument(entityIn instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entityIn);
         checkNotNull(entityIn, "Cannot capture on a null ticking entity!");
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.ENTITY, PhaseContext.start()
+        causeTracker.switchToPhase(WorldPhase.Tick.ENTITY, PhaseContext.start()
                 .add(NamedCause.source(entityIn))
                 .addEntityCaptures()
                 .addBlockCaptures()
@@ -94,7 +87,7 @@ public final class TrackingUtil {
     public static void tickRidingEntity(CauseTracker causeTracker, net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.ENTITY, PhaseContext.start()
+        causeTracker.switchToPhase(WorldPhase.Tick.ENTITY, PhaseContext.start()
                 .add(NamedCause.source(entity))
                 .addEntityCaptures()
                 .addBlockCaptures()
@@ -107,7 +100,7 @@ public final class TrackingUtil {
     }
 
     public static void tickTileEntity(CauseTracker causeTracker, ITickable tile) {
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.TILE_ENTITY, PhaseContext.start()
+        causeTracker.switchToPhase(WorldPhase.Tick.TILE_ENTITY, PhaseContext.start()
                 .add(NamedCause.source(tile))
                 .addEntityCaptures()
                 .addBlockCaptures()
@@ -117,8 +110,8 @@ public final class TrackingUtil {
         final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tile;
         mixinTileEntity.getTimingsHandler().startTiming();
         tile.update();
-        causeTracker.completePhase();
         mixinTileEntity.getTimingsHandler().stopTiming();
+        causeTracker.completePhase();
 
     }
 
@@ -135,7 +128,7 @@ public final class TrackingUtil {
         final IPhaseState currentState = current.getState();
         currentState.getPhase().appendNotifierPreBlockTick(causeTracker, pos, currentState, current.getContext(), phaseContext);
         // Now actually switch to the new phase
-        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.BLOCK, phaseContext.complete());
+        causeTracker.switchToPhase(WorldPhase.Tick.BLOCK, phaseContext.complete());
         block.updateTick(minecraftWorld, pos, state, random);
         causeTracker.completePhase();
     }
@@ -153,7 +146,7 @@ public final class TrackingUtil {
         final IPhaseState currentState = current.getState();
         currentState.getPhase().appendNotifierPreBlockTick(causeTracker, pos, currentState, current.getContext(), phaseContext);
         // Now actually switch to the new phase
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.RANDOM_BLOCK, phaseContext.complete());
+        causeTracker.switchToPhase(WorldPhase.Tick.RANDOM_BLOCK, phaseContext.complete());
         block.randomTick(minecraftWorld, pos, state, random);
         causeTracker.completePhase();
     }
@@ -161,7 +154,7 @@ public final class TrackingUtil {
     public static void tickWorldProvider(IMixinWorldServer worldServer) {
         final CauseTracker causeTracker = worldServer.getCauseTracker();
         final WorldProvider worldProvider = ((WorldServer) worldServer).provider;
-        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.DIMENSION, PhaseContext.start()
+        causeTracker.switchToPhase(WorldPhase.Tick.DIMENSION, PhaseContext.start()
                 .add(NamedCause.source(worldProvider))
                 .addBlockCaptures()
                 .addEntityCaptures()
@@ -188,7 +181,7 @@ public final class TrackingUtil {
         blockEvent.getSourceUser().ifPresent(user -> phaseContext.add(NamedCause.notifier(user)));
 
         phaseContext.complete();
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.BLOCK_EVENT, phaseContext);
+        causeTracker.switchToPhase(WorldPhase.Tick.BLOCK_EVENT, phaseContext);
         boolean result = currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         causeTracker.completePhase();
         return result;
@@ -199,7 +192,7 @@ public final class TrackingUtil {
         final IPhaseState currentState = causeTracker.getStack().peekState();
         final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState);
         if (shouldEnterBlockDropPhase) {
-            causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DROP_ITEMS, PhaseContext.start()
+            causeTracker.switchToPhase(BlockPhase.State.BLOCK_DROP_ITEMS, PhaseContext.start()
                     .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
                     .addBlockCaptures()
                     .addEntityCaptures()
@@ -284,4 +277,7 @@ public final class TrackingUtil {
     private TrackingUtil() {
     }
 
+    public static void breakBlock(Block currentBlock, World worldObj, BlockPos pos, IBlockState currentState) {
+        currentBlock.breakBlock(worldObj, pos, currentState);
+    }
 }

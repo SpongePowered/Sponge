@@ -35,7 +35,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
@@ -188,12 +187,6 @@ public class PhaseContext {
                 .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block drops", this));
     }
 
-    public Collection<ItemDropData> getCapturedBlockDrops(BlockPos position) throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, BlockItemDropsSupplier.class)
-                .map(supplier -> supplier.get().get(position))
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture block drops for position: " + position, this));
-    }
-
     @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<BlockPos, ItemDropData> getBlockDropSupplier() throws IllegalStateException {
         return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS,
@@ -206,18 +199,6 @@ public class PhaseContext {
         return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS,
                 (Class<CapturedMultiMapSupplier<BlockPos, EntityItem>>) (Class<?>) BlockItemEntityDropsSupplier.class)
                 .orElseThrow(PhaseUtil.throwWithContext("Intended to track block item drops!", this));
-    }
-
-    public Multimap<UUID, ItemDropData> getCapturedEntityDrops() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, EntityItemDropsSupplier.class)
-                .map(EntityItemDropsSupplier::get)
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
-    }
-
-    public Collection<ItemDropData> getCapturedEntityDrops(UUID entityId) throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, EntityItemDropsSupplier.class)
-                .map(supplier -> supplier.get().get(entityId))
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
     }
 
     @SuppressWarnings("unchecked")

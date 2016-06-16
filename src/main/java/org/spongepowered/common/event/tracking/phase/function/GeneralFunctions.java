@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.function;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.item.EntityItem;
@@ -43,7 +42,6 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -69,6 +67,7 @@ import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -182,8 +181,7 @@ public class GeneralFunctions {
                 transaction.getOriginal().restore(true, false);
                 if (state.tracksBlockSpecificDrops()) {
                     final BlockPos position = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-                    final Multimap<BlockPos, ItemDropData> multiMap = context.getBlockDropSupplier().get();
-                    multiMap.get(position).clear();
+                    context.getBlockDropSupplier().ifPresentAndNotEmpty(map -> map.get(position).clear());
                 }
             }
         }
@@ -221,6 +219,7 @@ public class GeneralFunctions {
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(minecraftWorld, transactions);
         final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemDropData> capturedBlockDrops = phaseContext.getBlockDropSupplier();
+        final PhaseContext.CapturedMultiMapSupplier<BlockPos, EntityItem> capturedBlockItemEntityDrops = phaseContext.getBlockItemDropSupplier();
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 noCancelledTransactions = false;
@@ -236,15 +235,14 @@ public class GeneralFunctions {
             final Cause currentCause = builder.build();
 
             // Handle item drops captured
-            if (capturedBlockDrops != null) {
-                // These are not to be re-captured since we know the changes that took place
-                spawnItemStacksForBlockDrop(capturedBlockDrops.get().get(VecHelper.toBlockPos(oldBlockSnapshot.getPosition())), newBlockSnapshot,
-                        causeTracker, phaseContext, phaseState);
-            }
+            final BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
+            // This is for pre-merged items
+            capturedBlockDrops.ifPresentAndNotEmpty(map -> spawnItemDataForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, phaseContext, phaseState));
+            // And this is for un-pre-merged items, these will be EntityItems, not ItemDropDatas.
+            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, phaseContext, phaseState));
 
             SpongeHooks.logBlockAction(currentCause, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
             int updateFlag = oldBlockSnapshot.getUpdateFlag();
-            BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
             IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
@@ -269,7 +267,32 @@ public class GeneralFunctions {
         return noCancelledTransactions;
     }
 
-    public static void spawnItemStacksForBlockDrop(Collection<ItemDropData> itemStacks, SpongeBlockSnapshot oldBlockSnapshot, CauseTracker causeTracker,
+    public static void spawnItemEntitiesForBlockDrops(Collection<EntityItem> entityItems, SpongeBlockSnapshot newBlockSnapshot,
+            CauseTracker causeTracker, PhaseContext phaseContext, IPhaseState phaseState) {
+        final Vector3i position = newBlockSnapshot.getPosition();
+
+        // Now we can spawn the entity items appropriately
+        final List<Entity> itemDrops = entityItems.stream()
+                .map(EntityUtil::fromNative)
+                .collect(Collectors.toList());
+        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
+                .block(newBlockSnapshot)
+                .type(InternalSpawnTypes.DROPPED_ITEM)
+                .build());
+        phaseContext.firstNamed(NamedCause.NOTIFIER, User.class).map(NamedCause::notifier).ifPresent(builder::named);
+        final Cause spawnCauses = builder.build();
+        EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(spawnCauses, itemDrops, causeTracker.getWorld()))
+                .nonCancelled(event -> {
+                            for (Entity entity : event.getEntities()) {
+                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        }
+                )
+                .process();
+    }
+
+    public static void spawnItemDataForBlockDrops(Collection<ItemDropData> itemStacks, SpongeBlockSnapshot oldBlockSnapshot, CauseTracker causeTracker,
             PhaseContext phaseContext, IPhaseState state) {
         final Vector3i position = oldBlockSnapshot.getPosition();
         final List<ItemStackSnapshot> itemSnapshots = itemStacks.stream()

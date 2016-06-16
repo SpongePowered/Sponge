@@ -1132,20 +1132,21 @@ public abstract class MixinEntity implements IMixinEntity {
      * @param offsetY
      * @return
      */
-    @Overwrite
-    @Nullable
-    public EntityItem entityDropItem(net.minecraft.item.ItemStack itemStackIn, float offsetY) {
+    @Inject(method = "entityDropItem(Lnet/minecraft/item/ItemStack;F)Lnet/minecraft/entity/item/EntityItem;", at = @At("HEAD"), cancellable = true)
+    public void spongeEntityDropItem(net.minecraft.item.ItemStack itemStackIn, float offsetY, CallbackInfoReturnable<EntityItem> returnable) {
         // Gotta stick with the client side handling things
         if (this.worldObj.isRemote) {
             if (itemStackIn.stackSize != 0 && itemStackIn.getItem() != null) {
-                EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY + (double)offsetY, this.posZ, itemStackIn);
+                EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY + (double) offsetY, this.posZ, itemStackIn);
                 entityitem.setDefaultPickupDelay();
                 this.worldObj.spawnEntityInWorld(entityitem);
-                return entityitem;
+                returnable.setReturnValue(entityitem);
+                return;
             }
-            return null;
+            returnable.setReturnValue(null);
+            return;
         }
-        return EntityUtil.entityOnDropItem((net.minecraft.entity.Entity) (Object) this, itemStackIn, offsetY);
+        returnable.setReturnValue(EntityUtil.entityOnDropItem((net.minecraft.entity.Entity) (Object) this, itemStackIn, offsetY));
     }
 
     @Override

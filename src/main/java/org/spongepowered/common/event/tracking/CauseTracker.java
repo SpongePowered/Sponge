@@ -50,7 +50,6 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -107,9 +106,9 @@ public final class CauseTracker {
 
     // ----------------- STATE ACCESS ----------------------------------
 
-    public void switchToPhase(TrackingPhase phase, IPhaseState state, PhaseContext phaseContext) {
-        checkNotNull(phase, "Phase cannot be null!");
+    public void switchToPhase(IPhaseState state, PhaseContext phaseContext) {
         checkNotNull(state, "State cannot be null!");
+        checkNotNull(state.getPhase(), "Phase cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
         final IPhaseState currentState = this.stack.peek().getState();
@@ -119,7 +118,7 @@ public final class CauseTracker {
             PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Switching Phase").centre().hr();
             printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
-            printer.add("  %s : %s", "Entering Phase", phase);
+            printer.add("  %s : %s", "Entering Phase", state.getPhase());
             printer.add("  %s : %s", "Entering State", state);
             printer.add("%s :", "Current phases");
             this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
@@ -134,7 +133,7 @@ public final class CauseTracker {
             printer.add("Phase incompatibility detected! Attempting to switch to an invalid phase!");
             printer.add("  %s : %s", "Current Phase", currentState.getPhase());
             printer.add("  %s : %s", "Current State", currentState);
-            printer.add("  %s : %s", "Entering incompatible Phase", phase);
+            printer.add("  %s : %s", "Entering incompatible Phase", state.getPhase());
             printer.add("  %s : %s", "Entering incompatible State", state);
             printer.add("%s :", "Current phases");
             this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
@@ -148,7 +147,7 @@ public final class CauseTracker {
 
     public void completePhase() {
         final PhaseData currentPhaseData = this.stack.peek();
-        IPhaseState state = currentPhaseData.getState();
+        final IPhaseState state = currentPhaseData.getState();
         if (this.stack.size() > 6 && state.isExpectedForReEntrance() && this.isVerbose) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumulation.
@@ -170,7 +169,7 @@ public final class CauseTracker {
         try {
             if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
                 // Note that UnwindingPhaseContext is required for something? I don't think it requires anything tbh.
-                switchToPhase(TrackingPhases.GENERAL, GeneralPhase.Post.UNWINDING, UnwindingPhaseContext.unwind(state, context)
+                switchToPhase(GeneralPhase.Post.UNWINDING, UnwindingPhaseContext.unwind(state, context)
                         .addCaptures()
                         .addEntityDropCaptures()
                         .complete());
@@ -182,43 +181,31 @@ public final class CauseTracker {
                 SpongeTimings.TRACKING_PHASE_UNWINDING.stopTiming();
                 this.currentProcessingState = null;
             } catch (Exception e) {
-                final PrettyPrinter printer = new PrettyPrinter(40);
-                printer.add("Exception Exiting Phase").centre().hr();
-                printer.add("Something happened when trying to unwind the phase %s", state);
-                printer.addWrapped(40, "%s :", "PhaseContext");
-                CONTEXT_PRINTER.accept(printer, context);
-                printer.addWrapped(60, "%s :", "Phases remaining");
-                this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-                printer.add("Stacktrace:");
-                printer.add(e);
-                printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+                printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
             }
             if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
                 try {
                     completePhase();
                 } catch (Exception e) {
-                    final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture or spawn an Entity!").centre().hr();
-                    printer.addWrapped(40, "%s :", "PhaseContext");
-                    CONTEXT_PRINTER.accept(printer, context);
-                    printer.addWrapped(60, "%s :", "Phases remaining");
-                    this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-                    printer.add("Stacktrace:");
-                    printer.add(e);
-                    printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+                    printMessageWithCaughtException("Exception attempting to capture or spawn an Entity!", "Something happened trying to unwind", state, context, e);
                 }
             }
         } catch (Exception e) {
-            final PrettyPrinter printer = new PrettyPrinter(40);
-            printer.add("Exception Post Dispatching Phase").centre().hr();
-            printer.add("Something happened when trying to post dispatch state %s", state);
-            printer.addWrapped(40, "%s :", "PhaseContext");
-            CONTEXT_PRINTER.accept(printer, context);
-            printer.addWrapped(60, "%s :", "Phases remaining");
-            this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-            printer.add("Stacktrace:");
-            printer.add(e);
-            printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+            printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
         }
+    }
+
+    private void printMessageWithCaughtException(String header, String subHeader, IPhaseState state, PhaseContext context, Exception e) {
+        final PrettyPrinter printer = new PrettyPrinter(40);
+        printer.add(header).centre().hr()
+                .add("%s %s", subHeader, state)
+                .addWrapped(40, "%s :", "PhaseContext");
+        CONTEXT_PRINTER.accept(printer, context);
+        printer.addWrapped(60, "%s :", "Phases remaining");
+        this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+        printer.add("Stacktrace:")
+                .add(e)
+                .trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
     }
 
     // ----------------- SIMPLE GETTERS --------------------------------------

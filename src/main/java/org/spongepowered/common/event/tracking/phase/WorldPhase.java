@@ -47,6 +47,7 @@ import org.spongepowered.api.event.cause.entity.teleport.EntityTeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.Location;
@@ -174,34 +175,33 @@ public final class WorldPhase extends TrackingPhase {
                                     .entity(tickingEntity)
                                     .type(InternalSpawnTypes.PASSIVE)
                                     .build());
-                            EntityUtil.toMixin(tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
+                            mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
                                     .ifPresent(creator -> builder.named(NamedCause.notifier(creator)));
-                            EntityUtil.toMixin(tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
+                            mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
                                     .ifPresent(creator -> builder.named(NamedCause.owner(creator)));
-                            EventConsumer
-                                    .event(SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, causeTracker.getWorld()))
-                                    .nonCancelled(event -> {
-                                        for (Entity entity : event.getEntities()) {
-                                            Stream.<Supplier<Optional<UUID>>>of(
-                                                    () -> EntityUtil.toMixin(tickingEntity)
-                                                            .getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
-                                                            .map(Identifiable::getUniqueId),
-                                                    () -> EntityUtil.toMixin(tickingEntity)
-                                                            .getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
-                                                            .map(Identifiable::getUniqueId)
-                                            )
-                                                    .map(Supplier::get)
-                                                    .filter(Optional::isPresent)
-                                                    .map(Optional::get)
-                                                    .findFirst()
-                                                    .ifPresent(uuid ->
-                                                            EntityUtil.toMixin(entity)
-                                                                    .trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid)
-                                                    );
-                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                        }
-                                    })
-                                    .process();
+                            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, causeTracker.getWorld());
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                for (Entity entity : event.getEntities()) {
+                                    Stream.<Supplier<Optional<UUID>>>of(
+                                            () -> mixinEntity
+                                                    .getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
+                                                    .map(Identifiable::getUniqueId),
+                                            () -> mixinEntity
+                                                    .getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
+                                                    .map(Identifiable::getUniqueId)
+                                    )
+                                            .map(Supplier::get)
+                                            .filter(Optional::isPresent)
+                                            .map(Optional::get)
+                                            .findFirst()
+                                            .ifPresent(uuid ->
+                                                    EntityUtil.toMixin(entity)
+                                                            .trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid)
+                                            );
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                }
+                            }
                         });
                 phaseContext.getCapturedItemsSupplier()
                         .ifPresentAndNotEmpty(entities -> {
@@ -213,20 +213,20 @@ public final class WorldPhase extends TrackingPhase {
                                     .entity(tickingEntity)
                                     .type(InternalSpawnTypes.DROPPED_ITEM)
                                     .build());
-                            EntityUtil.toMixin(tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
+                            mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
                                     .ifPresent(creator -> builder.named(NamedCause.notifier(creator)));
-                            EntityUtil.toMixin(tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
+                            mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
                                     .ifPresent(creator -> builder.named(NamedCause.owner(creator)));
-                            EventConsumer.event(SpongeEventFactory
-                                    .createDropItemEventCustom(builder.build(), capturedEntities, causeTracker.getWorld()))
-                                    .nonCancelled(event -> {
-                                        for (Entity entity : event.getEntities()) {
-                                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity),
-                                                    causeTracker.getMinecraftWorld());
-                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                        }
-                                    })
-                                    .process();
+                            final DropItemEvent.Custom event = SpongeEventFactory
+                                    .createDropItemEventCustom(builder.build(), capturedEntities, causeTracker.getWorld());
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                for (Entity entity : event.getEntities()) {
+                                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity),
+                                            causeTracker.getMinecraftWorld());
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                }
+                            }
                         });
                 phaseContext.getCapturedBlockSupplier()
                         .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
@@ -973,6 +973,11 @@ public final class WorldPhase extends TrackingPhase {
         @Override
         public boolean canSwitchTo(IPhaseState state) {
             return state instanceof BlockPhase.State || state instanceof EntityPhase.State || state == State.TERRAIN_GENERATION;
+        }
+
+        @Override
+        public boolean tracksBlockSpecificDrops() {
+            return true;
         }
 
 

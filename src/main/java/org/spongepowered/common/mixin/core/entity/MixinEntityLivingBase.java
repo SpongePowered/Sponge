@@ -82,7 +82,6 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.EntityPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -444,7 +443,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
                     final boolean tracksEntitySpecificDrops = causeTracker.getStack().peekState().tracksEntityDeaths();
                     if (!tracksEntitySpecificDrops) {
-                        causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH, PhaseContext.start()
+                        causeTracker.switchToPhase(EntityPhase.State.DEATH, PhaseContext.start()
                                 .add(NamedCause.source(this))
                                 .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, source))
                                 .add(this.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).map(NamedCause::owner).orElse(null))
@@ -621,7 +620,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
         if (!entityLivingBase.worldObj.isRemote) {
             final CauseTracker causeTracker = ((IMixinWorldServer) entityLivingBase.worldObj).getCauseTracker();
-            causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH_UPDATE, PhaseContext.start()
+            causeTracker.switchToPhase(EntityPhase.State.DEATH_UPDATE, PhaseContext.start()
                     .addCaptures()
                     .addEntityDropCaptures()
                     .add(NamedCause.source(entityLivingBase))

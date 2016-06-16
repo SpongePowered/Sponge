@@ -47,7 +47,6 @@ import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -68,7 +67,6 @@ import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.cause.entity.teleport.PortalTeleportCause;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
@@ -94,7 +92,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.EntityPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
@@ -461,10 +458,10 @@ public class SpongeCommonEventFactory {
                 )
         );
         context.complete();
-        fromMixinWorld.getCauseTracker().switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.LEAVING_DIMENSION, context);
+        fromMixinWorld.getCauseTracker().switchToPhase(EntityPhase.State.LEAVING_DIMENSION, context);
 
         final CauseTracker toCauseTracker = toMixinWorld.getCauseTracker();
-        toCauseTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.CHANGING_TO_DIMENSION, context);
+        toCauseTracker.switchToPhase(EntityPhase.State.CHANGING_TO_DIMENSION, context);
 
         if (entityIn.isEntityAlive() && !(fromWorld.provider instanceof WorldProviderEnd)) {
             fromWorld.theProfiler.startSection("placing");

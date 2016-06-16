@@ -24,11 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
-import static com.google.common.base.Preconditions.checkState;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommand;
@@ -46,7 +43,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -62,7 +58,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -308,8 +303,7 @@ public final class GeneralPhase extends TrackingPhase {
                 transaction.getOriginal().restore(true, false);
                 if (unwindingState.tracksBlockSpecificDrops()) {
                     final BlockPos position = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-                    final Multimap<BlockPos, ItemDropData> multiMap = postContext.getBlockDropSupplier().get();
-                    multiMap.get(position).clear();
+                    postContext.getBlockDropSupplier().ifPresentAndNotEmpty(map -> map.get(position).clear());
                 }
             }
             invalidTransactions.clear();
@@ -323,6 +317,7 @@ public final class GeneralPhase extends TrackingPhase {
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(minecraftWorld, transactions);
         final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemDropData> capturedBlockDrops = postContext.getBlockDropSupplier();
+        final PhaseContext.CapturedMultiMapSupplier<BlockPos, EntityItem> capturedBlockItemEntityDrops = postContext.getBlockItemDropSupplier();
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 continue; // Don't use invalidated block transactions during notifications, these only need to be restored
@@ -337,15 +332,12 @@ public final class GeneralPhase extends TrackingPhase {
             final Cause currentCause = builder.build();
 
             // Handle item drops captured
-            if (capturedBlockDrops != null) {
-                // These are not to be re-captured since we know the changes that took place
-                GeneralFunctions.spawnItemStacksForBlockDrop(capturedBlockDrops.get().get(VecHelper.toBlockPos(oldBlockSnapshot.getPosition())), newBlockSnapshot,
-                        causeTracker, unwindingPhaseContext, unwindingState);
-            }
+            final BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
+            capturedBlockDrops.ifPresentAndNotEmpty(map -> GeneralFunctions.spawnItemDataForBlockDrops(map.get(pos), newBlockSnapshot, causeTracker, unwindingPhaseContext, unwindingState));
+            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> GeneralFunctions.spawnItemEntitiesForBlockDrops(map.get(pos), newBlockSnapshot, causeTracker, unwindingPhaseContext, unwindingState));
 
             SpongeHooks.logBlockAction(currentCause, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
             int updateFlag = oldBlockSnapshot.getUpdateFlag();
-            BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
             IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically

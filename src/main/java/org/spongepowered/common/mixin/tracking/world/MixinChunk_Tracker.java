@@ -45,7 +45,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
@@ -264,7 +263,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Inject(method = "onChunkLoad", at = @At("HEAD"))
     private void startChunkLoad(CallbackInfo callbackInfo) {
         if (!this.worldObj.isRemote) {
-            ((IMixinWorldServer) this.worldObj).getCauseTracker().switchToPhase(TrackingPhases.WORLD, WorldPhase.State.CHUNK_LOADING, PhaseContext.start()
+            ((IMixinWorldServer) this.worldObj).getCauseTracker().switchToPhase(WorldPhase.State.CHUNK_LOADING, PhaseContext.start()
                 .add(NamedCause.source(this))
                 .addCaptures()
                 .complete());

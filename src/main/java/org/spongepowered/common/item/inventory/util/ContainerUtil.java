@@ -135,7 +135,37 @@ public final class ContainerUtil {
                     }
                 }
             }
+            return;
+        }
+        // Finally, just default to spawning the entities normally, regardless of the case.
+        for (int i = 0; i < inventory.getSizeInventory(); i++) {
+            final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(i);
+            if (itemStack != null) {
+                float f = RANDOM.nextFloat() * 0.8F + 0.1F;
+                float f1 = RANDOM.nextFloat() * 0.8F + 0.1F;
+                float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
+                int stackSize = RANDOM.nextInt(21) + 10;
 
+                if (stackSize > itemStack.stackSize) {
+                    stackSize = itemStack.stackSize;
+                }
+
+                itemStack.stackSize -= stackSize;
+                final double posX = x + (double) f;
+                final double posY = y + (double) f1;
+                final double posZ = z + (double) f2;
+                EntityItem entityitem = new EntityItem(worldServer, posX, posY, posZ, new ItemStack(itemStack.getItem(), stackSize, itemStack.getMetadata()));
+
+                if (itemStack.hasTagCompound()) {
+                    entityitem.getEntityItem().setTagCompound((NBTTagCompound) itemStack.getTagCompound().copy());
+                }
+
+                float f3 = 0.05F;
+                entityitem.motionX = RANDOM.nextGaussian() * (double) f3;
+                entityitem.motionY = RANDOM.nextGaussian() * (double) f3 + 0.20000000298023224D;
+                entityitem.motionZ = RANDOM.nextGaussian() * (double) f3;
+                worldServer.spawnEntityInWorld(entityitem);
+            }
         }
     }
 

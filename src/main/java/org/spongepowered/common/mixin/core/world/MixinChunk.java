@@ -85,11 +85,8 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -527,7 +524,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             if (!this.worldObj.isRemote) {
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
                 if (currentState.getBlock() != newState.getBlock()) {
-                    // TODO - delegate entity spawns to the per block entity captures
                     currentBlock.breakBlock(this.worldObj, pos, currentState);
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
@@ -790,7 +786,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
             final NamedCause sourceCause = NamedCause.source(this);
             final NamedCause chunkProviderCause = NamedCause.of(InternalNamedCauses.WorldGeneration.CHUNK_PROVIDER, generator);
-            causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+            causeTracker.switchToPhase(WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                     .add(sourceCause)
                     .add(chunkProviderCause)
                     .add(NamedCause.of("ChunkPos", new Vector2i(x, z)))

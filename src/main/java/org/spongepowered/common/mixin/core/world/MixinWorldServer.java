@@ -128,7 +128,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
@@ -216,7 +215,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Inject(method = "createBonusChest", at = @At(value = "HEAD"))
     public void onCreateBonusChest(CallbackInfo ci) {
-        this.getCauseTracker().switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+        this.getCauseTracker().switchToPhase(WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                 .add(NamedCause.source(this))
                 .addCaptures()
                 .complete());
@@ -407,7 +406,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @ModifyConstant(method = "updateBlocks", constant = @Constant(stringValue = "iceandsnow"))
     private String onStartIceAndSnow(String iceAndSnow) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.WEATHER, PhaseContext.start()
+        causeTracker.switchToPhase(WorldPhase.Tick.WEATHER, PhaseContext.start()
                 .addCaptures()
                 .add(NamedCause.source(this))
                 .complete());
@@ -599,7 +598,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             context.add(NamedCause.of(entry.getKey(), entry.getValue()));
         }
         context.complete();
-        causeTracker.switchToPhase(TrackingPhases.PLUGIN, PluginPhase.State.BLOCK_WORKER, context);
+        causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, context);
         setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, notifyNeighbors ? 3 : 2);
         causeTracker.completePhase();
     }
@@ -865,7 +864,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final CauseTracker causeTracker = this.getCauseTracker();
         final IPhaseState state = causeTracker.getStack().peekState();
         if (!state.getPhase().alreadyCapturingEntitySpawns(state)) {
-            causeTracker.switchToPhase(TrackingPhases.PLUGIN, PluginPhase.State.CUSTOM_SPAWN, PhaseContext.start()
+            causeTracker.switchToPhase(PluginPhase.State.CUSTOM_SPAWN, PhaseContext.start()
                 .add(NamedCause.source(cause))
                 .addCaptures()
                 .complete());
