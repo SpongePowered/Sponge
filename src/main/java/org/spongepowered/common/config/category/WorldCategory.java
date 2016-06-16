@@ -69,7 +69,7 @@ public class WorldCategory extends ConfigCategory {
     @Setting(value = "deny-chunk-requests", comment = "If enabled, any request for a chunk not currently loaded will be denied (exceptions apply for things like world gen and player movement). \nNote: As this is an experimental setting for performance gain, if you encounter any issues then we recommend disabling it.")
     private boolean denyChunkRequests = true;
 
-    @Setting(value = "chunk-gc-tick-interval", comment = "The tick interval used to cleanup all inactive chunks in a world. \nIt is highly recommended that this feature is not disabled as it is now fully responsible for queuing chunks to unload. (Default: 600 or every 30 seconds).")
+    @Setting(value = "chunk-gc-tick-interval", comment = "The tick interval used to cleanup all inactive chunks in a world. \nSet to 0 to disable which restores vanilla handling. (Default: 600).")
     private int chunkGCTickInterval = 600;
 
     @Setting(value = "chunk-gc-load-threshold", comment = "The number of newly loaded chunks before triggering a forced cleanup. \nNote: When triggered, the loaded chunk threshold will reset and start incrementing. \nDisabled by default.")

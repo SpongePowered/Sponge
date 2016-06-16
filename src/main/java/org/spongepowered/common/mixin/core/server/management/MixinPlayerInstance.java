@@ -29,6 +29,7 @@ import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 @Mixin(PlayerInstance.class)
 public class MixinPlayerInstance {
@@ -38,9 +39,12 @@ public class MixinPlayerInstance {
         // We remove the ability for a PlayerInstance to queue chunks for unload to prevent chunk thrashing
         // where the same chunks repeatedly unload and load. This is caused by a player moving in and out of the same chunks.
         // Instead, the Chunk GC will now be responsible for going through loaded chunks and queuing any chunk where no player
-        // is within view distance or a spawn chunk is force loaded.
+        // is within view distance or a spawn chunk is force loaded. However, if the Chunk GC is disabled then we will fall back to vanilla
+        // and queue the chunk to be unloaded.
         // -- blood
 
-        // chunkProviderServer.dropChunk(chunkX, chunkZ);
+        if (((IMixinWorldServer) chunkProviderServer.worldObj).getChunkGCTickInterval() <= 0) {
+            chunkProviderServer.dropChunk(chunkX, chunkZ);
+        }
     }
 }

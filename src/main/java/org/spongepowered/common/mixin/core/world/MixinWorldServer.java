@@ -102,6 +102,7 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerManager;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.interfaces.IModData;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -120,7 +121,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(WorldServer.class)
-public abstract class MixinWorldServer extends MixinWorld {
+public abstract class MixinWorldServer extends MixinWorld implements IMixinWorldServer {
 
     private static final String PROFILER_SS = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V";
     private static final String PROFILER_ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
@@ -343,7 +344,9 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Inject(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;func_152380_a()Ljava/util/List;"), cancellable = true)
     public void onSaveAllChunks(boolean saveAllChunks, IProgressUpdate progressCallback, CallbackInfo ci) {
         // The chunk GC handles all queuing for chunk unloads so we cancel here to avoid it during a save.
-        ci.cancel();
+        if (this.chunkGCTickInterval > 0) {
+            ci.cancel();
+        }
     }
 
     /**
@@ -866,5 +869,10 @@ public abstract class MixinWorldServer extends MixinWorld {
                 }
             }
         }
+    }
+
+    @Override
+    public int getChunkGCTickInterval() {
+        return this.chunkGCTickInterval;
     }
 }
