@@ -42,9 +42,9 @@ import net.minecraft.server.management.PlayerManager;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.tileentity.TileEntityPiston;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ReportedException;
-import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
@@ -102,7 +102,6 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerManager;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.plugin.interfaces.IModData;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -336,9 +335,15 @@ public abstract class MixinWorldServer extends MixinWorld {
             }
 
             // Queue chunk for unload
-            ((IMixinChunkProviderServer) chunkProviderServer).getChunksQueuedForUnload().add(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(chunk.xPosition, chunk.zPosition)));
+            chunkProviderServer.dropChunk(chunk.xPosition, chunk.zPosition);
             SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.worldObj, chunk);
         }
+    }
+
+    @Inject(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;func_152380_a()Ljava/util/List;"), cancellable = true)
+    public void onSaveAllChunks(boolean saveAllChunks, IProgressUpdate progressCallback, CallbackInfo ci) {
+        // The chunk GC handles all queuing for chunk unloads so we cancel here to avoid it during a save.
+        ci.cancel();
     }
 
     /**

@@ -168,9 +168,4 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
         spongeWorld.getTimingsHandler().doChunkUnload.stopTiming();
     }
-
-    @Override
-    public Set<Long> getChunksQueuedForUnload() {
-        return this.droppedChunksSet;
-    }
 }

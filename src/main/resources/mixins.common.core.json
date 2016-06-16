@@ -328,6 +328,7 @@
         "server.MixinServerCommandManager",
         "server.MixinServerConfigurationManager",
         "server.management.MixinItemInWorldManager",
+        "server.management.MixinPlayerInstance",
         "server.management.MixinPlayerManager",
         "server.management.MixinPlayerProfileCache",
         "server.management.MixinPlayerProfileCacheEntry",

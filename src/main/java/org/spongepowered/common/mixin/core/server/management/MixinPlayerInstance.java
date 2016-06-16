@@ -22,22 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world.gen;
+package org.spongepowered.common.mixin.core.server.management;
 
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.server.management.PlayerManager.PlayerInstance;
+import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-import javax.annotation.Nullable;
+@Mixin(PlayerInstance.class)
+public class MixinPlayerInstance {
 
-public interface IMixinChunkProviderServer {
+    @Redirect(method = "removePlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;dropChunk(II)V"))
+    public void onPlayerDropChunk(ChunkProviderServer chunkProviderServer, int chunkX, int chunkZ) {
+        // We remove the ability for a PlayerInstance to queue chunks for unload to prevent chunk thrashing
+        // where the same chunks repeatedly unload and load. This is caused by a player moving in and out of the same chunks.
+        // Instead, the Chunk GC will now be responsible for going through loaded chunks and queuing any chunk where no player
+        // is within view distance or a spawn chunk is force loaded.
+        // -- blood
 
-    /**
-     * Gets the chunk at the desired position. If there is no
-     * loaded chunk at the position, {@code null} is returned.
-     *
-     * @param x The chunk x position
-     * @param z The chunk z position
-     * @return The chunk, if loaded
-     */
-    @Nullable
-    Chunk getChunkIfLoaded(int x, int z);
+        // chunkProviderServer.dropChunk(chunkX, chunkZ);
+    }
 }
