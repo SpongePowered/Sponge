@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.TimingHistory;
+import co.aikar.timings.Timings;
 import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
@@ -351,7 +353,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     /**
      * @author blood - May 26th, 2016
-     * 
+     *
      * @reason Rewritten due to the amount of injections required for both
      *     timing and capturing.
      */
@@ -601,6 +603,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.addedTileEntityList.clear();
         }
         this.timings.tileEntityPending.stopTiming(); // Sponge
+        TimingHistory.tileEntityTicks += this.loadedTileEntityList.size(); // Sponge
         this.theProfiler.endSection();
         this.theProfiler.endSection();
     }
