@@ -200,7 +200,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private Context worldContext;
     private SpongeChunkProvider spongegen;
     protected boolean processingExplosion = false;
-    private SpongeConfig<?> activeConfig;
+    protected SpongeConfig<?> activeConfig;
     private MessageChannel channel = MessageChannel.world(this);
     protected CauseTracker causeTracker;
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();

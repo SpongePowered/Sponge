@@ -235,6 +235,19 @@ public class SpongeHooks {
         }
     }
 
+    public static void logChunkGCQueueUnload(World world, Chunk chunk) {
+        if (world.isRemote) {
+            return;
+        }
+
+        SpongeConfig<?> config = getActiveConfig(world);
+        if (config.getConfig().getLogging().chunkGCQueueUnloadLogging()) {
+            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", world.provider.getDimensionId(), chunk.xPosition,
+                    chunk.zPosition);
+            logStack(config);
+        }
+    }
+
     public static void logExploitSignCommandUpdates(EntityPlayer player, TileEntity te, String command) {
         if (player.worldObj.isRemote) {
             return;
@@ -511,12 +524,6 @@ public class SpongeHooks {
     public static void refreshActiveConfigs() {
         for (WorldServer world : DimensionManager.getWorlds()) {
             ((IMixinWorld) world).setActiveConfig(SpongeHooks.getActiveConfig(world, true));
-            for (Entity entity : world.loadedEntityList) {
-                if (entity instanceof IModData) {
-                    IModData spongeEntity = (IModData) entity;
-                    spongeEntity.requiresCacheRefresh(true);
-                }
-            }
         }
         for (BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
             if (blockType instanceof IModData) {

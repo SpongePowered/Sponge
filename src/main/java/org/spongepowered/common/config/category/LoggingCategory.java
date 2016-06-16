@@ -44,6 +44,8 @@ public class LoggingCategory extends ConfigCategory {
     private boolean chunkLoadLogging = false;
     @Setting(value = "chunk-unload", comment = "Log when chunks are unloaded")
     private boolean chunkUnloadLogging = false;
+    @Setting(value = "chunk-gc-queue-unload", comment = "Log when chunks are queued to be unloaded by the chunk garbage collector.")
+    private boolean chunkGCQueueUnloadLogging = false;
     @Setting(value = "entity-spawn", comment = "Log when living entities are spawned")
     private boolean entitySpawnLogging = false;
     @Setting(value = "entity-despawn", comment = "Log when living entities are despawned")
@@ -119,6 +121,14 @@ public class LoggingCategory extends ConfigCategory {
 
     public void setChunkUnloadLogging(boolean flag) {
         this.chunkUnloadLogging = flag;
+    }
+
+    public void setChunkGCQueueUnloadLogging(boolean flag) {
+        this.chunkGCQueueUnloadLogging = flag;
+    }
+
+    public boolean chunkGCQueueUnloadLogging() {
+        return this.chunkGCQueueUnloadLogging;
     }
 
     public boolean entitySpawnLogging() {

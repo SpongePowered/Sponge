@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
@@ -50,6 +51,7 @@ import org.spongepowered.common.world.storage.SpongeChunkDataStream;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
@@ -61,8 +63,18 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Shadow private IChunkLoader chunkLoader;
     @Shadow private LongHashMap<Chunk> id2ChunkMap;
     @Shadow public IChunkProvider serverChunkGenerator;
+    @Shadow private Set<Long> droppedChunksSet;
+    @Shadow public boolean chunkLoadOverride;
+    @Shadow private Chunk dummyChunk;
 
-    @Shadow public abstract Chunk provideChunk(int x, int z);
+    @Shadow public abstract Chunk loadChunk(int chunkX, int chunkZ);
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void onConstruct(WorldServer world, IChunkLoader chunkLoader, IChunkProvider serverChunkGenerator, CallbackInfo ci) {
+        // Avoid various chunks loading and unloading repeatedly during chunk cleanup.
+        // Note: This will most likely have side effects with mods, we just need to try and do our best to handle them to maintain this performance boost.
+        this.chunkLoadOverride = !((IMixinWorld) world).getActiveConfig().getConfig().getWorld().getDenyChunkRequests();
+    }
 
     @Nullable
     @Override
@@ -123,6 +135,28 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         return (WorldProperties) this.worldObj.getWorldInfo();
     }
 
+    /**
+     * @author blood - June 15th, 2016
+     * @reason Make sure world gen is allowed to load chunks
+     *
+     * @return The chunk if loaded or dummy chunk if not
+     */
+    @Overwrite
+    public Chunk provideChunk(int x, int z) {
+        Chunk chunk = (Chunk)this.id2ChunkMap.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(x, z));
+        if (chunk == null) {
+            IMixinWorld world = (IMixinWorld) this.worldObj;
+            final CauseTracker causeTracker = world.getCauseTracker();
+            if (!this.worldObj.isFindingSpawnPoint() && !this.chunkLoadOverride && !causeTracker.isCapturingTerrainGen()) {
+                return this.dummyChunk;
+            } else {
+                return this.loadChunk(x, z);
+            }
+        } else {
+            return chunk;
+        }
+    }
+
     @Inject(method = "unloadQueuedChunks", at = @At("HEAD"))
     public void onUnloadQueuedChunksStart(CallbackInfoReturnable<Boolean> ci) {
         IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
@@ -133,5 +167,10 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     public void onUnloadQueuedChunksEnd(CallbackInfoReturnable<Boolean> ci) {
         IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
         spongeWorld.getTimingsHandler().doChunkUnload.stopTiming();
+    }
+
+    @Override
+    public Set<Long> getChunksQueuedForUnload() {
+        return this.droppedChunksSet;
     }
 }

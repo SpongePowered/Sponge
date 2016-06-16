@@ -38,17 +38,21 @@ import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerManager;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.tileentity.TileEntityPiston;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ReportedException;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServer.ServerBlockEventList;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkProviderServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -88,6 +92,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.event.CauseTracker;
@@ -96,6 +101,10 @@ import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerManager;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.mixin.plugin.interfaces.IModData;
+import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 
@@ -125,9 +134,13 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Shadow private int updateEntityTick;
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
     @Shadow public abstract void resetUpdateEntityTick();
+    @Shadow public abstract PlayerManager getPlayerManager();
 
     protected long weatherStartTime;
     protected Weather prevWeather;
+    private int chunkGCTickCount = 0;
+    private int chunkGCLoadThreshold = 0;
+    private int chunkGCTickInterval = 600;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(CallbackInfo ci) {
@@ -147,6 +160,8 @@ public abstract class MixinWorldServer extends MixinWorld {
         this.timings = new WorldTimingsHandler((net.minecraft.world.World) (Object) this);
         this.causeTracker = new CauseTracker((net.minecraft.world.World) (Object) this);
         updateWorldGenerator();
+        this.chunkGCLoadThreshold = this.getActiveConfig().getConfig().getWorld().getChunkLoadThreadhold();
+        this.chunkGCTickInterval = this.getActiveConfig().getConfig().getWorld().getTickInterval();
     }
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
@@ -296,6 +311,34 @@ public abstract class MixinWorldServer extends MixinWorld {
     public void onTickEnd(CallbackInfo ci) {
         // Make sure we clear our current notifier
         this.getCauseTracker().setCurrentNotifier(null);
+        // Clean up any leaked chunks
+        this.doChunkGC();
+    }
+
+    // Chunk GC
+    private void doChunkGC() {
+        this.chunkGCTickCount++;
+
+        ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
+        int chunkLoadCount = this.getChunkProvider().getLoadedChunkCount();
+        if (chunkLoadCount >= this.chunkGCLoadThreshold && this.chunkGCLoadThreshold > 0) {
+            chunkLoadCount = 0;
+        } else if (this.chunkGCTickCount >= this.chunkGCTickInterval && this.chunkGCTickInterval > 0) {
+            this.chunkGCTickCount = 0;
+        } else {
+            return;
+        }
+
+        for (Chunk chunk : chunkProviderServer.loadedChunks) {
+            // If a player is currently using the chunk, skip it
+            if (((IMixinPlayerManager) this.getPlayerManager()).isChunkInUse(chunk.xPosition, chunk.zPosition)) {
+                continue;
+            }
+
+            // Queue chunk for unload
+            ((IMixinChunkProviderServer) chunkProviderServer).getChunksQueuedForUnload().add(Long.valueOf(ChunkCoordIntPair.chunkXZ2Int(chunk.xPosition, chunk.zPosition)));
+            SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.worldObj, chunk);
+        }
     }
 
     /**
@@ -801,5 +844,22 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Override
     public void setWeatherStartTime(long weatherStartTime) {
         this.weatherStartTime = weatherStartTime;
+    }
+
+    @Override
+    public void setActiveConfig(SpongeConfig<?> config) {
+        this.activeConfig = config;
+        // update cached settings
+        this.chunkGCLoadThreshold = this.activeConfig.getConfig().getWorld().getChunkLoadThreadhold();
+        this.chunkGCTickInterval = this.activeConfig.getConfig().getWorld().getTickInterval();
+        if (this.getChunkProvider() != null) {
+            ((ChunkProviderServer) this.getChunkProvider()).chunkLoadOverride = !this.activeConfig.getConfig().getWorld().getDenyChunkRequests();
+            for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
+                if (entity instanceof IModData) {
+                    IModData spongeEntity = (IModData) entity;
+                    spongeEntity.requiresCacheRefresh(true);
+                }
+            }
+        }
     }
 }

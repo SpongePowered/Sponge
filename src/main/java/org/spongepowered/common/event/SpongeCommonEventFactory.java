@@ -812,7 +812,10 @@ public class SpongeCommonEventFactory {
             }
         }
 
+        boolean chunkLoadOverride = toWorld.theChunkProviderServer.chunkLoadOverride;
+        toWorld.theChunkProviderServer.chunkLoadOverride = true;
         scm.prepareEntityForPortal(entityIn, fromWorld, toWorld);
+        toWorld.theChunkProviderServer.chunkLoadOverride = chunkLoadOverride;
         if (entityIn instanceof EntityPlayerMP) {
             // disable packets from being sent to clients to avoid syncing issues, this is re-enabled before the event
             ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) entityIn).playerNetServerHandler).setAllowClientLocationUpdate(false);
@@ -831,7 +834,9 @@ public class SpongeCommonEventFactory {
             causeTracker.addCause(teleportCause);
             causeTracker.setSpecificCapture(true);
             // need to use placeInPortal to support mods
+            toWorld.theChunkProviderServer.chunkLoadOverride = true;
             teleporter.placeInPortal(entityIn, entityIn.rotationYaw);
+            toWorld.theChunkProviderServer.chunkLoadOverride = chunkLoadOverride;
             fromWorld.theProfiler.endSection();
         }
         // Grab the exit location of entity after being placed into portal

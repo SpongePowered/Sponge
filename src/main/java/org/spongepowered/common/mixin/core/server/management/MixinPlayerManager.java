@@ -22,26 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world.gen;
+package org.spongepowered.common.mixin.core.server.management;
 
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.server.management.PlayerManager;
+import net.minecraft.server.management.PlayerManager.PlayerInstance;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerManager;
 
-import java.util.Set;
+@Mixin(PlayerManager.class)
+public abstract class MixinPlayerManager implements IMixinPlayerManager {
 
-import javax.annotation.Nullable;
+    @Shadow public abstract PlayerInstance getPlayerInstance(int chunkX, int chunkZ, boolean createIfAbsent);
 
-public interface IMixinChunkProviderServer {
+    @Override
+    public boolean isChunkInUse(int x, int z) {
+        PlayerInstance playerInstance = this.getPlayerInstance(x, z, false);
+        if (playerInstance == null) {
+            return false;
+        }
 
-    /**
-     * Gets the chunk at the desired position. If there is no
-     * loaded chunk at the position, {@code null} is returned.
-     *
-     * @param x The chunk x position
-     * @param z The chunk z position
-     * @return The chunk, if loaded
-     */
-    @Nullable
-    Chunk getChunkIfLoaded(int x, int z);
-
-    Set<Long> getChunksQueuedForUnload();
+        return playerInstance.playersWatchingChunk.size() > 0 ? true : false;
+    }
 }
