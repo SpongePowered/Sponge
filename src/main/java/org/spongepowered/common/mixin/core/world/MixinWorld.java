@@ -1170,16 +1170,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     this.theProfiler.endSection();
                 }
 
-                if (!this.isRemote && causeTracker.hasPluginCause()) {
-                    causeTracker.addCause(causeTracker.getPluginCause().get());
-                    causeTracker.handleBlockCaptures();
-                    causeTracker.removeCurrentCause();
-                } else {
-                    // Don't notify clients or update physics while capturing blockstates
-                    if (originalBlockSnapshot == null) {
-                        // Modularize client and physic updates
-                        markAndNotifyNeighbors(pos, chunk, iblockstate1, newState, flags);
-                    }
+                // Don't notify clients or update physics while capturing blockstates
+                if (originalBlockSnapshot == null) {
+                    // Modularize client and physic updates
+                    markAndNotifyNeighbors(pos, chunk, iblockstate1, newState, flags);
                 }
 
                 return true;
@@ -1397,20 +1391,30 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
-        this.getCauseTracker().setPluginCause(null);
         checkBlockBounds(x, y, z);
+        final CauseTracker causeTracker = this.getCauseTracker();
+        boolean captureBlocks = causeTracker.isCapturingBlocks();
+        causeTracker.setCaptureBlocks(true);
+        causeTracker.addCause(Cause.of(NamedCause.source(this)));
         setBlockState(new BlockPos(x, y, z), (IBlockState) block, notifyNeighbors ? 3 : 2);
+        causeTracker.handleBlockCaptures();
+        causeTracker.removeCurrentCause();
+        causeTracker.setCaptureBlocks(captureBlocks);
     }
 
     @Override
     public void setBlock(int x, int y, int z, BlockState blockState, boolean notifyNeighbors, Cause cause) {
         checkArgument(cause != null, "Cause cannot be null!");
         checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
-        final CauseTracker causeTracker = this.getCauseTracker();
-        causeTracker.setPluginCause(cause);
         checkBlockBounds(x, y, z);
+        final CauseTracker causeTracker = this.getCauseTracker();
+        boolean captureBlocks = causeTracker.isCapturingBlocks();
+        causeTracker.setCaptureBlocks(true);
+        causeTracker.addCause(cause);
         setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, notifyNeighbors ? 3 : 2);
-        causeTracker.setPluginCause(null);
+        causeTracker.handleBlockCaptures();
+        causeTracker.removeCurrentCause();
+        causeTracker.setCaptureBlocks(captureBlocks);
     }
 
     private net.minecraft.world.World asMinecraftWorld() {

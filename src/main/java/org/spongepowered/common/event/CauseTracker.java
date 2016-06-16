@@ -139,7 +139,6 @@ public final class CauseTracker {
     @Nullable private Entity currentTickEntity;
     @Nullable private TileEntity currentTickTileEntity;
     @Nullable public IMixinNextTickListEntry currentPendingBlockUpdate;
-    @Nullable private Cause pluginCause;
     private boolean worldSpawnerRunning;
     private boolean chunkSpawnerRunning;
     private Deque<Cause> causeStack = new ArrayDeque<>();
@@ -325,18 +324,6 @@ public final class CauseTracker {
         this.chunkSpawnerRunning = chunkSpawnerRunning;
     }
 
-    public Optional<Cause> getPluginCause() {
-        return Optional.ofNullable(this.pluginCause);
-    }
-
-    public void setPluginCause(@Nullable Cause pluginCause) {
-        this.pluginCause = pluginCause;
-    }
-
-    public boolean hasPluginCause() {
-        return this.pluginCause != null;
-    }
-
     public Cause getCurrentCause() {
         return this.causeStack.peekFirst();
     }
@@ -346,7 +333,10 @@ public final class CauseTracker {
     }
 
     public void removeCurrentCause() {
-        this.causeStack.removeFirst();
+        Cause currentCause = this.causeStack.peekFirst();
+        if (currentCause != null) {
+            this.causeStack.remove(currentCause);
+        }
     }
 
     public Packet<?> getCurrentPlayerPacket() {
