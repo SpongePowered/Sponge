@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.launch;
 
-import static org.spongepowered.asm.mixin.MixinEnvironment.CompatibilityLevel.JAVA_8;
 import static org.spongepowered.common.SpongeImpl.ECOSYSTEM_ID;
 
 import org.spongepowered.asm.launch.MixinBootstrap;
-import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.common.launch.transformer.SpongeSuperclassRegistry;
 
