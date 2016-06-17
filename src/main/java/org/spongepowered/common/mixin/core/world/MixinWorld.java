@@ -816,31 +816,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public BlockSnapshot createSnapshot(int x, int y, int z) {
-        World world = this;
-        BlockState state = world.getBlock(x, y, z);
-        Optional<TileEntity> te = world.getTileEntity(x, y, z);
-        SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
-                .blockState(state)
-                .worldId(world.getUniqueId())
-                .position(new Vector3i(x, y, z));
-        Optional<UUID> creator = getCreator(x, y, z);
-        Optional<UUID> notifier = getNotifier(x, y, z);
-        if (creator.isPresent()) {
-            builder.creator(creator.get());
-        }
-        if (notifier.isPresent()) {
-            builder.notifier(notifier.get());
-        }
-        if (te.isPresent()) {
-            final TileEntity tileEntity = te.get();
-            for (DataManipulator<?, ?> manipulator : tileEntity.getContainers()) {
-                builder.add(manipulator);
-            }
-            final NBTTagCompound compound = new NBTTagCompound();
-            ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(compound);
-            builder.unsafeNbt(compound);
-        }
-        return builder.build();
+        BlockPos pos = new BlockPos(x, y, z);
+        IBlockState currentState = this.getBlockState(pos);
+        return this.createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
+                (IBlockAccess) this, pos), pos, 2);
     }
 
     @Override
