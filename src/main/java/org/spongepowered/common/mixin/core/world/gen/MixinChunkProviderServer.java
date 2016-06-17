@@ -145,9 +145,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     public Chunk provideChunk(int x, int z) {
         Chunk chunk = (Chunk)this.id2ChunkMap.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(x, z));
         if (chunk == null) {
-            IMixinWorld world = (IMixinWorld) this.worldObj;
-            final CauseTracker causeTracker = world.getCauseTracker();
-            if (!this.worldObj.isFindingSpawnPoint() && !this.chunkLoadOverride && !causeTracker.isCapturingTerrainGen()) {
+            if (!this.worldObj.isFindingSpawnPoint() && !this.chunkLoadOverride) {
                 return this.dummyChunk;
             } else {
                 return this.loadChunk(x, z);
