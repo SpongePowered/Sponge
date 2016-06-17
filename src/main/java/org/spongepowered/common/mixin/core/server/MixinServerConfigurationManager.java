@@ -242,6 +242,11 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
 
         playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
         playerIn.dimension = worldserver.provider.getDimensionId();
+        // make sure the chunk is loaded for login
+        boolean chunkLoadOverride = worldserver.theChunkProviderServer.chunkLoadOverride;
+        worldserver.theChunkProviderServer.chunkLoadOverride = true;
+        worldserver.theChunkProviderServer.loadChunk(loginEvent.getToTransform().getLocation().getChunkPosition().getX(), loginEvent.getToTransform().getLocation().getChunkPosition().getZ());
+        worldserver.theChunkProviderServer.chunkLoadOverride = chunkLoadOverride;
         // Sponge end
 
         playerIn.setWorld(worldserver);
@@ -444,7 +449,11 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         playerIn.setWorld(targetWorld);
         playerIn.theItemInWorldManager.setWorld(targetWorld);
 
+        // make sure the chunk is loaded for respawn
+        boolean chunkLoadOverride = targetWorld.theChunkProviderServer.chunkLoadOverride;
+        targetWorld.theChunkProviderServer.chunkLoadOverride = true;
         targetWorld.theChunkProviderServer.loadChunk((int) location.getX() >> 4, (int) location.getZ() >> 4);
+        targetWorld.theChunkProviderServer.chunkLoadOverride = chunkLoadOverride;
 
         // ### PHASE 5 ### Respawn player in new world
 
@@ -545,6 +554,11 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
         WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
         playerIn.dimension = toWorld.provider.getDimensionId();
+        // make sure the target chunk is loaded
+        boolean chunkLoadOverride = toWorld.theChunkProviderServer.chunkLoadOverride;
+        toWorld.theChunkProviderServer.chunkLoadOverride = true;
+        toWorld.theChunkProviderServer.loadChunk(event.getToTransform().getLocation().getChunkPosition().getX(), event.getToTransform().getLocation().getChunkPosition().getZ());
+        toWorld.theChunkProviderServer.chunkLoadOverride = chunkLoadOverride;
         // Support vanilla clients teleporting to custom dimensions
         int dimension = DimensionManager.getClientDimensionToSend(toWorld.provider.getDimensionId(), toWorld, playerIn);
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {

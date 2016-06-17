@@ -431,6 +431,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             teleportEntity(this.mcEntity, location, this.mcEntity.dimension, nmsWorld.provider.getDimensionId());
         } else {
             if (this.mcEntity instanceof EntityPlayerMP && ((EntityPlayerMP) this.mcEntity).playerNetServerHandler != null) {
+                // make sure chunk is loaded
+                chunkProviderServer.loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
                 ((EntityPlayerMP) this.mcEntity).playerNetServerHandler
                     .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
                             this.mcEntity.rotationYaw, this.mcEntity.rotationPitch);
@@ -880,6 +882,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             this.worldObj.removeEntity(this.mcEntity);
             this.isDead = false;
             this.worldObj.theProfiler.startSection("reposition");
+            // make sure chunk is loaded
+            boolean chunkLoadOverride = toWorld.theChunkProviderServer.chunkLoadOverride;
+            toWorld.theChunkProviderServer.chunkLoadOverride = true;
+            toWorld.theChunkProviderServer.loadChunk(event.getToTransform().getLocation().getChunkPosition().getX(), event.getToTransform().getLocation().getChunkPosition().getZ());
+            toWorld.theChunkProviderServer.chunkLoadOverride = chunkLoadOverride;
             // Only need to update the entity location here as the portal is handled in SpongeCommonEventFactory
             this.setLocationAndAngles(event.getToTransform().getPosition().getX(), event.getToTransform().getPosition().getY(), event.getToTransform().getPosition().getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
             toWorld.spawnEntityInWorld(this.mcEntity);
