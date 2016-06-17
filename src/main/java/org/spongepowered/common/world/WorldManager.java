@@ -128,11 +128,17 @@ public final class WorldManager {
                 final Integer world2DimId = ((IMixinWorldServer) world2).getDimensionId();
                 return world1DimId - world2DimId;
             };
-
+            
+    private static boolean registeredDimensions = false;
+            
     static {
-        registerDimensionType(0, DimensionType.OVERWORLD);
-        registerDimensionType(-1, DimensionType.NETHER);
-        registerDimensionType(1, DimensionType.THE_END);
+        WorldManager.registerDimensionTypes();
+    }
+
+    static void registerDimensionTypes() {
+        WorldManager.registerDimensionType(0, DimensionType.OVERWORLD);
+        WorldManager.registerDimensionType(-1, DimensionType.NETHER);
+        WorldManager.registerDimensionType(1, DimensionType.THE_END);
     }
 
     public static boolean registerDimensionType(DimensionType type) {
@@ -171,6 +177,17 @@ public final class WorldManager {
         return dimensionBits.nextClearBit(0);
     }
 
+    public static void registerDimensions() {
+        if (WorldManager.registeredDimensions) {
+            return;
+        }
+
+        WorldManager.registeredDimensions = true;
+        WorldManager.registerDimension(0, DimensionType.OVERWORLD);
+        WorldManager.registerDimension(-1, DimensionType.NETHER);
+        WorldManager.registerDimension(1, DimensionType.THE_END);
+    }
+
     public static boolean registerDimension(int dimensionId, DimensionType type) {
         checkNotNull(type);
         if (!dimensionTypeByTypeId.containsValue(type)) {
@@ -193,6 +210,12 @@ public final class WorldManager {
             throw new IllegalArgumentException("Failed to unregister dimension [" + dimensionId + "] as it is not registered!");
         }
         dimensionTypeByDimensionId.remove(dimensionId);
+    }
+
+    public static void registerDimensionPaths(final Path path) {
+        WorldManager.registerDimensionPath(0, path);
+        WorldManager.registerDimensionPath(-1, path.resolve("DIM-1"));
+        WorldManager.registerDimensionPath(1, path.resolve("DIM1"));
     }
 
     public static void registerDimensionPath(int dimensionId, Path dimensionDataRoot) {
@@ -596,13 +619,8 @@ public final class WorldManager {
             throw new RuntimeException(ioe);
         }
 
-        registerDimension(0, DimensionType.OVERWORLD);
-        registerDimension(-1, DimensionType.NETHER);
-        registerDimension(1, DimensionType.THE_END);
-
-        registerDimensionPath(0, currentSavesDir);
-        registerDimensionPath(-1, currentSavesDir.resolve("DIM-1"));
-        registerDimensionPath(1, currentSavesDir.resolve("DIM1"));
+        WorldManager.registerDimensions();
+        WorldManager.registerDimensionPaths(currentSavesDir);
 
         WorldMigrator.migrateWorldsTo(currentSavesDir);
 
@@ -716,7 +734,7 @@ public final class WorldManager {
 
         reorderWorldsVanillaFirst();
     }
-
+    
     public static WorldInfo createWorldInfoFromSettings(Path currentSaveRoot, org.spongepowered.api.world.DimensionType dimensionType, int
             dimensionId, String worldFolderName, WorldSettings worldSettings, String generatorOptions) {
         final MinecraftServer server = SpongeImpl.getServer();
