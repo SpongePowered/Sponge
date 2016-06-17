@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
@@ -149,12 +150,17 @@ public final class EntityUtil {
 
         entity.worldObj.theProfiler.startSection("changeDimension");
         // use the world from event
-        WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
+        final Transform<World> toTransform = event.getToTransform();
+        WorldServer toWorld = (WorldServer) toTransform.getExtent();
         entity.worldObj.removeEntity(entity);
         entity.isDead = false;
         entity.worldObj.theProfiler.startSection("reposition");
+
+        final Vector3i toChunkPosition = toTransform.getLocation().getChunkPosition();
+        toWorld.getChunkProvider().loadChunk(toChunkPosition.getX(), toChunkPosition.getZ());
         // Only need to update the entity location here as the portal is handled in SpongeCommonEventFactory
-        entity.setLocationAndAngles(event.getToTransform().getPosition().getX(), event.getToTransform().getPosition().getY(), event.getToTransform().getPosition().getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+        final Vector3d toPosition = toTransform.getPosition();
+        entity.setLocationAndAngles(toPosition.getX(), toPosition.getY(), toPosition.getZ(), (float) toTransform.getYaw(), (float) toTransform.getPitch());
         entity.worldObj = toWorld;
         toWorld.spawnEntityInWorld(entity);
         toWorld.updateEntityWithOptionalForce(entity, false);

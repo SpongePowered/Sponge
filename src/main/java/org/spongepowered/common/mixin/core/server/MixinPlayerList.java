@@ -255,6 +255,9 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         playerIn.dimension = ((IMixinWorldServer) worldServer).getDimensionId();
         playerIn.setWorld(worldServer);
         playerIn.interactionManager.setWorld((WorldServer) playerIn.worldObj);
+        playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
+        // make sure the chunk is loaded for login
+        worldServer.getChunkProvider().loadChunk(loginEvent.getToTransform().getLocation().getChunkPosition().getX(), loginEvent.getToTransform().getLocation().getChunkPosition().getZ());
         // Sponge end
 
         String s1 = "local";
@@ -597,6 +600,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
         WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
         playerIn.dimension = toWorld.provider.getDimensionType().getId();
+        toWorld.getChunkProvider().loadChunk(event.getToTransform().getLocation().getChunkPosition().getX(), event.getToTransform().getLocation().getChunkPosition().getZ());
         // Support vanilla clients teleporting to custom dimensions
         final DimensionType dimensionType = WorldManager.getClientDimensionType(toWorld.provider.getDimensionType());
 
