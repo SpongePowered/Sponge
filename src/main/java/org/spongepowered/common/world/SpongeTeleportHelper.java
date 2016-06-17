@@ -27,6 +27,8 @@ package org.spongepowered.common.world;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.Location;
@@ -44,8 +46,14 @@ public class SpongeTeleportHelper implements TeleportHelper {
 
     @Override
     public Optional<Location<World>> getSafeLocation(Location<World> location, final int height, final int width) {
+        ChunkProviderServer chunkProvider = ((WorldServer) location.getExtent()).theChunkProviderServer;
+        boolean chunkOverride = chunkProvider.chunkLoadOverride;
+        chunkProvider.chunkLoadOverride = true;
+
         // Check around the player first in a configurable radius:
         final Optional<Location<World>> safe = checkAboveAndBelowLocation(location, height, width);
+
+        chunkProvider.chunkLoadOverride = chunkOverride;
         if (safe.isPresent()) {
             // Add 0.5 to X and Z of block position so always in centre of block
             return Optional.of(new Location<>(safe.get().getExtent(), safe.get().getBlockPosition().toDouble().add(0.5, 0, 0.5)));
