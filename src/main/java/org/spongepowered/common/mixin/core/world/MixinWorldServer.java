@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.TimingHistory;
 import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -1147,6 +1148,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     protected void endPendingTileEntities() {
         this.timings.tileEntityPending.stopTiming();
+        TimingHistory.tileEntityTicks += this.loadedTileEntityList.size();
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickPending") )
