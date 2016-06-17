@@ -41,11 +41,14 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
@@ -98,6 +101,15 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
     @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"))
     public void onEntityItemUpdate(CallbackInfo ci) {
         this.destructCause = Cause.of(NamedCause.of("ExpiredItem", this));
+    }
+
+    @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
+    private double getSearchRadius(double originalRadius) {
+        if (this.worldObj.isRemote) {
+            return originalRadius;
+        }
+        final double configRadius = ((IMixinWorld) this.worldObj).getActiveConfig().getConfig().getWorld().getItemMergeRadius();
+        return configRadius < 0 ? 0 : configRadius;
     }
 
     public int getPickupDelay() {

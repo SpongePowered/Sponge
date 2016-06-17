@@ -75,6 +75,15 @@ public class WorldCategory extends ConfigCategory {
     @Setting(value = "chunk-gc-load-threshold", comment = "The number of newly loaded chunks before triggering a forced cleanup. \nNote: When triggered, the loaded chunk threshold will reset and start incrementing. \nDisabled by default.")
     private int chunkGCLoadThreshold = 0;
 
+    @Setting(value = "item-merge-radius", comment = "This defines the Item entity merge radius such that two Item entities"
+                                                    + "\nwithin the defined radius of each other will attempt to merge. Usually,"
+                                                    + "\nthe default radius is set to 0.5 in Vanilla, however, for performance reasons"
+                                                    + "\n2.5 is generally acceptable. "
+                                                    + "\nNote: Increasing the radius higher will likely cause performance degredation"
+                                                    + "\nwith larger amount of items as they attempt to merge and search nearby"
+                                                    + "\nareas for more items. Setting to a negative value is not supported!")
+    private double itemMergeRadius = 2.5D;
+
     public WorldCategory() {
         this.portalAgents.put("minecraft:default_nether", "DIM-1");
         this.portalAgents.put("minecraft:default_the_end", "DIM1");
@@ -162,5 +171,9 @@ public class WorldCategory extends ConfigCategory {
 
     public int getChunkLoadThreadhold() {
         return this.chunkGCLoadThreshold;
+    }
+
+    public double getItemMergeRadius() {
+        return itemMergeRadius;
     }
 }
