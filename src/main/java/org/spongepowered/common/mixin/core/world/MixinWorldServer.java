@@ -43,8 +43,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DimensionType;
@@ -134,12 +136,15 @@ import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
+import org.spongepowered.common.mixin.plugin.interfaces.IModData;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
@@ -181,6 +186,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     protected long weatherStartTime;
     protected Weather prevWeather;
     protected WorldTimingsHandler timings = new WorldTimingsHandler((WorldServer) (Object) this);
+    private int chunkGCTickCount = 0;
+    private int chunkGCLoadThreshold = 0;
+    private int chunkGCTickInterval = 600;
 
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
@@ -192,6 +200,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
     @Shadow public abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
+    @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
+    @Shadow @Override public abstract ChunkProviderServer getChunkProvider();
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, CallbackInfo callbackInfo) {
@@ -211,6 +221,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         // Turn on capturing
         updateWorldGenerator();
+        // Need to set the active config before we call it.
+        this.chunkGCLoadThreshold = SpongeHooks.getActiveConfig((WorldServer) (Object) this).getConfig().getWorld().getChunkLoadThreadhold();
+        this.chunkGCTickInterval = this.getActiveConfig().getConfig().getWorld().getTickInterval();
     }
 
     @Inject(method = "createBonusChest", at = @At(value = "HEAD"))
@@ -271,6 +284,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void setActiveConfig(SpongeConfig<?> config) {
         this.activeConfig = config;
+        // update cached settings
+        this.chunkGCLoadThreshold = this.activeConfig.getConfig().getWorld().getChunkLoadThreadhold();
+        this.chunkGCTickInterval = this.activeConfig.getConfig().getWorld().getTickInterval();
+        if (this.getChunkProvider() != null) {
+            // This was a thing in 1.8, but is gone in 1.9 - TODO blood see if this is necessary anymore.
+//            this.getChunkProvider().chunkLoadOverride = !this.activeConfig.getConfig().getWorld().getDenyChunkRequests();
+            for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
+                if (entity instanceof IModData) {
+                    IModData spongeEntity = (IModData) entity;
+                    spongeEntity.requiresCacheRefresh(true);
+                }
+            }
+        }
     }
 
     @Override
@@ -480,6 +506,40 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return fireBlockEvent(event);
         }
         return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event);
+    }
+
+    // Chunk GC
+    private void doChunkGC() {
+        this.chunkGCTickCount++;
+
+        ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
+        int chunkLoadCount = this.getChunkProvider().getLoadedChunkCount();
+        if (chunkLoadCount >= this.chunkGCLoadThreshold && this.chunkGCLoadThreshold > 0) {
+            chunkLoadCount = 0;
+        } else if (this.chunkGCTickCount >= this.chunkGCTickInterval && this.chunkGCTickInterval > 0) {
+            this.chunkGCTickCount = 0;
+        } else {
+            return;
+        }
+
+        for (net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.getLoadedChunks()) {
+            // If a player is currently using the chunk, skip it
+            if (((IMixinPlayerChunkMap) this.getPlayerChunkMap()).isChunkInUse(chunk.xPosition, chunk.zPosition)) {
+                continue;
+            }
+
+            // Queue chunk for unload
+            chunkProviderServer.unload(chunk);
+            SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.worldObj, chunk);
+        }
+    }
+
+    @Inject(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;getLoadedChunks()Ljava/util/Collection;"), cancellable = true)
+    public void onSaveAllChunks(boolean saveAllChunks, IProgressUpdate progressCallback, CallbackInfo ci) {
+        // The chunk GC handles all queuing for chunk unloads so we cancel here to avoid it during a save.
+        if (this.chunkGCTickInterval > 0) {
+            ci.cancel();
+        }
     }
 
     @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
@@ -1282,4 +1342,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.weatherStartTime = weatherStartTime;
     }
 
+    @Override
+    public int getChunkGCTickInterval() {
+        return this.chunkGCTickInterval;
+    }
 }

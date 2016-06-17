@@ -92,6 +92,7 @@ task devJar(type: Jar) {
 
     // Include API
     from api.sourceSets.main.output
+    from api.sourceSets.ap.output
 }
 
 artifacts {
@@ -108,6 +109,7 @@ task sourceJar(type: Jar, overwrite: true) {
 
     // Include SpongeAPI sources in source jar
     from api.sourceSets.main.allSource
+    from api.sourceSets.ap.allSource
 }
 
 artifacts {

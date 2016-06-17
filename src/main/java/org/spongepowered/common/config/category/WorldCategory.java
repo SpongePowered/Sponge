@@ -33,7 +33,7 @@ import java.util.Map;
 @ConfigSerializable
 public class WorldCategory extends ConfigCategory {
 
-    @Setting(value = "auto-save-interval", comment = "The auto-save tick interval used to save all loaded chunks in a world. Set to 0 to disable. (Default: 900) Note: 20 ticks is equivalent to 1 second.")
+    @Setting(value = "auto-save-interval", comment = "The auto-save tick interval used to save all loaded chunks in a world. \nSet to 0 to disable. (Default: 900) \nNote: 20 ticks is equivalent to 1 second.")
     private int autoSaveInterval = 900;
 
     @Setting(value = "infinite-water-source", comment = "Vanilla water source behavior - is infinite")
@@ -42,7 +42,7 @@ public class WorldCategory extends ConfigCategory {
     @Setting(value = "flowing-lava-decay", comment = "Lava behaves like vanilla water when source block is removed")
     private boolean flowingLavaDecay = false;
 
-    @Setting(value = "mob-spawn-range", comment = "Specifies the radius (in chunks) of where creatures will spawn. This value is capped to "
+    @Setting(value = "mob-spawn-range", comment = "Specifies the radius (in chunks) of where creatures will spawn. \nThis value is capped to "
             + "the current view distance setting in server.properties")
     protected int mobSpawnRange = 8;
 
@@ -62,9 +62,18 @@ public class WorldCategory extends ConfigCategory {
     protected boolean pvpEnabled = true;
 
     @Setting(value = "portal-agents", comment = "A list of all detected portal agents used in this world. "
-            + "In order to override, change the target world name to any other valid world. "
-            + "Note: If world is not found, it will fallback to default.")
+            + "\nIn order to override, change the target world name to any other valid world. "
+            + "\nNote: If world is not found, it will fallback to default.")
     private Map<String, String> portalAgents = new HashMap<>();
+
+    @Setting(value = "deny-chunk-requests", comment = "If enabled, any request for a chunk not currently loaded will be denied (exceptions apply for things like world gen and player movement). \nNote: As this is an experimental setting for performance gain, if you encounter any issues then we recommend disabling it.")
+    private boolean denyChunkRequests = true;
+
+    @Setting(value = "chunk-gc-tick-interval", comment = "The tick interval used to cleanup all inactive chunks in a world. \nSet to 0 to disable which restores vanilla handling. (Default: 600).")
+    private int chunkGCTickInterval = 600;
+
+    @Setting(value = "chunk-gc-load-threshold", comment = "The number of newly loaded chunks before triggering a forced cleanup. \nNote: When triggered, the loaded chunk threshold will reset and start incrementing. \nDisabled by default.")
+    private int chunkGCLoadThreshold = 0;
 
     public WorldCategory() {
         this.portalAgents.put("minecraft:default_nether", "DIM-1");
@@ -141,5 +150,17 @@ public class WorldCategory extends ConfigCategory {
 
     public Map<String, String> getPortalAgents() {
         return this.portalAgents;
+    }
+
+    public boolean getDenyChunkRequests() {
+        return this.denyChunkRequests;
+    }
+
+    public int getTickInterval() {
+        return this.chunkGCTickInterval;
+    }
+
+    public int getChunkLoadThreadhold() {
+        return this.chunkGCLoadThreshold;
     }
 }

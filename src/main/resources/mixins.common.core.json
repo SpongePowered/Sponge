@@ -335,6 +335,7 @@
         "server.MixinNetworkManager",
         "server.MixinServerCommandManager",
         "server.management.MixinPlayerInteractionManager",
+        "server.management.MixinPlayerChunkMap",
         "server.management.MixinPlayerProfileCache",
         "server.management.MixinPlayerProfileCacheEntry",
         "server.MixinPlayerList",

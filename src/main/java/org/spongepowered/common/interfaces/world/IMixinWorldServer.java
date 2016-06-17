@@ -85,4 +85,6 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     WorldTimingsHandler getTimingsHandler();
 
+    int getChunkGCTickInterval();
+
 }

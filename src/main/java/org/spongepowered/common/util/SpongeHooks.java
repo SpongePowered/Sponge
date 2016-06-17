@@ -40,6 +40,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
@@ -211,6 +213,19 @@ public class SpongeHooks {
         if (config.getConfig().getLogging().chunkUnloadLogging()) {
             logInfo("Unload Chunk At [{0}] ({1}, {2})", ((IMixinWorldServer) world).getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
+            logStack(config);
+        }
+    }
+
+    public static void logChunkGCQueueUnload(WorldServer world, Chunk chunk) {
+        if (world.isRemote) {
+            return;
+        }
+
+        SpongeConfig<?> config = getActiveConfig(world);
+        if (config.getConfig().getLogging().chunkGCQueueUnloadLogging()) {
+            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((IMixinWorldServer) world).getDimensionId(), chunk.xPosition,
+                    chunk.zPosition);
             logStack(config);
         }
     }
