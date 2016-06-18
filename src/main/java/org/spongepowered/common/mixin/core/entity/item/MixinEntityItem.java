@@ -40,12 +40,17 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
@@ -65,6 +70,12 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
 
     public int lifespan;
     public float dropChance = 1.0f;
+    /**
+     * A simple cached value of the merge radius for this item.
+     * Since the value is configurable, the first time searching for
+     * other items, this value is cached.
+     */
+    private double cachedRadius = -1;
 
     //
     // In the case where a Forge mod sets the delay to MAGIC_INFINITE_PICKUP_DELAY, but a plugin has
@@ -98,6 +109,18 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
     @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"))
     public void onEntityItemUpdate(CallbackInfo ci) {
         this.destructCause = Cause.of(NamedCause.of("ExpiredItem", this));
+    }
+
+    @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
+    private double getSearchRadius(double originalRadius) {
+        if (this.worldObj.isRemote) {
+            return originalRadius;
+        }
+        if (this.cachedRadius == -1) {
+            final double configRadius = ((IMixinWorldServer) this.worldObj).getActiveConfig().getConfig().getWorld().getItemMergeRadius();
+            this.cachedRadius = configRadius < 0 ? 0 : configRadius;
+        }
+        return this.cachedRadius;
     }
 
     public int getPickupDelay() {

@@ -1033,28 +1033,33 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return false;
         }
 
+        Optional<Chunk> currentColumn = Optional.of(base);
         for (int i = xStart; i <= xEnd; i++) {
-            Optional<Chunk> column = base.getNeighbor(Direction.EAST);
-            if (!column.isPresent()) {
+            if (!currentColumn.isPresent()) {
                 return false;
             }
 
-            Chunk unwrapped = column.get();
+            Chunk column = currentColumn.get();
+
+            Optional<Chunk> currentRow = column.getNeighbor(Direction.SOUTH);
             for (int j = zStart; j <= zEnd; j++) {
-                Optional<Chunk> row = unwrapped.getNeighbor(Direction.SOUTH);
-                if (!row.isPresent()) {
+                if (!currentRow.isPresent()) {
                     return false;
                 }
 
-                // This is redundant
-                if (!allowEmpty && ((net.minecraft.world.chunk.Chunk) row.get()).isEmpty()) {
+                Chunk row = currentRow.get();
+
+                if (!allowEmpty && ((net.minecraft.world.chunk.Chunk) row).isEmpty()) {
                     return false;
                 }
+
+                currentRow = row.getNeighbor(Direction.SOUTH);
             }
+
+            currentColumn = column.getNeighbor(Direction.EAST);
         }
 
         return true;
-
     }
 
 

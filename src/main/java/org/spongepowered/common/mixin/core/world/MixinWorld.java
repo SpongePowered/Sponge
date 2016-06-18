@@ -87,6 +87,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
@@ -772,14 +773,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
         List<NamedCause> causes = new ArrayList<>();
         causes.add(NamedCause.source(cause));
         causes.add(NamedCause.of("World", this));
-        EventConsumer.event(SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, this))
-            .nonCancelled(event -> {
-                for (Entity successful : event.getEntities()) {
-                    this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
-                    this.onEntityAdded((net.minecraft.entity.Entity) successful);
-                }
-            })
-            .process();
+        SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, this);
+        SpongeImpl.postEvent(chunkLoad);
+        if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {
+            for (Entity successful : chunkLoad.getEntities()) {
+                this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
+                this.onEntityAdded((net.minecraft.entity.Entity) successful);
+            }
+        }
         callbackInfo.cancel();
     }
 
