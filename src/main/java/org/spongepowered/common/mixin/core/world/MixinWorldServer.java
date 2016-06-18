@@ -143,6 +143,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private int chunkGCTickCount = 0;
     private int chunkGCLoadThreshold = 0;
     private int chunkGCTickInterval = 600;
+    private boolean isCapturingBlocks = false;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(CallbackInfo ci) {
@@ -703,11 +704,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "newExplosion", at = @At(value = "HEAD"))
     public void onExplosionHead(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking, CallbackInfoReturnable<net.minecraft.world.Explosion> cir) {
         this.processingExplosion = true;
+        this.isCapturingBlocks = this.causeTracker.isCapturingBlocks();
+        this.causeTracker.setCaptureBlocks(false);
     }
 
     @Inject(method = "newExplosion", at = @At(value = "RETURN"))
     public void onExplosionReturn(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking, CallbackInfoReturnable<net.minecraft.world.Explosion> cir) {
         this.processingExplosion = false;
+        this.causeTracker.setCaptureBlocks(this.isCapturingBlocks);
     }
 
     @Override
