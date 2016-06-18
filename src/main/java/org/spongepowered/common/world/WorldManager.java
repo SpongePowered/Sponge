@@ -32,9 +32,10 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.MapMaker;
-import it.unimi.dsi.fastutil.ints.Int2BooleanArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -109,7 +110,7 @@ public final class WorldManager {
 
     private static final Int2ObjectMap<DimensionType> dimensionTypeByTypeId = new Int2ObjectOpenHashMap<>(3);
     private static final Int2ObjectMap<DimensionType> dimensionTypeByDimensionId = new Int2ObjectOpenHashMap<>(3);
-    private static final Int2BooleanArrayMap unregisterableDimensions = new Int2BooleanArrayMap(3);
+    private static final IntSet unregisterableDimensions = new IntOpenHashSet(3);
     private static final Int2ObjectMap<Path> dimensionPathByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Int2ObjectOpenHashMap<WorldServer> worldByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>(3);
@@ -203,7 +204,9 @@ public final class WorldManager {
         if (dimensionId >= 0) {
             dimensionBits.set(dimensionId);
         }
-        unregisterableDimensions.put(dimensionId, canBeUnregistered);
+        if (canBeUnregistered) {
+            unregisterableDimensions.add(dimensionId);
+        }
         return true;
     }
 
@@ -465,7 +468,7 @@ public final class WorldManager {
         SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
                 worldServer));
 
-        if (force && unregisterableDimensions.getOrDefault(dimensionId, false)) {
+        if (force && unregisterableDimensions.contains(dimensionId)) {
             unregisterDimension(dimensionId);
         }
 
