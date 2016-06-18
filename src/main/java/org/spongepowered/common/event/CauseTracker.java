@@ -612,9 +612,9 @@ public final class CauseTracker {
         }
     }
 
-    private boolean handlePostEntityEvent(Cause cause, Event event) {
-        if (!(SpongeImpl.postEvent(event))) {
-            Iterator<Entity> iterator = ((SpawnEntityEvent) event).getEntities().iterator();
+    private boolean handlePostEntityEvent(Cause cause, SpawnEntityEvent event) {
+        if (!(SpongeImpl.postEvent(event)) && event.getEntities().size() > 0) {
+            Iterator<Entity> iterator = event.getEntities().iterator();
 
             while (iterator.hasNext()) {
                 Entity entity = iterator.next();
@@ -1055,7 +1055,7 @@ public final class CauseTracker {
                 return false;
             }
 
-            org.spongepowered.api.event.Event event = null;
+            org.spongepowered.api.event.entity.SpawnEntityEvent event = null;
             List<Entity> entitiesToSpawn = Lists.newArrayList(entity);
             ImmutableList<EntitySnapshot> entitySnapshots = ImmutableList.of(entity.createSnapshot());
             EntityLivingBase entityLiving = null;
@@ -1075,13 +1075,16 @@ public final class CauseTracker {
                 event = SpongeEventFactory.createSpawnEntityEvent(cause, entitiesToSpawn, entitySnapshots, this.getWorld());
             }
 
-            if (!SpongeImpl.postEvent(event)) {
-                if (entityIn instanceof EntityWeatherEffect) {
-                    return addWeatherEffect(entityIn, cause);
+            if (!SpongeImpl.postEvent(event) && event.getEntities().size() > 0) {
+                for (Entity spongeEntity : event.getEntities()) {
+                    net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) spongeEntity; 
+                    if (nmsEntity instanceof EntityWeatherEffect) {
+                        return addWeatherEffect(nmsEntity, cause);
+                    }
+                    this.getMinecraftWorld().getChunkFromChunkCoords(i, j).addEntity(nmsEntity);
+                    this.getMinecraftWorld().loadedEntityList.add(nmsEntity);
+                    this.getMixinWorld().onSpongeEntityAdded(nmsEntity);
                 }
-                this.getMinecraftWorld().getChunkFromChunkCoords(i, j).addEntity(entityIn);
-                this.getMinecraftWorld().loadedEntityList.add(entityIn);
-                this.getMixinWorld().onSpongeEntityAdded(entityIn);
                 return true;
             }
 

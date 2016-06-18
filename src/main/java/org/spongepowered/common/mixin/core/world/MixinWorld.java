@@ -962,7 +962,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList,
             snapshotBuilder.build(), this);
         SpongeImpl.postEvent(chunkLoad);
-        if (!chunkLoad.isCancelled()) {
+        if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {
             for (Entity successful : chunkLoad.getEntities()) {
                 this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
                 this.onEntityAdded((net.minecraft.entity.Entity) successful);
