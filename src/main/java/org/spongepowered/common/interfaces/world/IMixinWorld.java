@@ -80,5 +80,4 @@ public interface IMixinWorld {
     void setActiveConfig(SpongeConfig<?> config);
 
     WorldTimingsHandler getTimingsHandler();
-
 }
