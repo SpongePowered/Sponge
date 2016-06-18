@@ -66,6 +66,7 @@ import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -668,6 +669,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (!containsBlock(x, y, z)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), BLOCK_MIN, BLOCK_MAX);
         }
+    }
+
+    @Override
+    public BlockSnapshot createSnapshot(int x, int y, int z) {
+        BlockPos pos = new BlockPos(x, y, z);
+        IBlockState currentState = this.getBlockState(pos);
+        return this.createSpongeBlockSnapshot(currentState, currentState.getActualState((WorldServer) (Object) this, pos), pos, 2);
     }
 
     @Override

@@ -276,17 +276,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
             return Optional.empty();
         }
-        WorldServer worldserver = (WorldServer) (Object) this;
-        net.minecraft.world.chunk.Chunk chunk = null;
-        if (worldserver.getChunkProvider().chunkExists(x, z)) {
-            chunk = worldserver.getChunkProvider().getLoadedChunk(x, z);
-        }
-        return Optional.ofNullable((Chunk) chunk);
-    }
-
-    @Override
-    public Optional<Chunk> loadChunk(Vector3i position, boolean shouldGenerate) {
-        return loadChunk(position.getX(), position.getY(), position.getZ(), shouldGenerate);
+        final WorldServer worldserver = (WorldServer) (Object) this;
+        return Optional.ofNullable((Chunk) worldserver.getChunkProvider().getLoadedChunk(x, z));
     }
 
     @Override
@@ -294,12 +285,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
             return Optional.empty();
         }
-        WorldServer worldserver = (WorldServer) (Object) this;
-        net.minecraft.world.chunk.Chunk chunk = null;
-        if (worldserver.getChunkProvider().chunkExists(x, z) || shouldGenerate) {
-            chunk = worldserver.getChunkProvider().loadChunk(x, z);
+        final WorldServer worldserver = (WorldServer) (Object) this;
+        // If we aren't generating, return the chunk
+        if (!shouldGenerate) {
+            final net.minecraft.world.chunk.Chunk loadedChunk = worldserver.getChunkProvider().getLoadedChunk(x, z);
+            return Optional.ofNullable((Chunk) (loadedChunk == null ? worldserver.getChunkProvider().loadChunkFromFile(x, z) : loadedChunk));
         }
-        return Optional.ofNullable((Chunk) chunk);
+        return Optional.ofNullable((Chunk) worldserver.getChunkProvider().loadChunk(x, z));
     }
 
     @Override
