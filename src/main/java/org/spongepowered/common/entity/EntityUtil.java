@@ -185,7 +185,6 @@ public final class EntityUtil {
         // If leaving The End via End's Portal
         // Sponge Start - Check the provider, not the world's dimension
         final WorldServer fromWorldServer = ((WorldServer) entityPlayerMP.worldObj);
-        final IMixinWorldServer fromMixinWorldServer = (IMixinWorldServer) fromWorldServer;
         if (fromWorldServer.provider instanceof WorldProviderEnd && suggestedDimensionId == 1) { // if (this.dimension == 1 && dimensionIn == 1)
             // Sponge End
             fromWorldServer.removeEntity(entityPlayerMP);
@@ -653,7 +652,7 @@ public final class EntityUtil {
                     return null;
                 }
             }
-            EntityItem entityitem = new EntityItem(entity.worldObj, posX, posY, posZ, itemStack);
+            EntityItem entityitem = new EntityItem(entity.worldObj, posX, posY, posZ, item);
             entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
