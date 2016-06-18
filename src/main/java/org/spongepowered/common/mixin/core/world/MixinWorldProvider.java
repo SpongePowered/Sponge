@@ -34,12 +34,8 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.world.WorldManager;
 
 @NonnullByDefault
 @Mixin(WorldProvider.class)
@@ -54,19 +50,9 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     @Shadow public abstract boolean getHasNoSky();
     @Shadow private String generatorSettings;
 
-    private net.minecraft.world.DimensionType dimensionType;
-
-    @SuppressWarnings("unchecked")
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstruction(CallbackInfo ci) {
-        this.dimensionType = WorldManager.getDimensionType((Class<? extends WorldProvider>)
-                (Object) getClass()).orElseThrow(() -> new RuntimeException("Attempt was made to create an instance of a WorldProvider who has no "
-                + "registered type!"));
-    }
-
     @Override
     public DimensionType getType() {
-        return (DimensionType) (Object) this.dimensionType;
+        return (DimensionType) (Object) this.getDimensionType();
     }
 
     @Override
@@ -99,9 +85,8 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
         this.generatorSettings = generatorSettings;
     }
 
-    // TODO 1.9 - Make DimensionType a ContextSource and not dimension? -- Zidane
     @Override
     public Context getContext() {
-        return ((IMixinDimensionType) (Object) this.dimensionType).getContext();
+        return ((IMixinDimensionType) (Object) getDimensionType()).getContext();
     }
 }
