@@ -289,7 +289,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         // If we aren't generating, return the chunk
         if (!shouldGenerate) {
             final net.minecraft.world.chunk.Chunk loadedChunk = worldserver.getChunkProvider().getLoadedChunk(x, z);
-            return Optional.ofNullable((Chunk) (loadedChunk == null ? worldserver.getChunkProvider().loadChunkFromFile(x, z) : loadedChunk));
+            return Optional.ofNullable((Chunk) (loadedChunk == null ? worldserver.getChunkProvider().loadChunk(x, z) : loadedChunk));
         }
         return Optional.ofNullable((Chunk) worldserver.getChunkProvider().loadChunk(x, z));
     }
