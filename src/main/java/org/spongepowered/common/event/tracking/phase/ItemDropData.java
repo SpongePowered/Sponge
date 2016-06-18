@@ -200,8 +200,7 @@ public class ItemDropData {
 
         @Override
         public EntityItem create(WorldServer worldServer) {
-            final EntityItem entityItem = new EntityItem(worldServer);
-            entityItem.setEntityItemStack(this.getStack());
+            final EntityItem entityItem = new EntityItem(worldServer, this.position.getX(), this.position.getY(), this.position.getZ(), this.stack);
             entityItem.setPickupDelay(40);
             entityItem.posX = this.position.getX();
             entityItem.posY = this.position.getY();
