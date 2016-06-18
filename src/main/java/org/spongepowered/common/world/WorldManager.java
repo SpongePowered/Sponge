@@ -32,6 +32,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.MapMaker;
+import it.unimi.dsi.fastutil.ints.Int2BooleanArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -108,6 +109,7 @@ public final class WorldManager {
 
     private static final Int2ObjectMap<DimensionType> dimensionTypeByTypeId = new Int2ObjectOpenHashMap<>(3);
     private static final Int2ObjectMap<DimensionType> dimensionTypeByDimensionId = new Int2ObjectOpenHashMap<>(3);
+    private static final Int2BooleanArrayMap unregisterableDimensions = new Int2BooleanArrayMap(3);
     private static final Int2ObjectMap<Path> dimensionPathByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Int2ObjectOpenHashMap<WorldServer> worldByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>(3);
@@ -177,18 +179,18 @@ public final class WorldManager {
         return dimensionBits.nextClearBit(0);
     }
 
-    public static void registerDimensions() {
+    public static void registerVanillaDimensions() {
         if (WorldManager.registeredDimensions) {
             return;
         }
 
         WorldManager.registeredDimensions = true;
-        WorldManager.registerDimension(0, DimensionType.OVERWORLD);
-        WorldManager.registerDimension(-1, DimensionType.NETHER);
-        WorldManager.registerDimension(1, DimensionType.THE_END);
+        WorldManager.registerDimension(0, DimensionType.OVERWORLD, false);
+        WorldManager.registerDimension(-1, DimensionType.NETHER, false);
+        WorldManager.registerDimension(1, DimensionType.THE_END, false);
     }
 
-    public static boolean registerDimension(int dimensionId, DimensionType type) {
+    public static boolean registerDimension(int dimensionId, DimensionType type, boolean canBeUnregistered) {
         checkNotNull(type);
         if (!dimensionTypeByTypeId.containsValue(type)) {
             return false;
@@ -201,6 +203,7 @@ public final class WorldManager {
         if (dimensionId >= 0) {
             dimensionBits.set(dimensionId);
         }
+        unregisterableDimensions.put(dimensionId, canBeUnregistered);
         return true;
     }
 
@@ -462,9 +465,10 @@ public final class WorldManager {
         SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
                 worldServer));
 
-        if (force) {
+        if (force && unregisterableDimensions.getOrDefault(dimensionId, false)) {
             unregisterDimension(dimensionId);
         }
+
         return true;
     }
 
@@ -583,7 +587,7 @@ public final class WorldManager {
         }
 
         final int dimensionId = ((IMixinWorldInfo) properties).getDimensionId();
-        registerDimension(dimensionId, (DimensionType) (Object) properties.getDimensionType());
+        registerDimension(dimensionId, (DimensionType) (Object) properties.getDimensionType(), true);
         registerDimensionPath(dimensionId, worldFolder);
         SpongeImpl.getLogger().info("Loading world [{}] ({})", properties.getWorldName(), getDimensionType
                 (dimensionId).get().getName());
@@ -619,7 +623,7 @@ public final class WorldManager {
             throw new RuntimeException(ioe);
         }
 
-        WorldManager.registerDimensions();
+        WorldManager.registerVanillaDimensions();
         WorldManager.registerDimensionPaths(currentSavesDir);
 
         WorldMigrator.migrateWorldsTo(currentSavesDir);
@@ -940,7 +944,7 @@ public final class WorldManager {
                     continue;
                 }
 
-                registerDimension(dimensionId, dimensionType);
+                registerDimension(dimensionId, dimensionType, true);
                 registerDimensionPath(dimensionId, rootPath.resolve(worldFolderName));
             }
         } catch (IOException e) {
