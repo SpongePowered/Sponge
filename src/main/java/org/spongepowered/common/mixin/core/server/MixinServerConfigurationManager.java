@@ -493,6 +493,10 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         playerIn.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(maxHealth.get().floatValue());
         playerIn.playerNetServerHandler.sendPacket(new S06PacketUpdateHealth(maxHealth.get().floatValue(), food.get(), saturation.get().floatValue()));
 
+        for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
+            playerIn.playerNetServerHandler.sendPacket(new S1DPacketEntityEffect(playerIn.getEntityId(), potioneffect));
+        }
+
         return playerIn;
     }
 
@@ -646,7 +650,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
      * @author blood - May 21st, 2016
      *
      * @reason - rewritten to capture a plugin or mod that attempts to call this method directly.
-     * 
+     *
      * @param entityIn The entity being teleported
      * @param fromDimensionId The origin dimension id
      * @param fromWorld The origin world
