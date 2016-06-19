@@ -88,8 +88,8 @@ public final class CustomBiomeProvider extends BiomeProvider {
      *            BiomeCacheBlock
      */
     @Override
-    public Biome[] getBiomeGenAt(Biome[] listToReuse, int x, int z, int width, int length, boolean cacheFlag) {
-        return this.loadBlockGeneratorData(listToReuse, x, z, width, length);
+    public Biome[] getBiomes(Biome[] listToReuse, int x, int z, int width, int length, boolean cacheFlag) {
+        return this.getBiomes(listToReuse, x, z, width, length);
     }
 
     @Override
@@ -190,7 +190,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
     }
 
     @Override
-    public Biome[] loadBlockGeneratorData(Biome[] biomeArray, int startX, int startZ, int sizeX, int sizeZ) {
+    public Biome[] getBiomes(Biome[] biomeArray, int startX, int startZ, int sizeX, int sizeZ) {
         if (biomeArray == null || biomeArray.length < sizeX * sizeZ) {
             biomeArray = new Biome[sizeX * sizeZ];
         } else {

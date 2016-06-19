@@ -152,7 +152,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
                     .height(VariableAmount.baseWithRandomAddition(0, 256))
                     .build();
             FilteredPopulator filtered = new FilteredPopulator(lake, (c) -> {
-                Biome biomegenbase = this.worldObj.getBiomeGenForCoords(VecHelper.toBlockPos(c.getBlockMin()).add(16, 0, 16));
+                Biome biomegenbase = this.worldObj.getBiome(VecHelper.toBlockPos(c.getBlockMin()).add(16, 0, 16));
                 return biomegenbase != Biomes.DESERT && biomegenbase != Biomes.DESERT_HILLS;
             });
             filtered.setRequiredFlags(WorldGenConstants.VILLAGE_FLAG);

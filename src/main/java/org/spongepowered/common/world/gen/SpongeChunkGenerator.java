@@ -282,7 +282,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         BlockFalling.fallInstantly = true;
 
         BlockPos blockpos = new BlockPos(chunkX * 16, 0, chunkZ * 16);
-        BiomeType biome = (BiomeType) this.world.getBiomeGenForCoords(blockpos.add(16, 0, 16));
+        BiomeType biome = (BiomeType) this.world.getBiome(blockpos.add(16, 0, 16));
 
         org.spongepowered.api.world.Chunk chunk = (org.spongepowered.api.world.Chunk) this.world.getChunkFromChunkCoords(chunkX, chunkZ);
 
@@ -394,7 +394,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             return ((IChunkGenerator) this.baseGenerator).getPossibleCreatures(creatureType, pos);
         }
 
-        Biome biome = this.world.getBiomeGenForCoords(pos);
+        Biome biome = this.world.getBiome(pos);
         return biome.getSpawnableList(creatureType);
     }
 

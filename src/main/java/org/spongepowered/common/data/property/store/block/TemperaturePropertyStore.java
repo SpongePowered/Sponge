@@ -39,7 +39,7 @@ public class TemperaturePropertyStore extends AbstractSpongePropertyStore<Temper
     @Override
     public Optional<TemperatureProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final Biome biome = world.getBiomeGenForCoords(VecHelper.toBlockPos(location));
+        final Biome biome = world.getBiome(VecHelper.toBlockPos(location));
         return Optional.of(new TemperatureProperty(biome.getTemperature()));
     }
 

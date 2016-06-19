@@ -99,7 +99,6 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -211,7 +210,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public boolean addWeatherEffect(net.minecraft.entity.Entity entityIn) {
         return false; // Note this is not actually going to return false, it's just a target
     };
-    @Shadow public abstract Biome getBiomeGenForCoords(BlockPos pos);
+    @Shadow public abstract Biome getBiome(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
     @Shadow public abstract BiomeProvider getBiomeProvider();
     @Shadow @Nullable public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
@@ -321,7 +320,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public BiomeType getBiome(int x, int z) {
         checkBiomeBounds(x, z);
-        return (BiomeType) this.getBiomeGenForCoords(new BlockPos(x, 0, z));
+        return (BiomeType) this.getBiome(new BlockPos(x, 0, z));
     }
 
     @Override
