@@ -156,6 +156,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("shulker", newEntityTypeFromName("Shulker"));
         this.entityTypeMappings.put("shulker_bullet", newEntityTypeFromName("ShulkerBullet"));
         this.entityTypeMappings.put("spectral_arrow", newEntityTypeFromName("SpectralArrow"));
+        this.entityTypeMappings.put("polar_bear", newEntityTypeFromName("PolarBear"));
         this.entityTypeMappings.put("egg", new SpongeEntityType(-1, "Egg", EntityEgg.class, new SpongeTranslation("item.egg.name")));
         this.entityTypeMappings.put("fishing_hook", new SpongeEntityType(-2, "FishingHook", EntityFishHook.class, new SpongeTranslation("item.fishingRod.name")));
         this.entityTypeMappings.put("lightning", new SpongeEntityType(-3, "Lightning", EntityLightningBolt.class, null));
