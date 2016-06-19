@@ -49,8 +49,8 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.GameType;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -428,7 +428,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     @SuppressWarnings("unchecked")
     public SPacketPlayerListItem createPlayerListPacket(SPacketPlayerListItem.Action action) {
         SPacketPlayerListItem packet = new SPacketPlayerListItem(action);
-        packet.players.add(packet.new AddPlayerData(this.fakeProfile, 0, WorldSettings.GameType.NOT_SET, this.getDisplayName()));
+        packet.players.add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
         return packet;
     }
 

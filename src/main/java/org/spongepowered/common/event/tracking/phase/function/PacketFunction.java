@@ -748,7 +748,8 @@ public interface PacketFunction {
         final NetHandlerPlayServer connection = player.connection;
         final IMixinNetHandlerPlayServer mixinHandler = (IMixinNetHandlerPlayServer) connection;
         final CPacketResourcePackStatus resource = (CPacketResourcePackStatus) packet;
-        final String hash = resource.hash;
+        //final String hash = resource.hash; // TODO
+        final String hash = "";
         final ResourcePackStatusEvent.ResourcePackStatus status;
         final ResourcePack pack = mixinHandler.getSentResourcePacks().get(hash);
         switch (resource.action) {

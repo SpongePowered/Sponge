@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.network.play.server;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.WorldSettings;
+import net.minecraft.world.GameType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,7 +43,7 @@ public class MixinSPacketPlayerListItem implements IMixinSPacketPlayerListItem {
     @Shadow @Final public List<SPacketPlayerListItem.AddPlayerData> players;
 
     @Override
-    public void addEntry(GameProfile profile, int latency, WorldSettings.GameType gameMode, @Nullable ITextComponent displayName) {
+    public void addEntry(GameProfile profile, int latency, GameType gameMode, @Nullable ITextComponent displayName) {
         this.players.add(((SPacketPlayerListItem) (Object) this).new AddPlayerData(profile, latency, gameMode, displayName));
     }
 

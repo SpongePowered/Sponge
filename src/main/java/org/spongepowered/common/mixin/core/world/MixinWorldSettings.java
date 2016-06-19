@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
@@ -74,7 +75,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
 
     @Shadow abstract long shadow$getSeed();
     @Shadow abstract boolean isBonusChestEnabled();
-    @Shadow abstract WorldSettings.GameType getGameType();
+    @Shadow abstract GameType getGameType();
     @Shadow abstract boolean getHardcoreEnabled();
     @Shadow abstract boolean isMapFeaturesEnabled();
     @Shadow abstract WorldType getTerrainType();

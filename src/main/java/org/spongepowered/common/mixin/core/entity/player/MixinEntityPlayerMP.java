@@ -64,7 +64,7 @@ import net.minecraft.util.FoodStats;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.WorldSettings;
+import net.minecraft.world.GameType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
@@ -181,7 +181,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private int viewDistance;
     private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
 
-    private WorldSettings.GameType pendingGameType;
+    private GameType pendingGameType;
 
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
@@ -567,14 +567,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Inject(method = "setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At("HEAD"), cancellable = true)
-    private void onSetGameType(WorldSettings.GameType gameType, CallbackInfo ci) {
+    private void onSetGameType(GameType gameType, CallbackInfo ci) {
         ChangeGameModeEvent.TargetPlayer event = SpongeEventFactory.createChangeGameModeEventTargetPlayer(Cause.of(NamedCause.source(this)),
                 (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             ci.cancel();
         }
-        this.pendingGameType = (WorldSettings.GameType) (Object) event.getGameMode();
+        this.pendingGameType = (GameType) (Object) event.getGameMode();
     }
 
     /**
@@ -583,7 +583,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
      * local variable in the method.
      */
     @ModifyVariable(method = "Lnet/minecraft/entity/player/EntityPlayerMP;setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At(value = "HEAD", remap = false), argsOnly = true)
-    private WorldSettings.GameType assignPendingGameType(WorldSettings.GameType gameType) {
+    private GameType assignPendingGameType(GameType gameType) {
         return this.pendingGameType;
     }
 

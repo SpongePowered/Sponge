@@ -283,7 +283,7 @@ public class ProjectileLauncher {
 
         public static EnumFacing getFacing(TileEntityDispenser dispenser) {
             IBlockState state = dispenser.getWorld().getBlockState(dispenser.getPos());
-            return BlockDispenser.getFacing(state.getBlock().getMetaFromState(state));
+            return state.getValue(BlockDispenser.FACING);
         }
 
         @SuppressWarnings("unchecked")

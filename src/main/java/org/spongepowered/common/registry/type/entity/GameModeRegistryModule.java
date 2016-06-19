@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.world.WorldSettings;
+import net.minecraft.world.GameType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -52,34 +52,34 @@ public final class GameModeRegistryModule implements CatalogRegistryModule<GameM
 
     @Override
     public Collection<GameMode> getAll() {
-        return ImmutableList.copyOf((GameMode[]) (Object[]) WorldSettings.GameType.values());
+        return ImmutableList.copyOf((GameMode[]) (Object[]) GameType.values());
     }
 
     @Override
     public void registerDefaults() {
-        this.gameModeMappings.put("survival", (GameMode) (Object) WorldSettings.GameType.SURVIVAL);
-        this.gameModeMappings.put("creative", (GameMode) (Object) WorldSettings.GameType.CREATIVE);
-        this.gameModeMappings.put("adventure", (GameMode) (Object) WorldSettings.GameType.ADVENTURE);
-        this.gameModeMappings.put("spectator", (GameMode) (Object) WorldSettings.GameType.SPECTATOR);
-        this.gameModeMappings.put("not_set", (GameMode) (Object) WorldSettings.GameType.NOT_SET);
+        this.gameModeMappings.put("survival", (GameMode) (Object) GameType.SURVIVAL);
+        this.gameModeMappings.put("creative", (GameMode) (Object) GameType.CREATIVE);
+        this.gameModeMappings.put("adventure", (GameMode) (Object) GameType.ADVENTURE);
+        this.gameModeMappings.put("spectator", (GameMode) (Object) GameType.SPECTATOR);
+        this.gameModeMappings.put("not_set", (GameMode) (Object) GameType.NOT_SET);
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
-        for (WorldSettings.GameType gameType : WorldSettings.GameType.values()) {
+        for (GameType gameType : GameType.values()) {
             if (!this.gameModeMappings.inverse().containsKey((GameMode) (Object) gameType)) {
                 this.gameModeMappings.put(gameType.getName().toLowerCase(Locale.ENGLISH), (GameMode) (Object) gameType);
             }
         }
     }
 
-    public static WorldSettings.GameType toGameType(GameMode gamemode) {
-        for (WorldSettings.GameType gameType : WorldSettings.GameType.values()) {
+    public static GameType toGameType(GameMode gamemode) {
+        for (GameType gameType : GameType.values()) {
             if (gameType.getName().equalsIgnoreCase(gamemode.getId())) {
                 return gameType;
             }
         }
-        return WorldSettings.GameType.SURVIVAL;
+        return GameType.SURVIVAL;
     }
 
 }

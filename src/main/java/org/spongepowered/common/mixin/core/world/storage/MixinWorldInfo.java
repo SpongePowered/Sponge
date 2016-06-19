@@ -38,6 +38,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
@@ -115,7 +116,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Shadow private int rainTime;
     @Shadow private boolean thundering;
     @Shadow private int thunderTime;
-    @Shadow private WorldSettings.GameType theGameType;
+    @Shadow private GameType theGameType;
     @Shadow private boolean mapFeaturesEnabled;
     @Shadow private boolean hardcore;
     @Shadow private boolean allowCommands;

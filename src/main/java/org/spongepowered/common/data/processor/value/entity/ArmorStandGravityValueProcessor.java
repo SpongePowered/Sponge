@@ -49,13 +49,13 @@ public class ArmorStandGravityValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected boolean set(EntityArmorStand container, Boolean value) {
-        container.setNoGravity(!value);
+        container.func_189654_d(!value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityArmorStand container) {
-        return Optional.of(!container.hasNoGravity());
+        return Optional.of(!container.func_189652_ae());
     }
 
     @Override

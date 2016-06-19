@@ -59,7 +59,8 @@ public class SkeletonDataProcessor
     @Override
     protected boolean set(EntitySkeleton entity, SkeletonType value) {
         if (value instanceof SpongeSkeletonType) {
-            entity.setSkeletonType(((SpongeSkeletonType) value).type);
+            // TODO: int -> SkeletonType (add Mixin)
+            entity.func_189768_a((net.minecraft.entity.monster.SkeletonType) (Object) value);
             return true;
         }
         return false;
@@ -67,7 +68,8 @@ public class SkeletonDataProcessor
 
     @Override
     protected Optional<SkeletonType> getVal(EntitySkeleton entity) {
-        return Optional.ofNullable(SpongeEntityConstants.SKELETON_IDMAP.get(entity.getSkeletonType()));
+        // TODO: int -> SkeletonType (add Mixin)
+        return Optional.ofNullable((SkeletonType) (Object) entity.func_189771_df());
     }
 
     @Override

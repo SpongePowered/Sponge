@@ -54,7 +54,8 @@ public class VillagerZombieProcessor
 
     @Override
     protected boolean set(EntityZombie entity, Profession value) {
-        entity.setVillagerType(((SpongeProfession) value).type);
+        // TODO: Fix for ZombieType (add Mixin)
+        //entity.setVillagerType(((SpongeProfession) value).type);
         return true;
     }
 
@@ -89,7 +90,7 @@ public class VillagerZombieProcessor
         if (!oldValue.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        ((EntityZombie) container).setToNotVillager();
+        //((EntityZombie) container).setToNotVillager(); // TODO: -> ZombieType
         return DataTransactionResult.successRemove(constructImmutableValue(oldValue.get()));
     }
 
