@@ -31,14 +31,11 @@ import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.RabbitType;
-import org.spongepowered.api.data.type.SkeletonType;
 
 import java.util.Map;
 
 public class SpongeEntityConstants {
 
-    public static final Map<String, SkeletonType> SKELETON_TYPES = Maps.newHashMap();
-    public static final Map<Integer, SkeletonType> SKELETON_IDMAP = Maps.newHashMap();
     public static final Map<String, OcelotType> OCELOT_TYPES = Maps.newHashMap();
     public static final Map<Integer, OcelotType> OCELOT_IDMAP = Maps.newHashMap();
     public static final Map<String, RabbitType> RABBIT_TYPES = Maps.newHashMap();
@@ -49,10 +46,6 @@ public class SpongeEntityConstants {
     public static final Map<Integer, HorseStyle> HORSE_STYLE_IDMAP = Maps.newHashMap();
     public static final Map<String, HorseVariant> HORSE_VARIANTS = Maps.newHashMap();
     public static final Map<HorseType, HorseVariant> HORSE_VARIANT_IDMAP = Maps.newHashMap();
-
-    // skeleton types
-    public static final SpongeSkeletonType NORMAL_SKELETON = new SpongeSkeletonType(0, "NORMAL");
-    public static final SpongeSkeletonType WITHER_SKELETON = new SpongeSkeletonType(1, "WITHER");
 
     // ocelot types
     public static final SpongeOcelotType WILD_OCELOT = new SpongeOcelotType(0, "WILD_OCELOT");
@@ -93,12 +86,6 @@ public class SpongeEntityConstants {
     public static final SpongeHorseVariant SKELETON_HORSE = new SpongeHorseVariant(4, HorseType.SKELETON, "SKELETON_HORSE");
 
     static {
-        SKELETON_TYPES.put("normal", NORMAL_SKELETON);
-        SKELETON_TYPES.put("wither", WITHER_SKELETON);
-
-        SKELETON_IDMAP.put(0, NORMAL_SKELETON);
-        SKELETON_IDMAP.put(1, WITHER_SKELETON);
-
         OCELOT_TYPES.put("wild_ocelot", WILD_OCELOT);
         OCELOT_TYPES.put("black_cat", BLACK_CAT);
         OCELOT_TYPES.put("red_cat", RED_CAT);

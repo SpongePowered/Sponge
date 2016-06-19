@@ -22,14 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity;
+package org.spongepowered.common.mixin.core.data.types;
 
-import org.spongepowered.api.data.type.SkeletonType;
+import net.minecraft.entity.monster.SkeletonType;
+import org.spongepowered.asm.mixin.Mixin;
 
-public class SpongeSkeletonType extends SpongeEntityMeta implements SkeletonType {
+@Mixin(SkeletonType.class)
+public abstract class MixinSkeletonType implements org.spongepowered.api.data.type.SkeletonType {
 
-    public SpongeSkeletonType(int type, String name) {
-        super(type, name);
+    @Override
+    public String getId() {
+        return ((SkeletonType) (Object) this).name();
+    }
+
+    @Override
+    public String getName() {
+        return getId();
     }
 
 }
