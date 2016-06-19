@@ -610,9 +610,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     // Format disconnection message properly, causes weird messages with our console colors
     // Also see https://bugs.mojang.com/browse/MC-59535
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
-            target = "Ljava/lang/StringBuilder;append(Ljava/lang/Object;)Ljava/lang/StringBuilder;", ordinal = 0, remap = false))
-    private StringBuilder onDisconnectReasonToString(StringBuilder builder, Object reason) {
-        return builder.append(SpongeTexts.toLegacy((ITextComponent) reason));
+            target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 0, remap = false))
+    private void logDisconnect(Logger logger, String message, Object[] args) {
+        args[1] = SpongeTexts.toLegacy((ITextComponent) args[1]);
+        logger.info(message, args);
     }
 
     @Inject(method = "handleAnimation", at = @At(value = "HEAD"))

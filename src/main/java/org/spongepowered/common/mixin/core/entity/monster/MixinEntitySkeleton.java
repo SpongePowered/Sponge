@@ -47,16 +47,17 @@ import java.util.List;
 @Mixin(EntitySkeleton.class)
 public abstract class MixinEntitySkeleton extends MixinEntityMob implements Skeleton {
 
-    @Shadow public abstract int getSkeletonType();
+    @Shadow public abstract net.minecraft.entity.monster.SkeletonType func_189771_df(); // getSkeletonType
 
     @Override
     public SkeletonData getSkeletonData() {
-        return new SpongeSkeletonData(SpongeEntityConstants.SKELETON_IDMAP.get(this.getSkeletonType()));
+        // TODO: int -> SkeletonType (add Mixin)
+        return new SpongeSkeletonData((SkeletonType) (Object) this.func_189771_df());
     }
 
     @Override
     public Value<SkeletonType> variant() {
-        return new SpongeValue<>(Keys.SKELETON_TYPE, DataConstants.Catalog.DEFAULT_SKELETON, SpongeEntityConstants.SKELETON_IDMAP.get(this.getSkeletonType()));
+        return new SpongeValue<>(Keys.SKELETON_TYPE, DataConstants.Catalog.DEFAULT_SKELETON, (SkeletonType) (Object) func_189771_df());
     }
 
     @Override

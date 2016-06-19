@@ -61,11 +61,9 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
 
     @Shadow public abstract boolean getShowArms();
     @Shadow public abstract boolean hasNoBasePlate();
-    @Shadow public abstract boolean hasNoGravity();
     @Shadow public abstract boolean hasMarker();
     @Shadow public abstract boolean shadow$isSmall();
     @Shadow public abstract void setNoBasePlate(boolean p_175426_1_);
-    @Shadow public abstract void setNoGravity(boolean p_175425_1_);
     @Shadow public abstract void shadow$setSmall(boolean p_175420_1_);
     @Shadow public abstract void shadow$setShowArms(boolean p_175413_1_);
     @Shadow public abstract Rotations shadow$getHeadRotation();
@@ -110,13 +108,13 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     @Override
     @Deprecated
     public boolean hasGravity() {
-        return !this.hasNoGravity();
+        return !this.func_189652_ae();
     }
 
     @Override
     @Deprecated
     public void setGravity(boolean gravity) {
-        this.setNoGravity(!gravity);
+        this.func_189654_d(!gravity);
     }
 
     @Override
@@ -141,12 +139,12 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
 
     @Override
     public Value<Boolean> gravity() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_GRAVITY, true, !this.hasNoGravity());
+        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_GRAVITY, true, !this.func_189652_ae());
     }
 
     @Override
     public ArmorStandData getArmorStandData() {
-        return new SpongeArmorStandData(this.hasMarker(), this.shadow$isSmall(), !this.hasNoGravity(), this.getShowArms(), !this.hasNoBasePlate());
+        return new SpongeArmorStandData(this.hasMarker(), this.shadow$isSmall(), !this.func_189652_ae(), this.getShowArms(), !this.hasNoBasePlate());
     }
 
     @Override

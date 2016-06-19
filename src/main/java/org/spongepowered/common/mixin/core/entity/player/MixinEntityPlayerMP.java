@@ -566,7 +566,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return (CarriedInventory<? extends Carrier>) this.inventory;
     }
 
-    @Inject(method = "setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setGameType(Lnet/minecraft/world/GameType;)V", at = @At("HEAD"), cancellable = true)
     private void onSetGameType(GameType gameType, CallbackInfo ci) {
         ChangeGameModeEvent.TargetPlayer event = SpongeEventFactory.createChangeGameModeEventTargetPlayer(Cause.of(NamedCause.source(this)),
                 (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
@@ -582,7 +582,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
      * assigns the {@link #pendingGameType} returned by the event to the actual
      * local variable in the method.
      */
-    @ModifyVariable(method = "Lnet/minecraft/entity/player/EntityPlayerMP;setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At(value = "HEAD", remap = false), argsOnly = true)
+    @ModifyVariable(method = "Lnet/minecraft/entity/player/EntityPlayerMP;setGameType(Lnet/minecraft/world/GameType;)V", at = @At(value = "HEAD", remap = false), argsOnly = true)
     private GameType assignPendingGameType(GameType gameType) {
         return this.pendingGameType;
     }
