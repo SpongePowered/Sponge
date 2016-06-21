@@ -173,7 +173,7 @@ public final class PacketPhase extends TrackingPhase {
     public enum Inventory implements IPacketState, IPhaseState {
 
         INVENTORY,
-        DROP_ITEM(MODE_CLICK | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_OUTSIDE_WINDOW) {
+        DROP_ITEM(MODE_CLICK | MODE_DROP | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_ANYWHERE) {
             @Override
             public boolean doesCaptureEntityDrops() {
                 return true;
@@ -239,6 +239,11 @@ public final class PacketPhase extends TrackingPhase {
                 final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
                 return SpongeEventFactory.createClickInventoryEventDropSingle(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
 
+            }
+
+            @Override
+            public boolean ignoresItemPreMerges() {
+                return true;
             }
         },
         SWITCH_HOTBAR_NUMBER_PRESS(MODE_HOTBAR, MASK_MODE) {

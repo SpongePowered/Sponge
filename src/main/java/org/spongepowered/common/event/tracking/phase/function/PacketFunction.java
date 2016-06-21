@@ -45,6 +45,7 @@ import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -74,7 +75,6 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -151,7 +151,6 @@ public interface PacketFunction {
                     items.addAll(itemStacks);
 
                     if (!items.isEmpty()) {
-                        final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(affectedEntity.get());
                         final List<Entity> itemEntities = items.stream()
                                 .map(data -> data.create(causeTracker.getMinecraftWorld()))
                                 .map(EntityUtil::fromNative)
@@ -163,16 +162,14 @@ public interface PacketFunction {
                         )
                                 .named(NamedCause.of("Attacker", player))
                                 .build();
-                        EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld()))
-                                .nonCancelled(event -> {
-                                            for (Entity item : event.getEntities()) {
-                                                TrackingUtil.associateEntityCreator(context, item, causeTracker.getMinecraftWorld());
-                                                causeTracker.getMixinWorld().forceSpawnEntity(item);
-                                            }
-                                        }
-                                )
-                                .process();
+                        final DropItemEvent.Destruct
+                                destruct =
+                                SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(destruct);
+                        if (!destruct.isCancelled()) {
+                            processSpawnedEntities(player, causeTracker, destruct);
 
+                        }
                     }
                 }
             });
@@ -191,16 +188,14 @@ public interface PacketFunction {
                     )
                             .named(NamedCause.of("Attacker", player))
                             .build();
-                    EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld()))
-                            .nonCancelled(event -> {
-                                        for (Entity item : event.getEntities()) {
-                                            TrackingUtil.associateEntityCreator(context, item, causeTracker.getMinecraftWorld());
-                                            causeTracker.getMixinWorld().forceSpawnEntity(item);
-                                        }
-                                    }
-                            )
-                            .process();
+                    final DropItemEvent.Destruct
+                            destruct =
+                            SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld());
+                    SpongeImpl.postEvent(destruct);
+                    if (!destruct.isCancelled()) {
+                        processSpawnedEntities(player, causeTracker, destruct);
 
+                    }
                 }
             });
 
@@ -321,14 +316,14 @@ public interface PacketFunction {
                         for (EntityItem item : items) {
                             entities.add(EntityUtil.fromNative(item));
                         }
-                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld()))
-                                .nonCancelled(event -> {
-                                    for (Entity entity : event.getEntities()) {
-                                        EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                    }
-                                })
-                                .process();
+                        final DropItemEvent.Dispense
+                                dropItemEvent =
+                                SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(dropItemEvent);
+                        if (!dropItemEvent.isCancelled()) {
+                            processSpawnedEntities(player, causeTracker, dropItemEvent);
+
+                        }
                     });
             context.getCapturedEntityDropSupplier()
                     .ifPresentAndNotEmpty(itemMapping -> {
@@ -351,14 +346,14 @@ public interface PacketFunction {
                         for (EntityItem item : items) {
                             entities.add(EntityUtil.fromNative(item));
                         }
-                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld()))
-                                .nonCancelled(event -> {
-                                    for (Entity entity : event.getEntities()) {
-                                        EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                    }
-                                })
-                                .process();
+                        final DropItemEvent.Dispense
+                                dropItemEvent =
+                                SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(dropItemEvent);
+                        if (!dropItemEvent.isCancelled()) {
+                            processSpawnedEntities(player, causeTracker, dropItemEvent);
+
+                        }
                     });
 
         } else if (state == PacketPhase.General.INTERACTION) {
@@ -381,14 +376,13 @@ public interface PacketFunction {
                         for (EntityItem item : items) {
                             entities.add(EntityUtil.fromNative(item));
                         }
-                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld()))
-                                .nonCancelled(event -> {
-                                    for (Entity entity : event.getEntities()) {
-                                        EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                    }
-                                })
-                                .process();
+                        final DropItemEvent.Dispense
+                                dispense =
+                                SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(dispense);
+                        if (!dispense.isCancelled()) {
+                            processSpawnedEntities(player, causeTracker, dispense);
+                        }
                     });
             context.getCapturedEntityDropSupplier()
                     .ifPresentAndNotEmpty(map -> {
@@ -412,14 +406,14 @@ public interface PacketFunction {
                         .type(InternalSpawnTypes.PLACEMENT)
                         .build())
                         .build();
-                EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld()))
-                        .nonCancelled(event -> {
-                            for (Entity entity : event.getEntities()) {
-                                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                            }
-                        })
-                        .process();
+                final DropItemEvent.Dispense
+                        dispense =
+                        SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld());
+                SpongeImpl.postEvent(dispense);
+                if (!dispense.isCancelled()) {
+                    processSpawnedEntities(player, causeTracker, dispense);
+
+                }
             });
 
             context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
@@ -439,10 +433,7 @@ public interface PacketFunction {
                         final DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld());
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
-                                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                            }
+                            processSpawnedEntities(player, causeTracker, event);
                         }
                     }
                 }
@@ -450,6 +441,12 @@ public interface PacketFunction {
 
         }
     };
+    static void processSpawnedEntities(EntityPlayerMP player, CauseTracker causeTracker, SpawnEntityEvent event) {
+        for (Entity entity : event.getEntities()) {
+            EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+        }
+    }
 
     PacketFunction CREATIVE = (packet, state, player, context) -> {
         ((IMixinContainer) player.inventoryContainer).setCaptureInventory(false);
@@ -487,37 +484,34 @@ public interface PacketFunction {
             } else {
                 cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", ""));
                 PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, capturedTransactions);
-                event =
-                        SpongeEventFactory.createCreativeInventoryEventClick(cause, cursorTransaction, ContainerUtil.fromNative(openContainer),
+                event = SpongeEventFactory.createCreativeInventoryEventClick(cause, cursorTransaction, ContainerUtil.fromNative(openContainer),
                                 capturedTransactions);
             }
-            EventConsumer.event(event)
-                    .cancelled(creativeInventoryEvent -> {
-                        if (creativeInventoryEvent instanceof CreativeInventoryEvent.Drop) {
-                            capturedEntityItems.clear();
-                        }
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                if (event instanceof CreativeInventoryEvent.Drop) {
+                    capturedEntityItems.clear();
+                }
 
-                        // Restore cursor
-                        PacketPhaseUtil.handleCustomCursor(player, creativeInventoryEvent.getCursorTransaction().getOriginal());
+                // Restore cursor
+                PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getOriginal());
 
-                        // Restore target slots
-                        PacketPhaseUtil.handleSlotRestore(player, creativeInventoryEvent.getTransactions());
-                    })
-                    .nonCancelled(creativeInventoryEvent -> {
-                        PacketPhaseUtil.handleCustomSlot(player, creativeInventoryEvent.getTransactions());
+                // Restore target slots
+                PacketPhaseUtil.handleSlotRestore(player, event.getTransactions());
+            } else {
+                PacketPhaseUtil.handleCustomSlot(player, event.getTransactions());
 
-                        // Custom cursor
-                        if (event.getCursorTransaction().getCustom().isPresent()) {
-                            PacketPhaseUtil.handleCustomCursor(player, creativeInventoryEvent.getCursorTransaction().getFinal());
-                        }
-                        if (creativeInventoryEvent instanceof CreativeInventoryEvent.Drop) {
-                            for (Entity entity : ((CreativeInventoryEvent.Drop) creativeInventoryEvent).getEntities()) {
-                                TrackingUtil.associateEntityCreator(context, EntityUtil.toNative(entity), (WorldServer) player.worldObj);
-                                ((IMixinWorldServer) player.worldObj).forceSpawnEntity(entity);
-                            }
-                        }
-                    })
-                    .process();
+                // Custom cursor
+                if (event.getCursorTransaction().getCustom().isPresent()) {
+                    PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
+                }
+                if (event instanceof CreativeInventoryEvent.Drop) {
+                    for (Entity entity : ((CreativeInventoryEvent.Drop) event).getEntities()) {
+                        TrackingUtil.associateEntityCreator(context, EntityUtil.toNative(entity), (WorldServer) player.worldObj);
+                        ((IMixinWorldServer) player.worldObj).forceSpawnEntity(entity);
+                    }
+                }
+            }
             capturedTransactions.clear();
         }
 
@@ -552,46 +546,42 @@ public interface PacketFunction {
         }
 
         if (inventoryEvent != null) {
-            EventConsumer.event(inventoryEvent)
-                    .cancelled(event -> {
-                        if (event instanceof ClickInventoryEvent.Drop) {
-                            capturedItems.clear();
-                        }
+            SpongeImpl.postEvent(inventoryEvent);
+            if (inventoryEvent.isCancelled()) {
+                if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
+                    capturedItems.clear();
+                }
 
-                        if (event instanceof ClickInventoryEvent) {
-                            // Restore cursor
-                            PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getOriginal());
-                        }
-                        if (event instanceof ClickInventoryEvent.Double) {
-                            ((ClickInventoryEvent.Double) inventoryEvent).getTransactions().clear();
-                            return;
-                        }
+                if (inventoryEvent instanceof ClickInventoryEvent) {
+                    // Restore cursor
+                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
+                }
+                if (inventoryEvent instanceof ClickInventoryEvent.Double) {
+                    ((ClickInventoryEvent.Double) inventoryEvent).getTransactions().clear();
+                    return;
+                }
 
-                        if (event instanceof ChangeInventoryEvent) {
-                            // Restore target slots
-                            PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) event).getTransactions());
-                        }
-                    })
-                    .nonCancelled(event -> {
-                        if (inventoryEvent instanceof ChangeInventoryEvent) {
-                            PacketPhaseUtil.handleCustomSlot(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions());
-                        }
+                if (inventoryEvent instanceof ChangeInventoryEvent) {
+                    // Restore target slots
+                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions());
+                }
+            } else {
+                if (inventoryEvent instanceof ChangeInventoryEvent) {
+                    PacketPhaseUtil.handleCustomSlot(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions());
+                }
 
-                        // Custom cursor
-                        if (inventoryEvent instanceof ClickInventoryEvent) {
-                            final ClickInventoryEvent clickInventory = (ClickInventoryEvent) inventoryEvent;
-                            if (clickInventory.getCursorTransaction().getCustom().isPresent()) {
-                                PacketPhaseUtil.handleCustomCursor(player, clickInventory.getCursorTransaction().getFinal());
-                            }
-                        }
-                        if (inventoryEvent instanceof SpawnEntityEvent) {
-                            for (Entity entity : ((SpawnEntityEvent) inventoryEvent).getEntities()) {
-                                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                                ((IMixinWorldServer) player.worldObj).forceSpawnEntity(entity);
-                            }
-                        }
-                    }).post(event -> slotTransactions.clear())
-                    .process();
+                // Custom cursor
+                if (inventoryEvent instanceof ClickInventoryEvent) {
+                    final ClickInventoryEvent clickInventory = (ClickInventoryEvent) inventoryEvent;
+                    if (clickInventory.getCursorTransaction().getCustom().isPresent()) {
+                        PacketPhaseUtil.handleCustomCursor(player, clickInventory.getCursorTransaction().getFinal());
+                    }
+                }
+                if (inventoryEvent instanceof SpawnEntityEvent) {
+                    processSpawnedEntities(player, ((IMixinWorldServer) player.getServerWorld()).getCauseTracker(), (SpawnEntityEvent) inventoryEvent);
+                }
+            }
+            slotTransactions.clear();
         }
     };
     PacketFunction USE_ITEM = ((packet, state, player, context) -> {
@@ -608,14 +598,11 @@ public interface PacketFunction {
                             .build())
                             .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
                             .build();
-                    EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, spongeWorld))
-                            .nonCancelled(event -> {
-                                for (Entity entity : entities) {
-                                    EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                                    mixinWorld.forceSpawnEntity(entity);
-                                }
-                            })
-                            .process();
+                    final SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, entities, spongeWorld);
+                    SpongeImpl.postEvent(spawnEntityEvent);
+                    if (!spawnEntityEvent.isCancelled()) {
+                        processSpawnedEntities(player, mixinWorld.getCauseTracker(), spawnEntityEvent);
+                    }
                 });
         context.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(
@@ -640,14 +627,12 @@ public interface PacketFunction {
                             .build())
                             .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
                             .build();
-                    EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, spongeWorld))
-                            .nonCancelled(event -> {
-                                for (Entity entity : entities) {
-                                    EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                                    mixinWorld.forceSpawnEntity(entity);
-                                }
-                            })
-                            .process();
+                    final SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, entities, spongeWorld);
+                    SpongeImpl.postEvent(spawnEntityEvent);
+                    if (!spawnEntityEvent.isCancelled()) {
+                        processSpawnedEntities(player, mixinWorld.getCauseTracker(), spawnEntityEvent);
+
+                    }
                 });
         context.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(
@@ -672,15 +657,16 @@ public interface PacketFunction {
         ImmutableList<SlotTransaction>
                 transactions =
                 new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
-        EventConsumer.event(SpongeEventFactory
-                .createChangeInventoryEventHeld(Cause.of(NamedCause.source(player)), (Inventory) inventoryContainer, transactions))
-                .cancelled(event -> player.connection.sendPacket(new SPacketHeldItemChange(previousSlot)))
-                .nonCancelled(event -> {
-                    PacketPhaseUtil.handleCustomSlot(player, event.getTransactions());
-                    inventory.currentItem = itemChange.getSlotId();
-                    player.markPlayerActive();
-                })
-                .process();
+        final ChangeInventoryEvent.Held changeInventoryEventHeld = SpongeEventFactory
+                .createChangeInventoryEventHeld(Cause.of(NamedCause.source(player)), (Inventory) inventoryContainer, transactions);
+        SpongeImpl.postEvent(changeInventoryEventHeld);
+        if (changeInventoryEventHeld.isCancelled()) {
+            player.connection.sendPacket(new SPacketHeldItemChange(previousSlot));
+        } else {
+            PacketPhaseUtil.handleCustomSlot(player, changeInventoryEventHeld.getTransactions());
+            inventory.currentItem = itemChange.getSlotId();
+            player.markPlayerActive();
+        }
     });
     PacketFunction CLOSE_WINDOW = ((packet, state, player, context) -> {
         final Container container = context.firstNamed(InternalNamedCauses.Packet.OPEN_CONTAINER, Container.class)
@@ -690,32 +676,33 @@ public interface PacketFunction {
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         final Cause cause = Cause.source(player).build();
-        EventConsumer.event(SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction, ContainerUtil.fromNative(container)))
-                .cancelled(event -> {
-                    if (container.getSlot(0) != null) {
-                        player.openContainer = container;
-                        final Slot slot = container.getSlot(0);
-                        final String guiId;
-                        final IInventory slotInventory = slot.inventory;
-                        if (slotInventory instanceof IInteractionObject) {
-                            guiId = ((IInteractionObject) slotInventory).getGuiID();
-                        } else {
-                            guiId = "unknown";
-                        }
-                        slotInventory.openInventory(player);
-                        player.connection.sendPacket(new SPacketOpenWindow(container.windowId, guiId, slotInventory
-                                .getDisplayName(), slotInventory.getSizeInventory()));
-                        // resync data to client
-                        player.sendContainerToPlayer(container);
-                    }
-                })
-                .nonCancelled(event -> {
-                    // Custom cursor
-                    if (event.getCursorTransaction().getCustom().isPresent()) {
-                        PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
-                    }
-                })
-                .process();
+        final InteractInventoryEvent.Close
+                event =
+                SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction, ContainerUtil.fromNative(container));
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            if (container.getSlot(0) != null) {
+                player.openContainer = container;
+                final Slot slot = container.getSlot(0);
+                final String guiId;
+                final IInventory slotInventory = slot.inventory;
+                if (slotInventory instanceof IInteractionObject) {
+                    guiId = ((IInteractionObject) slotInventory).getGuiID();
+                } else {
+                    guiId = "unknown";
+                }
+                slotInventory.openInventory(player);
+                player.connection.sendPacket(new SPacketOpenWindow(container.windowId, guiId, slotInventory
+                        .getDisplayName(), slotInventory.getSizeInventory()));
+                // resync data to client
+                player.sendContainerToPlayer(container);
+            }
+        } else {
+            // Custom cursor
+            if (event.getCursorTransaction().getCustom().isPresent()) {
+                PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
+            }
+        }
     });
     PacketFunction ENCHANTMENT = ((packet, state, player, context) -> {
     });
@@ -732,16 +719,19 @@ public interface PacketFunction {
                     .orElseThrow(PhaseUtil.throwWithContext("Expected a cursor item stack, but had nothing!", context));
             final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-            EventConsumer.event(SpongeEventFactory.createInteractInventoryEventOpen(Cause.source(player).build(), cursorTransaction,
-                    ContainerUtil.fromNative(player.openContainer)))
-                    .cancelled(event -> player.closeScreen())
-                    .nonCancelled(event -> {
-                        // Custom cursor
-                        if (event.getCursorTransaction().getCustom().isPresent()) {
-                            PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
-                        }
-                    })
-                    .process();
+            final InteractInventoryEvent.Open
+                    event =
+                    SpongeEventFactory.createInteractInventoryEventOpen(Cause.source(player).build(), cursorTransaction,
+                            ContainerUtil.fromNative(player.openContainer));
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                player.closeScreen();
+            } else {
+                // Custom cursor
+                if (event.getCursorTransaction().getCustom().isPresent()) {
+                    PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
+                }
+            }
         }
     });
     PacketFunction RESOURCE_PACKET = ((packet, state, player, context) -> {

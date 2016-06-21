@@ -42,13 +42,13 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -281,15 +281,16 @@ public class GeneralFunctions {
                 .build());
         phaseContext.firstNamed(NamedCause.NOTIFIER, User.class).map(NamedCause::notifier).ifPresent(builder::named);
         final Cause spawnCauses = builder.build();
-        EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(spawnCauses, itemDrops, causeTracker.getWorld()))
-                .nonCancelled(event -> {
-                            for (Entity entity : event.getEntities()) {
-                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
-                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                            }
-                        }
-                )
-                .process();
+        final DropItemEvent.Destruct
+                destruct =
+                SpongeEventFactory.createDropItemEventDestruct(spawnCauses, itemDrops, causeTracker.getWorld());
+        SpongeImpl.postEvent(destruct);
+        if (!destruct.isCancelled()) {
+            for (Entity entity : destruct.getEntities()) {
+                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+            }
+        }
     }
 
     public static void spawnItemDataForBlockDrops(Collection<ItemDropData> itemStacks, SpongeBlockSnapshot oldBlockSnapshot, CauseTracker causeTracker,
@@ -301,10 +302,11 @@ public class GeneralFunctions {
                 .collect(Collectors.toList());
         final ImmutableList<ItemStackSnapshot> originalSnapshots = ImmutableList.copyOf(itemSnapshots);
         final Cause cause = Cause.source(oldBlockSnapshot).build();
-        EventConsumer.event(SpongeEventFactory.createDropItemEventPre(cause, originalSnapshots, itemSnapshots))
-                .cancelled(event -> itemStacks.clear())
-                .process();
-
+        final DropItemEvent.Pre dropItemEventPre = SpongeEventFactory.createDropItemEventPre(cause, originalSnapshots, itemSnapshots);
+        SpongeImpl.postEvent(dropItemEventPre);
+        if (dropItemEventPre.isCancelled()) {
+            itemStacks.clear();
+        }
         if (itemStacks.isEmpty()) {
             return;
         }
@@ -331,16 +333,16 @@ public class GeneralFunctions {
                 .build());
         phaseContext.firstNamed(NamedCause.NOTIFIER, User.class).map(NamedCause::notifier).ifPresent(builder::named);
         final Cause spawnCauses = builder.build();
-        EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(spawnCauses, itemDrops, causeTracker.getWorld()))
-                .nonCancelled(event -> {
-                            for (Entity entity : event.getEntities()) {
-                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
-                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                            }
-                        }
-                )
-                .process();
-
+        final DropItemEvent.Destruct
+                destruct =
+                SpongeEventFactory.createDropItemEventDestruct(spawnCauses, itemDrops, causeTracker.getWorld());
+        SpongeImpl.postEvent(destruct);
+        if (!destruct.isCancelled()) {
+            for (Entity entity : destruct.getEntities()) {
+                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+            }
+        }
     }
 
     public static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,

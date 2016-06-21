@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -35,6 +36,9 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
@@ -51,7 +55,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -71,8 +77,11 @@ import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.item.inventory.CreativeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.message.MessageEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
@@ -94,11 +103,14 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -544,4 +556,51 @@ public class SpongeCommonEventFactory {
 
     }
 
+
+    public static CreativeInventoryEvent.Click callCreativeClickInventoryEvent(EntityPlayerMP player, CPacketCreativeInventoryAction packetIn) {
+        Cause cause = Cause.of(NamedCause.owner(player));
+        // Creative doesn't inform server of cursor status
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+        if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0
+            && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
+            Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
+            if (slot != null) {
+                SlotTransaction slotTransaction =
+                        new SlotTransaction(new SlotAdapter(slot), ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+                ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
+            }
+        }
+        CreativeInventoryEvent.Click event = SpongeEventFactory.createCreativeInventoryEventClick(cause, cursorTransaction,
+                (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                ((IMixinContainer) player.openContainer).getCapturedTransactions());
+        SpongeImpl.postEvent(event);
+        return event;
+    }
+
+    public static CreativeInventoryEvent.Drop callCreativeDropInventoryEvent(EntityPlayerMP player, ItemStack itemstack, CPacketCreativeInventoryAction packetIn) {
+        // Creative doesn't inform server of cursor status
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+
+        EntityItem entityitem;
+        if (itemstack == null) {
+            // create dummy item
+            entityitem = new EntityItem(player.worldObj, player.posX, player.posY, player.posZ, (net.minecraft.item.ItemStack) ItemStackSnapshot.NONE.createStack());
+        } else {
+            entityitem = player.dropItem(itemstack, true);
+        }
+
+        List<Entity> entityList = new ArrayList<>();
+        entityList.add((Entity) entityitem);
+
+        SpawnCause spawnCause = EntitySpawnCause.builder()
+                .entity((Entity) player)
+                .type(SpawnTypes.DROPPED_ITEM)
+                .build();
+        final Cause cause = Cause.source(spawnCause).owner(player).build();
+        CreativeInventoryEvent.Drop event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, entityList,
+                ContainerUtil.fromNative(player.openContainer), (World) player.worldObj,
+                ContainerUtil.toMixin(player.openContainer).getCapturedTransactions());
+        SpongeImpl.postEvent(event);
+        return event;
+    }
 }
