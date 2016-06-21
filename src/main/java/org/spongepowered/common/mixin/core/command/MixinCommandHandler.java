@@ -29,6 +29,7 @@ import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -47,6 +48,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
 
     private boolean expandedSelector;
     private boolean captureBlocks;
+    private boolean chunkLoadOverride;
 
     @Inject(method = "tryExecute", at = @At(value = "HEAD"))
     public void onExecuteCommandHead(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
@@ -58,6 +60,9 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
             causeTracker.addCause(Cause.source(sender).named("Command", command).build());
             this.captureBlocks = causeTracker.isCapturingBlocks();
             causeTracker.setCaptureBlocks(true);
+            // make sure commands can load chunks
+            this.chunkLoadOverride = ((WorldServer) world).theChunkProviderServer.chunkLoadOverride;
+            ((WorldServer) world).theChunkProviderServer.chunkLoadOverride = true;
         }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
@@ -73,6 +78,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
             causeTracker.removeCurrentCause();
             causeTracker.setCapturingCommand(false);
             causeTracker.setCaptureBlocks(this.captureBlocks);
+            ((WorldServer) world).theChunkProviderServer.chunkLoadOverride = this.chunkLoadOverride;
         }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(false);
