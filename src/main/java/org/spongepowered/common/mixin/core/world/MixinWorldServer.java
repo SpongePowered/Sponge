@@ -336,7 +336,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.spongegen.setPopulators(newGenerator.getPopulators());
         this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
 
-        ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
+        ChunkProviderServer chunkProviderServer = this.getChunkProvider();
         chunkProviderServer.chunkGenerator = this.spongegen;
     }
 
@@ -510,11 +510,17 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event);
     }
 
+    @Inject(method = "tick", at = @At("RETURN"))
+    public void onTickEnd(CallbackInfo ci) {
+        // Clean up any leaked chunks
+        this.doChunkGC();
+    }
+
     // Chunk GC
     private void doChunkGC() {
         this.chunkGCTickCount++;
 
-        ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
+        ChunkProviderServer chunkProviderServer = this.getChunkProvider();
         int chunkLoadCount = this.getChunkProvider().getLoadedChunkCount();
         if (chunkLoadCount >= this.chunkGCLoadThreshold && this.chunkGCLoadThreshold > 0) {
             chunkLoadCount = 0;
