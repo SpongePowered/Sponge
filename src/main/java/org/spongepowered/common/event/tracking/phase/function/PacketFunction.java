@@ -45,6 +45,7 @@ import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -751,6 +752,58 @@ public interface PacketFunction {
             if (event.getCursorTransaction().getCustom().isPresent()) {
                 PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
             }
+            // Non-merged items
+            context.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
+                final Cause spawnCause = Cause.source(
+                        EntitySpawnCause.builder()
+                                .entity((Entity) player)
+                                .type(InternalSpawnTypes.PLACEMENT)
+                                .build()
+                ).named(NamedCause.notifier(player))
+                        .build();
+                final List<Entity> entities = items
+                        .stream()
+                        .map(EntityUtil::fromNative)
+                        .collect(Collectors.toList());
+                if (!entities.isEmpty()) {
+                    DropItemEvent.Custom drop = SpongeEventFactory.createDropItemEventCustom(spawnCause, entities, (World) player.getServerWorld());
+                    SpongeImpl.postEvent(drop);
+                    if (!drop.isCancelled()) {
+                        for (Entity droppedItem : drop.getEntities()) {
+                            EntityUtil.toMixin(droppedItem).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                            ((IMixinWorldServer) player.getServerWorld()).forceSpawnEntity(droppedItem);
+                        }
+                    }
+                }
+            });
+            // Pre-merged items
+            context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(stacks -> {
+                final List<EntityItem> items = stacks.stream()
+                        .map(drop -> drop.create(player.getServerWorld()))
+                        .collect(Collectors.toList());
+                final Cause spawnCause = Cause.source(
+                        EntitySpawnCause.builder()
+                                .entity((Entity) player)
+                                .type(InternalSpawnTypes.PLACEMENT)
+                                .build()
+                ).named(NamedCause.notifier(player))
+                        .build();
+                final List<Entity> entities = items
+                        .stream()
+                        .map(EntityUtil::fromNative)
+                        .collect(Collectors.toList());
+                if (!entities.isEmpty()) {
+                    DropItemEvent.Custom drop = SpongeEventFactory.createDropItemEventCustom(spawnCause, entities, (World) player.getServerWorld());
+                    SpongeImpl.postEvent(drop);
+                    if (!drop.isCancelled()) {
+                        for (Entity droppedItem : drop.getEntities()) {
+                            EntityUtil.toMixin(droppedItem).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                            ((IMixinWorldServer) player.getServerWorld()).forceSpawnEntity(droppedItem);
+                        }
+                    }
+                }
+
+            });
         }
     });
     PacketFunction ENCHANTMENT = ((packet, state, player, context) -> {
