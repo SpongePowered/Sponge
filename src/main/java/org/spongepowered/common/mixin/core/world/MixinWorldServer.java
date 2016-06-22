@@ -105,6 +105,7 @@ import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerManager;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.plugin.interfaces.IModData;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -868,6 +869,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.chunkGCLoadThreshold = this.activeConfig.getConfig().getWorld().getChunkLoadThreadhold();
         this.chunkGCTickInterval = this.activeConfig.getConfig().getWorld().getTickInterval();
         if (this.getChunkProvider() != null) {
+            final IMixinChunkProviderServer mixinChunkProvider = (IMixinChunkProviderServer) this.getChunkProvider();
+            final int maxChunkUnloads = this.activeConfig.getConfig().getWorld().getMaxChunkUnloads();
+            mixinChunkProvider.setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
             ((ChunkProviderServer) this.getChunkProvider()).chunkLoadOverride = !this.activeConfig.getConfig().getWorld().getDenyChunkRequests();
             for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
                 if (entity instanceof IModData) {

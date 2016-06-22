@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.LongHashMap;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.IChunkLoader;
@@ -40,7 +41,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.CauseTracker;
@@ -63,7 +66,6 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Shadow private IChunkLoader chunkLoader;
     @Shadow private LongHashMap<Chunk> id2ChunkMap;
     @Shadow public IChunkProvider serverChunkGenerator;
-    @Shadow private Set<Long> droppedChunksSet;
     @Shadow public boolean chunkLoadOverride;
     @Shadow private Chunk dummyChunk;
 
@@ -165,5 +167,21 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     public void onUnloadQueuedChunksEnd(CallbackInfoReturnable<Boolean> ci) {
         IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
         spongeWorld.getTimingsHandler().doChunkUnload.stopTiming();
+    }
+
+    private int maxChunkUnloads = -1;
+
+    @ModifyConstant(method = "unloadQueuedChunks", constant = @Constant(intValue = 100))
+    private int modifyUnloadCount(int original) {
+        if (this.maxChunkUnloads == -1) {
+            final int maxChunkUnloads = ((IMixinWorld) this.worldObj).getActiveConfig().getConfig().getWorld().getMaxChunkUnloads();
+            this.maxChunkUnloads = maxChunkUnloads < 1 ? 1 : maxChunkUnloads;
+        }
+        return this.maxChunkUnloads;
+    }
+
+    @Override
+    public void setMaxChunkUnloads(int maxUnloads) {
+        this.maxChunkUnloads = maxUnloads;
     }
 }
