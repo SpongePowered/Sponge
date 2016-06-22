@@ -28,6 +28,7 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.common.service.permission.SpongePermissionService;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,14 +37,21 @@ import java.util.Set;
 
 public abstract class SpongeSubjectCollection implements SubjectCollection {
     private final String identifier;
+    protected final SpongePermissionService service;
 
-    protected SpongeSubjectCollection(String identifier) {
+    protected SpongeSubjectCollection(String identifier, SpongePermissionService service) {
         this.identifier = identifier;
+        this.service = service;
     }
 
     @Override
     public String getIdentifier() {
         return this.identifier;
+    }
+
+    @Override
+    public SpongeSubject getDefaults() {
+        return this.service.getDefaultCollection().get(getIdentifier());
     }
 
     @Override
@@ -69,4 +77,15 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
         }
         return Collections.unmodifiableMap(ret);
     }
+
+    /**
+     * Returns the subject specified. Will not return null.
+     *
+     * @param identifier The identifier to look up a subject by.
+     *                   Case-insensitive
+     * @return A stored subject if present, otherwise a subject that may be
+     * stored if data is changed from defaults
+     */
+    @Override
+    public abstract SpongeSubject get(String identifier);
 }

@@ -42,21 +42,19 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 public class DataFactoryCollection extends SpongeSubjectCollection {
-    final SpongePermissionService service;
     private final ConcurrentMap<String, SpongeSubject> subjects = new ConcurrentHashMap<>();
     private final Function<String, MemorySubjectData> dataFactory;
     final Function<String, CommandSource> commandSourceFunction;
 
     protected DataFactoryCollection(String identifier, SpongePermissionService service, Function<String, MemorySubjectData> dataFactory,
             Function<String, CommandSource> commandSourceFunction) {
-        super(identifier);
-        this.service = service;
+        super(identifier, service);
         this.dataFactory = dataFactory;
         this.commandSourceFunction = commandSourceFunction;
     }
 
     @Override
-    public Subject get(String identifier) {
+    public SpongeSubject get(String identifier) {
         checkNotNull(identifier, "identifier");
         if (!this.subjects.containsKey(identifier)) {
             this.subjects.putIfAbsent(identifier, new DataFactorySubject(identifier, this.dataFactory.apply(identifier)));
@@ -107,8 +105,13 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         @Override
         public Tristate getPermissionValue(Set<Context> contexts, String permission) {
             Tristate ret = super.getPermissionValue(contexts, permission);
+
             if (ret == Tristate.UNDEFINED) {
-                ret = getDataPermissionValue(DataFactoryCollection.this.service.getDefaultData(), permission);
+                ret = getDataPermissionValue(DataFactoryCollection.this.getDefaults().getTransientSubjectData(), permission);
+            }
+
+            if (ret == Tristate.UNDEFINED) {
+                ret = getDataPermissionValue(DataFactoryCollection.this.service.getDefaults().getTransientSubjectData(), permission);
             }
             return ret;
 

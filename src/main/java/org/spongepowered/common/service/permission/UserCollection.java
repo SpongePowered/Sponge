@@ -29,6 +29,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.service.permission.base.SpongeSubject;
 import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
 
 import java.util.UUID;
@@ -38,15 +39,12 @@ import java.util.UUID;
  */
 public class UserCollection extends SpongeSubjectCollection {
 
-    private final SpongePermissionService service;
-
     public UserCollection(SpongePermissionService service) {
-        super(PermissionService.SUBJECTS_USER);
-        this.service = service;
+        super(PermissionService.SUBJECTS_USER, service);
     }
 
     @Override
-    public Subject get(String identifier) {
+    public SpongeSubject get(String identifier) {
         UUID uid = identToUuid(identifier);
         if (uid == null) {
             throw new IllegalArgumentException("Provided identifier must be a uuid, was " + identifier);
@@ -54,7 +52,7 @@ public class UserCollection extends SpongeSubjectCollection {
         return get(uuidToGameProfile(uid));
     }
 
-    protected Subject get(GameProfile profile) {
+    protected SpongeSubject get(GameProfile profile) {
         return new UserSubject(profile, this);
     }
 

@@ -36,7 +36,7 @@ import java.util.Set;
 public abstract class SpongeSubject implements Subject {
 
     @Override
-    public SubjectData getTransientSubjectData() {
+    public MemorySubjectData getTransientSubjectData() {
         return getSubjectData();
     }
 
