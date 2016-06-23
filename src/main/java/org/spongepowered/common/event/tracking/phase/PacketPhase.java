@@ -427,7 +427,27 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     public enum General implements IPacketState, IPhaseState {
-        UNKNOWN,
+        UNKNOWN() {
+            @Override
+            public boolean ignoresItemPreMerges() {
+                return true;
+            }
+
+            @Override
+            public boolean tracksBlockSpecificDrops() {
+                return true;
+            }
+
+            @Override
+            public boolean tracksEntitySpecificDrops() {
+                return true;
+            }
+
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                context.addBlockCaptures().addEntityCaptures().addEntityDropCaptures();
+            }
+        },
         MOVEMENT() {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
@@ -671,10 +691,9 @@ public final class PacketPhase extends TrackingPhase {
     private final Map<Class<? extends Packet<?>>, Function<Packet<?>, IPacketState>> packetTranslationMap = new IdentityHashMap<>();
     private final Map<Class<? extends Packet<?>>, PacketFunction> packetUnwindMap = new IdentityHashMap<>();
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "SuspiciousMethodCalls"})
     public IPacketState getStateForPacket(Packet<?> packet) {
-        final Class<? extends Packet<?>> packetClass = (Class<? extends Packet<?>>) packet.getClass();
-        final Function<Packet<?>, IPacketState> packetStateFunction = this.packetTranslationMap.get(packetClass);
+        final Function<Packet<?>, IPacketState> packetStateFunction = this.packetTranslationMap.get(packet.getClass());
         if (packetStateFunction != null) {
             return packetStateFunction.apply(packet);
         }
@@ -736,17 +755,9 @@ public final class PacketPhase extends TrackingPhase {
         checkArgument(phaseState instanceof IPacketState, "PhaseState passed in is not an instance of IPacketState! Got %s", phaseState);
         if (unwindFunction != null) {
             unwindFunction.unwind(packetIn, (IPacketState) phaseState, player, phaseContext);
-        } /*else { // This can be re-enabled at any time, but generally doesn't need to be on releases.
-            final PrettyPrinter printer = new PrettyPrinter(60);
-            printer.add("Unhandled Packet").centre().hr();
-            printer.add("   %s : %s", "Packet State", phaseState);
-            printer.add("   %s : %s", "Packet", packetInClass);
-            printer.addWrapped(60, "   %s : %s", "Phase Context", phaseContext);
-            printer.add("Stacktrace: ");
-            final Exception exception = new Exception();
-            printer.add(exception);
-            printer.print(System.err).log(SpongeImpl.getLogger(), Level.TRACE);
-        }*/
+        } else {
+            PacketFunction.UNKONWN_PACKET.unwind(packetIn, (IPacketState) phaseState, player, phaseContext);
+        }
     }
 
     PacketPhase(TrackingPhase parent) {

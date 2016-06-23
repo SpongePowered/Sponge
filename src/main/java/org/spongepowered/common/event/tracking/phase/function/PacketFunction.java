@@ -45,6 +45,7 @@ import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -881,6 +882,113 @@ public interface PacketFunction {
     PacketFunction MOVEMENT = (packet, state, player, context) -> {
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
         context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, mixinWorldServer.getCauseTracker(), state, context));
+    };
+
+    PacketFunction UNKONWN_PACKET = (packet, state, player, context) -> {
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.getServerWorld();
+        final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
+        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context));
+        context.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+            final Cause cause = Cause.source(EntitySpawnCause.builder()
+                    .entity((Player) player)
+                    .type(InternalSpawnTypes.PLACEMENT)
+                    .build()
+            ).build();
+            SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, entities, (World) mixinWorldServer);
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                for (Entity spawnedEntity : event.getEntities()) {
+                    EntityUtil.toMixin(spawnedEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                    mixinWorldServer.forceSpawnEntity(spawnedEntity);
+                }
+            }
+        });
+        context.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
+            final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+            final Cause cause = Cause.source(EntitySpawnCause.builder()
+                    .entity((Player) player)
+                    .type(InternalSpawnTypes.PLACEMENT)
+                    .build()
+            ).build();
+            SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, items, (World) mixinWorldServer);
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                for (Entity spawnedEntity : event.getEntities()) {
+                    EntityUtil.toMixin(spawnedEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                    mixinWorldServer.forceSpawnEntity(spawnedEntity);
+                }
+            }
+        });
+        context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
+            final PrettyPrinter printer = new PrettyPrinter(80);
+            printer.add("Processing Interact At Entity").centre().hr();
+            printer.add("The item stacks captured are: ");
+
+            for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
+                printer.add("  - Entity with UUID: %s", entry.getKey());
+                for (ItemDropData stack : entry.getValue()) {
+                    printer.add("    - %s", stack);
+                }
+            }
+            printer.trace(System.err);
+        });
+        context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {
+            for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
+                final UUID entityUuid = entry.getKey();
+                final net.minecraft.entity.Entity entityFromUuid = causeTracker.getMinecraftWorld().getEntityFromUuid(entityUuid);
+                final Entity affectedEntity = EntityUtil.fromNative(entityFromUuid);
+                if (entityFromUuid != null) {
+                    final Cause cause = Cause.source(
+                            EntitySpawnCause.builder()
+                                    .entity(affectedEntity)
+                                    .type(InternalSpawnTypes.CUSTOM)
+                                    .build()
+                    ).named(NamedCause.notifier(player))
+                            .build();
+                    final List<Entity> entities = entry.getValue()
+                            .stream()
+                            .map(EntityUtil::fromNative)
+                            .collect(Collectors.toList());
+                    if (!entities.isEmpty()) {
+                        DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            for (Entity droppedItem : event.getEntities()) {
+                                EntityUtil.toMixin(droppedItem).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                mixinWorldServer.forceSpawnEntity(droppedItem);
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(drops -> {
+            final List<EntityItem>
+                    items =
+                    drops.stream().map(drop -> drop.create(causeTracker.getMinecraftWorld())).collect(Collectors.toList());
+            final Cause cause = Cause.source(
+                    EntitySpawnCause.builder()
+                            .entity((Entity) player)
+                            .type(InternalSpawnTypes.CUSTOM)
+                            .build()
+            ).named(NamedCause.notifier(player))
+                    .build();
+            final List<Entity> entities = items
+                    .stream()
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
+            if (!entities.isEmpty()) {
+                DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities, causeTracker.getWorld());
+                SpongeImpl.postEvent(event);
+                if (!event.isCancelled()) {
+                    for (Entity droppedItem : event.getEntities()) {
+                        EntityUtil.toMixin(droppedItem).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                        mixinWorldServer.forceSpawnEntity(droppedItem);
+                    }
+                }
+            }
+
+        });
 
     };
 
