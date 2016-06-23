@@ -385,6 +385,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return setLocationAndRotation(safeLocation.get(), rotation, relativePositions);
     }
 
+    @Override
     public boolean setLocation(Location<World> location) {
         checkNotNull(location, "The location was null!");
         if (isRemoved()) {
@@ -528,6 +529,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
     }
 
+    @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public boolean setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
         boolean relocated = true;

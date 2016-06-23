@@ -205,6 +205,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      *
      * @reason SpongeForge requires an overwrite so we do it here instead. This handles player death events.
      */
+    @Override
     @Overwrite
     public void onDeath(DamageSource cause) {
 

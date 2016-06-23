@@ -184,6 +184,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
+    @Override
     @Shadow public abstract void func_175145_a(StatBase p_175145_1_);
     @Shadow public abstract StatisticsFile getStatFile();
     @Shadow public abstract void updateHeldItem();
@@ -217,6 +218,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
      *
      * @reason SpongeForge requires an overwrite so we do it here instead. This handles player death events.
      */
+    @Override
     @Overwrite
     public void onDeath(DamageSource cause) {
         if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase)(Object) this, cause) == null) {
@@ -288,6 +290,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
      *
      * @param dimensionId The id of target dimension.
      */
+    @Override
     @Overwrite
     public void travelToDimension(int dimensionId) {
         // If leaving The End via End's Portal

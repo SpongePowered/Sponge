@@ -52,6 +52,7 @@ public abstract class MixinCommandTeleport extends CommandBase {
      * @param sender The command source
      * @param args The command arguments
      */
+    @Override
     @Overwrite
     public void processCommand(ICommandSender sender, String[] args) throws CommandException
     {
