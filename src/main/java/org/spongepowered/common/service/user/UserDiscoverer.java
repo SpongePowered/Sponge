@@ -36,6 +36,7 @@ import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListEntryBan;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
@@ -241,8 +242,16 @@ class UserDiscoverer {
     }
 
     private static File getPlayerDataFile(UUID uniqueId) {
+        // This may be called triggered by mods using FakePlayer during
+        // initial world gen (before the overworld is registered). Because of
+        // this, we need to check if the overworld is actually registered yet
+        Optional<WorldServer> worldServer = WorldManager.getWorldByDimensionId(0);
+        if (!worldServer.isPresent()) {
+            return null;
+        }
+
         // Note: Uses the overworld's player data
-        SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
+        SaveHandler saveHandler = (SaveHandler) worldServer.get().getSaveHandler();
         String[] uuids = saveHandler.getAvailablePlayerDat();
         for (String playerUuid : uuids) {
             if (uniqueId.toString().equals(playerUuid)) {

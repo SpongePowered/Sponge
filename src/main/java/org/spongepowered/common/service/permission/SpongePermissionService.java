@@ -32,7 +32,6 @@ import net.minecraft.server.management.UserListOps;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.ContextCalculator;
-import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionDescription.Builder;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -42,6 +41,8 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.service.permission.base.FixedParentMemorySubjectData;
 import org.spongepowered.common.service.permission.base.GlobalMemorySubjectData;
+import org.spongepowered.common.service.permission.base.SpongeSubject;
+import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -57,16 +58,19 @@ import java.util.function.Function;
  * <p>Really doesn't do much else. Don't use this guys.
  */
 public class SpongePermissionService implements PermissionService {
+    private static final String SUBJECTS_DEFAULT = "default";
     private static final Function<String, CommandSource> NO_COMMAND_SOURCE = s -> null;
 
     private final Game game;
     private final Map<String, PermissionDescription> descriptionMap = new LinkedHashMap<>();
     private Collection<PermissionDescription> descriptions;
     private final ConcurrentMap<String, SubjectCollection> subjects = new ConcurrentHashMap<>();
-    private final MemorySubjectData defaultData;
+    private final SpongeSubjectCollection defaultCollection;
+    private final SpongeSubject defaultData;
 
     public SpongePermissionService(Game game) {
         this.game = game;
+        this.subjects.put(SUBJECTS_DEFAULT, (defaultCollection = newCollection(SUBJECTS_DEFAULT)));
         this.subjects.put(SUBJECTS_USER, new UserCollection(this));
         this.subjects.put(SUBJECTS_GROUP, new OpLevelCollection(this));
 
@@ -84,7 +88,7 @@ public class SpongePermissionService implements PermissionService {
                                                                          return null;
                                                                      }));
 
-        this.defaultData = new FixedParentMemorySubjectData(this, getGroupForOpLevel(0));
+        this.defaultData = getDefaultCollection().get(SUBJECTS_DEFAULT);
     }
 
     static UserListOps getOps() {
@@ -110,7 +114,7 @@ public class SpongePermissionService implements PermissionService {
     }
 
     @Override
-    public MemorySubjectData getDefaultData() {
+    public SpongeSubject getDefaults() {
         return this.defaultData;
     }
 
@@ -131,7 +135,7 @@ public class SpongePermissionService implements PermissionService {
         return ret;
     }
 
-    private SubjectCollection newCollection(String identifier) {
+    private SpongeSubjectCollection newCollection(String identifier) {
         return new DataFactoryCollection(identifier, this, s -> new GlobalMemorySubjectData(SpongePermissionService.this), NO_COMMAND_SOURCE);
     }
 
@@ -173,4 +177,7 @@ public class SpongePermissionService implements PermissionService {
         return descriptions;
     }
 
+    public SpongeSubjectCollection getDefaultCollection() {
+        return defaultCollection;
+    }
 }

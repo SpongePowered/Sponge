@@ -33,6 +33,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -43,18 +44,20 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -66,6 +69,7 @@ import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -87,6 +91,7 @@ public final class GeneralPhase extends TrackingPhase {
             public boolean tracksEntitySpecificDrops() {
                 return true;
             }
+
         },
         COMPLETE {
             @Override
@@ -150,21 +155,23 @@ public final class GeneralPhase extends TrackingPhase {
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         // TODO the entity spawn causes are not likely valid, need to investigate further.
-                        final Cause cause = Cause.source(SpawnCause.builder()
-                                .type(InternalSpawnTypes.PLACEMENT)
-                                .build())
+                        final Cause cause = Cause.source(
+                                SpawnCause.builder()
+                                        .type(InternalSpawnTypes.PLACEMENT)
+                                        .build())
                                 .build();
-                        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
-                                .nonCancelled(event -> {
-                                    for (Entity entity : event.getEntities()) {
-                                        TrackingUtil.associateEntityCreator(phaseContext,
-                                                EntityUtil.toNative(entity),
-                                                causeTracker.getMinecraftWorld()
-                                        );
-                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                    }
-                                })
-                                .process();
+                        final SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(spawnEntityEvent);
+                        if (!spawnEntityEvent.isCancelled()) {
+                            final boolean isPlayer = sender instanceof Player;
+                            final Player player = isPlayer ? (Player) sender : null;
+                            for (Entity entity : spawnEntityEvent.getEntities()) {
+                                if (isPlayer) {
+                                    EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+                                }
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        }
                     });
             phaseContext.getCapturedEntityDropSupplier()
                     .ifPresentAndNotEmpty(uuidItemStackMultimap -> {
@@ -180,9 +187,9 @@ public final class GeneralPhase extends TrackingPhase {
                             }
                             final List<ItemDropData> items = new ArrayList<>();
                             items.addAll(itemStacks);
+                            itemStacks.clear();
 
                             if (!items.isEmpty()) {
-                                final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(affectedEntity.get());
                                 final List<Entity> itemEntities = items.stream()
                                         .map(data -> data.create(causeTracker.getMinecraftWorld()))
                                         .map(EntityUtil::fromNative)
@@ -194,15 +201,20 @@ public final class GeneralPhase extends TrackingPhase {
                                 )
                                         .named(NamedCause.of("CommandSource", sender))
                                         .build();
-                                EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld()))
-                                        .nonCancelled(event -> {
-                                                    for (Entity entity : event.getEntities()) {
-                                                        TrackingUtil.associateEntityCreator(phaseContext, entity, causeTracker.getMinecraftWorld());
-                                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                                    }
-                                                }
-                                        )
-                                        .process();
+                                final DropItemEvent.Destruct
+                                        destruct =
+                                        SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld());
+                                SpongeImpl.postEvent(destruct);
+                                if (!destruct.isCancelled()) {
+                                    final boolean isPlayer = sender instanceof Player;
+                                    final Player player = isPlayer ? (Player) sender : null;
+                                    for (Entity entity : destruct.getEntities()) {
+                                        if (isPlayer) {
+                                            EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+                                        }
+                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                    }
+                                }
 
                             }
                         }
@@ -218,10 +230,9 @@ public final class GeneralPhase extends TrackingPhase {
 
     @Override
     public void postDispatch(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwindingContext, PhaseContext postContext) {
-        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();
-        final List<Entity> contextEntities = postContext.getCapturedEntities();
-        final List<Entity> contextItems = postContext.getCapturedItems()
-                .stream()
+        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlockSupplier().orEmptyList();
+        final List<Entity> contextEntities = postContext.getCapturedEntitySupplier().orEmptyList();
+        final List<Entity> contextItems = postContext.getCapturedItemsSupplier().stream()
                 .map(EntityUtil::fromNative)
                 .collect(Collectors.toList());
         final List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
@@ -255,7 +266,8 @@ public final class GeneralPhase extends TrackingPhase {
      * @param unwinding
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void processBlockTransactionListsPost(PhaseContext postContext, List<BlockSnapshot> snapshotsToProcess, CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwinding) {
+    public static void processBlockTransactionListsPost(PhaseContext postContext, List<BlockSnapshot> snapshotsToProcess, CauseTracker causeTracker,
+            IPhaseState unwindingState, PhaseContext unwinding) {
         final List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
         ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[GeneralFunctions.EVENT_COUNT];
         ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[GeneralFunctions.EVENT_COUNT];
@@ -266,7 +278,8 @@ public final class GeneralPhase extends TrackingPhase {
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
 
         for (BlockSnapshot snapshot : snapshotsToProcess) {
-            GeneralFunctions.TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(GeneralFunctions.TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
+            GeneralFunctions.TRANSACTION_PROCESSOR.apply(transactionBuilders)
+                    .accept(GeneralFunctions.TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
         }
 
         for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
@@ -276,7 +289,9 @@ public final class GeneralPhase extends TrackingPhase {
         final Cause.Builder builder = Cause.source(unwinding.firstNamed(NamedCause.SOURCE, Object.class).get());
         final World world = causeTracker.getWorld();
         GeneralFunctions.iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world);
-        final ChangeBlockEvent.Post postEvent = GeneralFunctions.throwMultiEventsAndCreatePost(transactionArrays, blockEvents, mainEvents, builder, world);
+        final ChangeBlockEvent.Post
+                postEvent =
+                GeneralFunctions.throwMultiEventsAndCreatePost(transactionArrays, blockEvents, mainEvents, builder, world);
 
         if (postEvent == null) { // Means that we have had no actual block changes apparently?
             return;
@@ -297,7 +312,6 @@ public final class GeneralPhase extends TrackingPhase {
             }
         }
 
-
         if (!invalidTransactions.isEmpty()) {
             for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalidTransactions)) {
                 transaction.getOriginal().restore(true, false);
@@ -311,7 +325,8 @@ public final class GeneralPhase extends TrackingPhase {
         performPostBlockAdditions(causeTracker, postContext, postEvent.getTransactions(), builder, unwindingState, unwinding);
     }
 
-    private static void performPostBlockAdditions(CauseTracker causeTracker, PhaseContext postContext, List<Transaction<BlockSnapshot>> transactions, Cause.Builder builder, IPhaseState unwindingState, PhaseContext unwindingPhaseContext) {
+    private static void performPostBlockAdditions(CauseTracker causeTracker, PhaseContext postContext, List<Transaction<BlockSnapshot>> transactions,
+            Cause.Builder builder, IPhaseState unwindingState, PhaseContext unwindingPhaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
@@ -333,40 +348,41 @@ public final class GeneralPhase extends TrackingPhase {
 
             // Handle item drops captured
             final BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
-            capturedBlockDrops.ifPresentAndNotEmpty(map -> GeneralFunctions.spawnItemDataForBlockDrops(map.get(pos), newBlockSnapshot, causeTracker, unwindingPhaseContext, unwindingState));
-            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> GeneralFunctions.spawnItemEntitiesForBlockDrops(map.get(pos), newBlockSnapshot, causeTracker, unwindingPhaseContext, unwindingState));
+            capturedBlockDrops.ifPresentAndNotEmpty(map -> GeneralFunctions
+                    .spawnItemDataForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, unwindingPhaseContext, unwindingState));
+            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> GeneralFunctions
+                    .spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, unwindingPhaseContext, unwindingState));
 
             SpongeHooks.logBlockAction(currentCause, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
             int updateFlag = oldBlockSnapshot.getUpdateFlag();
             IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
+            final PhaseContext.CapturedSupplier<BlockSnapshot> capturedBlockSupplier = postContext.getCapturedBlockSupplier();
             if (!SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
-                if (!postContext.getCapturedEntities().isEmpty()) {
+                postContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
 
-                }
-                if (!postContext.getCapturedBlocks().isEmpty()) {
-                    final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();
-                    final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
-                    contextBlocks.clear();
+                });
+                capturedBlockSupplier.ifPresentAndNotEmpty(blocks -> {
+                    final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
+                    blocks.clear();
                     processBlockTransactionListsPost(postContext, blockSnapshots, causeTracker, unwindingState, unwindingPhaseContext);
-                }
+                });
             }
 
             proxyBlockAccess.proceed();
 
             unwindingState.handleBlockChangeWithUser(oldBlockSnapshot.blockChange, minecraftWorld, transaction, unwindingPhaseContext);
 
-            causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, minecraftWorld.getChunkFromBlockCoords(pos), originalState, newState, updateFlag);
+            causeTracker.getMixinWorld()
+                    .markAndNotifyNeighbors(pos, minecraftWorld.getChunkFromBlockCoords(pos), originalState, newState, updateFlag);
 
-            if (!postContext.getCapturedBlocks().isEmpty()) {
-                final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();
-                final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
-                contextBlocks.clear();
+            capturedBlockSupplier.ifPresentAndNotEmpty(blocks -> {
+                final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
+                blocks.clear();
                 processBlockTransactionListsPost(postContext, blockSnapshots, causeTracker, unwindingState, unwindingPhaseContext);
-            }
-
+            });
         }
     }
 
@@ -401,6 +417,11 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
     @Override
+    public boolean ignoresItemPreMerging(IPhaseState currentState) {
+        return currentState == State.COMMAND || super.ignoresItemPreMerging(currentState);
+    }
+
+    @Override
     public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
             WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (state == Post.UNWINDING) {
@@ -412,7 +433,8 @@ public final class GeneralPhase extends TrackingPhase {
                     .associateNeighborStateNotifier(unwindingState, unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
         } else if (state == State.COMMAND) {
             context.firstNamed(NamedCause.SOURCE, Player.class)
-                    .ifPresent(player -> ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos)).setBlockNotifier(notifyPos, player.getUniqueId()));
+                    .ifPresent(player -> ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
+                            .setBlockNotifier(notifyPos, player.getUniqueId()));
 
         }
     }

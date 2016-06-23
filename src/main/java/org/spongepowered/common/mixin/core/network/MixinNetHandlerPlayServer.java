@@ -34,19 +34,24 @@ import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.PacketThreadUtil;
 import net.minecraft.network.play.client.CPacketAnimation;
+import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
+import net.minecraft.network.play.client.CPacketVehicleMove;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
@@ -63,14 +68,18 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.IntHashMap;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldSettings;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -78,6 +87,8 @@ import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.item.inventory.CreativeInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
@@ -96,14 +107,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.network.PacketUtil;
@@ -131,11 +145,29 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow @Final private MinecraftServer serverController;
     @Shadow @Final private IntHashMap<Short> pendingTransactions;
     @Shadow public EntityPlayerMP playerEntity;
+    @Shadow private int itemDropThreshold;
+    @Shadow private double firstGoodX;
+    @Shadow private double firstGoodY;
+    @Shadow private double firstGoodZ;
+    @Shadow private double lastGoodX;
+    @Shadow private double lastGoodY;
+    @Shadow private double lastGoodZ;
+    @Shadow private int lastPositionUpdate;
+    @Shadow private Vec3d targetPos;
+    @Shadow private int networkTickCount;
+    @Shadow private int movePacketCounter;
+    @Shadow private int lastMovePacketCounter;
+    @Shadow private boolean floating;
+
 
     @Shadow public abstract void sendPacket(final Packet<?> packetIn);
     @Shadow public abstract void kickPlayerFromServer(String reason);
+    @Shadow private void captureCurrentPosition() {}
+    @Shadow public abstract void setPlayerLocation(double x, double y, double z, float yaw, float pitch);
+    @Shadow private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) { return false; } // Shadowed
 
     private boolean justTeleported = false;
+    private boolean ignoreCreativeInventoryEvent;
     @Nullable private Location<World> lastMoveLocation = null;
 
     private final Map<String, ResourcePack> sentResourcePacks = new HashMap<>();
@@ -375,6 +407,113 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
+    /**
+     * @author blood - June 6th, 2016
+     * @author gabizou - June 20th, 2016 - Update for 1.9.4 and minor refactors.
+     * @reason Since mojang handles creative packets different than survival, we need to
+     * restructure this method to prevent any packets being sent to client as we will
+     * not be able to properly revert them during drops.
+     *
+     * @param packetIn The creative inventory packet
+     */
+    @Overwrite
+    public void processCreativeInventoryAction(CPacketCreativeInventoryAction packetIn) {
+        PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.playerEntity.getServerWorld());
+
+        if (this.playerEntity.interactionManager.isCreative()) {
+            boolean clickedOutside = packetIn.getSlotId() < 0;
+            ItemStack itemstack = packetIn.getStack();
+
+            if (itemstack != null && itemstack.hasTagCompound() && itemstack.getTagCompound().hasKey("BlockEntityTag", 10)) {
+                NBTTagCompound nbttagcompound = itemstack.getTagCompound().getCompoundTag("BlockEntityTag");
+
+                if (nbttagcompound.hasKey("x") && nbttagcompound.hasKey("y") && nbttagcompound.hasKey("z")) {
+                    BlockPos blockpos = new BlockPos(nbttagcompound.getInteger("x"), nbttagcompound.getInteger("y"), nbttagcompound.getInteger("z"));
+                    TileEntity tileentity = this.playerEntity.worldObj.getTileEntity(blockpos);
+
+                    if (tileentity != null) {
+                        NBTTagCompound nbttagcompound1 = new NBTTagCompound();
+                        tileentity.writeToNBT(nbttagcompound1);
+                        nbttagcompound1.removeTag("x");
+                        nbttagcompound1.removeTag("y");
+                        nbttagcompound1.removeTag("z");
+                        itemstack.setTagInfo("BlockEntityTag", nbttagcompound1);
+                    }
+                }
+            }
+
+            // Sponge Start - rename some of these local variables
+            boolean clickedHotbar = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
+            boolean itemValidCheck = itemstack == null || itemstack.getItem() != null;
+            boolean itemValidCheck2 = itemstack == null || itemstack.getMetadata() >= 0 && itemstack.stackSize <= 64 && itemstack.stackSize > 0;
+
+            // if (clickedHotbar && itemValidCheck && itemValidCheck2) // Sponge - remove the click hotbar for separation of events
+            if (itemValidCheck && itemValidCheck2) {
+                final CreativeInventoryEvent.Drop dropEvent;
+                if (!this.ignoreCreativeInventoryEvent) {
+                    CreativeInventoryEvent clickEvent = SpongeCommonEventFactory.callCreativeClickInventoryEvent(this.playerEntity, packetIn);
+                    if (clickEvent.isCancelled()) {
+                        // Reset slot on client
+                        if (packetIn.getSlotId() >= 0) {
+                            this.playerEntity.connection.sendPacket(
+                                    new SPacketSetSlot(this.playerEntity.inventoryContainer.windowId, packetIn.getSlotId(),
+                                            this.playerEntity.inventoryContainer.getSlot(packetIn.getSlotId()).getStack()));
+                            this.playerEntity.connection.sendPacket(new SPacketSetSlot(-1, -1, null));
+                        }
+                        return;
+                    }
+
+                    // This must be fired here since we are unable to properly revert a cursor in creative mode due to how mojang handles it
+                    dropEvent = SpongeCommonEventFactory.callCreativeDropInventoryEvent(this.playerEntity, itemstack, packetIn);
+                    if (dropEvent.isCancelled()) {
+                        // Reset slot on client
+                        if (packetIn.getSlotId() >= 0) {
+                            this.playerEntity.connection.sendPacket(
+                                    new SPacketSetSlot(this.playerEntity.inventoryContainer.windowId, packetIn.getSlotId(),
+                                            this.playerEntity.inventoryContainer.getSlot(packetIn.getSlotId()).getStack()));
+                            this.playerEntity.connection.sendPacket(new SPacketSetSlot(-1, -1, null));
+                        }
+                        return;
+                    }
+                } else {
+                    dropEvent = null;
+                }
+
+                if (clickedHotbar) {
+                    if (itemstack == null) {
+                        this.playerEntity.inventoryContainer.putStackInSlot(packetIn.getSlotId(), null);
+                    } else {
+                        this.playerEntity.inventoryContainer.putStackInSlot(packetIn.getSlotId(), itemstack);
+                    }
+
+                    this.playerEntity.inventoryContainer.setCanCraft(this.playerEntity, true);
+                    //             else if (flag && flag2 && flag3 && this.itemDropThreshold < 200) // Sponge - remove the flags as we already process them in the event
+                } else if (clickedOutside && this.itemDropThreshold < 200) {
+                    this.itemDropThreshold += 20;
+                    if (dropEvent != null) {
+                        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.playerEntity.worldObj;
+                        for (org.spongepowered.api.entity.Entity entity : dropEvent.getEntities()) {
+                            if (entity instanceof EntityItem) {
+                                EntityItem entityitem = (EntityItem) entity;
+                                entityitem.setAgeToCreativeDespawnTime();
+                                // Ignore spawn event as we handle this above
+                                mixinWorldServer.forceSpawnEntity(entityitem);
+                            }
+                        }
+                    }
+                    // Sponge - handled above
+                    /*EntityItem entityitem = this.playerEntity.dropPlayerItemWithRandomChoice(itemstack, true);
+
+                    if (entityitem != null)
+                    {
+                        entityitem.setAgeToCreativeDespawnTime();
+                    }*/
+                }
+            }
+            // Sponge end
+        }
+    }
+
     @Redirect(method = "processChatMessage", at = @At(value = "INVOKE", target = "Lorg/apache/commons/lang3/StringUtils;normalizeSpace(Ljava/lang/String;)Ljava/lang/String;", remap = false))
     public String onNormalizeSpace(String input) {
         return input;
@@ -385,13 +524,18 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         this.justTeleported = true;
     }
 
-    // TODO - 1.9 player movement packet changes
-    /*
-    @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
-    public void processPlayerMoved(CPacketPlayer packetIn, CallbackInfo ci){
-        if (packetIn.moving || packetIn.rotating && !this.playerEntity.isDead) {
+    /**
+     * @author gabizou - June 22nd, 2016
+     * @reason Sponge has to throw the movement events before we consider moving the player and there's
+     * no clear way to go about it with the target position being null and the last position update checks.
+     * @param packetIn
+     */
+    @Redirect(method = "processPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;playerConqueredTheEnd:Z"))
+    private boolean throwMoveEvent(EntityPlayerMP playerMP, CPacketPlayer packetIn) {
+        if (!playerMP.playerConqueredTheEnd) {
+            // Sponge Start - Movement event
             Player player = (Player) this.playerEntity;
-            IMixinEntity spongeEntity = (IMixinEntity) this.playerEntity;
+            IMixinEntityPlayerMP mixinPlayer = (IMixinEntityPlayerMP) this.playerEntity;
             Vector3d fromrot = player.getRotation();
 
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
@@ -429,31 +573,52 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
                 Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
                 Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
-                DisplaceEntityEvent.Move.TargetPlayer event =
-                        SpongeEventFactory.createDisplaceEntityEventMoveTargetPlayer(Cause.of(NamedCause.source(player)), fromTransform, toTransform, player);
+                MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Cause.of(NamedCause.source(player)), fromTransform, toTransform, player);
                 SpongeImpl.postEvent(event);
                 if (event.isCancelled()) {
-                    spongeEntity.setLocationAndAngles(fromTransform);
+                    mixinPlayer.setLocationAndAngles(fromTransform);
                     this.lastMoveLocation = from;
                     ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
-                    ci.cancel();
+                    return true;
                 } else if (!event.getToTransform().equals(toTransform)) {
-                    spongeEntity.setLocationAndAngles(event.getToTransform());
+                    mixinPlayer.setLocationAndAngles(event.getToTransform());
                     this.lastMoveLocation = event.getToTransform().getLocation();
                     ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
-                    ci.cancel();
+                    return true;
                 } else if (!from.equals(player.getLocation()) && this.justTeleported) {
                     this.lastMoveLocation = player.getLocation();
                     // Prevent teleports during the move event from causing odd behaviors
                     this.justTeleported = false;
                     ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
-                    ci.cancel();
+                    return true;
                 } else {
                     this.lastMoveLocation = event.getToTransform().getLocation();
                 }
             }
         }
-    }*/
+        return playerMP.playerConqueredTheEnd;
+    }
+
+    /**
+     * @author gabizou - June 22nd, 2016
+     * @reason Redirects the {@link Entity#getLowestRidingEntity()} call to throw our
+     * {@link MoveEntityEvent}. The peculiarity of this redirect is that the entity
+     * returned is perfectly valid to be {@link this#playerEntity} since, if the player
+     * is NOT riding anything, the lowest riding entity is themselves. This way, if
+     * the event is cancelled, the player can be returned instead of the actual riding
+     * entity.
+     *
+     * @param playerMP The player
+     * @param packetIn The packet movement
+     * @return The lowest riding entity
+     */
+    @Redirect(method = "processVehicleMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getLowestRidingEntity()Lnet/minecraft/entity/Entity;"))
+    private Entity processVehicleMoveEvent(EntityPlayerMP playerMP, CPacketVehicleMove packetIn) {
+
+
+        return playerMP.getLowestRidingEntity();
+    }
+
 
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/PlayerList;sendChatMsg(Lnet/minecraft/util/text/ITextComponent;)V"))

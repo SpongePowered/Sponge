@@ -30,8 +30,10 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -56,13 +58,15 @@ public final class BlockFunction {
             for (EntityItem item : items) {
                 entities.add(EntityUtil.fromNative(item));
             }
-            EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld()))
-                    .nonCancelled(event ->  {
-                        for (Entity entity : event.getEntities()) {
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                        }
-                    })
-                    .process();
+            final DropItemEvent.Destruct
+                    event =
+                    SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld());
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                for (Entity entity : event.getEntities()) {
+                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                }
+            }
         };
         Drops DISPENSE = (blockSnapshot, causeTracker, phaseContext, items) -> {
             final Cause cause = Cause.source(BlockSpawnCause.builder()
@@ -74,13 +78,15 @@ public final class BlockFunction {
             for (EntityItem item : items) {
                 entities.add(EntityUtil.fromNative(item));
             }
-            EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld()))
-                    .nonCancelled(event -> {
-                        for (Entity entity : event.getEntities()) {
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                        }
-                    })
-                    .process();
+            final DropItemEvent.Dispense
+                    event =
+                    SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld());
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                for (Entity entity : event.getEntities()) {
+                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                }
+            }
         };
 
         void processItemSpawns(BlockSnapshot blockSnapshot, CauseTracker causeTracker, PhaseContext phaseContext, List<EntityItem> items);
@@ -95,13 +101,15 @@ public final class BlockFunction {
                         .type(InternalSpawnTypes.BLOCK_SPAWNING)
                         .build())
                     .build();
-            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
-                    .nonCancelled(event -> {
-                        for (Entity entity : event.getEntities()) {
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                        }
-                    })
-                    .process();
+            final SpawnEntityEvent
+                    event =
+                    SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                for (Entity entity : event.getEntities()) {
+                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                }
+            }
         };
 
         void processEntities(BlockSnapshot blockSnapshot, CauseTracker causeTracker, PhaseContext phaseContext, List<Entity> entities);

@@ -41,12 +41,10 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -135,15 +133,27 @@ public abstract class TrackingPhase {
     }
 
     protected void processPostItemSpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> items) {
-        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, items, causeTracker.getWorld()))
-                .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
-                .process();
+        final SpawnEntityEvent
+                event =
+                SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, items, causeTracker.getWorld());
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled()) {
+            for (Entity entity : event.getEntities()) {
+                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+            }
+        }
     }
 
     protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> entities) {
-        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, entities, causeTracker.getWorld()))
-                .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
-                .process();
+        final SpawnEntityEvent
+                event =
+                SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, entities, causeTracker.getWorld());
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled()) {
+            for (Entity entity : event.getEntities()) {
+                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+            }
+        }
     }
 
     // Default methods that are basic qualifiers, leaving up to the phase and state to decide

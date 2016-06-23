@@ -36,17 +36,18 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -103,9 +104,15 @@ public final class EntityPhase extends TrackingPhase {
                                                 .build())
                                         .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
                                         .build();
-                                EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(experienceCause, experience, causeTracker.getWorld()))
-                                        .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
-                                        .process();
+                                final SpawnEntityEvent
+                                        spawnEntityEvent =
+                                        SpongeEventFactory.createSpawnEntityEvent(experienceCause, experience, causeTracker.getWorld());
+                                SpongeImpl.postEvent(spawnEntityEvent);
+                                if (!spawnEntityEvent.isCancelled()) {
+                                    for (Entity entity : spawnEntityEvent.getEntities()) {
+                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                    }
+                                }
                             }
 
                             // Now process other entities, this is separate from item drops specifically
@@ -120,13 +127,15 @@ public final class EntityPhase extends TrackingPhase {
                                                 .build())
                                         .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
                                         .build();
-                                EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(otherCause, experience, causeTracker.getWorld()))
-                                        .nonCancelled(event -> {
-                                            for (Entity entity : event.getEntities()) {
-                                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                            }
-                                        })
-                                        .process();
+                                final SpawnEntityEvent
+                                        spawnEntityEvent =
+                                        SpongeEventFactory.createSpawnEntityEvent(otherCause, experience, causeTracker.getWorld());
+                                SpongeImpl.postEvent(spawnEntityEvent);
+                                if (!spawnEntityEvent.isCancelled()) {
+                                    for (Entity entity : spawnEntityEvent.getEntities()) {
+                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                    }
+                                }
                             }
                         });
                 context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {
@@ -135,18 +144,21 @@ public final class EntityPhase extends TrackingPhase {
                     for (EntityItem item : items) {
                         entities.add(EntityUtil.fromNative(item));
                     }
-                    EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld()))
-                            .nonCancelled(event -> {
-                                if (isPlayer) {
-                                    if (!entityPlayer.worldObj.getGameRules().getBoolean("keepInventory")) {
-                                        entityPlayer.inventory.clear();
-                                    }
-                                }
-                                for (Entity entity : event.getEntities()) {
-                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                }
-                            })
-                            .process();
+
+                    final DropItemEvent.Destruct
+                            destruct =
+                            SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld());
+                    SpongeImpl.postEvent(destruct);
+                    if (!destruct.isCancelled()) {
+                        if (isPlayer) {
+                            if (!entityPlayer.worldObj.getGameRules().getBoolean("keepInventory")) {
+                                entityPlayer.inventory.clear();
+                            }
+                        }
+                        for (Entity entity : destruct.getEntities()) {
+                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                        }
+                    }
                 });
                 // Note that this is only used if and when item pre-merging is enabled.
                 context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
@@ -164,20 +176,21 @@ public final class EntityPhase extends TrackingPhase {
                                 .map(EntityUtil::fromNative)
                                 .collect(Collectors.toList());
 
-                        EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld()))
-                                .nonCancelled(event -> {
-                                            if (isPlayer) {
-                                                if (!entityPlayer.worldObj.getGameRules().getBoolean("keepInventory")) {
-                                                    entityPlayer.inventory.clear();
-                                                }
-                                            }
-                                            for (Entity entity : event.getEntities()) {
-                                                TrackingUtil.associateEntityCreator(context, entity, causeTracker.getMinecraftWorld());
-                                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                            }
-                                        }
-                                )
-                                .process();
+                        final DropItemEvent.Destruct
+                                destruct =
+                                SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(destruct);
+                        if (!destruct.isCancelled()) {
+                            if (isPlayer) {
+                                if (!entityPlayer.worldObj.getGameRules().getBoolean("keepInventory")) {
+                                    entityPlayer.inventory.clear();
+                                }
+                            }
+                            for (Entity entity : destruct.getEntities()) {
+                                TrackingUtil.associateEntityCreator(context, entity, causeTracker.getMinecraftWorld());
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        }
 
                     }
 
@@ -204,17 +217,15 @@ public final class EntityPhase extends TrackingPhase {
                             for (EntityItem item : items) {
                                 entities.add(EntityUtil.fromNative(item));
                             }
-                            EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld()))
-                                    .nonCancelled(event -> {
-                                        for (Entity entity : event.getEntities()) {
-                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                            final net.minecraft.entity.Entity
-                                                    entityFromUuid =
-                                                    causeTracker.getMinecraftWorld().getEntityFromUuid(entity.getUniqueId());
-                                            System.err.printf("Entity that was spawned is available in the world: %s%n", entityFromUuid == null);
-                                        }
-                                    })
-                                    .process();
+                            final DropItemEvent.Destruct
+                                    destruct =
+                                    SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld());
+                            SpongeImpl.postEvent(destruct);
+                            if (!destruct.isCancelled()) {
+                                for (Entity entity : destruct.getEntities()) {
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                }
+                            }
                         });
                 context.getCapturedEntitySupplier()
                         .ifPresentAndNotEmpty(entities -> {
@@ -228,9 +239,15 @@ public final class EntityPhase extends TrackingPhase {
                                                         .type(InternalSpawnTypes.EXPERIENCE)
                                                         .build())
                                                 .build();
-                                        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, experience, causeTracker.getWorld()))
-                                                .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
-                                                .process();
+                                        final SpawnEntityEvent
+                                                event =
+                                                SpongeEventFactory.createSpawnEntityEvent(cause, experience, causeTracker.getWorld());
+                                        SpongeImpl.postEvent(event);
+                                        if (!event.isCancelled()) {
+                                            for (Entity entity : event.getEntities()) {
+                                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                            }
+                                        }
                                     }
 
                                     final List<Entity> other = entities.stream()
@@ -243,9 +260,15 @@ public final class EntityPhase extends TrackingPhase {
                                                         .type(InternalSpawnTypes.ENTITY_DEATH)
                                                         .build())
                                                 .build();
-                                        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, other, causeTracker.getWorld()))
-                                                .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
-                                                .process();
+                                        final SpawnEntityEvent
+                                                event1 =
+                                                SpongeEventFactory.createSpawnEntityEvent(cause, other, causeTracker.getWorld());
+                                        SpongeImpl.postEvent(event1);
+                                        if (!event1.isCancelled()) {
+                                            for (Entity entity : event1.getEntities()) {
+                                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                            }
+                                        }
                                     }
 
                                 }

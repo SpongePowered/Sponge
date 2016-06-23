@@ -81,12 +81,14 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCause;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
@@ -123,7 +125,6 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -133,7 +134,6 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
-import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
@@ -336,7 +336,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.spongegen.setPopulators(newGenerator.getPopulators());
         this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
 
-        ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
+        ChunkProviderServer chunkProviderServer = this.getChunkProvider();
         chunkProviderServer.chunkGenerator = this.spongegen;
     }
 
@@ -510,11 +510,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event);
     }
 
+    @Inject(method = "tick", at = @At("RETURN"))
+    public void onTickEnd(CallbackInfo ci) {
+        // Clean up any leaked chunks
+        // TODO -blood needs to look at chunk GC'ing for 1.9.4
+//        this.doChunkGC();
+    }
+
     // Chunk GC
     private void doChunkGC() {
         this.chunkGCTickCount++;
 
-        ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
+        ChunkProviderServer chunkProviderServer = this.getChunkProvider();
         int chunkLoadCount = this.getChunkProvider().getLoadedChunkCount();
         if (chunkLoadCount >= this.chunkGCLoadThreshold && this.chunkGCLoadThreshold > 0) {
             chunkLoadCount = 0;
@@ -685,10 +692,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         checkArgument(cause.containsType(PluginContainer.class), "PluginContainer must be within the cause!");
         List<Entity> entitiesToSpawn = new ArrayList<>();
         entities.forEach(entitiesToSpawn::add);
-        return !EventConsumer.event(SpongeEventFactory.createSpawnEntityEventCustom(cause, entitiesToSpawn, this))
-                .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), this.getCauseTracker()))
-                .process()
-                .isCancelled();
+        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(cause, entitiesToSpawn, this);
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled()) {
+            for (Entity entity : event.getEntities()) {
+                this.forceSpawnEntity(entity);
+            }
+        }
+        return event.isCancelled();
     }
 
     /**
@@ -793,16 +804,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         final CauseTracker causeTracker = this.getCauseTracker();
 
-        EventConsumer.event(SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions))
-                .nonCancelled(event -> {
-                    for (EnumFacing facing : EnumFacing.values()) {
-                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                        if (event.getNeighbors().keySet().contains(direction)) {
-                            causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-                        }
-                    }
-                })
-                .process();
+        final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled()) {
+            for (EnumFacing facing : EnumFacing.values()) {
+                final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+                if (event.getNeighbors().keySet().contains(direction)) {
+                    causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+                }
+            }
+        }
 
     }
 
@@ -819,16 +830,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         final CauseTracker causeTracker = this.getCauseTracker();
 
-        EventConsumer.event(SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, EnumSet.allOf(EnumFacing.class)))
-                .nonCancelled(event -> {
-                    for (EnumFacing facing : EnumFacing.values()) {
-                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                        if (event.getNeighbors().keySet().contains(direction)) {
-                            causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-                        }
-                    }
-                })
-                .process();
+        final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, EnumSet.allOf(EnumFacing.class));
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled()) {
+            for (EnumFacing facing : EnumFacing.values()) {
+                final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+                if (event.getNeighbors().keySet().contains(direction)) {
+                    causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+                }
+            }
+        }
     }
 
     @SuppressWarnings("Duplicates")
