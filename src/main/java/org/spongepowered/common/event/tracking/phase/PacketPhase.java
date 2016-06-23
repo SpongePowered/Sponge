@@ -468,6 +468,10 @@ public final class PacketPhase extends TrackingPhase {
         IGNORED,
         INTERACT_ENTITY {
             @Override
+            public boolean ignoresItemPreMerges() {
+                return true;
+            }
+            @Override
             public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
                 final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
                 // There are cases where a player is interacting with an entity that doesn't exist on the server.
@@ -528,6 +532,11 @@ public final class PacketPhase extends TrackingPhase {
         },
         INTERACT_AT_ENTITY {
             @Override
+            public boolean ignoresItemPreMerges() {
+                return true;
+            }
+
+            @Override
             public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
                 final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
                 // There are cases where a player is interacting with an entity that doesn't exist on the server.
@@ -565,6 +574,10 @@ public final class PacketPhase extends TrackingPhase {
             }
         },
         CREATIVE_INVENTORY {
+            @Override
+            public boolean ignoresItemPreMerges() {
+                return true;
+            }
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 ((IMixinContainer) playerMP.inventoryContainer).setCaptureInventory(true);
