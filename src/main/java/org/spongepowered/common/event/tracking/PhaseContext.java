@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
@@ -40,16 +39,11 @@ import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -256,70 +250,6 @@ public class PhaseContext {
                 .toString();
     }
 
-    public static abstract class CapturedMultiMapSupplier<K, V> implements Supplier<Multimap<K, V>> {
-
-        @Nullable private Multimap<K, V> captured;
-
-        CapturedMultiMapSupplier() {
-        }
-
-        @Override
-        public Multimap<K, V> get() {
-            if (this.captured == null) {
-                this.captured = ArrayListMultimap.create();
-            }
-            return this.captured;
-        }
-
-        public final boolean isEmpty() {
-            return this.captured == null || this.captured.isEmpty();
-        }
-
-        public final void ifPresentAndNotEmpty(Consumer<Multimap<K, V>> consumer) {
-            if (this.captured != null && !this.captured.isEmpty()) {
-                consumer.accept(this.captured);
-            }
-        }
-
-        public final Multimap<K, V> orElse(Multimap<K, V> list) {
-            return this.captured == null ? list : this.captured;
-        }
-
-        public final Stream<V> stream(K key) {
-            // authors note: Multimap#get(K) returns an empty collection if there is no mapping.
-            return this.captured == null ? Stream.empty() : this.captured.get(key).stream();
-        }
-
-        @Nullable
-        public final <U> U map(K key, Function<Collection<V>, ? extends U> function) {
-            return this.captured == null ? null : function.apply(this.captured.get(key));
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(this.captured);
-        }
-
-        @Override
-        public boolean equals(@Nullable Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null || getClass() != obj.getClass()) {
-                return false;
-            }
-            final CapturedMultiMapSupplier<?, ?> other = (CapturedMultiMapSupplier<?, ?>) obj;
-            return Objects.equals(this.captured, other.captured);
-        }
-
-        @Override
-        public String toString() {
-            return com.google.common.base.Objects.toStringHelper(this)
-                    .add("Captured", this.captured == null ? 0 : this.captured.size())
-                    .toString();
-        }
-    }
-
     static class BlockItemDropsSupplier extends CapturedMultiMapSupplier<BlockPos, ItemDropData> {
 
         BlockItemDropsSupplier() {
@@ -330,69 +260,6 @@ public class PhaseContext {
     static class EntityItemDropsSupplier extends CapturedMultiMapSupplier<UUID, ItemDropData> {
 
         EntityItemDropsSupplier() {
-        }
-    }
-
-
-    public static abstract class CapturedSupplier<T> implements Supplier<List<T>> {
-        @Nullable private List<T> captured;
-
-        CapturedSupplier() {
-        }
-
-        @Override
-        public final List<T> get() {
-            if (this.captured == null) {
-                this.captured = new ArrayList<>();
-            }
-            return this.captured;
-        }
-
-        public final boolean isEmpty() {
-            return this.captured == null || this.captured.isEmpty();
-        }
-
-        public final void ifPresentAndNotEmpty(Consumer<List<T>> consumer) {
-            if (this.captured != null && !this.captured.isEmpty()) {
-                consumer.accept(this.captured);
-            }
-        }
-
-        public final List<T> orElse(List<T> list) {
-            return this.captured == null ? list : this.captured;
-        }
-
-        public final List<T> orEmptyList() {
-            return orElse(Collections.emptyList());
-        }
-
-        public final Stream<T> stream() {
-            return this.captured == null ? Stream.empty() : this.captured.stream();
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(this.captured);
-        }
-
-        @Override
-        public boolean equals(@Nullable Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null || getClass() != obj.getClass()) {
-                return false;
-            }
-            final CapturedSupplier<?> other = (CapturedSupplier<?>) obj;
-            return Objects.equals(this.captured, other.captured);
-        }
-
-
-        @Override
-        public String toString() {
-            return com.google.common.base.Objects.toStringHelper(this)
-                    .add("Captured", this.captured == null ? 0 : this.captured.size())
-                    .toString();
         }
     }
 
