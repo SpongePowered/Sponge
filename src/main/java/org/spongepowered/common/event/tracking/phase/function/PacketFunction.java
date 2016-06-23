@@ -45,7 +45,6 @@ import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -221,16 +220,22 @@ public interface PacketFunction {
                         }
                         printer.trace(System.err);
                     });
-            context.getCapturedItemsSupplier()
-                    .ifPresentAndNotEmpty(entities -> {
-                        final PrettyPrinter printer = new PrettyPrinter(80);
-                        printer.add("Processing Interact Entity").centre().hr();
-                        printer.add("The items captured are:");
-                        for (EntityItem capturedEntity : entities) {
-                            printer.add("  Item: %s", capturedEntity);
-                        }
-                        printer.trace(System.err);
-                    });
+            context.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
+                final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                final Cause cause = Cause.source(EntitySpawnCause.builder()
+                        .entity((Player) player)
+                        .type(InternalSpawnTypes.PLACEMENT)
+                        .build()
+                ).build();
+                SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, items, (World) mixinWorldServer);
+                SpongeImpl.postEvent(event);
+                if (!event.isCancelled()) {
+                    for (Entity spawnedEntity : event.getEntities()) {
+                        EntityUtil.toMixin(spawnedEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                        mixinWorldServer.forceSpawnEntity(spawnedEntity);
+                    }
+                }
+            });
             context.getCapturedEntityDropSupplier()
                     .ifPresentAndNotEmpty(map -> {
                         final PrettyPrinter printer = new PrettyPrinter(80);
@@ -263,13 +268,20 @@ public interface PacketFunction {
                 }
             });
             context.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
-                final PrettyPrinter printer = new PrettyPrinter(80);
-                printer.add("Processing Interact At Entity").centre().hr();
-                printer.add("The items captured are:");
-                for (EntityItem capturedEntity : entities) {
-                    printer.add("  Item: %s", capturedEntity);
+                final List<Entity> items = entities.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                final Cause cause = Cause.source(EntitySpawnCause.builder()
+                        .entity((Player) player)
+                        .type(InternalSpawnTypes.PLACEMENT)
+                        .build()
+                ).build();
+                SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, items, (World) mixinWorldServer);
+                SpongeImpl.postEvent(event);
+                if (!event.isCancelled()) {
+                    for (Entity spawnedEntity : event.getEntities()) {
+                        EntityUtil.toMixin(spawnedEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                        mixinWorldServer.forceSpawnEntity(spawnedEntity);
+                    }
                 }
-                printer.trace(System.err);
             });
             context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);

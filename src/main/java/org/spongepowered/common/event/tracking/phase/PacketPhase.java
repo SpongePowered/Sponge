@@ -575,10 +575,6 @@ public final class PacketPhase extends TrackingPhase {
         },
         CREATIVE_INVENTORY {
             @Override
-            public boolean ignoresItemPreMerges() {
-                return true;
-            }
-            @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 ((IMixinContainer) playerMP.inventoryContainer).setCaptureInventory(true);
             }
