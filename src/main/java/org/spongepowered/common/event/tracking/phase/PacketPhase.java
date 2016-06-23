@@ -835,8 +835,9 @@ public final class PacketPhase extends TrackingPhase {
         this.packetUnwindMap.put(CPacketKeepAlive.class, PacketFunction.IGNORED);
         this.packetUnwindMap.put(CPacketChatMessage.class, PacketFunction.HANDLED_EXTERNALLY);
         this.packetUnwindMap.put(CPacketUseEntity.class, PacketFunction.USE_ENTITY);
+        this.packetUnwindMap.put(CPacketPlayer.class, PacketFunction.MOVEMENT);
         this.packetUnwindMap.put(CPacketPlayer.Position.class, PacketFunction.MOVEMENT); // We only care when the player is moving blocks because of falling states
-        this.packetUnwindMap.put(CPacketPlayer.Rotation.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketPlayer.Rotation.class, PacketFunction.MOVEMENT);
         this.packetUnwindMap.put(CPacketPlayer.PositionRotation.class, PacketFunction.MOVEMENT); // We only care when the player is moving blocks because of falling states
         this.packetUnwindMap.put(CPacketPlayerDigging.class, PacketFunction.ACTION);
         this.packetUnwindMap.put(CPacketPlayerTryUseItem.class, PacketFunction.USE_ITEM);
