@@ -46,20 +46,19 @@ public abstract class MixinPlayerChunkMap implements IMixinPlayerChunkMap {
     public boolean isChunkInUse(int x, int z) {
         PlayerChunkMapEntry playerInstance = this.getEntry(x, z);
         return playerInstance != null && playerInstance.players.size() > 0;
-
     }
 
-    @Redirect(method = "removeEntry", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;unload(Lnet/minecraft/world/chunk/Chunk;)V"))
-    public void onPlayerDropChunk(ChunkProviderServer chunkProviderServer, Chunk chunk) {
-        // We remove the ability for a PlayerChunkMapEntry to queue chunks for unload to prevent chunk thrashing
-        // where the same chunks repeatedly unload and load. This is caused by a player moving in and out of the same chunks.
-        // Instead, the Chunk GC will now be responsible for going through loaded chunks and queuing any chunk where no player
-        // is within view distance or a spawn chunk is force loaded. However, if the Chunk GC is disabled then we will fall back to vanilla
-        // and queue the chunk to be unloaded.
-        // -- blood
-
-        if (((IMixinWorldServer) chunkProviderServer.worldObj).getChunkGCTickInterval() <= 0) {
-            chunkProviderServer.unload(chunk);
-        }
-    }
+//    @Redirect(method = "removeEntry", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;unload(Lnet/minecraft/world/chunk/Chunk;)V"))
+//    public void onPlayerDropChunk(ChunkProviderServer chunkProviderServer, Chunk chunk) {
+//        // We remove the ability for a PlayerChunkMapEntry to queue chunks for unload to prevent chunk thrashing
+//        // where the same chunks repeatedly unload and load. This is caused by a player moving in and out of the same chunks.
+//        // Instead, the Chunk GC will now be responsible for going through loaded chunks and queuing any chunk where no player
+//        // is within view distance or a spawn chunk is force loaded. However, if the Chunk GC is disabled then we will fall back to vanilla
+//        // and queue the chunk to be unloaded.
+//        // -- blood
+//
+//        if (((IMixinWorldServer) chunkProviderServer.worldObj).getChunkGCTickInterval() <= 0) {
+//            chunkProviderServer.unload(chunk);
+//        }
+//    }
 }

@@ -33,7 +33,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import javax.annotation.Nullable;
 
-public interface IMixinEntityPlayerMP {
+public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
 
     void reset();
 

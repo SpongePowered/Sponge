@@ -513,7 +513,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "tick", at = @At("RETURN"))
     public void onTickEnd(CallbackInfo ci) {
         // Clean up any leaked chunks
-        this.doChunkGC();
+        // TODO -blood needs to look at chunk GC'ing for 1.9.4
+//        this.doChunkGC();
     }
 
     // Chunk GC

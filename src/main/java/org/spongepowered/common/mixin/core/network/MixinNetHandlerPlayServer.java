@@ -34,6 +34,7 @@ import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -46,9 +47,11 @@ import net.minecraft.network.PacketThreadUtil;
 import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
+import net.minecraft.network.play.client.CPacketVehicleMove;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
@@ -65,15 +68,18 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.IntHashMap;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldSettings;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.InteractBlockEvent;
@@ -81,6 +87,7 @@ import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.CreativeInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
@@ -110,6 +117,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.network.PacketUtil;
@@ -138,9 +146,25 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow @Final private IntHashMap<Short> pendingTransactions;
     @Shadow public EntityPlayerMP playerEntity;
     @Shadow private int itemDropThreshold;
+    @Shadow private double firstGoodX;
+    @Shadow private double firstGoodY;
+    @Shadow private double firstGoodZ;
+    @Shadow private double lastGoodX;
+    @Shadow private double lastGoodY;
+    @Shadow private double lastGoodZ;
+    @Shadow private int lastPositionUpdate;
+    @Shadow private Vec3d targetPos;
+    @Shadow private int networkTickCount;
+    @Shadow private int movePacketCounter;
+    @Shadow private int lastMovePacketCounter;
+    @Shadow private boolean floating;
+
 
     @Shadow public abstract void sendPacket(final Packet<?> packetIn);
     @Shadow public abstract void kickPlayerFromServer(String reason);
+    @Shadow private void captureCurrentPosition() {}
+    @Shadow public abstract void setPlayerLocation(double x, double y, double z, float yaw, float pitch);
+    @Shadow private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) { return false; } // Shadowed
 
     private boolean justTeleported = false;
     private boolean ignoreCreativeInventoryEvent;
@@ -500,13 +524,18 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         this.justTeleported = true;
     }
 
-    // TODO - 1.9 player movement packet changes
-    /*
-    @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
-    public void processPlayerMoved(CPacketPlayer packetIn, CallbackInfo ci){
-        if (packetIn.moving || packetIn.rotating && !this.playerEntity.isDead) {
+    /**
+     * @author gabizou - June 22nd, 2016
+     * @reason Sponge has to throw the movement events before we consider moving the player and there's
+     * no clear way to go about it with the target position being null and the last position update checks.
+     * @param packetIn
+     */
+    @Redirect(method = "processPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;playerConqueredTheEnd:Z"))
+    private boolean throwMoveEvent(EntityPlayerMP playerMP, CPacketPlayer packetIn) {
+        if (!playerMP.playerConqueredTheEnd) {
+            // Sponge Start - Movement event
             Player player = (Player) this.playerEntity;
-            IMixinEntity spongeEntity = (IMixinEntity) this.playerEntity;
+            IMixinEntityPlayerMP mixinPlayer = (IMixinEntityPlayerMP) this.playerEntity;
             Vector3d fromrot = player.getRotation();
 
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
@@ -544,31 +573,52 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             if (deltaSquared > ((1f / 16) * (1f / 16)) || deltaAngleSquared > (.15f * .15f)) {
                 Transform<World> fromTransform = player.getTransform().setLocation(from).setRotation(fromrot);
                 Transform<World> toTransform = player.getTransform().setLocation(to).setRotation(torot);
-                DisplaceEntityEvent.Move.TargetPlayer event =
-                        SpongeEventFactory.createDisplaceEntityEventMoveTargetPlayer(Cause.of(NamedCause.source(player)), fromTransform, toTransform, player);
+                MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Cause.of(NamedCause.source(player)), fromTransform, toTransform, player);
                 SpongeImpl.postEvent(event);
                 if (event.isCancelled()) {
-                    spongeEntity.setLocationAndAngles(fromTransform);
+                    mixinPlayer.setLocationAndAngles(fromTransform);
                     this.lastMoveLocation = from;
                     ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
-                    ci.cancel();
+                    return true;
                 } else if (!event.getToTransform().equals(toTransform)) {
-                    spongeEntity.setLocationAndAngles(event.getToTransform());
+                    mixinPlayer.setLocationAndAngles(event.getToTransform());
                     this.lastMoveLocation = event.getToTransform().getLocation();
                     ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
-                    ci.cancel();
+                    return true;
                 } else if (!from.equals(player.getLocation()) && this.justTeleported) {
                     this.lastMoveLocation = player.getLocation();
                     // Prevent teleports during the move event from causing odd behaviors
                     this.justTeleported = false;
                     ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
-                    ci.cancel();
+                    return true;
                 } else {
                     this.lastMoveLocation = event.getToTransform().getLocation();
                 }
             }
         }
-    }*/
+        return playerMP.playerConqueredTheEnd;
+    }
+
+    /**
+     * @author gabizou - June 22nd, 2016
+     * @reason Redirects the {@link Entity#getLowestRidingEntity()} call to throw our
+     * {@link MoveEntityEvent}. The peculiarity of this redirect is that the entity
+     * returned is perfectly valid to be {@link this#playerEntity} since, if the player
+     * is NOT riding anything, the lowest riding entity is themselves. This way, if
+     * the event is cancelled, the player can be returned instead of the actual riding
+     * entity.
+     *
+     * @param playerMP The player
+     * @param packetIn The packet movement
+     * @return The lowest riding entity
+     */
+    @Redirect(method = "processVehicleMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getLowestRidingEntity()Lnet/minecraft/entity/Entity;"))
+    private Entity processVehicleMoveEvent(EntityPlayerMP playerMP, CPacketVehicleMove packetIn) {
+
+
+        return playerMP.getLowestRidingEntity();
+    }
+
 
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/PlayerList;sendChatMsg(Lnet/minecraft/util/text/ITextComponent;)V"))
