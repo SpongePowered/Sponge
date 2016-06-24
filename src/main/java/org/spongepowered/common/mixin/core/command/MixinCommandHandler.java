@@ -28,6 +28,7 @@ import co.aikar.timings.SpongeTimings;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.event.cause.Cause;
@@ -52,14 +53,17 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
 
     @Inject(method = "tryExecute", at = @At(value = "HEAD"))
     public void onExecuteCommandHead(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
-        SpongeTimings.playerCommandTimer.startTiming();
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
-            final CauseTracker causeTracker = world.getCauseTracker();
-            causeTracker.setCapturingCommand(true);
-            causeTracker.addCause(Cause.source(sender).named("Command", command).build());
-            this.captureBlocks = causeTracker.isCapturingBlocks();
-            causeTracker.setCaptureBlocks(true);
+            if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+                SpongeTimings.playerCommandTimer.startTiming();
+                final CauseTracker causeTracker = world.getCauseTracker();
+                causeTracker.setCapturingCommand(true);
+                causeTracker.addCause(Cause.source(sender).named("Command", command).build());
+                this.captureBlocks = causeTracker.isCapturingBlocks();
+                causeTracker.setCaptureBlocks(true);
+            }
+
             // make sure commands can load chunks
             this.chunkLoadOverride = ((WorldServer) world).theChunkProviderServer.chunkLoadOverride;
             ((WorldServer) world).theChunkProviderServer.chunkLoadOverride = true;
@@ -73,17 +77,19 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
     public void onExecuteCommandReturn(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
-            final CauseTracker causeTracker = world.getCauseTracker();
-            causeTracker.handlePostTickCaptures();
-            causeTracker.removeCurrentCause();
-            causeTracker.setCapturingCommand(false);
-            causeTracker.setCaptureBlocks(this.captureBlocks);
+            if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+                final CauseTracker causeTracker = world.getCauseTracker();
+                causeTracker.handlePostTickCaptures();
+                causeTracker.removeCurrentCause();
+                causeTracker.setCapturingCommand(false);
+                causeTracker.setCaptureBlocks(this.captureBlocks);
+                SpongeTimings.playerCommandTimer.stopTiming();
+            }
             ((WorldServer) world).theChunkProviderServer.chunkLoadOverride = this.chunkLoadOverride;
         }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(false);
         }
-        SpongeTimings.playerCommandTimer.stopTiming();
     }
 
     @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatMessage"
