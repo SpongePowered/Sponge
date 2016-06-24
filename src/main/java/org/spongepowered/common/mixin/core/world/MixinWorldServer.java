@@ -532,21 +532,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     try
                     {
                         // Sponge start - handle captures and timings
-                        // pistons are handled in MixinBlockPistonBase doMove method since they recreate TE's during move
-                        if (tileentity instanceof TileEntityPiston) {
-                            spongeTile.getTimingsHandler().startTiming();
-                            ((ITickable)tileentity).update();
-                            spongeTile.getTimingsHandler().stopTiming();
-                        } else {
-                            boolean captureBlocks = this.causeTracker.isCapturingBlocks();
-                            this.causeTracker.setCaptureBlocks(true);
-                            this.causeTracker.preTrackTileEntity((TileEntity) tileentity);
-                            spongeTile.getTimingsHandler().startTiming();
-                            ((ITickable)tileentity).update();
-                            spongeTile.getTimingsHandler().stopTiming();
-                            this.causeTracker.postTrackTileEntity();
-                            this.causeTracker.setCaptureBlocks(captureBlocks);
-                        }
+                        boolean captureBlocks = this.causeTracker.isCapturingBlocks();
+                        this.causeTracker.setCaptureBlocks(true);
+                        this.causeTracker.preTrackTileEntity((TileEntity) tileentity);
+                        spongeTile.getTimingsHandler().startTiming();
+                        ((ITickable)tileentity).update();
+                        spongeTile.getTimingsHandler().stopTiming();
+                        this.causeTracker.postTrackTileEntity();
+                        this.causeTracker.setCaptureBlocks(captureBlocks);
                         // Sponge end
                     }
                     catch (Throwable throwable)
