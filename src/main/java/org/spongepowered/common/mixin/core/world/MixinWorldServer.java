@@ -132,6 +132,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
@@ -894,6 +895,17 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         TrackingUtil.tickRidingEntity(causeTracker, entity);
         updateRotation(entity);
+    }
+
+    @Redirect(method = "wakeAllPlayers", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;wakeUpPlayer(ZZZ)V"))
+    private void spongeWakeUpPlayer(EntityPlayer player, boolean immediately, boolean updateWorldFlag, boolean setSpawn) {
+        this.causeTracker.switchToPhase(EntityPhase.State.PLAYER_WAKE_UP, PhaseContext.start()
+                .add(NamedCause.source(player))
+                .addCaptures()
+                .complete()
+        );
+        player.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
+        this.causeTracker.completePhase();
     }
 
     // ------------------------ End of Cause Tracking ------------------------------------
