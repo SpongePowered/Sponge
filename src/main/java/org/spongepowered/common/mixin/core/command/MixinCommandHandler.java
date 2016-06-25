@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -80,10 +81,12 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
                 // during the command's phase.
             }
         });
+        if (sender.getEntityWorld() != null && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            SpongeTimings.playerCommandTimer.stopTiming();
+        }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(false);
         }
-        SpongeTimings.playerCommandTimer.stopTiming();
     }
 
     @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatMessage(Lnet/minecraft/util/text/ITextComponent;)V",

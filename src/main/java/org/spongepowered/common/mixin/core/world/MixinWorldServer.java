@@ -292,6 +292,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (this.getChunkProvider() != null) {
             // This was a thing in 1.8, but is gone in 1.9 - TODO blood see if this is necessary anymore.
 //            this.getChunkProvider().chunkLoadOverride = !this.activeConfig.getConfig().getWorld().getDenyChunkRequests();
+            final IMixinChunkProviderServer mixinChunkProvider = (IMixinChunkProviderServer) this.getChunkProvider();
+            final int maxChunkUnloads = this.activeConfig.getConfig().getWorld().getMaxChunkUnloads();
+            mixinChunkProvider.setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
             for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
                 if (entity instanceof IModData) {
                     IModData spongeEntity = (IModData) entity;

@@ -32,6 +32,9 @@ public class GeneralCategory extends ConfigCategory {
 
     @Setting(value = "disable-warnings", comment = "Disable warning messages to server admins")
     private boolean disableWarnings = false;
+    
+    @Setting(value = "plugins-dir", comment = "Additional directory to search for plugins, relative to the execution root or specified as an absolute path")
+    private String pluginsDir = "${CANONICAL_MODS_DIR}/plugins";
 
     public boolean disableWarnings() {
         return this.disableWarnings;
@@ -39,5 +42,13 @@ public class GeneralCategory extends ConfigCategory {
 
     public void setDisableWarnings(boolean disableWarnings) {
         this.disableWarnings = disableWarnings;
+    }
+    
+    public String pluginsDir() {
+        return this.pluginsDir;
+    }
+    
+    public void setPluginsDir(String pluginsDir) {
+        this.pluginsDir = pluginsDir;
     }
 }
