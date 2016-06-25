@@ -69,10 +69,20 @@ public class WorldCategory extends ConfigCategory {
     @Setting(value = "deny-chunk-requests", comment = "If enabled, any request for a chunk not currently loaded will be denied (exceptions apply for things like world gen and player movement). \nNote: As this is an experimental setting for performance gain, if you encounter any issues then we recommend disabling it.")
     private boolean denyChunkRequests = true;
 
-    @Setting(value = "chunk-gc-tick-interval", comment = "The tick interval used to cleanup all inactive chunks in a world. \nSet to 0 to disable which restores vanilla handling. (Default: 600).")
-    private int chunkGCTickInterval = 600;
+    @Setting(value = "chunk-gc-tick-interval", comment = "The tick interval used to cleanup all inactive chunks in a world. "
+                                                         + "\nSet to 0 to disable which restores vanilla handling. (Default: 300).")
+    private int chunkGCTickInterval = 300;
 
-    @Setting(value = "chunk-gc-load-threshold", comment = "The number of newly loaded chunks before triggering a forced cleanup. \nNote: When triggered, the loaded chunk threshold will reset and start incrementing. \nDisabled by default.")
+    @Setting(value = "max-chunk-unloads-per-tick", comment = "The maximum number of queued unloaded chunks that will be unloaded in a single tick. "
+                                                             + "\nNote: With the chunk gc enabled, this setting only applies to the ticks "
+                                                             + "\nwhere the gc runs (controlled by 'chunk-gc-tick-interval')"
+                                                             + "\nNote: If the max unloads is too low, too many chunks may remain"
+                                                             + "\nloaded on the world and increases the chance for a drop in tps. Default is 100.")
+    private int maxChunkUnloads = 100;
+
+    @Setting(value = "chunk-gc-load-threshold", comment = "The number of newly loaded chunks before triggering a forced cleanup. "
+                                                          + "\nNote: When triggered, the loaded chunk threshold will reset and start incrementing. "
+                                                          + "\nDisabled by default.")
     private int chunkGCLoadThreshold = 0;
 
     @Setting(value = "item-merge-radius", comment = "The defined merge radius for Item entities such that when two items are"
@@ -171,6 +181,10 @@ public class WorldCategory extends ConfigCategory {
 
     public int getChunkLoadThreadhold() {
         return this.chunkGCLoadThreshold;
+    }
+
+    public int getMaxChunkUnloads() {
+        return maxChunkUnloads;
     }
 
     public double getItemMergeRadius() {

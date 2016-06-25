@@ -39,7 +39,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -101,4 +103,21 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         ((IMixinWorldServer) this.worldObj).getTimingsHandler().doChunkUnload.stopTiming();
     }
 
+
+    private int maxChunkUnloads = -1;
+    // TODO - disabled until chunk gc can be fixed for 1.9.4+
+
+//    @ModifyConstant(method = "unloadQueuedChunks", constant = @Constant(intValue = 100))
+//    private int modifyUnloadCount(int original) {
+//        if (this.maxChunkUnloads == -1) {
+//            final int maxChunkUnloads = ((IMixinWorldServer) this.worldObj).getActiveConfig().getConfig().getWorld().getMaxChunkUnloads();
+//            this.maxChunkUnloads = maxChunkUnloads < 1 ? 1 : maxChunkUnloads;
+//        }
+//        return this.maxChunkUnloads;
+//    }
+
+    @Override
+    public void setMaxChunkUnloads(int maxUnloads) {
+        this.maxChunkUnloads = maxUnloads;
+    }
 }

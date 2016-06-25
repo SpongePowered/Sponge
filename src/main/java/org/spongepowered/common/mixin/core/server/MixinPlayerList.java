@@ -538,6 +538,10 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         entityPlayerMP.connection.sendPacket(new SPacketUpdateHealth(maxHealth.get().floatValue(), food.get(), saturation.get().floatValue()));
         ((IMixinEntityPlayerMP) entityPlayerMP).refreshXpHealthAndFood();
 
+        for (PotionEffect potioneffect : entityPlayerMP.getActivePotionEffects()) {
+            entityPlayerMP.connection.sendPacket(new SPacketEntityEffect(entityPlayerMP.getEntityId(), potioneffect));
+        }
+
         return entityPlayerMP;
     }
 

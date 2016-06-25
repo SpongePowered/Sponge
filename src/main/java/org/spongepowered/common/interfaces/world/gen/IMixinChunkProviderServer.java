@@ -40,4 +40,6 @@ public interface IMixinChunkProviderServer {
      */
     @Nullable
     Chunk getChunkIfLoaded(int x, int z);
+
+    void setMaxChunkUnloads(int maxUnloads);
 }

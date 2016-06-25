@@ -35,6 +35,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.block.Block;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.command.CommandSource;
@@ -87,10 +88,11 @@ class TimingsExport extends Thread {
      * @param sender Who to report to
      */
     static void reportTimings(CommandSource sender) {
+        Platform platform = SpongeImpl.getGame().getPlatform();
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
-                .add("version", Sponge.getPlatform().getImplementation().getVersion())
-                .add("maxplayers", Sponge.getServer().getMaxPlayers())
+                .add("version", platform.getImplementation().getVersion().orElse(platform.getMinecraftVersion().getName() + "-DEV"))
+                .add("maxplayers", SpongeImpl.getGame().getServer().getMaxPlayers())
                 .add("start", TimingsManager.timingStart / 1000)
                 .add("end", System.currentTimeMillis() / 1000)
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
