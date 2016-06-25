@@ -415,7 +415,12 @@ public final class EntityPhase extends TrackingPhase {
             }
         },
         LEAVING_DIMENSION,
-        ;
+        PLAYER_WAKE_UP() {
+            @Override
+            void unwind(CauseTracker causeTracker, PhaseContext context) {
+                context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, this, context));
+            }
+        };
 
         @Override
         public EntityPhase getPhase() {
