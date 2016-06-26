@@ -273,13 +273,17 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
             at = @At(value = "INVOKE", target = "Lcom/mojang/authlib/GameProfileRepository;findProfilesByNames([Ljava/lang/String;"
                     + "Lcom/mojang/authlib/Agent;Lcom/mojang/authlib/ProfileLookupCallback;)V", remap = false))
     private static void onGetGameProfile(GameProfileRepository repository, String[] names, Agent agent, ProfileLookupCallback callback) {
-        GameProfileCache cache = Sponge.getServer().getGameProfileManager().getCache();
-        if (cache instanceof PlayerProfileCache) {
-            repository.findProfilesByNames(names, agent, callback);
+        if (Sponge.isServerAvailable()) {
+            GameProfileCache cache = Sponge.getServer().getGameProfileManager().getCache();
+            if (cache instanceof PlayerProfileCache) {
+                repository.findProfilesByNames(names, agent, callback);
+            } else {
+                // The method we're redirecting into obtains the resulting GameProfile from
+                // the callback here.
+                callback.onProfileLookupSucceeded((com.mojang.authlib.GameProfile) cache.getOrLookupByName(names[0]).orElse(null));
+            }
         } else {
-            // The method we're redirecting into obtains the resulting GameProfile from
-            // the callback here.
-            callback.onProfileLookupSucceeded((com.mojang.authlib.GameProfile) cache.getOrLookupByName(names[0]).orElse(null));
+            repository.findProfilesByNames(names, agent, callback);
         }
     }
 
