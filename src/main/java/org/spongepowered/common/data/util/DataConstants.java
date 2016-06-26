@@ -96,6 +96,7 @@ public final class DataConstants {
     public static final boolean ELDER_GUARDIAN_DEFAULT = false;
     public static final boolean IS_WET_DEFAULT = false;
     public static final boolean DEFAULT_ATTACHED = false;
+    public static final boolean DEFAULT_GLOWING = false;
 
     public static final int DEFAULT_FIRE_TICKS = 10;
     public static final int MINIMUM_FIRE_TICKS = 1;
