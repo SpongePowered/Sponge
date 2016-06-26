@@ -39,6 +39,7 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.Slot;
@@ -127,6 +128,7 @@ import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -208,6 +210,43 @@ public class SpongeCommonEventFactory {
             player.markPlayerActive();
         }
         return event;
+    }
+
+    public static boolean callPlayerChangeInventoryPickupEvent(EntityPlayer player, ItemStack itemToPickup, int pickupDelay) {
+        int slotId = ((IMixinInventoryPlayer) player.inventory).getFirstAvailableSlot(itemToPickup);
+        Slot slot = null;
+        if (slotId != -1) {
+            if (slotId < InventoryPlayer.getHotbarSize()) {
+                slot = player.inventoryContainer.getSlot(slotId + player.inventory.mainInventory.length);
+            } else {
+                slot = player.inventoryContainer.getSlot(slotId);
+            }
+        }
+
+        if (pickupDelay <= 0 && slot != null) {
+            ItemStackSnapshot sourceSnapshot =
+                    slot.getStack() != null ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot()
+                            : ItemStackSnapshot.NONE;
+            ItemStackSnapshot targetSnapshot = null;
+            if (sourceSnapshot != ItemStackSnapshot.NONE) {
+                // combined slot
+                targetSnapshot = org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemToPickup).quantity(itemToPickup.stackSize + slot.getStack().stackSize).build().createSnapshot();
+            } else {
+                // empty slot
+                targetSnapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemToPickup).createSnapshot();
+            }
+
+            SlotTransaction slotTransaction =
+                    new SlotTransaction(new SlotAdapter(slot), sourceSnapshot, targetSnapshot);
+            ImmutableList<SlotTransaction> transactions =
+                    new ImmutableList.Builder<SlotTransaction>().add(slotTransaction).build();
+            ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(Cause.of(NamedCause.source(player)), (Inventory) player.inventoryContainer, transactions);
+            if (SpongeImpl.postEvent(event)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     public static boolean callInteractInventoryOpenEvent(Cause cause, EntityPlayerMP player) {

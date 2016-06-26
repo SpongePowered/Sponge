@@ -697,7 +697,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
 
     @Redirect(method = "updateTimeAndWeatherForPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket"
             + "(Lnet/minecraft/network/Packet;)V", ordinal = 0))
-    public void onWorldBorderInitializePacket(NetHandlerPlayServer invoker, Packet packet, EntityPlayerMP playerMP, WorldServer worldServer) {
+    public void onWorldBorderInitializePacket(NetHandlerPlayServer invoker, Packet<?> packet, EntityPlayerMP playerMP, WorldServer worldServer) {
         if (worldServer.provider instanceof WorldProviderHell) {
             ((IMixinS44PacketWorldBorder) packet).netherifyCenterCoordinates();
         }

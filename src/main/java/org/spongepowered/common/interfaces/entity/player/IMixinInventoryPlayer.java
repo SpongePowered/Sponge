@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.interfaces.entity.player;
 
+import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 
 public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter {
@@ -36,5 +37,13 @@ public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter {
      *      server
      */
     public abstract void setSelectedItem(int itemIndex, boolean notify);
+
+    /**
+     * Gets the first available slot id for itemstack.
+     * 
+     * @param itemstack The itemstack attempting to be stored
+     * @return The slot id or -1 if no slot found.
+     */
+    int getFirstAvailableSlot(ItemStack itemstack);
 
 }

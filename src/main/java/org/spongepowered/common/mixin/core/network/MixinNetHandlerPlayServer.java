@@ -638,14 +638,14 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     @Inject(method = "processClientStatus", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;triggerAchievement(Lnet/minecraft/stats/StatBase;)V"), cancellable = true)
     public void onProcessClientStatus(C16PacketClientStatus packetIn, CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(Cause.of(NamedCause.source(this.playerEntity)), (EntityPlayerMP) this.playerEntity)) {
+        if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(Cause.of(NamedCause.source(this.playerEntity)), this.playerEntity)) {
             ci.cancel();
         }
     }
 
     @Inject(method = "processCloseWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;closeContainer()V"), cancellable = true)
     public void onProcessCloseWindow(C0DPacketCloseWindow packetIn, CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.callInteractInventoryCloseEvent(Cause.of(NamedCause.source(this.playerEntity)), (EntityPlayerMP) this.playerEntity)) {
+        if (!SpongeCommonEventFactory.callInteractInventoryCloseEvent(Cause.of(NamedCause.source(this.playerEntity)), this.playerEntity)) {
             ci.cancel();
         }
     }
