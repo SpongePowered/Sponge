@@ -132,16 +132,24 @@ public final class WorldManager {
                 return world1DimId - world2DimId;
             };
             
-    private static boolean registeredDimensions = false;
+    private static boolean isVanillaRegistered = false;
             
     static {
-        WorldManager.registerDimensionTypes();
+        WorldManager.registerVanillaTypesAndDimensions();
     }
 
-    static void registerDimensionTypes() {
-        WorldManager.registerDimensionType(0, DimensionType.OVERWORLD);
-        WorldManager.registerDimensionType(-1, DimensionType.NETHER);
-        WorldManager.registerDimensionType(1, DimensionType.THE_END);
+    public static void registerVanillaTypesAndDimensions() {
+        if (!isVanillaRegistered) {
+            WorldManager.registerDimensionType(0, DimensionType.OVERWORLD);
+            WorldManager.registerDimensionType(-1, DimensionType.NETHER);
+            WorldManager.registerDimensionType(1, DimensionType.THE_END);
+
+            WorldManager.registerDimension(0, DimensionType.OVERWORLD, false);
+            WorldManager.registerDimension(-1, DimensionType.NETHER, false);
+            WorldManager.registerDimension(1, DimensionType.THE_END, false);
+        }
+
+        isVanillaRegistered = true;
     }
 
     public static boolean registerDimensionType(DimensionType type) {
@@ -180,17 +188,6 @@ public final class WorldManager {
         return dimensionBits.nextClearBit(0);
     }
 
-    public static void registerVanillaDimensions() {
-        if (WorldManager.registeredDimensions) {
-            return;
-        }
-
-        WorldManager.registeredDimensions = true;
-        WorldManager.registerDimension(0, DimensionType.OVERWORLD, false);
-        WorldManager.registerDimension(-1, DimensionType.NETHER, false);
-        WorldManager.registerDimension(1, DimensionType.THE_END, false);
-    }
-
     public static boolean registerDimension(int dimensionId, DimensionType type, boolean canBeUnregistered) {
         checkNotNull(type);
         if (!dimensionTypeByTypeId.containsValue(type)) {
@@ -218,10 +215,10 @@ public final class WorldManager {
         dimensionTypeByDimensionId.remove(dimensionId);
     }
 
-    public static void registerDimensionPaths(final Path path) {
-        WorldManager.registerDimensionPath(0, path);
-        WorldManager.registerDimensionPath(-1, path.resolve("DIM-1"));
-        WorldManager.registerDimensionPath(1, path.resolve("DIM1"));
+    public static void registerVanillaDimensionPaths(final Path savePath) {
+        WorldManager.registerDimensionPath(0, savePath);
+        WorldManager.registerDimensionPath(-1, savePath.resolve("DIM-1"));
+        WorldManager.registerDimensionPath(1, savePath.resolve("DIM1"));
     }
 
     public static void registerDimensionPath(int dimensionId, Path dimensionDataRoot) {
@@ -626,8 +623,7 @@ public final class WorldManager {
             throw new RuntimeException(ioe);
         }
 
-        WorldManager.registerVanillaDimensions();
-        WorldManager.registerDimensionPaths(currentSavesDir);
+        WorldManager.registerVanillaDimensionPaths(currentSavesDir);
 
         WorldMigrator.migrateWorldsTo(currentSavesDir);
 
