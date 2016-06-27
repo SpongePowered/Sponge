@@ -349,7 +349,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
     
     @Override
-    public Optional<Entity> createNaturallyEntity(EntityType type, Vector3d position) {
+    public Optional<Entity> createEntityNaturally(EntityType type, Vector3d position) {
     	return createEntity(type, position, true);
     }
     
