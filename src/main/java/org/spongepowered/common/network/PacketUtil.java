@@ -98,24 +98,23 @@ public class PacketUtil {
             if (packetIn instanceof CPacketAnimation || packetIn instanceof CPacketClientSettings) {
                 packetIn.processPacket(netHandler);
             } else {
-                PhaseContext context = PhaseContext.start()
-                        .add(NamedCause.source(packetPlayer))
-                        .add(NamedCause.of(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer))
-                        .addCaptures()
-                        .add(NamedCause.of(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn))
-                        .add(NamedCause.of(InternalNamedCauses.Packet.CURSOR, cursor))
-                        .add(NamedCause.of(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative));
-
                 final PacketPhase.IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
                 if (packetState == null) {
                     throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
                 }
                 if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
+                    PhaseContext context = PhaseContext.start()
+                            .add(NamedCause.source(packetPlayer))
+                            .add(NamedCause.of(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer))
+                            .addCaptures()
+                            .add(NamedCause.of(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn))
+                            .add(NamedCause.of(InternalNamedCauses.Packet.CURSOR, cursor))
+                            .add(NamedCause.of(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative));
+
                     TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
                     context.complete();
                     causeTracker.switchToPhase(packetState, context);
                 } else {
-                    context.complete();
                     causeTracker.switchToPhase(PacketPhase.General.INVALID, EMPTY_INVALID);
                 }
                 packetIn.processPacket(netHandler);
