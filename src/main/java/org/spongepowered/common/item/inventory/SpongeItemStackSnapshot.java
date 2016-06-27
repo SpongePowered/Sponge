@@ -59,6 +59,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
@@ -74,6 +75,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<ImmutableValue<?>> values;
     @Nullable private final NBTTagCompound compound;
+    @Nullable private Optional<UUID> creatorUniqueId;
 
     public SpongeItemStackSnapshot(ItemStack itemStack) {
         checkNotNull(itemStack);
@@ -349,5 +351,13 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public GameDictionary.Entry createGameDictionaryEntry() {
         return new SpongeGameDictionaryEntry.Specific((Item) this.itemType, this.damageValue);
+    }
+
+    public Optional<UUID> getCreator() {
+        return this.creatorUniqueId;
+    }
+
+    public void setCreator(@Nullable UUID uuid) {
+        this.creatorUniqueId = Optional.of(uuid);
     }
 }

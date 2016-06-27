@@ -630,7 +630,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         logger.info("Preparing start region for level {} ({})", world.provider.getDimensionId(), ((World) world).getName());
         BlockPos blockpos = world.getSpawnPoint();
         long j = MinecraftServer.getCurrentTimeMillis();
-
+        boolean chunkLoadOverride = world.theChunkProviderServer.chunkLoadOverride;
+        world.theChunkProviderServer.chunkLoadOverride = true;
         for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
             for (int l = -192; l <= 192 && this.isServerRunning(); l += 16) {
                 long i1 = MinecraftServer.getCurrentTimeMillis();
@@ -644,7 +645,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 world.theChunkProviderServer.loadChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
             }
         }
-
+        world.theChunkProviderServer.chunkLoadOverride = chunkLoadOverride;
         this.clearCurrentTask();
         ((IMixinWorld) world).getCauseTracker().setCapturingTerrainGen(false);
     }

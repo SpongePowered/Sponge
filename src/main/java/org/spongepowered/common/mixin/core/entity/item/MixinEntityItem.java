@@ -33,6 +33,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -225,7 +226,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
 
     @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
     public void onPlayerItemPickup(EntityPlayer entityIn, CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(entityIn, this.getEntityItem(), this.delayBeforeCanPickup)) {
+        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(entityIn, this.getEntityItem(), this.delayBeforeCanPickup, ((Entity)(Object) this).getCreator().orElse(null))) {
             ci.cancel();
         }
     }

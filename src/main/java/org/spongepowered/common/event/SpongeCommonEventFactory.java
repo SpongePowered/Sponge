@@ -132,6 +132,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -148,6 +149,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -212,7 +214,7 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static boolean callPlayerChangeInventoryPickupEvent(EntityPlayer player, ItemStack itemToPickup, int pickupDelay) {
+    public static boolean callPlayerChangeInventoryPickupEvent(EntityPlayer player, ItemStack itemToPickup, int pickupDelay, UUID creator) {
         int slotId = ((IMixinInventoryPlayer) player.inventory).getFirstAvailableSlot(itemToPickup);
         Slot slot = null;
         if (slotId != -1) {
@@ -236,6 +238,7 @@ public class SpongeCommonEventFactory {
                 targetSnapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemToPickup).createSnapshot();
             }
 
+            ((SpongeItemStackSnapshot) targetSnapshot).setCreator(creator);
             SlotTransaction slotTransaction =
                     new SlotTransaction(new SlotAdapter(slot), sourceSnapshot, targetSnapshot);
             ImmutableList<SlotTransaction> transactions =
