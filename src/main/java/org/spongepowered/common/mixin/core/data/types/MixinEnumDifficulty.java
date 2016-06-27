@@ -49,7 +49,7 @@ public class MixinEnumDifficulty implements Difficulty {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     public void onConstruction(CallbackInfo callbackInfo) {
-        this.id = this.difficultyResourceKey.replace("options.difficulty.", "");
+        this.id = this.difficultyResourceKey.replace("options.difficulty.", "minecraft:");
     }
     
     @Override

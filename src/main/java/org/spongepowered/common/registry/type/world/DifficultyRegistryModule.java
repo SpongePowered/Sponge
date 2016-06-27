@@ -47,6 +47,10 @@ public final class DifficultyRegistryModule implements CatalogRegistryModule<Dif
 
     @Override
     public Optional<Difficulty> getById(String id) {
+        checkNotNull(id);
+        if (!id.contains(":") && !id.equals("none")) {
+            id = "minecraft:" + id; // assume vanilla
+        }
         return Optional.ofNullable(this.difficultyMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
@@ -57,10 +61,10 @@ public final class DifficultyRegistryModule implements CatalogRegistryModule<Dif
 
     @Override
     public void registerDefaults() {
-        this.difficultyMappings.put("peaceful", (Difficulty) (Object) EnumDifficulty.PEACEFUL);
-        this.difficultyMappings.put("easy", (Difficulty) (Object) EnumDifficulty.EASY);
-        this.difficultyMappings.put("normal", (Difficulty) (Object) EnumDifficulty.NORMAL);
-        this.difficultyMappings.put("hard", (Difficulty) (Object) EnumDifficulty.HARD);
+        this.difficultyMappings.put("minecraft:peaceful", (Difficulty) (Object) EnumDifficulty.PEACEFUL);
+        this.difficultyMappings.put("minecraft:easy", (Difficulty) (Object) EnumDifficulty.EASY);
+        this.difficultyMappings.put("minecraft:normal", (Difficulty) (Object) EnumDifficulty.NORMAL);
+        this.difficultyMappings.put("minecraft:hard", (Difficulty) (Object) EnumDifficulty.HARD);
     }
 
     @AdditionalRegistration
