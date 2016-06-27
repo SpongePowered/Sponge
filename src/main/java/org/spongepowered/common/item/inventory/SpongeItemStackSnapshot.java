@@ -358,6 +358,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     public void setCreator(@Nullable UUID uuid) {
-        this.creatorUniqueId = Optional.of(uuid);
+        if (uuid != null) {
+            this.creatorUniqueId = Optional.of(uuid);
+        }
     }
 }
