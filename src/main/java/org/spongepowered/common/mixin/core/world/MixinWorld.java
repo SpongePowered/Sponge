@@ -353,7 +353,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     	return createEntity(type, position, true);
     }
     
-    public Optional<Entity> createEntity(EntityType type, Vector3d position, boolean naturally) {
+    private Optional<Entity> createEntity(EntityType type, Vector3d position, boolean naturally) {
         checkNotNull(type, "The entity type cannot be null!");
         checkNotNull(position, "The position cannot be null!");
 
@@ -413,7 +413,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         
         if (naturally && entity instanceof EntityLiving) {
             // Adding the default equipment
-        	 ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos((net.minecraft.entity.Entity) entity)), null);
+            ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos((net.minecraft.entity.Entity) entity)), null);
         }
 
         if (entity instanceof EntityPainting) {
