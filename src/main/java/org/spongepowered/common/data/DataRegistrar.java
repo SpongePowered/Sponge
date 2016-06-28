@@ -387,6 +387,9 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(InvulnerabilityData.class, SpongeInvulnerabilityData.class, ImmutableInvulnerabilityData.class,
                 ImmutableSpongeInvulnerabilityData.class, new InvulnerabilityDataProcessor());
 
+        dataManager.registerDualProcessor(GlowingData.class, SpongeGlowingData.class, ImmutableGlowingData.class, ImmutableSpongeGlowingData.class,
+                new GlowingDataProcessor());
+
         // Item Processors
 
         dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,

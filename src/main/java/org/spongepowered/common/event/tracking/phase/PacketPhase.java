@@ -745,12 +745,13 @@ public final class PacketPhase extends TrackingPhase {
     @SuppressWarnings("unchecked")
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext phaseContext) {
+        if (phaseState == General.INVALID) { // Invalid doesn't capture any packets.
+            return;
+        }
         final Packet<?> packetIn = phaseContext.firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, Packet.class).get();
         final EntityPlayerMP player = phaseContext.firstNamed(NamedCause.SOURCE, EntityPlayerMP.class).get();
         final Class<? extends Packet<?>> packetInClass = (Class<? extends Packet<?>>) packetIn.getClass();
-        if (phaseState == General.INVALID) {
-            return;
-        }
+
         final PacketFunction unwindFunction = this.packetUnwindMap.get(packetInClass);
         checkArgument(phaseState instanceof IPacketState, "PhaseState passed in is not an instance of IPacketState! Got %s", phaseState);
         if (unwindFunction != null) {
