@@ -35,6 +35,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -344,6 +345,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Optional<Entity> createEntity(EntityType type, Vector3d position) {
+    	return createEntity(type, position, false);
+    }
+    
+    @Override
+    public Optional<Entity> createEntityNaturally(EntityType type, Vector3d position) {
+    	return createEntity(type, position, true);
+    }
+    
+    private Optional<Entity> createEntity(EntityType type, Vector3d position, boolean naturally) {
         checkNotNull(type, "The entity type cannot be null!");
         checkNotNull(position, "The position cannot be null!");
 
@@ -400,6 +410,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 return Optional.empty();
             }
         }*/
+        
+        if (naturally && entity instanceof EntityLiving) {
+            // Adding the default equipment
+            ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos((net.minecraft.entity.Entity) entity)), null);
+        }
 
         if (entity instanceof EntityPainting) {
             // This is default when art is null when reading from NBT, could
