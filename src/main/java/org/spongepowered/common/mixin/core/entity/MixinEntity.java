@@ -231,8 +231,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract double getDistanceSqToEntity(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void addToPlayerScore(net.minecraft.entity.Entity entityIn, int amount);
     @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
-    @Shadow public abstract boolean func_189652_ae(); // hasNoGravity
-    @Shadow public abstract void func_189654_d(boolean p_189654_1_); // setNoGravity
+    @Shadow public abstract boolean hasNoGravity();
+    @Shadow public abstract void setNoGravity(boolean noGravity);
 
 
     // @formatter:on
