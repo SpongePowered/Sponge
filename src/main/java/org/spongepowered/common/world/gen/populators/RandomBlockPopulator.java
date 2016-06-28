@@ -78,7 +78,11 @@ public class RandomBlockPopulator implements RandomBlock {
             if (this.check.apply(pos)) {
                 chunk.getWorld().setBlock(pos.getBlockPosition(), this.state);
                 // Liquids force a block update tick so they may flow during world gen
-                mcWorld.forceBlockUpdateTick((Block) this.state.getType(), VecHelper.toBlockPos(pos), random);
+                try {
+                    mcWorld.forceBlockUpdateTick((Block) this.state.getType(), VecHelper.toBlockPos(pos), random);
+                } catch(IllegalArgumentException e) {
+                    // ignore
+                }
             }
         }
     }
