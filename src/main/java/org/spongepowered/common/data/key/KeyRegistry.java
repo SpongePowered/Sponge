@@ -85,6 +85,7 @@ import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -232,6 +233,7 @@ public class KeyRegistry {
         keyMap.put("cooldown", makeSingleKey(Integer.class, Value.class, of("Cooldown")));
         keyMap.put("note_pitch", makeSingleKey(NotePitch.class, Value.class, of("Note")));
         keyMap.put("vehicle", makeSingleKey(EntitySnapshot.class, Value.class, of("Vehicle")));
+        keyMap.put("passenger", makeSingleKey(Entity.class, Value.class, of("Passenger")));
         keyMap.put("base_vehicle", makeSingleKey(EntitySnapshot.class, Value.class, of("BaseVehicle")));
         keyMap.put("art", makeSingleKey(Art.class, Value.class, of("Art")));
         keyMap.put("fall_damage_per_block", makeSingleKey(Double.class, Value.class, of("FallDamagePerBlock")));

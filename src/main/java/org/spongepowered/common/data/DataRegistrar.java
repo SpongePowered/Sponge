@@ -264,6 +264,9 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(VehicleData.class, SpongeVehicleData.class, ImmutableVehicleData.class,
                 ImmutableSpongeVehicleData.class, new VehicleDataProcessor());
 
+        dataManager.registerDualProcessor(PassengerData.class, SpongePassengerData.class, ImmutablePassengerData.class,
+                ImmutableSpongePassengerData.class, new PassengerDataProcessor());
+
         dataManager.registerDataProcessorAndImpl(MinecartBlockData.class, SpongeMinecartBlockData.class,
                 ImmutableMinecartBlockData.class, ImmutableSpongeMinecartBlockData.class, new MinecartBlockDataProcessor());
 
