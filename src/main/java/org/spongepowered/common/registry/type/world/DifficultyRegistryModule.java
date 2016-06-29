@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.world.EnumDifficulty;
-import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.difficulty.Difficulties;
@@ -40,7 +40,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class DifficultyRegistryModule implements CatalogRegistryModule<Difficulty> {
+public final class DifficultyRegistryModule implements AlternateCatalogRegistryModule<Difficulty> {
 
     @RegisterCatalog(Difficulties.class)
     private final Map<String, Difficulty> difficultyMappings = new HashMap<>();
@@ -57,6 +57,15 @@ public final class DifficultyRegistryModule implements CatalogRegistryModule<Dif
     @Override
     public Collection<Difficulty> getAll() {
         return ImmutableList.copyOf(this.difficultyMappings.values());
+    }
+
+    @Override
+    public Map<String, Difficulty> provideCatalogMap() {
+        Map<String, Difficulty> newMap = new HashMap<>();
+        for (Map.Entry<String, Difficulty> entry : this.difficultyMappings.entrySet()) {
+            newMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return newMap;
     }
 
     @Override
