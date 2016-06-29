@@ -74,6 +74,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
@@ -82,7 +83,6 @@ import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.FunctionalUtil;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.persistence.JsonTranslator;
 
 import java.util.ArrayList;
@@ -161,7 +161,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     //     public WorldInfo(NBTTagCompound nbt)
     @Inject(method = "<init>*", at = @At("RETURN") )
     public void onConstruction(NBTTagCompound nbt, CallbackInfo ci) {
-        if (!StaticMixinHelper.convertingMapFormat) {
+        if (!SpongeCommonEventFactory.convertingMapFormat) {
             onConstruction(ci);
         }
     }
