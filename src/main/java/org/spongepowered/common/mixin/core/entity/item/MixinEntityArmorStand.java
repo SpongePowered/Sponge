@@ -108,13 +108,13 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     @Override
     @Deprecated
     public boolean hasGravity() {
-        return !this.func_189652_ae();
+        return !this.hasNoGravity();
     }
 
     @Override
     @Deprecated
     public void setGravity(boolean gravity) {
-        this.func_189654_d(!gravity);
+        this.setNoGravity(!gravity);
     }
 
     @Override
@@ -139,12 +139,12 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
 
     @Override
     public Value<Boolean> gravity() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_GRAVITY, true, !this.func_189652_ae());
+        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_GRAVITY, true, !this.hasNoGravity());
     }
 
     @Override
     public ArmorStandData getArmorStandData() {
-        return new SpongeArmorStandData(this.hasMarker(), this.shadow$isSmall(), !this.func_189652_ae(), this.getShowArms(), !this.hasNoBasePlate());
+        return new SpongeArmorStandData(this.hasMarker(), this.shadow$isSmall(), !this.hasNoGravity(), this.getShowArms(), !this.hasNoBasePlate());
     }
 
     @Override

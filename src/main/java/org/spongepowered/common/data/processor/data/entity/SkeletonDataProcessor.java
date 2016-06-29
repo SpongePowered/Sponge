@@ -58,7 +58,7 @@ public class SkeletonDataProcessor
     @Override
     protected boolean set(EntitySkeleton entity, SkeletonType value) {
         if ((Object) value instanceof net.minecraft.entity.monster.SkeletonType) {
-            entity.func_189768_a((net.minecraft.entity.monster.SkeletonType) (Object) value);
+            entity.setSkeletonType((net.minecraft.entity.monster.SkeletonType) (Object) value);
             return true;
         }
         return false;
@@ -66,7 +66,7 @@ public class SkeletonDataProcessor
 
     @Override
     protected Optional<SkeletonType> getVal(EntitySkeleton entity) {
-        return Optional.ofNullable((SkeletonType) (Object) entity.func_189771_df());
+        return Optional.ofNullable((SkeletonType) (Object) entity.getSkeletonType());
     }
 
     @Override
