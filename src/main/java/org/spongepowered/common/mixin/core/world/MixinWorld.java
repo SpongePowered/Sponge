@@ -1370,6 +1370,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
         checkBlockBounds(x, y, z);
         final CauseTracker causeTracker = this.getCauseTracker();
+        if (causeTracker.isCapturingTerrainGen()) {
+            setBlockState(new BlockPos(x, y, z), (IBlockState) block, notifyNeighbors ? 3 : 2);
+            return;
+        }
+
         boolean captureBlocks = causeTracker.isCapturingBlocks();
         causeTracker.setCaptureBlocks(true);
         causeTracker.addCause(Cause.of(NamedCause.source(this)));
@@ -1385,6 +1390,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
         checkBlockBounds(x, y, z);
         final CauseTracker causeTracker = this.getCauseTracker();
+        if (causeTracker.isCapturingTerrainGen()) {
+            setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, notifyNeighbors ? 3 : 2);
+            return;
+        }
+
         boolean captureBlocks = causeTracker.isCapturingBlocks();
         causeTracker.setCaptureBlocks(true);
         causeTracker.addCause(cause);
