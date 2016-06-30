@@ -49,6 +49,7 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.util.TreeTypeResolver;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -67,16 +68,18 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         final boolean isBlockAlready = causeTracker.getStack().current() != TrackingPhases.BLOCK;
+        final IPhaseState currentState = causeTracker.getStack().peek().getState();
+        final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
         final IBlockState blockState = worldIn.getBlockState(pos);
         final IBlockState actualState = blockState.getActualState(worldIn, pos);
-        if (isBlockAlready) {
+        if (isBlockAlready && !isWorldGen) {
             causeTracker.switchToPhase(BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
                     .add(NamedCause.source(spongeWorld.createSpongeBlockSnapshot(blockState, actualState, pos, 3)))
                     .addCaptures()
                     .complete());
         }
         boolean result = worldIn.setBlockState(pos, state, flags);
-        if (isBlockAlready) {
+        if (isBlockAlready && !isWorldGen) {
             causeTracker.completePhase();
         }
         return result;
@@ -87,16 +90,18 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         final boolean isBlockAlready = causeTracker.getStack().current() != TrackingPhases.BLOCK;
+        final IPhaseState currentState = causeTracker.getStack().peek().getState();
+        final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
         final IBlockState blockState = worldIn.getBlockState(pos);
         final IBlockState actualState = blockState.getActualState(worldIn, pos);
-        if (isBlockAlready) {
+        if (isBlockAlready && !isWorldGen) {
             causeTracker.switchToPhase(BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
                     .add(NamedCause.source(spongeWorld.createSpongeBlockSnapshot(blockState, actualState, pos, 3)))
                     .addCaptures()
                     .complete());
         }
         boolean result = worldIn.setBlockToAir(pos);
-        if (isBlockAlready) {
+        if (isBlockAlready && !isWorldGen) {
             causeTracker.completePhase();
         }
         return result;

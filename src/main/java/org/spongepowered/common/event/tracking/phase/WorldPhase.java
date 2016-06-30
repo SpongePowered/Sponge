@@ -1178,4 +1178,8 @@ public final class WorldPhase extends TrackingPhase {
         return state instanceof Tick ? ((Tick) state).generateTeleportCause(context) : super.generateTeleportCause(state, context);
     }
 
+    @Override
+    public boolean isWorldGeneration(IPhaseState state) {
+        return state instanceof State;
+    }
 }

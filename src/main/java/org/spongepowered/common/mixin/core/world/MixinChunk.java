@@ -780,20 +780,21 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return this.world.getBlockDigTimeWith(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), itemStack, cause);
     }
 
-    @Redirect(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkGenerator;populate(II)V"))
-    public void onChunkPopulate(IChunkGenerator generator, int x, int z) {
+    @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkGenerator;populate(II)V"))
+    private void onChunkPopulate(IChunkGenerator generator, CallbackInfo callbackInfo) {
         if (this.worldObj instanceof WorldServer) {
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-            final NamedCause sourceCause = NamedCause.source(this);
-            final NamedCause chunkProviderCause = NamedCause.of(InternalNamedCauses.WorldGeneration.CHUNK_PROVIDER, generator);
             causeTracker.switchToPhase(WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                    .add(sourceCause)
-                    .add(chunkProviderCause)
-                    .add(NamedCause.of("ChunkPos", new Vector2i(x, z)))
                     .addCaptures()
                     .complete());
-            generator.populate(x, z);
-            causeTracker.completePhase();
+        }
+    }
+
+    @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setChunkModified()V"))
+    private void onChunkPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
+        if (this.worldObj instanceof WorldServer) {
+            ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
+
         }
     }
 

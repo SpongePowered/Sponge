@@ -485,7 +485,12 @@ public final class PacketPhase extends TrackingPhase {
                 return true;
             }
         },
-        IGNORED,
+        IGNORED() {
+            @Override
+            public boolean ignoresItemPreMerges() {
+                return true;
+            }
+        },
         INTERACT_ENTITY {
             @Override
             public boolean ignoresItemPreMerges() {
@@ -595,8 +600,13 @@ public final class PacketPhase extends TrackingPhase {
         },
         CREATIVE_INVENTORY {
             @Override
-            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                ((IMixinContainer) playerMP.inventoryContainer).setCaptureInventory(true);
+            public boolean ignoresItemPreMerges() {
+                return true;
+            }
+
+            @Override
+            public boolean doesCaptureEntityDrops() {
+                return false;
             }
         },
         PLACE_BLOCK() {
@@ -669,7 +679,12 @@ public final class PacketPhase extends TrackingPhase {
             }
         },
         UPDATE_SIGN,
-        HANDLED_EXTERNALLY,
+        HANDLED_EXTERNALLY() {
+            @Override
+            public boolean ignoresItemPreMerges() {
+                return true;
+            }
+        },
         RESOURCE_PACK,
         STOP_RIDING_JUMP,
         SWAP_HAND_ITEMS,
