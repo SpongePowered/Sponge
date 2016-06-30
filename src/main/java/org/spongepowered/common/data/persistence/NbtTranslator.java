@@ -188,25 +188,25 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         switch (type) {
             case NbtDataUtil.TAG_BYTE:
                 if (key.contains(BOOLEAN_IDENTIFER)) {
-                    view.set(of(key.replace(BOOLEAN_IDENTIFER, "")), (((NBTBase.NBTPrimitive) base).getByte() == 1));
+                    view.set(of(key.replace(BOOLEAN_IDENTIFER, "")), (((NBTTagByte) base).getByte() == 1));
                 } else {
-                    view.set(of(key), ((NBTBase.NBTPrimitive) base).getByte());
+                    view.set(of(key), ((NBTTagByte) base).getByte());
                 }
                 break;
             case NbtDataUtil.TAG_SHORT:
-                view.set(of(key), ((NBTBase.NBTPrimitive) base).getShort());
+                view.set(of(key), ((NBTTagShort) base).getShort());
                 break;
             case NbtDataUtil.TAG_INT:
-                view.set(of(key), ((NBTBase.NBTPrimitive) base).getInt());
+                view.set(of(key), ((NBTTagInt) base).getInt());
                 break;
             case NbtDataUtil.TAG_LONG:
-                view.set(of(key), ((NBTBase.NBTPrimitive) base).getLong());
+                view.set(of(key), ((NBTTagLong) base).getLong());
                 break;
             case NbtDataUtil.TAG_FLOAT:
-                view.set(of(key), ((NBTBase.NBTPrimitive) base).getFloat());
+                view.set(of(key), ((NBTTagFloat) base).getFloat());
                 break;
             case NbtDataUtil.TAG_DOUBLE:
-                view.set(of(key), ((NBTBase.NBTPrimitive) base).getDouble());
+                view.set(of(key), ((NBTTagDouble) base).getDouble());
                 break;
             case NbtDataUtil.TAG_BYTE_ARRAY:
                 view.set(of(key), ((NBTTagByteArray) base).getByteArray());
@@ -249,17 +249,17 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     private static Object fromTagBase(NBTBase base, byte type) {
         switch (type) {
             case NbtDataUtil.TAG_BYTE:
-                return ((NBTBase.NBTPrimitive) base).getByte();
+                return ((NBTTagByte) base).getByte();
             case NbtDataUtil.TAG_SHORT:
-                return (((NBTBase.NBTPrimitive) base)).getShort();
+                return (((NBTTagShort) base)).getShort();
             case NbtDataUtil.TAG_INT:
-                return ((NBTBase.NBTPrimitive) base).getInt();
+                return ((NBTTagInt) base).getInt();
             case NbtDataUtil.TAG_LONG:
-                return ((NBTBase.NBTPrimitive) base).getLong();
+                return ((NBTTagLong) base).getLong();
             case NbtDataUtil.TAG_FLOAT:
-                return ((NBTBase.NBTPrimitive) base).getFloat();
+                return ((NBTTagFloat) base).getFloat();
             case NbtDataUtil.TAG_DOUBLE:
-                return ((NBTBase.NBTPrimitive) base).getDouble();
+                return ((NBTTagDouble) base).getDouble();
             case NbtDataUtil.TAG_BYTE_ARRAY:
                 return ((NBTTagByteArray) base).getByteArray();
             case NbtDataUtil.TAG_STRING:

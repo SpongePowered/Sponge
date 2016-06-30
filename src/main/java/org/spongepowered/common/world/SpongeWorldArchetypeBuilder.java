@@ -27,6 +27,7 @@ package org.spongepowered.common.world;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import org.spongepowered.api.Sponge;
@@ -242,7 +243,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
             throw new CatalogTypeAlreadyRegisteredException(id);
         });
         final WorldSettings settings =
-                new WorldSettings(this.seed, (WorldSettings.GameType) (Object) this.gameMode, this.mapFeaturesEnabled, this.hardcore,
+                new WorldSettings(this.seed, (GameType) (Object) this.gameMode, this.mapFeaturesEnabled, this.hardcore,
                         (WorldType) this.generatorType);
         IMixinWorldSettings spongeSettings = (IMixinWorldSettings) (Object) settings;
         spongeSettings.setId(id);

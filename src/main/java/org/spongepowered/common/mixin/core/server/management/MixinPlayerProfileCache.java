@@ -51,6 +51,7 @@ import org.spongepowered.common.profile.callback.SingleProfileLookupCallback;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.Map;
@@ -64,7 +65,7 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
 
     @Shadow @Final private Map<String, IMixinPlayerProfileCacheEntry> usernameToProfileEntryMap;
     @Shadow @Final private Map<UUID, IMixinPlayerProfileCacheEntry> uuidToProfileEntryMap;
-    @Shadow @Final private LinkedList<com.mojang.authlib.GameProfile> gameProfiles;
+    @Shadow @Final private Deque<com.mojang.authlib.GameProfile> gameProfiles;
     @Shadow abstract void addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry);
     @Nullable @Shadow public abstract com.mojang.authlib.GameProfile getProfileByUUID(UUID uniqueId);
     @Shadow public abstract void save();

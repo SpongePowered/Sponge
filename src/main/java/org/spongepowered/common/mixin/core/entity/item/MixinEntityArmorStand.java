@@ -61,11 +61,9 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
 
     @Shadow public abstract boolean getShowArms();
     @Shadow public abstract boolean hasNoBasePlate();
-    @Shadow public abstract boolean hasNoGravity();
     @Shadow public abstract boolean hasMarker();
     @Shadow public abstract boolean shadow$isSmall();
     @Shadow public abstract void setNoBasePlate(boolean p_175426_1_);
-    @Shadow public abstract void setNoGravity(boolean p_175425_1_);
     @Shadow public abstract void shadow$setSmall(boolean p_175420_1_);
     @Shadow public abstract void shadow$setShowArms(boolean p_175413_1_);
     @Shadow public abstract Rotations shadow$getHeadRotation();

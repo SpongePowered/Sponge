@@ -22,14 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity;
+package org.spongepowered.common.mixin.core.entity.passive;
 
-import org.spongepowered.api.data.type.SkeletonType;
+import net.minecraft.entity.monster.EntityPolarBear;
+import org.spongepowered.api.entity.living.animal.PolarBear;
+import org.spongepowered.asm.mixin.Mixin;
 
-public class SpongeSkeletonType extends SpongeEntityMeta implements SkeletonType {
-
-    public SpongeSkeletonType(int type, String name) {
-        super(type, name);
-    }
+@Mixin(EntityPolarBear.class)
+public abstract class MixinEntityPolarBear implements PolarBear {
 
 }

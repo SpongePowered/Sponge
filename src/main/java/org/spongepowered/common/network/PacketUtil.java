@@ -81,9 +81,9 @@ public class PacketUtil {
             /*if (packetIn instanceof C16PacketClientStatus) {
                 C16PacketClientStatus statusPacket = (C16PacketClientStatus) packetIn;
                 if (statusPacket.getStatus() == C16PacketClientStatus.EnumState.PERFORM_RESPAWN) {
-                    if (!StaticMixinHelper.packetPlayer.isDead) {
-                        SpongeHooks.logExploitRespawnInvisibility(StaticMixinHelper.packetPlayer);
-                        StaticMixinHelper.packetPlayer.connection.kickPlayerFromServer("You have been kicked for attempting to perform an invisibility respawn exploit.");
+                    if (!SpongeCommonEventFactory.packetPlayer.isDead) {
+                        SpongeHooks.logExploitRespawnInvisibility(SpongeCommonEventFactory.packetPlayer);
+                        SpongeCommonEventFactory.packetPlayer.connection.kickPlayerFromServer("You have been kicked for attempting to perform an invisibility respawn exploit.");
                         resetStaticData();
                         return;
                     }
@@ -91,7 +91,6 @@ public class PacketUtil {
 
             }*/
 
-            //System.out.println("RECEIVED PACKET " + packetIn);
             final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
             final IMixinWorldServer world = (IMixinWorldServer) packetPlayer.worldObj;
             final CauseTracker causeTracker = world.getCauseTracker();

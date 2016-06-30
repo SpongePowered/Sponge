@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.WorldSettings;
+import net.minecraft.world.GameType;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGameModeData;
@@ -56,7 +56,7 @@ public class GameModeDataProcessor extends
 
     @Override
     protected boolean set(EntityPlayerMP entity, GameMode value) {
-        entity.setGameType((WorldSettings.GameType) (Object) value);
+        entity.setGameType((GameType) (Object) value);
         return true;
     }
 

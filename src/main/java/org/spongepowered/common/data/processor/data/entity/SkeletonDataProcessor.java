@@ -40,7 +40,6 @@ import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.SpongeEntityConstants;
-import org.spongepowered.common.entity.SpongeSkeletonType;
 
 import java.util.Optional;
 
@@ -58,8 +57,8 @@ public class SkeletonDataProcessor
 
     @Override
     protected boolean set(EntitySkeleton entity, SkeletonType value) {
-        if (value instanceof SpongeSkeletonType) {
-            entity.setSkeletonType(((SpongeSkeletonType) value).type);
+        if ((Object) value instanceof net.minecraft.entity.monster.SkeletonType) {
+            entity.setSkeletonType((net.minecraft.entity.monster.SkeletonType) (Object) value);
             return true;
         }
         return false;
@@ -67,7 +66,7 @@ public class SkeletonDataProcessor
 
     @Override
     protected Optional<SkeletonType> getVal(EntitySkeleton entity) {
-        return Optional.ofNullable(SpongeEntityConstants.SKELETON_IDMAP.get(entity.getSkeletonType()));
+        return Optional.ofNullable((SkeletonType) (Object) entity.getSkeletonType());
     }
 
     @Override

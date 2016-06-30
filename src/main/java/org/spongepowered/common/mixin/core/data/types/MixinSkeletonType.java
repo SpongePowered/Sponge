@@ -22,20 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.monster.SkeletonType;
+import org.spongepowered.asm.mixin.Mixin;
 
+@Mixin(SkeletonType.class)
+public abstract class MixinSkeletonType implements org.spongepowered.api.data.type.SkeletonType {
 
-public class StaticMixinHelper {
+    @Override
+    public String getId() {
+        return ((SkeletonType) (Object) this).name();
+    }
 
-    public static boolean processingInternalForgeEvent = false;
-    // Set before firing an internal Forge BlockBreak event to handle extended blockstate
-    public static boolean convertingMapFormat = false;
+    @Override
+    public String getName() {
+        return getId();
+    }
 
-    // For animation packet
-    public static int lastAnimationPacketTick = 0;
-    public static int lastSecondaryPacketTick = 0;
-    public static int lastPrimaryPacketTick = 0;
-    public static EntityPlayerMP lastAnimationPlayer = null;
 }

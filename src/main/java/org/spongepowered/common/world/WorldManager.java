@@ -43,6 +43,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.GameType;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.ServerWorldEventHandler;
 import net.minecraft.world.WorldProvider;
@@ -776,7 +777,7 @@ public final class WorldManager {
         worldServer.addEventListener(new ServerWorldEventHandler(server, worldServer));
 
         // This code changes from Mojang's to account for per-world API-set GameModes.
-        if (!server.isSinglePlayer() && worldServer.getWorldInfo().getGameType().equals(WorldSettings.GameType.NOT_SET)) {
+        if (!server.isSinglePlayer() && worldServer.getWorldInfo().getGameType().equals(GameType.NOT_SET)) {
             worldServer.getWorldInfo().setGameType(server.getGameType());
         }
 

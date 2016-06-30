@@ -56,7 +56,9 @@ public class SkeletonTypeRegistryModule implements CatalogRegistryModule<Skeleto
 
     @Override
     public void registerDefaults() {
-        this.skeletonTypeMap.putAll(SpongeEntityConstants.SKELETON_TYPES);
+        for (net.minecraft.entity.monster.SkeletonType type : net.minecraft.entity.monster.SkeletonType.values()) {
+            skeletonTypeMap.put(type.name().toLowerCase(Locale.ENGLISH), (SkeletonType) (Object) type);
+        }
     }
 
 }

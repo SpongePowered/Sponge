@@ -40,23 +40,22 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkeletonData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.SpongeEntityConstants;
 
 import java.util.List;
 
 @Mixin(EntitySkeleton.class)
 public abstract class MixinEntitySkeleton extends MixinEntityMob implements Skeleton {
 
-    @Shadow public abstract int getSkeletonType();
+    @Shadow public abstract net.minecraft.entity.monster.SkeletonType getSkeletonType();
 
     @Override
     public SkeletonData getSkeletonData() {
-        return new SpongeSkeletonData(SpongeEntityConstants.SKELETON_IDMAP.get(this.getSkeletonType()));
+        return new SpongeSkeletonData((SkeletonType) (Object) this.getSkeletonType());
     }
 
     @Override
     public Value<SkeletonType> variant() {
-        return new SpongeValue<>(Keys.SKELETON_TYPE, DataConstants.Catalog.DEFAULT_SKELETON, SpongeEntityConstants.SKELETON_IDMAP.get(this.getSkeletonType()));
+        return new SpongeValue<>(Keys.SKELETON_TYPE, DataConstants.Catalog.DEFAULT_SKELETON, (SkeletonType) (Object) getSkeletonType());
     }
 
     @Override

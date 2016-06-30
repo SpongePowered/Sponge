@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -57,7 +56,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -113,7 +111,6 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
@@ -126,6 +123,16 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 public class SpongeCommonEventFactory {
+
+    public static boolean processingInternalForgeEvent = false;
+    // Set before firing an internal Forge BlockBreak event to handle extended blockstate
+    public static boolean convertingMapFormat = false;
+
+    // For animation packet
+    public static int lastAnimationPacketTick = 0;
+    public static int lastSecondaryPacketTick = 0;
+    public static int lastPrimaryPacketTick = 0;
+    public static EntityPlayerMP lastAnimationPlayer = null;
 
     @SuppressWarnings("unchecked")
     @Nullable
@@ -192,9 +199,9 @@ public class SpongeCommonEventFactory {
         peek.getState().getPhase().populateCauseForNotifyNeighborEvent(peek.getState(), context, builder, causeTracker, mixinChunk, pos);
 
         NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(builder.build(), originalNeighbors, neighbors);
-        StaticMixinHelper.processingInternalForgeEvent = true;
+        SpongeCommonEventFactory.processingInternalForgeEvent = true;
         SpongeImpl.postEvent(event);
-        StaticMixinHelper.processingInternalForgeEvent = false;
+        SpongeCommonEventFactory.processingInternalForgeEvent = false;
         return event;
     }
 

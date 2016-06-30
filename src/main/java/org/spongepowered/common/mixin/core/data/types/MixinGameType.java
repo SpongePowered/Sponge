@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.world.WorldSettings;
+import net.minecraft.world.GameType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -36,7 +36,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Locale;
 
-@Mixin(WorldSettings.GameType.class)
+@Mixin(GameType.class)
 @Implements(@Interface(iface = GameMode.class, prefix = "gamemode$"))
 public abstract class MixinGameType {
     @Shadow String name;

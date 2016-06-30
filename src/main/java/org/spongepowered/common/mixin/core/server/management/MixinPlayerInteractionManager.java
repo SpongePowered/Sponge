@@ -47,6 +47,7 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.GameType;
 import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -62,13 +63,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.mixin.core.block.state.MixinStateImplementation;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.util.TristateUtil;
 
 import java.util.Optional;
 
@@ -79,7 +75,7 @@ public abstract class MixinPlayerInteractionManager {
 
     @Shadow public EntityPlayerMP thisPlayerMP;
     @Shadow public net.minecraft.world.World theWorld;
-    @Shadow private WorldSettings.GameType gameType;
+    @Shadow private GameType gameType;
 
     @Shadow public abstract boolean isCreative();
     @Shadow public abstract EnumActionResult processRightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand);
@@ -101,7 +97,7 @@ public abstract class MixinPlayerInteractionManager {
      */
     @Overwrite
     public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float offsetX, float offsetY, float offsetZ) {
-        if (this.gameType == WorldSettings.GameType.SPECTATOR) {
+        if (this.gameType == GameType.SPECTATOR) {
             TileEntity tileentity = worldIn.getTileEntity(pos);
 
             if (tileentity instanceof ILockableContainer) {

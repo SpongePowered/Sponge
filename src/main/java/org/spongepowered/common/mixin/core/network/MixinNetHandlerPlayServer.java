@@ -49,6 +49,7 @@ import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
@@ -123,7 +124,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
@@ -634,11 +634,17 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
+    @Inject(method = "processRightClickBlock", at = @At(value = "HEAD"))
+    public void onProcessPlayerBlockPlacement(CPacketPlayerTryUseItemOnBlock packetIn, CallbackInfo ci) {
+        if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
+        }
+    }
 
     @Inject(method = "processPlayerDigging", at = @At("HEAD"), cancellable = true)
     public void injectDig(CPacketPlayerDigging packetIn, CallbackInfo ci) {
         if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            StaticMixinHelper.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
+            SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
         }
     }
 
@@ -773,16 +779,17 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     // Format disconnection message properly, causes weird messages with our console colors
     // Also see https://bugs.mojang.com/browse/MC-59535
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
-            target = "Ljava/lang/StringBuilder;append(Ljava/lang/Object;)Ljava/lang/StringBuilder;", ordinal = 0, remap = false))
-    private StringBuilder onDisconnectReasonToString(StringBuilder builder, Object reason) {
-        return builder.append(SpongeTexts.toLegacy((ITextComponent) reason));
+            target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 0, remap = false))
+    private void logDisconnect(Logger logger, String message, Object[] args) {
+        args[1] = SpongeTexts.toLegacy((ITextComponent) args[1]);
+        logger.info(message, args);
     }
 
     @Inject(method = "handleAnimation", at = @At(value = "HEAD"))
     public void onProcessAnimationHead(CPacketAnimation packetIn, CallbackInfo ci) {
         if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            StaticMixinHelper.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
-            StaticMixinHelper.lastAnimationPlayer = this.playerEntity;
+            SpongeCommonEventFactory.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
+            SpongeCommonEventFactory.lastAnimationPlayer = this.playerEntity;
         }
     }
 }

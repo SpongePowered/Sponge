@@ -26,7 +26,7 @@ package org.spongepowered.common.interfaces.network.play.server;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.WorldSettings;
+import net.minecraft.world.GameType;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -34,13 +34,13 @@ import javax.annotation.Nullable;
 
 public interface IMixinSPacketPlayerListItem {
 
-    void addEntry(GameProfile profile, int latency, WorldSettings.GameType gameMode, @Nullable ITextComponent displayName);
+    void addEntry(GameProfile profile, int latency, GameType gameMode, @Nullable ITextComponent displayName);
 
     default void addEntry(TabListEntry entry) {
         this.addEntry(
                 (GameProfile) entry.getProfile(),
                 entry.getLatency(),
-                (WorldSettings.GameType) (Object) entry.getGameMode(),
+                (GameType) (Object) entry.getGameMode(),
                 entry.getDisplayName().isPresent() ? SpongeTexts.toComponent(entry.getDisplayName().get()) : null
         );
     }

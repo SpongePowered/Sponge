@@ -39,10 +39,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.GameType;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.ISaveHandler;
 import org.apache.logging.log4j.Logger;
@@ -88,6 +88,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
@@ -100,7 +101,6 @@ import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
@@ -139,7 +139,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow public abstract String getFolderName();
     @Shadow public abstract PlayerList getPlayerList();
     @Shadow public abstract EnumDifficulty getDifficulty();
-    @Shadow public abstract WorldSettings.GameType getGameType();
+    @Shadow public abstract GameType getGameType();
     @Shadow protected abstract void setUserMessage(String message);
     @Shadow protected abstract void outputPercentRemaining(String message, int percent);
     @Shadow protected abstract void clearCurrentTask();
@@ -316,9 +316,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      */
     @Overwrite
     protected void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generatorOptions) {
-        StaticMixinHelper.convertingMapFormat = true;
+        SpongeCommonEventFactory.convertingMapFormat = true;
         this.convertMapIfNeeded(overworldFolder);
-        StaticMixinHelper.convertingMapFormat = false;
+        SpongeCommonEventFactory.convertingMapFormat = false;
         this.setUserMessage("menu.loadingLevel");
 
         WorldManager.loadAllWorlds(worldName, seed, type, generatorOptions);
@@ -551,15 +551,15 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Inject(method = "tick", at = @At(value = "RETURN"))
     public void onServerTickEnd(CallbackInfo ci) {
-        int lastAnimTick = StaticMixinHelper.lastAnimationPacketTick;
-        int lastPrimaryTick = StaticMixinHelper.lastPrimaryPacketTick;
-        int lastSecondaryTick = StaticMixinHelper.lastSecondaryPacketTick;
-        EntityPlayerMP player = StaticMixinHelper.lastAnimationPlayer;
+        int lastAnimTick = SpongeCommonEventFactory.lastAnimationPacketTick;
+        int lastPrimaryTick = SpongeCommonEventFactory.lastPrimaryPacketTick;
+        int lastSecondaryTick = SpongeCommonEventFactory.lastSecondaryPacketTick;
+        EntityPlayerMP player = SpongeCommonEventFactory.lastAnimationPlayer;
         if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
             InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Cause.of(NamedCause.source(player)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
             Sponge.getEventManager().post(event);
         }
-        StaticMixinHelper.lastAnimationPacketTick = 0;
+        SpongeCommonEventFactory.lastAnimationPacketTick = 0;
         TimingsManager.FULL_SERVER_TICK.stopTiming();
     }
 
