@@ -57,6 +57,7 @@
         "block.MixinBlockLeaves",
         "block.MixinBlockLever",
         "block.MixinBlockLog",
+        "block.MixinBlockMagma",
         "block.MixinBlockMycelium",
         "block.MixinBlockNetherWart",
         "block.MixinBlockPane",

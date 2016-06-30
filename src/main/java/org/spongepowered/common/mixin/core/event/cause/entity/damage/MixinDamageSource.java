@@ -61,11 +61,7 @@ public abstract class MixinDamageSource implements DamageSource {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(String damageTypeIn, CallbackInfo ci) {
-        final Optional<DamageType> damageType = DamageSourceToTypeProvider.getInstance().get(damageTypeIn);
-        if (!damageType.isPresent()) {
-            DamageSourceToTypeProvider.getInstance().addCustom(damageTypeIn);
-        }
-        this.apiDamageType = damageType.orElse(DamageTypes.CUSTOM);
+        this.apiDamageType = DamageSourceToTypeProvider.getInstance().getOrCustom(damageTypeIn);
     }
 
     @Inject(method = "causeExplosionDamage(Lnet/minecraft/world/Explosion;)Lnet/minecraft/util/DamageSource;", at = @At("HEAD"), cancellable = true)

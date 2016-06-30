@@ -55,7 +55,7 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
         this.damageSourceToTypeMappings.put("generic", DamageTypes.GENERIC);
         this.damageSourceToTypeMappings.put("indirectmagic", DamageTypes.MAGIC);
         this.damageSourceToTypeMappings.put("infire", DamageTypes.FIRE);
-        this.damageSourceToTypeMappings.put("inwall", DamageTypes.CONTACT);
+        this.damageSourceToTypeMappings.put("inwall", DamageTypes.SUFFOCATE);
         this.damageSourceToTypeMappings.put("lava", DamageTypes.FIRE);
         this.damageSourceToTypeMappings.put("lightningbolt", DamageTypes.PROJECTILE);
         this.damageSourceToTypeMappings.put("magic", DamageTypes.MAGIC);
@@ -67,11 +67,21 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
         this.damageSourceToTypeMappings.put("thorns", DamageTypes.MAGIC);
         this.damageSourceToTypeMappings.put("thrown", DamageTypes.PROJECTILE);
         this.damageSourceToTypeMappings.put("wither", DamageTypes.MAGIC);
+        this.damageSourceToTypeMappings.put("hotfloor", DamageTypes.MAGMA);
     }
 
     @Override
     public Optional<DamageType> get(String key) {
         return Optional.ofNullable(this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH)));
+    }
+
+    public DamageType getOrCustom(String key) {
+        final DamageType damageType = this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH));
+        if (damageType == null) {
+            addCustom(key);
+            return DamageTypes.CUSTOM;
+        }
+        return damageType;
     }
 
     @Override
@@ -80,7 +90,7 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
     }
 
     public void addCustom(String in) {
-        this.damageSourceToTypeMappings.put(in, DamageTypes.CUSTOM);
+        this.damageSourceToTypeMappings.put(in.toLowerCase(Locale.ENGLISH), DamageTypes.CUSTOM);
     }
 
     private static final class Holder {
