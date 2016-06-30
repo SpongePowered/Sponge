@@ -63,6 +63,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -908,6 +909,20 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
 
         }
+    }
+
+    @Override
+    public Optional<AABB> getBlockSelectionBox(int x, int y, int z) {
+        return this.world.getBlockSelectionBox(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15));
+    }
+
+    @Override
+    public Optional<AABB> getBlockCollisionBox(int x, int y, int z) {
+        return this.world.getBlockCollisionBox(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15));
+    }
+
+    private User userForUUID(UUID uuid) {
+        return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().getOrCreate(GameProfile.of(uuid, null));
     }
 
     @Override

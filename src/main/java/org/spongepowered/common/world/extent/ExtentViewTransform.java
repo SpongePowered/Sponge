@@ -52,6 +52,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
@@ -511,19 +512,35 @@ public class ExtentViewTransform implements DefaultedExtent {
     }
 
     @Override public Optional<UUID> getCreator(int x, int y, int z) {
-        return this.extent.getCreator(x, y, z);
+        return this.extent.getCreator(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+            this.inverseTransform.transformZ(x, y, z));
     }
 
     @Override public Optional<UUID> getNotifier(int x, int y, int z) {
-        return this.extent.getNotifier(x, y, z);
+        return this.extent.getNotifier(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+            this.inverseTransform.transformZ(x, y, z));
     }
 
     @Override public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
-        this.extent.setCreator(x, y, z, uuid);
+        this.extent.setCreator(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+            this.inverseTransform.transformZ(x, y, z), uuid);
     }
 
     @Override public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
-        this.extent.setNotifier(x, y, z, uuid);
+        this.extent.setNotifier(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+            this.inverseTransform.transformZ(x, y, z), uuid);
+    }
+
+    @Override
+    public Optional<AABB> getBlockSelectionBox(int x, int y, int z) {
+        return this.extent.getBlockSelectionBox(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+            this.inverseTransform.transformZ(x, y, z));
+    }
+
+    @Override
+    public Optional<AABB> getBlockCollisionBox(int x, int y, int z) {
+        return this.extent.getBlockCollisionBox(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+            this.inverseTransform.transformZ(x, y, z));
     }
 
     @Override

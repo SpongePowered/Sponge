@@ -51,6 +51,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
@@ -497,19 +498,35 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override public Optional<UUID> getCreator(int x, int y, int z) {
+        checkRange(x, y, z);
         return this.extent.getCreator(x, y, z);
     }
 
     @Override public Optional<UUID> getNotifier(int x, int y, int z) {
+        checkRange(x, y, z);
         return this.extent.getNotifier(x, y, z);
     }
 
     @Override public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
+        checkRange(x, y, z);
         this.extent.setCreator(x, y, z, uuid);
     }
 
     @Override public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
+        checkRange(x, y, z);
         this.extent.setNotifier(x, y, z, uuid);
+    }
+
+    @Override
+    public Optional<AABB> getBlockSelectionBox(int x, int y, int z) {
+        checkRange(x, y, z);
+        return this.extent.getBlockSelectionBox(x, y, z);
+    }
+
+    @Override
+    public Optional<AABB> getBlockCollisionBox(int x, int y, int z) {
+        checkRange(x, y, z);
+        return this.extent.getBlockCollisionBox(x, y, z);
     }
 
     @Override
