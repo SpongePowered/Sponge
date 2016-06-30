@@ -96,6 +96,8 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
+import org.spongepowered.api.util.AABB;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -696,6 +698,45 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
     }
 
+    @Override
+    public Optional<AABB> getBlockSelectionBox(int x, int y, int z) {
+        checkBlockBounds(x, y, z);
+        final BlockPos pos = new BlockPos(x, y, z);
+        final IBlockState state = getBlockState(pos);
+        final Block type = state.getBlock();
+        type.setBlockBoundsBasedOnState((IBlockAccess) this, pos);
+        try {
+            return Optional.of(new AABB(
+                new Vector3d(type.getBlockBoundsMinX() + x, type.getBlockBoundsMinY() + y, type.getBlockBoundsMinZ() + z),
+                new Vector3d(type.getBlockBoundsMaxX() + x, type.getBlockBoundsMaxY() + y, type.getBlockBoundsMaxZ() + z)
+            ));
+        } catch (IllegalArgumentException exception) {
+            // Box is degenerate
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<AABB> getBlockCollisionBox(int x, int y, int z) {
+        checkBlockBounds(x, y, z);
+        final BlockPos pos = new BlockPos(x, y, z);
+        final IBlockState state = getBlockState(pos);
+        final Block type = state.getBlock();
+        type.setBlockBoundsBasedOnState((IBlockAccess) this, pos);
+        final AxisAlignedBB box = type.getCollisionBoundingBox((net.minecraft.world.World) (Object) this, pos, state);
+        if (box == null) {
+            return Optional.empty();
+        }
+        try {
+            return Optional.of(new AABB(
+                new Vector3d(box.minX, box.minY, box.minZ),
+                new Vector3d(box.maxX, box.maxY, box.maxZ)
+            ));
+        } catch (IllegalArgumentException exception) {
+            // Box is degenerate
+            return Optional.empty();
+        }
+    }
 
     @Nullable
     @Override
