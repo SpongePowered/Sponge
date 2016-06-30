@@ -208,6 +208,9 @@ public abstract class TrackingPhase {
         return false;
     }
 
+    public boolean isWorldGeneration(IPhaseState state) {
+        return false;
+    }
 
     public boolean doesCaptureEntityDrops(IPhaseState currentState) {
         return false;

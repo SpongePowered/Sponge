@@ -663,17 +663,23 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
         final CauseTracker causeTracker = this.getCauseTracker();
         checkBlockBounds(x, y, z);
-        final PhaseContext context = PhaseContext.start()
-                .add(NamedCause.of(InternalNamedCauses.General.PLUGIN_CAUSE, cause))
-                .addCaptures()
-                .add(NamedCause.source(cause.root()));
-        for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-            context.add(NamedCause.of(entry.getKey(), entry.getValue()));
+        final PhaseData peek = causeTracker.getStack().peek();
+        boolean isWorldGen = peek.getState().getPhase().isWorldGeneration(peek.getState());
+        if (!isWorldGen) {
+            final PhaseContext context = PhaseContext.start()
+                    .add(NamedCause.of(InternalNamedCauses.General.PLUGIN_CAUSE, cause))
+                    .addCaptures()
+                    .add(NamedCause.source(cause.root()));
+            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                context.add(NamedCause.of(entry.getKey(), entry.getValue()));
+            }
+            context.complete();
+            causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, context);
         }
-        context.complete();
-        causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, context);
         setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, notifyNeighbors ? 3 : 2);
-        causeTracker.completePhase();
+        if (!isWorldGen) {
+            causeTracker.completePhase();
+        }
     }
 
     private void checkBlockBounds(int x, int y, int z) {

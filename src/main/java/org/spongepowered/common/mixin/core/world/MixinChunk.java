@@ -784,10 +784,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public void onChunkPopulate(IChunkGenerator generator, int x, int z) {
         if (this.worldObj instanceof WorldServer) {
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-            final NamedCause sourceCause = NamedCause.source(this);
             final NamedCause chunkProviderCause = NamedCause.of(InternalNamedCauses.WorldGeneration.CHUNK_PROVIDER, generator);
             causeTracker.switchToPhase(WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                    .add(sourceCause)
                     .add(chunkProviderCause)
                     .add(NamedCause.of("ChunkPos", new Vector2i(x, z)))
                     .addCaptures()

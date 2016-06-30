@@ -33,8 +33,8 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
-import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -73,8 +73,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldSettings;
-import org.apache.logging.log4j.Level;
+import net.minecraft.world.WorldServerMulti;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
@@ -107,13 +106,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
@@ -167,7 +167,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) { return false; } // Shadowed
 
     private boolean justTeleported = false;
-    private boolean ignoreCreativeInventoryEvent;
     @Nullable private Location<World> lastMoveLocation = null;
 
     private final Map<String, ResourcePack> sentResourcePacks = new HashMap<>();
@@ -421,6 +420,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.playerEntity.getServerWorld());
 
         if (this.playerEntity.interactionManager.isCreative()) {
+            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.playerEntity.getServerWorld();
+            final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
+            final PhaseContext context = peek.getContext();
+            final boolean ignoresCreative = context.firstNamed(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class).get();
             boolean clickedOutside = packetIn.getSlotId() < 0;
             ItemStack itemstack = packetIn.getStack();
 
@@ -442,15 +445,14 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 }
             }
 
-            // Sponge Start - rename some of these local variables
             boolean clickedHotbar = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
             boolean itemValidCheck = itemstack == null || itemstack.getItem() != null;
             boolean itemValidCheck2 = itemstack == null || itemstack.getMetadata() >= 0 && itemstack.stackSize <= 64 && itemstack.stackSize > 0;
 
-            // if (clickedHotbar && itemValidCheck && itemValidCheck2) // Sponge - remove the click hotbar for separation of events
+            // Sponge start - handle CreativeInventoryEvent
             if (itemValidCheck && itemValidCheck2) {
-                final CreativeInventoryEvent.Drop dropEvent;
-                if (!this.ignoreCreativeInventoryEvent) {
+                CreativeInventoryEvent.Drop dropEvent = null;
+                if (!ignoresCreative) {
                     CreativeInventoryEvent clickEvent = SpongeCommonEventFactory.callCreativeClickInventoryEvent(this.playerEntity, packetIn);
                     if (clickEvent.isCancelled()) {
                         // Reset slot on client
@@ -475,8 +477,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         }
                         return;
                     }
-                } else {
-                    dropEvent = null;
                 }
 
                 if (clickedHotbar) {
@@ -487,17 +487,15 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
 
                     this.playerEntity.inventoryContainer.setCanCraft(this.playerEntity, true);
-                    //             else if (flag && flag2 && flag3 && this.itemDropThreshold < 200) // Sponge - remove the flags as we already process them in the event
                 } else if (clickedOutside && this.itemDropThreshold < 200) {
                     this.itemDropThreshold += 20;
                     if (dropEvent != null) {
-                        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.playerEntity.worldObj;
                         for (org.spongepowered.api.entity.Entity entity : dropEvent.getEntities()) {
                             if (entity instanceof EntityItem) {
                                 EntityItem entityitem = (EntityItem) entity;
                                 entityitem.setAgeToCreativeDespawnTime();
                                 // Ignore spawn event as we handle this above
-                                mixinWorldServer.forceSpawnEntity(entityitem);
+                                this.playerEntity.worldObj.spawnEntityInWorld(entityitem);
                             }
                         }
                     }

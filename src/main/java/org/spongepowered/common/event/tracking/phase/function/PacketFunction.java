@@ -512,71 +512,8 @@ public interface PacketFunction {
     }
 
     PacketFunction CREATIVE = (packet, state, player, context) -> {
-        ((IMixinContainer) player.inventoryContainer).setCaptureInventory(false);
-        boolean ignoringCreative = context.firstNamed(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class).orElse(false);
-        if (!ignoringCreative) {
-            final CPacketCreativeInventoryAction packetIn = ((CPacketCreativeInventoryAction) packet);
-            final ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing the cursor item in use, but found none.", context));
-            final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
-            final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-            final List<EntityItem> capturedEntityItems = context.getCapturedItems();
-            final Cause cause;
-            final Container openContainer = player.openContainer;
-            final List<SlotTransaction> capturedTransactions = ((IMixinContainer) openContainer).getCapturedTransactions();
-            final CreativeInventoryEvent event;
-            if (packetIn.getSlotId() == -1 && capturedEntityItems.size() > 0) {
-                Iterator<EntityItem> iterator = capturedEntityItems.iterator();
-                while (iterator.hasNext()) {
-                    EntityUtil.toMixin(iterator.next()).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                }
-                cause = Cause.source(
-                        EntitySpawnCause.builder()
-                                .entity(EntityUtil.fromNative(player))
-                                .type(InternalSpawnTypes.DROPPED_ITEM)
-                                .build())
-                        .build();
+        final CPacketCreativeInventoryAction creativeInventoryAction = (CPacketCreativeInventoryAction) packet;
 
-                final ArrayList<Entity> entities = new ArrayList<>();
-                for (EntityItem capturedEntityItem : capturedEntityItems) {
-                    entities.add(EntityUtil.fromNative(capturedEntityItem));
-                }
-                event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, entities,
-                        ContainerUtil.fromNative(openContainer), (World) player.worldObj,
-                        capturedTransactions);
-            } else {
-                cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", ""));
-                PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, capturedTransactions);
-                event = SpongeEventFactory.createCreativeInventoryEventClick(cause, cursorTransaction, ContainerUtil.fromNative(openContainer),
-                                capturedTransactions);
-            }
-            SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
-                if (event instanceof CreativeInventoryEvent.Drop) {
-                    capturedEntityItems.clear();
-                }
-
-                // Restore cursor
-                PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getOriginal());
-
-                // Restore target slots
-                PacketPhaseUtil.handleSlotRestore(player, event.getTransactions());
-            } else {
-                PacketPhaseUtil.handleCustomSlot(player, event.getTransactions());
-
-                // Custom cursor
-                if (event.getCursorTransaction().getCustom().isPresent()) {
-                    PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
-                }
-                if (event instanceof CreativeInventoryEvent.Drop) {
-                    for (Entity entity : ((CreativeInventoryEvent.Drop) event).getEntities()) {
-                        TrackingUtil.associateEntityCreator(context, EntityUtil.toNative(entity), (WorldServer) player.worldObj);
-                        ((IMixinWorldServer) player.worldObj).forceSpawnEntity(entity);
-                    }
-                }
-            }
-            capturedTransactions.clear();
-        }
 
     };
 
