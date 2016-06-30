@@ -318,7 +318,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Nullable
     @Overwrite
     public EntityItem dropItem(@Nullable ItemStack droppedItem, boolean dropAround, boolean traceItem) {
-        if (droppedItem == null || droppedItem.stackSize == 0) {
+        if (droppedItem == null || droppedItem.stackSize == 0 || droppedItem.getItem() == null) {
             return null;
         } else if (this.worldObj.isRemote) {
             double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();

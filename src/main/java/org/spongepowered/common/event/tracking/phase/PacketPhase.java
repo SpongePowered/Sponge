@@ -606,7 +606,10 @@ public final class PacketPhase extends TrackingPhase {
 
             @Override
             public boolean doesCaptureEntityDrops() {
-                return false;
+                // We specifically capture because the entities are already
+                // being captured in a drop event, and therefor will be
+                // spawned manually into the world by the creative event handling.
+                return true;
             }
         },
         PLACE_BLOCK() {

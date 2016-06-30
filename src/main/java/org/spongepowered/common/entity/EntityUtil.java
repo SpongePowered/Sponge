@@ -606,27 +606,26 @@ public final class EntityUtil {
         final double posX = entity.posX;
         final double posY = entity.posY + offsetY;
         final double posZ = entity.posZ;
-        if (itemStack.getItem() != null) {
-            // FIRST we want to throw the DropItemEvent.PRE
-            final ItemStackSnapshot snapshot = ItemStackUtil.createSnapshot(itemStack);
-            final List<ItemStackSnapshot> original = new ArrayList<>();
-            original.add(snapshot);
-            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(entity)),
-                    ImmutableList.of(snapshot), original);
-            if (dropEvent.isCancelled()) {
-                return null;
-            }
-
-            // SECOND throw the ConstructEntityEvent
-            Transform<World> suggested = new Transform<>(mixinEntity.getWorld(), new Vector3d(posX, entity.posY + (double) offsetY, posZ));
-            SpawnCause cause = EntitySpawnCause.builder().entity(mixinEntity).type(SpawnTypes.DROPPED_ITEM).build();
-            ConstructEntityEvent.Pre event = SpongeEventFactory
-                    .createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, suggested);
-            SpongeImpl.postEvent(event);
-            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
-        } else {
+        if (itemStack.stackSize == 0 || itemStack.getItem() == null) {
             return null;
         }
+        // FIRST we want to throw the DropItemEvent.PRE
+        final ItemStackSnapshot snapshot = ItemStackUtil.createSnapshot(itemStack);
+        final List<ItemStackSnapshot> original = new ArrayList<>();
+        original.add(snapshot);
+        final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(entity)),
+                ImmutableList.of(snapshot), original);
+        if (dropEvent.isCancelled()) {
+            return null;
+        }
+
+        // SECOND throw the ConstructEntityEvent
+        Transform<World> suggested = new Transform<>(mixinEntity.getWorld(), new Vector3d(posX, entity.posY + (double) offsetY, posZ));
+        SpawnCause cause = EntitySpawnCause.builder().entity(mixinEntity).type(SpawnTypes.DROPPED_ITEM).build();
+        ConstructEntityEvent.Pre event = SpongeEventFactory
+                .createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, suggested);
+        SpongeImpl.postEvent(event);
+        item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
         if (item == null) {
             return null;
         }
@@ -683,26 +682,23 @@ public final class EntityUtil {
         final double posZ = player.posZ;
         // Now the real fun begins.
         final ItemStack item;
-        if (droppedItem.getItem() != null) {
-            // FIRST we want to throw the DropItemEvent.PRE
-            final ItemStackSnapshot snapshot = ItemStackUtil.createSnapshot(droppedItem);
-            final List<ItemStackSnapshot> original = new ArrayList<>();
-            original.add(snapshot);
-            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(player)),
-                    ImmutableList.of(snapshot), original);
-            if (dropEvent.isCancelled()) {
-                return null;
-            }
 
-            // SECOND throw the ConstructEntityEvent
-            Transform<World> suggested = new Transform<>(mixinPlayer.getWorld(), new Vector3d(posX, adjustedPosY, posZ));
-            SpawnCause cause = EntitySpawnCause.builder().entity(mixinPlayer).type(SpawnTypes.DROPPED_ITEM).build();
-            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, suggested);
-            SpongeImpl.postEvent(event);
-            item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
-        } else {
+        // FIRST we want to throw the DropItemEvent.PRE
+        final ItemStackSnapshot snapshot = ItemStackUtil.createSnapshot(droppedItem);
+        final List<ItemStackSnapshot> original = new ArrayList<>();
+        original.add(snapshot);
+        final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(player)),
+                ImmutableList.of(snapshot), original);
+        if (dropEvent.isCancelled()) {
             return null;
         }
+
+        // SECOND throw the ConstructEntityEvent
+        Transform<World> suggested = new Transform<>(mixinPlayer.getWorld(), new Vector3d(posX, adjustedPosY, posZ));
+        SpawnCause cause = EntitySpawnCause.builder().entity(mixinPlayer).type(SpawnTypes.DROPPED_ITEM).build();
+        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, suggested);
+        SpongeImpl.postEvent(event);
+        item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.getDroppedItems().get(0));
         if (item == null) {
             return null;
         }
