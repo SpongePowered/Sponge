@@ -160,7 +160,7 @@ public final class SpongePlayerDataHandler {
                 try {
                     Files.deleteIfExists(finalDatPath);
                 } catch (IOException ioe) {
-                    SpongeImpl.getLogger().warn("Failed to delete the previous file [" + finalDatPath + "]!", ioe);
+                    SpongeImpl.getLogger().error("Failed to delete the previous file [" + finalDatPath + "]!", ioe);
                     return;
                 }
 
