@@ -176,9 +176,7 @@ public final class CauseTracker {
             }
             try { // Yes this is a nested try, but in the event the current phase cannot be unwound, at least unwind UNWINDING
                 this.currentProcessingState = currentPhaseData;
-                SpongeTimings.TRACKING_PHASE_UNWINDING.startTiming();
                 phase.unwind(this, state, context);
-                SpongeTimings.TRACKING_PHASE_UNWINDING.stopTiming();
                 this.currentProcessingState = null;
             } catch (Exception e) {
                 printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
