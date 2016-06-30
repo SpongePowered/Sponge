@@ -50,12 +50,6 @@ public abstract class MixinBlockMagma extends MixinBlock {
             DamageSource.hotFloor =
                     new MinecraftBlockDamageSource("hotFloor", new Location<>((World) world, VecHelper.toVector3i(pos))).setFireDamage();
             boolean result = entity.attackEntityFrom(DamageSource.hotFloor, damage);
-            final PrettyPrinter printer = new PrettyPrinter(40);
-            printer.add("Magma!").centre().hr()
-                    .add("%s : %s", "World", world)
-                    .add("%s : %s", "Position", pos)
-                    .addWrapped("%s : %s", "Damage Source", DamageSource.hotFloor)
-                    .trace(Level.ERROR);
             DamageSource.hotFloor = originalDamageSource;
             return result;
         }
