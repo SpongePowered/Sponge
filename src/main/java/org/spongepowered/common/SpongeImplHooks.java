@@ -47,6 +47,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.Teleporter;
+import net.minecraft.world.WorldProvider;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -180,5 +181,13 @@ public final class SpongeImplHooks {
 
     public static void registerPortalAgentType(@Nullable Teleporter teleporter) {
         // plugins are required to register types
+    }
+
+    public static boolean canDoLightning(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
+        return true;
+    }
+
+    public static boolean canDoRainSnowIce(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
+        return true;
     }
 }

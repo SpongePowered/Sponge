@@ -59,6 +59,7 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldProvider;
@@ -173,6 +174,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -223,6 +225,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final public net.minecraft.world.border.WorldBorder worldBorder;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
     @Shadow protected WorldInfo worldInfo;
+    @Shadow public Set<ChunkCoordIntPair> activeChunkSet;
+    @Shadow protected int updateLCG;
 
     @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow public abstract EnumDifficulty shadow$getDifficulty();
@@ -258,6 +262,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
+    @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
+    @Shadow protected abstract void playMoodSoundAndCheckLight(int x, int z, net.minecraft.world.chunk.Chunk chunkIn);
+    @Shadow protected abstract void setActivePlayerChunksAndCheckLight();
 
     // @formatter:on
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -1406,6 +1413,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     private net.minecraft.world.World asMinecraftWorld() {
         return (net.minecraft.world.World) (Object) this;
+    }
+
+    /**
+     * @author blood - July 1st, 2016
+     *
+     * @reason Added chunk and block tick optimizations.
+     */
+    @Overwrite
+    protected void updateBlocks() {
+        this.setActivePlayerChunksAndCheckLight();
     }
 
     @Override

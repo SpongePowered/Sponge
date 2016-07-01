@@ -145,9 +145,9 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
      */
     @Overwrite
     public Chunk provideChunk(int x, int z) {
-        Chunk chunk = (Chunk)this.id2ChunkMap.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(x, z));
+        Chunk chunk = this.id2ChunkMap.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(x, z));
         if (chunk == null) {
-            if (!this.worldObj.isFindingSpawnPoint() && !this.chunkLoadOverride) {
+            if (canDenyChunkRequest()) {
                 return this.dummyChunk;
             } else {
                 return this.loadChunk(x, z);
@@ -155,6 +155,19 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         } else {
             return chunk;
         }
+    }
+
+    private boolean canDenyChunkRequest() {
+        if (this.chunkLoadOverride || this.worldObj.isFindingSpawnPoint()) {
+            return false;
+        }
+
+        final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
+        if (causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning() || causeTracker.isCapturingTerrainGen()) {
+            return true;
+        }
+
+        return false;
     }
 
     @Inject(method = "unloadQueuedChunks", at = @At("HEAD"))

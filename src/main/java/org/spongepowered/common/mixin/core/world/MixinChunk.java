@@ -117,6 +117,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     private org.spongepowered.api.world.World world;
     private UUID uuid;
     private Chunk[] neighbors = new Chunk[4];
+    private static final Direction[] CARDINAL_DIRECTIONS = new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
 
     private static final int NUM_XZ_BITS = 4;
     private static final int NUM_SHORT_Y_BITS = 8;
@@ -987,6 +988,17 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public boolean areNeighborsLoaded() {
+        for (Direction direction : CARDINAL_DIRECTIONS) {
+            if (!this.getNeighbor(direction, false).isPresent()) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private static int directionToIndex(Direction direction) {

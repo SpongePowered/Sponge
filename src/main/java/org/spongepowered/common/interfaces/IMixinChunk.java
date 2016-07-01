@@ -64,4 +64,6 @@ public interface IMixinChunk {
 
     void setNeighbor(Direction direction, Chunk neighbor);
 
+    boolean areNeighborsLoaded();
+
 }

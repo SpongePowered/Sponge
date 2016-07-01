@@ -29,12 +29,16 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 @Mixin(World.class)
 public abstract class MixinWorld_Lighting {
@@ -48,6 +52,7 @@ public abstract class MixinWorld_Lighting {
     @Shadow public abstract int getLight(BlockPos pos);
     @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
 
+    @Shadow @Final public boolean isRemote;
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract int getSkylightSubtracted();
@@ -69,19 +74,14 @@ public abstract class MixinWorld_Lighting {
         }
     }
 
-    @Inject(method = "getRawLight", at = @At(value = "HEAD"), cancellable = true)
-    public void onGetRawLight(BlockPos pos, EnumSkyBlock lightType, CallbackInfoReturnable<Integer> callbackInfo) {
-        if (!this.isBlockLoaded(pos)) {
-            callbackInfo.setReturnValue(0);
-            callbackInfo.cancel();
-        }
-    }
-
     @Inject(method = "checkLightFor", at = @At(value = "HEAD"), cancellable = true)
     public void onCheckLightFor(EnumSkyBlock lightType, BlockPos pos, CallbackInfoReturnable<Boolean> callbackInfo) {
-        if (!this.isBlockLoaded(pos)) {
-            callbackInfo.setReturnValue(false);
-            callbackInfo.cancel();
+        if (!this.isRemote) {
+            final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
+            if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
+                callbackInfo.setReturnValue(false);
+                callbackInfo.cancel();
+            }
         }
     }
 }
