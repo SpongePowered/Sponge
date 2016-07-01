@@ -185,7 +185,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
         Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
         for (Direction direction : directions) {
-            Vector3i neighborPosition = this.getPosition().add(direction.toVector3d().toInt());
+            Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
             net.minecraft.world.chunk.Chunk neighbor = ((IMixinChunkProviderServer) this.worldObj.getChunkProvider()).getChunkIfLoaded
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
@@ -203,7 +203,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
         Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
         for (Direction direction : directions) {
-            Vector3i neighborPosition = this.getPosition().add(direction.toVector3d().toInt());
+            Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
             net.minecraft.world.chunk.Chunk neighbor = ((IMixinChunkProviderServer) this.worldObj.getChunkProvider()).getChunkIfLoaded
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
@@ -972,7 +972,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         neighbor = this.neighbors[index];
 
         if (neighbor == null && shouldLoad) {
-            Vector3i neighborPosition = this.getPosition().add(getCardinalDirection(direction).toVector3d().toInt());
+            Vector3i neighborPosition = this.getPosition().add(getCardinalDirection(direction).asBlockOffset());
             Optional<Chunk> cardinal = this.getWorld().loadChunk(neighborPosition, true);
             if (cardinal.isPresent()) {
                 neighbor = cardinal.get();
