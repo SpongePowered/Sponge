@@ -313,11 +313,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                     // Sponge start - capture random tick
                                     // ++i;
                                     BlockPos pos = new BlockPos(l1 + k, j2 + extendedblockstorage.getYLocation(), i2 + l);
+                                    IMixinBlock spongeBlock = (IMixinBlock) block;
+                                    spongeBlock.getTimingsHandler().startTiming();
                                     if (causeTracker.hasTickingBlock() || causeTracker.isIgnoringCaptures()) {
                                         block.randomTick(this.mcWorldServer, pos, iblockstate, this.rand);
                                     } else {
                                         causeTracker.randomTickBlock(block, pos, iblockstate, this.rand);
                                     }
+                                    spongeBlock.getTimingsHandler().stopTiming();
                                     // Sponge end
                                 }
                             }
