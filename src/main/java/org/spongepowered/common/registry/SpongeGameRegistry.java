@@ -207,7 +207,7 @@ public class SpongeGameRegistry implements GameRegistry {
     @SuppressWarnings("unchecked")
     public <T extends CatalogType> Optional<CatalogRegistryModule<T>> getRegistryModuleFor(Class<T> catalogClass) {
         checkNotNull(catalogClass);
-        return Optional.of((CatalogRegistryModule<T>) this.catalogRegistryMap.get(catalogClass));
+        return Optional.ofNullable((CatalogRegistryModule<T>) this.catalogRegistryMap.get(catalogClass));
     }
 
     @SuppressWarnings("unchecked")
@@ -256,7 +256,7 @@ public class SpongeGameRegistry implements GameRegistry {
             return builder.build();
         }
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public <T extends ResettableBuilder<?, ? super T>> T createBuilder(Class<T> builderClass) {
