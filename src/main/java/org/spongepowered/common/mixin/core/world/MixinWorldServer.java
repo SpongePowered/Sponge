@@ -224,16 +224,20 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     continue;
                 }
                 // Sponge end
+                this.timings.updateBlocksCheckNextLight.startTiming();
                 this.playMoodSoundAndCheckLight(k, l, chunk);
+                this.timings.updateBlocksCheckNextLight.stopTiming();
                 this.theProfiler.endStartSection("tickChunk");
+                this.timings.updateBlocksChunkTick.startTiming();
                 chunk.func_150804_b(false);
+                this.timings.updateBlocksChunkTick.stopTiming();
                 // Sponge start - if surrounding neighbors are not loaded, skip
                 if (!((IMixinChunk) chunk).areNeighborsLoaded()) {
                     continue;
                 }
                 // Sponge end
                 this.theProfiler.endStartSection("thunder");
-
+                this.timings.updateBlocksThunder.startTiming();
                 if (SpongeImplHooks.canDoLightning(this.provider, chunk) && this.rand.nextInt(100000) == 0 && this.mcWorldServer.isRaining() && this.mcWorldServer.isThundering())
                 {
                     this.updateLCG = this.updateLCG * 3 + 1013904223;
@@ -254,6 +258,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     }
                     // Sponge end
                 }
+                this.timings.updateBlocksThunder.stopTiming();
+                this.timings.updateBlocksIceAndSnow.startTiming();
 
                 this.theProfiler.endStartSection("iceandsnow");
 
@@ -274,12 +280,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         this.mcWorldServer.setBlockState(blockpos2, Blocks.snow_layer.getDefaultState());
                     }
 
-                    if (this.mcWorldServer.isRaining() && this.getBiomeGenForCoords(blockpos1).canRain())
+                    if (this.mcWorldServer.isRaining() && this.mcWorldServer.getBiomeGenForCoords(blockpos1).canRain())
                     {
                         this.getBlockState(blockpos1).getBlock().fillWithRain(this.mcWorldServer, blockpos1);
                     }
                 }
 
+                this.timings.updateBlocksIceAndSnow.stopTiming();
+                this.timings.updateBlocksRandomTick.startTiming();
                 this.theProfiler.endStartSection("tickBlocks");
                 int l2 = this.mcWorldServer.getGameRules().getInt("randomTickSpeed");
 
@@ -307,10 +315,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                     BlockPos pos = new BlockPos(l1 + k, j2 + extendedblockstorage.getYLocation(), i2 + l);
                                     if (causeTracker.hasTickingBlock() || causeTracker.isIgnoringCaptures()) {
                                         block.randomTick(this.mcWorldServer, pos, iblockstate, this.rand);
-                                        return;
+                                    } else {
+                                        causeTracker.randomTickBlock(block, pos, iblockstate, this.rand);
                                     }
-
-                                    causeTracker.randomTickBlock(block, pos, iblockstate, this.rand);
                                     // Sponge end
                                 }
                             }
@@ -318,6 +325,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     }
                 }
 
+                this.timings.updateBlocksRandomTick.stopTiming();
                 this.theProfiler.endSection();
             }
         }
@@ -440,12 +448,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickBlocks") )
     private void onAfterTickBlockUpdate(CallbackInfo ci) {
         this.timings.scheduledBlocks.stopTiming();
-        this.timings.chunkTicks.startTiming();
+        this.timings.updateBlocks.startTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=chunkMap") )
     private void onBeginUpdateBlocks(CallbackInfo ci) {
-        this.timings.chunkTicks.stopTiming();
+        this.timings.updateBlocks.stopTiming();
         this.timings.doChunkMap.startTiming();
     }
 
@@ -687,14 +695,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     try
                     {
                         // Sponge start - handle captures and timings
+                        spongeTile.getTimingsHandler().startTiming();
                         boolean captureBlocks = this.causeTracker.isCapturingBlocks();
                         this.causeTracker.setCaptureBlocks(true);
                         this.causeTracker.preTrackTileEntity((TileEntity) tileentity);
-                        spongeTile.getTimingsHandler().startTiming();
                         ((ITickable)tileentity).update();
-                        spongeTile.getTimingsHandler().stopTiming();
                         this.causeTracker.postTrackTileEntity();
                         this.causeTracker.setCaptureBlocks(captureBlocks);
+                        spongeTile.getTimingsHandler().stopTiming();
                         // Sponge end
                     }
                     catch (Throwable throwable)
