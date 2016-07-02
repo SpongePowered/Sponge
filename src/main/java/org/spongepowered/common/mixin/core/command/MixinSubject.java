@@ -176,4 +176,10 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
         Subject subj = internalSubject();
         return subj == null ? Collections.<Context>emptySet() : subj.getActiveContexts();
     }
+
+    @Override
+    public Optional<String> getOption(Set<Context> contexts, String key) {
+        Subject subj = internalSubject();
+        return subj == null ? Optional.empty() : subj.getOption(contexts, key);
+    }
 }

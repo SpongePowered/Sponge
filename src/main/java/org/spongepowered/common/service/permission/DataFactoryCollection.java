@@ -114,7 +114,18 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
                 ret = getDataPermissionValue(DataFactoryCollection.this.service.getDefaults().getTransientSubjectData(), permission);
             }
             return ret;
+        }
 
+        @Override
+        public String getDataOptionValue(MemorySubjectData data, String permission) {
+            String ret = super.getDataOptionValue(data, permission);
+            if (ret == null) {
+                ret = getDataOptionValue(DataFactoryCollection.this.getDefaults().getSubjectData(), permission);
+            }
+            if (ret == null) {
+                ret = getDataOptionValue(DataFactoryCollection.this.service.getDefaults().getSubjectData(), permission);
+            }
+            return ret;
         }
     }
 }

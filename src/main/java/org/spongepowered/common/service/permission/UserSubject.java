@@ -133,6 +133,17 @@ public class UserSubject extends SpongeSubject {
             ret = Tristate.TRUE;
         }
         return ret;
+    }
 
+    @Override
+    public String getDataOptionValue(MemorySubjectData data, String permission) {
+        String ret = super.getDataOptionValue(data, permission);
+        if (ret == null) {
+            ret = getDataOptionValue(this.collection.getDefaults().getSubjectData(), permission);
+        }
+        if (ret == null) {
+            ret = getDataOptionValue(this.collection.getService().getDefaults().getSubjectData(), permission);
+        }
+        return ret;
     }
 }

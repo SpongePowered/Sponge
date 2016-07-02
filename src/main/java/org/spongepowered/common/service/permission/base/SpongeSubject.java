@@ -31,6 +31,7 @@ import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public abstract class SpongeSubject implements Subject {
@@ -76,6 +77,26 @@ public abstract class SpongeSubject implements Subject {
     @Override
     public List<Subject> getParents(Set<Context> contexts) {
         return getSubjectData().getParents(contexts);
+    }
+
+    protected String getDataOptionValue(MemorySubjectData subject, String option) {
+        String res = subject.getOptions(SubjectData.GLOBAL_CONTEXT).get(option);
+
+        if (res == null) {
+            for (Subject parent : subject.getParents(SubjectData.GLOBAL_CONTEXT)) {
+                Optional<String> tempRes = parent.getOption(SubjectData.GLOBAL_CONTEXT, option);
+                if (tempRes.isPresent()) {
+                    res = tempRes.get();
+                    break;
+                }
+            }
+        }
+        return res;
+    }
+
+    @Override
+    public Optional<String> getOption(Set<Context> contexts, String key) {
+        return Optional.ofNullable(getDataOptionValue(getSubjectData(), key));
     }
 
     @Override
