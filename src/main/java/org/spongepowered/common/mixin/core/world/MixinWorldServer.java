@@ -208,6 +208,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             //int j = 0;
 
             final CauseTracker causeTracker = this.getCauseTracker();
+            boolean captureBlocks = causeTracker.isCapturingBlocks();
             Iterator<ChunkCoordIntPair> iterator = this.activeChunkSet.iterator();
             while (iterator.hasNext())
             {
@@ -238,6 +239,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 // Sponge end
                 this.theProfiler.endStartSection("thunder");
                 this.timings.updateBlocksThunder.startTiming();
+                causeTracker.setCaptureBlocks(true);
                 if (SpongeImplHooks.canDoLightning(this.provider, chunk) && this.rand.nextInt(100000) == 0 && this.mcWorldServer.isRaining() && this.mcWorldServer.isThundering())
                 {
                     this.updateLCG = this.updateLCG * 3 + 1013904223;
@@ -258,9 +260,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     }
                     // Sponge end
                 }
+
                 this.timings.updateBlocksThunder.stopTiming();
                 this.timings.updateBlocksIceAndSnow.startTiming();
-
                 this.theProfiler.endStartSection("iceandsnow");
 
                 if (SpongeImplHooks.canDoRainSnowIce(this.provider, chunk)  && this.rand.nextInt(16) == 0)
@@ -286,6 +288,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     }
                 }
 
+                causeTracker.setCaptureBlocks(captureBlocks);
                 this.timings.updateBlocksIceAndSnow.stopTiming();
                 this.timings.updateBlocksRandomTick.startTiming();
                 this.theProfiler.endStartSection("tickBlocks");
