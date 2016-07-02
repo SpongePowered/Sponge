@@ -152,6 +152,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private int chunkGCLoadThreshold = 0;
     private int chunkGCTickInterval = 600;
     private boolean isCapturingBlocks = false;
+    private boolean weatherThunderEnabled = true;
+    private boolean weatherIceAndSnowEnabled = true;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(CallbackInfo ci) {
@@ -173,6 +175,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         updateWorldGenerator();
         this.chunkGCLoadThreshold = this.getActiveConfig().getConfig().getWorld().getChunkLoadThreadhold();
         this.chunkGCTickInterval = this.getActiveConfig().getConfig().getWorld().getTickInterval();
+        this.weatherIceAndSnowEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherIceAndSnow();
+        this.weatherThunderEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherThunder();
     }
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
@@ -240,7 +244,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 this.theProfiler.endStartSection("thunder");
                 this.timings.updateBlocksThunder.startTiming();
                 causeTracker.setCaptureBlocks(true);
-                if (SpongeImplHooks.canDoLightning(this.provider, chunk) && this.rand.nextInt(100000) == 0 && this.mcWorldServer.isRaining() && this.mcWorldServer.isThundering())
+                if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.provider, chunk) && this.rand.nextInt(100000) == 0 && this.mcWorldServer.isRaining() && this.mcWorldServer.isThundering())
                 {
                     this.updateLCG = this.updateLCG * 3 + 1013904223;
                     int i1 = this.updateLCG >> 2;
@@ -265,7 +269,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 this.timings.updateBlocksIceAndSnow.startTiming();
                 this.theProfiler.endStartSection("iceandsnow");
 
-                if (SpongeImplHooks.canDoRainSnowIce(this.provider, chunk)  && this.rand.nextInt(16) == 0)
+                if (this.weatherIceAndSnowEnabled && SpongeImplHooks.canDoRainSnowIce(this.provider, chunk)  && this.rand.nextInt(16) == 0)
                 {
                     this.updateLCG = this.updateLCG * 3 + 1013904223;
                     int k2 = this.updateLCG >> 2;
@@ -1030,6 +1034,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // update cached settings
         this.chunkGCLoadThreshold = this.activeConfig.getConfig().getWorld().getChunkLoadThreadhold();
         this.chunkGCTickInterval = this.activeConfig.getConfig().getWorld().getTickInterval();
+        this.weatherIceAndSnowEnabled = this.activeConfig.getConfig().getWorld().getWeatherIceAndSnow();
+        this.weatherThunderEnabled = this.activeConfig.getConfig().getWorld().getWeatherThunder();
         if (this.getChunkProvider() != null) {
             final IMixinChunkProviderServer mixinChunkProvider = (IMixinChunkProviderServer) this.getChunkProvider();
             final int maxChunkUnloads = this.activeConfig.getConfig().getWorld().getMaxChunkUnloads();

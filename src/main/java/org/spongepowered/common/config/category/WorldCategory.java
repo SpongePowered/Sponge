@@ -94,6 +94,12 @@ public class WorldCategory extends ConfigCategory {
                                                     + "\nareas for more items. Setting to a negative value is not supported!")
     private double itemMergeRadius = 2.5D;
 
+    @Setting(value = "weather-thunder", comment = "Enable to initiate thunderstorms in supported biomes.")
+    private boolean weatherThunder = true;
+
+    @Setting(value = "weather-ice-and-snow", comment = "Enable to allow the natural formation of ice and snow in supported biomes.")
+    private boolean weatherIceAndSnow = true;
+
     public WorldCategory() {
         this.portalAgents.put("minecraft:default_nether", "DIM-1");
         this.portalAgents.put("minecraft:default_the_end", "DIM1");
@@ -184,10 +190,18 @@ public class WorldCategory extends ConfigCategory {
     }
 
     public int getMaxChunkUnloads() {
-        return maxChunkUnloads;
+        return this.maxChunkUnloads;
     }
 
     public double getItemMergeRadius() {
-        return itemMergeRadius;
+        return this.itemMergeRadius;
+    }
+
+    public boolean getWeatherThunder() {
+        return this.weatherThunder;
+    }
+
+    public boolean getWeatherIceAndSnow() {
+        return this.weatherIceAndSnow;
     }
 }
