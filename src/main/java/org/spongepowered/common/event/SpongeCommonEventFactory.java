@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -35,6 +36,8 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
@@ -75,9 +78,11 @@ import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CreativeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.message.MessageEvent;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.text.Text;
@@ -104,9 +109,11 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -119,6 +126,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -133,6 +141,45 @@ public class SpongeCommonEventFactory {
     public static int lastSecondaryPacketTick = 0;
     public static int lastPrimaryPacketTick = 0;
     public static EntityPlayerMP lastAnimationPlayer = null;
+
+    public static boolean callPlayerChangeInventoryPickupEvent(EntityPlayer player, ItemStack itemToPickup, int pickupDelay, UUID creator) {
+        int slotId = ((IMixinInventoryPlayer) player.inventory).getFirstAvailableSlot(itemToPickup);
+        Slot slot = null;
+        if (slotId != -1) {
+            if (slotId < InventoryPlayer.getHotbarSize()) {
+                slot = player.inventoryContainer.getSlot(slotId + player.inventory.mainInventory.length);
+            } else {
+                slot = player.inventoryContainer.getSlot(slotId);
+            }
+        }
+
+        if (pickupDelay <= 0 && slot != null) {
+            ItemStackSnapshot sourceSnapshot =
+                    slot.getStack() != null ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot()
+                                            : ItemStackSnapshot.NONE;
+            ItemStackSnapshot targetSnapshot = null;
+            if (sourceSnapshot != ItemStackSnapshot.NONE) {
+                // combined slot
+                targetSnapshot = org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemToPickup).quantity(itemToPickup.stackSize + slot.getStack().stackSize).build().createSnapshot();
+            } else {
+                // empty slot
+                targetSnapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemToPickup).createSnapshot();
+            }
+
+            ((SpongeItemStackSnapshot) targetSnapshot).setCreator(creator);
+            SlotTransaction slotTransaction =
+                    new SlotTransaction(new SlotAdapter(slot), sourceSnapshot, targetSnapshot);
+            ImmutableList<SlotTransaction> transactions =
+                    new ImmutableList.Builder<SlotTransaction>().add(slotTransaction).build();
+            ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(Cause.of(NamedCause.source(player)),
+                    (Inventory) player.inventoryContainer, transactions);
+            if (SpongeImpl.postEvent(event)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 
     @SuppressWarnings("unchecked")
     @Nullable

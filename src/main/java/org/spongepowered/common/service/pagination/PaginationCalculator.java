@@ -72,7 +72,7 @@ public class PaginationCalculator {
 
             List<? extends ConfigurationNode> glyphWidths = node.getNode("glyph-widths").getChildrenList();
             byte[] unicodeCharWidths = new byte[glyphWidths.size()];
-            for (int i = 0; i < nonUnicodeCharWidths.length; ++i) {
+            for (int i = 0; i < unicodeCharWidths.length; ++i) {
                 unicodeCharWidths[i] = (byte) glyphWidths.get(i).getInt();
             }
             UNICODE_CHAR_WIDTHS = unicodeCharWidths;

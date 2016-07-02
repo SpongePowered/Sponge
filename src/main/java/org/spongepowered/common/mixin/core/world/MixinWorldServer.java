@@ -38,7 +38,10 @@ import net.minecraft.block.BlockEventData;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
+import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.HorseType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
@@ -50,6 +53,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.Teleporter;
@@ -60,6 +64,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
@@ -109,6 +114,7 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
@@ -118,6 +124,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
@@ -135,6 +142,8 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
@@ -163,6 +172,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -192,10 +202,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private int chunkGCTickCount = 0;
     private int chunkGCLoadThreshold = 0;
     private int chunkGCTickInterval = 600;
+    private boolean weatherThunderEnabled = true;
+    private boolean weatherIceAndSnowEnabled = true;
 
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
+    @Shadow @Final private PlayerChunkMap thePlayerManager;
     @Shadow private Teleporter worldTeleporter;
     @Shadow private WorldServer.ServerBlockEventList[] blockEventQueue;
     @Shadow private int blockEventCacheIndex;
@@ -205,6 +218,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
     @Shadow @Override public abstract ChunkProviderServer getChunkProvider();
+    @Shadow protected abstract void playerCheckLight();
+    @Shadow protected abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, CallbackInfo callbackInfo) {
@@ -227,6 +242,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Need to set the active config before we call it.
         this.chunkGCLoadThreshold = SpongeHooks.getActiveConfig((WorldServer) (Object) this).getConfig().getWorld().getChunkLoadThreadhold();
         this.chunkGCTickInterval = this.getActiveConfig().getConfig().getWorld().getTickInterval();
+        this.weatherIceAndSnowEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherIceAndSnow();
+        this.weatherThunderEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherThunder();
     }
 
     @Inject(method = "createBonusChest", at = @At(value = "HEAD"))
@@ -290,12 +307,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // update cached settings
         this.chunkGCLoadThreshold = this.activeConfig.getConfig().getWorld().getChunkLoadThreadhold();
         this.chunkGCTickInterval = this.activeConfig.getConfig().getWorld().getTickInterval();
+        this.weatherIceAndSnowEnabled = this.activeConfig.getConfig().getWorld().getWeatherIceAndSnow();
+        this.weatherThunderEnabled = this.activeConfig.getConfig().getWorld().getWeatherThunder();
         if (this.getChunkProvider() != null) {
-            // This was a thing in 1.8, but is gone in 1.9 - TODO blood see if this is necessary anymore.
-//            this.getChunkProvider().chunkLoadOverride = !this.activeConfig.getConfig().getWorld().getDenyChunkRequests();
             final IMixinChunkProviderServer mixinChunkProvider = (IMixinChunkProviderServer) this.getChunkProvider();
             final int maxChunkUnloads = this.activeConfig.getConfig().getWorld().getMaxChunkUnloads();
             mixinChunkProvider.setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
+//            ((ChunkProviderServer) this.getChunkProvider()).chunkLoadOverride = !this.activeConfig.getConfig().getWorld().getDenyChunkRequests();
             for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
                 if (entity instanceof IModData) {
                     IModData spongeEntity = (IModData) entity;
@@ -401,48 +419,228 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return this.causeTracker;
     }
 
-    @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
-    public void onRandomBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        final CauseTracker causeTracker = this.getCauseTracker();
-        final PhaseData currentTuple = causeTracker.getStack().peek();
-        final IPhaseState phaseState = currentTuple.getState();
-        if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.getContext())) {
-            block.randomTick(worldIn, pos, state, rand);
-            return;
-        }
-
-        TrackingUtil.randomTickBlock(causeTracker, block, pos, state, rand);
-    }
-
-    @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;isRainingAt(Lnet/minecraft/util/math/BlockPos;)Z"))
-    private boolean onLightningCheck(WorldServer world, BlockPos blockPos) {
-        if (world.isRainingAt(blockPos)) {
-            Transform<org.spongepowered.api.world.World> transform = new Transform<>(this, VecHelper.toVector3d(blockPos).toDouble());
-            SpawnCause cause = WeatherSpawnCause.builder().weather(this.getWeather()).type(SpawnTypes.WEATHER).build();
-            ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)),
-                    EntityTypes.LIGHTNING, transform);
-            SpongeImpl.postEvent(event);
-            return !event.isCancelled();
-        }
-        return false;
-    }
 
     /**
-     * @author gabizou - May 17th, 2016
-     * @reason This isn't a modify constant at all, but it's the best injection point I can think of
-     * to head before the World starts performing precipitation changes.
+     * @author blood - July 1st, 2016
+     * @author gabizou - July 1st, 2016 - Update to 1.10 and cause tracking
      *
-     * @param iceAndSnow The "iceandsnow" value
-     * @return The same value, we are not actually modifying it
+     * @reason Added chunk and block tick optimizations, timings, cause tracking, and pre-construction events.
      */
-    @ModifyConstant(method = "updateBlocks", constant = @Constant(stringValue = "iceandsnow"))
-    private String onStartIceAndSnow(String iceAndSnow) {
-        final CauseTracker causeTracker = this.getCauseTracker();
-        causeTracker.switchToPhase(WorldPhase.Tick.WEATHER, PhaseContext.start()
-                .addCaptures()
-                .add(NamedCause.source(this))
-                .complete());
-        return iceAndSnow;
+    @Override
+    @Overwrite
+    protected void updateBlocks() {
+        this.playerCheckLight();
+
+        if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD)
+        {
+            Iterator<net.minecraft.world.chunk.Chunk> iterator1 = this.thePlayerManager.getChunkIterator();
+
+            while (iterator1.hasNext())
+            {
+                iterator1.next().onTick(false);
+            }
+            return;
+        }
+        // else // Sponge - Remove unnecessary else
+        // { //
+
+        int i = this.shadow$getGameRules().getInt("randomTickSpeed");
+        boolean flag = this.isRaining();
+        boolean flag1 = this.isThundering();
+        this.theProfiler.startSection("pollingChunks");
+
+        final CauseTracker causeTracker = this.getCauseTracker(); // Sponge - get the cause tracker
+
+        for (Iterator<net.minecraft.world.chunk.Chunk> iterator = getPersistentChunkIterable(this.thePlayerManager.getChunkIterator()); iterator.hasNext(); this.theProfiler.endSection())
+        {
+            this.theProfiler.startSection("getChunk");
+            net.minecraft.world.chunk.Chunk chunk = iterator.next();
+            int j = chunk.xPosition * 16;
+            int k = chunk.zPosition * 16;
+            this.theProfiler.endStartSection("checkNextLight");
+            this.timings.updateBlocksCheckNextLight.startTiming(); // Sponge - Timings
+            chunk.enqueueRelightChecks();
+            this.timings.updateBlocksCheckNextLight.stopTiming(); // Sponge - Timings
+            this.theProfiler.endStartSection("tickChunk");
+            this.timings.updateBlocksChunkTick.startTiming(); // Sponge - Timings
+            chunk.onTick(false);
+            this.timings.updateBlocksChunkTick.stopTiming(); // Sponge - Timings
+            // Sponge start - if surrounding neighbors are not loaded, skip
+            if (!((IMixinChunk) chunk).areNeighborsLoaded()) {
+                continue;
+            }
+            // Sponge end
+            this.theProfiler.endStartSection("thunder");
+            // Sponge start
+            this.timings.updateBlocksThunder.startTiming();
+
+            //if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0) // Sponge - Add SpongeImplHooks for forge
+            if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.provider, chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
+            {
+                causeTracker.switchToPhase(WorldPhase.Tick.WEATHER, PhaseContext.start()
+                        .addCaptures()
+                        .add(NamedCause.source(this))
+                        .complete());
+                // Sponge end
+                this.updateLCG = this.updateLCG * 3 + 1013904223;
+                int l = this.updateLCG >> 2;
+                BlockPos blockpos = this.adjustPosToNearbyEntity(new BlockPos(j + (l & 15), 0, k + (l >> 8 & 15)));
+
+                if (this.isRainingAt(blockpos))
+                {
+                    DifficultyInstance difficultyinstance = this.getDifficultyForLocation(blockpos);
+
+                    // Sponge - create a transform to be used for events
+                    final Transform<org.spongepowered.api.world.World> transform = new Transform<>(this, VecHelper.toVector3d(blockpos).toDouble());
+
+                    if (this.rand.nextDouble() < (double)difficultyinstance.getAdditionalDifficulty() * 0.05D)
+                    {
+                        // Sponge Start - Throw construction events
+                        SpawnCause horseCause = WeatherSpawnCause.builder().weather(this.getWeather()).type(SpawnTypes.WEATHER).build();
+                        ConstructEntityEvent.Pre constructEntityEvent = SpongeEventFactory.createConstructEntityEventPre(Cause.source(horseCause).build(), EntityTypes.HORSE, transform);
+                        SpongeImpl.postEvent(constructEntityEvent);
+                        if (!constructEntityEvent.isCancelled()) {
+                            // Sponge End
+                            EntityHorse entityhorse = new EntityHorse((WorldServer) (Object) this);
+                            entityhorse.setType(HorseType.SKELETON);
+                            entityhorse.setSkeletonTrap(true);
+                            entityhorse.setGrowingAge(0);
+                            entityhorse.setPosition((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
+                            this.spawnEntityInWorld(entityhorse);
+                            // Sponge Start - Throw a construct event for the lightning
+                        }
+
+                        SpawnCause lightiningCause = WeatherSpawnCause.builder().weather(this.getWeather()).type(SpawnTypes.WEATHER).build();
+                        ConstructEntityEvent.Pre lightning = SpongeEventFactory.createConstructEntityEventPre(Cause.source(lightiningCause).build(), EntityTypes.LIGHTNING, transform);
+                        SpongeImpl.postEvent(lightning);
+                        if (!lightning.isCancelled()) {
+                            // Sponge End
+                            this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), true));
+                        } // Sponge - Brackets.
+                    }
+                    else
+                    {
+                        // Sponge start - Throw construction event for lightningbolts
+
+                        SpawnCause cause = WeatherSpawnCause.builder().weather(this.getWeather()).type(SpawnTypes.WEATHER).build();
+                        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)),
+                                EntityTypes.LIGHTNING, transform);
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            // Sponge End
+                            this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), false));
+                        } // Sponge - Brackets.
+                    }
+                }
+                // Sponge Start - Cause tracker unwind
+                causeTracker.completePhase();
+                // Sponge End
+
+            }
+
+            this.timings.updateBlocksThunder.stopTiming(); // Sponge - Stop thunder timing
+            this.timings.updateBlocksIceAndSnow.startTiming(); // Sponge - Start thunder timing
+            this.theProfiler.endStartSection("iceandsnow");
+
+            // if (this.rand.nextInt(16) == 0) // Sponge - Rewrite to use our boolean, and forge hook
+            if (this.weatherIceAndSnowEnabled && SpongeImplHooks.canDoRainSnowIce(this.provider, chunk) && this.rand.nextInt(16) == 0)
+            {
+                // Sponge Start - Enter weather phase for snow and ice and flooding.
+                causeTracker.switchToPhase(WorldPhase.Tick.WEATHER, PhaseContext.start()
+                        .addCaptures()
+                        .add(NamedCause.source(this))
+                        .complete());
+                // Sponge End
+                this.updateLCG = this.updateLCG * 3 + 1013904223;
+                int j2 = this.updateLCG >> 2;
+                BlockPos blockpos1 = this.getPrecipitationHeight(new BlockPos(j + (j2 & 15), 0, k + (j2 >> 8 & 15)));
+                BlockPos blockpos2 = blockpos1.down();
+
+                if (this.canBlockFreezeNoWater(blockpos2))
+                {
+                    this.setBlockState(blockpos2, Blocks.ICE.getDefaultState());
+                }
+
+                if (flag && this.canSnowAt(blockpos1, true))
+                {
+                    this.setBlockState(blockpos1, Blocks.SNOW_LAYER.getDefaultState());
+                }
+
+                if (flag && this.getBiome(blockpos2).canRain())
+                {
+                    this.getBlockState(blockpos2).getBlock().fillWithRain((WorldServer) (Object) this, blockpos2);
+                }
+                causeTracker.completePhase(); // Sponge - complete weather phase
+            }
+
+            this.timings.updateBlocksIceAndSnow.stopTiming(); // Sponge - Stop ice and snow timing
+            this.timings.updateBlocksRandomTick.startTiming(); // Sponge - Start random block tick timing
+            this.theProfiler.endStartSection("tickBlocks");
+
+            if (i > 0)
+            {
+                for (ExtendedBlockStorage extendedblockstorage : chunk.getBlockStorageArray())
+                {
+                    if (extendedblockstorage != net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE && extendedblockstorage.getNeedsRandomTick())
+                    {
+                        for (int i1 = 0; i1 < i; ++i1)
+                        {
+                            this.updateLCG = this.updateLCG * 3 + 1013904223;
+                            int j1 = this.updateLCG >> 2;
+                            int k1 = j1 & 15;
+                            int l1 = j1 >> 8 & 15;
+                            int i2 = j1 >> 16 & 15;
+                            IBlockState iblockstate = extendedblockstorage.get(k1, i2, l1);
+                            Block block = iblockstate.getBlock();
+                            this.theProfiler.startSection("randomTick");
+
+                            if (block.getTickRandomly())
+                            {
+                                // Sponge start - capture random tick
+                                // Remove the random tick for cause tracking
+                                // block.randomTick(this, new BlockPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k), iblockstate, this.rand);
+
+                                BlockPos pos = new BlockPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k);
+                                IMixinBlock spongeBlock = (IMixinBlock) block;
+                                spongeBlock.getTimingsHandler().startTiming();
+                                final PhaseData currentTuple = causeTracker.getStack().peek();
+                                final IPhaseState phaseState = currentTuple.getState();
+                                if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.getContext())) {
+                                    block.randomTick((WorldServer) (Object) this, pos, iblockstate, rand);
+                                } else {
+                                    TrackingUtil.randomTickBlock(causeTracker, block, pos, iblockstate, rand);
+                                }
+                                spongeBlock.getTimingsHandler().stopTiming();
+                                // Sponge end
+                            }
+
+                            this.theProfiler.endSection();
+                        }
+                    }
+                }
+            }
+        }
+
+        this.timings.updateBlocksRandomTick.stopTiming(); // Sponge - Stop random block timing
+        this.theProfiler.endSection();
+        // } // Sponge- Remove unecessary else
+    }
+
+    @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target= "Lnet/minecraft/world/WorldServer;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"))
+    public boolean onBlockTickIsAreaLoaded(WorldServer worldIn, BlockPos fromPos, BlockPos toPos) {
+        int posX = fromPos.getX() + 8;
+        int posZ = fromPos.getZ() + 8;
+        // Forge passes the same block position for forced chunks
+        if (fromPos.equals(toPos)) {
+            posX = fromPos.getX();
+            posZ = fromPos.getZ();
+        }
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(posX >> 4, posZ >> 4);
+        if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
+            return false;
+        }
+
+        return true;
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;onWorldUpdateEntities()V"))
@@ -450,24 +648,28 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         TrackingUtil.tickWorldProvider(this);
     }
 
-    /**
-     * @author gabizou - May 17th, 2016
-     * @reason This isn't a modify constant at all, but it's the best injection point I can think of
-     * to head after ice and snow are performed.
-     *
-     * @param tickBlocks The "tickBlocks" value
-     * @return The same value, we are not actually modifying it
-     */
-    @ModifyConstant(method = "updateBlocks", constant = @Constant(stringValue = "tickBlocks"))
-    private String onEndIceAndSnow(String tickBlocks) {
-        this.getCauseTracker().completePhase();
-        return tickBlocks;
-    }
-
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         this.onUpdateTick(block, worldIn, pos, state, rand);
     }
+
+    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target= "Lnet/minecraft/world/WorldServer;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"))
+    public boolean onTickUpdateIsAreaLoaded(WorldServer worldIn, BlockPos fromPos, BlockPos toPos) {
+        int posX = fromPos.getX() + 8;
+        int posZ = fromPos.getZ() + 8;
+        // Forge passes the same block position for forced chunks
+        if (fromPos.equals(toPos)) {
+            posX = fromPos.getX();
+            posZ = fromPos.getZ();
+        }
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(posX >> 4, posZ >> 4);
+        if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
+            return false;
+        }
+
+        return true;
+    }
+
 
     // This ticks pending updates to blocks, Requires mixin for NextTickListEntry so we use the correct tracking
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
@@ -1204,12 +1406,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickBlocks") )
     private void onAfterTickBlockUpdate(CallbackInfo ci) {
         this.timings.scheduledBlocks.stopTiming();
-        this.timings.chunkTicks.startTiming();
+        this.timings.updateBlocks.startTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=chunkMap") )
     private void onBeginUpdateBlocks(CallbackInfo ci) {
-        this.timings.chunkTicks.stopTiming();
+        this.timings.updateBlocks.stopTiming();
         this.timings.doChunkMap.startTiming();
     }
 
@@ -1219,13 +1421,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.timings.doVillages.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=portalForcer") )
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=portalForcer"))
     private void onBeginUpdatePortal(CallbackInfo ci) {
         this.timings.doVillages.stopTiming();
         this.timings.doPortalForcer.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/profiler/Profiler;endSection()V") )
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/profiler/Profiler;endSection()V"))
     private void onEndUpdatePortal(CallbackInfo ci) {
         this.timings.doPortalForcer.stopTiming();
     }

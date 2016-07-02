@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.Agent;
@@ -69,6 +70,7 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
     @Shadow abstract void addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry);
     @Nullable @Shadow public abstract com.mojang.authlib.GameProfile getProfileByUUID(UUID uniqueId);
     @Shadow public abstract void save();
+    private boolean bulkRemove = false;
 
     @Override
     public boolean add(GameProfile profile, boolean overwrite, @Nullable Date expiry) {
@@ -82,6 +84,62 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
         this.addEntry((com.mojang.authlib.GameProfile) profile, expiry);
 
         return true;
+    }
+
+    @Override
+    public boolean remove(GameProfile profile) {
+        checkNotNull(profile, "profile");
+
+        UUID uniqueId = profile.getUniqueId();
+
+        if (this.uuidToProfileEntryMap.containsKey(uniqueId)) {
+            this.uuidToProfileEntryMap.remove(uniqueId);
+            this.gameProfiles.remove(profile);
+
+            if (profile.getName().isPresent()) {
+                this.usernameToProfileEntryMap.remove(profile.getName().get().toLowerCase(Locale.ROOT));
+            }
+
+            if (!this.bulkRemove) {
+                this.save();
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public Collection<GameProfile> remove(Iterable<GameProfile> profiles) {
+        checkNotNull(profiles, "profiles");
+
+        Collection<GameProfile> result = Lists.newArrayList();
+
+        try {
+            this.bulkRemove = true;
+            for (GameProfile profile : profiles) {
+                if (this.remove(profile)) {
+                    result.add(profile);
+                }
+            }
+        } finally {
+            this.bulkRemove = false;
+        }
+
+        if (!result.isEmpty()) {
+            this.save();
+        }
+
+        return result;
+    }
+
+    @Override
+    public void clear() {
+        this.uuidToProfileEntryMap.clear();
+        this.gameProfiles.clear();
+        this.usernameToProfileEntryMap.clear();
+        this.save();
     }
 
     @Override

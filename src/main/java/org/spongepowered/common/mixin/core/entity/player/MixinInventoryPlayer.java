@@ -61,6 +61,8 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
     @Shadow public ItemStack[] mainInventory;
     @Shadow public ItemStack[] armorInventory;
 
+    @Shadow public abstract int getInventoryStackLimit();
+
     protected SlotCollection slots;
     protected Fabric<IInventory> inventory;
     protected HumanInventoryLens lens;
@@ -144,5 +146,28 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
                 //this.armorInventory[i] = null; // Sponge - we handle this in EntityPlayer onDeath
             }
         }
+    }
+
+    @Override
+    public int getFirstAvailableSlot(ItemStack itemstack) {
+        int stackSize = itemstack.stackSize;
+
+        for (int i = 0; i < this.mainInventory.length; ++i) {
+            if (this.mainInventory[i] == null) {
+                // empty slot
+                return i;
+            }
+
+            if (this.mainInventory[i] != null && this.mainInventory[i].getItem() == itemstack.getItem() && this.mainInventory[i].isStackable() && this.mainInventory[i].stackSize < this.mainInventory[i].getMaxStackSize() && this.mainInventory[i].stackSize < this.getInventoryStackLimit() && (!this.mainInventory[i].getHasSubtypes() || this.mainInventory[i].getItemDamage() == itemstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(this.mainInventory[i], itemstack)) {
+                stackSize -= (this.mainInventory[i].getMaxStackSize() < this.getInventoryStackLimit() ? this.mainInventory[i].getMaxStackSize() : this.getInventoryStackLimit()) - this.mainInventory[i].stackSize;
+            }
+
+            if (stackSize <= 0) {
+                // available space in slot
+                return i;
+            }
+        }
+
+        return -1;
     }
 }

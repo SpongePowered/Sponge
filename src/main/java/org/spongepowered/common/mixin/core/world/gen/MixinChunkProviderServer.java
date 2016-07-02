@@ -45,6 +45,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.world.storage.SpongeChunkDataStream;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
@@ -92,6 +93,19 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     public WorldProperties getWorldProperties() {
         return (WorldProperties) this.worldObj.getWorldInfo();
     }
+
+//    private boolean canDenyChunkRequest() {
+//        if (this.chunkLoadOverride || this.worldObj.isFindingSpawnPoint()) {
+//            return false;
+//        }
+//
+//        final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
+//        if (causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning() || causeTracker.isCapturingTerrainGen()) {
+//            return true;
+//        }
+//
+//        return false;
+//    }
 
     @Inject(method = "unloadQueuedChunks", at = @At("HEAD"))
     public void onUnloadQueuedChunksStart(CallbackInfoReturnable<Boolean> ci) {

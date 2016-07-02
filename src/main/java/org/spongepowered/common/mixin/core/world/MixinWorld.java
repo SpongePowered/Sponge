@@ -57,7 +57,10 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
@@ -140,6 +143,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -188,6 +192,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow protected boolean scheduledUpdatesAreImmediate;
     @Shadow protected WorldInfo worldInfo;
     @Shadow @Final net.minecraft.world.border.WorldBorder worldBorder;
+    @Shadow protected int updateLCG;
 
     @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow public abstract EnumDifficulty shadow$getDifficulty();
@@ -227,6 +232,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     // Methods needed for MixinWorldServer & Tracking
     @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entity); // This is overridden in MixinWorldServer
     @Shadow public abstract void updateAllPlayersSleepingFlag();
+    @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state);
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
     @Shadow public abstract void immediateBlockTick(BlockPos pos, IBlockState state, Random random);
     @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
@@ -237,6 +243,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
     @Shadow public abstract void scheduleBlockUpdate(BlockPos pos, Block blockIn, int delay, int priority);
     @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
+    @Shadow protected abstract void updateBlocks();
+    @Shadow public abstract GameRules shadow$getGameRules();
+    @Shadow public abstract boolean isRaining();
+    @Shadow public abstract boolean isThundering();
+    @Shadow public abstract Iterator<net.minecraft.world.chunk.Chunk> getPersistentChunkIterable(
+            Iterator<net.minecraft.world.chunk.Chunk> chunkIterator);
+    @Shadow public abstract boolean isRainingAt(BlockPos strikePosition);
+    @Shadow public abstract DifficultyInstance getDifficultyForLocation(BlockPos pos);
+    @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
+    @Shadow public abstract boolean canBlockFreezeNoWater(BlockPos pos);
+    @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
 
     // @formatter:on
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -1017,6 +1034,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.theProfiler.endSection();
         this.theProfiler.endSection();
     }
+
+    /**
+     * @author blood - July 1st, 2016
+     * @author gabizou - July 1st, 2016 - Update to 1.10 - Previous method was spliced between WorldClient and WorldServer.
+     *
+     * @reason Added chunk and block tick optimizations.
+     */
 
     protected void startEntityGlobalTimings() { }
 

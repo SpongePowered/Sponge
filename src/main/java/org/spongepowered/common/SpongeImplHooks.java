@@ -45,6 +45,7 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import net.minecraft.world.Teleporter;
+import net.minecraft.world.WorldProvider;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -164,5 +165,13 @@ public final class SpongeImplHooks {
      */
     public static void handlePostChangeDimensionEvent(EntityPlayerMP playerIn, WorldServer fromWorld, WorldServer toWorld) {
 
+    }
+
+    public static boolean canDoLightning(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
+        return true;
+    }
+
+    public static boolean canDoRainSnowIce(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
+        return true;
     }
 }
