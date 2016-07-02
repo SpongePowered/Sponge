@@ -105,13 +105,13 @@ public class SpongePaginationList implements PaginationList {
         @SuppressWarnings("unchecked")
         PaginationCalculator calculator = new PaginationCalculator(this.linesPerPage);
         Iterable<Map.Entry<Text, Integer>> counts = StreamSupport.stream(this.contents.spliterator(), false).map(input -> {
-            int lines = calculator.getLines(receiver, input);
+            int lines = calculator.getLines(input);
             return Maps.immutableEntry(input, lines);
         }).collect(Collectors.toList());
 
         Text title = this.title.orElse(null);
         if (title != null) {
-            title = calculator.center(receiver, title, this.paginationSpacer);
+            title = calculator.center(title, this.paginationSpacer);
         }
 
         ActivePagination pagination;

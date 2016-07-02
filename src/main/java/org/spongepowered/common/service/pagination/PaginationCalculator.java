@@ -25,20 +25,25 @@
 package org.spongepowered.common.service.pagination;
 
 import com.flowpowered.math.GenericMath;
+import com.google.common.annotations.VisibleForTesting;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.IChatComponent;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.spongepowered.api.command.CommandMessageFormatting;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.text.format.TextStyles;
+import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
+import java.util.PrimitiveIterator;
 
 /**
  * Pagination calculator for players.
@@ -85,88 +90,165 @@ public class PaginationCalculator {
         return this.linesPerPage;
     }
 
-    public int getLines(MessageReceiver source, Text text) {
-        return (int) Math.ceil((double) getLength(source, text) / LINE_WIDTH);
+    /**
+     *
+     * @param text
+     * @return the number of lines that this text flows into.
+     */
+    public int getLines(Text text) {
+        //TODO: this needs fixing as well.
+        return (int) Math.ceil((double) this.getWidth(text) / LINE_WIDTH);
     }
 
-    private double getWidth(int codePoint, boolean isBold) {
+    @VisibleForTesting
+    int getWidth(int codePoint, boolean isBold) {
         int nonUnicodeIdx = NON_UNICODE_CHARS.indexOf(codePoint);
-        double width;
-        if (nonUnicodeIdx != -1) {
-            width = NON_UNICODE_CHAR_WIDTHS[nonUnicodeIdx];
-            if (isBold) {
-                width += 1;
-            }
-        } else {
-            // MC unicode -- what does this even do? but it's client-only so we can't use it directly :/
-            int j = UNICODE_CHAR_WIDTHS[codePoint] >>> 4;
-            int k = UNICODE_CHAR_WIDTHS[codePoint] & 15;
-
-            if (k > 7) {
-                k = 15;
-                j = 0;
-            }
-            width = ((k + 1) - j) / 2 + 1;
-            if (isBold) {
-                width += 0.5;
-            }
+        int width;
+        if (codePoint == 32) {
+            width = 4;
         }
+        else if (codePoint > 0 && nonUnicodeIdx != -1) {
+            width = NON_UNICODE_CHAR_WIDTHS[nonUnicodeIdx];
+        } else if (UNICODE_CHAR_WIDTHS[codePoint] != 0) {
+            //from 1.9 & 255 to avoid strange signed int math ruining things.
+            //https://bugs.mojang.com/browse/MC-7181
+            final int temp = UNICODE_CHAR_WIDTHS[codePoint] & 255;
+            // Split into high and low nibbles.
+            //bit digits
+            //87654321 >>> 4 = 00008765
+            int startColumn = temp >>> 4;
+            //87654321 & 00001111 = 00004321
+            int endColumn = temp & 15;
+
+            width = (endColumn + 1) - startColumn;
+            //Why does this scaling happen?
+            //I believe it makes unicode fonts skinnier to better match the character widths of the default Minecraft
+            // font however there is a int math vs float math bug in the Minecraft FontRenderer.
+            //The float math is adjusted for rendering, they attempt to do the same thing for calculating string widths
+            //using integer math, this has potential rounding errors, but we should copy it and use ints as well.
+            width = (width / 2)+1;
+        } else {
+            width = 0;
+        }
+        //if bolded width gets 1 added.
+        if(isBold && width > 0) width = width + 1;
+
         return width;
     }
 
-    private int getLength(MessageReceiver source, Text text) {
-        double columnCount = 0d;
-        for (Text child : text.withChildren()) {
-            final String txt;
-            if (child instanceof LiteralText) {
-                txt = ((LiteralText) child).getContent();
-            } else if (child instanceof TranslatableText) {
-                txt = child.toPlain();
+    /**
+     * compute the width of a given text
+     * @param text
+     * @return the number of character pixels/columns the line takes up
+     */
+    @VisibleForTesting
+    int getWidth(Text text) {
+        IChatComponent component = SpongeTexts.toComponent(text);
+        Iterable<IChatComponent> children = ((IMixinChatComponent) component).withChildren();
+        int total = 0;
+
+        for(IChatComponent child : children) {
+            PrimitiveIterator.OfInt i_it;
+            if(child instanceof ChatComponentText || child instanceof ChatComponentTranslation) {
+                i_it = child.getUnformattedTextForChat().codePoints().iterator();
             } else {
                 continue;
             }
-            boolean isBold = child.getStyle().contains(TextStyles.BOLD);
-            for (int i = 0; i < txt.length(); ++i) {
-                columnCount += getWidth(txt.codePointAt(i), isBold);
+
+            boolean bold = child
+                    .getChatStyle()
+                    .getBold();
+
+            Integer cp;
+            while(i_it.hasNext()){
+                cp = i_it.next();
+                int width = getWidth(cp, bold);
+                total += width;
             }
         }
-        return (int) Math.ceil(columnCount);
 
+        return total;
     }
 
-    public Text center(MessageReceiver source, Text text, Text padding) {
-        int length = getLength(source, text);
-        if (length >= LINE_WIDTH) {
+    /**
+     * Center a text in the middle of the chat box
+     * @param text or 0 width text for no heading
+     * @param padding a >1 width padding character
+     * @return the centered text, or if too big, the original text.
+     */
+    //TODO: Probably should completely rewrite this to not compute padding, but loop until the padding is done, unless
+    //we can get accurate computation of padding ahead of time.
+    public Text center(Text text, Text padding) {
+        int inputLength = this.getWidth(text);
+        //Minecraft breaks lines when the next character would be > then LINE_WIDTH, this seems most graceful way to fail
+        if (inputLength >= LINE_WIDTH) {
             return text;
         }
-        int paddingLength = getLength(source, padding.toBuilder().style(text.getStyle()).build());
-        double paddingNecessary = LINE_WIDTH - length;
+        Text styledSpace = this.withStyle(LiteralText.of(" "), text);
+        Text textWithSpaces = this.addSpaces(styledSpace, text);
 
-        Text.Builder build =  Text.builder();
-        if (length == 0) {
-            build.append(Collections.nCopies(GenericMath.floor((double) LINE_WIDTH / paddingLength), padding));
-        } else {
-            paddingNecessary -= getWidth(' ', text.getStyle().contains(TextStyles.BOLD)) * 2;
-            int paddingCount = GenericMath.floor(paddingNecessary / paddingLength);
-            int beforePadding = GenericMath.floor(paddingCount / 2.0);
-            int afterPadding = (int) Math.ceil(paddingCount / 2.0);
-            if (beforePadding > 0) {
-                if (beforePadding > 1) {
-                    build.append(Collections.nCopies(beforePadding, padding));
-                }
-                build.append(CommandMessageFormatting.SPACE_TEXT);
-            }
-            build.append(text);
-            if (afterPadding > 0) {
-                build.append(CommandMessageFormatting.SPACE_TEXT);
-                if (afterPadding > 1) {
-                    build.append(Collections.nCopies(afterPadding, padding));
-                }
-            }
+        //Minecraft breaks lines when the next character would be > then LINE_WIDTH
+        boolean addSpaces = getWidth(textWithSpaces) <= LINE_WIDTH;
+
+        //TODO: suspect, why are we changing the style of the padding, they may want different styles on the padding.
+        int paddingLength = this.getWidth(this.withStyle(padding, text));
+        final Text.Builder output =  Text.builder();
+
+        //Using 0 width unicode symbols as padding throws us into an unending loop, replace them with the default padding
+        if(paddingLength < 1) {
+            Text defaultPadding = Text.of("=");
+            padding = defaultPadding;
+            paddingLength = this.getWidth(this.withStyle(defaultPadding, text));
         }
 
+        Text styledPadding = this.withStyle(padding, text);
+
+        //if we only need padding
+        if (inputLength == 0) {
+            this.addPadding(padding, output, GenericMath.floor((double) LINE_WIDTH / paddingLength));
+        } else {
+            if(addSpaces) {
+                text = textWithSpaces;
+                inputLength = this.getWidth(textWithSpaces);
+            }
+
+            int paddingNecessary = LINE_WIDTH - inputLength;
+
+            int paddingCount = GenericMath.floor(paddingNecessary / paddingLength);
+            //pick a halfway point
+            int beforePadding = GenericMath.floor(paddingCount / 2.0);
+            //Do not use ceil, this prevents floating point errors.
+            int afterPadding = paddingCount-beforePadding;
+
+            this.addPadding(styledPadding, output, beforePadding);
+            output.append(text);
+            this.addPadding(styledPadding, output, afterPadding);
+        }
+
+        return this.finalizeBuilder(text, output);
+    }
+
+    private Text withStyle(Text text, Text styled) {
+        return text.toBuilder().color(styled.getColor()).style(styled.getStyle()).build();
+    }
+
+    private Text finalizeBuilder(Text text, Text.Builder build) {
         build.color(text.getColor())
             .style(text.getStyle());
         return build.build();
+    }
+
+    private Text addSpaces(Text spaces, Text text) {
+        Text.Builder build = Text.builder().color(text.getColor()).style(text.getStyle());
+        build.append(spaces);
+        build.append(text);
+        build.append(spaces);
+        return build.build();
+    }
+
+    private void addPadding(Text padding, Text.Builder build, int count) {
+        if (count > 0) {
+            build.append(Collections.nCopies(count, padding));
+        }
     }
 }
