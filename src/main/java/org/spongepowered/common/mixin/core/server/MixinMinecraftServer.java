@@ -406,7 +406,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public boolean unloadWorld(World world) {
-        return WorldManager.unloadWorld((WorldServer) world, false, true, false);
+        return WorldManager.unloadWorld((WorldServer) world, false, true, true, false);
     }
 
     @SuppressWarnings("unchecked")

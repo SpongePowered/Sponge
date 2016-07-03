@@ -409,7 +409,7 @@ public final class WorldManager {
 
     public static void unloadQueuedWorlds() {
         while (unloadQueue.peek() != null) {
-            unloadWorld(unloadQueue.poll(), false, true, false);
+            unloadWorld(unloadQueue.poll(), false, true, true, false);
         }
 
         unloadQueue.clear();
@@ -421,7 +421,7 @@ public final class WorldManager {
     }
 
     // TODO Result
-    public static boolean unloadWorld(WorldServer worldServer, boolean checkConfig, boolean save, boolean force) {
+    public static boolean unloadWorld(WorldServer worldServer, boolean checkConfig, boolean save, boolean throwEvent, boolean force) {
         checkNotNull(worldServer);
         final MinecraftServer server = SpongeImpl.getServer();
 
@@ -463,8 +463,10 @@ public final class WorldManager {
             reorderWorldsVanillaFirst();
         }
 
-        SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
-                worldServer));
+        if (throwEvent) {
+            SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
+                    worldServer));
+        }
 
         if (force && unregisterableDimensions.contains(dimensionId)) {
             unregisterDimension(dimensionId);
