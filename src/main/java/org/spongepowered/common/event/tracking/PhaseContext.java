@@ -28,9 +28,11 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -104,6 +106,18 @@ public class PhaseContext {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, new EntityItemDropsSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_ITEM_DROPS, new EntityItemEntityDropsSupplier()));
+        return this;
+    }
+
+    public PhaseContext player() {
+        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURE_PLAYER, new CapturePlayer()));
+        return this;
+    }
+
+    public PhaseContext player(@Nullable Player player) {
+        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURE_PLAYER, new CapturePlayer(player)));
         return this;
     }
 
@@ -215,6 +229,17 @@ public class PhaseContext {
                 .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing ItemStack drops from entities, but we're not capturing them!", this));
     }
 
+    public CapturePlayer getCapturPlayerSupplier() throws IllegalStateException {
+        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURE_PLAYER, CapturePlayer.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this));
+    }
+
+    public Optional<Player> getCapturedPlayer() throws IllegalStateException {
+        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURE_PLAYER, CapturePlayer.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this))
+                .getPlayer();
+    }
+
     public void forEach(Consumer<NamedCause> consumer) {
         this.contextObjects.forEach(consumer);
     }
@@ -298,4 +323,48 @@ public class PhaseContext {
         }
     }
 
+    public static final class CapturePlayer {
+
+        @Nullable private Player player;
+
+        CapturePlayer() {
+
+        }
+
+        CapturePlayer(@Nullable Player player) {
+            this.player = player;
+        }
+
+        public Optional<Player> getPlayer() {
+            return Optional.ofNullable(this.player);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            CapturePlayer that = (CapturePlayer) o;
+            return com.google.common.base.Objects.equal(player, that.player);
+        }
+
+        @Override
+        public int hashCode() {
+            return com.google.common.base.Objects.hashCode(player);
+        }
+
+        @Override
+        public String toString() {
+            return com.google.common.base.Objects.toStringHelper(this)
+                    .add("player", player)
+                    .toString();
+        }
+
+        public void addPlayer(EntityPlayerMP playerMP) {
+            this.player = ((Player) playerMP);
+        }
+    }
 }

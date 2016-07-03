@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import ninja.leaping.configurate.objectmapping.Setting;
 import org.spongepowered.common.config.category.BungeeCordCategory;
+import org.spongepowered.common.config.category.CauseTrackerCategory;
 import org.spongepowered.common.config.category.CommandsCategory;
 import org.spongepowered.common.config.category.ExploitCategory;
 import org.spongepowered.common.config.category.GlobalWorldCategory;
@@ -72,8 +73,8 @@ public class GlobalConfig extends ConfigBase {
     @Setting
     protected GlobalWorldCategory world = new GlobalWorldCategory();
 
-    @Setting("cause-tracker-verbose")
-    private boolean isCauseTrackerVerbose = false;
+    @Setting(value = "cause-tracker")
+    protected CauseTrackerCategory causeTracker = new CauseTrackerCategory();
 
     public GlobalConfig() {
         super();
@@ -129,7 +130,8 @@ public class GlobalConfig extends ConfigBase {
         return true;
     }
 
-    public boolean isCauseTrackerVerbose() {
-        return this.isCauseTrackerVerbose;
+    public CauseTrackerCategory getCauseTracker() {
+        return causeTracker;
     }
+
 }

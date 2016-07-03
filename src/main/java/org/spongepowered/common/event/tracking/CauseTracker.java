@@ -95,7 +95,7 @@ public final class CauseTracker {
 
     @Nullable private PhaseData currentProcessingState = null;
 
-    private final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().isCauseTrackerVerbose();
+    private final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().isVerbose();
 
     public CauseTracker(WorldServer targetWorld) {
         if (((IMixinWorldServer) targetWorld).getCauseTracker() != null) {

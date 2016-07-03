@@ -27,10 +27,15 @@ package org.spongepowered.common.mixin.core.item;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -59,9 +64,13 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.interfaces.item.IMixinItemStack;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -128,6 +137,16 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     private void onSet(NBTTagCompound compound, CallbackInfo callbackInfo) {
         if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
             readFromNbt(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
+        }
+    }
+
+    @Inject(method = "onBlockDestroyed", at = @At("HEAD"))
+    private void capturePlayerOnBlockDestroyed(World worldIn, IBlockState blockIn, BlockPos pos, EntityPlayer playerIn, CallbackInfo ci) {
+        if (!worldIn.isRemote) {
+            final CauseTracker causeTracker = ((IMixinWorldServer) worldIn).getCauseTracker();
+            final PhaseData peek = causeTracker.getStack().peek();
+            final IPhaseState state = peek.getState();
+            state.getPhase().capturePlayerUsingStackToBreakBlock(this, (EntityPlayerMP) playerIn, state, peek.getContext(), causeTracker);
         }
     }
 

@@ -24,10 +24,29 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
+import org.apache.logging.log4j.Level;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
+import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
+import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.interfaces.event.forge.IMixinWorldTickEvent;
 
 import javax.annotation.Nullable;
 
@@ -36,7 +55,7 @@ public final class PluginPhase extends TrackingPhase {
     public enum State implements IPhaseState {
         BLOCK_WORKER,
         CUSTOM_SPAWN,
-        COMPLETE;
+        COMPLETE,;
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
@@ -50,7 +69,168 @@ public final class PluginPhase extends TrackingPhase {
 
     }
 
-    public PluginPhase(@Nullable TrackingPhase parent) {
+    public enum Listener implements IPhaseState {
+        /**
+         * A specialized phase for forge event listeners during pre tick, may need to do the same
+         * if SpongeAPI adds pre tick events.
+         */
+        PRE_WORLD_TICK_LISTENER() {
+            @Override
+            public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+                context.getCapturedPlayer().ifPresent(player -> builder.named(NamedCause.notifier(player)));
+            }
+
+            @Override
+            public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+                final IMixinWorldTickEvent worldTickEvent = phaseContext
+                        .firstNamed(InternalNamedCauses.Tracker.TICK_EVENT, IMixinWorldTickEvent.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a WorldTickEvent but we're not!!!", phaseContext));
+                final Object listener = phaseContext.firstNamed(NamedCause.SOURCE, Object.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
+
+                phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
+                    if (causeTracker.getMinecraftWorld() != worldTickEvent.getWorld()
+                        && SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().reportWorldTickDifferences()) {
+                        final PrettyPrinter printer = new PrettyPrinter(50).add("Changing a different World than expected!!").centre().hr();
+                        printer.add("Sponge is going to process the block changes as normal, however, a mod seems to be changing");
+                        printer.add("a world without checking for the world equality of the event! If you do not wish to see this");
+                        printer.add("message, you may disable this check in the <gamedir>/config/sponge/global.conf under");
+                        printer.add("cause-tracker.world-modification-warning = false");
+                        printer.hr();
+                        printer.add("Providing information of the event:");
+                        printer.add("%s : %s", "Event world", worldTickEvent.getWorld());
+                        printer.addWrapped("%s : %s", "Changed world", causeTracker.getMinecraftWorld());
+                        printer.addWrapped("%s : %s", "Listener", listener);
+                        printer.add("Stacktrace:");
+                        printer.add(new Exception());
+                        printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+                    }
+                    GeneralFunctions.processBlockCaptures(blocks, causeTracker, this, phaseContext);
+                });
+            }
+
+            @Override
+            public void assignEntityCreator(PhaseContext context, Entity entity) {
+                context.getCapturedPlayer()
+                        .ifPresent(player -> EntityUtil.toMixin(entity)
+                                .trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId())
+                        );
+            }
+
+            @Override
+            public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                    WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+                context.getCapturedPlayer().ifPresent(player ->
+                        ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
+                                .setBlockNotifier(notifyPos, player.getUniqueId())
+                );
+            }
+
+            @Override
+            public void capturePlayerUsingStackToBreakBlocks(PhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
+                context.getCapturPlayerSupplier().addPlayer(playerMP);
+            }
+        },
+        /**
+         * A specialized phase for forge event listeners during post tick, may need to do the same
+         * if SpongeAPI adds post tick events.
+         */
+        POST_WORLD_TICK_LISTENER() {
+            @Override
+            public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+                context.getCapturedPlayer().ifPresent(player -> builder.named(NamedCause.notifier(player)));
+            }
+
+            @Override
+            public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+                final IMixinWorldTickEvent worldTickEvent = phaseContext
+                        .firstNamed(InternalNamedCauses.Tracker.TICK_EVENT, IMixinWorldTickEvent.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a WorldTickEvent but we're not!!!", phaseContext));
+                final Object listener = phaseContext.firstNamed(NamedCause.SOURCE, Object.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
+
+                phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
+                    if (causeTracker.getMinecraftWorld() != worldTickEvent.getWorld()
+                        && SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().reportWorldTickDifferences()) {
+                        final PrettyPrinter printer = new PrettyPrinter(50).add("Changing a different World than expected!!").centre().hr();
+                        printer.add("Sponge is going to process the block changes as normal, however, a mod seems to be changing");
+                        printer.add("a world without checking for the world equality of the event! If you do not wish to see this");
+                        printer.add("message, you may disable this check in the <gamedir>/config/sponge/global.conf under");
+                        printer.add("cause-tracker.world-modification-warning = false");
+                        printer.hr();
+                        printer.add("Providing information of the event:");
+                        printer.add("%s : %s", "Event world", worldTickEvent.getWorld());
+                        printer.addWrapped("%s : %s", "Changed world", causeTracker.getMinecraftWorld());
+                        printer.addWrapped("%s : %s", "Listener", listener);
+                        printer.add("Stacktrace:");
+                        printer.add(new Exception());
+                        printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+                    }
+                    GeneralFunctions.processBlockCaptures(blocks, causeTracker, this, phaseContext);
+
+                });
+            }
+
+            @Override
+            public void assignEntityCreator(PhaseContext context, Entity entity) {
+                context.getCapturedPlayer()
+                        .ifPresent(player -> EntityUtil.toMixin(entity)
+                                .trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId())
+                        );
+            }
+
+            @Override
+            public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                    WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+                context.getCapturedPlayer().ifPresent(player ->
+                        ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
+                                .setBlockNotifier(notifyPos, player.getUniqueId())
+                );
+            }
+
+            @Override
+            public void capturePlayerUsingStackToBreakBlocks(PhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
+                context.getCapturPlayerSupplier().addPlayer(playerMP);
+            }
+        },;
+
+        public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+
+        }
+
+        @Override
+        public TrackingPhase getPhase() {
+            return TrackingPhases.PLUGIN;
+        }
+
+        @Override
+        public boolean canSwitchTo(IPhaseState state) {
+            return state instanceof BlockPhase.State || state instanceof EntityPhase.State || state == WorldPhase.State.TERRAIN_GENERATION;
+        }
+
+        @Override
+        public boolean tracksBlockSpecificDrops() {
+            return true;
+        }
+
+
+        public abstract void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker);
+
+        public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+
+        }
+
+        public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+
+        }
+
+        public void capturePlayerUsingStackToBreakBlocks(PhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
+
+        }
+    }
+
+    PluginPhase(@Nullable TrackingPhase parent) {
         super(parent);
     }
 
@@ -68,6 +248,40 @@ public final class PluginPhase extends TrackingPhase {
             });
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(snapshots -> GeneralFunctions.processBlockCaptures(snapshots, causeTracker, state, phaseContext));
+        } else if (state instanceof Listener) {
+            ((Listener) state).processPostTick(causeTracker, phaseContext);
+        }
+    }
+
+    @Override
+    public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+        if (state instanceof Listener) {
+            ((Listener) state).associateAdditionalBlockChangeCauses(context, builder, causeTracker);
+        }
+    }
+
+    @Override
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos,
+            IMixinBlockEventData blockEvent) {
+        if (phaseState instanceof Listener) {
+            ((Listener) phaseState).associateBlockEventNotifier(context, causeTracker, pos, blockEvent);
+        }
+    }
+
+
+    @Override
+    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+        if (state instanceof Listener) {
+            ((Listener) state).associateNeighborBlockNotifier(context, sourcePos, block, notifyPos, minecraftWorld, notifier);
+        }
+    }
+
+    @Override
+    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState state, PhaseContext context,
+            CauseTracker causeTracker) {
+        if (state instanceof PluginPhase.Listener) {
+            ((Listener) state).capturePlayerUsingStackToBreakBlocks(context, playerMP, itemStack);
         }
     }
 }

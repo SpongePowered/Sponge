@@ -972,7 +972,7 @@ public final class WorldPhase extends TrackingPhase {
             public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
 
             }
-        }
+        },
         ;
 
 
