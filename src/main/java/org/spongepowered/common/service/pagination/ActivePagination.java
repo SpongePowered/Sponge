@@ -73,20 +73,26 @@ abstract class ActivePagination {
         this.nextPageText = t("»").toBuilder()
                 .color(TextColors.BLUE)
                 .style(TextStyles.UNDERLINE)
-                .onClick(TextActions.runCommand("/pagination " + this.id.toString() + " next")).build();
+                .onClick(TextActions.runCommand("/pagination " + this.id.toString() + " next"))
+                .onHover(TextActions.showText(Text.of("/page next")))
+                .onShiftClick(TextActions.insertText("/page next"))
+                .build();
         this.prevPageText = t("«").toBuilder()
                 .color(TextColors.BLUE)
                 .style(TextStyles.UNDERLINE)
-                .onClick(TextActions.runCommand("/pagination " + this.id.toString() + " prev")).build();
+                .onClick(TextActions.runCommand("/pagination " + this.id.toString() + " prev"))
+                .onHover(TextActions.showText(Text.of("/page prev")))
+                .onShiftClick(TextActions.insertText("/page prev"))
+                .build();
         int maxContentLinesPerPage = calc.getLinesPerPage(src) - 1;
         if (title != null) {
-            maxContentLinesPerPage -= calc.getLines(src, title);
+            maxContentLinesPerPage -= calc.getLines(title);
         }
         if (header != null) {
-            maxContentLinesPerPage -= calc.getLines(src, header);
+            maxContentLinesPerPage -= calc.getLines(header);
         }
         if (footer != null) {
-            maxContentLinesPerPage -= calc.getLines(src, footer);
+            maxContentLinesPerPage -= calc.getLines(footer);
         }
         this.maxContentLinesPerPage = maxContentLinesPerPage;
 
@@ -146,7 +152,7 @@ abstract class ActivePagination {
 
         Text footer = calculateFooter(page);
         if (footer != null) {
-            toSend.add(this.calc.center(src, footer, this.padding));
+            toSend.add(this.calc.center(footer, this.padding));
         }
         if (this.footer != null) {
             toSend.add(this.footer);
@@ -167,7 +173,17 @@ abstract class ActivePagination {
         boolean needsDiv = false;
         int totalPages = getTotalPages();
         if (totalPages > 1) {
-            ret.append(Text.of(currentPage)).append(SLASH_TEXT).append(Text.of(totalPages));
+            ret.append(Text.of(
+                    TextActions.showText(Text.of("/page " + currentPage)),
+                    TextActions.runCommand("/pagination " + this.id + ' ' + currentPage),
+                    TextActions.insertText("/page " + currentPage),
+                    currentPage
+            )).append(SLASH_TEXT).append(Text.of(
+                    TextActions.showText(Text.of("/page " + totalPages)),
+                    TextActions.runCommand("/pagination " + this.id + ' ' + totalPages),
+                    TextActions.insertText("/page " + totalPages),
+                    totalPages
+            ));
             needsDiv = true;
         }
         if (hasNext) {
@@ -194,7 +210,7 @@ abstract class ActivePagination {
             if (addContinuation && i == maxContentLinesPerPage - 1) {
                 currentPage.add(CONTINUATION_TEXT);
             } else {
-                currentPage.add(Text.EMPTY);
+                currentPage.add(0, Text.EMPTY);
             }
         }
     }

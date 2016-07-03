@@ -80,7 +80,11 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
     @Override
     public Optional<Explosive> getSourceExplosive() {
-        return Optional.ofNullable((Explosive) this.exploder);
+        if (this.exploder instanceof Explosive) {
+            return Optional.of((Explosive) this.exploder);
+        }
+
+        return Optional.empty();
     }
 
     @Override

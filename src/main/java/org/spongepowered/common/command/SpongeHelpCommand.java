@@ -94,7 +94,8 @@ public class SpongeHelpCommand {
         Text.Builder text = Text.builder("/" + mapping.getPrimaryAlias());
         text.color(TextColors.GREEN);
         text.style(TextStyles.UNDERLINE);
-        text.onClick(TextActions.suggestCommand("/" + mapping.getPrimaryAlias()));
+        //End with a space, so tab completion works immediately.
+        text.onClick(TextActions.suggestCommand("/" + mapping.getPrimaryAlias() + " "));
         Optional<? extends Text> longDescription = mapping.getCallable().getHelp(source);
         if (longDescription.isPresent()) {
             text.onHover(TextActions.showText(longDescription.get()));
