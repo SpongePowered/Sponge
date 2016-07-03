@@ -42,10 +42,13 @@ import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveHandler;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.WorldConfig;
@@ -329,7 +332,8 @@ public class DimensionManager {
         WorldServer world =
                 (dim == 0 ? overworld : (WorldServer) (new WorldServerMulti(mcServer, savehandler, dim, overworld, mcServer.theProfiler).init()));
         world.addWorldAccess(new WorldManager(mcServer, world));
-        SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) world));
+        LoadWorldEvent event = SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(SpongeImpl.getGame().getServer())), (org.spongepowered.api.world.World) world);
+        SpongeImpl.postEvent(event);
         if (!mcServer.isSinglePlayer()) {
             world.getWorldInfo().setGameType(mcServer.getGameType());
         }

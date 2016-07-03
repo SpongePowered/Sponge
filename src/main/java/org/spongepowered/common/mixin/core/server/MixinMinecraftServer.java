@@ -58,6 +58,7 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.command.TabCompleteEvent;
+import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -87,7 +88,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
@@ -472,7 +472,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 worldServer.getWorldInfo().setGameType(this.getGameType());
             }
 
-            SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) worldServer));
+            LoadWorldEvent event = SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(SpongeImpl.getGame().getServer())), (World) worldServer);
+            SpongeImpl.postEvent(event);
         }
 
         this.serverConfigManager.setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
@@ -732,7 +733,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         ((IMixinWorldProvider) worldServer.provider).setDimension(dim);
 
         worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
-        SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) worldServer));
+        LoadWorldEvent event = SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(SpongeImpl.getGame().getServer())), (World) worldServer);
+        SpongeImpl.postEvent(event);
         if (!isSinglePlayer()) {
             worldServer.getWorldInfo().setGameType(getGameType());
         }

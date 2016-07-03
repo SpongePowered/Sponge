@@ -48,12 +48,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldProvider;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.event.world.LoadWorldEvent;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -69,10 +64,6 @@ import javax.annotation.Nullable;
  * this issue with Sponge by overwriting this class
  */
 public final class SpongeImplHooks {
-
-    public static LoadWorldEvent createLoadWorldEvent(World world) {
-        return SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(SpongeImpl.getGame().getServer())), world);
-    }
 
     public static boolean blockHasTileEntity(Block block, IBlockState state) {
         return block instanceof ITileEntityProvider;
