@@ -116,7 +116,7 @@ public final class PluginPhase extends TrackingPhase {
 
             @Override
             public void capturePlayerUsingStackToBreakBlocks(PhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
-                context.getCapturPlayerSupplier().addPlayer(playerMP);
+                context.getCapturedPlayerSupplier().addPlayer(playerMP);
             }
         },
         /**
@@ -166,7 +166,7 @@ public final class PluginPhase extends TrackingPhase {
 
             @Override
             public void capturePlayerUsingStackToBreakBlocks(PhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
-                context.getCapturPlayerSupplier().addPlayer(playerMP);
+                context.getCapturedPlayerSupplier().addPlayer(playerMP);
             }
         },
         ;

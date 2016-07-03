@@ -111,13 +111,13 @@ public class PhaseContext {
 
     public PhaseContext player() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURE_PLAYER, new CapturePlayer()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_PLAYER, new CapturePlayer()));
         return this;
     }
 
     public PhaseContext player(@Nullable Player player) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURE_PLAYER, new CapturePlayer(player)));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_PLAYER, new CapturePlayer(player)));
         return this;
     }
 
@@ -229,13 +229,13 @@ public class PhaseContext {
                 .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing ItemStack drops from entities, but we're not capturing them!", this));
     }
 
-    public CapturePlayer getCapturPlayerSupplier() throws IllegalStateException {
-        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURE_PLAYER, CapturePlayer.class)
+    public CapturePlayer getCapturedPlayerSupplier() throws IllegalStateException {
+        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_PLAYER, CapturePlayer.class)
                 .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this));
     }
 
     public Optional<Player> getCapturedPlayer() throws IllegalStateException {
-        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURE_PLAYER, CapturePlayer.class)
+        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_PLAYER, CapturePlayer.class)
                 .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this))
                 .getPlayer();
     }
