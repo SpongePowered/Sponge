@@ -47,7 +47,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -123,20 +122,6 @@ public final class SpongePlayerDataHandler {
         } else {
             SpongeImpl.getLogger().error("Couldn't find a player data for the uuid: " + id.toString());
         }
-    }
-
-    public static void saveFiles() {
-        checkState(Holder.INSTANCE.hasInitialized, "PlayerDataHandler hasn't initialized yet!");
-        SpongePlayerDataHandler instance = Holder.INSTANCE;
-        Map<String, NBTTagCompound> compoundMap = new HashMap<>();
-        for (Map.Entry<UUID, SpongePlayerData> entry : instance.playerDataMap.entrySet()) {
-            SpongePlayerData data = entry.getValue();
-            compoundMap.put(entry.getKey().toString(), createCompoundFor(data));
-        }
-        for (Map.Entry<String, NBTTagCompound> entry : compoundMap.entrySet()) {
-            saveFile(entry.getKey(), entry.getValue());
-        }
-        compoundMap.clear();
     }
 
     private static NBTTagCompound createCompoundFor(SpongePlayerData data) {
