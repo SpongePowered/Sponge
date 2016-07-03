@@ -91,19 +91,7 @@ public final class PluginPhase extends TrackingPhase {
                 phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
                     if (causeTracker.getMinecraftWorld() != worldTickEvent.getWorld()
                         && SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().reportWorldTickDifferences()) {
-                        final PrettyPrinter printer = new PrettyPrinter(50).add("Changing a different World than expected!!").centre().hr();
-                        printer.add("Sponge is going to process the block changes as normal, however, a mod seems to be changing");
-                        printer.add("a world without checking for the world equality of the event! If you do not wish to see this");
-                        printer.add("message, you may disable this check in the <gamedir>/config/sponge/global.conf under");
-                        printer.add("cause-tracker.world-modification-warning = false");
-                        printer.hr();
-                        printer.add("Providing information of the event:");
-                        printer.add("%s : %s", "Event world", worldTickEvent.getWorld());
-                        printer.addWrapped("%s : %s", "Changed world", causeTracker.getMinecraftWorld());
-                        printer.addWrapped("%s : %s", "Listener", listener);
-                        printer.add("Stacktrace:");
-                        printer.add(new Exception());
-                        printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+                        logWarningOfDifferentWorldchanges(causeTracker, worldTickEvent, listener);
                     }
                     GeneralFunctions.processBlockCaptures(blocks, causeTracker, this, phaseContext);
                 });
@@ -152,19 +140,7 @@ public final class PluginPhase extends TrackingPhase {
                 phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
                     if (causeTracker.getMinecraftWorld() != worldTickEvent.getWorld()
                         && SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().reportWorldTickDifferences()) {
-                        final PrettyPrinter printer = new PrettyPrinter(50).add("Changing a different World than expected!!").centre().hr();
-                        printer.add("Sponge is going to process the block changes as normal, however, a mod seems to be changing");
-                        printer.add("a world without checking for the world equality of the event! If you do not wish to see this");
-                        printer.add("message, you may disable this check in the <gamedir>/config/sponge/global.conf under");
-                        printer.add("cause-tracker.world-modification-warning = false");
-                        printer.hr();
-                        printer.add("Providing information of the event:");
-                        printer.add("%s : %s", "Event world", worldTickEvent.getWorld());
-                        printer.addWrapped("%s : %s", "Changed world", causeTracker.getMinecraftWorld());
-                        printer.addWrapped("%s : %s", "Listener", listener);
-                        printer.add("Stacktrace:");
-                        printer.add(new Exception());
-                        printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+                        logWarningOfDifferentWorldchanges(causeTracker, worldTickEvent, listener);
                     }
                     GeneralFunctions.processBlockCaptures(blocks, causeTracker, this, phaseContext);
 
@@ -192,7 +168,24 @@ public final class PluginPhase extends TrackingPhase {
             public void capturePlayerUsingStackToBreakBlocks(PhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
                 context.getCapturPlayerSupplier().addPlayer(playerMP);
             }
-        },;
+        },
+        ;
+
+        private static void logWarningOfDifferentWorldchanges(CauseTracker causeTracker, IMixinWorldTickEvent worldTickEvent, Object listener) {
+            final PrettyPrinter printer = new PrettyPrinter(50).add("Changing a different World than expected!!").centre().hr();
+            printer.add("Sponge is going to process the block changes as normal, however, a mod seems to be changing");
+            printer.add("a world without checking for the world equality of the event! If you do not wish to see this");
+            printer.add("message, you may disable this check in the <gamedir>/config/sponge/global.conf under");
+            printer.add("cause-tracker.report-different-world-changes = false");
+            printer.hr();
+            printer.add("Providing information of the event:");
+            printer.add("%s : %s", "Event world", worldTickEvent.getWorld());
+            printer.addWrapped("%s : %s", "Changed world", causeTracker.getMinecraftWorld());
+            printer.addWrapped("%s : %s", "Listener", listener);
+            printer.add("Stacktrace:");
+            printer.add(new Exception());
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+        }
 
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
 
