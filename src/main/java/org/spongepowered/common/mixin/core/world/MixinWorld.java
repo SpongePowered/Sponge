@@ -247,8 +247,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract GameRules shadow$getGameRules();
     @Shadow public abstract boolean isRaining();
     @Shadow public abstract boolean isThundering();
-    @Shadow public abstract Iterator<net.minecraft.world.chunk.Chunk> getPersistentChunkIterable(
-            Iterator<net.minecraft.world.chunk.Chunk> chunkIterator);
     @Shadow public abstract boolean isRainingAt(BlockPos strikePosition);
     @Shadow public abstract DifficultyInstance getDifficultyForLocation(BlockPos pos);
     @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);

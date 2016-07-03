@@ -439,7 +439,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             {
                 iterator1.next().onTick(false);
             }
-            return;
+            return; // Sponge: Add return
         }
         // else // Sponge - Remove unnecessary else
         // { //
@@ -451,7 +451,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         final CauseTracker causeTracker = this.getCauseTracker(); // Sponge - get the cause tracker
 
-        for (Iterator<net.minecraft.world.chunk.Chunk> iterator = getPersistentChunkIterable(this.thePlayerManager.getChunkIterator()); iterator.hasNext(); this.theProfiler.endSection())
+        // Sponge: Use SpongeImplHooks for Forge
+        for (Iterator<net.minecraft.world.chunk.Chunk> iterator =
+             SpongeImplHooks.getChunkIterator((WorldServer) (Object) this); iterator.hasNext(); this.theProfiler.endSection())
         {
             this.theProfiler.startSection("getChunk");
             net.minecraft.world.chunk.Chunk chunk = iterator.next();

@@ -42,6 +42,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import net.minecraft.world.Teleporter;
@@ -58,6 +59,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.phase.ItemDropData;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -174,4 +176,9 @@ public final class SpongeImplHooks {
     public static boolean canDoRainSnowIce(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
         return true;
     }
+
+    public static Iterator<Chunk> getChunkIterator(WorldServer world) {
+        return world.getPlayerChunkMap().getChunkIterator();
+    }
+
 }
