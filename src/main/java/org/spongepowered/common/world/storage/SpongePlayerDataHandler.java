@@ -143,7 +143,7 @@ public final class SpongePlayerDataHandler {
         SpongePlayerDataHandler instance = Holder.INSTANCE;
         try {
             final String pathString = instance.playerDir.toString() + File.separator + id;
-            File newFile = new File(pathString + "_new.dat");
+            File newFile = new File(pathString + "dat.tmp");
             File finalFile = new File(pathString + ".dat");
             try (FileOutputStream stream = new FileOutputStream(newFile)) {
                 CompressedStreamTools.writeCompressed(compound, stream);
