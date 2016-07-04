@@ -62,6 +62,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
@@ -102,6 +103,7 @@ import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -110,6 +112,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -169,6 +172,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow public abstract void setBiomeArray(byte[] biomeArray);
     @Shadow public abstract int getTopFilledSegment();
     @Shadow public abstract void checkLight();
+    @Shadow public abstract <T extends Entity> void getEntitiesOfTypeWithinAAAB(Class <? extends T > entityClass, AxisAlignedBB aabb,
+        List<T> listToFill, Predicate <? super T > p_177430_4_);
     // @formatter:on
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
@@ -393,6 +398,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     private void checkBlockBounds(int x, int y, int z) {
         if (!containsBlock(x, y, z)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.blockMin, this.blockMax);
+        }
+    }
+
+    private void checkPositionBounds(double x, double y, double z) {
+        if (!VecHelper.inBounds(x, y, z, this.blockMin, this.blockMax)) {
+            throw new PositionOutOfBoundsException(new Vector3d(x, y, z), this.blockMin.toDouble(), this.blockMax.toDouble());
         }
     }
 
@@ -913,12 +924,27 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Override
     public Optional<AABB> getBlockSelectionBox(int x, int y, int z) {
+        checkBlockBounds(x, y, z);
         return this.world.getBlockSelectionBox(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15));
     }
 
     @Override
     public Optional<AABB> getBlockCollisionBox(int x, int y, int z) {
+        checkBlockBounds(x, y, z);
         return this.world.getBlockCollisionBox(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15));
+    }
+
+    @Override
+    public Set<org.spongepowered.api.entity.Entity> getIntersectingEntities(AABB box,
+            java.util.function.Predicate<org.spongepowered.api.entity.Entity> filter) {
+        final AxisAlignedBB aabb = new AxisAlignedBB(
+            box.getMin().getX(), box.getMin().getY(), box.getMin().getZ(),
+            box.getMax().getX(), box.getMax().getY(), box.getMax().getZ()
+        );
+        final List<Entity> entities = new ArrayList<>();
+        getEntitiesOfTypeWithinAAAB(net.minecraft.entity.Entity.class, aabb, entities,
+            entity -> filter.test((org.spongepowered.api.entity.Entity) entity));
+        return entities.stream().map(entity -> (org.spongepowered.api.entity.Entity) entity).collect(Collectors.toSet());
     }
 
     private User userForUUID(UUID uuid) {
