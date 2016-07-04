@@ -50,7 +50,7 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
 
     @Override
     protected boolean doesDataExist(net.minecraft.entity.Entity entity) {
-        return entity.isRiding();
+        return entity.ridingEntity != null;
     }
 
     @Override
@@ -80,7 +80,7 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (supports(dataHolder)) {
             net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) dataHolder);
-            if (entity.isRiding()) {
+            if (entity.ridingEntity != null) {
                 Entity ridingEntity = (Entity) entity.ridingEntity;
                 entity.mountEntity(null);
                 return DataTransactionResult.successResult(new ImmutableSpongeValue<>(Keys.VEHICLE, ridingEntity.createSnapshot()));
