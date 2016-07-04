@@ -148,6 +148,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -231,6 +232,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             boolean isFlaming, boolean isSmoking);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
+    @Shadow public abstract <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class <? extends T > clazz, AxisAlignedBB aabb,
+            com.google.common.base.Predicate<? super T > filter);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
     @Shadow public abstract MinecraftServer getMinecraftServer();
     // Methods needed for MixinWorldServer & Tracking
@@ -736,6 +739,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
             // Box is degenerate
             return Optional.empty();
         }
+    }
+
+    @Override
+    public Set<Entity> getIntersectingEntities(AABB box, Predicate<Entity> filter) {
+        final AxisAlignedBB aabb = new AxisAlignedBB(
+            box.getMin().getX(), box.getMin().getY(), box.getMin().getZ(),
+            box.getMax().getX(), box.getMax().getY(), box.getMax().getZ()
+        );
+        return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, aabb, entity -> filter.test((Entity) entity))
+            .stream().map(entity -> (Entity) entity).collect(Collectors.toSet());
     }
 
     @Nullable

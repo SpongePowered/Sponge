@@ -544,6 +544,12 @@ public class ExtentViewTransform implements DefaultedExtent {
     }
 
     @Override
+    public Set<Entity> getIntersectingEntities(AABB box, Predicate<Entity> filter) {
+        box = new AABB(inverseTransform(box.getMin()), inverseTransform(box.getMax()));
+        return this.extent.getIntersectingEntities(box, filter);
+    }
+
+    @Override
     public boolean hitBlock(int x, int y, int z, Direction side, Cause cause) {
         return this.extent.hitBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
             this.inverseTransform.transformZ(x, y, z), side, cause);
