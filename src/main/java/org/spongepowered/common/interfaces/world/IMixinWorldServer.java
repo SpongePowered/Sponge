@@ -27,6 +27,4 @@ package org.spongepowered.common.interfaces.world;
 public interface IMixinWorldServer {
 
     int getChunkGCTickInterval();
-
-    boolean canLeavesDecay();
 }
