@@ -152,6 +152,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private int chunkGCLoadThreshold = 0;
     private int chunkGCTickInterval = 600;
     private boolean isCapturingBlocks = false;
+    private boolean leafDecay = true;
     private boolean weatherThunderEnabled = true;
     private boolean weatherIceAndSnowEnabled = true;
 
@@ -175,6 +176,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         updateWorldGenerator();
         this.chunkGCLoadThreshold = this.getActiveConfig().getConfig().getWorld().getChunkLoadThreadhold();
         this.chunkGCTickInterval = this.getActiveConfig().getConfig().getWorld().getTickInterval();
+        this.leafDecay = this.getActiveConfig().getConfig().getWorld().getLeafDecay();
         this.weatherIceAndSnowEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherIceAndSnow();
         this.weatherThunderEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherThunder();
     }
@@ -1034,6 +1036,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // update cached settings
         this.chunkGCLoadThreshold = this.activeConfig.getConfig().getWorld().getChunkLoadThreadhold();
         this.chunkGCTickInterval = this.activeConfig.getConfig().getWorld().getTickInterval();
+        this.leafDecay = this.activeConfig.getConfig().getWorld().getLeafDecay();
         this.weatherIceAndSnowEnabled = this.activeConfig.getConfig().getWorld().getWeatherIceAndSnow();
         this.weatherThunderEnabled = this.activeConfig.getConfig().getWorld().getWeatherThunder();
         if (this.getChunkProvider() != null) {
@@ -1048,6 +1051,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 }
             }
         }
+    }
+
+    @Override
+    public boolean canLeavesDecay() {
+        return this.leafDecay;
     }
 
     @Override

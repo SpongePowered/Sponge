@@ -100,6 +100,9 @@ public class WorldCategory extends ConfigCategory {
     @Setting(value = "weather-ice-and-snow", comment = "Enable to allow the natural formation of ice and snow in supported biomes.")
     private boolean weatherIceAndSnow = true;
 
+    @Setting(value = "leaf-decay", comment = "Enable to allow natural leaf decay.")
+    private boolean leafDecay = true;
+    
     public WorldCategory() {
         this.portalAgents.put("minecraft:default_nether", "DIM-1");
         this.portalAgents.put("minecraft:default_the_end", "DIM1");
@@ -131,6 +134,14 @@ public class WorldCategory extends ConfigCategory {
 
     public void setWorldEnabled(boolean enabled) {
         this.worldEnabled = enabled;
+    }
+
+    public boolean getLeafDecay() {
+        return this.leafDecay;
+    }
+
+    public void setLeafDecay(boolean flag) {
+        this.leafDecay = flag;
     }
 
     public boolean loadOnStartup() {
