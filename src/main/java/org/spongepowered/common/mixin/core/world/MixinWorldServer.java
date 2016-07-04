@@ -32,6 +32,7 @@ import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -316,6 +317,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 // ++j; // Sponge - unused
                                 IBlockState iblockstate = extendedblockstorage.get(l1, j2, i2);
                                 Block block = iblockstate.getBlock();
+                                if (block instanceof BlockLeaves && !this.leafDecay) {
+                                    continue;
+                                }
 
                                 if (block.getTickRandomly())
                                 {
