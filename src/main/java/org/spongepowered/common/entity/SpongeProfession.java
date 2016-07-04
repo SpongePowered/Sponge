@@ -37,8 +37,16 @@ public class SpongeProfession extends SpongeEntityMeta implements Profession {
 
     private final List<Career> careers = new ArrayList<>();
 
-    public SpongeProfession(int id, String name) {
-        super(id, name);
+    private String name;
+
+    public SpongeProfession(int id, String resourceId, String name) {
+        super(id, resourceId);
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 
     @Override

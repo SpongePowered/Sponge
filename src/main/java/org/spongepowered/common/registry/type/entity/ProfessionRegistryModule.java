@@ -45,11 +45,11 @@ import java.util.Optional;
 
 public class ProfessionRegistryModule implements SpongeAdditionalCatalogRegistryModule<Profession> {
 
-    public static final Profession FARMER = new SpongeProfession(0, "farmer");
-    public static final Profession LIBRARIAN = new SpongeProfession(1, "librarian");
-    public static final Profession PRIEST = new SpongeProfession(2, "priest");
-    public static final Profession BLACKSMITH = new SpongeProfession(3, "blacksmith");
-    public static final Profession BUTCHER = new SpongeProfession(4, "butcher");
+    public static final Profession FARMER = new SpongeProfession(0, "minecraft:farmer", "farmer");
+    public static final Profession LIBRARIAN = new SpongeProfession(1, "minecraft:librarian", "librarian");
+    public static final Profession PRIEST = new SpongeProfession(2, "minecraft:priest", "priest");
+    public static final Profession BLACKSMITH = new SpongeProfession(3, "minecraft:blacksmith", "blacksmith");
+    public static final Profession BUTCHER = new SpongeProfession(4, "minecraft:butcher", "butcher");
 
     public static ProfessionRegistryModule getInstance() {
         return Holder.INSTANCE;
