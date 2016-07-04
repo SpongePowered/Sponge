@@ -407,6 +407,7 @@ public final class CommonModuleRegistry {
             .registerModule(BlockPaletteType.class, new PaletteTypeRegistryModule())
             .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
+            .registerModule(ZombieType.class, ZombieTypeRegistryModule.getInstance());
             ;
     }
 

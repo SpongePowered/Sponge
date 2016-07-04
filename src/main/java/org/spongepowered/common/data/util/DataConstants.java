@@ -60,6 +60,8 @@ import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.SkeletonType;
 import org.spongepowered.api.data.type.SkeletonTypes;
+import org.spongepowered.api.data.type.ZombieType;
+import org.spongepowered.api.data.type.ZombieTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Axis;
@@ -158,6 +160,7 @@ public final class DataConstants {
         public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
         public static final Art DEFAULT_ART = Arts.KEBAB;
         public static final PickupRule DEFAULT_PICKUP_RULE = PickupRules.ALLOWED;
+        public static final ZombieType DEFAULT_ZOMBIE_TYPE = ZombieTypes.NORMAL;
     }
 
     public static final class Entity {}

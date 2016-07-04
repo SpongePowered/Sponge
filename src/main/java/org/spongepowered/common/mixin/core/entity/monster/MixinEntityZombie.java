@@ -25,19 +25,49 @@
 package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.monster.EntityZombie;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.ZombieData;
+import org.spongepowered.api.data.type.ZombieType;
+import org.spongepowered.api.data.type.ZombieTypes;
 import org.spongepowered.api.entity.living.monster.Zombie;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeZombieData;
+import org.spongepowered.common.entity.EntityUtil;
+
+import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(EntityZombie.class)
 public abstract class MixinEntityZombie extends MixinEntityMob implements Zombie {
 
     @Shadow public abstract boolean isChild();
     @Shadow public abstract void setChildSize(boolean isChild);
+    @Shadow @Nullable public abstract net.minecraft.entity.monster.ZombieType getZombieType();
 
 
     @Override
     public void setScaleForAge() {
         this.setChildSize(this.isChild());
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getZombieData());
+    }
+
+    @Override
+    public ZombieData getZombieData() {
+        System.out.println("Common zombie");
+        net.minecraft.entity.monster.ZombieType nativeType = getZombieType();
+        ZombieType type = EntityUtil.typeFromNative(nativeType);
+        if (type != ZombieTypes.VILLAGER) {
+            return new SpongeZombieData(type, Optional.empty());
+        }
+
+        return new SpongeZombieData(ZombieTypes.VILLAGER, EntityUtil.profFromNative(nativeType));
     }
 }

@@ -235,8 +235,8 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(SlimeData.class, SpongeSlimeData.class, ImmutableSlimeData.class, ImmutableSpongeSlimeData.class,
                 new SlimeDataProcessor());
 
-        dataManager.registerDualProcessor(VillagerZombieData.class, SpongeVillagerZombieData.class, ImmutableVillagerZombieData.class,
-                ImmutableSpongeVillagerZombieData.class, new VillagerZombieProcessor());
+        dataManager.registerDataProcessorAndImpl(ZombieData.class, SpongeZombieData.class, ImmutableZombieData.class,
+                ImmutableSpongeZombieData.class, new ZombieDataProcessor());
 
         dataManager.registerDualProcessor(PlayingData.class, SpongePlayingData.class, ImmutablePlayingData.class,
                 ImmutableSpongePlayingData.class, new PlayingDataProcessor());
@@ -729,6 +729,8 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.ARMOR_STAND_MARKER, new ArmorStandMarkerValueProcessor());
         dataManager.registerValueProcessor(Keys.ARMOR_STAND_IS_SMALL, new ArmorStandSmallValueProcessor());
         dataManager.registerValueProcessor(Keys.ARMOR_STAND_HAS_ARMS, new ArmorStandArmsValueProcessor());
+        dataManager.registerValueProcessor(Keys.ZOMBIE_TYPE, new ZombieTypeValueProcessor());
+        dataManager.registerValueProcessor(Keys.VILLAGER_ZOMBIE_PROFESSION, new VillagerZombieProfessionValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

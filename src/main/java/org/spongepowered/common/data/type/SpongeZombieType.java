@@ -22,19 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable.entity;
+package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVillagerZombieData;
-import org.spongepowered.api.data.manipulator.mutable.entity.VillagerZombieData;
-import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.data.type.Professions;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVillagerZombieData;
+import org.spongepowered.api.data.type.ZombieType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class ImmutableSpongeVillagerZombieData extends AbstractImmutableSingleCatalogData<Profession, ImmutableVillagerZombieData, VillagerZombieData> implements ImmutableVillagerZombieData {
+public class SpongeZombieType extends SpongeCatalogType implements ZombieType {
 
-    public ImmutableSpongeVillagerZombieData(Profession value) {
-        super(ImmutableVillagerZombieData.class, value, Professions.FARMER, Keys.VILLAGER_ZOMBIE_PROFESSION, SpongeVillagerZombieData.class);
+    public SpongeZombieType(String id) {
+        super(id);
     }
 }
