@@ -38,29 +38,25 @@ public class ImmutableSpongeArmorStandData extends AbstractImmutableData<Immutab
 
     private final boolean marker;
     private final boolean small;
-    private final boolean gravity;
     private final boolean arms;
     private final boolean basePlate;
     private final ImmutableValue<Boolean> markerValue;
     private final ImmutableValue<Boolean> smallValue;
-    private final ImmutableValue<Boolean> gravityValue;
     private final ImmutableValue<Boolean> armsValue;
     private final ImmutableValue<Boolean> basePlateValue;
 
     public ImmutableSpongeArmorStandData() {
-        this(false, false, true, false, true);
+        this(false, false, false, true);
     }
 
-    public ImmutableSpongeArmorStandData(boolean marker, boolean small, boolean gravity, boolean arms, boolean basePlate) {
+    public ImmutableSpongeArmorStandData(boolean marker, boolean small, boolean arms, boolean basePlate) {
         super(ImmutableArmorStandData.class);
         this.marker = marker;
         this.small = small;
-        this.gravity = gravity;
         this.arms = arms;
         this.basePlate = basePlate;
         this.markerValue = ImmutableSpongeValue.cachedOf(Keys.ARMOR_STAND_MARKER, false, this.marker);
         this.smallValue = ImmutableSpongeValue.cachedOf(Keys.ARMOR_STAND_IS_SMALL, false, this.small);
-        this.gravityValue = ImmutableSpongeValue.cachedOf(Keys.ARMOR_STAND_HAS_GRAVITY, true, this.gravity);
         this.armsValue = ImmutableSpongeValue.cachedOf(Keys.ARMOR_STAND_HAS_ARMS, false, this.arms);
         this.basePlateValue = ImmutableSpongeValue.cachedOf(Keys.ARMOR_STAND_HAS_BASE_PLATE, true, this.basePlate);
         registerGetters();
@@ -76,9 +72,6 @@ public class ImmutableSpongeArmorStandData extends AbstractImmutableData<Immutab
 
         registerFieldGetter(Keys.ARMOR_STAND_HAS_BASE_PLATE, () -> this.basePlate);
         registerKeyValue(Keys.ARMOR_STAND_HAS_BASE_PLATE, () -> this.basePlateValue);
-
-        registerFieldGetter(Keys.ARMOR_STAND_HAS_GRAVITY, () -> this.gravity);
-        registerKeyValue(Keys.ARMOR_STAND_HAS_GRAVITY, () -> this.gravityValue);
 
         registerFieldGetter(Keys.ARMOR_STAND_MARKER, () -> this.marker);
         registerKeyValue(Keys.ARMOR_STAND_MARKER, () -> this.markerValue);
@@ -96,11 +89,6 @@ public class ImmutableSpongeArmorStandData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    public ImmutableValue<Boolean> gravity() {
-        return this.gravityValue;
-    }
-
-    @Override
     public ImmutableValue<Boolean> arms() {
         return this.armsValue;
     }
@@ -112,7 +100,7 @@ public class ImmutableSpongeArmorStandData extends AbstractImmutableData<Immutab
 
     @Override
     public ArmorStandData asMutable() {
-        return new SpongeArmorStandData(this.marker, this.small, this.gravity, this.arms, this.basePlate);
+        return new SpongeArmorStandData(this.marker, this.small, this.arms, this.basePlate);
     }
 
     @Override
@@ -121,7 +109,6 @@ public class ImmutableSpongeArmorStandData extends AbstractImmutableData<Immutab
                 .compare(o.arms().get(), this.arms)
                 .compare(o.marker().get(), this.marker)
                 .compare(o.basePlate().get(), this.basePlate)
-                .compare(o.gravity().get(), this.gravity)
                 .compare(o.small().get(), this.small)
                 .result();
     }
@@ -131,7 +118,6 @@ public class ImmutableSpongeArmorStandData extends AbstractImmutableData<Immutab
         return super.toContainer()
                 .set(Keys.ARMOR_STAND_HAS_ARMS, this.arms)
                 .set(Keys.ARMOR_STAND_HAS_BASE_PLATE, this.basePlate)
-                .set(Keys.ARMOR_STAND_HAS_GRAVITY, this.gravity)
                 .set(Keys.ARMOR_STAND_IS_SMALL, this.small)
                 .set(Keys.ARMOR_STAND_MARKER, this.marker);
     }

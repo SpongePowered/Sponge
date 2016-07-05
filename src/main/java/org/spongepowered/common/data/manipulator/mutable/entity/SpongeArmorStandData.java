@@ -39,19 +39,17 @@ public class SpongeArmorStandData extends AbstractData<ArmorStandData, Immutable
 
     private boolean marker;
     private boolean small;
-    private boolean gravity;
     private boolean arms;
     private boolean basePlate;
 
     public SpongeArmorStandData() {
-        this(false, false, true, false, true);
+        this(false, false, false, true);
     }
 
-    public SpongeArmorStandData(boolean marker, boolean small, boolean gravity, boolean arms, boolean basePlate) {
+    public SpongeArmorStandData(boolean marker, boolean small, boolean arms, boolean basePlate) {
         super(ArmorStandData.class);
         this.marker = marker;
         this.small = small;
-        this.gravity = gravity;
         this.arms = arms;
         this.basePlate = basePlate;
         registerGettersAndSetters();
@@ -72,10 +70,6 @@ public class SpongeArmorStandData extends AbstractData<ArmorStandData, Immutable
         registerFieldSetter(Keys.ARMOR_STAND_HAS_BASE_PLATE, (basePlate) -> this.basePlate = basePlate);
         registerKeyValue(Keys.ARMOR_STAND_HAS_BASE_PLATE, this::basePlate);
 
-        registerFieldGetter(Keys.ARMOR_STAND_HAS_GRAVITY, () -> this.gravity);
-        registerFieldSetter(Keys.ARMOR_STAND_HAS_GRAVITY, (gravity) -> this.gravity = gravity);
-        registerKeyValue(Keys.ARMOR_STAND_HAS_GRAVITY, this::gravity);
-
         registerFieldGetter(Keys.ARMOR_STAND_MARKER, () -> this.marker);
         registerFieldSetter(Keys.ARMOR_STAND_MARKER, (marker) -> this.marker = marker);
         registerKeyValue(Keys.ARMOR_STAND_MARKER, this::marker);
@@ -92,11 +86,6 @@ public class SpongeArmorStandData extends AbstractData<ArmorStandData, Immutable
     }
 
     @Override
-    public Value<Boolean> gravity() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_GRAVITY, true, this.gravity);
-    }
-
-    @Override
     public Value<Boolean> arms() {
         return new SpongeValue<>(Keys.ARMOR_STAND_HAS_ARMS, false, this.arms);
     }
@@ -109,12 +98,12 @@ public class SpongeArmorStandData extends AbstractData<ArmorStandData, Immutable
 
     @Override
     public ArmorStandData copy() {
-        return new SpongeArmorStandData(this.marker, this.small, this.gravity, this.arms, this.basePlate);
+        return new SpongeArmorStandData(this.marker, this.small, this.arms, this.basePlate);
     }
 
     @Override
     public ImmutableArmorStandData asImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeArmorStandData.class, this.marker, this.small, this.gravity, this.arms, this.basePlate);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeArmorStandData.class, this.marker, this.small, this.arms, this.basePlate);
     }
 
     @Override
@@ -123,7 +112,6 @@ public class SpongeArmorStandData extends AbstractData<ArmorStandData, Immutable
                 .compare(o.arms().get(), this.arms)
                 .compare(o.marker().get(), this.marker)
                 .compare(o.basePlate().get(), this.basePlate)
-                .compare(o.gravity().get(), this.gravity)
                 .compare(o.small().get(), this.small)
                 .result();
     }
@@ -133,7 +121,6 @@ public class SpongeArmorStandData extends AbstractData<ArmorStandData, Immutable
         return super.toContainer()
                 .set(Keys.ARMOR_STAND_HAS_ARMS, this.arms)
                 .set(Keys.ARMOR_STAND_HAS_BASE_PLATE, this.basePlate)
-                .set(Keys.ARMOR_STAND_HAS_GRAVITY, this.gravity)
                 .set(Keys.ARMOR_STAND_IS_SMALL, this.small)
                 .set(Keys.ARMOR_STAND_MARKER, this.marker);
     }

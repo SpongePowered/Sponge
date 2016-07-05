@@ -317,12 +317,12 @@ public class KeyRegistry {
         keyMap.put("explosion_radius", makeSingleKey(Integer.class, Value.class, of("ExplosionRadius")));
         keyMap.put("armor_stand_has_arms", makeSingleKey(Boolean.class, Value.class, of("HasArms")));
         keyMap.put("armor_stand_has_base_plate", makeSingleKey(Boolean.class, Value.class, of("HasBasePlate")));
-        keyMap.put("armor_stand_has_gravity", makeSingleKey(Boolean.class, Value.class, of("HasGravity")));
         keyMap.put("armor_stand_marker", makeSingleKey(Boolean.class, Value.class, of("IsMarker")));
         keyMap.put("armor_stand_is_small", makeSingleKey(Boolean.class, Value.class, of("IsSmall")));
         keyMap.put("invulnerability_ticks", makeSingleKey(Integer.class, MutableBoundedValue.class, of("HurtTime")));
         keyMap.put("glowing", makeSingleKey(Boolean.class, Value.class, of("Glowing")));
         keyMap.put("pickup_rule", makeSingleKey(PickupRule.class, Value.class, of("PickupRule")));
+        keyMap.put("has_gravity", makeSingleKey(Boolean.class, Value.class, of("HasGravity")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
