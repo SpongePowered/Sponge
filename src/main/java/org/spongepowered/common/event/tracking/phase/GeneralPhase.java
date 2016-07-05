@@ -279,17 +279,24 @@ public final class GeneralPhase extends TrackingPhase {
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
 
         for (BlockSnapshot snapshot : snapshotsToProcess) {
+            // This processes each snapshot to assign them to the correct event in the next area, with the
+            // correct builder array entry.
             GeneralFunctions.TRANSACTION_PROCESSOR.apply(transactionBuilders)
                     .accept(GeneralFunctions.TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
         }
 
         for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
+            // Build each event array
             transactionArrays[i] = transactionBuilders[i].build();
         }
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
+        // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
+        // case in point for WorldTick event listeners since the players are captured non-deterministically
         final Cause.Builder builder = Cause.source(unwinding.firstNamed(NamedCause.SOURCE, Object.class).get());
         final World world = causeTracker.getWorld();
+        // Creates the block events accordingly to the transaction arrays
         GeneralFunctions.iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world);
+        // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
         final ChangeBlockEvent.Post
                 postEvent =
                 GeneralFunctions.throwMultiEventsAndCreatePost(transactionArrays, blockEvents, mainEvents, builder, world);
@@ -298,15 +305,19 @@ public final class GeneralPhase extends TrackingPhase {
             return;
         }
 
+        // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
+        // transactions of the preceeding block events)
         for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
             if (blockEvent.isCancelled()) {
-                // Restore original blocks and add to invalid transactions
+                // Don't restore the transactions just yet, since we're just marking them as invalid for now
                 for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
                     transaction.setValid(false);
                 }
             }
         }
 
+        // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
+        // Because after, we will restore all the invalid transactions in reverse order.
         for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
             if (!transaction.isValid()) {
                 invalidTransactions.add(transaction);
@@ -314,11 +325,19 @@ public final class GeneralPhase extends TrackingPhase {
         }
 
         if (!invalidTransactions.isEmpty()) {
+            // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
+            // or the events were cancelled), again in reverse order of which they were received.
             for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalidTransactions)) {
                 transaction.getOriginal().restore(true, false);
                 if (unwindingState.tracksBlockSpecificDrops()) {
+                    // Cancel any block drops or harvests for the block change.
+                    // This prevents unnecessary spawns.
                     final BlockPos position = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-                    postContext.getBlockDropSupplier().ifPresentAndNotEmpty(map -> map.get(position).clear());
+                    postContext.getBlockDropSupplier().ifPresentAndNotEmpty(map -> {
+                        if (map.containsKey(position)) {
+                            map.get(position).clear();
+                        }
+                    });
                 }
             }
             invalidTransactions.clear();

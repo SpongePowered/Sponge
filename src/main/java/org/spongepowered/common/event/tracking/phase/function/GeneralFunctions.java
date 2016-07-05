@@ -148,17 +148,24 @@ public class GeneralFunctions {
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
 
         for (BlockSnapshot snapshot : snapshots) {
+            // This processes each snapshot to assign them to the correct event in the next area, with the
+            // correct builder array entry.
             TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
         }
 
         for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
+            // Build each event array
             transactionArrays[i] = transactionBuilders[i].build();
         }
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
+        // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
+        // case in point for WorldTick event listeners since the players are captured non-deterministically
         final Cause.Builder builder = Cause.source(context.firstNamed(NamedCause.SOURCE, Object.class).orElseThrow(PhaseUtil.throwWithContext("There was no root sEmerource object for this phase!", context)));
         state.getPhase().associateAdditionalCauses(state, context, builder, causeTracker);
         final World world = causeTracker.getWorld();
+        // Creates the block events accordingly to the transaction arrays
         iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world); // Needs to throw events
+        // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
         final ChangeBlockEvent.Post postEvent = throwMultiEventsAndCreatePost(transactionArrays, blockEvents, mainEvents, builder, world);
 
         if (postEvent == null) { // Means that we have had no actual block changes apparently?
@@ -169,16 +176,20 @@ public class GeneralFunctions {
 
         boolean noCancelledTransactions = true;
 
+        // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
+        // transactions of the preceeding block events)
         for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
             if (blockEvent.isCancelled()) {
                 noCancelledTransactions = false;
-                // Restore original blocks and add to invalid transactions
+                // Don't restore the transactions just yet, since we're just marking them as invalid for now
                 for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
                     transaction.setValid(false);
                 }
             }
         }
 
+        // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
+        // Because after, we will restore all the invalid transactions in reverse order.
         for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
             if (!transaction.isValid()) {
                 invalid.add(transaction);
@@ -191,12 +202,23 @@ public class GeneralFunctions {
         }
 
         if (!invalid.isEmpty()) {
+            // We need to set this value and return it to signify that some transactions were cancelled
             noCancelledTransactions = false;
+            // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
+            // or the events were cancelled), again in reverse order of which they were received.
             for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
                 transaction.getOriginal().restore(true, false);
                 if (state.tracksBlockSpecificDrops()) {
+                    // Cancel any block drops or harvests for the block change.
+                    // This prevents unnecessary spawns.
                     final BlockPos position = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-                    context.getBlockDropSupplier().ifPresentAndNotEmpty(map -> map.get(position).clear());
+                    context.getBlockDropSupplier().ifPresentAndNotEmpty(map -> {
+                        // Check if the mapping actually has the position to avoid unnecessary
+                        // collection creation
+                        if (map.containsKey(position)) {
+                            map.get(position).clear();
+                        }
+                    });
                 }
             }
         }
@@ -237,6 +259,9 @@ public class GeneralFunctions {
         final CapturedMultiMapSupplier<BlockPos, EntityItem> capturedBlockItemEntityDrops = phaseContext.getBlockItemDropSupplier();
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
+                // Rememver that this value needs to be set to false to return because of the fact that
+                // a transaction was marked as invalid or cancelled. This is used primarily for
+                // things like portal creation, and if false, removes the portal from the cache
                 noCancelledTransactions = false;
                 continue; // Don't use invalidated block transactions during notifications, these only need to be restored
             }
