@@ -401,12 +401,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
     }
 
-    private void checkPositionBounds(double x, double y, double z) {
-        if (!VecHelper.inBounds(x, y, z, this.blockMin, this.blockMax)) {
-            throw new PositionOutOfBoundsException(new Vector3d(x, y, z), this.blockMin.toDouble(), this.blockMax.toDouble());
-        }
-    }
-
     @Override
     public Extent getExtentView(Vector3i newMin, Vector3i newMax) {
         checkBlockBounds(newMin.getX(), newMin.getY(), newMin.getZ());
@@ -929,22 +923,18 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     @Override
-    public Optional<AABB> getBlockCollisionBox(int x, int y, int z) {
-        checkBlockBounds(x, y, z);
-        return this.world.getBlockCollisionBox(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15));
+    public Set<org.spongepowered.api.entity.Entity> getIntersectingEntities(AABB box,
+            java.util.function.Predicate<org.spongepowered.api.entity.Entity> filter) {
+        final List<Entity> entities = new ArrayList<>();
+        getEntitiesOfTypeWithinAAAB(net.minecraft.entity.Entity.class, VecHelper.toMC(box), entities,
+            entity -> filter.test((org.spongepowered.api.entity.Entity) entity));
+        return entities.stream().map(entity -> (org.spongepowered.api.entity.Entity) entity).collect(Collectors.toSet());
     }
 
     @Override
-    public Set<org.spongepowered.api.entity.Entity> getIntersectingEntities(AABB box,
-            java.util.function.Predicate<org.spongepowered.api.entity.Entity> filter) {
-        final AxisAlignedBB aabb = new AxisAlignedBB(
-            box.getMin().getX(), box.getMin().getY(), box.getMin().getZ(),
-            box.getMax().getX(), box.getMax().getY(), box.getMax().getZ()
-        );
-        final List<Entity> entities = new ArrayList<>();
-        getEntitiesOfTypeWithinAAAB(net.minecraft.entity.Entity.class, aabb, entities,
-            entity -> filter.test((org.spongepowered.api.entity.Entity) entity));
-        return entities.stream().map(entity -> (org.spongepowered.api.entity.Entity) entity).collect(Collectors.toSet());
+    public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
+        return this.world.getIntersectingBlockCollisionBoxes(box).stream().filter(aabb -> VecHelper.inBounds(aabb.getCenter(), this.blockMin,
+            this.blockMax.add(Vector3i.ONE))).collect(Collectors.toSet());
     }
 
     private User userForUUID(UUID uuid) {
