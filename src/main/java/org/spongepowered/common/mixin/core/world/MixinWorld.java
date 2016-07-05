@@ -261,6 +261,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
     @Shadow public abstract boolean canSeeSky(BlockPos pos);
     @Shadow public abstract int getLightFor(EnumSkyBlock type, BlockPos pos);
+    @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(AxisAlignedBB bb);
 
     // @formatter:on
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -720,35 +721,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public Optional<AABB> getBlockCollisionBox(int x, int y, int z) {
-        checkBlockBounds(x, y, z);
-        final BlockPos pos = new BlockPos(x, y, z);
-        final IBlockState state = getBlockState(pos);
-        final Block type = state.getBlock();
-        type.setBlockBoundsBasedOnState((IBlockAccess) this, pos);
-        final AxisAlignedBB box = type.getCollisionBoundingBox((net.minecraft.world.World) (Object) this, pos, state);
-        if (box == null) {
-            return Optional.empty();
-        }
-        try {
-            return Optional.of(new AABB(
-                new Vector3d(box.minX, box.minY, box.minZ),
-                new Vector3d(box.maxX, box.maxY, box.maxZ)
-            ));
-        } catch (IllegalArgumentException exception) {
-            // Box is degenerate
-            return Optional.empty();
-        }
+    public Set<Entity> getIntersectingEntities(AABB box, Predicate<Entity> filter) {
+        return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMC(box), entity -> filter.test((Entity) entity))
+            .stream().map(entity -> (Entity) entity).collect(Collectors.toSet());
     }
 
     @Override
-    public Set<Entity> getIntersectingEntities(AABB box, Predicate<Entity> filter) {
-        final AxisAlignedBB aabb = new AxisAlignedBB(
-            box.getMin().getX(), box.getMin().getY(), box.getMin().getZ(),
-            box.getMax().getX(), box.getMax().getY(), box.getMax().getZ()
-        );
-        return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, aabb, entity -> filter.test((Entity) entity))
-            .stream().map(entity -> (Entity) entity).collect(Collectors.toSet());
+    public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
+        return getCollisionBoxes(VecHelper.toMC(box)).stream().map(VecHelper::toSponge).collect(Collectors.toSet());
     }
 
     @Nullable
