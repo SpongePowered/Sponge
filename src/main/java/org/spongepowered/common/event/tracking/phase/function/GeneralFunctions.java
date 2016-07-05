@@ -120,6 +120,20 @@ public class GeneralFunctions {
         }
     }
 
+    /**
+     * Processes the given list of {@link BlockSnapshot}s and creates and throws and processes
+     * the {@link ChangeBlockEvent}s as appropriately determined based on the {@link BlockChange}
+     * for each snapshot. If any transactions are invalid or events cancelled, this event
+     * returns {@code false} to signify a transaction was cancelled. This return value
+     * is used for portal creation.
+     *
+     * @param snapshots The snapshots to process
+     * @param causeTracker The cause tracker for the world
+     * @param state The phase state that is being processed, used to handle marking notifiers
+     *  and block owners
+     * @param context The phase context, only used by the phase for handling processes.
+     * @return True if no events or transactions were cancelled
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static boolean processBlockCaptures(List<BlockSnapshot> snapshots, CauseTracker causeTracker, IPhaseState state, PhaseContext context) {
         if (snapshots.isEmpty()) {
@@ -247,7 +261,7 @@ public class GeneralFunctions {
             IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
-            if (!SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
+            if (originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
                 final PhaseData peek = causeTracker.getStack().peek();
                 if (peek.getState() == GeneralPhase.Post.UNWINDING) {

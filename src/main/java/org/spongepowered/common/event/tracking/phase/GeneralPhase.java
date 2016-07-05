@@ -129,7 +129,7 @@ public final class GeneralPhase extends TrackingPhase {
 
         @Override
         public boolean tracksBlockRestores() {
-            return true;
+            return false; // TODO - check that this really is needed.
         }
 
     }
@@ -360,7 +360,7 @@ public final class GeneralPhase extends TrackingPhase {
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
             final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = postContext.getCapturedBlockSupplier();
-            if (!SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
+            if (originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
                 postContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
 

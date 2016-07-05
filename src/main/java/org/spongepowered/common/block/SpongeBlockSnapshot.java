@@ -175,7 +175,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             return false;
         }
 
-        net.minecraft.world.World world = (net.minecraft.world.World) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
+        WorldServer world = (WorldServer) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
         CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
         final IPhaseState currentState = causeTracker.getStack().peekState();
         if (!currentState.tracksBlockRestores()) {
@@ -196,7 +196,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
 
         world.setBlockState(pos, replaced, notifyNeighbors ? 3 : 2);
-        ((WorldServer) world).getPlayerChunkMap().markBlockForUpdate(pos);
+        world.getPlayerChunkMap().markBlockForUpdate(pos);
         if (this.compound != null) {
             final TileEntity te = world.getTileEntity(pos);
             if (te != null) {
