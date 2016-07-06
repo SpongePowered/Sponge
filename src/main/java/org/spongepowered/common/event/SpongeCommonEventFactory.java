@@ -597,9 +597,7 @@ public class SpongeCommonEventFactory {
         }
 
         NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(notifyCause != null ? notifyCause : parentCause, originalNeighbors, neighbors);
-        StaticMixinHelper.processingInternalForgeEvent = true;
         SpongeImpl.postEvent(event);
-        StaticMixinHelper.processingInternalForgeEvent = false;
         return event;
     }
 

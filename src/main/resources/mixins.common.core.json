@@ -74,6 +74,7 @@
         "block.MixinBlockRailPowered",
         "block.MixinBlockRedSandstone",
         "block.MixinBlockRedstoneComparator",
+        "block.MixinBlockRedstoneDiode",
         "block.MixinBlockRedstoneRepeater",
         "block.MixinBlockRedstoneWire",
         "block.MixinBlockReed",
