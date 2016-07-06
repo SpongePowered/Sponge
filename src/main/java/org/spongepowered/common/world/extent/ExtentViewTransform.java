@@ -550,6 +550,12 @@ public class ExtentViewTransform implements DefaultedExtent {
     }
 
     @Override
+    public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
+        box = new AABB(inverseTransform(box.getMin()), inverseTransform(box.getMax()));
+        return this.extent.getIntersectingCollisionBoxes(owner, box);
+    }
+
+    @Override
     public boolean hitBlock(int x, int y, int z, Direction side, Cause cause) {
         return this.extent.hitBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
             this.inverseTransform.transformZ(x, y, z), side, cause);
