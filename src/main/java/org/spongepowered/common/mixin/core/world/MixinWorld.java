@@ -262,6 +262,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean canSeeSky(BlockPos pos);
     @Shadow public abstract int getLightFor(EnumSkyBlock type, BlockPos pos);
     @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(AxisAlignedBB bb);
+    @Shadow public abstract List<AxisAlignedBB> getCollidingBoundingBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
 
     // @formatter:on
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -729,6 +730,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
         return getCollisionBoxes(VecHelper.toMC(box)).stream().map(VecHelper::toSponge).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
+        return getCollidingBoundingBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMC(box)).stream().map(VecHelper::toSponge).
+            collect(Collectors.toSet());
     }
 
     @Nullable

@@ -538,6 +538,13 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
+    public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
+        checkRange(box.getMin().getX(), box.getMin().getY(), box.getMin().getZ());
+        checkRange(box.getMax().getX(), box.getMax().getY(), box.getMax().getZ());
+        return this.extent.getIntersectingCollisionBoxes(owner, box);
+    }
+
+    @Override
     public boolean hitBlock(int x, int y, int z, Direction side, Cause cause) {
         checkRange(x, y, z);
         return this.extent.hitBlock(x, y, z, side, cause);
