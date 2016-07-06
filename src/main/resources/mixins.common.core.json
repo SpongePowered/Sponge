@@ -40,6 +40,7 @@
         "block.MixinBlockDoublePlant",
         "block.MixinBlockDoubleStoneSlab",
         "block.MixinBlockDoubleWoodSlab",
+        "block.MixinBlockDynamicLiquid",
         "block.MixinBlockEnderChest",
         "block.MixinBlockEndPortalFrame",
         "block.MixinBlockFalling",
