@@ -79,14 +79,14 @@ public abstract class SpongeSubject implements Subject {
         return getSubjectData().getParents(contexts);
     }
 
-    protected String getDataOptionValue(MemorySubjectData subject, String option) {
-        String res = subject.getOptions(SubjectData.GLOBAL_CONTEXT).get(option);
+    protected Optional<String> getDataOptionValue(MemorySubjectData subject, String option) {
+        Optional<String> res = Optional.ofNullable(subject.getOptions(SubjectData.GLOBAL_CONTEXT).get(option));
 
-        if (res == null) {
+        if (!res.isPresent()) {
             for (Subject parent : subject.getParents(SubjectData.GLOBAL_CONTEXT)) {
                 Optional<String> tempRes = parent.getOption(SubjectData.GLOBAL_CONTEXT, option);
                 if (tempRes.isPresent()) {
-                    res = tempRes.get();
+                    res = tempRes;
                     break;
                 }
             }
@@ -96,7 +96,7 @@ public abstract class SpongeSubject implements Subject {
 
     @Override
     public Optional<String> getOption(Set<Context> contexts, String key) {
-        return Optional.ofNullable(getDataOptionValue(getSubjectData(), key));
+        return getDataOptionValue(getSubjectData(), key);
     }
 
     @Override

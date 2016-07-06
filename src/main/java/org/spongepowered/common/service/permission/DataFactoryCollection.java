@@ -117,13 +117,13 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public String getDataOptionValue(MemorySubjectData data, String permission) {
-            String ret = super.getDataOptionValue(data, permission);
-            if (ret == null) {
-                ret = getDataOptionValue(DataFactoryCollection.this.getDefaults().getSubjectData(), permission);
+        public Optional<String> getOption(Set<Context> contexts, String option) {
+            Optional<String> ret = super.getOption(contexts, option);
+            if (!ret.isPresent()) {
+                ret = getDataOptionValue(DataFactoryCollection.this.getDefaults().getSubjectData(), option);
             }
-            if (ret == null) {
-                ret = getDataOptionValue(DataFactoryCollection.this.service.getDefaults().getSubjectData(), permission);
+            if (!ret.isPresent()) {
+                ret = getDataOptionValue(DataFactoryCollection.this.service.getDefaults().getSubjectData(), option);
             }
             return ret;
         }

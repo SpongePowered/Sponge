@@ -136,13 +136,13 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public String getDataOptionValue(MemorySubjectData data, String permission) {
-        String ret = super.getDataOptionValue(data, permission);
-        if (ret == null) {
-            ret = getDataOptionValue(this.collection.getDefaults().getSubjectData(), permission);
+    public Optional<String> getOption(Set<Context> contexts, String option) {
+        Optional<String> ret = super.getOption(contexts, option);
+        if (!ret.isPresent()) {
+            ret = getDataOptionValue(this.collection.getDefaults().getSubjectData(), option);
         }
-        if (ret == null) {
-            ret = getDataOptionValue(this.collection.getService().getDefaults().getSubjectData(), permission);
+        if (!ret.isPresent()) {
+            ret = getDataOptionValue(this.collection.getService().getDefaults().getSubjectData(), option);
         }
         return ret;
     }
