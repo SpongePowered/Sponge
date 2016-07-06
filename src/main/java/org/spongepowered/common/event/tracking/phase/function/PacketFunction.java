@@ -42,10 +42,9 @@ import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.network.play.server.SPacketOpenWindow;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IInteractionObject;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -60,7 +59,6 @@ import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeCli
 import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
-import org.spongepowered.api.event.item.inventory.CreativeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -78,7 +76,6 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.util.PacketPhaseUtil;
@@ -96,7 +93,6 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -636,7 +632,19 @@ public interface PacketFunction {
                 });
         context.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(
-                        originalBlocks -> GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state, context));
+                        originalBlocks -> {
+                            boolean success = GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state,
+                                    context);
+                            if (!success) {
+                                player.isChangingQuantityOnly = false;
+                                player.inventory.mainInventory[player.inventory.currentItem] = (net.minecraft.item.ItemStack) itemStack;
+                                final Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
+                                player.openContainer.detectAndSendChanges();
+                                player.isChangingQuantityOnly = false;
+                                player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slot.slotNumber, (net.minecraft.item
+                                        .ItemStack) itemStack));
+                            }
+                        });
     };
     PacketFunction HELD_ITEM_CHANGE = ((packet, state, player, context) -> {
         final CPacketHeldItemChange itemChange = (CPacketHeldItemChange) packet;
@@ -646,9 +654,6 @@ public interface PacketFunction {
         final InventoryPlayer inventory = player.inventory;
         final Slot sourceSlot = inventoryContainer.getSlot(previousSlot + inventory.mainInventory.length);
         final Slot targetSlot = inventoryContainer.getSlot(itemChange.getSlotId() + inventory.mainInventory.length);
-        if (sourceSlot == null || targetSlot == null) {
-            return; // should never happen but just in case it does
-        }
 
         ItemStackSnapshot sourceSnapshot = ItemStackUtil.snapshotOf(sourceSlot.getStack());
         ItemStackSnapshot targetSnapshot = ItemStackUtil.snapshotOf(targetSlot.getStack());

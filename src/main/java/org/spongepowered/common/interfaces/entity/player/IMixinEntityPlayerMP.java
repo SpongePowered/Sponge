@@ -25,9 +25,7 @@
 package org.spongepowered.common.interfaces.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -47,16 +45,6 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
 
     MessageChannel getDeathMessageChannel();
 
-    ItemStack getPacketItem();
-
-    ItemStackSnapshot getPacketCursor();
-
-    void setPacketItem(ItemStack itemstack);
-
-    void setPacketCursor(ItemStackSnapshot cursor);
-
-    void restorePacketItem();
-
     void initScoreboard();
 
     void resetAttributeMap();
@@ -64,5 +52,4 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     IMixinWorldServer getMixinWorld();
 
     void refreshXpHealthAndFood();
-
 }
