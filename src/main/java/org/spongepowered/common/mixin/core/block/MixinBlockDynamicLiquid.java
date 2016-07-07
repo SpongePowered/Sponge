@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockDynamicLiquid;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
@@ -56,7 +57,7 @@ public abstract class MixinBlockDynamicLiquid {
         }
 
         Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
-        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(Cause.source(causeTracker.getCurrentTickBlock().get()).build(), location, (World) worldIn);
+        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(Cause.source(causeTracker.getCurrentTickBlock().get()).build(), ImmutableList.of(location), (World) worldIn);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             cir.setReturnValue(false);
