@@ -49,7 +49,6 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameType;
 import net.minecraft.world.ILockableContainer;
-import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
@@ -83,6 +82,10 @@ public abstract class MixinPlayerInteractionManager {
     @Inject(method = "processRightClick", at = @At("HEAD"), cancellable = true)
     private void onProcessRightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand,
             CallbackInfoReturnable<EnumActionResult> cir) {
+        if (SpongeCommonEventFactory.ignoreRightClickAirEvent) {
+            return;
+        }
+
         if (SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)), Optional.empty(),
                 BlockSnapshot.NONE, Direction.NONE, hand).isCancelled()) {
             cir.setReturnValue(EnumActionResult.FAIL);
@@ -206,6 +209,15 @@ public abstract class MixinPlayerInteractionManager {
 
         if (!ItemStack.areItemStacksEqual(player.getHeldItem(hand), oldStack) || result != EnumActionResult.SUCCESS) {
             player.openContainer.detectAndSendChanges();
+        }
+
+        // Since we cancel the second packet received while looking at a block with
+        // item in hand, we need to make sure to make an attempt to run the 'processRightClick'
+        // method during the first packet.
+        if (stack != null && result != EnumActionResult.SUCCESS && !event.isCancelled() && event.getUseItemResult() != Tristate.FALSE) {
+            SpongeCommonEventFactory.ignoreRightClickAirEvent = true;
+            this.processRightClick(playerMP, worldIn, oldStack, hand);
+            SpongeCommonEventFactory.ignoreRightClickAirEvent = false;
         }
         return result;
         // Sponge end

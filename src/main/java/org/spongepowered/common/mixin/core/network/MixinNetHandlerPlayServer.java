@@ -33,7 +33,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
@@ -49,7 +48,6 @@ import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
-import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
@@ -74,7 +72,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
@@ -171,7 +168,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     private final Map<String, ResourcePack> sentResourcePacks = new HashMap<>();
 
-    private Long lastPacket;
     // Store the last block right-clicked
     private boolean allowClientLocationUpdate = true;
     @Nullable private Item lastItem;
@@ -631,13 +627,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         SpongeImpl.postEvent(event);
         if (!event.isMessageCancelled()) {
             event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
-        }
-    }
-
-    @Inject(method = "processRightClickBlock", at = @At(value = "HEAD"))
-    public void onProcessPlayerBlockPlacement(CPacketPlayerTryUseItemOnBlock packetIn, CallbackInfo ci) {
-        if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
         }
     }
 
