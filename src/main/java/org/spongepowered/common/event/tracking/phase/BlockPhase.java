@@ -103,4 +103,9 @@ public final class BlockPhase extends TrackingPhase {
 
     }
 
+
+    @Override
+    public boolean isRestoring(IPhaseState state, PhaseContext phaseContext, int updateFlag) {
+        return state == State.RESTORING_BLOCKS && (updateFlag & 1) == 0;
+    }
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.world.extent;
 
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -41,9 +42,9 @@ public class MutableBlockViewDownsize extends AbstractBlockViewDownsize<MutableB
     }
 
     @Override
-    public void setBlock(int x, int y, int z, BlockState block) {
+    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
         checkRange(x, y, z);
-        this.volume.setBlock(x, y, z, block);
+        return this.volume.setBlock(x, y, z, block, cause);
     }
 
     @Override
@@ -59,8 +60,8 @@ public class MutableBlockViewDownsize extends AbstractBlockViewDownsize<MutableB
     }
 
     @Override
-    public MutableBlockVolumeWorker<? extends MutableBlockVolume> getBlockWorker() {
-        return new SpongeMutableBlockVolumeWorker<>(this);
+    public MutableBlockVolumeWorker<? extends MutableBlockVolume> getBlockWorker(Cause cause) {
+        return new SpongeMutableBlockVolumeWorker<>(this, cause);
     }
 
     @Override

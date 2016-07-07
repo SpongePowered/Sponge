@@ -39,7 +39,6 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
@@ -55,7 +54,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.util.VecHelper;
 
@@ -137,7 +135,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
             for (Transaction<BlockSnapshot> bt : strike.getTransactions()) {
                 if (bt.isValid()) {
                     BlockSnapshot bs = bt.getFinal();
-                    world.setBlock(bs.getPosition(), bs.getState());
+                    world.setBlock(bs.getPosition(), bs.getState(), cause);
                 }
             }
             for (Entity e : strike.getEntities()) {

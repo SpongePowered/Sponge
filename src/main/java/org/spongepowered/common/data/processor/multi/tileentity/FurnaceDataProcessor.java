@@ -34,7 +34,9 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableFurnaceData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.FurnaceData;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
 
@@ -47,6 +49,8 @@ public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEn
     public FurnaceDataProcessor() {
         super(TileEntityFurnace.class);
     }
+
+    private final Cause cause = Cause.source(SpongeImpl.getPlugin()).build();
 
     @Override
     protected boolean doesDataExist(TileEntityFurnace tileEntity) {
@@ -76,7 +80,7 @@ public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEn
         if (needsUpdate) {
             final World world = (World) tileEntity.getWorld();
             world.setBlockType(tileEntity.getPos().getX(), tileEntity.getPos().getY(),
-                    tileEntity.getPos().getZ(), maxBurnTime > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
+                    tileEntity.getPos().getZ(), maxBurnTime > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE, this.cause);
             tileEntity = (TileEntityFurnace) tileEntity.getWorld().getTileEntity(tileEntity.getPos());
         }
 

@@ -43,6 +43,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
@@ -50,6 +51,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -112,34 +114,14 @@ public final class CauseTracker {
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
         final IPhaseState currentState = this.stack.peek().getState();
-        if (this.stack.size() > 6 && currentState.isExpectedForReEntrance() && this.isVerbose) {
+        if (this.isVerbose && this.stack.size() > 6 && currentState.isExpectedForReEntrance()) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumilation.
-            PrettyPrinter printer = new PrettyPrinter(60);
-            printer.add("Switching Phase").centre().hr();
-            printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
-            printer.add("  %s : %s", "Entering Phase", state.getPhase());
-            printer.add("  %s : %s", "Entering State", state);
-            printer.add("%s :", "Current phases");
-            this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-            printer.add("  %s :", "Printing stack trace");
-            printer.add(new Exception("Stack trace"));
-            printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+            printRunawayPhase(state, phaseContext);
         }
         if (!currentState.canSwitchTo(state) && (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING)) {
             // This is to detect incompatible phase switches.
-            PrettyPrinter printer = new PrettyPrinter(80);
-            printer.add("Switching Phase").centre().hr();
-            printer.add("Phase incompatibility detected! Attempting to switch to an invalid phase!");
-            printer.add("  %s : %s", "Current Phase", currentState.getPhase());
-            printer.add("  %s : %s", "Current State", currentState);
-            printer.add("  %s : %s", "Entering incompatible Phase", state.getPhase());
-            printer.add("  %s : %s", "Entering incompatible State", state);
-            printer.add("%s :", "Current phases");
-            this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-            printer.add("  %s :", "Printing stack trace");
-            printer.add(new Exception("Stack trace"));
-            printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+            printPhaseIncompatibility(currentState, state);
         }
 
         this.stack.push(state, phaseContext);
@@ -191,6 +173,35 @@ public final class CauseTracker {
         } catch (Exception e) {
             printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
         }
+    }
+
+    private void printRunawayPhase(IPhaseState state, PhaseContext context) {
+        final PrettyPrinter printer = new PrettyPrinter(40);
+        printer.add("Switching Phase").centre().hr();
+        printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
+        printer.add("  %s : %s", "Entering Phase", state.getPhase());
+        printer.add("  %s : %s", "Entering State", state);
+        CONTEXT_PRINTER.accept(printer, context);
+        printer.addWrapped(60, "%s :", "Phases remaining");
+        this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+        printer.add("  %s :", "Printing stack trace")
+                .add(new Exception("Stack trace"))
+                .trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+    }
+
+    private void printPhaseIncompatibility(IPhaseState currentState, IPhaseState incompatibleState) {
+        PrettyPrinter printer = new PrettyPrinter(80);
+        printer.add("Switching Phase").centre().hr();
+        printer.add("Phase incompatibility detected! Attempting to switch to an invalid phase!");
+        printer.add("  %s : %s", "Current Phase", currentState.getPhase());
+        printer.add("  %s : %s", "Current State", currentState);
+        printer.add("  %s : %s", "Entering incompatible Phase", incompatibleState.getPhase());
+        printer.add("  %s : %s", "Entering incompatible State", incompatibleState);
+        printer.add("%s :", "Current phases");
+        this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+        printer.add("  %s :", "Printing stack trace");
+        printer.add(new Exception("Stack trace"));
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
     }
 
     private void printMessageWithCaughtException(String header, String subHeader, IPhaseState state, PhaseContext context, Exception e) {
@@ -474,4 +485,43 @@ public final class CauseTracker {
     }
 
 
+    public boolean setBlockStateWithFlag(BlockPos pos, IBlockState newState, BlockChangeFlag flag) {
+        final net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
+        final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
+        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+        final Block newBlock = newState.getBlock();
+        // Sponge Start - Up to this point, we've copied exactly what Vanilla minecraft does.
+        final IBlockState currentState = chunk.getBlockState(pos);
+
+        if (currentState == newState) {
+            // Some micro optimization in case someone is trying to set the new state to the same as current
+            return false;
+        }
+
+        // Sponge End - continue with vanilla mechanics
+        final IBlockState iblockstate = mixinChunk.setBlockState(pos, newState, currentState, null, flag);
+
+        if (iblockstate == null) {
+            return false;
+        }
+        if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
+            minecraftWorld.theProfiler.startSection("checkLight");
+            minecraftWorld.checkLight(pos);
+            minecraftWorld.theProfiler.endSection();
+        }
+
+        if (flag.updateNeighbors() && chunk.isPopulated()) {
+            minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, 3);
+        }
+
+        if (!minecraftWorld.isRemote && flag.updateNeighbors()) {
+            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
+
+            if (newState.hasComparatorInputOverride()) {
+                minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
+            }
+        }
+
+        return true;
+    }
 }

@@ -48,24 +48,23 @@ public final class BlockUtil {
     public static final Comparator<BlockState> BLOCK_STATE_COMPARATOR = new BlockStateComparator();
     public static final UUID INVALID_WORLD_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
-    public static void setBlockState(World world, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
-        setBlockState(world, new BlockPos(x, y, z), state, notifyNeighbors);
+    public static boolean setBlockState(World world, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
+        return setBlockState(world, new BlockPos(x, y, z), state, notifyNeighbors);
     }
 
-    public static void setBlockState(World world, BlockPos position, BlockState state, boolean notifyNeighbors) {
-        world.setBlockState(position, toNative(state), notifyNeighbors ? 3 : 2);
+    public static boolean setBlockState(World world, BlockPos position, BlockState state, boolean notifyNeighbors) {
+        return world.setBlockState(position, toNative(state), notifyNeighbors ? 3 : 2);
     }
 
-    public static void setBlockState(Chunk chunk, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
-        setBlockState(chunk, new BlockPos(x, y, z), state, notifyNeighbors);
+    public static boolean setBlockState(Chunk chunk, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
+        return setBlockState(chunk, new BlockPos(x, y, z), state, notifyNeighbors);
     }
 
-    public static void setBlockState(Chunk chunk, BlockPos position, BlockState state, boolean notifyNeighbors) {
+    public static boolean setBlockState(Chunk chunk, BlockPos position, BlockState state, boolean notifyNeighbors) {
         if (notifyNeighbors) { // delegate to world
-            setBlockState(chunk.getWorld(), position, state, true);
-            return;
+            return setBlockState(chunk.getWorld(), position, state, true);
         }
-        chunk.setBlockState(position, toNative(state));
+        return chunk.setBlockState(position, toNative(state)) != null;
     }
 
     public static IBlockState toNative(BlockState state) {

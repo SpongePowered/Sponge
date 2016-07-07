@@ -33,6 +33,7 @@ import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.structure.MapGenStructure;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
@@ -47,6 +48,7 @@ import org.spongepowered.api.world.gen.populator.Lake;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.FilteredPopulator;
@@ -61,6 +63,7 @@ public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorPr
     @Shadow @Final private boolean hasDecoration;
     @Shadow @Final private boolean hasDungeons;
     @Shadow @Final private FlatGeneratorInfo flatWorldGenInfo;
+    private final Cause providerCause = Cause.source(SpongeImpl.getPlugin()).build();
 
     @Override
     public void addPopulators(WorldGenerator generator) {
@@ -125,7 +128,7 @@ public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorPr
                 for (x = 0; x < 16; ++x) {
                     int x0 = min.getX() + x;
                     for (z = 0; z < 16; ++z) {
-                        buffer.setBlock(x0, y0, min.getZ() + z, (BlockState) iblockstate);
+                        buffer.setBlock(x0, y0, min.getZ() + z, (BlockState) iblockstate, this.providerCause);
                     }
                 }
             }

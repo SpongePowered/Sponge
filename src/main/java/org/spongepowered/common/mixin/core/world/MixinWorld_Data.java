@@ -42,6 +42,7 @@ import org.spongepowered.api.data.property.PropertyStore;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -211,38 +212,49 @@ public abstract class MixinWorld_Data implements World {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends BaseValue<E>> key, E value) {
+        return getTileEntity(x, y, z)
+                .map(tileEntity ->  tileEntity.offer(key, value))
+                .orElseGet(DataTransactionResult::failNoData);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends BaseValue<E>> key, E value, Cause cause) {
         final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
         if (blockState.supports(key)) {
             ImmutableValue<E> old = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
-            setBlock(x, y, z, blockState.with(key, value).get());
+            setBlock(x, y, z, blockState.with(key, value).get(), cause);
             ImmutableValue<E> newVal = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
             return DataTransactionResult.successReplaceResult(newVal, old);
         }
-        final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
-        if (tileEntity.isPresent() && tileEntity.get().supports(key)) {
-            return tileEntity.get().offer(key, value);
-        }
-        return DataTransactionResult.failNoData();
+        return getTileEntity(x, y, z)
+                .map(tileEntity ->  tileEntity.offer(key, value, cause))
+                .orElseGet(DataTransactionResult::failNoData);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function) {
+        return getTileEntity(x, y, z)
+                .map(tileEntity -> tileEntity.offer(manipulator, function))
+                .orElseGet(() -> DataTransactionResult.failResult(manipulator.getValues()));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function, Cause cause) {
         final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
         final ImmutableDataManipulator<?, ?> immutableDataManipulator = manipulator.asImmutable();
         if (blockState.supports((Class) immutableDataManipulator.getClass())) {
             final List<ImmutableValue<?>> old = new ArrayList<>(blockState.getValues());
             final BlockState newState = blockState.with(immutableDataManipulator).get();
             old.removeAll(newState.getValues());
-            setBlock(x, y, z, newState);
+            setBlock(x, y, z, newState, cause);
             return DataTransactionResult.successReplaceResult(old, manipulator.getValues());
-        } else {
-            final Optional<TileEntity> tileEntityOptional = getTileEntity(x, y, z);
-            if (tileEntityOptional.isPresent()) {
-                return tileEntityOptional.get().offer(manipulator, function);
-            }
         }
-        return DataTransactionResult.failResult(manipulator.getValues());
+        return getTileEntity(x, y, z)
+                .map(tileEntity -> tileEntity.offer(manipulator, function, cause))
+                .orElseGet(() -> DataTransactionResult.failResult(manipulator.getValues()));
     }
 
     @Override

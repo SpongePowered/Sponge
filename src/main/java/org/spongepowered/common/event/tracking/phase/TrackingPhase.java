@@ -223,6 +223,11 @@ public abstract class TrackingPhase {
 
     }
 
+
+    public boolean isRestoring(IPhaseState state, PhaseContext context, int updateFlag) {
+        return false;
+    }
+
     public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState state, PhaseContext context,
             CauseTracker causeTracker) {
 

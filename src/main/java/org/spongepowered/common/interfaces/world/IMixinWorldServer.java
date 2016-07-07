@@ -31,6 +31,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
@@ -58,6 +59,8 @@ public interface IMixinWorldServer extends IMixinWorld {
     void updateRotation(Entity entityIn);
 
     void markAndNotifyNeighbors(BlockPos pos, @Nullable Chunk chunk, IBlockState oldState, IBlockState newState, int flags);
+
+    boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag);
 
     boolean forceSpawnEntity(org.spongepowered.api.entity.Entity entity);
 

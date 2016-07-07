@@ -239,11 +239,11 @@ public final class TrackingUtil {
             PhaseContext phaseContext, IPhaseState phaseState) {
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final IBlockState actualState = currentState.getActualState(minecraftWorld, pos);
-        final BlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
+        final SpongeBlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
         final List<BlockSnapshot> capturedSnapshots = phaseContext.getCapturedBlocks();
         final Block newBlock = newState.getBlock();
 
-        associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, (SpongeBlockSnapshot) originalBlockSnapshot, capturedSnapshots);
+        associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot, capturedSnapshots);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
         if (originalBlockState == null) {

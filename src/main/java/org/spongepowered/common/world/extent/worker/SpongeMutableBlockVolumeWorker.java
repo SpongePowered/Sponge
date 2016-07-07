@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.extent.worker;
 
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeFiller;
@@ -34,12 +35,12 @@ import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeFiller;
  */
 public class SpongeMutableBlockVolumeWorker<V extends MutableBlockVolume> extends SpongeBlockVolumeWorker<V> implements MutableBlockVolumeWorker<V> {
 
-    public SpongeMutableBlockVolumeWorker(V volume) {
-        super(volume);
+    public SpongeMutableBlockVolumeWorker(V volume, Cause cause) {
+        super(volume, cause);
     }
 
     @Override
-    public void fill(BlockVolumeFiller filler) {
+    public void fill(BlockVolumeFiller filler, Cause cause) {
         final int xMin = this.volume.getBlockMin().getX();
         final int yMin = this.volume.getBlockMin().getY();
         final int zMin = this.volume.getBlockMin().getZ();
@@ -50,7 +51,7 @@ public class SpongeMutableBlockVolumeWorker<V extends MutableBlockVolume> extend
             for (int y = yMin; y <= yMax; y++) {
                 for (int x = xMin; x <= xMax; x++) {
                     final BlockState block = filler.produce(x, y, z);
-                    this.volume.setBlock(x, y, z, block);
+                    this.volume.setBlock(x, y, z, block, cause);
                 }
             }
         }

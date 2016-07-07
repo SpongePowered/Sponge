@@ -31,13 +31,17 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
 public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<TileEntityFurnace, Integer, MutableBoundedValue<Integer>> {
+
+    private final Cause cause = Cause.source(SpongeImpl.getPlugin()).build();
 
     public MaxBurnTimeValueProcessor() {
         super(TileEntityFurnace.class, Keys.MAX_BURN_TIME);
@@ -57,7 +61,7 @@ public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
         if (!container.isBurning() && value > 0 || container.isBurning() && value == 0) {
             final World world = (World) container.getWorld();
             world.setBlockType(container.getPos().getX(), container.getPos().getY(),
-                    container.getPos().getZ(), value > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE);
+                    container.getPos().getZ(), value > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE, this.cause);
             container = (TileEntityFurnace) container.getWorld().getTileEntity(container.getPos());
         }
         container.setField(1, value);

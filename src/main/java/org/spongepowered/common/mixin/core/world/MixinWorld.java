@@ -57,7 +57,6 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameRules;
@@ -100,6 +99,7 @@ import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
@@ -143,7 +143,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -327,8 +326,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public void setBlock(int x, int y, int z, BlockState block) {
-        setBlock(x, y, z, block, true);
+    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
+        return setBlock(x, y, z, block, BlockChangeFlag.ALL, cause);
     }
 
 
@@ -627,8 +626,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public MutableBlockVolumeWorker<? extends World> getBlockWorker() {
-        return new SpongeMutableBlockVolumeWorker<>(this);
+    public MutableBlockVolumeWorker<? extends World> getBlockWorker(Cause cause) {
+        return new SpongeMutableBlockVolumeWorker<>(this, cause);
     }
 
     @Override
@@ -664,14 +663,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
-        return snapshot.restore(force, notifyNeighbors);
+    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
+        return snapshot.restore(force, flag);
     }
 
     @Override
-    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
+    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
         snapshot = snapshot.withLocation(new Location<>(this, new Vector3i(x, y, z)));
-        return snapshot.restore(force, notifyNeighbors);
+        return snapshot.restore(force, flag);
     }
 
     @Override

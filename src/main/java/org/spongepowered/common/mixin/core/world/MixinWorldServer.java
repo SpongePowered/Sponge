@@ -98,6 +98,7 @@ import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
@@ -118,9 +119,7 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -143,7 +142,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -609,9 +607,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 final PhaseData currentTuple = causeTracker.getStack().peek();
                                 final IPhaseState phaseState = currentTuple.getState();
                                 if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.getContext())) {
-                                    block.randomTick((WorldServer) (Object) this, pos, iblockstate, rand);
+                                    block.randomTick((WorldServer) (Object) this, pos, iblockstate, this.rand);
                                 } else {
-                                    TrackingUtil.randomTickBlock(causeTracker, block, pos, iblockstate, rand);
+                                    TrackingUtil.randomTickBlock(causeTracker, block, pos, iblockstate, this.rand);
                                 }
                                 spongeBlock.getTimingsHandler().stopTiming();
                                 // Sponge end
@@ -855,25 +853,22 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return Optional.ofNullable((Entity) this.getEntityFromUuid(uuid));
     }
 
-
     @Override
-    public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
-        // TODO this is a dummy workaround fix until we decide on the setblock methods that don't take a cause.
-        setBlock(x, y, z, block, notifyNeighbors, Cause.source(SpongeImpl.getPlugin()).build());
-    }
-
-    @Override
-    public void setBlock(int x, int y, int z, BlockState blockState, boolean notifyNeighbors, Cause cause) {
-        checkArgument(cause != null, "Cause cannot be null!");
-        checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
-        final CauseTracker causeTracker = this.getCauseTracker();
+    public boolean setBlock(int x, int y, int z, BlockState blockState, BlockChangeFlag flag, Cause cause) {
         checkBlockBounds(x, y, z);
+        final CauseTracker causeTracker = this.getCauseTracker();
         final PhaseData peek = causeTracker.getStack().peek();
         boolean isWorldGen = peek.getState().getPhase().isWorldGeneration(peek.getState());
+        if (!isWorldGen) {
+            checkArgument(cause != null, "Cause cannot be null!");
+            checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
+            checkArgument(flag != null, "BlockChangeFlag cannot be null!");
+        }
         if (!isWorldGen) {
             final PhaseContext context = PhaseContext.start()
                     .add(NamedCause.of(InternalNamedCauses.General.PLUGIN_CAUSE, cause))
                     .addCaptures()
+                    .add(NamedCause.of(InternalNamedCauses.General.BLOCK_CHANGE, flag))
                     .add(NamedCause.source(cause.root()));
             for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
                 context.add(NamedCause.of(entry.getKey(), entry.getValue()));
@@ -881,10 +876,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             context.complete();
             causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, context);
         }
-        setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, notifyNeighbors ? 3 : 2);
+        final boolean state = setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag.updateNeighbors() ? 3 : 2);
         if (!isWorldGen) {
             causeTracker.completePhase();
         }
+        return state;
     }
 
     private void checkBlockBounds(int x, int y, int z) {
@@ -969,6 +965,17 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
+    @Override
+    public boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag) {
+        if (!this.isValid(pos)) {
+            return false;
+        } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) { // isRemote is always false since this is WorldServer
+            return false;
+        } else {
+            // Sponge - reroute to the CauseTracker
+            return this.getCauseTracker().setBlockStateWithFlag(pos, state, flag);
+        }
+    }
 
     /**
      * @author gabizou - March 12th, 2016
@@ -1207,6 +1214,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return true;
     }
 
+
     @Override
     public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag) {
         this.builder.reset();
@@ -1235,7 +1243,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 this.builder.unsafeNbt(nbt);
             }
         }
-        return new SpongeBlockSnapshot(this.builder, updateFlag);
+        return new SpongeBlockSnapshot(this.builder, BlockChangeFlag.ALL.setUpdateNeighbors((updateFlag & 1) != 0), updateFlag);
     }
 
 

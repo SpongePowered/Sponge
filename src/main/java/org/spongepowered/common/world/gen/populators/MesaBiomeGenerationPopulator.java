@@ -34,6 +34,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.EnumDyeColor;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -53,6 +54,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
     private boolean hasTrees = false;
 
     private double[] stoneNoise;
+    private final Cause populatorCause = Cause.source(this).build();
 
     public MesaBiomeGenerationPopulator(boolean mesa, boolean trees) {
         this.hasHills = mesa;
@@ -128,11 +130,11 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
         for (int k1 = 255; k1 >= 0; --k1) {
             if (((IBlockState) p_180622_3_.getBlock(l, k1, k)).getMaterial() == Material.AIR && k1 < (int) d5) {
-                p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.STONE.getDefaultState());
+                p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.STONE.getDefaultState(), this.populatorCause);
             }
 
             if (k1 <= p_180622_2_.nextInt(5)) {
-                p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.BEDROCK.getDefaultState());
+                p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.BEDROCK.getDefaultState(), this.populatorCause);
             } else {
                 IBlockState iblockstate1 = (IBlockState) p_180622_3_.getBlock(l, k1, k);
 
@@ -163,9 +165,9 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
                                 if (flag1) {
                                     p_180622_3_.setBlock(l, k1, k,
                                             (BlockState) Blocks.DIRT.getDefaultState()
-                                                    .withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT));
+                                                    .withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT), this.populatorCause);
                                 } else {
-                                    p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.GRASS.getDefaultState());
+                                    p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.GRASS.getDefaultState(), this.populatorCause);
                                 }
                             } else if (k1 > seaLevel + 3 + i1) {
                                 if (k1 >= 64 && k1 <= 127) {
@@ -179,18 +181,20 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
                                             Blocks.STAINED_HARDENED_CLAY.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.ORANGE);
                                 }
 
-                                p_180622_3_.setBlock(l, k1, k, (BlockState) iblockstate2);
+                                p_180622_3_.setBlock(l, k1, k, (BlockState) iblockstate2, this.populatorCause);
                             } else {
                                 p_180622_3_.setBlock(l, k1, k,
-                                        (BlockState) Blocks.SAND.getDefaultState().withProperty(BlockSand.VARIANT, BlockSand.EnumType.RED_SAND));
+                                        (BlockState) Blocks.SAND.getDefaultState().withProperty(BlockSand.VARIANT, BlockSand.EnumType.RED_SAND),
+                                        this.populatorCause);
                                 flag2 = true;
                             }
                         } else {
-                            p_180622_3_.setBlock(l, k1, k, (BlockState) iblockstate3);
+                            p_180622_3_.setBlock(l, k1, k, (BlockState) iblockstate3, this.populatorCause);
 
                             if (iblockstate3.getBlock() == Blocks.STAINED_HARDENED_CLAY) {
                                 p_180622_3_.setBlock(l, k1, k,
-                                        (BlockState) iblockstate3.getBlock().getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.ORANGE));
+                                        (BlockState) iblockstate3.getBlock().getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.ORANGE),
+                                        this.populatorCause);
                             }
                         }
                     } else if (j1 > 0) {
@@ -198,10 +202,10 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
                         if (flag2) {
                             IBlockState clay = Blocks.STAINED_HARDENED_CLAY.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.ORANGE);
-                            p_180622_3_ .setBlock(l, k1, k, (BlockState) clay);
+                            p_180622_3_ .setBlock(l, k1, k, (BlockState) clay, this.populatorCause);
                         } else {
                             iblockstate2 = this.func_180629_a(p_180622_4_, k1, p_180622_5_);
-                            p_180622_3_.setBlock(l, k1, k, (BlockState) iblockstate2);
+                            p_180622_3_.setBlock(l, k1, k, (BlockState) iblockstate2, this.populatorCause);
                         }
                     }
                 }

@@ -44,6 +44,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -208,7 +209,7 @@ public class GeneralFunctions {
             // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
             // or the events were cancelled), again in reverse order of which they were received.
             for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
-                transaction.getOriginal().restore(true, false);
+                transaction.getOriginal().restore(true, BlockChangeFlag.NONE);
                 if (state.tracksBlockSpecificDrops()) {
                     // Cancel any block drops or harvests for the block change.
                     // This prevents unnecessary spawns.
@@ -268,7 +269,7 @@ public class GeneralFunctions {
             }
             // Handle custom replacements
             if (transaction.getCustom().isPresent()) {
-                transaction.getFinal().restore(true, false);
+                transaction.getFinal().restore(true, BlockChangeFlag.NONE);
             }
 
             final SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
@@ -283,11 +284,11 @@ public class GeneralFunctions {
             capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, phaseContext, phaseState));
 
             SpongeHooks.logBlockAction(currentCause, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
-            int updateFlag = oldBlockSnapshot.getUpdateFlag();
+            BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
             IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
-            if (originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
+            if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
                 final PhaseData peek = causeTracker.getStack().peek();
                 if (peek.getState() == GeneralPhase.Post.UNWINDING) {
@@ -298,7 +299,10 @@ public class GeneralFunctions {
             proxyBlockAccess.proceed();
             phaseState.handleBlockChangeWithUser(oldBlockSnapshot.blockChange, minecraftWorld, transaction, phaseContext);
 
-            causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, minecraftWorld.getChunkFromBlockCoords(pos), originalState, newState, updateFlag);
+            if (changeFlag.updateNeighbors()) {
+                causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, minecraftWorld.getChunkFromBlockCoords(pos), originalState, newState, oldBlockSnapshot.getUpdateFlag());
+            }
+
 
             final PhaseData peek = causeTracker.getStack().peek();
             if (peek.getState() == GeneralPhase.Post.UNWINDING) {

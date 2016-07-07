@@ -46,6 +46,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -330,7 +331,7 @@ public final class GeneralPhase extends TrackingPhase {
             // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
             // or the events were cancelled), again in reverse order of which they were received.
             for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalidTransactions)) {
-                transaction.getOriginal().restore(true, false);
+                transaction.getOriginal().restore(true, BlockChangeFlag.NONE);
                 if (unwindingState.tracksBlockSpecificDrops()) {
                     // Cancel any block drops or harvests for the block change.
                     // This prevents unnecessary spawns.
@@ -361,7 +362,7 @@ public final class GeneralPhase extends TrackingPhase {
             }
             // Handle custom replacements
             if (transaction.getCustom().isPresent()) {
-                transaction.getFinal().restore(true, false);
+                transaction.getFinal().restore(true, BlockChangeFlag.ALL);
             }
 
             final SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();

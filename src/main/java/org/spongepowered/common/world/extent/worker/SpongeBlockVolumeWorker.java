@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.extent.BlockVolume;
@@ -51,9 +52,11 @@ import java.util.function.BiFunction;
 public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolumeWorker<V> {
 
     protected final V volume;
+    protected final Cause cause;
 
-    public SpongeBlockVolumeWorker(V volume) {
+    public SpongeBlockVolumeWorker(V volume, Cause cause) {
         this.volume = volume;
+        this.cause = cause;
     }
 
     @Override
@@ -94,7 +97,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
                 for (int x = xMin; x <= xMax; x++) {
                     final BlockState block = mapper.map(unmodifiableVolume, x, y, z);
 
-                    destination.setBlock(x + xOffset, y + yOffset, z + zOffset, block);
+                    destination.setBlock(x + xOffset, y + yOffset, z + zOffset, block, this.cause);
                 }
             }
         }
@@ -135,7 +138,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
                 for (int x = xMin; x <= xMax; x++) {
                     final BlockState block = merger.merge(firstUnmodifiableVolume, x, y, z,
                         secondUnmodifiableVolume, x + xOffsetSecond, y + yOffsetSecond, z + zOffsetSecond);
-                    destination.setBlock(x + xOffsetDestination, y + yOffsetDestination, z + zOffsetDestination, block);
+                    destination.setBlock(x + xOffsetDestination, y + yOffsetDestination, z + zOffsetDestination, block, this.cause);
                 }
             }
         }

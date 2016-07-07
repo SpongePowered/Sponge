@@ -31,12 +31,15 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.common.entity.PlayerTracker;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 public interface IMixinChunk {
 
@@ -48,7 +51,11 @@ public interface IMixinChunk {
 
     Optional<User> getBlockNotifier(BlockPos pos);
 
-    IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockSnapshot originalBlockSnapshot);
+    @Nullable
+    IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot originalBlockSnapshot);
+
+    @Nullable
+    IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot originalBlockSnapshot, BlockChangeFlag flag);
 
     void setBlockNotifier(BlockPos pos, UUID uuid);
 

@@ -88,6 +88,7 @@ public final class InternalNamedCauses {
         public static final String BLOCK_BREAK_FORTUNE = "BreakingBlockFortune";
         public static final String BLOCK_BREAK_POSITION = "BreakingBlockPosition";
         public static final String PLUGIN_CAUSE = "PluginCause";
+        public static final String BLOCK_CHANGE = "BlockChangeFlag";
 
         private General() {
         }

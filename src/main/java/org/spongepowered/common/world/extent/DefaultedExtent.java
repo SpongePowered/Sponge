@@ -26,6 +26,7 @@ package org.spongepowered.common.world.extent;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -135,8 +136,8 @@ public interface DefaultedExtent extends Extent {
     }
 
     @Override
-    default MutableBlockVolumeWorker<? extends Extent> getBlockWorker() {
-        return new SpongeMutableBlockVolumeWorker<>(this);
+    default MutableBlockVolumeWorker<? extends Extent> getBlockWorker(Cause cause) {
+        return new SpongeMutableBlockVolumeWorker<>(this, cause);
     }
 
 }

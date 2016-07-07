@@ -27,12 +27,14 @@ package org.spongepowered.common.world.gen.populators;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
 
 public class EndBiomeGenerationPopulator implements GenerationPopulator {
+    private final Cause populatorCause = Cause.source(this).build();
 
     @Override
     public void populate(World world, MutableBlockVolume buffer, ImmutableBiomeArea biomes) {
@@ -44,7 +46,7 @@ public class EndBiomeGenerationPopulator implements GenerationPopulator {
                 for (int y = max.getY(); y >= min.getY(); --y) {
                     BlockState iblockstate2 = buffer.getBlock(x, y, z);
                     if (iblockstate2.getType() == BlockTypes.STONE) {
-                        buffer.setBlock(x, y, z, iblockstate);
+                        buffer.setBlock(x, y, z, iblockstate, this.populatorCause);
                     }
                 }
             }

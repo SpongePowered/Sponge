@@ -36,6 +36,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -49,6 +50,7 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -93,12 +95,14 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     // Internal use only
     private final BlockPos blockPos;
     private int updateFlag;
+    private BlockChangeFlag changeFlag;
     public BlockChange blockChange; // used for post event
 
     // Internal use for restores
-    public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder, int flag) {
+    public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder, BlockChangeFlag flag, int updateFlag) {
         this(builder);
-        this.updateFlag = flag;
+        this.changeFlag = flag;
+        this.updateFlag = updateFlag;
     }
 
     public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder) {
@@ -170,13 +174,14 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public boolean restore(boolean force, boolean notifyNeighbors) {
+    public boolean restore(boolean force, BlockChangeFlag flag) {
         if (!SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).isPresent()) {
             return false;
         }
 
         WorldServer world = (WorldServer) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
-        CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
+        CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
         final IPhaseState currentState = causeTracker.getStack().peekState();
         if (!currentState.tracksBlockRestores()) {
             causeTracker.switchToPhase(BlockPhase.State.RESTORING_BLOCKS,
@@ -195,7 +200,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             return false;
         }
 
-        world.setBlockState(pos, replaced, notifyNeighbors ? 3 : 2);
+        mixinWorldServer.setBlockState(pos, replaced, flag);
         world.getPlayerChunkMap().markBlockForUpdate(pos);
         if (this.compound != null) {
             final TileEntity te = world.getTileEntity(pos);
@@ -434,6 +439,11 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     // Used internally for restores
+
+    public BlockChangeFlag getChangeFlag() {
+        return this.changeFlag;
+    }
+
     public int getUpdateFlag() {
         return this.updateFlag;
     }
@@ -471,7 +481,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             return false;
         }
         SpongeBlockSnapshot that = (SpongeBlockSnapshot) o;
-        return this.updateFlag == that.updateFlag &&
+        return this.changeFlag == that.changeFlag &&
                Objects.equal(this.extendedState, that.extendedState) &&
                Objects.equal(this.worldUniqueId, that.worldUniqueId) &&
                Objects.equal(this.pos, that.pos) &&
@@ -488,7 +498,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 this.pos,
                 this.extraData,
                 this.blockData,
-                this.updateFlag,
+                this.changeFlag,
                 this.compound);
     }
 }

@@ -39,6 +39,7 @@ import org.spongepowered.api.entity.explosive.PrimedTNT;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -101,7 +102,7 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
         setDead();
         // Place a TNT block at the Entity's position
         getWorld().setBlock((int) this.posX, (int) this.posY, (int) this.posZ,
-                BlockState.builder().blockType(BLOCK_TYPE).build(), true);
+                BlockState.builder().blockType(BLOCK_TYPE).build(), BlockChangeFlag.ALL, Cause.source(this).build());
     }
 
     @Override

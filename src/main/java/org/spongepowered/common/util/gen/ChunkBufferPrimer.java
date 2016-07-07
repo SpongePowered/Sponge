@@ -29,7 +29,9 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
+import org.spongepowered.common.SpongeImpl;
 
 /**
  * Wraps a {@link MutableBlockVolume} within a ChunkPrimer in order to be able
@@ -40,6 +42,7 @@ public class ChunkBufferPrimer extends ChunkPrimer {
     private static final IBlockState defaultState = Blocks.AIR.getDefaultState();
     private final MutableBlockVolume buffer;
     private final Vector3i min;
+    private final Cause cause = Cause.source(SpongeImpl.getPlugin()).build();
 
     public ChunkBufferPrimer(MutableBlockVolume buffer) {
         this.buffer = buffer;
@@ -53,7 +56,7 @@ public class ChunkBufferPrimer extends ChunkPrimer {
 
     @Override
     public void setBlockState(int x, int y, int z, IBlockState state) {
-        this.buffer.setBlock(this.min.getX() + x, this.min.getY() + y, this.min.getZ() + z, (BlockState) state);
+        this.buffer.setBlock(this.min.getX() + x, this.min.getY() + y, this.min.getZ() + z, (BlockState) state, this.cause);
     }
 
     @Override

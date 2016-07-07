@@ -55,6 +55,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -180,9 +181,9 @@ public class ExtentViewTransform implements DefaultedExtent {
     }
 
     @Override
-    public void setBlock(int x, int y, int z, BlockState block) {
-        this.extent.setBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
-            .transformZ(x, y, z), block);
+    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
+        return this.extent.setBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
+            .transformZ(x, y, z), block, cause);
     }
 
     @Override
@@ -196,15 +197,9 @@ public class ExtentViewTransform implements DefaultedExtent {
     }
 
     @Override
-    public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
-        this.extent.setBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
-            .transformZ(x, y, z), block, notifyNeighbors);
-    }
-
-    @Override
-    public void setBlock(int x, int y, int z, BlockState blockState, boolean notifyNeighbors, Cause cause) {
+    public boolean setBlock(int x, int y, int z, BlockState blockState, BlockChangeFlag flag, Cause cause) {
         checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
-        this.extent.setBlock(x, y, z, blockState, notifyNeighbors, cause);
+        return this.extent.setBlock(x, y, z, blockState, flag, cause);
     }
 
     @Override
@@ -215,19 +210,19 @@ public class ExtentViewTransform implements DefaultedExtent {
     }
 
     @Override
-    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
+    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
         final Vector3i position = snapshot.getPosition();
         final int x = position.getX();
         final int y = position.getY();
         final int z = position.getZ();
         return this.extent.restoreSnapshot(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
-            this.inverseTransform.transformZ(x, y, z), snapshot, force, notifyNeighbors);
+            this.inverseTransform.transformZ(x, y, z), snapshot, force, flag, cause);
     }
 
     @Override
-    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
+    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
         return this.extent.restoreSnapshot(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
-            this.inverseTransform.transformZ(x, y, z), snapshot, force, notifyNeighbors);
+            this.inverseTransform.transformZ(x, y, z), snapshot, force, flag, cause);
     }
 
     @Override
@@ -333,10 +328,24 @@ public class ExtentViewTransform implements DefaultedExtent {
     }
 
     @Override
+    public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends BaseValue<E>> key, E value, Cause cause) {
+        return this.extent
+                .offer(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform.transformZ(x, y, z),
+                        key, value, cause);
+    }
+
+    @Override
     public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function) {
         return this.extent
             .offer(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform.transformZ(x, y, z),
                 manipulator, function);
+    }
+
+    @Override
+    public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function, Cause cause) {
+        return this.extent
+                .offer(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform.transformZ(x, y, z),
+                        manipulator, function, cause);
     }
 
     @Override
