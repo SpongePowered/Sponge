@@ -99,7 +99,7 @@ public class WorldCategory extends ConfigCategory {
 
     @Setting(value = "weather-ice-and-snow", comment = "Enable to allow the natural formation of ice and snow in supported biomes.")
     private boolean weatherIceAndSnow = true;
-
+    
     public WorldCategory() {
         this.portalAgents.put("minecraft:default_nether", "DIM-1");
         this.portalAgents.put("minecraft:default_the_end", "DIM1");

@@ -33,7 +33,18 @@ public class GlobalWorldCategory extends WorldCategory {
     @Setting(value = "auto-player-save-interval", comment = "The auto-save tick interval used when saving global player data. Set to 0 to disable. (Default: 900) Note: 20 ticks is equivalent to 1 second.")
     private int autoPlayerSaveInterval = 900;
 
+    @Setting(value = "leaf-decay", comment = "Enable to allow natural leaf decay.")
+    private boolean leafDecay = true;
+
     public int getAutoPlayerSaveInterval() {
         return this.autoPlayerSaveInterval;
+    }
+
+    public boolean getLeafDecay() {
+        return this.leafDecay;
+    }
+
+    public void setLeafDecay(boolean flag) {
+        this.leafDecay = flag;
     }
 }
