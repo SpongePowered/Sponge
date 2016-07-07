@@ -751,6 +751,7 @@ public class DataRegistrar {
         propertyRegistry.register(TemperatureProperty.class, new TemperaturePropertyStore());
         propertyRegistry.register(UnbreakableProperty.class, new UnbreakablePropertyStore());
         propertyRegistry.register(SurrogateBlockProperty.class, new SurrogateBlockPropertyStore());
+        propertyRegistry.register(FullBlockSelectionBoxProperty.class, new FullBlockSelectionBoxPropertyStore());
 
         // Items
         propertyRegistry.register(ApplicableEffectProperty.class, new ApplicableEffectPropertyStore());
