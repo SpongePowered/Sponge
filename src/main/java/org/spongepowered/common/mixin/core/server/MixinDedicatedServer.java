@@ -24,13 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,6 +44,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.net.InetSocketAddress;
@@ -80,9 +87,25 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
      * will apply to any world. Additionally, fire a spawn protection event
      */
     @Override
-    public boolean isBlockProtected(World worldIn, BlockPos pos, EntityPlayer playerIn) {
-        // Mods such as Thaumcraft may check this method during a server tick before attempting to set a blockstate.
-        ((IMixinWorld) worldIn).getCauseTracker().setCurrentNotifier((User) playerIn);
+    public boolean isBlockProtected(net.minecraft.world.World worldIn, BlockPos pos, EntityPlayer playerIn) {
+        // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
+        final CauseTracker causeTracker = ((IMixinWorld) worldIn).getCauseTracker();
+        Cause cause = causeTracker.getCurrentCause();
+        if (cause == null) {
+            causeTracker.setCurrentNotifier((User) playerIn);
+            cause = Cause.of(NamedCause.source(playerIn));
+        } else if (!causeTracker.hasNotifier()) {
+            causeTracker.setCurrentNotifier((User) playerIn);
+            cause = cause.merge(Cause.of(NamedCause.notifier(playerIn)));
+        }
+
+        Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
+        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, ImmutableList.of(location), (World) worldIn);
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            return true;
+        }
+
         BlockPos spawnPoint = worldIn.getSpawnPoint();
         int protectionRadius = getSpawnProtectionSize();
 
