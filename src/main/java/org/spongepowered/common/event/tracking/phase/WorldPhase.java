@@ -144,6 +144,24 @@ public final class WorldPhase extends TrackingPhase {
 
     public enum Tick implements IPhaseState {
         ENTITY() {
+
+
+            @Override
+            public void appendPreBlockProtectedCheck(Cause.Builder builder, PhaseContext context, CauseTracker causeTracker) {
+                context.firstNamed(NamedCause.SOURCE, Entity.class).ifPresent(entity -> {
+                    final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
+                    Stream.<Supplier<Optional<User>>>of(
+                            () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR),
+                            () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
+                    )
+                            .map(Supplier::get)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .findFirst()
+                            .ifPresent(user -> builder.named(NamedCause.notifier(user)));
+                });
+            }
+
             @Override
             public void assignEntityCreator(PhaseContext context, Entity entity) {
                 final Entity tickingEntity = context.firstNamed(NamedCause.SOURCE, Entity.class)
@@ -399,6 +417,21 @@ public final class WorldPhase extends TrackingPhase {
         TILE_ENTITY() {
 
             @Override
+            public void appendPreBlockProtectedCheck(Cause.Builder builder, PhaseContext context, CauseTracker causeTracker) {
+                context.firstNamed(NamedCause.SOURCE, TileEntity.class).ifPresent(tileEntity -> {
+                    final Vector3d position = tileEntity.getLocation().getPosition();
+                    final BlockPos blockPos = VecHelper.toBlockPos(position);
+                    final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(blockPos);
+                    Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
+                            .map(Supplier::get)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .findFirst()
+                            .ifPresent(user -> builder.named(NamedCause.notifier(user)));
+                });
+            }
+
+            @Override
             public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                     WorldServer minecraftWorld, PlayerTracker.Type notifier) {
                 context.firstNamed(NamedCause.SOURCE, TileEntity.class).ifPresent(tileEntity -> {
@@ -523,6 +556,20 @@ public final class WorldPhase extends TrackingPhase {
             }
         },
         BLOCK() {
+            @Override
+            public void appendPreBlockProtectedCheck(Cause.Builder builder, PhaseContext context, CauseTracker causeTracker) {
+                context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).ifPresent(snapshot -> {
+                    final Vector3d position = snapshot.getLocation().get().getPosition();
+                    final BlockPos blockPos = VecHelper.toBlockPos(position);
+                    final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(blockPos);
+                    Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
+                            .map(Supplier::get)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .findFirst()
+                            .ifPresent(user -> builder.named(NamedCause.notifier(user)));
+                });
+            }
 
             @Override
             public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
@@ -770,6 +817,21 @@ public final class WorldPhase extends TrackingPhase {
         },
         RANDOM_BLOCK() {
             @Override
+            public void appendPreBlockProtectedCheck(Cause.Builder builder, PhaseContext context, CauseTracker causeTracker) {
+                context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).ifPresent(snapshot -> {
+                    final Vector3d position = snapshot.getLocation().get().getPosition();
+                    final BlockPos blockPos = VecHelper.toBlockPos(position);
+                    final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(blockPos);
+                    Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
+                            .map(Supplier::get)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .findFirst()
+                            .ifPresent(user -> builder.named(NamedCause.notifier(user)));
+                });
+            }
+
+            @Override
             public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                     WorldServer minecraftWorld, PlayerTracker.Type notifier) {
                 context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).ifPresent(snapshot -> {
@@ -1009,6 +1071,10 @@ public final class WorldPhase extends TrackingPhase {
         public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos, WorldServer minecraftWorld, PlayerTracker.Type notifier) {
 
         }
+
+        public void appendPreBlockProtectedCheck(Cause.Builder builder, PhaseContext context, CauseTracker causeTracker) {
+
+        }
     }
 
     @Override
@@ -1181,5 +1247,13 @@ public final class WorldPhase extends TrackingPhase {
     @Override
     public boolean isWorldGeneration(IPhaseState state) {
         return state instanceof State;
+    }
+
+    @Override
+    public void appendPreBlockProtectedCheck(Cause.Builder builder, IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker) {
+        if (phaseState instanceof Tick) {
+            ((Tick) phaseState).appendPreBlockProtectedCheck(builder, context, causeTracker);
+        }
+        context.firstNamed(NamedCause.SOURCE, Player.class).ifPresent(player -> builder.named(NamedCause.notifier(player)));
     }
 }
