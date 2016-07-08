@@ -37,7 +37,6 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.CollisionModCategory;
 import org.spongepowered.common.config.category.EntityCollisionCategory;
 import org.spongepowered.common.entity.SpongeEntityType;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
@@ -73,7 +72,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
 
             this.entityModId = this.spongeEntityType.getModId();
             if (!this.worldObj.isRemote) {
-                initializeCollisionState();
+                initializeCollisionState(this.worldObj);
             }
         }
     }
@@ -108,8 +107,9 @@ public class MixinEntity_Collisions implements IModData_Collisions {
         this.entityModId = id;
     }
 
-    private boolean initializeCollisionState() {
-        SpongeConfig<?> activeConfig = ((IMixinWorldServer) this.worldObj).getActiveConfig();
+    @Override
+    public void initializeCollisionState(World worldObj) {
+        SpongeConfig<?> activeConfig = ((IMixinWorldServer) worldObj).getActiveConfig();
         EntityCollisionCategory collisionCat = activeConfig.getConfig().getEntityCollisionCategory();
         this.maxCollisions = collisionCat.getMaxEntitiesWithinAABB();
         boolean requiresSave = false;
@@ -119,11 +119,11 @@ public class MixinEntity_Collisions implements IModData_Collisions {
             collisionCat.getModList().put(this.entityModId, collisionMod);
             collisionMod.getEntityList().put(this.entityName, maxCollisions);
             activeConfig.save();
-            return true;
+            return;
         } else if (collisionMod != null) {
             if (!collisionMod.isEnabled()) {
                 this.maxCollisions = -1;
-                return false;
+                return;
             }
             // check mod overrides
             Integer modCollisionMax = collisionMod.getDefaultMaxCollisions().get("entities");
@@ -150,13 +150,13 @@ public class MixinEntity_Collisions implements IModData_Collisions {
         }
 
         if (this.maxCollisions <= 0) {
-            return false;
+            return;
         }
 
         if (requiresSave && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
             activeConfig.save();
         }
-        return true;
+        return;
     }
 
     @Override

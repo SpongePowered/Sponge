@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.plugin.entitycollisions.interfaces;
 
+import net.minecraft.world.World;
 import org.spongepowered.common.mixin.plugin.interfaces.IModData;
 
 public interface IModData_Collisions extends IModData {
@@ -31,5 +32,7 @@ public interface IModData_Collisions extends IModData {
     int getMaxCollisions();
 
     void setMaxCollisions(int max);
+
+    void initializeCollisionState(World worldIn);
 
 }

@@ -33,17 +33,12 @@ import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.util.OptBool;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.CollisionModCategory;
-import org.spongepowered.common.config.category.EntityCollisionCategory;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
@@ -102,15 +97,20 @@ public class MixinChunk_Collisions {
                         BlockType blockType = tickBlock.getState().getType();
                         IModData_Collisions spongeBlock = (IModData_Collisions) blockType;
                         if (spongeBlock.requiresCacheRefresh()) {
-                            initializeCollisionState(blockType);
+                            spongeBlock.initializeCollisionState(this.worldObj);
                             spongeBlock.requiresCacheRefresh(false);
                         }
 
                         return !((spongeBlock.getMaxCollisions() >= 0) && (listToFill.size() >= spongeBlock.getMaxCollisions()));
                     }),
-                    () -> phaseContext.firstNamed(NamedCause.SOURCE, IModData_Collisions.class).map(collisions ->
-                            !((collisions.getMaxCollisions() >= 0) && (listToFill.size() >= collisions.getMaxCollisions()))
-                    )
+                    () -> phaseContext.firstNamed(NamedCause.SOURCE, IModData_Collisions.class).map(spongeEntity -> {
+                            if (spongeEntity.requiresCacheRefresh()) {
+                                spongeEntity.initializeCollisionState(this.worldObj);
+                                spongeEntity.requiresCacheRefresh(false);
+                            }
+
+                            return !((spongeEntity.getMaxCollisions() >= 0) && (listToFill.size() >= spongeEntity.getMaxCollisions()));
+                    })
             ).map(Supplier::get)
             .filter(Optional::isPresent)
             .map(Optional::get)
@@ -119,52 +119,5 @@ public class MixinChunk_Collisions {
         }
 
         return true;
-    }
-
-    private void initializeCollisionState(BlockType type) {
-        SpongeConfig<?> activeConfig = ((IMixinWorldServer) this.worldObj).getActiveConfig();
-        EntityCollisionCategory collisionCat = activeConfig.getConfig().getEntityCollisionCategory();
-        IModData_Collisions spongeBlock = (IModData_Collisions) type;
-        spongeBlock.setMaxCollisions(collisionCat.getMaxEntitiesWithinAABB());
-        String[] ids = type.getId().split(":");
-        String modId = ids[0];
-        String name = ids[1];
-        CollisionModCategory collisionMod = collisionCat.getModList().get(modId);
-        if (collisionMod == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-            collisionMod = new CollisionModCategory(modId);
-            collisionCat.getModList().put(modId, collisionMod);
-            collisionMod.getBlockList().put(name, spongeBlock.getMaxCollisions());
-            if (activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-                activeConfig.save();
-            }
-
-            return;
-        } else if (collisionMod != null) {
-            if (!collisionMod.isEnabled()) {
-                spongeBlock.setMaxCollisions(-1);
-                return;
-            }
-            // check mod overrides
-            Integer modCollisionMax = collisionMod.getDefaultMaxCollisions().get("blocks");
-            if (modCollisionMax != null) {
-                spongeBlock.setMaxCollisions(modCollisionMax);
-            }
-
-            Integer blockMaxCollision = collisionMod.getBlockList().get(name);
-            // entity overrides
-            if (blockMaxCollision == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-                collisionMod.getBlockList().put(name, spongeBlock.getMaxCollisions());
-            } else if (blockMaxCollision != null) {
-                spongeBlock.setMaxCollisions(blockMaxCollision);
-            }
-        }
-
-        if (spongeBlock.getMaxCollisions() <= 0) {
-            return;
-        }
-
-        if (activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-            activeConfig.save();
-        }
     }
 }

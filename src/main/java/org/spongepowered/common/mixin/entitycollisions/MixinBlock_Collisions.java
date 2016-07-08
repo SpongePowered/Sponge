@@ -25,12 +25,19 @@
 package org.spongepowered.common.mixin.entitycollisions;
 
 import net.minecraft.block.Block;
+import net.minecraft.world.World;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.category.CollisionModCategory;
+import org.spongepowered.common.config.category.EntityCollisionCategory;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 
 @Mixin(Block.class)
 public abstract class MixinBlock_Collisions implements IModData_Collisions {
 
+    private BlockType collisionBlockType = (BlockType)(Object) this;
     private int maxCollisions = 8;
     private String modId;
     @SuppressWarnings("unused")
@@ -70,5 +77,53 @@ public abstract class MixinBlock_Collisions implements IModData_Collisions {
     @Override
     public boolean requiresCacheRefresh() {
         return this.refreshCache;
+    }
+
+    @Override
+    public void initializeCollisionState(World worldIn) {
+        SpongeConfig<?> activeConfig = ((IMixinWorldServer) worldIn).getActiveConfig();
+        EntityCollisionCategory collisionCat = activeConfig.getConfig().getEntityCollisionCategory();
+        IModData_Collisions spongeBlock = (IModData_Collisions) this.collisionBlockType;
+        spongeBlock.setMaxCollisions(collisionCat.getMaxEntitiesWithinAABB());
+        String[] ids = this.collisionBlockType.getId().split(":");
+        String modId = ids[0];
+        String name = ids[1];
+        CollisionModCategory collisionMod = collisionCat.getModList().get(modId);
+        if (collisionMod == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
+            collisionMod = new CollisionModCategory(modId);
+            collisionCat.getModList().put(modId, collisionMod);
+            collisionMod.getBlockList().put(name, spongeBlock.getMaxCollisions());
+            if (activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
+                activeConfig.save();
+            }
+
+            return;
+        } else if (collisionMod != null) {
+            if (!collisionMod.isEnabled()) {
+                spongeBlock.setMaxCollisions(-1);
+                return;
+            }
+            // check mod overrides
+            Integer modCollisionMax = collisionMod.getDefaultMaxCollisions().get("blocks");
+            if (modCollisionMax != null) {
+                spongeBlock.setMaxCollisions(modCollisionMax);
+            }
+
+            Integer blockMaxCollision = collisionMod.getBlockList().get(name);
+            // entity overrides
+            if (blockMaxCollision == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
+                collisionMod.getBlockList().put(name, spongeBlock.getMaxCollisions());
+            } else if (blockMaxCollision != null) {
+                spongeBlock.setMaxCollisions(blockMaxCollision);
+            }
+        }
+
+        if (spongeBlock.getMaxCollisions() <= 0) {
+            return;
+        }
+
+        if (activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
+            activeConfig.save();
+        }
     }
 }
