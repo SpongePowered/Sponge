@@ -121,6 +121,10 @@ public class MixinEntity_Collisions implements IModData_Collisions {
             activeConfig.save();
             return true;
         } else if (collisionMod != null) {
+            if (!collisionMod.isEnabled()) {
+                this.maxCollisions = -1;
+                return false;
+            }
             // check mod overrides
             Integer modCollisionMax = collisionMod.getDefaultMaxCollisions().get("entities");
             if (modCollisionMax != null) {

@@ -140,6 +140,10 @@ public class MixinChunk_Collisions {
 
             return;
         } else if (collisionMod != null) {
+            if (!collisionMod.isEnabled()) {
+                spongeBlock.setMaxCollisions(-1);
+                return;
+            }
             // check mod overrides
             Integer modCollisionMax = collisionMod.getDefaultMaxCollisions().get("blocks");
             if (modCollisionMax != null) {
