@@ -750,6 +750,7 @@ public class DataRegistrar {
         propertyRegistry.register(StatisticsTrackedProperty.class, new StatisticsTrackedPropertyStore());
         propertyRegistry.register(TemperatureProperty.class, new TemperaturePropertyStore());
         propertyRegistry.register(UnbreakableProperty.class, new UnbreakablePropertyStore());
+        propertyRegistry.register(SurrogateBlockProperty.class, new SurrogateBlockPropertyStore());
 
         // Items
         propertyRegistry.register(ApplicableEffectProperty.class, new ApplicableEffectPropertyStore());

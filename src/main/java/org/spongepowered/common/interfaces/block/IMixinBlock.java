@@ -125,4 +125,14 @@ public interface IMixinBlock {
 
     // Timings
     Timing getTimingsHandler();
+
+    /**
+     * Used only for Forge's dummy air block that is acting as a surrogate block for missing
+     * mod blocks. Usually when a block is simply marked for replacement when a mod is re-introduced.
+     *
+     * @return True if this block is a surrogate dummy block. Should only be used for forge blocks.
+     */
+    default boolean isDummy() {
+        return false;
+    }
 }
