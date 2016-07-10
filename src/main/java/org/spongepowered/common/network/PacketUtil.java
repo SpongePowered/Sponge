@@ -25,7 +25,6 @@
 package org.spongepowered.common.network;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -38,6 +37,7 @@ import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.util.EnumHand;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -56,8 +56,6 @@ public class PacketUtil {
     private static final PhaseContext EMPTY_INVALID = PhaseContext.start().complete();
     private static long lastInventoryOpenPacketTimeStamp = 0;
     private static long lastRightClickPacketTimeStamp = 0;
-    private static long currentRightClickPacketTimeStamp = 0;
-    private static Item lastItem = null;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
@@ -92,18 +90,19 @@ public class PacketUtil {
             // second one. This sadly has to remain until Mojang makes their packets saner. :(
             //  -- Grum
             if (packetIn instanceof CPacketPlayerTryUseItem) {
+                long currentRightClickPacketTimeStamp = System.currentTimeMillis();
                 CPacketPlayerTryUseItem tryUseItemPacket = (CPacketPlayerTryUseItem) packetIn;
                 ItemStack itemInHand = packetPlayer.getHeldItem(tryUseItemPacket.getHand());
-                if (itemInHand != null && itemInHand.getItem() == lastItem && lastRightClickPacketTimeStamp != 0 &&
+                if (itemInHand != null && lastRightClickPacketTimeStamp != 0 &&
                         currentRightClickPacketTimeStamp - lastRightClickPacketTimeStamp < 100) {
                     lastRightClickPacketTimeStamp = 0;
                     return;
                 }
             } else if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
-                CPacketPlayerTryUseItemOnBlock tryUseItemOnBlockPacket = (CPacketPlayerTryUseItemOnBlock) packetIn;
-                ItemStack itemInHand = packetPlayer.getHeldItem(tryUseItemOnBlockPacket.getHand());
-                lastItem = itemInHand == null ? null : itemInHand.getItem();
-                lastRightClickPacketTimeStamp = System.currentTimeMillis();
+                CPacketPlayerTryUseItemOnBlock tryUseItemPacket = (CPacketPlayerTryUseItemOnBlock) packetIn;
+                if (tryUseItemPacket.getHand() == EnumHand.MAIN_HAND) {
+                    lastRightClickPacketTimeStamp = System.currentTimeMillis();
+                }
                 SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
             }
 
