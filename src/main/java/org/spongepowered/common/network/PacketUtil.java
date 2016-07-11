@@ -25,7 +25,6 @@
 package org.spongepowered.common.network;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -33,17 +32,12 @@ import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.client.CPacketClientStatus;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
-import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
-import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.EnumHand;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.PacketPhase;
@@ -55,7 +49,6 @@ public class PacketUtil {
 
     private static final PhaseContext EMPTY_INVALID = PhaseContext.start().complete();
     private static long lastInventoryOpenPacketTimeStamp = 0;
-    private static long lastRightClickPacketTimeStamp = 0;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
@@ -80,30 +73,6 @@ public class PacketUtil {
                 if (packetDiff < 100) {
                     ignoreCreative = true;
                 }
-            }
-
-            // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
-            // aimed at a block. We shouldn't need to get the second packet if the data is handled
-            // but we cannot know what the client will do, so we might still get it
-            //
-            // If the time between packets is small enough, and the 'signature' similar, we discard the
-            // second one. This sadly has to remain until Mojang makes their packets saner. :(
-            //  -- Grum
-            if (packetIn instanceof CPacketPlayerTryUseItem) {
-                long currentRightClickPacketTimeStamp = System.currentTimeMillis();
-                CPacketPlayerTryUseItem tryUseItemPacket = (CPacketPlayerTryUseItem) packetIn;
-                ItemStack itemInHand = packetPlayer.getHeldItem(tryUseItemPacket.getHand());
-                if (itemInHand != null && lastRightClickPacketTimeStamp != 0 &&
-                        currentRightClickPacketTimeStamp - lastRightClickPacketTimeStamp < 100) {
-                    lastRightClickPacketTimeStamp = 0;
-                    return;
-                }
-            } else if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
-                CPacketPlayerTryUseItemOnBlock tryUseItemPacket = (CPacketPlayerTryUseItemOnBlock) packetIn;
-                if (tryUseItemPacket.getHand() == EnumHand.MAIN_HAND) {
-                    lastRightClickPacketTimeStamp = System.currentTimeMillis();
-                }
-                SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
             }
 
             // Fix invisibility respawn exploit

@@ -77,15 +77,18 @@ public abstract class MixinPlayerInteractionManager {
     @Shadow private GameType gameType;
 
     @Shadow public abstract boolean isCreative();
-    @Shadow public abstract EnumActionResult processRightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand);
 
     @Inject(method = "processRightClick", at = @At("HEAD"), cancellable = true)
     private void onProcessRightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand,
             CallbackInfoReturnable<EnumActionResult> cir) {
+        // If a CPacketTryUseItemOnBlock was just processed and didn't succeed, 
+        // ignore firing the right-click AIR event
         if (SpongeCommonEventFactory.ignoreRightClickAirEvent) {
+            SpongeCommonEventFactory.ignoreRightClickAirEvent = false;
             return;
         }
 
+        // We fire an event here when a player right-click's the AIR
         if (SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)), Optional.empty(),
                 BlockSnapshot.NONE, Direction.NONE, hand).isCancelled()) {
             cir.setReturnValue(EnumActionResult.FAIL);
@@ -211,14 +214,6 @@ public abstract class MixinPlayerInteractionManager {
             player.openContainer.detectAndSendChanges();
         }
 
-        // Since we cancel the second packet received while looking at a block with
-        // item in hand, we need to make sure to make an attempt to run the 'processRightClick'
-        // method during the first packet.
-        if (stack != null && result != EnumActionResult.SUCCESS && !event.isCancelled() && event.getUseItemResult() != Tristate.FALSE) {
-            SpongeCommonEventFactory.ignoreRightClickAirEvent = true;
-            this.processRightClick(playerMP, worldIn, oldStack, hand);
-            SpongeCommonEventFactory.ignoreRightClickAirEvent = false;
-        }
         return result;
         // Sponge end
         // } // Sponge - Remove unecessary else bracket
