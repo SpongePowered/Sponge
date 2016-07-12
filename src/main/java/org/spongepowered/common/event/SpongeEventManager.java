@@ -50,6 +50,8 @@ import org.spongepowered.common.event.gen.DefineableClassLoader;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -71,6 +73,8 @@ public class SpongeEventManager implements EventManager {
             new FilterFactory("org.spongepowered.common.event.filters", classLoader), classLoader);
     private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent = HashMultimap.create();
     private final Set<Object> registeredListeners = Sets.newHashSet();
+
+    public final ListenerChecker checker = new ListenerChecker(ShouldFire.class);
 
     /**
      * A cache of all the handlers for an event type for quick event posting.
@@ -119,17 +123,18 @@ public class SpongeEventManager implements EventManager {
         return parameters.length >= 1 && Event.class.isAssignableFrom(parameters[0]);
     }
 
-    private void register(RegisteredListener<?> handler) {
-        register(Collections.<RegisteredListener<?>>singletonList(handler));
+    private void register(RegisteredListener<? extends Event> handler) {
+        register(Collections.singletonList(handler));
     }
 
-    private void register(List<RegisteredListener<?>> handlers) {
+    private void register(List<RegisteredListener<? extends Event>> handlers) {
         synchronized (this.lock) {
             boolean changed = false;
 
             for (RegisteredListener<?> handler : handlers) {
                 if (this.handlersByEvent.put(handler.getEventClass(), handler)) {
                     changed = true;
+                    this.checker.registerListenerFor(handler.getEventClass());
                 }
             }
 
@@ -137,6 +142,26 @@ public class SpongeEventManager implements EventManager {
                 this.handlersCache.invalidateAll();
             }
         }
+    }
+
+    /*private void enableFields(Collection<RegisteredListener<? extends Event>> handlers) {
+        for (RegisteredListener<?> handler: handlers) {
+            if (this.hasAnyListeners(handler.getEventClass())) {
+                // We don't need to do a check for every subtype
+                this.checker.updateFields(handler.getEventClass(), k -> true);
+            }
+        }
+    }
+
+    private void disableFields(Collection<RegisteredListener<? extends Event>> handlers) {
+        for (RegisteredListener<?> handler: handlers) {
+            this.checker.updateFields(handler.getEventClass(), this::hasAnyListeners);
+        }
+    }*/
+
+    // Override in SpongeModEventManager
+    protected boolean hasAnyListeners(Class<? extends Event> clazz) {
+        return !this.handlersCache.getUnchecked(clazz).getListeners().isEmpty();
     }
 
     public void registerListener(PluginContainer plugin, Object listenerObject) {
@@ -150,7 +175,7 @@ public class SpongeEventManager implements EventManager {
             return;
         }
 
-        List<RegisteredListener<?>> handlers = Lists.newArrayList();
+        List<RegisteredListener<? extends Event>> handlers = Lists.newArrayList();
 
         Class<?> handle = listenerObject.getClass();
         for (Method method : handle.getMethods()) {
@@ -226,6 +251,7 @@ public class SpongeEventManager implements EventManager {
                 if (unregister.test(handler)) {
                     itr.remove();
                     changed = true;
+                    this.checker.unregisterListenerFor(handler.getEventClass());
                 }
             }
 
@@ -273,7 +299,7 @@ public class SpongeEventManager implements EventManager {
     public boolean post(Event event) {
         return post(event, getHandlerCache(event).getListeners());
     }
-    
+
     public boolean post(Event event, boolean allowClientThread) {
         return post(event);
     }
