@@ -96,7 +96,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         this.values = valueBuilder.build();
         @Nullable NBTTagCompound compound = ((net.minecraft.item.ItemStack) this.privateStack).getTagCompound();
         if (compound != null) {
-            compound = (NBTTagCompound) compound.copy();
+            compound = compound.copy();
         }
         if (compound != null) {
             NbtDataUtil.filterSpongeCustomData(compound);
@@ -129,7 +129,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         }
         this.keys = keyBuilder.build();
         this.values = valueBuilder.build();
-        this.compound = compound == null ? null : (NBTTagCompound) compound.copy();
+        this.compound = compound == null ? null : compound.copy();
     }
 
     @Override
@@ -146,7 +146,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public ItemStack createStack() {
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(ItemStackUtil.toNative(this.privateStack.copy()));
         if(this.compound != null) {
-            nativeStack.setTagCompound((NBTTagCompound) this.compound.copy());
+            nativeStack.setTagCompound(this.compound.copy());
         }
         return ItemStackUtil.fromNative(nativeStack);
     }
@@ -342,7 +342,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     public Optional<NBTTagCompound> getCompound() {
         if (this.compound != null) {
-            return Optional.of((NBTTagCompound) this.compound.copy());
+            return Optional.of(this.compound.copy());
         } else {
             return Optional.empty();
         }

@@ -70,8 +70,9 @@ public class ListenerChecker {
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, name);
     }
 
+    @SuppressWarnings("unchecked")
     public void registerListenerFor(Class<?> eventClass) {
-        Set<Class<?>> types = (Set) TypeToken.of(eventClass).getTypes().rawTypes();
+        Set<Class<?>> types = (Set<Class<?>>) TypeToken.of(eventClass).getTypes().rawTypes();
         for (Class<?> type: types) {
             this.subtypeMappings.getUnchecked(type).add(eventClass);
         }
@@ -92,8 +93,9 @@ public class ListenerChecker {
         this.updateFields(types, c -> true);
     }
 
+    @SuppressWarnings("unchecked")
     public void unregisterListenerFor(Class<?> eventClass) {
-        Set<Class<?>> types = (Set) TypeToken.of(eventClass).getTypes().rawTypes();
+        Set<Class<?>> types = (Set<Class<?>>) TypeToken.of(eventClass).getTypes().rawTypes();
         for (Class<?> type: types) {
             this.subtypeMappings.getUnchecked(type).remove(eventClass);
         }

@@ -233,7 +233,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     }
 
     public SpongeEntitySnapshotBuilder unsafeCompound(NBTTagCompound compound) {
-        this.compound = (NBTTagCompound) checkNotNull(compound).copy();
+        this.compound = checkNotNull(compound).copy();
         return this;
     }
 

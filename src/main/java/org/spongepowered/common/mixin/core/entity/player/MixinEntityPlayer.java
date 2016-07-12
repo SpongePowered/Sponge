@@ -365,6 +365,14 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
     }
 
+    /**
+     * @author gabizou - June 4th, 2016
+     * @reason Overwrites the original logic to simply pass through to the
+     * CauseTracker.
+     *
+     * @param p_184816_1_ The entity item to spawn
+     * @return The itemstack
+     */
     @Overwrite
     @Nullable
     protected ItemStack dropItemAndGetStack(EntityItem p_184816_1_) {

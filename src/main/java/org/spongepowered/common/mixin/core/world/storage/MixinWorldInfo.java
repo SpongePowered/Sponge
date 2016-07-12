@@ -766,7 +766,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public DataContainer getAdditionalProperties() {
-        NBTTagCompound additionalProperties = (NBTTagCompound) this.spongeRootLevelNbt.copy();
+        NBTTagCompound additionalProperties = this.spongeRootLevelNbt.copy();
         additionalProperties.removeTag(SpongeImpl.ECOSYSTEM_NAME);
         return NbtTranslator.getInstance().translateFrom(additionalProperties);
     }

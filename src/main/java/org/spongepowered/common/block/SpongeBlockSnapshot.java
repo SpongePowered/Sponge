@@ -127,7 +127,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
         this.keyValueMap = tileBuilder.build();
         this.valueSet = ImmutableSet.copyOf(this.keyValueMap.values());
-        this.compound = builder.compound == null ? null : (NBTTagCompound) builder.compound.copy();
+        this.compound = builder.compound == null ? null : builder.compound.copy();
 
     }
 
@@ -414,7 +414,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     public Optional<NBTTagCompound> getCompound() {
-        return this.compound == null ? Optional.<NBTTagCompound>empty() : Optional.of((NBTTagCompound) this.compound.copy());
+        return this.compound == null ? Optional.<NBTTagCompound>empty() : Optional.of(this.compound.copy());
     }
 
     @SuppressWarnings("rawtypes")

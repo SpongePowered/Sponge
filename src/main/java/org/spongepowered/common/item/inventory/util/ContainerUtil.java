@@ -112,7 +112,7 @@ public final class ContainerUtil {
                         EntityItem entityitem = new EntityItem(worldServer, posX, posY, posZ, new ItemStack(itemStack.getItem(), stackSize, itemStack.getMetadata()));
 
                         if (itemStack.hasTagCompound()) {
-                            entityitem.getEntityItem().setTagCompound((NBTTagCompound) itemStack.getTagCompound().copy());
+                            entityitem.getEntityItem().setTagCompound(itemStack.getTagCompound().copy());
                         }
 
                         float f3 = 0.05F;
@@ -157,7 +157,7 @@ public final class ContainerUtil {
                 EntityItem entityitem = new EntityItem(worldServer, posX, posY, posZ, new ItemStack(itemStack.getItem(), stackSize, itemStack.getMetadata()));
 
                 if (itemStack.hasTagCompound()) {
-                    entityitem.getEntityItem().setTagCompound((NBTTagCompound) itemStack.getTagCompound().copy());
+                    entityitem.getEntityItem().setTagCompound(itemStack.getTagCompound().copy());
                 }
 
                 float f3 = 0.05F;

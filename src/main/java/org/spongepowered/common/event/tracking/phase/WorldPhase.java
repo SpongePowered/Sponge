@@ -717,7 +717,7 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
-            final Location location = Stream.<Supplier<Optional<Location>>>
+            final Location<World> location = Stream.<Supplier<Optional<Location<World>>>>
                     of(
                     () -> context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).map(snapshot -> snapshot.getLocation().get()),
                     () -> context.firstNamed(NamedCause.SOURCE, TileEntity.class).map(Locatable::getLocation),

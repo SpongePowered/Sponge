@@ -134,7 +134,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         if (itemStack instanceof net.minecraft.item.ItemStack) {
             final NBTTagCompound itemCompound = ((net.minecraft.item.ItemStack) itemStack).getTagCompound();
             if (itemCompound != null) {
-                this.compound = (NBTTagCompound) itemCompound.copy();
+                this.compound = itemCompound.copy();
             }
             this.itemDataSet.addAll(((IMixinCustomDataHolder) itemStack).getCustomManipulators());
 
@@ -245,7 +245,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         checkState(this.quantity <= max, "Quantity cannot be greater than the max quantity (%s)", max);
         final ItemStack stack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.type, this.quantity, this.damageValue);
         if (this.compound != null) {
-            ((net.minecraft.item.ItemStack) stack).setTagCompound((NBTTagCompound) this.compound.copy());
+            ((net.minecraft.item.ItemStack) stack).setTagCompound(this.compound.copy());
         }
         if (this.itemDataSet != null) {
             this.itemDataSet.forEach(stack::offer);

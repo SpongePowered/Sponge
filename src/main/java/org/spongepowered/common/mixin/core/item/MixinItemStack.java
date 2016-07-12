@@ -203,7 +203,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
                 .set(DataQueries.ITEM_COUNT, this.getQuantity())
                 .set(DataQueries.ITEM_DAMAGE_VALUE, this.getItemDamage());
         if (hasTagCompound()) { // no tag? no data, simple as that.
-            final NBTTagCompound compound = (NBTTagCompound) getTagCompound().copy();
+            final NBTTagCompound compound = getTagCompound().copy();
             if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
                 final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
                 if (spongeCompound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST)) {

@@ -111,7 +111,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             this.keys = keyBuilder.build();
             this.values = valueBuilder.build();
         }
-        this.compound = builder.compound == null ? null : (NBTTagCompound) builder.compound.copy();
+        this.compound = builder.compound == null ? null : builder.compound.copy();
         this.worldUuid = builder.worldId == null ? null : builder.worldId;
         this.position = builder.position == null ? null : builder.position;
         this.rotation = builder.rotation == null ? null : builder.rotation;
@@ -386,7 +386,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         final SpongeEntitySnapshotBuilder builder = createBuilder();
         builder.position = location.getPosition();
         builder.worldId = location.getExtent().getUniqueId();
-        NBTTagCompound newCompound = (NBTTagCompound) this.compound.copy();
+        NBTTagCompound newCompound = this.compound.copy();
         newCompound.setTag("Pos", newDoubleNBTList(new double[] {location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ()}));
         newCompound.setInteger("Dimension", ((IMixinWorldInfo)location.getExtent().getProperties()).getDimensionId());
         builder.compound = newCompound;
@@ -404,7 +404,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         if (this.compound == null) {
             return Optional.empty();
         } else {
-            return Optional.of((NBTTagCompound) this.compound.copy());
+            return Optional.of(this.compound.copy());
         }
     }
 
