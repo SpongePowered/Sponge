@@ -48,7 +48,7 @@ public abstract class MixinBlockRedstoneDiode extends BlockHorizontal {
 
     @Inject(method = "notifyNeighbors", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/BlockPos;offset(Lnet/minecraft/util/EnumFacing;)Lnet/minecraft/util/math/BlockPos;", shift = At.Shift.AFTER), cancellable = true)
     public void onNotifyNeighbors(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, CallbackInfo ci) {
-        EnumFacing enumfacing = (EnumFacing)state.getValue(BlockDirectional.FACING);
+        EnumFacing enumfacing = state.getValue(BlockHorizontal.FACING);
         BlockPos blockpos = pos.offset(enumfacing.getOpposite());
         if (worldIn.isRemote) {
             worldIn.notifyBlockOfStateChange(blockpos, (BlockRedstoneDiode)(Object) this);

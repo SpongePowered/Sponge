@@ -632,7 +632,7 @@ public final class PacketPhase extends TrackingPhase {
             @Override
             public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> transaction, PhaseContext context) {
                 Player player = context.first(Player.class).get();
-                BlockPos pos = ((IMixinLocation) (Object) transaction.getFinal().getLocation()).getBlockPos();
+                BlockPos pos = ((IMixinLocation) (Object) transaction.getFinal().getLocation().get()).getBlockPos();
                 IMixinChunk spongeChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(pos);
                 if (blockChange == BlockChange.PLACE) {
                     spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.OWNER);

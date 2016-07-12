@@ -445,7 +445,7 @@ public final class WorldPhase extends TrackingPhase {
                     .ifPresentAndNotEmpty(map -> {
                         final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
                         for (BlockSnapshot snapshot : capturedBlocks) {
-                            final BlockPos blockPos = ((IMixinLocation) (Object) snapshot.getLocation()).getBlockPos();
+                            final BlockPos blockPos = ((IMixinLocation) (Object) snapshot.getLocation().get()).getBlockPos();
                             final Collection<EntityItem> entityItems = map.get(blockPos);
                             if (!entityItems.isEmpty()) {
                                 final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
