@@ -50,6 +50,7 @@ import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -79,6 +80,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -420,7 +423,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, entityIn, listToFill);
+        final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+        final PhaseData peek = causeTracker.getStack().peek();
+
         if (event == null || event.isCancelled()) {
+            if (event == null && !peek.getState().getPhase().isTicking(peek.getState())) {
+                return;
+            }
             listToFill.clear();
         }
     }
@@ -438,7 +447,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, null, listToFill);
+        final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+        final PhaseData peek = causeTracker.getStack().peek();
+
         if (event == null || event.isCancelled()) {
+            if (event == null && !peek.getState().getPhase().isTicking(peek.getState())) {
+                return;
+            }
             listToFill.clear();
         }
     }

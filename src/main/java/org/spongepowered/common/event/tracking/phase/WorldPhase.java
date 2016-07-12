@@ -1091,4 +1091,9 @@ public final class WorldPhase extends TrackingPhase {
         }
         context.firstNamed(NamedCause.SOURCE, Player.class).ifPresent(player -> builder.named(NamedCause.notifier(player)));
     }
+
+    @Override
+    public boolean isTicking(IPhaseState state) {
+        return state instanceof TickPhaseState;
+    }
 }
