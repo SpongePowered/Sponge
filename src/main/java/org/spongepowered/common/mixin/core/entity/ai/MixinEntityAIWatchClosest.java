@@ -32,7 +32,9 @@ import net.minecraft.world.World;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WatchClosestAITask;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -48,7 +50,7 @@ public abstract class MixinEntityAIWatchClosest extends EntityAIBase implements 
 
     @Shadow private Class watchedClass;
     @Shadow private float maxDistanceForPlayer;
-    @Shadow private float chance;
+    @Shadow @Final @Mutable private float chance;
     @Nullable
     private EntityType watchedType;
 

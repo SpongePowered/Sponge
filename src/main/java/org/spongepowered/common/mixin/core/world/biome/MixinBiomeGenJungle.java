@@ -38,6 +38,7 @@ import org.spongepowered.api.world.gen.populator.Melon;
 import org.spongepowered.api.world.gen.populator.Shrub;
 import org.spongepowered.api.world.gen.populator.Vine;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
@@ -47,7 +48,7 @@ import java.util.Iterator;
 @Mixin(BiomeJungle.class)
 public abstract class MixinBiomeGenJungle extends MixinBiomeGenBase {
 
-    @Shadow private boolean isEdge;
+    @Shadow @Final private boolean isEdge;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {

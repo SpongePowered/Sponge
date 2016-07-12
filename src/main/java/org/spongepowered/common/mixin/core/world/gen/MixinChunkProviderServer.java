@@ -58,7 +58,7 @@ import javax.annotation.Nullable;
 @Mixin(ChunkProviderServer.class)
 public abstract class MixinChunkProviderServer implements WorldStorage, IMixinChunkProviderServer {
 
-    @Shadow public WorldServer worldObj;
+    @Shadow @Final public WorldServer worldObj;
     @Shadow @Final private IChunkLoader chunkLoader;
     @Shadow @Final private Long2ObjectMap<Chunk> id2ChunkMap;
 

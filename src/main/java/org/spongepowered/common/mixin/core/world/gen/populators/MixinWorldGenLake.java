@@ -41,7 +41,9 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Lake;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -56,7 +58,7 @@ public abstract class MixinWorldGenLake implements Lake {
     private double prob;
     private VariableAmount height;
 
-    @Shadow private Block block;
+    @Shadow @Final @Mutable private Block block;
 
     @Shadow
     public abstract boolean generate(World worldIn, Random rand, BlockPos position);

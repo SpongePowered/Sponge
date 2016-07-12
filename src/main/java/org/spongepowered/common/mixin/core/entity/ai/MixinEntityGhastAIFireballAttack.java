@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity.ai;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntityGhast;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +37,7 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 @Mixin(EntityGhast.AIFireballAttack.class)
 public abstract class MixinEntityGhastAIFireballAttack extends EntityAIBase {
 
-    @Shadow(aliases = "this$0") private EntityGhast parentEntity;
+    @Shadow(aliases = "this$0") @Final private EntityGhast parentEntity;
 
     @ModifyArg(method = "updateTask", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntityInWorld"
             + "(Lnet/minecraft/entity/Entity;)Z"))

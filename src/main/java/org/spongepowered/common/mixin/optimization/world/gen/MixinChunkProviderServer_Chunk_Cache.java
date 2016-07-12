@@ -26,7 +26,9 @@ package org.spongepowered.common.mixin.optimization.world.gen;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
 
@@ -34,6 +36,6 @@ import org.spongepowered.common.util.CachedLong2ObjectMap;
 @Mixin(ChunkProviderServer.class)
 public class MixinChunkProviderServer_Chunk_Cache {
 
-    @Shadow private Long2ObjectMap id2ChunkMap = new CachedLong2ObjectMap();
+    @Shadow @Final @Mutable private Long2ObjectMap id2ChunkMap = new CachedLong2ObjectMap();
 
 }

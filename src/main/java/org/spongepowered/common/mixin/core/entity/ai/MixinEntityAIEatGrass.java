@@ -28,6 +28,7 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAIEatGrass;
 import net.minecraft.world.GameRules;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,7 +38,7 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 @Mixin(EntityAIEatGrass.class)
 public abstract class MixinEntityAIEatGrass extends EntityAIBase {
 
-    @Shadow private EntityLiving grassEaterEntity;
+    @Shadow @Final private EntityLiving grassEaterEntity;
 
     @Redirect(method = "updateTask", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean onCanGrief(GameRules gameRules, String rule) {

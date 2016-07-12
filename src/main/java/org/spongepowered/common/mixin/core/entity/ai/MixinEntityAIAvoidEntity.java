@@ -27,7 +27,9 @@ package org.spongepowered.common.mixin.core.entity.ai;
 import net.minecraft.entity.ai.EntityAIAvoidEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.GuavaJavaUtils;
 
@@ -37,10 +39,10 @@ import java.util.function.Predicate;
 @Mixin(EntityAIAvoidEntity.class)
 public abstract class MixinEntityAIAvoidEntity extends MixinEntityAIBase implements AvoidEntityAITask {
 
-    @Shadow private double farSpeed;
-    @Shadow private double nearSpeed;
-    @Shadow private float avoidDistance;
-    @Shadow private com.google.common.base.Predicate avoidTargetSelector;
+    @Shadow @Final @Mutable private double farSpeed;
+    @Shadow @Final @Mutable private double nearSpeed;
+    @Shadow @Final @Mutable private float avoidDistance;
+    @Shadow @Final @Mutable private com.google.common.base.Predicate avoidTargetSelector;
 
     @SuppressWarnings("unchecked")
     @Override

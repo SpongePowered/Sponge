@@ -46,7 +46,7 @@ import java.net.InetSocketAddress;
 public abstract class MixinLegacyPingHandler extends ChannelInboundHandlerAdapter {
 
     @Shadow @Final private static Logger LOGGER;
-    @Shadow private NetworkSystem networkSystem;
+    @Shadow @Final private NetworkSystem networkSystem;
 
     @Shadow abstract void writeAndFlush(ChannelHandlerContext ctx, ByteBuf data);
     @Shadow abstract ByteBuf getStringBuffer(String string);

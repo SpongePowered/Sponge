@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity.ai;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntityEnderman;
 import net.minecraft.world.GameRules;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +37,7 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 @Mixin(EntityEnderman.AITakeBlock.class)
 public abstract class MixinEntityEndermanAITakeBlock extends EntityAIBase {
 
-    @Shadow private EntityEnderman enderman;
+    @Shadow @Final private EntityEnderman enderman;
 
     @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean onCanGrief(GameRules gameRules, String rule) {

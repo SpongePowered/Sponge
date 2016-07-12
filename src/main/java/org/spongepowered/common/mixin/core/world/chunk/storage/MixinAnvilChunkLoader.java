@@ -73,8 +73,8 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     private static final String ENTITY_LIST_CREATE_FROM_NBT =
             "Lnet/minecraft/entity/EntityList;createEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;";
 
-    @Shadow private Set<ChunkPos> pendingAnvilChunksCoordinates;
-    @Shadow private Map<ChunkPos, NBTTagCompound> chunksToRemove;
+    @Shadow @Final private Set<ChunkPos> pendingAnvilChunksCoordinates;
+    @Shadow @Final private Map<ChunkPos, NBTTagCompound> chunksToRemove;
     @Shadow @Final private File chunkSaveLocation;
 
     @Inject(method = "writeChunkToNBT", at = @At(value = "RETURN"))

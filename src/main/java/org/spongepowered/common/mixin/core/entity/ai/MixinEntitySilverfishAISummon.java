@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity.ai;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntitySilverfish;
 import net.minecraft.world.GameRules;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +37,7 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 @Mixin(EntitySilverfish.AISummonSilverfish.class)
 public abstract class MixinEntitySilverfishAISummon extends EntityAIBase {
 
-    @Shadow(aliases = "this$0") private EntitySilverfish silverfish;
+    @Shadow(aliases = "this$0") @Final private EntitySilverfish silverfish;
 
     @Redirect(method = "updateTask", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean onCanGrief(GameRules gameRules, String rule) {

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.nbt;
 
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -52,7 +53,7 @@ public abstract class MixinNBTTagCompound extends NBTBase {
 
     private static final String SET_TAG = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V";
 
-    @Shadow private Map<String, NBTBase> tagMap;
+    @Shadow @Final private Map<String, NBTBase> tagMap;
 
     @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTBase;copy()Lnet/minecraft/nbt/NBTBase;"))
     @Nullable

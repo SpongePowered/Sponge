@@ -34,6 +34,7 @@ import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.entity.HumanInventory;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -58,8 +59,8 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
 
     @Shadow public int currentItem;
     @Shadow public EntityPlayer player;
-    @Shadow public ItemStack[] mainInventory;
-    @Shadow public ItemStack[] armorInventory;
+    @Shadow @Final public ItemStack[] mainInventory;
+    @Shadow @Final public ItemStack[] armorInventory;
 
     @Shadow public abstract int getInventoryStackLimit();
 

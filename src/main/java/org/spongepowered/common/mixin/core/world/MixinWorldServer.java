@@ -114,6 +114,7 @@ import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -209,8 +210,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
     @Shadow @Final private PlayerChunkMap thePlayerManager;
-    @Shadow private Teleporter worldTeleporter;
-    @Shadow private WorldServer.ServerBlockEventList[] blockEventQueue;
+    @Shadow @Final @Mutable private Teleporter worldTeleporter;
+    @Shadow @Final private WorldServer.ServerBlockEventList[] blockEventQueue;
     @Shadow private int blockEventCacheIndex;
 
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);

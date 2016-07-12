@@ -46,7 +46,7 @@ import java.util.Random;
 @Mixin(ChunkProviderEnd.class)
 public abstract class MixinChunkProviderEnd implements IChunkProvider, GenerationPopulator, IPopulatorProvider {
 
-    @Shadow public Random rand;
+    @Shadow @Final public Random rand;
 
     @Shadow
     public abstract void setBlocksInChunk(int p_180520_1_, int p_180520_2_, ChunkPrimer p_180520_3_);

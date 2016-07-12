@@ -32,6 +32,7 @@ import org.spongepowered.api.world.gen.populator.Forest;
 import org.spongepowered.api.world.gen.populator.IcePath;
 import org.spongepowered.api.world.gen.populator.IceSpike;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
@@ -39,7 +40,7 @@ import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 @Mixin(BiomeSnow.class)
 public abstract class MixinBiomeGenSnow extends MixinBiomeGenBase {
 
-    @Shadow private boolean superIcy;
+    @Shadow @Final private boolean superIcy;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {

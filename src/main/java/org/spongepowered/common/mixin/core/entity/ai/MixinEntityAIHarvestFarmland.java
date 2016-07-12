@@ -30,6 +30,7 @@ import net.minecraft.entity.ai.EntityAIHarvestFarmland;
 import net.minecraft.entity.ai.EntityAIMoveToBlock;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.world.GameRules;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,7 +40,7 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 @Mixin(EntityAIHarvestFarmland.class)
 public abstract class MixinEntityAIHarvestFarmland extends EntityAIMoveToBlock {
 
-    @Shadow private EntityVillager theVillager;
+    @Shadow @Final private EntityVillager theVillager;
 
     public MixinEntityAIHarvestFarmland(EntityCreature creature, double a, int b) {
         super(creature, a, b);

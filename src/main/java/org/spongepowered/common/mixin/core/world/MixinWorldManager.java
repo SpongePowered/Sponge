@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.ServerWorldEventHandler;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +37,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 @Mixin(ServerWorldEventHandler.class)
 public abstract class MixinWorldManager {
 
-    @Shadow private WorldServer theWorldServer;
+    @Shadow @Final private WorldServer theWorldServer;
 
     @Redirect(method = "playSoundToAllNearExcept", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     private int getDimensionForPlayingSound(DimensionType dimensionType) {

@@ -36,6 +36,7 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.IcePath;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,7 +52,7 @@ public abstract class MixinWorldGenIcePath implements IcePath {
     private VariableAmount radius;
     private VariableAmount sections;
 
-    @Shadow private Block block;
+    @Shadow @Final private Block block;
 
     @Inject(method = "<init>(I)V", at = @At("RETURN") )
     public void onConstructed(int radius, CallbackInfo ci) {

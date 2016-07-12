@@ -28,6 +28,7 @@ import net.minecraft.block.BlockSilverfish;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.monster.EntitySilverfish;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,7 +38,7 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 @Mixin(EntitySilverfish.AIHideInStone.class)
 public abstract class MixinEntitySilverfishAIHideInStone extends EntityAIBase {
 
-    @Shadow(aliases = "this$0") private EntitySilverfish silverfish;
+    @Shadow(aliases = "this$0") @Final private EntitySilverfish silverfish;
 
     @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockSilverfish;canContainSilverfish"
             + "(Lnet/minecraft/block/state/IBlockState;)Z"))

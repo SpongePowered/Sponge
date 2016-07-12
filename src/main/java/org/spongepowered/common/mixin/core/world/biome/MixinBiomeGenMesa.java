@@ -32,6 +32,7 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Cactus;
 import org.spongepowered.api.world.gen.populator.Forest;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,8 +46,8 @@ import java.util.Random;
 @Mixin(BiomeMesa.class)
 public abstract class MixinBiomeGenMesa extends MixinBiomeGenBase {
 
-    @Shadow private boolean brycePillars;
-    @Shadow private boolean hasForest;
+    @Shadow @Final private boolean brycePillars;
+    @Shadow @Final private boolean hasForest;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {

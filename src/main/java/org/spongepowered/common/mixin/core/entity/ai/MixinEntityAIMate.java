@@ -33,6 +33,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.BreedEntityEvent;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -49,7 +50,7 @@ public abstract class MixinEntityAIMate {
     private static final String
         METHOD_INVOKE_ASSIGN =
         "net/minecraft/entity/passive/EntityAnimal.createChild(Lnet/minecraft/entity/EntityAgeable;)Lnet/minecraft/entity/EntityAgeable;";
-    @Shadow private EntityAnimal theAnimal;
+    @Shadow @Final private EntityAnimal theAnimal;
     @Shadow private EntityAnimal targetMate;
 
     @Inject(method = "spawnBaby()V", at = @At(value = "INVOKE_ASSIGN", target = METHOD_INVOKE_ASSIGN, shift = At.Shift.AFTER),
