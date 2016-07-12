@@ -86,6 +86,7 @@ import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
@@ -631,7 +632,7 @@ public final class PacketPhase extends TrackingPhase {
             @Override
             public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> transaction, PhaseContext context) {
                 Player player = context.first(Player.class).get();
-                BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
+                BlockPos pos = ((IMixinLocation) (Object) transaction.getFinal().getLocation()).getBlockPos();
                 IMixinChunk spongeChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(pos);
                 if (blockChange == BlockChange.PLACE) {
                     spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.OWNER);

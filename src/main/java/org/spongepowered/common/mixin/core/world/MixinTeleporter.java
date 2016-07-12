@@ -48,6 +48,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
@@ -191,7 +192,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
             teleporter$portalposition.lastUpdateTime = this.worldServerInstance.getTotalWorldTime();
             addToCache = false;
         } else {
-            BlockPos blockSearchPosition = VecHelper.toBlockPos(searchLocation);
+            BlockPos blockSearchPosition = ((IMixinLocation) (Object) searchLocation).getBlockPos();
 
             for (int i1 = -this.searchRadius; i1 <= this.searchRadius; ++i1) {
                 BlockPos blockpos2;
@@ -232,7 +233,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     }
 
     private void handleEntityPortalExit(Entity entityIn, Location<World> portalLocation, float rotationYaw) {
-        BlockPos blockPos = VecHelper.toBlockPos(portalLocation);
+        BlockPos blockPos = ((IMixinLocation) (Object) portalLocation).getBlockPos();
         double xTarget = portalLocation.getX() + 0.5D;
         double yTarget = portalLocation.getY() + 0.5D;
         double zTarget = portalLocation.getZ() + 0.5D;

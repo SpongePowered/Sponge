@@ -50,8 +50,6 @@ public interface IPhaseState {
 
     TrackingPhase getPhase();
 
-    int ordinal();
-
     default boolean canSwitchTo(IPhaseState state) {
         return false;
     }

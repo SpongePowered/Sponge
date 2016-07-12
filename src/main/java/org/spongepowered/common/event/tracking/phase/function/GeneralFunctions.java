@@ -58,6 +58,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
+import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -88,7 +89,7 @@ public class GeneralFunctions {
     public static final int EVENT_COUNT = 5;
 
     public static final BiFunction<WorldServer, BlockSnapshot, Transaction<BlockSnapshot>> TRANSACTION_CREATION = ((worldServer, blockSnapshot) -> {
-        final BlockPos blockPos = VecHelper.toBlockPos(blockSnapshot.getPosition());
+        final BlockPos blockPos = ((IMixinLocation) (Object) blockSnapshot.getLocation().get()).getBlockPos();
         final IBlockState newState = worldServer.getBlockState(blockPos);
         final IBlockState newActualState = newState.getActualState(worldServer, blockPos);
         final BlockSnapshot newSnapshot = ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, 0);
@@ -195,7 +196,7 @@ public class GeneralFunctions {
                 invalid.add(transaction);
                 // Cancel any block drops performed, avoids any item drops, regardless
                 context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
-                    final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
+                    final BlockPos blockPos = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
                     map.get(blockPos).clear();
                 });
             }
@@ -211,7 +212,7 @@ public class GeneralFunctions {
                 if (state.tracksBlockSpecificDrops()) {
                     // Cancel any block drops or harvests for the block change.
                     // This prevents unnecessary spawns.
-                    final BlockPos position = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
+                    final BlockPos position = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
                     context.getBlockDropSupplier().ifPresentAndNotEmpty(map -> {
                         // Check if the mapping actually has the position to avoid unnecessary
                         // collection creation
@@ -275,7 +276,7 @@ public class GeneralFunctions {
             final Cause currentCause = builder.build();
 
             // Handle item drops captured
-            final BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
+            final BlockPos pos = ((IMixinLocation) (Object) oldBlockSnapshot.getLocation().get()).getBlockPos();
             // This is for pre-merged items
             capturedBlockDrops.ifPresentAndNotEmpty(map -> spawnItemDataForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, phaseContext, phaseState));
             // And this is for un-pre-merged items, these will be EntityItems, not ItemDropDatas.

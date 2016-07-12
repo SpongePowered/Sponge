@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
@@ -41,8 +42,10 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.Identifiable;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
@@ -54,6 +57,7 @@ import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.List;
@@ -279,5 +283,16 @@ public final class TrackingUtil {
 
     public static void breakBlock(Block currentBlock, World worldObj, BlockPos pos, IBlockState currentState) {
         currentBlock.breakBlock(worldObj, pos, currentState);
+    }
+
+    public static Optional<User> getNotifierOrOwnerFromBlock(Location<org.spongepowered.api.world.World> location) {
+        final Vector3d position = location.getPosition();
+        final BlockPos blockPos = VecHelper.toBlockPos(position);
+        final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(blockPos);
+        return Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
+                .map(Supplier::get)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst();
     }
 }

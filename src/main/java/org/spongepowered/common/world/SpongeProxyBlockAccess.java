@@ -32,6 +32,7 @@ import net.minecraft.world.IBlockAccess;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.util.GuavaCollectors;
+import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.LinkedHashMap;
@@ -49,7 +50,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         this.original = original;
         this.transactions = snapshotTransaction;
         this.poses = this.transactions.stream()
-            .map(transaction -> VecHelper.toBlockPos(transaction.getOriginal().getPosition()))
+            .map(transaction -> ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos())
             .collect(GuavaCollectors.toImmutableList());
         this.index = 0;
     }

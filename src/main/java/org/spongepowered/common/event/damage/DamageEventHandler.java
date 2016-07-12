@@ -64,6 +64,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -379,7 +380,7 @@ public class DamageEventHandler {
         } else if (damageSource instanceof BlockDamageSource) {
             List<NamedCause> causeObjects = new ArrayList<>();
             Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
-            BlockPos blockPos = VecHelper.toBlockPos(location);
+            BlockPos blockPos = ((IMixinLocation) (Object) location).getBlockPos();
             Optional<User> owner = ((IMixinChunk) ((net.minecraft.world.World) location.getExtent())
                 .getChunkFromBlockCoords(blockPos)).getBlockOwner(blockPos);
             Optional<User> notifier = ((IMixinChunk) ((net.minecraft.world.World) location.getExtent())

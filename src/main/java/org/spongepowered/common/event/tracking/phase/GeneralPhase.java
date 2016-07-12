@@ -45,6 +45,7 @@ import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -62,6 +63,7 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -332,7 +334,7 @@ public final class GeneralPhase extends TrackingPhase {
                 if (unwindingState.tracksBlockSpecificDrops()) {
                     // Cancel any block drops or harvests for the block change.
                     // This prevents unnecessary spawns.
-                    final BlockPos position = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
+                    final BlockPos position = ((IMixinLocation) (Object) transaction.getOriginal().getLocation()).getBlockPos();
                     postContext.getBlockDropSupplier().ifPresentAndNotEmpty(map -> {
                         if (map.containsKey(position)) {
                             map.get(position).clear();
@@ -367,7 +369,7 @@ public final class GeneralPhase extends TrackingPhase {
             final Cause currentCause = builder.build();
 
             // Handle item drops captured
-            final BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
+            final BlockPos pos = ((IMixinLocation) (Object) oldBlockSnapshot.getLocation().get()).getBlockPos();
             capturedBlockDrops.ifPresentAndNotEmpty(map -> GeneralFunctions
                     .spawnItemDataForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, unwindingPhaseContext, unwindingState));
             capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> GeneralFunctions
