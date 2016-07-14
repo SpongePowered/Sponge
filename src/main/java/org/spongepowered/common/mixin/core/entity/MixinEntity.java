@@ -242,6 +242,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 for (EnumCreatureType type : EnumCreatureType.values()) {
                     if (SpongeImplHooks.isCreatureOfType(this.mcEntity, type)) {
                         spongeEntityType.setEnumCreatureType(type);
+                        break;
                     }
                 }
             }

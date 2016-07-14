@@ -52,7 +52,7 @@ public abstract class MixinEntityTracker {
     @Inject(method = "addEntityToTracker", at = @At("HEAD"))
     public void onAddEntityToTracker(Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates, CallbackInfo ci) {
         if (!MinecraftServer.getServer().isCallingFromMinecraftThread() ) {
-            throw new IllegalStateException("Detected attempt to add entity "' + entityIn + '" to tracker asynchronously.\n"
+            throw new IllegalStateException("Detected attempt to add entity '" + entityIn + "' to tracker asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during server tick.");
         }
     }
@@ -60,7 +60,7 @@ public abstract class MixinEntityTracker {
     @Inject(method = "untrackEntity", at = @At("HEAD"))
     public void onUntrackEntity(Entity entityIn, CallbackInfo ci) {
         if (!MinecraftServer.getServer().isCallingFromMinecraftThread() ) {
-            throw new IllegalStateException("Detected attempt to untrack entity "' + entityIn + '" asynchronously.\n"
+            throw new IllegalStateException("Detected attempt to untrack entity '" + entityIn + "' asynchronously.\n"
                     + "This is very bad as it can cause ConcurrentModificationException's during server tick.");
         }
     }
