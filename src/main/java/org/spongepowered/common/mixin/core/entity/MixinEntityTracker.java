@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 
 @Mixin(EntityTracker.class)
@@ -49,19 +50,25 @@ public abstract class MixinEntityTracker {
         }
     }
 
-    @Inject(method = "addEntityToTracker", at = @At("HEAD"))
+    @Inject(method = "addEntityToTracker", at = @At("HEAD"), cancellable = true)
     public void onAddEntityToTracker(Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates, CallbackInfo ci) {
         if (!MinecraftServer.getServer().isCallingFromMinecraftThread() ) {
-            throw new IllegalStateException("Detected attempt to add entity '" + entityIn + "' to tracker asynchronously.\n"
-                    + " This is very bad as it can cause ConcurrentModificationException's during server tick.");
+            Thread.dumpStack();
+            SpongeImpl.getLogger().error("Detected attempt to add entity '" + entityIn + "' to tracker asynchronously.\n"
+                    + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
+                    + " Skipping...");
+            ci.cancel();
         }
     }
 
-    @Inject(method = "untrackEntity", at = @At("HEAD"))
+    @Inject(method = "untrackEntity", at = @At("HEAD"), cancellable = true)
     public void onUntrackEntity(Entity entityIn, CallbackInfo ci) {
         if (!MinecraftServer.getServer().isCallingFromMinecraftThread() ) {
-            throw new IllegalStateException("Detected attempt to untrack entity '" + entityIn + "' asynchronously.\n"
-                    + "This is very bad as it can cause ConcurrentModificationException's during server tick.");
+            Thread.dumpStack();
+            SpongeImpl.getLogger().error("Detected attempt to untrack entity '" + entityIn + "' asynchronously.\n"
+                    + "This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
+                    + " Skipping...");
+            ci.cancel();
         }
     }
 }
