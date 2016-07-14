@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTracker;
+import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,6 +46,22 @@ public abstract class MixinEntityTracker {
         if (entityIn instanceof EntityHuman) {
             this.trackEntity(entityIn, 512, 2);
             ci.cancel();
+        }
+    }
+
+    @Inject(method = "addEntityToTracker", at = @At("HEAD"))
+    public void onAddEntityToTracker(Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates, CallbackInfo ci) {
+        if (!MinecraftServer.getServer().isCallingFromMinecraftThread() ) {
+            throw new IllegalStateException("Detected attempt to add entity "' + entityIn + '" to tracker asynchronously.\n"
+                    + " This is very bad as it can cause ConcurrentModificationException's during server tick.");
+        }
+    }
+
+    @Inject(method = "untrackEntity", at = @At("HEAD"))
+    public void onUntrackEntity(Entity entityIn, CallbackInfo ci) {
+        if (!MinecraftServer.getServer().isCallingFromMinecraftThread() ) {
+            throw new IllegalStateException("Detected attempt to untrack entity "' + entityIn + '" asynchronously.\n"
+                    + "This is very bad as it can cause ConcurrentModificationException's during server tick.");
         }
     }
 }

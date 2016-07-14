@@ -39,6 +39,7 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -109,12 +110,14 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
+import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.DamageEventHandler;
 import org.spongepowered.common.event.MinecraftBlockDamageSource;
@@ -230,6 +233,20 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
 
     // @formatter:on
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstruction(net.minecraft.world.World worldIn, CallbackInfo ci) {
+        if (this.entityType != null) {
+            SpongeEntityType spongeEntityType = (SpongeEntityType) this.entityType;
+            if (spongeEntityType.getEnumCreatureType() == null) {
+                for (EnumCreatureType type : EnumCreatureType.values()) {
+                    if (SpongeImplHooks.isCreatureOfType(this.mcEntity, type)) {
+                        spongeEntityType.setEnumCreatureType(type);
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public boolean isInConstructPhase() {
