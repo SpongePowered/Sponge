@@ -39,6 +39,13 @@ public class DebugCategory extends ConfigCategory {
     @Setting(value = "dump-threads-on-warn", comment = "Dump the server thread on deadlock warning")
     private boolean dumpThreadsOnWarn = false;
 
+    @Setting(value = "concurrent-entity-checks", comment = "Detect and prevent certain attempts to use entities concurrently.\nWARNING: May drastically decrase server performance. Only enable this to debug a pre-existing issue")
+    private boolean concurrentChecks = false;
+
+    public boolean doConcurrentChecks() {
+        return this.concurrentChecks;
+    }
+
     public boolean isEnableThreadContentionMonitoring() {
         return this.enableThreadContentionMonitoring;
     }
