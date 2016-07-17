@@ -116,6 +116,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     private Cause populateCause;
     private org.spongepowered.api.world.World world;
     private UUID uuid;
+    private Long scheduledForUnload; // delay chunk unloads
     private Chunk[] neighbors = new Chunk[4];
     private static final Direction[] CARDINAL_DIRECTIONS = new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
 
@@ -1052,4 +1053,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
     }
 
+    @Override
+    public Long getScheduledForUnload() {
+        return this.scheduledForUnload;
+    }
+
+    @Override
+    public void setScheduledForUnload(Long scheduled) {
+        this.scheduledForUnload = scheduled;
+    }
 }

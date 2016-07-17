@@ -152,6 +152,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private int chunkGCTickCount = 0;
     private int chunkGCLoadThreshold = 0;
     private int chunkGCTickInterval = 600;
+    private long chunkUnloadDelay = 30000;
     private boolean isCapturingBlocks = false;
     private boolean weatherThunderEnabled = true;
     private boolean weatherIceAndSnowEnabled = true;
@@ -507,9 +508,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
+        long now = System.currentTimeMillis();
+        long unloadAfter = this.chunkUnloadDelay;
         for (Chunk chunk : chunkProviderServer.loadedChunks) {
+            IMixinChunk spongeChunk = (IMixinChunk) chunk;
+            if (spongeChunk.getScheduledForUnload() != null && (now - spongeChunk.getScheduledForUnload()) > unloadAfter) {
+                spongeChunk.setScheduledForUnload(null);
+            }
             // If a player is currently using the chunk, skip it
-            if (((IMixinPlayerManager) this.getPlayerManager()).isChunkInUse(chunk.xPosition, chunk.zPosition)) {
+            if (spongeChunk.getScheduledForUnload() != null || ((IMixinPlayerManager) this.getPlayerManager()).isChunkInUse(chunk.xPosition, chunk.zPosition)) {
                 continue;
             }
 
@@ -1035,6 +1042,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // update cached settings
         this.chunkGCLoadThreshold = this.activeConfig.getConfig().getWorld().getChunkLoadThreadhold();
         this.chunkGCTickInterval = this.activeConfig.getConfig().getWorld().getTickInterval();
+        this.chunkUnloadDelay = this.activeConfig.getConfig().getWorld().getChunkUnloadDelay() * 1000;
         this.weatherIceAndSnowEnabled = this.activeConfig.getConfig().getWorld().getWeatherIceAndSnow();
         this.weatherThunderEnabled = this.activeConfig.getConfig().getWorld().getWeatherThunder();
         if (this.getChunkProvider() != null) {
@@ -1054,5 +1062,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public int getChunkGCTickInterval() {
         return this.chunkGCTickInterval;
+    }
+
+    @Override
+    public long getChunkUnloadDelay() {
+        return this.chunkUnloadDelay;
     }
 }
