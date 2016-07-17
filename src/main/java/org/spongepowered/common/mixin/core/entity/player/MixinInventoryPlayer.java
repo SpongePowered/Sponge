@@ -55,7 +55,7 @@ import java.util.Optional;
 
 @Mixin(InventoryPlayer.class)
 public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, HumanInventory {
-    
+
     @Shadow public int currentItem;
     @Shadow public EntityPlayer player;
     @Shadow public ItemStack[] mainInventory;
@@ -114,7 +114,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
     public SlotProvider<IInventory, ItemStack> getSlotProvider() {
         return this.slots;
     }
-    
+
     @Override
     public void setSelectedItem(int itemIndex, boolean notify) {
         itemIndex = itemIndex % 9;
@@ -150,9 +150,9 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
 
     @Override
     public int getFirstAvailableSlot(ItemStack itemstack) {
-        int stackSize = itemstack.stackSize;
-
         for (int i = 0; i < this.mainInventory.length; ++i) {
+            int stackSize = itemstack.stackSize;
+
             if (this.mainInventory[i] == null) {
                 // empty slot
                 return i;
