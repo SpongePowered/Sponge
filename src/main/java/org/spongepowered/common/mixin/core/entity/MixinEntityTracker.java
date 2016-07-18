@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,6 +36,7 @@ import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 
 @Mixin(EntityTracker.class)
@@ -55,8 +55,31 @@ public abstract class MixinEntityTracker {
         }
     }
 
+
     @ModifyConstant(method = "addEntityToTracker", constant = @Constant(stringValue = "Entity is already tracked!"))
     private String reportEntityAlreadyTrackedWithWorld(String string) {
         return "Entity is already tracked for world: " + ((World) this.theWorld).getName();
+    }
+
+    @Inject(method = "addEntityToTracker", at = @At("HEAD"), cancellable = true)
+    public void onAddEntityToTracker(Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates, CallbackInfo ci) {
+        if (!SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
+            Thread.dumpStack();
+            SpongeImpl.getLogger().error("Detected attempt to add entity '" + entityIn + "' to tracker asynchronously.\n"
+                    + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
+                    + " Skipping...");
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "untrackEntity", at = @At("HEAD"), cancellable = true)
+    public void onUntrackEntity(Entity entityIn, CallbackInfo ci) {
+        if (!SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
+            Thread.dumpStack();
+            SpongeImpl.getLogger().error("Detected attempt to untrack entity '" + entityIn + "' asynchronously.\n"
+                    + "This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
+                    + " Skipping...");
+            ci.cancel();
+        }
     }
 }

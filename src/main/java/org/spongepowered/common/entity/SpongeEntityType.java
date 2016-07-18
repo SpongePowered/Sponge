@@ -27,6 +27,7 @@ package org.spongepowered.common.entity;
 import com.google.common.base.Objects.ToStringHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EnumCreatureType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
@@ -68,6 +69,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public final String entityName;
     public final String modId;
     public final Class<? extends Entity> entityClass;
+    private EnumCreatureType creatureType;
     private final Translation translation;
     // currently not used
     public int trackingRange;
@@ -106,6 +108,14 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
 
     public String getModId() {
         return this.modId;
+    }
+
+    public EnumCreatureType getEnumCreatureType() {
+        return this.creatureType;
+    }
+
+    public void setEnumCreatureType(EnumCreatureType type) {
+        this.creatureType = type;
     }
 
     @SuppressWarnings("unchecked")
