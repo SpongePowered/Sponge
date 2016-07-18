@@ -57,6 +57,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -69,6 +70,7 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -200,14 +202,14 @@ public class ExtentViewTransform implements DefaultedExtent {
     @Override
     public boolean setBlock(int x, int y, int z, BlockState blockState, BlockChangeFlag flag, Cause cause) {
         checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
-        return this.extent.setBlock(x, y, z, blockState, flag, cause);
+        return this.extent.setBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+                this.inverseTransform.transformZ(x, y, z), blockState, flag, cause);
     }
 
     @Override
     public BlockSnapshot createSnapshot(int x, int y, int z) {
-        return this.extent
-            .createSnapshot(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
-                .transformZ(x, y, z));
+        return this.extent.createSnapshot(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+                this.inverseTransform.transformZ(x, y, z));
     }
 
     @Override
@@ -410,10 +412,10 @@ public class ExtentViewTransform implements DefaultedExtent {
     @Override
     public Collection<TileEntity> getTileEntities() {
         final Collection<TileEntity> tileEntities = this.extent.getTileEntities();
+        final Vector3i max = this.blockMax.add(Vector3i.ONE);
         for (Iterator<TileEntity> iterator = tileEntities.iterator(); iterator.hasNext(); ) {
             final TileEntity tileEntity = iterator.next();
-            final Location<World> block = tileEntity.getLocation();
-            if (!VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.blockMin, this.blockMax)) {
+            if (!VecHelper.inBounds(tileEntity.getLocation().getPosition(), this.blockMin, max)) {
                 iterator.remove();
             }
         }
@@ -423,10 +425,9 @@ public class ExtentViewTransform implements DefaultedExtent {
     @Override
     public Collection<TileEntity> getTileEntities(Predicate<TileEntity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        return this.extent.getTileEntities(Functional.predicateAnd(input -> {
-            final Location<World> block = input.getLocation();
-            return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.blockMin, this.blockMax);
-        }, filter));
+        final Vector3i max = this.blockMax.add(Vector3i.ONE);
+        return this.extent.getTileEntities(Functional.predicateAnd(input ->
+            VecHelper.inBounds(input.getLocation().getPosition(), this.blockMin, max), filter));
     }
 
     @Override
@@ -460,10 +461,10 @@ public class ExtentViewTransform implements DefaultedExtent {
     @Override
     public Collection<Entity> getEntities() {
         final Collection<Entity> entities = this.extent.getEntities();
+        final Vector3i max = this.blockMax.add(Vector3i.ONE);
         for (Iterator<Entity> iterator = entities.iterator(); iterator.hasNext(); ) {
             final Entity tileEntity = iterator.next();
-            final Location<World> block = tileEntity.getLocation();
-            if (!VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.blockMin, this.blockMax)) {
+            if (!VecHelper.inBounds(tileEntity.getLocation().getPosition(), this.blockMin, max)) {
                 iterator.remove();
             }
         }
@@ -473,10 +474,9 @@ public class ExtentViewTransform implements DefaultedExtent {
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
-        return this.extent.getEntities(Functional.predicateAnd(input -> {
-            final Location<World> block = input.getLocation();
-            return VecHelper.inBounds(block.getX(), block.getY(), block.getZ(), this.blockMin, this.blockMax);
-        }, filter));
+        final Vector3i max = this.blockMax.add(Vector3i.ONE);
+        return this.extent.getEntities(Functional.predicateAnd(input ->
+            VecHelper.inBounds(input.getLocation().getPosition(), this.blockMin, max), filter));
     }
 
     @Override

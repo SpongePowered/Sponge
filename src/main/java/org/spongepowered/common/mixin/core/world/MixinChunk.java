@@ -939,15 +939,17 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Override
     public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
+        final Vector3i max = this.blockMax.add(Vector3i.ONE);
         return this.world.getIntersectingBlockCollisionBoxes(box).stream().
-            filter(aabb -> VecHelper.inBounds(aabb.getCenter(), this.blockMin, this.blockMax.add(Vector3i.ONE))).
+            filter(aabb -> VecHelper.inBounds(aabb.getCenter(), this.blockMin, max)).
             collect(Collectors.toSet());
     }
 
     @Override
     public Set<AABB> getIntersectingCollisionBoxes(org.spongepowered.api.entity.Entity owner, AABB box) {
+        final Vector3i max = this.blockMax.add(Vector3i.ONE);
         return this.world.getIntersectingCollisionBoxes(owner, box).stream().
-            filter(aabb -> VecHelper.inBounds(aabb.getCenter(), this.blockMin, this.blockMax.add(Vector3i.ONE))).
+            filter(aabb -> VecHelper.inBounds(aabb.getCenter(), this.blockMin, max)).
             collect(Collectors.toSet());
     }
 
