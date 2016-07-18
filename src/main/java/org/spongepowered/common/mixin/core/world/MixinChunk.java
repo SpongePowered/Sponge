@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.GenericMath;
+import com.flowpowered.math.vector.Vector2d;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -68,6 +70,7 @@ import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Chunk;
@@ -104,14 +107,17 @@ import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWork
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -943,6 +949,126 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return this.world.getIntersectingCollisionBoxes(owner, box).stream().
             filter(aabb -> VecHelper.inBounds(aabb.getCenter(), this.blockMin, this.blockMax.add(Vector3i.ONE))).
             collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d end,
+            BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter) {
+        final Vector3d diff = end.sub(start);
+        return getIntersectingEntities(start, end, diff.normalize(), diff.length(), filter);
+    }
+
+    @Override
+    public Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d direction,
+            double distance, BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter) {
+        direction = direction.normalize();
+        return getIntersectingEntities(start, start.add(direction.mul(distance)), direction, distance, filter);
+    }
+
+    private Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d end,
+            Vector3d direction, double distance, BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter) {
+        final Vector2d entryAndExitY = getEntryAndExitY(start, end, direction, distance);
+        System.out.println(entryAndExitY);
+        if (entryAndExitY == null) {
+            return Collections.emptySet();
+        }
+        return getIntersectingEntities(start, direction, distance, filter, entryAndExitY.getX(), entryAndExitY.getY());
+    }
+
+    @Nullable
+    private Vector2d getEntryAndExitY(Vector3d start, Vector3d end, Vector3d direction, double distance) {
+        // Modified from AABB.intersects(ray)
+        final Vector3i min = getBlockMin();
+        final Vector3i max = getBlockMax().add(Vector3i.ONE);
+        // Find the intersections on the -x and +x planes, oriented by direction
+        final double txMin;
+        final double txMax;
+        if (Math.copySign(1, direction.getX()) > 0) {
+            txMin = (min.getX() - start.getX()) / direction.getX();
+            txMax = (max.getX() - start.getX()) / direction.getX();
+        } else {
+            txMin = (max.getX() - start.getX()) / direction.getX();
+            txMax = (min.getX() - start.getX()) / direction.getX();
+        }
+        // Find the intersections on the -z and +z planes, oriented by direction
+        final double tzMin;
+        final double tzMax;
+        if (Math.copySign(1, direction.getZ()) > 0) {
+            tzMin = (min.getZ() - start.getZ()) / direction.getZ();
+            tzMax = (max.getZ() - start.getZ()) / direction.getZ();
+        } else {
+            tzMin = (max.getZ() - start.getZ()) / direction.getZ();
+            tzMax = (min.getZ() - start.getZ()) / direction.getZ();
+        }
+        // The ray should intersect the -x plane before the +z plane and intersect
+        // the -z plane before the +x plane, else it is outside the column
+        if (txMin > tzMax || txMax < tzMin) {
+            return null;
+        }
+        // The ray intersects only the furthest min plane on the column and only the closest
+        // max plane on the column
+        final double tMin = tzMin > txMin ? tzMin : txMin;
+        final double tMax = tzMax < txMax ? tzMax : txMax;
+        // If both intersection points are behind the start, there are no intersections
+        if (tMax < 0) {
+            return null;
+        }
+        // If the closest intersection is before the start, use the start y instead
+        final double yEntry = tMin < 0 ? start.getY() : direction.getY() * tMin + start.getY();
+        // If the furthest intersection is after the end, use the end y instead
+        final double yExit = tMax > distance ? end.getY() : direction.getY() * tMax + start.getY();
+        //noinspection SuspiciousNameCombination
+        return new Vector2d(yEntry, yExit);
+    }
+
+    private Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d direction,
+            double distance, BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter,  double entryY, double exitY) {
+        final Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> intersections = new HashSet<>();
+        // Order the entry and exit y coordinates by magnitude
+        final double yMin = Math.min(entryY, exitY);
+        final double yMax = Math.max(entryY, exitY);
+        // Added offset matches the one in Chunk.getEntitiesWithinAABBForEntity
+        final int lowestSubChunk = GenericMath.clamp(GenericMath.floor((yMin - 2) / 16D), 0, this.entityLists.length - 1);
+        final int highestSubChunk = GenericMath.clamp(GenericMath.floor((yMax + 2) / 16D), 0, this.entityLists.length - 1);
+        // For each sub-chunk, perform intersections in its entity list
+        for (int i = lowestSubChunk; i <= highestSubChunk; i++) {
+            getIntersectingEntities(this.entityLists[i], start, direction, distance, filter, intersections);
+        }
+        return intersections;
+    }
+
+    private void getIntersectingEntities(Collection<Entity> entities, Vector3d start, Vector3d direction, double distance,
+            BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter,
+            Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> intersections) {
+        // Check each entity in the list
+        for (Entity entity : entities) {
+            final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entity;
+            final Optional<AABB> box = spongeEntity.getBoundingBox();
+            // Can't intersect if the entity doesn't have a bounding box
+            if (!box.isPresent()) {
+                continue;
+            }
+            // Ignore entities that didn't intersect
+            final Optional<Tuple<Vector3d, Vector3d>> intersection = box.get().intersects(start, direction);
+            if (!intersection.isPresent()) {
+                continue;
+            }
+            // Check that the entity isn't too far away
+            if (intersection.get().getFirst().sub(start).lengthSquared() > distance * distance) {
+                continue;
+            }
+            // Now test the filter on the entity and intersection
+            if (!filter.test(spongeEntity, intersection.get())) {
+                continue;
+            }
+            // If everything passes we have an intersection!
+            intersections.add(new Tuple<>(spongeEntity, intersection.get()));
+            // If the entity has part, recurse on these
+            final Entity[] parts = entity.getParts();
+            if (parts != null && parts.length > 0) {
+                getIntersectingEntities(Arrays.asList(parts), start, direction, distance, filter, intersections);
+            }
+        }
     }
 
     private User userForUUID(UUID uuid) {

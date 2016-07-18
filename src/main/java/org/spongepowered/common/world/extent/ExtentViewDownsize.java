@@ -545,6 +545,24 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
+    public Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d direction, double distance,
+            BiPredicate<Entity, Tuple<Vector3d, Vector3d>> filter) {
+        // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
+        final Vector3i max = this.blockMax.add(Vector3i.ONE);
+        return this.extent.getIntersectingEntities(start, direction, distance,
+            Functional.biPredicateAnd((entity, intersection) -> VecHelper.inBounds(entity.getLocation().getPosition(), this.blockMin, max), filter));
+    }
+
+    @Override
+    public Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d end,
+            BiPredicate<Entity, Tuple<Vector3d, Vector3d>> filter) {
+        // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
+        final Vector3i max = this.blockMax.add(Vector3i.ONE);
+        return this.extent.getIntersectingEntities(start, end,
+                Functional.biPredicateAnd((entity, intersection) -> VecHelper.inBounds(entity.getLocation().getPosition(), this.blockMin, max), filter));
+    }
+
+    @Override
     public boolean hitBlock(int x, int y, int z, Direction side, Cause cause) {
         checkRange(x, y, z);
         return this.extent.hitBlock(x, y, z, side, cause);
