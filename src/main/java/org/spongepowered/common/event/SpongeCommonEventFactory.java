@@ -573,10 +573,6 @@ public class SpongeCommonEventFactory {
             BlockPos offset = pos.offset(notifiedSide);
             Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
             Location<World> location = new Location<>(world, VecHelper.toVector(offset));
-            // ignore any block that does not have an onNeighborBlockChange override
-            if (!((IMixinBlock) location.getBlock().getType()).hasNotifyNeighborLogic()) {
-                continue;
-            }
 
             if (location.getBlockY() >= 0 && location.getBlockY() <= 255) {
                 neighbors.put(direction, location.getBlock());

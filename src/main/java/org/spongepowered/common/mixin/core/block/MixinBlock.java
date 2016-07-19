@@ -82,8 +82,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
     private boolean hasCollideLogic = false;
     private boolean hasCollideWithStateLogic = false;
-    private boolean hasNotifyNeighborLogic = false;
-    private boolean hasOnBlockAddedLogic = true;
     private Timing timing;
 
     @Shadow private boolean needsRandomTick;
@@ -126,30 +124,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         } catch (Throwable ex) {
             // ignore
         }
-
-        // onNeighborBlockChange
-        try {
-            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onNeighborBlockChange" : "func_176204_a";
-            Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class, Block.class };
-            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            if (!clazz.equals(Block.class)) {
-                this.hasNotifyNeighborLogic = true;
-            }
-        } catch (Throwable ex) {
-            // ignore
-        }
-
-        // onBlockAdded - disable until it can be tested further
-        /*try {
-            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onBlockAdded" : "func_176213_c";
-            Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class };
-            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            if (!clazz.equals(Block.class)) {
-                this.hasOnBlockAddedLogic = true;
-            }
-        } catch (Throwable ex) {
-            // ignore
-        }*/
     }
 
     @Inject(method = "registerBlock", at = @At("RETURN"))
@@ -330,16 +304,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public boolean hasCollideWithStateLogic() {
         return this.hasCollideWithStateLogic;
-    }
-
-    @Override
-    public boolean hasNotifyNeighborLogic() {
-        return this.hasNotifyNeighborLogic;
-    }
-
-    @Override
-    public boolean hasOnBlockAddedLogic() {
-        return this.hasOnBlockAddedLogic;
     }
 
     @Override
