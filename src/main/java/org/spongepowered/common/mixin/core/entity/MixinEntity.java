@@ -122,6 +122,7 @@ import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.DamageEventHandler;
 import org.spongepowered.common.event.MinecraftBlockDamageSource;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
@@ -1195,8 +1196,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
-        if (block == Blocks.air) {
-            // ignore air blocks
+        // if block can't collide, return
+        if (!((IMixinBlock) block).canCollide()) {
             return;
         }
 
@@ -1217,8 +1218,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
-        if (block == Blocks.air) {
-            // ignore air blocks
+        // if block can't collide, return
+        if (!((IMixinBlock) block).canCollideWithState()) {
             return;
         }
 

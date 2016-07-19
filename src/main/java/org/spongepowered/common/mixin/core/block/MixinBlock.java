@@ -79,6 +79,8 @@ import java.util.Random;
 public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
+    private boolean canCollide = false;
+    private boolean canCollideWithState = false;
     private Timing timing;
 
     @Shadow private boolean needsRandomTick;
@@ -91,6 +93,32 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract Material getMaterial();
     @Shadow(prefix = "shadow$")
     public abstract IBlockState shadow$getDefaultState();
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstruction(CallbackInfo ci) {
+        // Determine which blocks override onEntityCollidedWithBlock
+        // This will allow us to avoid running event logic for blocks that do nothing such as grass
+        // -- blood
+        try {
+            Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, Entity.class };
+            Class<?> clazz = this.getClass().getMethod("onEntityCollidedWithBlock", argTypes).getDeclaringClass();
+            if (!clazz.equals(Block.class)) {
+                this.canCollide = true;
+            }
+        } catch (Throwable ex) {
+            // ignore
+        }
+
+        try {
+            Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class, Entity.class };
+            Class<?> clazz = this.getClass().getMethod("onEntityCollidedWithBlock", argTypes).getDeclaringClass();
+            if (!clazz.equals(Block.class)) {
+                this.canCollideWithState = true;
+            }
+        } catch (Throwable ex) {
+            // ignore
+        }
+    }
 
     @Inject(method = "registerBlock", at = @At("RETURN"))
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
@@ -260,6 +288,16 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public boolean isVanilla() {
         return this.isVanilla;
+    }
+
+    @Override
+    public boolean canCollide() {
+        return this.canCollide;
+    }
+
+    @Override
+    public boolean canCollideWithState() {
+        return this.canCollideWithState;
     }
 
     @Override
