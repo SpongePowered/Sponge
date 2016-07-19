@@ -128,7 +128,7 @@ public class SpongeCommand {
         flagChildren.register(getSaveCommand(), "save");
         flagChildren.register(getTpsCommand(), "tps");
         return CommandSpec.builder()
-                .description(Text.of("Text description"))
+                .description(Text.of("Base command for the Sponge API."))
                 .extendedDescription(Text.of("commands:\n", // TODO: Automatically generate from child executors (wait for help system on this)
                         INDENT, title("chunks"), LONG_INDENT, "Prints chunk data for a specific dimension or world(s)\n",
                         INDENT, title("conf"), LONG_INDENT, "Configure sponge settings\n",
@@ -136,8 +136,8 @@ public class SpongeCommand {
                         INDENT, title("reload"), LONG_INDENT, "Reloads a global, dimension, or world config\n",
                         INDENT, title("save"), LONG_INDENT, "Saves a global, dimension, or world config\n",
                         INDENT, title("version"), LONG_INDENT, "Prints current Sponge version\n",
-                        INDENT, title("audit"), LONG_INDENT, "Audit mixin classes for implementation",
-                        INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins",
+                        INDENT, title("audit"), LONG_INDENT, "Audit mixin classes for implementation\n",
+                        INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins\n",
                         INDENT, title("tps"), LONG_INDENT, "Provides TPS (ticks per second) data for loaded worlds"))
                 .arguments(firstParsing(nonFlagChildren, flags()
                         .flag("-global", "g")
