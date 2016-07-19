@@ -83,7 +83,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private boolean hasCollideLogic = false;
     private boolean hasCollideWithStateLogic = false;
     private boolean hasNotifyNeighborLogic = false;
-    private boolean hasOnBlockAddedLogic = false;
+    private boolean hasOnBlockAddedLogic = true;
     private Timing timing;
 
     @Shadow private boolean needsRandomTick;
@@ -139,8 +139,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             // ignore
         }
 
-        // onBlockAdded
-        try {
+        // onBlockAdded - disable until it can be tested further
+        /*try {
             String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onBlockAdded" : "func_176213_c";
             Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class };
             Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
@@ -149,7 +149,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             }
         } catch (Throwable ex) {
             // ignore
-        }
+        }*/
     }
 
     @Inject(method = "registerBlock", at = @At("RETURN"))
