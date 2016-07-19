@@ -33,7 +33,12 @@ public class GeneralCategory extends ConfigCategory {
     @Setting(value = "disable-warnings", comment = "Disable warning messages to server admins")
     private boolean disableWarnings = false;
     
-    @Setting(value = "plugins-dir", comment = "Additional directory to search for plugins, relative to the execution root or specified as an absolute path")
+    @Setting(value = "plugins-dir", comment = "Additional directory to search for plugins, relative to the "
+                                              + "\nexecution root or specified as an absolute path."
+                                              + "\nNote that the default: \"${CANONICAL_MODS_DIR}/plugins\""
+                                              + "\nis going to search for a plugins folder in the mods directory."
+                                              + "\nIf you wish for the plugins folder to reside in the root game"
+                                              + "\ndirectory, change the value to \"${CANONICAL_GAME_DIR}/plugins\".")
     private String pluginsDir = "${CANONICAL_MODS_DIR}/plugins";
 
     public boolean disableWarnings() {
