@@ -123,9 +123,13 @@ public interface IMixinBlock {
 
     boolean isVanilla();
 
-    boolean canCollide();
+    boolean hasCollideLogic();
 
-    boolean canCollideWithState();
+    boolean hasCollideWithStateLogic();
+
+    boolean hasNotifyNeighborLogic();
+
+    boolean hasOnBlockAddedLogic();
 
     // Timings
     Timing getTimingsHandler();

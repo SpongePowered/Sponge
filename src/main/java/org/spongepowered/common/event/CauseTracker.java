@@ -94,6 +94,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
@@ -1195,7 +1196,8 @@ public final class CauseTracker {
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             BlockSnapshot currentTickingBlock = this.getCurrentTickBlock().orElse(null);
             // Containers get placed automatically
-            if (originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
+            if (originalState.getBlock() != newState.getBlock() && ((IMixinBlock) newState.getBlock()).hasOnBlockAddedLogic() 
+                    && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 this.setCurrentTickBlock(this.getMixinWorld().createSpongeBlockSnapshot(newState,
                         newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag));
                 List<NamedCause> namedCauses = new ArrayList<>();

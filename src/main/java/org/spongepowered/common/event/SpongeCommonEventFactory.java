@@ -126,6 +126,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
@@ -572,6 +573,11 @@ public class SpongeCommonEventFactory {
             BlockPos offset = pos.offset(notifiedSide);
             Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
             Location<World> location = new Location<>(world, VecHelper.toVector(offset));
+            // ignore any block that does not have an onNeighborBlockChange override
+            if (!((IMixinBlock) location.getBlock().getType()).hasNotifyNeighborLogic()) {
+                continue;
+            }
+
             if (location.getBlockY() >= 0 && location.getBlockY() <= 255) {
                 neighbors.put(direction, location.getBlock());
             }

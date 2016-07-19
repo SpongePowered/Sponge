@@ -1197,7 +1197,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
         // if block can't collide, return
-        if (!((IMixinBlock) block).canCollide()) {
+        if (!((IMixinBlock) block).hasCollideLogic()) {
             return;
         }
 
@@ -1219,7 +1219,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
         // if block can't collide, return
-        if (!((IMixinBlock) block).canCollideWithState()) {
+        if (!((IMixinBlock) block).hasCollideWithStateLogic()) {
             return;
         }
 

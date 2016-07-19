@@ -61,6 +61,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -79,8 +80,10 @@ import java.util.Random;
 public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
-    private boolean canCollide = false;
-    private boolean canCollideWithState = false;
+    private boolean hasCollideLogic = false;
+    private boolean hasCollideWithStateLogic = false;
+    private boolean hasNotifyNeighborLogic = false;
+    private boolean hasOnBlockAddedLogic = false;
     private Timing timing;
 
     @Shadow private boolean needsRandomTick;
@@ -96,24 +99,53 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
-        // Determine which blocks override onEntityCollidedWithBlock
-        // This will allow us to avoid running event logic for blocks that do nothing such as grass
+        // Determine which blocks can avoid executing un-needed event logic
+        // This will allow us to avoid running event logic for blocks that do nothing such as grass collisions
         // -- blood
+
+        // onEntityCollidedWithBlock
         try {
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollidedWithBlock" : "func_176199_a";
             Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, Entity.class };
-            Class<?> clazz = this.getClass().getMethod("onEntityCollidedWithBlock", argTypes).getDeclaringClass();
+            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
             if (!clazz.equals(Block.class)) {
-                this.canCollide = true;
+                this.hasCollideLogic = true;
             }
         } catch (Throwable ex) {
             // ignore
         }
 
+        // onEntityCollidedWithBlock (IBlockState)
         try {
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollidedWithBlock" : "func_180634_a";
             Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class, Entity.class };
-            Class<?> clazz = this.getClass().getMethod("onEntityCollidedWithBlock", argTypes).getDeclaringClass();
+            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
             if (!clazz.equals(Block.class)) {
-                this.canCollideWithState = true;
+                this.hasCollideWithStateLogic = true;
+            }
+        } catch (Throwable ex) {
+            // ignore
+        }
+
+        // onNeighborBlockChange
+        try {
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onNeighborBlockChange" : "func_176204_a";
+            Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class, Block.class };
+            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
+            if (!clazz.equals(Block.class)) {
+                this.hasNotifyNeighborLogic = true;
+            }
+        } catch (Throwable ex) {
+            // ignore
+        }
+
+        // onBlockAdded
+        try {
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onBlockAdded" : "func_176213_c";
+            Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class };
+            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
+            if (!clazz.equals(Block.class)) {
+                this.hasOnBlockAddedLogic = true;
             }
         } catch (Throwable ex) {
             // ignore

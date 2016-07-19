@@ -181,4 +181,8 @@ public final class SpongeImplHooks {
     public static boolean canDoRainSnowIce(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
         return true;
     }
+
+    public static boolean isDeobfuscatedEnvironment() {
+        return true;
+    }
 }
