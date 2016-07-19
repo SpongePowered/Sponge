@@ -323,13 +323,23 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public boolean canCollide() {
-        return this.canCollide;
+    public boolean hasCollideLogic() {
+        return this.hasCollideLogic;
     }
 
     @Override
-    public boolean canCollideWithState() {
-        return this.canCollideWithState;
+    public boolean hasCollideWithStateLogic() {
+        return this.hasCollideWithStateLogic;
+    }
+
+    @Override
+    public boolean hasNotifyNeighborLogic() {
+        return this.hasNotifyNeighborLogic;
+    }
+
+    @Override
+    public boolean hasOnBlockAddedLogic() {
+        return this.hasOnBlockAddedLogic;
     }
 
     @Override
