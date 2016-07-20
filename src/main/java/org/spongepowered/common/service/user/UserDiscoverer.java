@@ -30,7 +30,6 @@ import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.BanEntry;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.server.management.UserListBans;
@@ -38,7 +37,6 @@ import net.minecraft.server.management.UserListBansEntry;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
 import net.minecraft.world.storage.SaveHandler;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
@@ -51,11 +49,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 class UserDiscoverer {
@@ -76,10 +71,11 @@ class UserDiscoverer {
      * before. A user added to the ban/whitelist that has not been on the server
      * before should be discover-able.
      *
-     * @param uniqueId The user's UUID
+     * @param profile The user's profile
      * @return The user data, or null if not found
      */
-    static User findByUuid(UUID uniqueId) {
+    static User findByProfile(org.spongepowered.api.profile.GameProfile profile) {
+        UUID uniqueId = profile.getUniqueId();
         User user = userCache.getIfPresent(uniqueId);
         if (user != null) {
             return user;
@@ -88,7 +84,7 @@ class UserDiscoverer {
         if (user != null) {
             return user;
         }
-        user = getFromStoredData(uniqueId);
+        user = getFromStoredData(profile);
         if (user != null) {
             return user;
         }
@@ -106,7 +102,7 @@ class UserDiscoverer {
         if (names.contains(username.toLowerCase(Locale.ROOT))) {
             GameProfile profile = cache.getGameProfileForUsername(username);
             if (profile != null) {
-                return findByUuid(profile.getId());
+                return findByProfile((org.spongepowered.api.profile.GameProfile) profile);
             }
         }
         return null;
@@ -179,41 +175,19 @@ class UserDiscoverer {
         return null;
     }
 
-    private static User getFromStoredData(UUID uniqueId) {
+    private static User getFromStoredData(org.spongepowered.api.profile.GameProfile profile) {
         // Note: Uses the overworld's player data
-        File dataFile = getPlayerDataFile(uniqueId);
+        File dataFile = getPlayerDataFile(profile.getUniqueId());
         if (dataFile == null) {
             return null;
         }
-        Optional<org.spongepowered.api.profile.GameProfile> profile = getProfileFromServer(uniqueId);
-
-        if (profile.isPresent()) {
-            User user = create((GameProfile) profile.get());
-            try {
-                ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(new FileInputStream(dataFile)));
-            } catch (IOException e) {
-                SpongeImpl.getLogger().warn("Corrupt user file {}", dataFile, e);
-            }
-            return user;
-        } else {
-            return null;
-        }
-    }
-
-    private static Optional<org.spongepowered.api.profile.GameProfile> getProfileFromServer(UUID uuid) {
-        CompletableFuture<org.spongepowered.api.profile.GameProfile> gameProfile = Sponge.getServer().getGameProfileManager().get(uuid);
-
+        User user = create((GameProfile) profile);
         try {
-            org.spongepowered.api.profile.GameProfile profile = gameProfile.get();
-            if (profile != null) {
-                return Optional.of(profile);
-            } else {
-                return Optional.empty();
-            }
-        } catch (InterruptedException | ExecutionException e) {
-            SpongeImpl.getLogger().warn("Error while getting profile for {}", uuid, e);
-            return Optional.empty();
+            ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(new FileInputStream(dataFile)));
+        } catch (IOException e) {
+            SpongeImpl.getLogger().warn("Corrupt user file {}", dataFile, e);
         }
+        return user;
     }
 
     private static User getFromWhitelist(UUID uniqueId) {
@@ -245,11 +219,10 @@ class UserDiscoverer {
     private static File getPlayerDataFile(UUID uniqueId) {
         // Note: Uses the overworld's player data
         SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldFromDimId(0).getSaveHandler();
-        String[] uuids = saveHandler.getAvailablePlayerDat();
-        for (String playerUuid : uuids) {
-            if (uniqueId.toString().equals(playerUuid)) {
-                return new File(saveHandler.playersDirectory, playerUuid + ".dat");
-            }
+
+        File file = new File(saveHandler.playersDirectory, uniqueId.toString() + ".dat");
+        if (file.exists()) {
+            return file;
         }
         return null;
     }

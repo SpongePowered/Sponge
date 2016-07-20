@@ -28,14 +28,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Sets;
-import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
 
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 public class SpongeUserStorageService implements UserStorageService {
 
@@ -43,7 +45,11 @@ public class SpongeUserStorageService implements UserStorageService {
 
     @Override
     public Optional<User> get(UUID uniqueId) {
-        return Optional.ofNullable(UserDiscoverer.findByUuid(checkNotNull(uniqueId, "uniqueId")));
+        try {
+            return Optional.ofNullable(UserDiscoverer.findByProfile(Sponge.getServer().getGameProfileManager().get(checkNotNull(uniqueId, "uniqueId")).get()));
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Error looking up GameProfile!", e);
+        }
     }
 
     @Override
@@ -55,7 +61,7 @@ public class SpongeUserStorageService implements UserStorageService {
 
     @Override
     public Optional<User> get(GameProfile profile) {
-        return Optional.ofNullable(UserDiscoverer.findByUuid(checkNotNull(checkNotNull(profile, "profile").getUniqueId(), "profile id")));
+        return Optional.ofNullable(UserDiscoverer.findByProfile(profile));
     }
 
     @Override
