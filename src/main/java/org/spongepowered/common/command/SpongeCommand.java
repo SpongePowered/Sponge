@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command;
 
+import static org.spongepowered.api.command.args.GenericArguments.choices;
 import static org.spongepowered.api.command.args.GenericArguments.dimension;
 import static org.spongepowered.api.command.args.GenericArguments.firstParsing;
 import static org.spongepowered.api.command.args.GenericArguments.flags;
@@ -41,15 +42,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
@@ -83,9 +83,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.mixin.core.world.MixinWorld;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.File;
@@ -95,6 +93,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.function.Function;
 
 @NonnullByDefault
 public class SpongeCommand {
@@ -104,6 +103,7 @@ public class SpongeCommand {
     static final Text INDENT_TEXT = Text.of(INDENT);
     static final Text NEWLINE_TEXT = Text.NEW_LINE;
     static final Text SEPARATOR_TEXT = Text.of(", ");
+    static final Text LIST_ITEM_TEXT = Text.of(TextColors.GRAY, "- ");
     static final Text UNKNOWN = Text.of("UNKNOWN");
 
     private static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
@@ -122,13 +122,14 @@ public class SpongeCommand {
         nonFlagChildren.register(getHeapCommand(), "heap");
         nonFlagChildren.register(getPluginsCommand(), "plugins");
         nonFlagChildren.register(getTimingsCommand(), "timings");
+        nonFlagChildren.register(getWhichCommand(), "which");
         flagChildren.register(getChunksCommand(), "chunks");
         flagChildren.register(getConfigCommand(), "config");
         flagChildren.register(getReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
         flagChildren.register(getSaveCommand(), "save");
         flagChildren.register(getTpsCommand(), "tps");
         return CommandSpec.builder()
-                .description(Text.of("Text description"))
+                .description(Text.of("General Sponge command"))
                 .extendedDescription(Text.of("commands:\n", // TODO: Automatically generate from child executors (wait for help system on this)
                         INDENT, title("chunks"), LONG_INDENT, "Prints chunk data for a specific dimension or world(s)\n",
                         INDENT, title("conf"), LONG_INDENT, "Configure sponge settings\n",
@@ -136,8 +137,9 @@ public class SpongeCommand {
                         INDENT, title("reload"), LONG_INDENT, "Reloads a global, dimension, or world config\n",
                         INDENT, title("save"), LONG_INDENT, "Saves a global, dimension, or world config\n",
                         INDENT, title("version"), LONG_INDENT, "Prints current Sponge version\n",
-                        INDENT, title("audit"), LONG_INDENT, "Audit mixin classes for implementation",
-                        INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins",
+                        INDENT, title("audit"), LONG_INDENT, "Audit mixin classes for implementation\n",
+                        INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins\n",
+                        INDENT, title("which"), LONG_INDENT, "List plugins that own a specific command\n",
                         INDENT, title("tps"), LONG_INDENT, "Provides TPS (ticks per second) data for loaded worlds"))
                 .arguments(firstParsing(nonFlagChildren, flags()
                         .flag("-global", "g")
@@ -448,6 +450,9 @@ public class SpongeCommand {
     static Text title(String title) {
         return Text.of(TextColors.GREEN, title);
     }
+    static Text hl(String toHighlight) {
+        return Text.of(TextColors.DARK_GREEN, toHighlight);
+    }
 
     private static CommandSpec getPluginsCommand() {
         return CommandSpec.builder()
@@ -582,6 +587,34 @@ public class SpongeCommand {
                             return CommandResult.success();
                         })
                         .build(), "cost")
+                .build();
+    }
+
+    private static CommandSpec getWhichCommand() {
+        return CommandSpec.builder()
+                .permission("sponge.command.which")
+                .description(Text.of("List plugins that own a specific command"))
+                .arguments(choices(Text.of("command"), () -> Sponge.getCommandManager().getAll().keySet(), Function.identity()))
+                .executor((src, args) -> {
+                    CommandManager mgr = Sponge.getCommandManager();
+                    String commandName = args.<String>getOne("command").get();
+                    CommandMapping primary = mgr.get(commandName, src)
+                            .orElseThrow(() -> new CommandException(Text.of("Invalid command ", commandName)));
+                    Collection<? extends CommandMapping> all = mgr.getAll(commandName);
+                    src.sendMessage(Text.of(title("Primary: "),  "Aliases ", hl(primary.getAllAliases().toString()), " owned by ",
+                            hl(mgr.getOwner(primary).map(PluginContainer::getName).orElse("unknown"))));
+                    if (all.size() > 1 || all.iterator().next() != primary) {
+                        src.sendMessage(title("Others:"));
+                        all.stream()
+                                .filter(map -> !map.equals(primary))
+                                .forEach(mapping -> {
+                                    src.sendMessage(Text.of(LIST_ITEM_TEXT, "Aliases ", hl(mapping.getAllAliases().toString()), " owned by ",
+                                            hl(mgr.getOwner(mapping).map(PluginContainer::getName).orElse("unknown"))));
+                                });
+                    }
+
+                    return CommandResult.success();
+                })
                 .build();
     }
 
