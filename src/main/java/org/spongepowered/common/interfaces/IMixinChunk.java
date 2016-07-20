@@ -24,20 +24,25 @@
  */
 package org.spongepowered.common.interfaces;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.common.entity.PlayerTracker;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiPredicate;
 
 import javax.annotation.Nullable;
 
@@ -74,5 +79,9 @@ public interface IMixinChunk {
     Long getScheduledForUnload();
 
     void setScheduledForUnload(Long scheduled);
+
+    Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d direction,
+            double distance, BiPredicate<Entity, Tuple<Vector3d, Vector3d>> filter,  double entryY, double exitY,
+            Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> intersections);
 
 }
