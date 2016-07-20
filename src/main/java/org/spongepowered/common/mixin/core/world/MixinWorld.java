@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -62,6 +63,7 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
+import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -97,10 +99,10 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Chunk;
@@ -129,6 +131,7 @@ import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -144,12 +147,14 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -736,6 +741,105 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
         return getCollidingBoundingBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMC(box)).stream().map(VecHelper::toSponge).
             collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d end,
+            BiPredicate<Entity, Tuple<Vector3d, Vector3d>> filter) {
+        final Vector3d diff = end.sub(start);
+        return getIntersectingEntities(start, diff.normalize(), diff.length(), filter);
+    }
+
+    @Override
+    public Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d direction, double distance,
+            BiPredicate<Entity, Tuple<Vector3d, Vector3d>> filter) {
+        // Adapted from BlockRay
+        final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
+        // Figure out the direction of the ray for each axis
+        final int xPlaneIncrement = direction.getX() >= 0 ? chunkWidth : -chunkWidth;
+        final int zPlaneIncrement = direction.getZ() >= 0 ? chunkWidth : -chunkWidth;
+        // First planes are for the chunk that contains the coordinates
+        final double xInChunk = start.getX() % chunkWidth;
+        final double zInChunk = start.getZ() % chunkWidth;
+        int xPlaneNext = (int) (start.getX() - xInChunk);
+        int zPlaneNext = (int) (start.getZ() - zInChunk);
+        // Correct the next planes for the direction when inside the chunk
+        if (xInChunk != 0 && direction.getX() >= 0) {
+            xPlaneNext += chunkWidth;
+        }
+        if (zInChunk != 0 && direction.getZ() >= 0) {
+            zPlaneNext += chunkWidth;
+        }
+        // Compute the first intersection solutions for each plane
+        double xPlaneT = (xPlaneNext - start.getX()) / direction.getX();
+        double zPlaneT = (zPlaneNext - start.getZ()) / direction.getZ();
+        // Trace the chunks in 2D to find which contain possibly intersecting entities
+        final Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> intersecting = new HashSet<>();
+        // Keep track of the last distance using the t multiplier
+        double currentT = 0;
+        // Keep tack of the last intersection y coordinate
+        double xCurrent = start.getX();
+        double yCurrent = start.getY();
+        double zCurrent = start.getZ();
+        // Trace each chunks until the remaining distance goes below 0
+        double remainingDistance = distance;
+        do {
+            final double nextT;
+            final double xNext;
+            final double yNext;
+            final double zNext;
+            // Find the closest intersection and its coordinates
+            if (xPlaneT == zPlaneT) {
+                nextT = xPlaneT;
+                // Update current position
+                xNext = xPlaneNext;
+                zNext = zPlaneNext;
+                // Prepare next intersection
+                xPlaneNext += xPlaneIncrement;
+                zPlaneNext += zPlaneIncrement;
+                xPlaneT = (xPlaneNext - start.getX()) / direction.getX();
+                zPlaneT = (zPlaneNext - start.getZ()) / direction.getZ();
+            } else if (xPlaneT < zPlaneT) {
+                nextT = xPlaneT;
+                // Update current position
+                xNext = xPlaneNext;
+                zNext = direction.getZ() * nextT + start.getZ();
+                // Prepare next intersection
+                xPlaneNext += xPlaneIncrement;
+                xPlaneT = (xPlaneNext - start.getX()) / direction.getX();
+            } else {
+                nextT = zPlaneT;
+                // Update current position
+                xNext = direction.getX() * nextT + start.getX();
+                zNext = zPlaneNext;
+                // Prepare next intersection
+                zPlaneNext += zPlaneIncrement;
+                zPlaneT = (zPlaneNext - start.getZ()) / direction.getZ();
+            }
+            // Don't go over the distance when calculating the next intersection y
+            yNext = direction.getY() * Math.min(nextT, distance) + start.getY();
+            // Get the coordinates of the chunk that was last entered (correct for entering from the back plane)
+            final int xChunk = xCurrent % chunkWidth == 0 && direction.getX() < 0 ? (int) xCurrent - chunkWidth : GenericMath.floor(xCurrent);
+            final int zChunk = zCurrent % chunkWidth == 0 && direction.getZ() < 0 ? (int) zCurrent - chunkWidth : GenericMath.floor(zCurrent);
+            // Get the chunk and call the intersection method to perform the task locally
+            final Optional<Chunk> chunk = getChunkAtBlock(xChunk, 0, zChunk);
+            if (chunk.isPresent()) {
+                setBlockType((int) xCurrent, (int) yCurrent, (int) zCurrent, BlockTypes.GOLD_BLOCK);
+                setBlockType((int) xNext, (int) yNext, (int) zNext, BlockTypes.DIAMOND_BLOCK);
+                ((IMixinChunk) chunk.get()).getIntersectingEntities(new Vector3d(xCurrent, yCurrent, zCurrent), direction, remainingDistance, filter,
+                        yCurrent, yNext, intersecting);
+                // Remove the chunk from the distance
+                remainingDistance -= nextT - currentT;
+            }
+            // Update the current intersection to the new one
+            currentT = nextT;
+            xCurrent = xNext;
+            yCurrent = yNext;
+            zCurrent = zNext;
+        } while (remainingDistance >= 0);
+        return intersecting;
+        // TODO: properly support directions with x == 0 && z == 0
+        // TODO: fix entities being missed when only part of the AABB is the chunk
     }
 
     @Nullable

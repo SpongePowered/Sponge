@@ -970,11 +970,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     private Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d end,
             Vector3d direction, double distance, BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter) {
         final Vector2d entryAndExitY = getEntryAndExitY(start, end, direction, distance);
-        System.out.println(entryAndExitY);
         if (entryAndExitY == null) {
+            // Doesn't intersect the chunk, ignore it
             return Collections.emptySet();
         }
-        return getIntersectingEntities(start, direction, distance, filter, entryAndExitY.getX(), entryAndExitY.getY());
+        final Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> intersections = new HashSet<>();
+        getIntersectingEntities(start, direction, distance, filter, entryAndExitY.getX(), entryAndExitY.getY(), intersections);
+        return intersections;
     }
 
     @Nullable
@@ -1023,9 +1025,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return new Vector2d(yEntry, yExit);
     }
 
-    private Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d direction,
-            double distance, BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter,  double entryY, double exitY) {
-        final Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> intersections = new HashSet<>();
+    @Override
+    public Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d direction,
+            double distance, BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter,  double entryY, double exitY,
+            Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> intersections) {
         // Order the entry and exit y coordinates by magnitude
         final double yMin = Math.min(entryY, exitY);
         final double yMax = Math.max(entryY, exitY);
