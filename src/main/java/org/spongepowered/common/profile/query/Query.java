@@ -66,7 +66,9 @@ public abstract class Query<V> implements Callable<V> {
                 }
             }
 
-            result.addAll(this.cache.getOrLookupByIds(pool).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+            if (!pool.isEmpty()) {
+                result.addAll(this.cache.getOrLookupByIds(pool).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+            }
 
             return result;
         }
