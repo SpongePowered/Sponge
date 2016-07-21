@@ -136,6 +136,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -1087,6 +1088,32 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return null;
     }
 
+    @Redirect(method = "addTileEntity", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 1))
+    public boolean onAddTileEntity(List<net.minecraft.tileentity.TileEntity> list, Object tile) {
+        if (!this.isRemote && !canTileUpdate((net.minecraft.tileentity.TileEntity) tile)) {
+            return false;
+        }
+
+        return list.add((net.minecraft.tileentity.TileEntity) tile);
+    }
+
+    @Redirect(method = "addTileEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 1))
+    public boolean onAddTileEntities(List<net.minecraft.tileentity.TileEntity> list, Object tile) {
+        if (!this.isRemote && !canTileUpdate((net.minecraft.tileentity.TileEntity) tile)) {
+            return false;
+        }
+
+        return list.add((net.minecraft.tileentity.TileEntity) tile);
+    }
+
+    private boolean canTileUpdate(net.minecraft.tileentity.TileEntity tile) {
+        TileEntity spongeTile = (TileEntity) tile;
+        if (spongeTile.getType() != null && !((SpongeTileEntityType) spongeTile.getType()).canTick()) {
+            return false;
+        }
+
+        return true;
+    }
     /**************************** TRACKER AND TIMINGS ****************************************/
 
     /**
