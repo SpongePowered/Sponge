@@ -70,7 +70,6 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -556,23 +555,21 @@ public class ExtentViewTransform implements DefaultedExtent {
     }
 
     @Override
-    public Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d direction, double distance,
-            BiPredicate<Entity, Tuple<Vector3d, Vector3d>> filter) {
+    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityHit> filter) {
         final Vector3d startT = inverseTransform(start);
         final Vector3d directionT = inverseTransform(direction.normalize().mul(distance).add(start)).sub(startT);
         final Vector3i max = this.blockMax.add(Vector3i.ONE);
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
         return this.extent.getIntersectingEntities(startT, directionT, distance,
-            Functional.biPredicateAnd((entity, intersection) -> VecHelper.inBounds(entity.getLocation().getPosition(), this.blockMin, max), filter));
+            Functional.predicateAnd(hit -> VecHelper.inBounds(hit.getEntity().getLocation().getPosition(), this.blockMin, max), filter));
     }
 
     @Override
-    public Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d end,
-            BiPredicate<Entity, Tuple<Vector3d, Vector3d>> filter) {
+    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Predicate<EntityHit> filter) {
         final Vector3i max = this.blockMax.add(Vector3i.ONE);
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
         return this.extent.getIntersectingEntities(inverseTransform(start), inverseTransform(end),
-                Functional.biPredicateAnd((entity, intersection) -> VecHelper.inBounds(entity.getLocation().getPosition(), this.blockMin, max), filter));
+                Functional.predicateAnd(hit -> VecHelper.inBounds(hit.getEntity().getLocation().getPosition(), this.blockMin, max), filter));
     }
 
     @Override

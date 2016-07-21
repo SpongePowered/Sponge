@@ -117,7 +117,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiPredicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -954,27 +953,26 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     @Override
-    public Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d end,
-            BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter) {
+    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, java.util.function.Predicate<EntityHit> filter) {
         final Vector3d diff = end.sub(start);
         return getIntersectingEntities(start, end, diff.normalize(), diff.length(), filter);
     }
 
     @Override
-    public Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d direction,
-            double distance, BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter) {
+    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance,
+            java.util.function.Predicate<EntityHit> filter) {
         direction = direction.normalize();
         return getIntersectingEntities(start, start.add(direction.mul(distance)), direction, distance, filter);
     }
 
-    private Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d end,
-            Vector3d direction, double distance, BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter) {
+    private Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Vector3d direction, double distance,
+            java.util.function.Predicate<EntityHit> filter) {
         final Vector2d entryAndExitY = getEntryAndExitY(start, end, direction, distance);
         if (entryAndExitY == null) {
             // Doesn't intersect the chunk, ignore it
             return Collections.emptySet();
         }
-        final Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> intersections = new HashSet<>();
+        final Set<EntityHit> intersections = new HashSet<>();
         getIntersectingEntities(start, direction, distance, filter, entryAndExitY.getX(), entryAndExitY.getY(), intersections);
         return intersections;
     }
@@ -1026,9 +1024,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     @Override
-    public Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d direction,
-            double distance, BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter,  double entryY, double exitY,
-            Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> intersections) {
+    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance,
+            java.util.function.Predicate<EntityHit> filter, double entryY, double exitY, Set<EntityHit> intersections) {
         // Order the entry and exit y coordinates by magnitude
         final double yMin = Math.min(entryY, exitY);
         final double yMax = Math.max(entryY, exitY);
@@ -1043,8 +1040,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     private void getIntersectingEntities(Collection<Entity> entities, Vector3d start, Vector3d direction, double distance,
-            BiPredicate<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>> filter,
-            Set<Tuple<org.spongepowered.api.entity.Entity, Tuple<Vector3d, Vector3d>>> intersections) {
+            java.util.function.Predicate<EntityHit> filter, Set<EntityHit> intersections) {
         // Check each entity in the list
         for (Entity entity : entities) {
             final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entity;
@@ -1054,20 +1050,22 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                 continue;
             }
             // Ignore entities that didn't intersect
-            final Optional<Tuple<Vector3d, Vector3d>> intersection = box.get().intersects(start, direction);
-            if (!intersection.isPresent()) {
+            final Optional<Tuple<Vector3d, Vector3d>> optionalIntersection = box.get().intersects(start, direction);
+            if (!optionalIntersection.isPresent()) {
                 continue;
             }
             // Check that the entity isn't too far away
-            if (intersection.get().getFirst().sub(start).lengthSquared() > distance * distance) {
+            final Tuple<Vector3d, Vector3d> intersection = optionalIntersection.get();
+            if (intersection.getFirst().sub(start).lengthSquared() > distance * distance) {
                 continue;
             }
             // Now test the filter on the entity and intersection
-            if (!filter.test(spongeEntity, intersection.get())) {
+            final EntityHit hit = new EntityHit(spongeEntity, intersection.getFirst(), intersection.getSecond());
+            if (!filter.test(hit)) {
                 continue;
             }
             // If everything passes we have an intersection!
-            intersections.add(new Tuple<>(spongeEntity, intersection.get()));
+            intersections.add(hit);
             // If the entity has part, recurse on these
             final Entity[] parts = entity.getParts();
             if (parts != null && parts.length > 0) {
