@@ -44,9 +44,6 @@ public final class SpongeTimings {
     public static final Timing serverCommandTimer = SpongeTimingsFactory.ofSafe("Server Command");
     public static final Timing worldSaveTimer = SpongeTimingsFactory.ofSafe("World Save");
 
-    public static final Timing tickEntityTimer = SpongeTimingsFactory.ofSafe("## tickEntity");
-    public static final Timing tickTileEntityTimer = SpongeTimingsFactory.ofSafe("## tickTileEntity");
-
     public static final Timing processQueueTimer = SpongeTimingsFactory.ofSafe("processQueue");
 
     public static final Timing playerCommandTimer = SpongeTimingsFactory.ofSafe("playerCommand");
@@ -92,10 +89,6 @@ public final class SpongeTimings {
             name += " (Single)";
         }
 
-        if (plugin == null) {
-            return SpongeTimingsFactory.ofSafe(null, name, TimingsManager.PLUGIN_GROUP_HANDLER);
-        }
-
         return SpongeTimingsFactory.ofSafe(plugin, name);
     }
 
@@ -109,7 +102,7 @@ public final class SpongeTimings {
     public static Timing getEntityTiming(Entity entity) {
         EntityType type = entity.getType();
         String entityType = type != null ? type.getId() : entity.getClass().getName();
-        return SpongeTimingsFactory.ofSafe("Minecraft", "## tickEntity - " + entityType, tickEntityTimer);
+        return SpongeTimingsFactory.ofSafe("Minecraft", "## tickEntity - " + entityType);
     }
 
     /**
@@ -120,7 +113,7 @@ public final class SpongeTimings {
     public static Timing getTileEntityTiming(TileEntity entity) {
         TileEntityType type = entity.getType();
         String entityType = type != null ? type.getId() : entity.getClass().getName();
-        return SpongeTimingsFactory.ofSafe("Minecraft", "## tickTileEntity - " + entityType, tickTileEntityTimer);
+        return SpongeTimingsFactory.ofSafe("Minecraft", "## tickTileEntity - " + entityType);
     }
 
     public static Timing getModTimings(PluginContainer plugin, String context) {
