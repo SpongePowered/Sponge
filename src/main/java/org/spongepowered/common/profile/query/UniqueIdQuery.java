@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
+import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -52,6 +53,14 @@ public abstract class UniqueIdQuery<T> extends Query<T> {
 
         @Override
         public GameProfile call() throws Exception {
+            if (this.useCache) {
+                // check username cache first
+                String username = SpongeUsernameCache.getLastKnownUsername(this.uniqueId);
+                if (username != null) {
+                    return GameProfile.of(this.uniqueId, username);
+                }
+            }
+
             final List<GameProfile> gameProfiles = this.fromUniqueIds(Collections.singleton(this.uniqueId));
             return gameProfiles.isEmpty() ? GameProfile.of(this.uniqueId, null) : gameProfiles.get(0);
         }

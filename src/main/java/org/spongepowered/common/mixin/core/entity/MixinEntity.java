@@ -1125,7 +1125,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 return Optional.of((User)player);
             }
             // player is not online, get user from storage if one exists
-            return Optional.of(SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().getOrCreate(GameProfile.of(uuid, null)));
+            return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
         }
     }
 

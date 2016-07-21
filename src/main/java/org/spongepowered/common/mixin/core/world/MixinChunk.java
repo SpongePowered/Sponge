@@ -664,7 +664,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                     return Optional.of((User) player);
                 }
                 // player is not online, get or create user from storage
-                return Optional.of(this.userForUUID(uuid.get()));
+                return this.userForUUID(uuid.get());
             }
         } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
             PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPosToShort(pos));
@@ -676,7 +676,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                     return Optional.of((User) player);
                 }
                 // player is not online, get or create user from storage
-                return Optional.of(this.userForUUID(uuid.get()));
+                return this.userForUUID(uuid.get());
             }
         }
 
@@ -695,7 +695,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                     return Optional.of((User) player);
                 }
                 // player is not online, get or create user from storage
-                return Optional.of(this.userForUUID(uuid.get()));
+                return this.userForUUID(uuid.get());
             }
         } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
             PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPosToShort(pos));
@@ -707,7 +707,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                     return Optional.of((User) player);
                 }
                 // player is not online, get or create user from storage
-                return Optional.of(this.userForUUID(uuid.get()));
+                return this.userForUUID(uuid.get());
             }
         }
 
@@ -949,8 +949,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return this.world.getBlockDigTimeWith(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), itemStack, cause);
     }
 
-    private User userForUUID(UUID uuid) {
-        return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().getOrCreate(GameProfile.of(uuid, null));
+    private Optional<User> userForUUID(UUID uuid) {
+        return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
     }
 
     @Override

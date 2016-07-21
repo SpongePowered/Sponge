@@ -25,24 +25,20 @@
 package org.spongepowered.common.profile.query;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.ProfileNotFoundException;
-import org.spongepowered.api.util.Identifiable;
+import org.spongepowered.common.util.SpongeUsernameCache;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 public abstract class Query<V> implements Callable<V> {
 
@@ -56,8 +52,25 @@ public abstract class Query<V> implements Callable<V> {
 
     protected List<GameProfile> fromUniqueIds(Collection<UUID> uniqueIds) throws ProfileNotFoundException {
         if (this.useCache) {
-            return this.cache.getOrLookupByIds(uniqueIds).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+            List<UUID> pool = Lists.newArrayList(uniqueIds);
+            List<GameProfile> result = Lists.newArrayListWithCapacity(uniqueIds.size());
+
+            // check username cache first
+            Iterator<UUID> it = uniqueIds.iterator();
+            while (it.hasNext()) {
+                UUID uniqueId = it.next();
+                @Nullable String username = SpongeUsernameCache.getLastKnownUsername(uniqueId);
+                if (username != null) {
+                    result.add(GameProfile.of(uniqueId, username));
+                    it.remove();
+                }
+            }
+
+            result.addAll(this.cache.getOrLookupByIds(pool).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList()));
+
+            return result;
         }
+
         return this.cache.lookupByIds(uniqueIds).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
 
