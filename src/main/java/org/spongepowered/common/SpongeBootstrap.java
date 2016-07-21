@@ -45,6 +45,7 @@ import org.spongepowered.common.service.sql.SqlServiceImpl;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.service.whitelist.SpongeWhitelistService;
 import org.spongepowered.common.text.action.SpongeCallbackHolder;
+import org.spongepowered.common.util.SpongeUsernameCache;
 
 /**
  * Used to setup the ecosystem.
@@ -62,6 +63,7 @@ public final class SpongeBootstrap {
         registerService(BanService.class, new SpongeBanService());
         registerService(WhitelistService.class, new SpongeWhitelistService());
         SpongeInternalListeners.getInstance().registerServiceCallback(PermissionService.class, input -> SpongeImpl.getGame().getServer().getConsole().getContainingCollection());
+        SpongeUsernameCache.load();
     }
 
     public static void initializeCommands() {

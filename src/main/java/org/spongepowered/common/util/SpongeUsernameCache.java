@@ -68,6 +68,8 @@ public final class SpongeUsernameCache {
     private static final File saveFile = new File(".", "usernamecache.json");
     private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
+    private static boolean loaded = false;
+
     /**
      * Set a player's current username
      *
@@ -79,6 +81,9 @@ public final class SpongeUsernameCache {
     public static void setUsername(UUID uuid, String username) {
         checkNotNull(uuid);
         checkNotNull(username);
+        if (!loaded) {
+            load();
+        }
 
         if (username.equals(map.get(uuid))) {
             return;
@@ -97,6 +102,9 @@ public final class SpongeUsernameCache {
      */
     public static boolean removeUsername(UUID uuid) {
         checkNotNull(uuid);
+        if (!loaded) {
+            load();
+        }
 
         if (map.remove(uuid) != null) {
             save();
@@ -119,6 +127,10 @@ public final class SpongeUsernameCache {
     @Nullable
     public static String getLastKnownUsername(UUID uuid) {
         checkNotNull(uuid);
+        if (!loaded) {
+            load();
+        }
+
         return map.get(uuid);
     }
 
@@ -131,6 +143,10 @@ public final class SpongeUsernameCache {
      */
     public static boolean containsUUID(UUID uuid) {
         checkNotNull(uuid);
+        if (!loaded) {
+            load();
+        }
+
         return map.containsKey(uuid);
     }
 
@@ -140,6 +156,10 @@ public final class SpongeUsernameCache {
      * @return the map
      */
     public static Map<UUID, String> getMap() {
+        if (!loaded) {
+            load();
+        }
+
         return ImmutableMap.copyOf(map);
     }
 
@@ -147,6 +167,10 @@ public final class SpongeUsernameCache {
      * Save the cache to file
      */
     public static void save() {
+        if (!loaded) {
+            load();
+        }
+
         new SaveThread(gson.toJson(map)).start();
     }
 
@@ -154,6 +178,7 @@ public final class SpongeUsernameCache {
      * Load the cache from file
      */
     public static void load() {
+        loaded = true;
         if (!saveFile.exists()) return;
 
         try {
