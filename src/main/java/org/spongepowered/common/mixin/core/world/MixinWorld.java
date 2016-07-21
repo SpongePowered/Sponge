@@ -102,7 +102,6 @@ import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Chunk;
@@ -154,7 +153,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -744,15 +742,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d end,
-            BiPredicate<Entity, Tuple<Vector3d, Vector3d>> filter) {
+    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Predicate<EntityHit> filter) {
         final Vector3d diff = end.sub(start);
         return getIntersectingEntities(start, diff.normalize(), diff.length(), filter);
     }
 
     @Override
-    public Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d direction, double distance,
-            BiPredicate<Entity, Tuple<Vector3d, Vector3d>> filter) {
+    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityHit> filter) {
         // Adapted from BlockRay
         final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
         // Figure out the direction of the ray for each axis
@@ -774,7 +770,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         double xPlaneT = (xPlaneNext - start.getX()) / direction.getX();
         double zPlaneT = (zPlaneNext - start.getZ()) / direction.getZ();
         // Trace the chunks in 2D to find which contain possibly intersecting entities
-        final Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> intersecting = new HashSet<>();
+        final Set<EntityHit> intersecting = new HashSet<>();
         // Keep track of the last distance using the t multiplier
         double currentT = 0;
         // Keep tack of the last intersection y coordinate
@@ -824,6 +820,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             // Get the chunk and call the intersection method to perform the task locally
             final Optional<Chunk> chunk = getChunkAtBlock(xChunk, 0, zChunk);
             if (chunk.isPresent()) {
+                System.out.println(chunk.get().getPosition());
                 setBlockType((int) xCurrent, (int) yCurrent, (int) zCurrent, BlockTypes.GOLD_BLOCK);
                 setBlockType((int) xNext, (int) yNext, (int) zNext, BlockTypes.DIAMOND_BLOCK);
                 ((IMixinChunk) chunk.get()).getIntersectingEntities(new Vector3d(xCurrent, yCurrent, zCurrent), direction, remainingDistance, filter,
@@ -838,7 +835,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             zCurrent = zNext;
         } while (remainingDistance >= 0);
         return intersecting;
-        // TODO: properly support directions with x == 0 && z == 0
         // TODO: fix entities being missed when only part of the AABB is the chunk
     }
 

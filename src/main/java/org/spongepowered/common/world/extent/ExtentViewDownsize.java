@@ -57,7 +57,6 @@ import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -69,7 +68,6 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -549,21 +547,19 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d direction, double distance,
-            BiPredicate<Entity, Tuple<Vector3d, Vector3d>> filter) {
+    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityHit> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
         final Vector3i max = this.blockMax.add(Vector3i.ONE);
         return this.extent.getIntersectingEntities(start, direction, distance,
-            Functional.biPredicateAnd((entity, intersection) -> VecHelper.inBounds(entity.getLocation().getPosition(), this.blockMin, max), filter));
+            Functional.predicateAnd(hit -> VecHelper.inBounds(hit.getEntity().getLocation().getPosition(), this.blockMin, max), filter));
     }
 
     @Override
-    public Set<Tuple<Entity, Tuple<Vector3d, Vector3d>>> getIntersectingEntities(Vector3d start, Vector3d end,
-            BiPredicate<Entity, Tuple<Vector3d, Vector3d>> filter) {
+    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Predicate<EntityHit> filter) {
         // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
         final Vector3i max = this.blockMax.add(Vector3i.ONE);
         return this.extent.getIntersectingEntities(start, end,
-                Functional.biPredicateAnd((entity, intersection) -> VecHelper.inBounds(entity.getLocation().getPosition(), this.blockMin, max), filter));
+                Functional.predicateAnd(hit -> VecHelper.inBounds(hit.getEntity().getLocation().getPosition(), this.blockMin, max), filter));
     }
 
     @Override
