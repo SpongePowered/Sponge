@@ -65,7 +65,7 @@ public class SpongeTeamBuilder implements Team.Builder {
     }
 
     @Override
-    public Team.Builder color(TextColor color) throws IllegalArgumentException {
+    public Team.Builder color(TextColor color) {
         this.color = checkNotNull(color, "Color cannot be null!");
         return this;
     }
