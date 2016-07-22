@@ -48,6 +48,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerProfileCache;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerProfileCacheEntry;
 import org.spongepowered.common.profile.callback.MapProfileLookupCallback;
 import org.spongepowered.common.profile.callback.SingleProfileLookupCallback;
@@ -67,16 +68,16 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import javax.annotation.Nullable;
 
 @Mixin(PlayerProfileCache.class)
-public abstract class MixinPlayerProfileCache implements GameProfileCache {
+public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCache, GameProfileCache {
 
     @Shadow @Final private Map<String, IMixinPlayerProfileCacheEntry> usernameToProfileEntryMap;
     @Shadow @Final private Map<UUID, IMixinPlayerProfileCacheEntry> uuidToProfileEntryMap;
     @Shadow abstract void addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry);
     @Nullable @Shadow public abstract com.mojang.authlib.GameProfile getProfileByUUID(UUID uniqueId);
     @Shadow public abstract void save();
-    private boolean bulkRemove = false;
     // Thread-safe queue
     private Queue<com.mojang.authlib.GameProfile> profiles = new ConcurrentLinkedQueue<>();
+    private boolean canSave = false;
 
     @Inject(method = "addEntry(Lcom/mojang/authlib/GameProfile;Ljava/util/Date;)V", at = @At(value = "RETURN"))
     public void onAddEntry(com.mojang.authlib.GameProfile profile, Date date, CallbackInfo ci) {
@@ -142,6 +143,13 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
         }
     }
 
+    @Inject(method = "save", at = @At("HEAD"), cancellable = true)
+    public void onSave(CallbackInfo ci) {
+        if (!this.canSave) {
+            ci.cancel();
+        }
+    }
+
     @Override
     public boolean add(GameProfile profile, boolean overwrite, @Nullable Date expiry) {
         checkNotNull(profile, "profile");
@@ -170,10 +178,6 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
                 this.usernameToProfileEntryMap.remove(profile.getName().get().toLowerCase(Locale.ROOT));
             }
 
-            if (!this.bulkRemove) {
-                this.save();
-            }
-
             return true;
         }
 
@@ -186,19 +190,10 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
 
         Collection<GameProfile> result = Lists.newArrayList();
 
-        try {
-            this.bulkRemove = true;
-            for (GameProfile profile : profiles) {
-                if (this.remove(profile)) {
-                    result.add(profile);
-                }
+        for (GameProfile profile : profiles) {
+            if (this.remove(profile)) {
+                result.add(profile);
             }
-        } finally {
-            this.bulkRemove = false;
-        }
-
-        if (!result.isEmpty()) {
-            this.save();
         }
 
         return result;
@@ -416,7 +411,6 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
             this.profiles.add(profile);
         }
 
-        this.save();
         return entry == null ? null : entry.getGameProfile();
     }
 
@@ -424,4 +418,13 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
         return (MinecraftServer) Sponge.getServer();
     }
 
+    @Override
+    public boolean canSave() {
+        return this.canSave;
+    }
+
+    @Override
+    public void setCanSave(boolean flag) {
+        this.canSave = flag;
+    }
 }

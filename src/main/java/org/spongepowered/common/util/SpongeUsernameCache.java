@@ -92,7 +92,6 @@ public final class SpongeUsernameCache {
         }
 
         map.put(uuid, username);
-        save();
     }
 
     /**
@@ -109,7 +108,6 @@ public final class SpongeUsernameCache {
         }
 
         if (map.remove(uuid) != null) {
-            save();
             return true;
         }
 
@@ -168,12 +166,17 @@ public final class SpongeUsernameCache {
     /**
      * Save the cache to file
      */
-    public synchronized static void save() {
+    public static void save() {
         if (!loaded) {
             load();
         }
 
-        new SaveThread(gson.toJson(map)).start();
+        try {
+            // Make sure we don't save when another thread is still saving
+            Files.write(gson.toJson(map), saveFile, charset);
+        } catch (IOException e) {
+            SpongeImpl.getLogger().error("Failed to save username cache to file!", e);
+        }
     }
 
     /**
@@ -199,32 +202,6 @@ public final class SpongeUsernameCache {
             // Can sometimes occur when the json file is malformed
             if (map == null) {
                 map = Maps.newHashMap();
-            }
-        }
-    }
-
-    /**
-     * Used for saving the {@link com.google.gson.Gson#toJson(Object) Gson}
-     * representation of the cache to disk
-     */
-    private static class SaveThread extends Thread {
-
-        /** The data that will be saved to disk */
-        private final String data;
-
-        public SaveThread(String data) {
-            this.data = data;
-        }
-
-        @Override
-        public void run() {
-            try {
-                // Make sure we don't save when another thread is still saving
-                synchronized (saveFile) {
-                    Files.write(data, saveFile, charset);
-                }
-            } catch (IOException e) {
-                SpongeImpl.getLogger().error("Failed to save username cache to file!", e);
             }
         }
     }

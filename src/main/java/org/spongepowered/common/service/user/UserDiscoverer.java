@@ -78,6 +78,10 @@ class UserDiscoverer {
         UUID uniqueId = profile.getUniqueId();
         User user = userCache.getIfPresent(uniqueId);
         if (user != null) {
+            // update cached user with name
+            if (user.getName() == null && profile.getName().isPresent()) {
+                user = getFromStoredData(profile);
+            }
             return user;
         }
         user = getOnlinePlayer(uniqueId);

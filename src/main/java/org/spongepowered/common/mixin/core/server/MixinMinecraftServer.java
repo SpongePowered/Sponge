@@ -859,8 +859,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             try {
                 worldServer.saveAllChunks(true, null);
                 worldServer.flush();
-
-                Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEvent(Cause.of(NamedCause.source(this)), world));
             } catch (MinecraftException e) {
                 e.printStackTrace();
             }

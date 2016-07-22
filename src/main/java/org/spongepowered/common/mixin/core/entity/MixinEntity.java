@@ -62,6 +62,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -128,10 +129,12 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.SpongeUsernameCache;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.world.DimensionManager;
 
@@ -173,6 +176,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     public java.util.ArrayList<EntityItem> capturedItemDrops = new java.util.ArrayList<EntityItem>();
     private boolean spawnedFromBlockBreak = false;
     private SpawnCause spawnCause = null;
+    private SpongeProfileManager spongeProfileManager;
+    private UserStorageService userStorageService;
     private Timing timing;
 
     @Shadow private UUID entityUniqueID;
@@ -247,6 +252,10 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                     }
                 }
             }
+        }
+        if (worldIn != null && !worldIn.isRemote) {
+            this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
+            this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
         }
     }
 
@@ -1119,14 +1128,38 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             }
 
             UUID uuid = new UUID(creatorNbt.getLong(NbtDataUtil.WORLD_UUID_MOST), creatorNbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
-            // get player if online
-            EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
-            if (player != null) {
-                return Optional.of((User)player);
-            }
             // player is not online, get user from storage if one exists
-            return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
+            return userForUUID(uuid);
         }
+    }
+
+    private Optional<User> userForUUID(UUID uuid) {
+        // get player if online
+        EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
+        if (player != null) {
+            return Optional.of((User)player);
+        }
+
+        if (this.spongeProfileManager == null) {
+            this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
+        }
+        if (this.userStorageService == null) {
+            this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
+        }
+
+        // check username cache
+        String username = SpongeUsernameCache.getLastKnownUsername(uuid);
+        if (username == null) {
+            // check mojang cache
+            Optional<GameProfile> profile = this.spongeProfileManager.getCache().getById(uuid);
+            if (profile.isPresent()) {
+                return this.userStorageService.get(profile.get());
+            }
+
+            this.spongeProfileManager.getGameProfileQueryTask().queueUuid(uuid);
+        }
+
+        return this.userStorageService.get(GameProfile.of(uuid, username));
     }
 
     @Override
