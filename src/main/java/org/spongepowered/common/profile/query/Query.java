@@ -56,7 +56,7 @@ public abstract class Query<V> implements Callable<V> {
             List<GameProfile> result = Lists.newArrayListWithCapacity(uniqueIds.size());
 
             // check username cache first
-            Iterator<UUID> it = uniqueIds.iterator();
+            Iterator<UUID> it = pool.iterator();
             while (it.hasNext()) {
                 UUID uniqueId = it.next();
                 @Nullable String username = SpongeUsernameCache.getLastKnownUsername(uniqueId);
