@@ -1088,7 +1088,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return null;
     }
 
-    @Redirect(method = "addTileEntity", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 1))
+    @Redirect(method = "addTileEntity", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 1, remap = false))
     public boolean onAddTileEntity(List<net.minecraft.tileentity.TileEntity> list, Object tile) {
         if (!this.isRemote && !canTileUpdate((net.minecraft.tileentity.TileEntity) tile)) {
             return false;
@@ -1097,7 +1097,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return list.add((net.minecraft.tileentity.TileEntity) tile);
     }
 
-    @Redirect(method = "addTileEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 1))
+    @Redirect(method = "addTileEntities", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 1, remap = false))
     public boolean onAddTileEntities(List<net.minecraft.tileentity.TileEntity> list, Object tile) {
         if (!this.isRemote && !canTileUpdate((net.minecraft.tileentity.TileEntity) tile)) {
             return false;

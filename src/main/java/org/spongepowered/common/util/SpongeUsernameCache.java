@@ -32,6 +32,7 @@ import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
 
@@ -61,7 +62,8 @@ import com.google.gson.JsonSyntaxException;
  */
 public final class SpongeUsernameCache {
 
-    private static Map<UUID, String> map = Maps.newHashMap();
+    // Thread-safe map
+    private static Map<UUID, String> map = new ConcurrentHashMap<>();
 
     private static final Charset charset = Charsets.UTF_8;
 
@@ -166,7 +168,7 @@ public final class SpongeUsernameCache {
     /**
      * Save the cache to file
      */
-    public static void save() {
+    public synchronized static void save() {
         if (!loaded) {
             load();
         }

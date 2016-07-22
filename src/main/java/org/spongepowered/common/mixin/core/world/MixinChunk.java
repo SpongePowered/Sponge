@@ -51,6 +51,7 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -89,7 +90,9 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.SpongeUsernameCache;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
@@ -117,6 +120,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     private org.spongepowered.api.world.World world;
     private UUID uuid;
     private Long scheduledForUnload; // delay chunk unloads
+    private SpongeProfileManager spongeProfileManager;
+    private UserStorageService userStorageService;
     private Chunk[] neighbors = new Chunk[4];
     private static final Direction[] CARDINAL_DIRECTIONS = new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
 
@@ -175,6 +180,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         if (this.world.getUniqueId() != null) { // Client worlds have no UUID
             this.uuid = new UUID(this.world.getUniqueId().getMostSignificantBits() ^ (x * 2 + 1),
                     this.world.getUniqueId().getLeastSignificantBits() ^ (z * 2 + 1));
+            this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
+            this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
         }
     }
 
@@ -950,7 +957,19 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     private Optional<User> userForUUID(UUID uuid) {
-        return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
+        // check username cache
+        String username = SpongeUsernameCache.getLastKnownUsername(uuid);
+        if (username == null) {
+            // check mojang cache
+            Optional<GameProfile> profile = this.spongeProfileManager.getCache().getById(uuid);
+            if (profile.isPresent()) {
+                return this.userStorageService.get(profile.get());
+            }
+
+            this.spongeProfileManager.getGameProfileQueryTask().queueUuid(uuid);
+        }
+
+        return this.userStorageService.get(GameProfile.of(uuid, username));
     }
 
     @Override
