@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -42,7 +43,7 @@ public class GameProfileQueryTask implements Runnable {
 
     private List<CompletableFuture<GameProfile>> futureList = new ArrayList<>();
     private Set<UUID> queuedUuidList = new HashSet<>();
-    private static final int REQUEST_LIMIT = 2;
+    private static final int REQUEST_LIMIT = SpongeImpl.getGlobalConfig().getConfig().getWorld().getGameProfileRequestLimit();
 
     public synchronized void queueUuid(UUID uuid) {
         this.queuedUuidList.add(UUID.fromString(uuid.toString()));
