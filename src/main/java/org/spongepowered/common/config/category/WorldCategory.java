@@ -70,20 +70,24 @@ public class WorldCategory extends ConfigCategory {
     private boolean denyChunkRequests = true;
 
     @Setting(value = "chunk-gc-tick-interval", comment = "The tick interval used to cleanup all inactive chunks in a world. "
-                                                         + "\nSet to 0 to disable which restores vanilla handling. (Default: 300).")
-    private int chunkGCTickInterval = 300;
+                                                         + "\nSet to 0 to disable which restores vanilla handling. (Default: 20)")
+    private int chunkGCTickInterval = 20;
 
     @Setting(value = "max-chunk-unloads-per-tick", comment = "The maximum number of queued unloaded chunks that will be unloaded in a single tick. "
                                                              + "\nNote: With the chunk gc enabled, this setting only applies to the ticks "
                                                              + "\nwhere the gc runs (controlled by 'chunk-gc-tick-interval')"
                                                              + "\nNote: If the max unloads is too low, too many chunks may remain"
-                                                             + "\nloaded on the world and increases the chance for a drop in tps. Default is 100.")
+                                                             + "\nloaded on the world and increases the chance for a drop in tps. (Default: 100)")
     private int maxChunkUnloads = 100;
 
     @Setting(value = "chunk-gc-load-threshold", comment = "The number of newly loaded chunks before triggering a forced cleanup. "
                                                           + "\nNote: When triggered, the loaded chunk threshold will reset and start incrementing. "
                                                           + "\nDisabled by default.")
     private int chunkGCLoadThreshold = 0;
+
+    @Setting(value = "chunk-unload-delay", comment = "The number of seconds to delay a chunk unload once marked inactive. (Default: 30)"
+                                                     + "\nNote: This gets reset if the chunk becomes active again.")
+    private int chunkUnloadDelay = 30;
 
     @Setting(value = "item-merge-radius", comment = "The defined merge radius for Item entities such that when two items are"
                                                     + "\nwithin the defined radius of each other, they will attempt to merge. Usually,"
@@ -131,6 +135,14 @@ public class WorldCategory extends ConfigCategory {
 
     public void setWorldEnabled(boolean enabled) {
         this.worldEnabled = enabled;
+    }
+
+    public long getChunkUnloadDelay() {
+        return this.chunkUnloadDelay;
+    }
+
+    public void setChunkUnloadDelay(int delay) {
+        this.chunkUnloadDelay = delay;
     }
 
     public boolean loadOnStartup() {

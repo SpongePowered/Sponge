@@ -71,4 +71,8 @@ public interface IMixinChunk {
 
     boolean areNeighborsLoaded();
 
+    Long getScheduledForUnload();
+
+    void setScheduledForUnload(Long scheduled);
+
 }

@@ -151,9 +151,9 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
 
     @Override
     public int getFirstAvailableSlot(ItemStack itemstack) {
-        int stackSize = itemstack.stackSize;
-
         for (int i = 0; i < this.mainInventory.length; ++i) {
+            int stackSize = itemstack.stackSize;
+
             if (this.mainInventory[i] == null) {
                 // empty slot
                 return i;

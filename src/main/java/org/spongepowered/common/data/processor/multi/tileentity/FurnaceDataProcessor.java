@@ -39,18 +39,20 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@ImplementationRequiredForTest
 public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEntityFurnace, FurnaceData, ImmutableFurnaceData> {
 
     public FurnaceDataProcessor() {
         super(TileEntityFurnace.class);
     }
 
-    private final Cause cause = Cause.source(SpongeImpl.getPlugin()).build();
+    private Cause cause;
 
     @Override
     protected boolean doesDataExist(TileEntityFurnace tileEntity) {
@@ -65,6 +67,9 @@ public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEn
         // 1 : currentItemBurnTime -> equal to maxBurnTime
         // 2 : cookTime -> equal to passedCookTime
         // 3 : totalCookTime -> equal to maxCookTime
+        if (this.cause == null) { // lazy evaluation because of tests
+            this.cause = Cause.source(SpongeImpl.getPlugin()).build();
+        }
 
         final int passedBurnTime = (Integer) keyValues.get(Keys.PASSED_BURN_TIME); //time (int) the fuel item already burned
         final int maxBurnTime = (Integer) keyValues.get(Keys.MAX_BURN_TIME); //time (int) the fuel can burn until its depleted

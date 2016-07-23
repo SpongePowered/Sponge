@@ -71,6 +71,7 @@ import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
@@ -201,6 +202,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private int chunkGCTickCount = 0;
     private int chunkGCLoadThreshold = 0;
     private int chunkGCTickInterval = 600;
+    private long chunkUnloadDelay = 30000;
     private boolean weatherThunderEnabled = true;
     private boolean weatherIceAndSnowEnabled = true;
 
@@ -308,6 +310,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.chunkGCTickInterval = this.activeConfig.getConfig().getWorld().getTickInterval();
         this.weatherIceAndSnowEnabled = this.activeConfig.getConfig().getWorld().getWeatherIceAndSnow();
         this.weatherThunderEnabled = this.activeConfig.getConfig().getWorld().getWeatherThunder();
+        this.chunkUnloadDelay = this.activeConfig.getConfig().getWorld().getChunkUnloadDelay() * 1000;
         if (this.getChunkProvider() != null) {
             final IMixinChunkProviderServer mixinChunkProvider = (IMixinChunkProviderServer) this.getChunkProvider();
             final int maxChunkUnloads = this.activeConfig.getConfig().getWorld().getMaxChunkUnloads();
@@ -738,9 +741,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
+        long now = System.currentTimeMillis();
+        long unloadAfter = this.chunkUnloadDelay;
         for (net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.getLoadedChunks()) {
+            IMixinChunk spongeChunk = (IMixinChunk) chunk;
+            if (spongeChunk.getScheduledForUnload() != null && (now - spongeChunk.getScheduledForUnload()) > unloadAfter) {
+                spongeChunk.setScheduledForUnload(null);
+            }
             // If a player is currently using the chunk, skip it
-            if (((IMixinPlayerChunkMap) this.getPlayerChunkMap()).isChunkInUse(chunk.xPosition, chunk.zPosition)) {
+            if (spongeChunk.getScheduledForUnload() != null || ((IMixinPlayerChunkMap) this.getPlayerChunkMap()).isChunkInUse(chunk.xPosition, chunk.zPosition)) {
                 continue;
             }
 
@@ -752,6 +761,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Inject(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;getLoadedChunks()Ljava/util/Collection;"), cancellable = true)
     public void onSaveAllChunks(boolean saveAllChunks, IProgressUpdate progressCallback, CallbackInfo ci) {
+        Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEvent(Cause.of(NamedCause.source(this)), this));
         // The chunk GC handles all queuing for chunk unloads so we cancel here to avoid it during a save.
         if (this.chunkGCTickInterval > 0) {
             ci.cancel();
@@ -1605,5 +1615,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public int getChunkGCTickInterval() {
         return this.chunkGCTickInterval;
+    }
+
+    @Override
+    public long getChunkUnloadDelay() {
+        return this.chunkUnloadDelay;
     }
 }

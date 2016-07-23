@@ -123,6 +123,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -842,6 +843,24 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;updateRidden()V"))
     protected void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
         entity.updateRidden();
+    }
+
+    @Redirect(method = "addTileEntity", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 1, remap = false))
+    public boolean onAddTileEntity(List<net.minecraft.tileentity.TileEntity> list, Object tile) {
+        if (!this.isRemote && !canTileUpdate((net.minecraft.tileentity.TileEntity) tile)) {
+            return false;
+        }
+
+        return list.add((net.minecraft.tileentity.TileEntity) tile);
+    }
+
+    private boolean canTileUpdate(net.minecraft.tileentity.TileEntity tile) {
+        TileEntity spongeTile = (TileEntity) tile;
+        if (spongeTile.getType() != null && !((SpongeTileEntityType) spongeTile.getType()).canTick()) {
+            return false;
+        }
+
+        return true;
     }
 
     /*********************** TIMINGS ***********************/

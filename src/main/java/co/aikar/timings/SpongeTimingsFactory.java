@@ -87,9 +87,6 @@ public class SpongeTimingsFactory implements TimingsFactory {
     @Override
     public Timing of(Object pluginObj, String name, @Nullable Timing groupHandler) {
         PluginContainer plugin = checkPlugin(pluginObj);
-        if (groupHandler == null) {
-            groupHandler = ofSafe(plugin.getId(), "Combined Total", TimingsManager.PLUGIN_GROUP_HANDLER);
-        }
         return TimingsManager.getHandler(plugin.getId(), name, groupHandler, true);
     }
 
@@ -186,25 +183,20 @@ public class SpongeTimingsFactory implements TimingsFactory {
     }
 
     public static Timing ofSafe(PluginContainer plugin, String name) {
-        Timing pluginHandler = null;
-        if (plugin != null) {
-            pluginHandler = ofSafe(plugin.getName(), "Combined Total", TimingsManager.PLUGIN_GROUP_HANDLER);
-        }
-        return ofSafe(plugin != null ? plugin.getName() : "Minecraft - Invalid Plugin", name, pluginHandler);
+        return ofSafe(plugin != null ? plugin.getName() : "Minecraft - Invalid Plugin", name);
     }
 
     // used for events
     public static Timing ofSafe(PluginContainer plugin, String name, boolean isMod) {
-        Timing pluginHandler = null;
-        if (plugin != null) {
-            pluginHandler = ofSafe(plugin.getName(), "Combined Total", isMod ? TimingsManager.MOD_EVENT_HANDLER : TimingsManager.PLUGIN_EVENT_HANDLER);
-        }
-
-        return ofSafe(plugin.getName(), name, pluginHandler);
+        return ofSafe(plugin.getName(), name);
     }
 
     public static TimingHandler ofSafe(String name, Timing groupHandler) {
         return ofSafe(null, name, groupHandler);
+    }
+
+    public static TimingHandler ofSafe(String groupName, String name) {
+        return TimingsManager.getHandler(groupName, name, null, false);
     }
 
     public static TimingHandler ofSafe(String groupName, String name, Timing groupHandler) {

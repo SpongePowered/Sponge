@@ -123,6 +123,10 @@ public interface IMixinBlock {
 
     boolean isVanilla();
 
+    boolean hasCollideLogic();
+
+    boolean hasCollideWithStateLogic();
+
     // Timings
     Timing getTimingsHandler();
 

@@ -56,6 +56,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -75,6 +76,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
@@ -107,10 +109,12 @@ import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -151,6 +155,8 @@ public abstract class MixinEntity implements IMixinEntity {
     private BlockState currentCollidingBlock;
     private BlockPos lastCollidedBlockPos;
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
+    private SpongeProfileManager spongeProfileManager;
+    private UserStorageService userStorageService;
     private Timing timing;
 
     @Shadow private UUID entityUniqueID;
@@ -246,6 +252,10 @@ public abstract class MixinEntity implements IMixinEntity {
                     }
                 }
             }
+        }
+        if (worldIn != null && !worldIn.isRemote) {
+            this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
+            this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
         }
     }
 
@@ -950,8 +960,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Redirect(method = "moveEntity",at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;"
                                                                         + "onEntityWalk(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
-        if (block == Blocks.AIR) {
-            // ignore air blocks
+        // if block can't collide, return
+        if (!((IMixinBlock) block).hasCollideLogic()) {
             return;
         }
 
@@ -972,8 +982,8 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
-        if (block == Blocks.AIR) {
-            // ignore air blocks
+        // if block can't collide, return
+        if (!((IMixinBlock) block).hasCollideWithStateLogic()) {
             return;
         }
 

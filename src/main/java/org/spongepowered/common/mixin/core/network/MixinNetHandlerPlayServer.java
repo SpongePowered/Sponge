@@ -769,9 +769,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                                 interactionPoint, EntityUtil.fromNative(entity));
                     }
                     SpongeImpl.postEvent(event);
-                    if (!event.isCancelled()) {
-                        this.playerEntity.attackTargetEntityWithCurrentItem(entity);
+                    if (event.isCancelled()) {
+                        ((IMixinEntityPlayerMP) this.playerEntity).restorePacketItem();
+                        return;
                     }
+
+                    this.playerEntity.attackTargetEntityWithCurrentItem(entity);
                 }
             }
         }

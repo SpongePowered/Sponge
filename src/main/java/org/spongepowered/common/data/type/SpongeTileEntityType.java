@@ -35,16 +35,22 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
 
     private final String name;
     private final Class<? extends TileEntity> clazz;
+    private final boolean canTick;
 
-    public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id) {
+    public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id, boolean canTick) {
         super(id);
         this.name = checkNotNull(name, "name");
         this.clazz = checkNotNull(clazz, "clazz");
+        this.canTick = canTick;
     }
 
     @Override
     public String getName() {
         return this.name;
+    }
+
+    public boolean canTick() {
+        return this.canTick;
     }
 
     @Override

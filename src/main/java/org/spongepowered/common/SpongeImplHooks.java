@@ -177,6 +177,10 @@ public final class SpongeImplHooks {
         return true;
     }
 
+    public static boolean isDeobfuscatedEnvironment() {
+        return true;
+    }
+
     public static Iterator<Chunk> getChunkIterator(WorldServer world) {
         return world.getPlayerChunkMap().getChunkIterator();
     }

@@ -90,4 +90,6 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     int getChunkGCTickInterval();
 
+    long getChunkUnloadDelay();
+
 }

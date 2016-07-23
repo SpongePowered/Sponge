@@ -26,9 +26,13 @@ package org.spongepowered.common;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
+import org.spongepowered.api.event.world.SaveWorldEvent;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerProfileCache;
+import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.util.Iterator;
 import java.util.function.Consumer;
@@ -62,6 +66,17 @@ public class SpongeInternalListeners {
             if (!it.next().test(event.getNewProvider())) {
                 it.remove();
             }
+        }
+    }
+
+    @Listener
+    public void onWorldSave(SaveWorldEvent event) {
+        if (event.getTargetWorld().getUniqueId().equals(Sponge.getServer().getDefaultWorld().get().getUniqueId())) {
+            SpongeUsernameCache.save();
+            final MinecraftServer server = SpongeImpl.getServer();
+            ((IMixinPlayerProfileCache) server.getPlayerProfileCache()).setCanSave(true);
+            server.getPlayerProfileCache().save();
+            ((IMixinPlayerProfileCache) server.getPlayerProfileCache()).setCanSave(false);
         }
     }
 

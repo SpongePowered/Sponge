@@ -41,7 +41,7 @@ import java.util.Optional;
 
 public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<TileEntityFurnace, Integer, MutableBoundedValue<Integer>> {
 
-    private final Cause cause = Cause.source(SpongeImpl.getPlugin()).build();
+    private Cause cause;
 
     public MaxBurnTimeValueProcessor() {
         super(TileEntityFurnace.class, Keys.MAX_BURN_TIME);
@@ -59,6 +59,9 @@ public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
     @Override
     protected boolean set(TileEntityFurnace container, Integer value) {
         if (!container.isBurning() && value > 0 || container.isBurning() && value == 0) {
+            if (this.cause == null) {
+                this.cause = Cause.source(SpongeImpl.getPlugin()).build();
+            }
             final World world = (World) container.getWorld();
             world.setBlockType(container.getPos().getX(), container.getPos().getY(),
                     container.getPos().getZ(), value > 0 ? BlockTypes.LIT_FURNACE : BlockTypes.FURNACE, this.cause);

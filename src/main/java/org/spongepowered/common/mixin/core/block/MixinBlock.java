@@ -32,6 +32,7 @@ import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -90,14 +91,46 @@ import java.util.Random;
 public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
+    private boolean hasCollideLogic = false;
+    private boolean hasCollideWithStateLogic = false;
     private Timing timing;
 
     @Shadow private boolean needsRandomTick;
 
     @Shadow public abstract String getUnlocalizedName();
     @Shadow public abstract Material getMaterial(IBlockState state);
-    @Shadow(prefix = "shadow$")
-    public abstract IBlockState shadow$getDefaultState();
+    @Shadow public abstract IBlockState shadow$getDefaultState();
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstruction(CallbackInfo ci) {
+        // Determine which blocks can avoid executing un-needed event logic
+        // This will allow us to avoid running event logic for blocks that do nothing such as grass collisions
+        // -- blood
+
+        // onEntityCollidedWithBlock
+        try {
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollidedWithBlock" : "func_176199_a";
+            Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, Entity.class };
+            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
+            if (!clazz.equals(Block.class)) {
+                this.hasCollideLogic = true;
+            }
+        } catch (Throwable ex) {
+            // ignore
+        }
+
+        // onEntityCollidedWithBlock (IBlockState)
+        try {
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollidedWithBlock" : "func_180634_a";
+            Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class, Entity.class };
+            Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
+            if (!clazz.equals(Block.class)) {
+                this.hasCollideWithStateLogic = true;
+            }
+        } catch (Throwable ex) {
+            // ignore
+        }
+    }
 
     @Inject(method = "registerBlock", at = @At("RETURN"))
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
@@ -245,6 +278,16 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public boolean isVanilla() {
         return this.isVanilla;
+    }
+
+    @Override
+    public boolean hasCollideLogic() {
+        return this.hasCollideLogic;
+    }
+
+    @Override
+    public boolean hasCollideWithStateLogic() {
+        return this.hasCollideWithStateLogic;
     }
 
     @Override

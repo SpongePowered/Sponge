@@ -50,6 +50,7 @@ import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -61,6 +62,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -78,6 +80,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -89,6 +92,7 @@ import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -114,6 +118,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     private org.spongepowered.api.world.World world;
     private UUID uuid;
+    private Long scheduledForUnload; // delay chunk unloads
+    private SpongeProfileManager spongeProfileManager;
+    private UserStorageService userStorageService;
     private Chunk[] neighbors = new Chunk[4];
     private static final Direction[] CARDINAL_DIRECTIONS = new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
 
@@ -171,6 +178,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         if (this.world.getUniqueId() != null) { // Client worlds have no UUID
             this.uuid = new UUID(this.world.getUniqueId().getMostSignificantBits() ^ (x * 2 + 1),
                     this.world.getUniqueId().getLeastSignificantBits() ^ (z * 2 + 1));
+            this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
+            this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
         }
     }
 
@@ -915,4 +924,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
     }
 
+    @Override
+    public Long getScheduledForUnload() {
+        return this.scheduledForUnload;
+    }
+
+    @Override
+    public void setScheduledForUnload(Long scheduled) {
+        this.scheduledForUnload = scheduled;
+    }
 }

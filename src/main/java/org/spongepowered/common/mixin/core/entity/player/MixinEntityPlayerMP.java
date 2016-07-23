@@ -40,6 +40,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -394,6 +395,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.lastExperience = -1;
         this.lastHealth = -1.0F;
         this.lastFoodLevel = -1;
+    }
+
+    @Override
+    public void restorePacketItem() {
+        // TODO - apparently this was a thing in 1.8.9, not sure how to do it in 1.10
+
     }
 
     @Override

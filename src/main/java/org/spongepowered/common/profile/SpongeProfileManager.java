@@ -35,22 +35,35 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.profile.property.ProfileProperty;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.profile.query.GameProfileQuery;
 import org.spongepowered.common.profile.query.NameQuery;
 import org.spongepowered.common.profile.query.UniqueIdQuery;
+import org.spongepowered.common.profile.task.GameProfileQueryTask;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
 public final class SpongeProfileManager implements GameProfileManager {
 
     private final GameProfileCache defaultCache = (GameProfileCache) ((MinecraftServer) Sponge.getServer()).getPlayerProfileCache();
+    private final GameProfileQueryTask gameProfileQueryTask;
     private GameProfileCache cache = this.defaultCache;
+
+    public SpongeProfileManager() {
+        this.gameProfileQueryTask = new GameProfileQueryTask();
+        SpongeScheduler.getInstance().createTaskBuilder().interval(SpongeImpl.getGlobalConfig().getConfig().getWorld().getGameProfileQueryTaskInterval(), TimeUnit.SECONDS).execute(this.gameProfileQueryTask).name("GameProfileQueryTask").submit(SpongeImpl.getPlugin());
+    }
+
+    public GameProfileQueryTask getGameProfileQueryTask() {
+        return this.gameProfileQueryTask;
+    }
 
     @Override
     public GameProfile createProfile(UUID uniqueId, @Nullable String name) {

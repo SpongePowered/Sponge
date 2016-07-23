@@ -31,6 +31,9 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.tileentity.TileEntityEnderChest;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -55,6 +58,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
@@ -113,7 +117,20 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     private static void onRegister(Class clazz, String name, CallbackInfo callbackInfo) {
         if (clazz != null) {
             final String id = TileEntityTypeRegistryModule.getInstance().getIdForName(name);
-            final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name, id);
+            boolean canTick = false;
+            try  {
+                if (ITickable.class.isAssignableFrom(clazz)) {
+                    String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "update" : "func_73660_a";
+                    Class<?> declaringClazz = clazz.getMethod(mapping).getDeclaringClass();
+                    if (!declaringClazz.equals(TileEntityChest.class) && !declaringClazz.equals(TileEntityEnderChest.class)) {
+                        canTick = true;
+                    }
+                }
+            }  catch (Throwable e)  {
+                // ignore
+            }
+
+            final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name, id, canTick);
             TileEntityTypeRegistryModule.getInstance().registerAdditionalCatalog(tileEntityType);
         }
     }
