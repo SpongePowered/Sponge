@@ -809,11 +809,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     InteractEntityEvent.Secondary event = SpongeEventFactory.createInteractEntityEventSecondary(
                             Cause.of(NamedCause.source(this.playerEntity)), Optional.of(VecHelper.toVector(packetIn.getHitVec())), (org.spongepowered.api.entity.Entity) entity);
                         SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            // If INTERACT_AT returns a false result, we assume this packet was meant for interactWith
-                            if (!entity.interactAt(this.playerEntity, packetIn.getHitVec())) {
-                                this.playerEntity.interactWith(entity);
-                            }
+                        if (event.isCancelled()) {
+                            ((IMixinEntityPlayerMP) this.playerEntity).restorePacketItem();
+                            return;
+                        }
+                        // If INTERACT_AT returns a false result, we assume this packet was meant for interactWith
+                        if (!entity.interactAt(this.playerEntity, packetIn.getHitVec())) {
+                            this.playerEntity.interactWith(entity);
                         }
                 } else if (packetIn.getAction() == C02PacketUseEntity.Action.ATTACK) {
                     if (entity instanceof EntityItem || entity instanceof EntityXPOrb || entity instanceof EntityArrow || entity == this.playerEntity) {
@@ -829,9 +831,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(
                         Cause.of(NamedCause.source(this.playerEntity)), packetIn.getHitVec() == null ? Optional.empty() : Optional.of(VecHelper.toVector(packetIn.getHitVec())), (org.spongepowered.api.entity.Entity) entity);
                     SpongeImpl.postEvent(event);
-                    if (!event.isCancelled()) {
-                        this.playerEntity.attackTargetEntityWithCurrentItem(entity);
+                    if (event.isCancelled()) {
+                        ((IMixinEntityPlayerMP) this.playerEntity).restorePacketItem();
+                        return;
                     }
+
+                    this.playerEntity.attackTargetEntityWithCurrentItem(entity);
                 }
             }
         }
