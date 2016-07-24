@@ -671,34 +671,36 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             PlayerTracker tracker = this.trackedIntBlockPositions.get(blockPos);
             Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.ownerIndex));
             if (uuid.isPresent()) {
+                UUID userUniqueId = uuid.get();
                 // get player if online
-                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid.get());
+                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(userUniqueId);
                 if (player != null) {
                     return Optional.of((User) player);
                 }
-                if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
+                if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(userUniqueId)) {
                     this.trackedIntBlockPositions.remove(blockPos);
                     return Optional.empty();
                 }
                 // player is not online, get or create user from storage
-                return this.userForUUID(uuid.get());
+                return this.userForUUID(userUniqueId);
             }
         } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
             short blockPos = blockPosToShort(pos);
             PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPos);
             Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.ownerIndex));
             if (uuid.isPresent()) {
+                UUID userUniqueId = uuid.get();
                 // get player if online
-                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid.get());
+                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(userUniqueId);
                 if (player != null) {
                     return Optional.of((User) player);
                 }
-                if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
+                if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(userUniqueId)) {
                     this.trackedShortBlockPositions.remove(blockPos);
                     return Optional.empty();
                 }
                 // player is not online, get or create user from storage
-                return this.userForUUID(uuid.get());
+                return this.userForUUID(userUniqueId);
             }
         }
 
@@ -712,34 +714,36 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             PlayerTracker tracker = this.trackedIntBlockPositions.get(blockPos);
             Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.notifierIndex));
             if (uuid.isPresent()) {
+                UUID userUniqueId = uuid.get();
                 // get player if online
-                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid.get());
+                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(userUniqueId);
                 if (player != null) {
                     return Optional.of((User) player);
                 }
-                if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
+                if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(userUniqueId)) {
                     this.trackedIntBlockPositions.remove(blockPos);
                     return Optional.empty();
                 }
                 // player is not online, get or create user from storage
-                return this.userForUUID(uuid.get());
+                return this.userForUUID(userUniqueId);
             }
         } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
             short blockPos = blockPosToShort(pos);
             PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPos);
             Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.notifierIndex));
             if (uuid.isPresent()) {
+                UUID userUniqueId = uuid.get();
                 // get player if online
-                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid.get());
+                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(userUniqueId);
                 if (player != null) {
                     return Optional.of((User) player);
                 }
-                if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
+                if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(userUniqueId)) {
                     this.trackedShortBlockPositions.remove(blockPos);
                     return Optional.empty();
                 }
                 // player is not online, get or create user from storage
-                return this.userForUUID(uuid.get());
+                return this.userForUUID(userUniqueId);
             }
         }
 
