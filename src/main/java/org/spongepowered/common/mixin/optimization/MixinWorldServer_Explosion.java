@@ -26,6 +26,8 @@ package org.spongepowered.common.mixin.optimization;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.WorldServer;
@@ -58,13 +60,18 @@ public abstract class MixinWorldServer_Explosion extends MixinWorld {
 
 
     @Inject(method = "newExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/Explosion;doExplosionB(Z)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onCallExpalosion(Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking, CallbackInfoReturnable<Explosion> callbackInfo, Explosion explosion) {
+    private void onCallExplosion(Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking, CallbackInfoReturnable<Explosion> callbackInfo, Explosion explosion) {
         for (EntityPlayer playerEntity : this.playerEntities) {
             final Vec3d knockback = explosion.getPlayerKnockbackMap().get(playerEntity);
             if (knockback != null) {
-                playerEntity.motionX += knockback.xCoord;
-                playerEntity.motionY += knockback.yCoord;
-                playerEntity.motionZ += knockback.zCoord;
+                // In Vanilla, doExplosionB always updates the 'motion[xyz]' fields for every entity in range.
+                // However, this field is completely ignored for players (since 'velocityChanged') is never set, and
+                // a completely different value is sent through 'SPacketExplosion'.
+
+                // To replicate this behavior, we manually send a velocity packet. It's critical that we don't simply
+                // add to the 'motion[xyz]' fields, as that will end up using the value set by 'doExplosionB', which must be
+                // ignored.
+                ((EntityPlayerMP) playerEntity).connection.sendPacket(new SPacketEntityVelocity(playerEntity.getEntityId(), knockback.xCoord, knockback.yCoord, knockback.zCoord));
             }
         }
     }
