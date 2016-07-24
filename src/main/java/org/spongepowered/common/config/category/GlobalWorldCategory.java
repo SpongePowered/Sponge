@@ -27,6 +27,10 @@ package org.spongepowered.common.config.category;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 @ConfigSerializable
 public class GlobalWorldCategory extends WorldCategory {
 
@@ -54,6 +58,17 @@ public class GlobalWorldCategory extends WorldCategory {
             + "\nFinally, if set to 0 or less, the default interval will be used.")
     private int gameProfileQueryTaskInterval = 1;
 
+    @Setting(value = "invalid-lookup-uuids", comment = 
+            "The list of uuid's that should never perform a lookup against Mojang's session server."
+            + "\nNote: If you are using SpongeForge, make sure to enter any mod fake player's UUID to this list.")
+    private List<UUID> invalidLookupUuids = new ArrayList<>();
+
+    public GlobalWorldCategory() {
+        this.invalidLookupUuids.add(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+        this.invalidLookupUuids.add(UUID.fromString("0d0c4ca0-4ff1-11e4-916c-0800200c9a66")); // ComputerCraft FakePlayer
+        this.invalidLookupUuids.add(UUID.fromString("41c82c87-7afb-4024-ba57-13d2c99cae77")); // Forge FakePlayer
+    }
+
     public int getAutoPlayerSaveInterval() {
         return this.autoPlayerSaveInterval;
     }
@@ -66,7 +81,7 @@ public class GlobalWorldCategory extends WorldCategory {
         this.leafDecay = flag;
     }
 
-    public int getGameProfileRequestLimit() {
+    public int getGameProfileLookupBatchSize() {
         if (this.gameProfileLookupBatchSize <= 0) {
             this.gameProfileLookupBatchSize = 1;
         }
@@ -78,5 +93,9 @@ public class GlobalWorldCategory extends WorldCategory {
             this.gameProfileQueryTaskInterval = 1;
         }
         return this.gameProfileQueryTaskInterval;
+    }
+
+    public List<UUID> getInvalidLookupUuids() {
+        return this.invalidLookupUuids;
     }
 }

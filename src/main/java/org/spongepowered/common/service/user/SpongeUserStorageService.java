@@ -41,7 +41,7 @@ import java.util.concurrent.ExecutionException;
 
 public class SpongeUserStorageService implements UserStorageService {
 
-    public static final String FAKEPLAYER_UUID = "41C82C87-7AfB-4024-BA57-13D2C99CAE77";
+    public static final UUID FAKEPLAYER_UUID = UUID.fromString("41C82C87-7AfB-4024-BA57-13D2C99CAE77");
 
     @Override
     public Optional<User> get(UUID uniqueId) {
@@ -69,8 +69,7 @@ public class SpongeUserStorageService implements UserStorageService {
         if (profile.getUniqueId() == null) {
             String name = profile.getName().orElse(null);
             // Use Forge's FakePlayer UUID
-            UUID uuid = UUID.fromString(FAKEPLAYER_UUID);
-            profile = (GameProfile) new com.mojang.authlib.GameProfile(uuid, name);
+            profile = (GameProfile) new com.mojang.authlib.GameProfile(FAKEPLAYER_UUID, name);
         }
 
         Optional<User> user = get(profile);
