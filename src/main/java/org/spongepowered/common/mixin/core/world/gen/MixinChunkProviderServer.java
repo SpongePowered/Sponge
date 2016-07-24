@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.gen;
 
 import com.flowpowered.math.vector.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.IChunkLoader;
@@ -45,15 +44,12 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.world.storage.SpongeChunkDataStream;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nullable;
 
 @Mixin(ChunkProviderServer.class)
 public abstract class MixinChunkProviderServer implements WorldStorage, IMixinChunkProviderServer {
@@ -63,12 +59,6 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Shadow @Final private Long2ObjectMap<Chunk> id2ChunkMap;
 
     @Shadow public abstract Chunk provideChunk(int x, int z);
-
-    @Nullable
-    @Override
-    public Chunk getChunkIfLoaded(int x, int z) {
-        return this.id2ChunkMap.get(ChunkPos.chunkXZ2Int(x, z));
-    }
 
 
     @Override
@@ -119,16 +109,15 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
 
     private int maxChunkUnloads = -1;
-    // TODO - disabled until chunk gc can be fixed for 1.9.4+
 
-//    @ModifyConstant(method = "unloadQueuedChunks", constant = @Constant(intValue = 100))
-//    private int modifyUnloadCount(int original) {
-//        if (this.maxChunkUnloads == -1) {
-//            final int maxChunkUnloads = ((IMixinWorldServer) this.worldObj).getActiveConfig().getConfig().getWorld().getMaxChunkUnloads();
-//            this.maxChunkUnloads = maxChunkUnloads < 1 ? 1 : maxChunkUnloads;
-//        }
-//        return this.maxChunkUnloads;
-//    }
+    @ModifyConstant(method = "unloadQueuedChunks", constant = @Constant(intValue = 100))
+    private int modifyUnloadCount(int original) {
+        if (this.maxChunkUnloads == -1) {
+            final int maxChunkUnloads = ((IMixinWorldServer) this.worldObj).getActiveConfig().getConfig().getWorld().getMaxChunkUnloads();
+            this.maxChunkUnloads = maxChunkUnloads < 1 ? 1 : maxChunkUnloads;
+        }
+        return this.maxChunkUnloads;
+    }
 
     @Override
     public void setMaxChunkUnloads(int maxUnloads) {

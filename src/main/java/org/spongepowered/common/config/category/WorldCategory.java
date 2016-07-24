@@ -70,8 +70,8 @@ public class WorldCategory extends ConfigCategory {
     private boolean denyChunkRequests = true;
 
     @Setting(value = "chunk-gc-tick-interval", comment = "The tick interval used to cleanup all inactive chunks in a world. "
-                                                         + "\nSet to 0 to disable which restores vanilla handling. (Default: 20)")
-    private int chunkGCTickInterval = 20;
+                                                         + "\nSet to 0 to disable which restores vanilla handling. (Default: 1)")
+    private int chunkGCTickInterval = 1;
 
     @Setting(value = "max-chunk-unloads-per-tick", comment = "The maximum number of queued unloaded chunks that will be unloaded in a single tick. "
                                                              + "\nNote: With the chunk gc enabled, this setting only applies to the ticks "

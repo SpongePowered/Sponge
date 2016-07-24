@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 @Mixin(World.class)
 public abstract class MixinWorld_Lighting {
@@ -77,7 +76,7 @@ public abstract class MixinWorld_Lighting {
     @Inject(method = "checkLightFor", at = @At(value = "HEAD"), cancellable = true)
     public void onCheckLightFor(EnumSkyBlock lightType, BlockPos pos, CallbackInfoReturnable<Boolean> callbackInfo) {
         if (!this.isRemote) {
-            final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
+            final Chunk chunk = this.chunkProvider.getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4);
             if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
                 callbackInfo.setReturnValue(false);
                 callbackInfo.cancel();

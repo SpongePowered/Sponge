@@ -639,7 +639,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             posX = fromPos.getX();
             posZ = fromPos.getZ();
         }
-        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(posX >> 4, posZ >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = this.getChunkProvider().getLoadedChunk(posX >> 4, posZ >> 4);
         if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
             return false;
         }
@@ -666,7 +666,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             posX = fromPos.getX();
             posZ = fromPos.getZ();
         }
-        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(posX >> 4, posZ >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = this.getChunkProvider().getLoadedChunk(posX >> 4, posZ >> 4);
         if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
             return false;
         }
@@ -723,8 +723,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "tick", at = @At("RETURN"))
     public void onTickEnd(CallbackInfo ci) {
         // Clean up any leaked chunks
-        // TODO -blood needs to look at chunk GC'ing for 1.9.4
-//        this.doChunkGC();
+        this.doChunkGC();
     }
 
     // Chunk GC
@@ -1291,7 +1290,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         xEnd = xEnd >> 4;
         zEnd = zEnd >> 4;
 
-        Chunk base = (Chunk) ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(xStart, zStart);
+        Chunk base = (Chunk) this.getChunkProvider().getLoadedChunk(xStart, zStart);
         if (base == null) {
             return false;
         }
@@ -1324,7 +1323,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         return true;
     }
-
 
     @Override
     public WorldStorage getWorldStorage() {

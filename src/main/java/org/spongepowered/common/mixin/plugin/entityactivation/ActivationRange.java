@@ -64,7 +64,6 @@ import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.entity.projectile.IMixinEntityArrow;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 
 import java.util.HashMap;
@@ -240,8 +239,7 @@ public class ActivationRange {
             for (int i1 = i; i1 <= j; ++i1) {
                 for (int j1 = k; j1 <= l; ++j1) {
                     WorldServer worldserver = (WorldServer) world;
-                    IMixinChunkProviderServer chunkProvider = (IMixinChunkProviderServer) worldserver.getChunkProvider();
-                    Chunk chunk = chunkProvider.getChunkIfLoaded(i1, j1);
+                    Chunk chunk = worldserver.getChunkProvider().getLoadedChunk(i1, j1);
                     if (chunk != null) {
                         activateChunkEntities(player, chunk);
                     }
@@ -409,8 +407,7 @@ public class ActivationRange {
         // Make sure not on edge of unloaded chunk
         int x = MathHelper.floor_double(entity.posX);
         int z = MathHelper.floor_double(entity.posZ);
-        IMixinChunkProviderServer chunkProvider = (IMixinChunkProviderServer) ((WorldServer) entity.worldObj).getChunkProvider();
-        Chunk chunk = isActive ? chunkProvider.getChunkIfLoaded(x >> 4, z >> 4) : null;
+        Chunk chunk = isActive ? ((WorldServer) entity.worldObj).getChunkProvider().getLoadedChunk(x >> 4, z >> 4) : null;
         if (isActive && chunk != null && !entity.worldObj.isAreaLoaded(new BlockPos(x, 0, z), 16)) {
             isActive = false;
         }

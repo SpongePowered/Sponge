@@ -91,7 +91,6 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -193,7 +192,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
         for (Direction direction : directions) {
             Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
-            net.minecraft.world.chunk.Chunk neighbor = ((IMixinChunkProviderServer) this.worldObj.getChunkProvider()).getChunkIfLoaded
+            net.minecraft.world.chunk.Chunk neighbor = this.worldObj.getChunkProvider().getLoadedChunk
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
                 this.setNeighbor(direction, (Chunk) neighbor);
@@ -211,7 +210,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
         for (Direction direction : directions) {
             Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
-            net.minecraft.world.chunk.Chunk neighbor = ((IMixinChunkProviderServer) this.worldObj.getChunkProvider()).getChunkIfLoaded
+            net.minecraft.world.chunk.Chunk neighbor = this.worldObj.getChunkProvider().getLoadedChunk
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
                 this.setNeighbor(direction, null);
