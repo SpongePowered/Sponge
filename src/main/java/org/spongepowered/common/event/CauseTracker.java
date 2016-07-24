@@ -822,6 +822,7 @@ public final class CauseTracker {
                     this.capturedSpawnedEntities.clear();
                     this.capturedSpawnedEntityItems.clear();
                 }
+                this.causeTrackerBlockTimer.stopTiming();
                 return false;
             }
         }
@@ -869,6 +870,7 @@ public final class CauseTracker {
                     this.capturedSpawnedEntities.clear();
                     this.capturedSpawnedEntityItems.clear();
                 }
+                this.causeTrackerBlockTimer.stopTiming();
                 return false;
             } else {
                 for (Transaction<BlockSnapshot> transaction : blockEvent.getTransactions()) {

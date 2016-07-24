@@ -32,7 +32,6 @@ import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -532,6 +531,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEvent(Cause.of(NamedCause.source(this)), this));
         // The chunk GC handles all queuing for chunk unloads so we cancel here to avoid it during a save.
         if (this.chunkGCTickInterval > 0) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "addBlockEvent", at = @At("HEAD"), cancellable = true)
+    public void addBlockEvent(BlockPos pos, Block blockIn, int eventID, int eventParam, CallbackInfo ci) {
+        // We fire a Pre event to make sure our captures do not get stuck in a loop.
+        // This is very common with pistons as they add block events while blocks are being notified.
+        if (SpongeCommonEventFactory.handleChangeBlockEventPre(this.mcWorldServer, pos)) {
             ci.cancel();
         }
     }

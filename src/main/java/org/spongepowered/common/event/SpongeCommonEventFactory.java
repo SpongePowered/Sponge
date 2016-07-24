@@ -81,6 +81,7 @@ import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
@@ -126,7 +127,6 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
@@ -563,6 +563,27 @@ public class SpongeCommonEventFactory {
                 (World) world);
         SpongeImpl.postEvent(event);
         return event;
+    }
+
+    public static boolean handleChangeBlockEventPre(net.minecraft.world.World worldIn, BlockPos pos) {
+        if (worldIn.isRemote) {
+            return false;
+        }
+
+        final CauseTracker causeTracker = ((IMixinWorld) worldIn).getCauseTracker();
+        if (causeTracker.getCurrentCause() == null) {
+            // safety measure
+            return false;
+        }
+
+        Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
+        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(causeTracker.getCurrentCause(), ImmutableList.of(location), (World) worldIn);
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            return true;
+        }
+
+        return false;
     }
 
     @SuppressWarnings("rawtypes")
