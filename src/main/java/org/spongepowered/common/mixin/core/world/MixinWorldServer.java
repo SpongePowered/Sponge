@@ -657,24 +657,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.onUpdateTick(block, worldIn, pos, state, rand);
     }
 
-    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target= "Lnet/minecraft/world/WorldServer;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"))
-    public boolean onTickUpdateIsAreaLoaded(WorldServer worldIn, BlockPos fromPos, BlockPos toPos) {
-        int posX = fromPos.getX() + 8;
-        int posZ = fromPos.getZ() + 8;
-        // Forge passes the same block position for forced chunks
-        if (fromPos.equals(toPos)) {
-            posX = fromPos.getX();
-            posZ = fromPos.getZ();
-        }
-        final net.minecraft.world.chunk.Chunk chunk = this.getChunkProvider().getLoadedChunk(posX >> 4, posZ >> 4);
-        if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
-            return false;
-        }
-
-        return true;
-    }
-
-
     // This ticks pending updates to blocks, Requires mixin for NextTickListEntry so we use the correct tracking
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
