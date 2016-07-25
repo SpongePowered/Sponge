@@ -185,4 +185,15 @@ public final class SpongeImplHooks {
         return world.getPlayerChunkMap().getChunkIterator();
     }
 
+    public static int getChunkPosLight(IBlockState blockState, net.minecraft.world.World worldObj, BlockPos blockpos$mutableblockpos) {
+        return blockState.getLightValue();
+    }
+
+    public static int getChunkBlockLightOpacity(IBlockState blockState, net.minecraft.world.World worldObj, BlockPos pos) {
+        return blockState.getLightOpacity();
+    }
+
+    public static int getChunkBlockLightOpacity(IBlockState state, net.minecraft.world.World worldObj, int x, int y, int z) {
+        return 0;
+    }
 }

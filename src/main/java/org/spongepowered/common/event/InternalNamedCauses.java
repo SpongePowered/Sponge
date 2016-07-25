@@ -111,4 +111,11 @@ public final class InternalNamedCauses {
         public static final String FROM_TRANSFORM = "FromTransform";
         public static final String TARGET_TRANSFORM = "TargetTransform";
     }
+
+    public static final class Piston {
+
+        public static final String POSITION = "pos";
+        public static final String DIRECTION = "direction";
+        public static final String DUMMY_CALLBACK = "dummyCallback";
+    }
 }

@@ -49,6 +49,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
@@ -69,6 +70,7 @@ import org.spongepowered.common.world.BlockChange;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -86,9 +88,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private final ImmutableList<ImmutableDataManipulator<?, ?>> extraData;
     private final ImmutableMap<Key<?>, ImmutableValue<?>> keyValueMap;
     private final ImmutableSet<ImmutableValue<?>> valueSet;
-    private final ImmutableList<ImmutableDataManipulator<?, ?>> blockData;
-    private final ImmutableMap<Key<?>, ImmutableValue<?>> blockKeyValueMap;
-    private final ImmutableSet<ImmutableValue<?>> blockValueSet;
+    private ImmutableList<ImmutableDataManipulator<?, ?>> blockData;
+    private ImmutableMap<Key<?>, ImmutableValue<?>> blockKeyValueMap;
+    private ImmutableSet<ImmutableValue<?>> blockValueSet;
     @Nullable final NBTTagCompound compound;
     @Nullable final UUID creatorUniqueId;
     @Nullable final UUID notifierUniqueId;
@@ -113,15 +115,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         this.notifierUniqueId = builder.notifierUuid;
         this.pos = checkNotNull(builder.coords);
         this.blockPos = VecHelper.toBlockPos(this.pos);
-        final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> mapBuilder = ImmutableMap.builder();
-        for (ImmutableValue<?> value : this.blockState.getValues()) {
-            mapBuilder.put(value.getKey(), value);
-        }
-        this.blockKeyValueMap = mapBuilder.build();
-        this.blockValueSet = ImmutableSet.copyOf(this.blockKeyValueMap.values());
-        this.blockData = ImmutableList.copyOf(this.blockState.getContainers());
 
         // This avoids cross contamination of block state based values versus tile entity values.
+        // TODO - delegate this to NbtProcessors when schematics are merged.
         final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> tileBuilder = ImmutableMap.builder();
         this.extraData = builder.manipulators == null ? ImmutableList.<ImmutableDataManipulator<?, ?>>of() : ImmutableList.copyOf(builder.manipulators);
         for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
@@ -130,7 +126,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             }
         }
         this.keyValueMap = tileBuilder.build();
-        this.valueSet = ImmutableSet.copyOf(this.keyValueMap.values());
+        this.valueSet = this.keyValueMap.isEmpty() ? ImmutableSet.of() : ImmutableSet.copyOf(this.keyValueMap.values());
         this.compound = builder.compound == null ? null : builder.compound.copy();
 
     }
@@ -236,7 +232,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators() {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder().addAll(this.blockData).addAll(this.extraData).build();
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder().addAll(this.getBlockManipulators()).addAll(this.extraData).build();
     }
 
     @Override
@@ -381,17 +377,42 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
         if (this.keyValueMap.containsKey(key)) {
             return Optional.of((E) this.keyValueMap.get(key).get());
-        } else if (this.blockKeyValueMap.containsKey(key)) {
+        } else if (getKeyValueMap().containsKey(key)) {
             return Optional.of((E) this.blockKeyValueMap.get(key).get());
         }
         return Optional.empty();
+    }
+
+    private ImmutableMap<Key<?>, ImmutableValue<?>> getKeyValueMap() {
+        if (this.blockKeyValueMap == null) {
+            final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> mapBuilder = ImmutableMap.builder();
+            for (ImmutableValue<?> value : this.blockState.getValues()) {
+                mapBuilder.put(value.getKey(), value);
+            }
+            this.blockKeyValueMap = mapBuilder.build();
+        }
+        return this.blockKeyValueMap;
+    }
+
+    private ImmutableSet<ImmutableValue<?>> getValueSet() {
+        if (this.blockValueSet == null) {
+            this.blockValueSet = ImmutableSet.copyOf(getKeyValueMap().values());
+        }
+        return this.blockValueSet;
+    }
+
+    private ImmutableList<ImmutableDataManipulator<?, ?>> getBlockManipulators() {
+        if (this.blockData == null) {
+            this.blockData = ImmutableList.copyOf(this.blockState.getContainers());
+        }
+        return this.blockData;
     }
 
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
         if (this.keyValueMap.containsKey(key)) {
             return Optional.of((V) this.keyValueMap.get(key).asMutable());
-        } else if (this.blockKeyValueMap.containsKey(key)) {
+        } else if (getKeyValueMap().containsKey(key)) {
             return Optional.of((V) this.blockKeyValueMap.get(key).asMutable());
         }
         return Optional.empty();
@@ -400,7 +421,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public boolean supports(Key<?> key) {
         checkNotNull(key, "Key");
-        return this.keyValueMap.containsKey(key) || this.blockKeyValueMap.containsKey(key);
+        return this.keyValueMap.containsKey(key) || getKeyValueMap().containsKey(key);
     }
 
     @Override
@@ -410,12 +431,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public Set<Key<?>> getKeys() {
-        return ImmutableSet.<Key<?>>builder().addAll(this.keyValueMap.keySet()).addAll(this.blockKeyValueMap.keySet()).build();
+        return ImmutableSet.<Key<?>>builder().addAll(getKeyValueMap().keySet()).addAll(this.blockKeyValueMap.keySet()).build();
     }
 
     @Override
     public Set<ImmutableValue<?>> getValues() {
-        return ImmutableSet.<ImmutableValue<?>>builder().addAll(this.valueSet).addAll(this.blockValueSet).build();
+        return ImmutableSet.<ImmutableValue<?>>builder().addAll(this.valueSet).addAll(getValueSet()).build();
     }
 
     public Optional<NBTTagCompound> getCompound() {
@@ -486,7 +507,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                Objects.equal(this.worldUniqueId, that.worldUniqueId) &&
                Objects.equal(this.pos, that.pos) &&
                Objects.equal(this.extraData, that.extraData) &&
-               Objects.equal(this.blockData, that.blockData) &&
                Objects.equal(this.compound, that.compound);
     }
 
@@ -497,7 +517,6 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 this.worldUniqueId,
                 this.pos,
                 this.extraData,
-                this.blockData,
                 this.changeFlag,
                 this.compound);
     }

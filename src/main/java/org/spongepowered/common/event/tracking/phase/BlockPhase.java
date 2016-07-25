@@ -27,11 +27,17 @@ package org.spongepowered.common.event.tracking.phase;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.function.BlockFunction;
+import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
+import org.spongepowered.common.event.tracking.phase.util.MutableWrapper;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
+
+import java.util.List;
 
 public final class BlockPhase extends TrackingPhase {
 
@@ -40,7 +46,10 @@ public final class BlockPhase extends TrackingPhase {
         RESTORING_BLOCKS,
         DISPENSE,
         BLOCK_DROP_ITEMS,
-        BLOCK_ADDED, BLOCK_BREAK;
+        BLOCK_ADDED,
+        BLOCK_BREAK,
+        PISTON_MOVING,
+        ;
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
@@ -74,6 +83,7 @@ public final class BlockPhase extends TrackingPhase {
         return currentState != State.RESTORING_BLOCKS;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
         if (state == State.BLOCK_DECAY) {
@@ -99,6 +109,13 @@ public final class BlockPhase extends TrackingPhase {
                     .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DISPENSE.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
+        } else if (state == State.PISTON_MOVING) {
+            final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
+            if (!GeneralFunctions.processBlockCaptures(capturedBlocks, causeTracker, state, phaseContext)) {
+                phaseContext.firstNamed(InternalNamedCauses.Piston.DUMMY_CALLBACK, MutableWrapper.class)
+                        .map(wrapper -> ((MutableWrapper<CallbackInfoReturnable<Boolean>>) wrapper).getObj())
+                        .ifPresent(callback -> callback.setReturnValue(false));
+            }
         }
 
     }
@@ -108,4 +125,5 @@ public final class BlockPhase extends TrackingPhase {
     public boolean isRestoring(IPhaseState state, PhaseContext phaseContext, int updateFlag) {
         return state == State.RESTORING_BLOCKS && (updateFlag & 1) == 0;
     }
+
 }

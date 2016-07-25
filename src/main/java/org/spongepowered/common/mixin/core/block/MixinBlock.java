@@ -38,6 +38,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.IBlockAccess;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -93,6 +94,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
     private boolean hasCollideLogic = false;
     private boolean hasCollideWithStateLogic = false;
+    private boolean requiresLocationCheckForLight = false;
+    private boolean requiresLocationCheckForOpacity = false;
     private Timing timing;
 
     @Shadow private boolean needsRandomTick;
@@ -129,6 +132,28 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             }
         } catch (Throwable ex) {
             // ignore
+        }
+
+        // requiresLocationCheckForLightValue // Forge added method getLightValue that takes a state, world, and position
+        try {
+            Class<?>[] args = {IBlockState.class, IBlockAccess.class, BlockPos.class};
+            Class<?> clazz = this.getClass().getMethod("getLightValue", args).getDeclaringClass();
+            if (!clazz.equals(Block.class)) {
+                this.requiresLocationCheckForLight = true;
+            }
+        } catch (Throwable throwable) {
+            // Ignore
+        }
+
+        // requiresLocationCheckForOpacity // Forge added method getLightValue that takes a state, world, and position
+        try {
+            Class<?>[] args = {IBlockState.class, IBlockAccess.class, BlockPos.class};
+            Class<?> clazz = this.getClass().getMethod("getLightOpacity", args).getDeclaringClass();
+            if (!clazz.equals(Block.class)) {
+                this.requiresLocationCheckForOpacity = true;
+            }
+        } catch (Throwable throwable) {
+            // Ignore
         }
     }
 
@@ -296,5 +321,15 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             this.timing = SpongeTimings.getBlockTiming((net.minecraft.block.Block)(Object) this);
         }
         return this.timing;
+    }
+
+    @Override
+    public boolean requiresLocationCheckForLightValue() {
+        return this.requiresLocationCheckForLight;
+    }
+
+    @Override
+    public boolean requiresLocationCheckForOpacity() {
+        return this.requiresLocationCheckForOpacity;
     }
 }

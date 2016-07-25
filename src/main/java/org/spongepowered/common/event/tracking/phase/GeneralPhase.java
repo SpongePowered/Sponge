@@ -232,13 +232,12 @@ public final class GeneralPhase extends TrackingPhase {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void postDispatch(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwindingContext, PhaseContext postContext) {
         final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlockSupplier().orEmptyList();
         final List<Entity> contextEntities = postContext.getCapturedEntitySupplier().orEmptyList();
-        final List<Entity> contextItems = postContext.getCapturedItemsSupplier().stream()
-                .map(EntityUtil::fromNative)
-                .collect(Collectors.toList());
+        final List<Entity> contextItems = (List<Entity>) (List<?>) postContext.getCapturedItemsSupplier().orEmptyList();
         final List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
         if (contextBlocks.isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty() && invalidTransactions.isEmpty()) {
             return;

@@ -130,11 +130,24 @@ public class PhaseContext {
         return this.isCompleted;
     }
 
+    @Nullable private Class<?> cachedClass;
+    @Nullable private Object cachedObject;
+    @Nullable private String cachedName;
+
     @SuppressWarnings("unchecked")
     public <T> Optional<T> first(Class<T> tClass) {
+        if (this.cachedClass != null && this.cachedClass == tClass) {
+            if (this.cachedObject != null) {
+                return Optional.of((T) this.cachedObject);
+            }
+        }
         for (NamedCause cause : this.contextObjects) {
             if (tClass.isInstance(cause.getCauseObject())) {
-                return Optional.of((T) cause.getCauseObject());
+                Object causeObject = cause.getCauseObject();
+                this.cachedClass = tClass;
+                this.cachedObject = causeObject;
+                this.cachedName = cause.getName();
+                return Optional.of((T) causeObject);
             }
         }
         return Optional.empty();
@@ -142,8 +155,16 @@ public class PhaseContext {
 
     @SuppressWarnings("unchecked")
     public <T> Optional<T> firstNamed(String name, Class<T> tClass) {
+        if (name.equals(this.cachedName) && tClass == this.cachedClass) {
+            if (this.cachedObject != null) {
+                return Optional.of((T) this.cachedObject);
+            }
+        }
         for (NamedCause cause : this.contextObjects) {
             if (cause.getName().equalsIgnoreCase(name) && tClass.isInstance(cause.getCauseObject())) {
+                this.cachedObject = cause.getCauseObject();
+                this.cachedClass = tClass;
+                this.cachedName = name;
                 return Optional.of((T) cause.getCauseObject());
             }
         }
@@ -348,18 +369,18 @@ public class PhaseContext {
                 return false;
             }
             CapturePlayer that = (CapturePlayer) o;
-            return com.google.common.base.Objects.equal(player, that.player);
+            return com.google.common.base.Objects.equal(this.player, that.player);
         }
 
         @Override
         public int hashCode() {
-            return com.google.common.base.Objects.hashCode(player);
+            return com.google.common.base.Objects.hashCode(this.player);
         }
 
         @Override
         public String toString() {
             return com.google.common.base.Objects.toStringHelper(this)
-                    .add("player", player)
+                    .add("player", this.player)
                     .toString();
         }
 

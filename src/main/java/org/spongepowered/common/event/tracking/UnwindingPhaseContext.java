@@ -28,6 +28,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.event.InternalNamedCauses;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 final class UnwindingPhaseContext extends PhaseContext {
@@ -36,26 +37,39 @@ final class UnwindingPhaseContext extends PhaseContext {
         return new UnwindingPhaseContext(state, context);
     }
 
+    private PhaseContext unwindingContext;
+    private IPhaseState unwindingState;
+
     UnwindingPhaseContext(IPhaseState unwindingState, PhaseContext unwindingContext) {
         add(NamedCause.of(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, unwindingContext));
         add(NamedCause.of(InternalNamedCauses.Tracker.UNWINDING_STATE, unwindingState));
+        this.unwindingContext = unwindingContext;
+        this.unwindingState = unwindingState;
     }
 
-
+    @SuppressWarnings("unchecked")
     @Override
     public <T> Optional<T> first(Class<T> tClass) {
-        return Stream.of(super.first(tClass), super.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class).get().first(tClass))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst();
+        if (PhaseContext.class == tClass) {
+            return Optional.of((T) this.unwindingContext);
+        }
+        if (IPhaseState.class == tClass) {
+            return Optional.of((T) this.unwindingState);
+        }
+        return Optional.ofNullable(super.first(tClass).orElseGet(() -> this.unwindingContext.first(tClass).orElse(null)));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T> Optional<T> firstNamed(String name, Class<T> tClass) {
-        return Stream.of(super.firstNamed(name, tClass), super.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class).get().firstNamed(name, tClass))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst();
+        if (PhaseContext.class == tClass) {
+            return Optional.of((T) this.unwindingContext);
+        }
+        if (IPhaseState.class == tClass) {
+            return Optional.of((T) this.unwindingState);
+        }
+        return Optional.ofNullable(super.firstNamed(name, tClass).orElseGet(() -> this.unwindingContext.firstNamed(name, tClass).orElse(null)));
+
     }
 
 }

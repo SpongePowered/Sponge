@@ -59,6 +59,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldProvider;
@@ -121,6 +122,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
@@ -252,6 +254,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
     @Shadow public abstract boolean canBlockFreezeNoWater(BlockPos pos);
     @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
+    @Shadow public abstract boolean canSeeSky(BlockPos pos);
+    @Shadow public abstract int getLightFor(EnumSkyBlock type, BlockPos pos);
 
     // @formatter:on
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -861,6 +865,67 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         return true;
+    }
+
+    /**
+     * @author gabizou - July 25th, 2016
+     * @reason Optimizes several blockstate lookups for getting raw light.
+     *
+     * @param pos The position to get the light for
+     * @param lightType The light type
+     * @return The raw light
+     */
+    @Overwrite
+    private int getRawLight(BlockPos pos, EnumSkyBlock lightType) {
+        if (lightType == EnumSkyBlock.SKY && this.canSeeSky(pos)) {
+            return 15;
+        } else {
+            // Sponge Start - Optimize block light checks
+
+            // Vanilla
+
+            // Block block = this.getBlockState(pos).getBlock();
+            // int i = lightType == EnumSkyBlock.SKY ? 0 : block.getLightValue();
+
+            // Forge
+
+            // Block block = this.getBlockState(pos).getBlock();
+            // int blockLight = block.getLightValue(this, pos);
+            IBlockState blockState = this.getBlockState(pos);
+            int blockLight = SpongeImplHooks.getChunkPosLight(blockState, (net.minecraft.world.World) (Object) this, pos);
+            int i = lightType == EnumSkyBlock.SKY ? 0 : blockLight; // Changed by forge to use the local variable
+            int j = SpongeImplHooks.getBlockLightOpacity(blockState, (net.minecraft.world.World) (Object) this, pos);
+            // Sponge End
+
+            if (j >= 15 && blockLight > 0) {
+                j = 1;
+            }
+
+            if (j < 1) {
+                j = 1;
+            }
+
+            if (j >= 15) {
+                return 0;
+            } else if (i >= 14) {
+                return i;
+            } else {
+                for (EnumFacing enumfacing : EnumFacing.values()) {
+                    BlockPos blockpos = pos.offset(enumfacing);
+                    int k = this.getLightFor(lightType, blockpos) - j;
+
+                    if (k > i) {
+                        i = k;
+                    }
+
+                    if (i >= 14) {
+                        return i;
+                    }
+                }
+
+                return i;
+            }
+        }
     }
 
     /*********************** TIMINGS ***********************/
