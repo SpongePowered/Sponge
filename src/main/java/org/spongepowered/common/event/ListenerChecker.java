@@ -42,9 +42,10 @@ import java.util.function.Predicate;
 
 public class ListenerChecker {
 
+    private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("sponge.debugShouldFire", "").toLowerCase());
+
     private final Class<?> clazz;
     private Map<String, Field> fields = new HashMap<>();
-    private boolean DEBUG = Boolean.parseBoolean(System.getProperty("sponge.debugShouldFire", "").toLowerCase());
 
     private LoadingCache<Class<?>, Optional<Field>> fieldCache = CacheBuilder.newBuilder().build(new CacheLoader<Class<?>, Optional<Field>>() {
 
@@ -70,9 +71,8 @@ public class ListenerChecker {
         return CaseFormat.UPPER_CAMEL.to(CaseFormat.UPPER_UNDERSCORE, name);
     }
 
-    @SuppressWarnings("unchecked")
-    public void registerListenerFor(Class<?> eventClass) {
-        Set<Class<?>> types = (Set<Class<?>>)(Object) TypeToken.of(eventClass).getTypes().rawTypes();
+    public <T> void registerListenerFor(Class<T> eventClass) {
+        Set<Class<? super T>> types = TypeToken.of(eventClass).getTypes().rawTypes();
         for (Class<?> type: types) {
             this.subtypeMappings.getUnchecked(type).add(eventClass);
         }
@@ -93,9 +93,8 @@ public class ListenerChecker {
         this.updateFields(types, c -> true);
     }
 
-    @SuppressWarnings("unchecked")
-    public void unregisterListenerFor(Class<?> eventClass) {
-        Set<Class<?>> types = (Set<Class<?>>)(Object) TypeToken.of(eventClass).getTypes().rawTypes();
+    public <T> void unregisterListenerFor(Class<T> eventClass) {
+        Set<Class<? super T>> types = TypeToken.of(eventClass).getTypes().rawTypes();
         for (Class<?> type: types) {
             this.subtypeMappings.getUnchecked(type).remove(eventClass);
         }
@@ -122,7 +121,7 @@ public class ListenerChecker {
         }
     }
 
-    public void updateFields(Collection<Class<?>> classes, Predicate<Class<?>> enable) {
+    public <T> void updateFields(Collection<Class<? super T>> classes, Predicate<Class<?>> enable) {
         for (Class<?> clazz: classes) {
             this.fieldCache.getUnchecked(clazz).ifPresent(f -> {
                 boolean isEnabled = enable.test(clazz);
