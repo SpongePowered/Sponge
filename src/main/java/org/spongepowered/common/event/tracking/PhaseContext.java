@@ -513,7 +513,6 @@ public class PhaseContext {
         }
     }
 
-
     public static final class CaptureFlag {
 
         @Nullable private BlockChangeFlag flag;
