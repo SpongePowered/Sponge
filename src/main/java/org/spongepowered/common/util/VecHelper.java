@@ -32,7 +32,7 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Rotations;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.math.AxisAlignedBB;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.Location;
 

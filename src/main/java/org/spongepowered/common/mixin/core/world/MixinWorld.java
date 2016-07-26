@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector2d;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
@@ -80,6 +79,7 @@ import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -265,7 +265,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean canSeeSky(BlockPos pos);
     @Shadow public abstract int getLightFor(EnumSkyBlock type, BlockPos pos);
     @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(AxisAlignedBB bb);
-    @Shadow public abstract List<AxisAlignedBB> getCollidingBoundingBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
+    @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
 
     // @formatter:on
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -711,13 +711,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkBlockBounds(x, y, z);
         final BlockPos pos = new BlockPos(x, y, z);
         final IBlockState state = getBlockState(pos);
-        final Block type = state.getBlock();
-        type.setBlockBoundsBasedOnState((IBlockAccess) this, pos);
+        final AxisAlignedBB box = state.getBoundingBox((IBlockAccess) this, pos);
         try {
-            return Optional.of(new AABB(
-                new Vector3d(type.getBlockBoundsMinX() + x, type.getBlockBoundsMinY() + y, type.getBlockBoundsMinZ() + z),
-                new Vector3d(type.getBlockBoundsMaxX() + x, type.getBlockBoundsMaxY() + y, type.getBlockBoundsMaxZ() + z)
-            ));
+            return Optional.of(VecHelper.toSponge(box));
         } catch (IllegalArgumentException exception) {
             // Box is degenerate
             return Optional.empty();
@@ -737,7 +733,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
-        return getCollidingBoundingBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMC(box)).stream().map(VecHelper::toSponge).
+        return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMC(box)).stream().map(VecHelper::toSponge).
             collect(Collectors.toSet());
     }
 
@@ -833,7 +829,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 if (nearIntersections != null) {
                     nearIntersections
                             .getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
-
                 }
                 // Remove the chunk from the distance
                 remainingDistance -= nextT - Math.max(0, currentT);

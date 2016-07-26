@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.FullBlockSelectionBoxProperty;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
@@ -40,7 +40,7 @@ public class FullBlockSelectionBoxPropertyStore extends AbstractBlockPropertySto
     }
 
     @Override
-    protected Optional<FullBlockSelectionBoxProperty> getForBlock(Block block) {
+    protected Optional<FullBlockSelectionBoxProperty> getForBlock(IBlockState block) {
         return block.isFullCube() ? TRUE : FALSE;
     }
 
