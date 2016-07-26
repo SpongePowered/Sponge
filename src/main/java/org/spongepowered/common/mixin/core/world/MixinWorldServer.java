@@ -115,6 +115,8 @@ import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -184,6 +186,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @Mixin(WorldServer.class)
+@Implements(@Interface(iface = IMixinWorldServer.class, prefix = "worldServer$", unique = true))
 public abstract class MixinWorldServer extends MixinWorld implements IMixinWorldServer {
 
     private static final String PROFILER_SS = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V";
@@ -1147,11 +1150,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     // IMixinWorld method
     @Override
-    public void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState oldState, IBlockState newState, int flags) {
-        if ((flags & 2) != 0 && (chunk == null || chunk.isPopulated())) {
-            this.notifyBlockUpdate(pos, oldState, newState, flags);
-        }
-
+    public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {
         if ((flags & 1) != 0) {
             this.notifyNeighborsRespectDebug(pos, newState.getBlock());
 

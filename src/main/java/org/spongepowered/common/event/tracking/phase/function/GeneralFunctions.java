@@ -299,8 +299,13 @@ public class GeneralFunctions {
             proxyBlockAccess.proceed();
             phaseState.handleBlockChangeWithUser(oldBlockSnapshot.blockChange, minecraftWorld, transaction, phaseContext);
 
-            if (changeFlag.updateNeighbors()) {
-                causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, minecraftWorld.getChunkFromBlockCoords(pos), originalState, newState, oldBlockSnapshot.getUpdateFlag());
+            final int minecraftChangeFlag = oldBlockSnapshot.getUpdateFlag();
+            if (((minecraftChangeFlag & 2) != 0)) { // Always try to notify clients of the change.
+                causeTracker.getMinecraftWorld().notifyBlockUpdate(pos, originalState, newState, minecraftChangeFlag);
+            }
+
+            if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
+                causeTracker.getMixinWorld().spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, oldBlockSnapshot.getUpdateFlag());
             }
 
 

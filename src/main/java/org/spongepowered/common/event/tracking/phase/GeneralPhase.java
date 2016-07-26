@@ -395,8 +395,12 @@ public final class GeneralPhase extends TrackingPhase {
 
             unwindingState.handleBlockChangeWithUser(oldBlockSnapshot.blockChange, minecraftWorld, transaction, unwindingPhaseContext);
 
-            causeTracker.getMixinWorld()
-                    .markAndNotifyNeighbors(pos, minecraftWorld.getChunkFromBlockCoords(pos), originalState, newState, updateFlag);
+            final int minecraftChangeFlag = oldBlockSnapshot.getUpdateFlag();
+            if (((minecraftChangeFlag & 2) != 0)) {
+                causeTracker.getMinecraftWorld().notifyBlockUpdate(pos, originalState, newState, minecraftChangeFlag);
+            }
+
+            causeTracker.getMixinWorld().spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, updateFlag);
 
             capturedBlockSupplier.ifPresentAndNotEmpty(blocks -> {
                 final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);

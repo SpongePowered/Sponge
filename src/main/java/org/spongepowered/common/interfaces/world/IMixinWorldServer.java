@@ -29,7 +29,6 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -39,8 +38,6 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
-
-import javax.annotation.Nullable;
 
 public interface IMixinWorldServer extends IMixinWorld {
 
@@ -58,7 +55,7 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     void updateRotation(Entity entityIn);
 
-    void markAndNotifyNeighbors(BlockPos pos, @Nullable Chunk chunk, IBlockState oldState, IBlockState newState, int flags);
+    void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
 
     boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag);
 
