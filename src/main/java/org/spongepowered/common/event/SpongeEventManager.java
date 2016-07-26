@@ -28,9 +28,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.TimingsManager;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
@@ -39,24 +38,24 @@ import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.event.EventManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 import javax.inject.Inject;
@@ -70,7 +69,7 @@ public class SpongeEventManager implements EventManager {
     private final PluginManager pluginManager;
     private final DefineableClassLoader classLoader = new DefineableClassLoader(getClass().getClassLoader());
     private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
-            new FilterFactory("org.spongepowered.common.event.filters", classLoader), classLoader);
+            new FilterFactory("org.spongepowered.common.event.filters", this.classLoader), this.classLoader);
     private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent = HashMultimap.create();
     private final Set<Object> registeredListeners = Sets.newHashSet();
 
@@ -82,25 +81,42 @@ public class SpongeEventManager implements EventManager {
      * removed.</p>
      */
     private final LoadingCache<Class<? extends Event>, RegisteredListener.Cache> handlersCache =
-            CacheBuilder.newBuilder().build(new CacheLoader<Class<? extends Event>, RegisteredListener.Cache>() {
-                @Override
-                public RegisteredListener.Cache load(Class<? extends Event> eventClass) throws Exception {
-                    return bakeHandlers(eventClass);
-                }
-            });
+            Caffeine.newBuilder().initialCapacity(150).build((eventClass) -> bakeHandlers(eventClass));
 
     @Inject
     public SpongeEventManager(PluginManager pluginManager) {
         this.pluginManager = checkNotNull(pluginManager, "pluginManager");
+        
+        // Caffeine offers no control over the concurrency level of the
+        // ConcurrentHashMap which backs the cache. By default this concurrency
+        // level is 16. We replace the backing map before any use can occur
+        // a new ConcurrentHashMap with a concurrency level of 1
+        try {
+            // Cache impl class is UnboundedLocalLoadingCache which extends
+            // UnboundedLocalManualCache
+            
+            // UnboundedLocalManualCache has a field 'cache' with an
+            // UnboundedLocalCache which contains the actual backing map
+            Field innerCache = this.handlersCache.getClass().getSuperclass().getDeclaredField("cache");
+            innerCache.setAccessible(true);
+            Object innerCacheValue = innerCache.get(this.handlersCache);
+            Class<?> innerCacheClass = innerCacheValue.getClass(); // UnboundedLocalCache
+            Field cacheData = innerCacheClass.getDeclaredField("data");
+            cacheData.setAccessible(true);
+            ConcurrentHashMap<Class<? extends Event>, RegisteredListener.Cache> newBackingData = new ConcurrentHashMap<>(150, 0.75f, 1);
+            cacheData.set(innerCacheValue, newBackingData);
+        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+            SpongeImpl.getLogger().warn("Failed to set event cache backing array, type was " + this.handlersCache.getClass().getName());
+            SpongeImpl.getLogger().warn("  Caused by: " + e.getClass().getName() + ": " + e.getMessage());
+        }
     }
 
-    RegisteredListener.Cache bakeHandlers(Class<?> rootEvent) {
+    <T extends Event> RegisteredListener.Cache bakeHandlers(Class<T> rootEvent) {
         List<RegisteredListener<?>> handlers = Lists.newArrayList();
-        @SuppressWarnings({"unchecked", "rawtypes"})
-        Set<Class<?>> types = (Set) TypeToken.of(rootEvent).getTypes().rawTypes();
+        Set<Class<? super T>> types = TypeToken.of(rootEvent).getTypes().rawTypes();
 
         synchronized (this.lock) {
-            for (Class<?> type : types) {
+            for (Class<? super T> type : types) {
                 if (Event.class.isAssignableFrom(type)) {
                     handlers.addAll(this.handlersByEvent.get(type));
                 }
@@ -161,7 +177,7 @@ public class SpongeEventManager implements EventManager {
 
     // Override in SpongeModEventManager
     protected boolean hasAnyListeners(Class<? extends Event> clazz) {
-        return !this.handlersCache.getUnchecked(clazz).getListeners().isEmpty();
+        return !this.handlersCache.get(clazz).getListeners().isEmpty();
     }
 
     public void registerListener(PluginContainer plugin, Object listenerObject) {
@@ -275,7 +291,7 @@ public class SpongeEventManager implements EventManager {
     }
 
     protected RegisteredListener.Cache getHandlerCache(Event event) {
-        return this.handlersCache.getUnchecked(checkNotNull(event, "event").getClass());
+        return this.handlersCache.get(checkNotNull(event, "event").getClass());
     }
 
     @SuppressWarnings("unchecked")
