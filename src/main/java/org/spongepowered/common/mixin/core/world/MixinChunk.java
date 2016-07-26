@@ -1056,11 +1056,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             }
             // Check that the entity isn't too far away
             final Tuple<Vector3d, Vector3d> intersection = optionalIntersection.get();
-            if (intersection.getFirst().sub(start).lengthSquared() > distance * distance) {
+            final double distanceSquared = intersection.getFirst().sub(start).lengthSquared();
+            if (distanceSquared > distance * distance) {
                 continue;
             }
             // Now test the filter on the entity and intersection
-            final EntityHit hit = new EntityHit(spongeEntity, intersection.getFirst(), intersection.getSecond());
+            final EntityHit hit = new EntityHit(spongeEntity, intersection.getFirst(), intersection.getSecond(), Math.sqrt(distanceSquared));
             if (!filter.test(hit)) {
                 continue;
             }
