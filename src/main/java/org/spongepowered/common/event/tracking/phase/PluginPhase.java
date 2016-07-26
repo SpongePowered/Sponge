@@ -169,6 +169,96 @@ public final class PluginPhase extends TrackingPhase {
                 context.getCapturedPlayerSupplier().addPlayer(playerMP);
             }
         },
+        /**
+         * A specialized phase for forge event listeners during pre tick, may need to do the same
+         * if SpongeAPI adds pre tick events.
+         */
+        PRE_SERVER_TICK_LISTENER() {
+            @Override
+            public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+                context.getCapturedPlayer().ifPresent(player -> builder.named(NamedCause.notifier(player)));
+            }
+
+            @Override
+            public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+                final Object listener = phaseContext.getSource(Object.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
+
+                phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
+                    if (SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().reportWorldTickDifferences()) {
+                        logWarningOfDifferentWorldchanges(causeTracker, listener);
+                    }
+                    GeneralFunctions.processBlockCaptures(blocks, causeTracker, this, phaseContext);
+                });
+            }
+
+            @Override
+            public void assignEntityCreator(PhaseContext context, Entity entity) {
+                context.getCapturedPlayer()
+                        .ifPresent(player -> EntityUtil.toMixin(entity)
+                                .trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId())
+                        );
+            }
+
+            @Override
+            public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                    WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+                context.getCapturedPlayer().ifPresent(player ->
+                        ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
+                                .setBlockNotifier(notifyPos, player.getUniqueId())
+                );
+            }
+
+            @Override
+            public void capturePlayerUsingStackToBreakBlocks(PhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
+                context.getCapturedPlayerSupplier().addPlayer(playerMP);
+            }
+        },
+        /**
+         * A specialized phase for forge event listeners during pre tick, may need to do the same
+         * if SpongeAPI adds pre tick events.
+         */
+        POST_SERVER_TICK_LISTENER() {
+            @Override
+            public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+                context.getCapturedPlayer().ifPresent(player -> builder.named(NamedCause.notifier(player)));
+            }
+
+            @Override
+            public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+                final Object listener = phaseContext.getSource(Object.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
+
+                phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
+                    if (SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().reportWorldTickDifferences()) {
+                        logWarningOfDifferentWorldchanges(causeTracker, listener);
+                    }
+                    GeneralFunctions.processBlockCaptures(blocks, causeTracker, this, phaseContext);
+                });
+            }
+
+            @Override
+            public void assignEntityCreator(PhaseContext context, Entity entity) {
+                context.getCapturedPlayer()
+                        .ifPresent(player -> EntityUtil.toMixin(entity)
+                                .trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId())
+                        );
+            }
+
+            @Override
+            public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+                    WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+                context.getCapturedPlayer().ifPresent(player ->
+                        ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
+                                .setBlockNotifier(notifyPos, player.getUniqueId())
+                );
+            }
+
+            @Override
+            public void capturePlayerUsingStackToBreakBlocks(PhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
+                context.getCapturedPlayerSupplier().addPlayer(playerMP);
+            }
+        },
         ;
 
         private static void logWarningOfDifferentWorldchanges(CauseTracker causeTracker, IMixinWorldTickEvent worldTickEvent, Object listener) {
@@ -180,6 +270,20 @@ public final class PluginPhase extends TrackingPhase {
             printer.hr();
             printer.add("Providing information of the event:");
             printer.add("%s : %s", "Event world", worldTickEvent.getWorld());
+            printer.addWrapped("%s : %s", "Changed world", causeTracker.getMinecraftWorld());
+            printer.addWrapped("%s : %s", "Listener", listener);
+            printer.add("Stacktrace:");
+            printer.add(new Exception());
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+        }
+        private static void logWarningOfDifferentWorldchanges(CauseTracker causeTracker, Object listener) {
+            final PrettyPrinter printer = new PrettyPrinter(50).add("Changing a different World than expected!!").centre().hr();
+            printer.add("Sponge is going to process the block changes as normal, however, a mod seems to be changing");
+            printer.add("a world during a general server tick event! If you do not wish to see this");
+            printer.add("message, you may disable this check in the <gamedir>/config/sponge/global.conf under");
+            printer.add("cause-tracker.report-different-world-changes = false");
+            printer.hr();
+            printer.add("Providing information of the event:");
             printer.addWrapped("%s : %s", "Changed world", causeTracker.getMinecraftWorld());
             printer.addWrapped("%s : %s", "Listener", listener);
             printer.add("Stacktrace:");
@@ -276,5 +380,10 @@ public final class PluginPhase extends TrackingPhase {
         if (state instanceof PluginPhase.Listener) {
             ((Listener) state).capturePlayerUsingStackToBreakBlocks(context, playerMP, itemStack);
         }
+    }
+
+    @Override
+    public boolean handlesOwnPhaseCompletion(IPhaseState state) {
+        return state == State.BLOCK_WORKER;
     }
 }

@@ -275,12 +275,13 @@ public final class CauseTracker {
     public void notifyBlockOfStateChange(final BlockPos notifyPos, final Block sourceBlock, @Nullable final BlockPos sourcePos) {
         final IBlockState iblockstate = this.targetWorld.getBlockState(notifyPos);
 
-        final PhaseData peek = this.getStack().peek(); // Sponge
-
         try {
             // Sponge start - prepare notification
-            final IPhaseState state = peek.state;
-            state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos, this.targetWorld, PlayerTracker.Type.NOTIFIER);
+            if (CauseTracker.ENABLED) {
+                final PhaseData peek = this.getStack().peek();
+                final IPhaseState state = peek.state;
+                state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos, this.targetWorld, PlayerTracker.Type.NOTIFIER);
+            }
             // Sponge End
 
             iblockstate.getBlock().neighborChanged(iblockstate, this.targetWorld, notifyPos, sourceBlock);
@@ -358,6 +359,46 @@ public final class CauseTracker {
         }
 
         if (!minecraftWorld.isRemote && (flags & 1) != 0) {
+            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
+
+            if (newState.hasComparatorInputOverride()) {
+                minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
+            }
+        }
+
+        return true;
+    }
+
+    public boolean setBlockStateWithFlag(BlockPos pos, IBlockState newState, BlockChangeFlag flag) {
+        final net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
+        final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
+        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+        final Block newBlock = newState.getBlock();
+        // Sponge Start - Up to this point, we've copied exactly what Vanilla minecraft does.
+        final IBlockState currentState = chunk.getBlockState(pos);
+
+        if (currentState == newState) {
+            // Some micro optimization in case someone is trying to set the new state to the same as current
+            return false;
+        }
+
+        // Sponge End - continue with vanilla mechanics
+        final IBlockState iblockstate = mixinChunk.setBlockState(pos, newState, currentState, null, flag);
+
+        if (iblockstate == null) {
+            return false;
+        }
+        if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
+            minecraftWorld.theProfiler.startSection("checkLight");
+            minecraftWorld.checkLight(pos);
+            minecraftWorld.theProfiler.endSection();
+        }
+
+        if (chunk.isPopulated()) {
+            minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, flag.updateNeighbors() ? 3 : 2);
+        }
+
+        if (flag.updateNeighbors()) { // Sponge - remove the isRemote check
             minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
 
             if (newState.hasComparatorInputOverride()) {
@@ -489,46 +530,5 @@ public final class CauseTracker {
 
             return true;
         }
-    }
-
-
-    public boolean setBlockStateWithFlag(BlockPos pos, IBlockState newState, BlockChangeFlag flag) {
-        final net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
-        final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
-        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-        final Block newBlock = newState.getBlock();
-        // Sponge Start - Up to this point, we've copied exactly what Vanilla minecraft does.
-        final IBlockState currentState = chunk.getBlockState(pos);
-
-        if (currentState == newState) {
-            // Some micro optimization in case someone is trying to set the new state to the same as current
-            return false;
-        }
-
-        // Sponge End - continue with vanilla mechanics
-        final IBlockState iblockstate = mixinChunk.setBlockState(pos, newState, currentState, null, flag);
-
-        if (iblockstate == null) {
-            return false;
-        }
-        if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
-            minecraftWorld.theProfiler.startSection("checkLight");
-            minecraftWorld.checkLight(pos);
-            minecraftWorld.theProfiler.endSection();
-        }
-
-        if (flag.updateNeighbors() && chunk.isPopulated()) {
-            minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, 3);
-        }
-
-        if (!minecraftWorld.isRemote && flag.updateNeighbors()) {
-            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
-
-            if (newState.hasComparatorInputOverride()) {
-                minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
-            }
-        }
-
-        return true;
     }
 }

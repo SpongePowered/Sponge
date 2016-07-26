@@ -688,27 +688,32 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
     public boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
-        final CauseTracker causeTracker = this.getCauseTracker();
-        final PhaseData currentPhase = causeTracker.getStack().peek();
-        final IPhaseState phaseState = currentPhase.state;
-        if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
-            return list.add((BlockEventData) obj);
-        }
-        final BlockEventData blockEventData = (BlockEventData) obj;
-        final PhaseContext context = currentPhase.context;
+        if (CauseTracker.ENABLED) {
+            final CauseTracker causeTracker = this.getCauseTracker();
+            final PhaseData currentPhase = causeTracker.getStack().peek();
+            final IPhaseState phaseState = currentPhase.state;
+            if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
+                return list.add((BlockEventData) obj);
+            }
+            final BlockEventData blockEventData = (BlockEventData) obj;
+            final PhaseContext context = currentPhase.context;
 
-        IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
-        phaseState.getPhase().addNotifierToBlockEvent(phaseState, context, causeTracker, pos, blockEvent);
-        return list.add(blockEventData);
+            IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
+            phaseState.getPhase().addNotifierToBlockEvent(phaseState, context, causeTracker, pos, blockEvent);
+        }
+        return list.add((BlockEventData) obj);
     }
 
     // special handling for Pistons since they use their own event system
     @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
+        if (!CauseTracker.ENABLED) {
+            fireBlockEvent(event);
+        }
         final CauseTracker causeTracker = this.getCauseTracker();
         final IPhaseState phaseState = causeTracker.getStack().peekState();
-        if (!CauseTracker.ENABLED && phaseState.getPhase().ignoresBlockEvent(phaseState)) {
+        if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
             return fireBlockEvent(event);
         }
         return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event);
@@ -862,12 +867,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final CauseTracker causeTracker = this.getCauseTracker();
         final PhaseData peek = causeTracker.getStack().peek();
         boolean isWorldGen = CauseTracker.ENABLED && peek.state.getPhase().isWorldGeneration(peek.state);
+        boolean handlesOwnCompletion = CauseTracker.ENABLED && peek.state.getPhase().handlesOwnPhaseCompletion(peek.state);
         if (!isWorldGen) {
             checkArgument(cause != null, "Cause cannot be null!");
             checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
             checkArgument(flag != null, "BlockChangeFlag cannot be null!");
         }
-        if (!isWorldGen) {
+        if (!isWorldGen && !handlesOwnCompletion) {
             final PhaseContext context = PhaseContext.start()
                     .add(NamedCause.of(InternalNamedCauses.General.PLUGIN_CAUSE, cause))
                     .addCaptures()
@@ -879,8 +885,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             context.complete();
             causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, context);
         }
-        final boolean state = setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag.updateNeighbors() ? 3 : 2);
-        if (!isWorldGen) {
+        if (handlesOwnCompletion) {
+            peek.context.firstNamed(InternalNamedCauses.General.BLOCK_CHANGE, PhaseContext.CaptureFlag.class)
+                    .ifPresent(captureFlag -> captureFlag.addFlag(flag));
+        }
+        final boolean state = setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
+        if (!isWorldGen && !handlesOwnCompletion) {
             causeTracker.completePhase();
         }
         return state;

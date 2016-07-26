@@ -343,4 +343,8 @@ public abstract class TrackingPhase {
     public boolean isTicking(IPhaseState state) {
         return false;
     }
+
+    public boolean handlesOwnPhaseCompletion(IPhaseState state) {
+        return false;
+    }
 }

@@ -36,6 +36,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
@@ -452,6 +453,45 @@ public class PhaseContext {
 
         public void addPlayer(EntityPlayerMP playerMP) {
             this.player = ((Player) playerMP);
+        }
+    }
+
+
+    public static final class CaptureFlag {
+
+        @Nullable private BlockChangeFlag flag;
+
+        public CaptureFlag() {
+
+        }
+
+        public CaptureFlag(@Nullable BlockChangeFlag flag) {
+
+        }
+
+        public Optional<BlockChangeFlag> getFlag() {
+            return Optional.ofNullable(this.flag);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            CaptureFlag that = (CaptureFlag) o;
+            return flag == that.flag;
+        }
+
+        @Override
+        public int hashCode() {
+            return com.google.common.base.Objects.hashCode(flag);
+        }
+
+        public void addFlag(BlockChangeFlag flag) {
+            this.flag = flag;
         }
     }
 }

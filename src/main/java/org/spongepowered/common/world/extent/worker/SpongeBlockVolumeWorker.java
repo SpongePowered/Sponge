@@ -39,6 +39,7 @@ import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeMapper;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeMerger;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeReducer;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
@@ -159,12 +160,28 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int xMax = this.volume.getBlockMax().getX();
         final int yMax = this.volume.getBlockMax().getY();
         final int zMax = this.volume.getBlockMax().getZ();
+        IMixinWorldServer mixinWorld = null;
+        if (this.volume instanceof IMixinWorldServer) {
+            mixinWorld = (IMixinWorldServer) this.volume;
+        } else if (this.volume instanceof Chunk) {
+            mixinWorld = (IMixinWorldServer) ((Chunk) this.volume).getWorld();
+        }
+        if (CauseTracker.ENABLED && mixinWorld != null) {
+            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
+            causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
+                    .add(NamedCause.source(this))
+                    .add(NamedCause.of(InternalNamedCauses.General.BLOCK_CHANGE, new PhaseContext.CaptureFlag()))
+                    .complete());
+        }
         for (int z = zMin; z <= zMax; z++) {
             for (int y = yMin; y <= yMax; y++) {
                 for (int x = xMin; x <= xMax; x++) {
                     visitor.visit(this.volume, x, y, z);
                 }
             }
+        }
+        if (CauseTracker.ENABLED && mixinWorld != null) {
+            mixinWorld.getCauseTracker().completePhase();
         }
     }
 
