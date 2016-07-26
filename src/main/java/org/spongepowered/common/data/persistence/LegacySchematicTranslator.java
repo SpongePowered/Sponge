@@ -30,7 +30,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.block.tileentity.TileEntityType;
@@ -41,6 +40,7 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.Schematic;
@@ -59,6 +59,8 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
     private static final LegacySchematicTranslator INSTANCE = new LegacySchematicTranslator();
     private static final TypeToken<Schematic> TYPE_TOKEN = TypeToken.of(Schematic.class);
     private static final int MAX_SIZE = 65535;
+
+    private final Cause cause = Cause.source(this).build();
 
     public static LegacySchematicTranslator get() {
         return INSTANCE;
@@ -121,7 +123,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                         palette_id |= add_block[index] << 12;
                     }
                     BlockState block = palette.get(palette_id).get();
-                    buffer.setBlock(x - offsetX, y - offsetY, z - offsetZ, block);
+                    buffer.setBlock(x - offsetX, y - offsetY, z - offsetZ, block, this.cause);
                 }
             }
         }
@@ -171,7 +173,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
         data.set(DataQueries.Schematic.LEGACY_OFFSET_Y, -yMin);
         data.set(DataQueries.Schematic.LEGACY_OFFSET_Z, -zMin);
         SaveIterator itr = new SaveIterator(width, height, length);
-        schematic.getBlockWorker().iterate(itr);
+        schematic.getBlockWorker(this.cause).iterate(itr);
         byte[] blockids = itr.blockids;
         byte[] extraids = itr.extraids;
         byte[] blockdata = itr.blockdata;

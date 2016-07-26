@@ -47,6 +47,7 @@ import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBlockBuffer;
@@ -159,7 +160,7 @@ public interface DefaultedExtent extends Extent {
     default ArchetypeVolume createArchetypeVolume(Vector3i min, Vector3i max, Vector3i origin) {
         Extent area = getExtentView(min, max);
         BimapPalette palette = new BimapPalette();
-        area.getBlockWorker().iterate((v, x, y, z) -> {
+        area.getBlockWorker(SpongeImpl.getImplementationCause()).iterate((v, x, y, z) -> {
             palette.getOrAssign(v.getBlock(x, y, z));
         });
         int ox = origin.getX();
@@ -176,9 +177,9 @@ public interface DefaultedExtent extends Extent {
         Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
         Map<Vector3f, EntityArchetype> entities = Maps.newHashMap();
         // TODO populate these maps
-        area.getBlockWorker().iterate((extent, x, y, z) -> {
+        area.getBlockWorker(SpongeImpl.getImplementationCause()).iterate((extent, x, y, z) -> {
             BlockState state = extent.getBlock(x, y, z);
-            backing.setBlock(x - ox, y - oy, z - oz, state);
+            backing.setBlock(x - ox, y - oy, z - oz, state, SpongeImpl.getImplementationCause());
             Optional<TileEntity> tile = extent.getTileEntity(x, y, z);
             if (tile.isPresent()) {
                 tiles.put(new Vector3i(x - ox, y - oy, z - oz), tile.get().createArchetype());

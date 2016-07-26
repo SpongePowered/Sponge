@@ -22,6 +22,7 @@ import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.schematic.Schematic.Builder;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.util.gen.ByteArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.IntArrayMutableBlockBuffer;
@@ -133,8 +134,8 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             } else {
                 volume = new IntArrayMutableBlockBuffer(this.palette, min, size);
             }
-            this.view.getBlockWorker().iterate((v, x, y, z) -> {
-                volume.setBlock(x, y, z, v.getBlock(x, y, z));
+            this.view.getBlockWorker(SpongeImpl.getImplementationCause()).iterate((v, x, y, z) -> {
+                volume.setBlock(x, y, z, v.getBlock(x, y, z), SpongeImpl.getImplementationCause());
             });
             return new SpongeSchematic(volume, tiles, entities, this.metadata);
         }

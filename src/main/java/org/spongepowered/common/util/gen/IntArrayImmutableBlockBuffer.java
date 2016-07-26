@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
@@ -90,8 +91,8 @@ public class IntArrayImmutableBlockBuffer extends AbstractBlockBuffer implements
     }
 
     @Override
-    public BlockVolumeWorker<? extends ImmutableBlockVolume> getBlockWorker() {
-        return new SpongeBlockVolumeWorker<>(this);
+    public BlockVolumeWorker<? extends ImmutableBlockVolume> getBlockWorker(Cause cause) {
+        return new SpongeBlockVolumeWorker<>(this, cause);
     }
 
     @Override

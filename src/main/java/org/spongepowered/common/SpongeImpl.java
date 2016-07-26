@@ -39,6 +39,7 @@ import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactoryUtils;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.state.GameStateEvent;
 import org.spongepowered.api.event.game.state.GameStoppedEvent;
 import org.spongepowered.api.event.game.state.GameStoppingEvent;
@@ -94,6 +95,7 @@ public final class SpongeImpl {
     private final Game game;
     private final PluginContainer plugin;
     private final PluginContainer minecraftPlugin;
+    private final Cause implementationCause;
 
     @Nullable
     private static List<PluginContainer> components;
@@ -107,6 +109,7 @@ public final class SpongeImpl {
         this.game = checkNotNull(game, "game");
         this.plugin = checkNotNull(plugin, "plugin");
         this.minecraftPlugin = checkNotNull(minecraftPlugin, "minecraftPlugin");
+        this.implementationCause = Cause.source(this.plugin).build();
     }
 
     public static SpongeImpl getInstance() {
@@ -203,4 +206,7 @@ public final class SpongeImpl {
         return SpongeImpl.class.getPackage();
     }
 
+    public static Cause getImplementationCause() {
+        return getInstance().implementationCause;
+    }
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.util.gen;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
@@ -73,9 +74,10 @@ public class ByteArrayMutableBlockBuffer extends AbstractBlockBuffer implements 
     }
 
     @Override
-    public void setBlock(int x, int y, int z, BlockState block) {
+    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
         checkRange(x, y, z);
         this.blocks[getIndex(x, y, z)] = (byte) this.palette.getOrAssign(block);
+        return true;
     }
 
     @Override
@@ -98,8 +100,8 @@ public class ByteArrayMutableBlockBuffer extends AbstractBlockBuffer implements 
     }
 
     @Override
-    public MutableBlockVolumeWorker<? extends MutableBlockVolume> getBlockWorker() {
-        return new SpongeMutableBlockVolumeWorker<>(this);
+    public MutableBlockVolumeWorker<? extends MutableBlockVolume> getBlockWorker(Cause cause) {
+        return new SpongeMutableBlockVolumeWorker<>(this, cause);
     }
 
     @Override

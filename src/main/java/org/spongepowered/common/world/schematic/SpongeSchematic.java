@@ -30,6 +30,7 @@ import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.schematic.Schematic;
@@ -64,8 +65,8 @@ public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic 
     }
 
     @Override
-    public MutableBlockVolumeWorker<Schematic> getBlockWorker() {
-        return new SpongeMutableBlockVolumeWorker<>(this);
+    public MutableBlockVolumeWorker<Schematic> getBlockWorker(Cause cause) {
+        return new SpongeMutableBlockVolumeWorker<>(this, cause);
     }
 
 }

@@ -32,6 +32,7 @@ import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.ArchetypeVolume;
@@ -81,14 +82,14 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
     }
 
     @Override
-    public MutableBlockVolumeWorker<? extends ArchetypeVolume> getBlockWorker() {
-        return new SpongeMutableBlockVolumeWorker<>(this);
+    public MutableBlockVolumeWorker<? extends ArchetypeVolume> getBlockWorker(Cause cause) {
+        return new SpongeMutableBlockVolumeWorker<>(this, cause);
     }
 
     @Override
-    public void apply(Location<World> location, Cause cause) {
-        this.backing.getBlockWorker().iterate((v, x, y, z) -> {
-            location.getExtent().setBlock(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBlock(x, y, z), false,
+    public void apply(Location<World> location, BlockChangeFlag changeFlag, Cause cause) {
+        this.backing.getBlockWorker(cause).iterate((v, x, y, z) -> {
+            location.getExtent().setBlock(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBlock(x, y, z), changeFlag,
                     cause);
         });
         for (Vector3i pos : this.tiles.keySet()) {
@@ -99,8 +100,9 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
     }
 
     @Override
-    public void setBlock(int x, int y, int z, BlockState block) {
-        this.backing.setBlock(x, y, z, block);
+    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
+        this.backing.setBlock(x, y, z, block, cause);
+        return true;
     }
 
     @Override

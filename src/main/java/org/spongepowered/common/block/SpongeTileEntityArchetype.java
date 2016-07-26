@@ -35,6 +35,7 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.AbstractArchetype;
@@ -80,9 +81,9 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
 
         BlockPos blockpos = VecHelper.toBlockPos(location);
         if (currentBlock != newBlock) {
-            ((World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState, true, cause);
+            ((World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState, BlockChangeFlag.ALL, cause);
         }
-        final NBTTagCompound compound = (NBTTagCompound) this.data.copy();
+        final NBTTagCompound compound = this.data.copy();
 
         TileEntity tileEntity = minecraftWorld.getTileEntity(blockpos);
         if (tileEntity == null) {
@@ -92,6 +93,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
         compound.setInteger("y", blockpos.getY());
         compound.setInteger("z", blockpos.getZ());
         tileEntity.readFromNBT(compound);
+        tileEntity.markDirty();
         return true;
     }
 
@@ -99,7 +101,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     public BlockSnapshot toSnapshot(Location<World> location) {
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         builder.blockState = this.blockState;
-        builder.compound = (NBTTagCompound) this.data.copy();
+        builder.compound = this.data.copy();
         builder.worldUuid = location.getExtent().getUniqueId();
         builder.coords = location.getBlockPosition();
         return builder.build();
