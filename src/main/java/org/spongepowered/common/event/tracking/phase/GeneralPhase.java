@@ -364,7 +364,6 @@ public final class GeneralPhase extends TrackingPhase {
 
             final SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
             final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
-            final Cause currentCause = builder.build();
 
             // Handle item drops captured
             final BlockPos pos = ((IMixinLocation) (Object) oldBlockSnapshot.getLocation().get()).getBlockPos();
@@ -373,13 +372,14 @@ public final class GeneralPhase extends TrackingPhase {
             capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> GeneralFunctions
                     .spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, unwindingPhaseContext, unwindingState));
 
-            SpongeHooks.logBlockAction(currentCause, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
-            int updateFlag = oldBlockSnapshot.getUpdateFlag();
-            IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
-            IBlockState newState = (IBlockState) newBlockSnapshot.getState();
+            SpongeHooks.logBlockAction(builder, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
+            final BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
+            final int updateFlag = oldBlockSnapshot.getUpdateFlag();
+            final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
+            final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
             final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = postContext.getCapturedBlockSupplier();
-            if (originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
+            if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
                 postContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
 
@@ -395,13 +395,15 @@ public final class GeneralPhase extends TrackingPhase {
 
             unwindingState.handleBlockChangeWithUser(oldBlockSnapshot.blockChange, minecraftWorld, transaction, unwindingPhaseContext);
 
-            final int minecraftChangeFlag = oldBlockSnapshot.getUpdateFlag();
-            if (((minecraftChangeFlag & 2) != 0)) {
-                causeTracker.getMinecraftWorld().notifyBlockUpdate(pos, originalState, newState, minecraftChangeFlag);
+            if (((updateFlag & 2) != 0)) {
+                // Since notifyBlockUpdate is basically to tell clients that the block position has changed,
+                // we need to respect that flag
+                causeTracker.getMinecraftWorld().notifyBlockUpdate(pos, originalState, newState, updateFlag);
             }
 
-            causeTracker.getMixinWorld().spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, updateFlag);
-
+            if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
+                causeTracker.getMixinWorld().spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, oldBlockSnapshot.getUpdateFlag());
+            }
             capturedBlockSupplier.ifPresentAndNotEmpty(blocks -> {
                 final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
                 blocks.clear();

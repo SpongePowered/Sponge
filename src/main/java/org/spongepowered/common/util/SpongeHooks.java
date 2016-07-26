@@ -168,18 +168,16 @@ public class SpongeHooks {
         }
     }
 
-    public static void logBlockAction(Cause cause, World world, @Nullable BlockChange type, Transaction<BlockSnapshot> transaction) {
+    public static void logBlockAction(Cause.Builder builder, World world, @Nullable BlockChange type, Transaction<BlockSnapshot> transaction) {
         if (world.isRemote) {
             return;
         }
 
         SpongeConfig<?> config = getActiveConfig((WorldServer) world);
+        Cause cause = builder.build();
         Optional<User> user = cause.first(User.class);
         LoggingCategory logging = config.getConfig().getLogging();
-        if (logging.blockBreakLogging() && type == BlockChange.BREAK
-            || logging.blockModifyLogging() && type == BlockChange.MODIFY
-            || logging.blockPlaceLogging() && type == BlockChange.PLACE) {
-
+        if (type != null && type.allowsLogging(logging)) {
             logInfo("Block " + type.name() + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}][OriginalState: {4}][NewState: {5}]",
                     getFriendlyCauseName(cause),
                     user.isPresent() ? user.get().getName() : "None",

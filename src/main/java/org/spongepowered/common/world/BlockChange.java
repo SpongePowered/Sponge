@@ -32,6 +32,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.config.category.LoggingCategory;
 
 import javax.annotation.Nullable;
 
@@ -46,6 +47,11 @@ public enum BlockChange {
         @Override
         public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
             builder.suggestNamed("BreakEvent", mainEvent);
+        }
+
+        @Override
+        public boolean allowsLogging(LoggingCategory category) {
+            return category.blockBreakLogging();
         }
     },
     DECAY() {
@@ -65,6 +71,11 @@ public enum BlockChange {
         public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
             builder.suggestNamed("ModifyEvent", mainEvent);
         }
+
+        @Override
+        public boolean allowsLogging(LoggingCategory category) {
+            return category.blockModifyLogging();
+        }
     },
     PLACE("PlaceEvent") {
         @Override
@@ -75,6 +86,11 @@ public enum BlockChange {
         @Override
         public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
             builder.suggestNamed("PlaceEvent", mainEvent);
+        }
+
+        @Override
+        public boolean allowsLogging(LoggingCategory category) {
+            return category.blockPlaceLogging();
         }
     };
 
@@ -104,6 +120,10 @@ public enum BlockChange {
 
     public String getEventSuggestedName() {
         return this.eventName;
+    }
+
+    public boolean allowsLogging(LoggingCategory category) {
+        return false;
     }
 
     @Nullable

@@ -274,7 +274,6 @@ public class GeneralFunctions {
 
             final SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
             final SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
-            final Cause currentCause = builder.build();
 
             // Handle item drops captured
             final BlockPos pos = ((IMixinLocation) (Object) oldBlockSnapshot.getLocation().get()).getBlockPos();
@@ -283,10 +282,10 @@ public class GeneralFunctions {
             // And this is for un-pre-merged items, these will be EntityItems, not ItemDropDatas.
             capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, phaseContext, phaseState));
 
-            SpongeHooks.logBlockAction(currentCause, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
-            BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
-            IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
-            IBlockState newState = (IBlockState) newBlockSnapshot.getState();
+            SpongeHooks.logBlockAction(builder, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
+            final BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
+            final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
+            final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
             if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);

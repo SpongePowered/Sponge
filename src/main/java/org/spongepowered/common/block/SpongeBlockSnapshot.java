@@ -128,7 +128,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         this.keyValueMap = tileBuilder.build();
         this.valueSet = this.keyValueMap.isEmpty() ? ImmutableSet.of() : ImmutableSet.copyOf(this.keyValueMap.values());
         this.compound = builder.compound == null ? null : builder.compound.copy();
-
+        this.changeFlag = BlockChangeFlag.ALL;
     }
 
     @Override
