@@ -62,12 +62,12 @@ public final class CauseStack {
 
     public IPhaseState peekState() {
         final PhaseData peek = this.states.peek();
-        return peek == null ? GeneralPhase.State.COMPLETE : peek.getState();
+        return peek == null ? GeneralPhase.State.COMPLETE : peek.state;
     }
 
     public PhaseContext peekContext() {
         final PhaseData peek = this.states.peek();
-        return peek == null ? CauseStack.EMPTY : peek.getContext();
+        return peek == null ? CauseStack.EMPTY : peek.context;
     }
 
     public PhaseData pop() {
@@ -76,12 +76,12 @@ public final class CauseStack {
 
     public TrackingPhase current() {
         final PhaseData tuple = this.states.peek();
-        return tuple == null ? TrackingPhases.GENERAL : tuple.getState().getPhase();
+        return tuple == null ? TrackingPhases.GENERAL : tuple.state.getPhase();
     }
 
     public CauseStack push(PhaseData tuple) {
         checkNotNull(tuple, "Tuple cannot be null!");
-        checkArgument(tuple.getContext().isComplete(), "Phase context must be complete: %s", tuple);
+        checkArgument(tuple.context.isComplete(), "Phase context must be complete: %s", tuple);
         this.states.push(tuple);
         return this;
     }

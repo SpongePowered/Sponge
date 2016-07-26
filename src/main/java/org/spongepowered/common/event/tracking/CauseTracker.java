@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import co.aikar.timings.SpongeTimings;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
@@ -39,6 +38,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.helpers.Booleans;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -64,9 +64,16 @@ import javax.annotation.Nullable;
 /**
  * A helper object that is hard attached to a {@link World} that acts as a
  * proxy object entering and processing between different states of the
- * world and it's objects.
+ * world and its objects.
  */
 public final class CauseTracker {
+
+    public static final boolean ENABLED = Booleans.parseBoolean(System.getProperty("sponge.causeTracking"), true);
+    static {
+        new PrettyPrinter(100).add("CauseTracking").centre().hr()
+                .add("%s : %s", "Enabled", ENABLED)
+                .trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+    }
 
     public static final int DEFAULT_QUEUE_SIZE = 16;
 
@@ -78,9 +85,9 @@ public final class CauseTracker {
     };
 
     public static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
-        printer.add("  - Phase: %s", data.getState());
+        printer.add("  - Phase: %s", data.state);
         printer.add("    Context:");
-        data.getContext().forEach(namedCause -> {
+        data.context.forEach(namedCause -> {
             printer.add("    - Name: %s", namedCause.getName());
             final Object causeObject = namedCause.getCauseObject();
             if (causeObject instanceof PhaseContext) {
@@ -113,10 +120,10 @@ public final class CauseTracker {
         checkNotNull(state.getPhase(), "Phase cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
-        final IPhaseState currentState = this.stack.peek().getState();
+        final IPhaseState currentState = this.stack.peek().state;
         if (this.isVerbose && this.stack.size() > 6 && currentState.isExpectedForReEntrance()) {
             // This printing is to detect possibilities of a phase not being cleared properly
-            // and resulting in a "runaway" phase state accumilation.
+            // and resulting in a "runaway" phase state accumulation.
             printRunawayPhase(state, phaseContext);
         }
         if (!currentState.canSwitchTo(state) && (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING)) {
@@ -129,7 +136,7 @@ public final class CauseTracker {
 
     public void completePhase() {
         final PhaseData currentPhaseData = this.stack.peek();
-        final IPhaseState state = currentPhaseData.getState();
+        final IPhaseState state = currentPhaseData.state;
         if (this.stack.size() > 6 && state.isExpectedForReEntrance() && this.isVerbose) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumulation.
@@ -147,7 +154,7 @@ public final class CauseTracker {
         // If pop is called, the Deque will already throw an exception if there is no element
         // so it's an error properly handled.
         final TrackingPhase phase = state.getPhase();
-        final PhaseContext context = currentPhaseData.getContext();
+        final PhaseContext context = currentPhaseData.context;
         try {
             if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
                 // Note that UnwindingPhaseContext is required for something? I don't think it requires anything tbh.
@@ -218,7 +225,7 @@ public final class CauseTracker {
     }
 
     // ----------------- SIMPLE GETTERS --------------------------------------
-
+//https://github.com/OpenModLoader/OpenModLoader
     /**
      * Gets the {@link World} as a SpongeAPI world.
      *
@@ -266,17 +273,17 @@ public final class CauseTracker {
      */
     @SuppressWarnings("deprecation")
     public void notifyBlockOfStateChange(final BlockPos notifyPos, final Block sourceBlock, @Nullable final BlockPos sourcePos) {
-        final IBlockState iblockstate = this.getMinecraftWorld().getBlockState(notifyPos);
+        final IBlockState iblockstate = this.targetWorld.getBlockState(notifyPos);
 
         final PhaseData peek = this.getStack().peek(); // Sponge
 
         try {
             // Sponge start - prepare notification
-            final IPhaseState state = peek.getState();
-            state.getPhase().associateNeighborStateNotifier(state, peek.getContext(), sourcePos, iblockstate.getBlock(), notifyPos, this.getMinecraftWorld(), PlayerTracker.Type.NOTIFIER);
+            final IPhaseState state = peek.state;
+            state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos, this.targetWorld, PlayerTracker.Type.NOTIFIER);
             // Sponge End
 
-            iblockstate.getBlock().neighborChanged(iblockstate, this.getMinecraftWorld(), notifyPos, sourceBlock);
+            iblockstate.getBlock().neighborChanged(iblockstate, this.targetWorld, notifyPos, sourceBlock);
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
@@ -316,16 +323,16 @@ public final class CauseTracker {
 
         // Now we need to do some of our own logic to see if we need to capture.
         final PhaseData phaseData = this.getStack().peek();
-        final IPhaseState phaseState = phaseData.getState();
-        if (phaseState.getPhase().requiresBlockCapturing(phaseState)) {
+        final IPhaseState phaseState = phaseData.state;
+        if (CauseTracker.ENABLED && phaseState.getPhase().requiresBlockCapturing(phaseState)) {
             try {
                 // Default, this means we've captured the block. Keeping with the semantics
                 // of the original method where true means it successfully changed.
-                return TrackingUtil.trackBlockChange(this, chunk, currentState, newState, pos, flags, phaseData.getContext(), phaseState);
+                return TrackingUtil.trackBlockChange(this, chunk, currentState, newState, pos, flags, phaseData.context, phaseState);
             } catch (Exception e) {
                 final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture a block change!").centre().hr();
                 printer.addWrapped(40, "%s :", "PhaseContext");
-                CONTEXT_PRINTER.accept(printer, phaseData.getContext());
+                CONTEXT_PRINTER.accept(printer, phaseData.context);
                 printer.addWrapped(60, "%s :", "Phases remaining");
                 this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
                 printer.add("Stacktrace:");
@@ -382,8 +389,8 @@ public final class CauseTracker {
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
         final WorldServer minecraftWorld = this.getMinecraftWorld();
         final PhaseData phaseData = this.getStack().peek();
-        final IPhaseState phaseState = phaseData.getState();
-        final PhaseContext context = phaseData.getContext();
+        final IPhaseState phaseState = phaseData.state;
+        final PhaseContext context = phaseData.context;
         final TrackingPhase phase = phaseState.getPhase();
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 

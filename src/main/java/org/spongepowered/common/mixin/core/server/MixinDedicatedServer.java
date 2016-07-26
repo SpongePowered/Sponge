@@ -31,11 +31,9 @@ import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -99,8 +97,8 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
         final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
         final Cause.Builder builder = Cause.source(playerIn);
         final PhaseData peek = causeTracker.getStack().peek();
-        final IPhaseState phaseState = peek.getState();
-        phaseState.getPhase().appendPreBlockProtectedCheck(builder, phaseState, peek.getContext(), causeTracker);
+        final IPhaseState phaseState = peek.state;
+        phaseState.getPhase().appendPreBlockProtectedCheck(builder, phaseState, peek.context, causeTracker);
 
         Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
         ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), ImmutableList.of(location), (World) worldIn);

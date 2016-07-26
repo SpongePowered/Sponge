@@ -80,17 +80,20 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         // TODO integrate with the cause tracker to handle the block sets in
         // a single go, requiring only one event
         IMixinWorldServer mixinWorld = null;
-        if (destination instanceof IMixinWorldServer) {
-            mixinWorld = (IMixinWorldServer) destination;
-        } else if (destination instanceof Chunk) {
-            mixinWorld = (IMixinWorldServer) ((Chunk) destination).getWorld();
-        }
-        if (mixinWorld != null) {
-            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
-            causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
-                    .add(NamedCause.source(this))
-                    .addCaptures()
-                    .complete());
+        if (CauseTracker.ENABLED) {
+            mixinWorld = null;
+            if (destination instanceof IMixinWorldServer) {
+                mixinWorld = (IMixinWorldServer) destination;
+            } else if (destination instanceof Chunk) {
+                mixinWorld = (IMixinWorldServer) ((Chunk) destination).getWorld();
+            }
+            if (mixinWorld != null) {
+                final CauseTracker causeTracker = mixinWorld.getCauseTracker();
+                causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
+                        .add(NamedCause.source(this))
+                        .addCaptures()
+                        .complete());
+            }
         }
         for (int z = zMin; z <= zMax; z++) {
             for (int y = yMin; y <= yMax; y++) {
@@ -101,7 +104,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
                 }
             }
         }
-        if (mixinWorld != null) {
+        if (mixinWorld != null && CauseTracker.ENABLED) {
             final CauseTracker causeTracker = mixinWorld.getCauseTracker();
             causeTracker.completePhase();
         }
@@ -127,7 +130,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final UnmodifiableBlockVolume secondUnmodifiableVolume = second.getUnmodifiableBlockView();
         // TODO integrate with the cause tracker to handle the block sets in
         // a single go, requiring only one event
-        if (destination instanceof IMixinWorldServer) {
+        if (CauseTracker.ENABLED && destination instanceof IMixinWorldServer) {
             final CauseTracker causeTracker = ((IMixinWorldServer) destination).getCauseTracker();
             causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
                     .add(NamedCause.source(this))
@@ -142,7 +145,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
                 }
             }
         }
-        if (destination instanceof IMixinWorldServer) {
+        if (CauseTracker.ENABLED && destination instanceof IMixinWorldServer) {
             final CauseTracker causeTracker = ((IMixinWorldServer) destination).getCauseTracker();
             causeTracker.completePhase();
         }

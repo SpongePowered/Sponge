@@ -75,8 +75,8 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     public boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        final boolean isBlockAlready = causeTracker.getStack().current() != TrackingPhases.BLOCK;
-        final IPhaseState currentState = causeTracker.getStack().peek().getState();
+        final boolean isBlockAlready = CauseTracker.ENABLED && causeTracker.getStack().current() != TrackingPhases.BLOCK;
+        final IPhaseState currentState = causeTracker.getStack().peek().state;
         final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
         final IBlockState blockState = worldIn.getBlockState(pos);
         final IBlockState actualState = blockState.getActualState(worldIn, pos);
@@ -97,8 +97,8 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     private boolean onDestroyLeaves(net.minecraft.world.World worldIn, BlockPos pos) {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        final boolean isBlockAlready = causeTracker.getStack().current() != TrackingPhases.BLOCK;
-        final IPhaseState currentState = causeTracker.getStack().peek().getState();
+        final boolean isBlockAlready = CauseTracker.ENABLED && causeTracker.getStack().current() != TrackingPhases.BLOCK;
+        final IPhaseState currentState = causeTracker.getStack().peek().state;
         final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
         final IBlockState blockState = worldIn.getBlockState(pos);
         final IBlockState actualState = blockState.getActualState(worldIn, pos);

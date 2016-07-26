@@ -201,7 +201,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;onUpdateEntity()V"))
     private void onPlayerTick(EntityPlayerMP playerEntity) {
-        if (playerEntity.worldObj.isRemote) {
+        if (playerEntity.worldObj.isRemote || !CauseTracker.ENABLED) {
             playerEntity.onUpdateEntity();
             return;
         }
@@ -419,7 +419,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         if (this.playerEntity.interactionManager.isCreative()) {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.playerEntity.getServerWorld();
             final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
-            final PhaseContext context = peek.getContext();
+            final PhaseContext context = peek.context;
             final boolean ignoresCreative = context.firstNamed(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class).get();
             boolean clickedOutside = packetIn.getSlotId() < 0;
             ItemStack itemstack = packetIn.getStack();

@@ -162,7 +162,7 @@ public class GeneralFunctions {
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
         // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
         // case in point for WorldTick event listeners since the players are captured non-deterministically
-        final Cause.Builder builder = Cause.source(context.firstNamed(NamedCause.SOURCE, Object.class).orElseThrow(PhaseUtil.throwWithContext("There was no root sEmerource object for this phase!", context)));
+        final Cause.Builder builder = Cause.source(context.getSource(Object.class).orElseThrow(PhaseUtil.throwWithContext("There was no root source object for this phase!", context)));
         state.getPhase().associateAdditionalCauses(state, context, builder, causeTracker);
         final World world = causeTracker.getWorld();
         // Creates the block events accordingly to the transaction arrays
@@ -291,8 +291,8 @@ public class GeneralFunctions {
             if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
                 final PhaseData peek = causeTracker.getStack().peek();
-                if (peek.getState() == GeneralPhase.Post.UNWINDING) {
-                    peek.getState().getPhase().unwind(causeTracker, peek.getState(), peek.getContext());
+                if (peek.state == GeneralPhase.Post.UNWINDING) {
+                    peek.state.getPhase().unwind(causeTracker, peek.state, peek.context);
                 }
             }
 
@@ -305,8 +305,8 @@ public class GeneralFunctions {
 
 
             final PhaseData peek = causeTracker.getStack().peek();
-            if (peek.getState() == GeneralPhase.Post.UNWINDING) {
-                peek.getState().getPhase().unwind(causeTracker, peek.getState(), peek.getContext());
+            if (peek.state == GeneralPhase.Post.UNWINDING) {
+                peek.state.getPhase().unwind(causeTracker, peek.state, peek.context);
             }
         }
         return noCancelledTransactions;

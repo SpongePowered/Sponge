@@ -103,7 +103,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         if (this.worldObj != null && !this.worldObj.isRemote) {
             IMixinWorldServer world = (IMixinWorldServer) this.worldObj;
             // This handles transfers to this TE from a source such as a Hopper
-            world.getCauseTracker().getStack().peek().getContext().firstNamed(NamedCause.SOURCE, TileEntity.class).ifPresent(currentTick -> {
+            world.getCauseTracker().getStack().peek().context.getSource(TileEntity.class).ifPresent(currentTick -> {
                 if (currentTick != this) {
                     net.minecraft.tileentity.TileEntity te = (net.minecraft.tileentity.TileEntity) currentTick;
 //                    world.getCauseTracker().trackTargetBlockFromSource(te, te.getPos(), this.getBlockType(), this.pos, PlayerTracker.Type.NOTIFIER);

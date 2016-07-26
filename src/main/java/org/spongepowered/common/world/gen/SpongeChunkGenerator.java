@@ -330,10 +330,12 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                 }
                 timing.startTimingIfSync();
             }
-            causeTracker.switchToPhase(WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
-                    .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, type))
-                    .addEntityCaptures()
-                    .complete());
+            if (CauseTracker.ENABLED) {
+                causeTracker.switchToPhase(WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
+                        .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, type))
+                        .addEntityCaptures()
+                        .complete());
+            }
             if (populator instanceof IFlaggedPopulator) {
                 ((IFlaggedPopulator) populator).populate(volume, spongeWorld, this.rand, flags);
             } else {
@@ -342,7 +344,9 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             if (Timings.isTimingsEnabled()) {
                 timing.stopTimingIfSync();
             }
-            causeTracker.completePhase();
+            if (CauseTracker.ENABLED) {
+                causeTracker.completePhase();
+            }
         }
 
         // If we wrapped a custom chunk provider then we should call its
@@ -374,14 +378,17 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {
                 if (populator instanceof StructureOceanMonument) {
-                    IMixinWorldServer world = (IMixinWorldServer) this.world;
-                    final CauseTracker causeTracker = world.getCauseTracker();
-                    causeTracker.switchToPhase(WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
-                            .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType()))
-                            .addEntityCaptures()
-                            .complete());
+                    final CauseTracker causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
+                    if (CauseTracker.ENABLED) {
+                        causeTracker.switchToPhase(WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
+                                .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType()))
+                                .addEntityCaptures()
+                                .complete());
+                    }
                     flag |= ((StructureOceanMonument) populator).generateStructure(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
-                    causeTracker.completePhase();
+                    if (CauseTracker.ENABLED) {
+                        causeTracker.completePhase();
+                    }
                 }
             }
         }

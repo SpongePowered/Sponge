@@ -30,20 +30,12 @@ import java.util.Objects;
 
 public final class PhaseData {
 
-    private final PhaseContext context;
-    private final IPhaseState state;
+    public final PhaseContext context;
+    public final IPhaseState state;
 
     PhaseData(PhaseContext context, IPhaseState state) {
         this.context = checkNotNull(context, "Context cannot be null!");
         this.state = checkNotNull(state, "State cannot be null!");
-    }
-
-    public PhaseContext getContext() {
-        return this.context;
-    }
-
-    public IPhaseState getState() {
-        return this.state;
     }
 
     @Override

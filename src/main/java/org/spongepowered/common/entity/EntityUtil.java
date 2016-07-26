@@ -82,6 +82,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -631,11 +632,11 @@ public final class EntityUtil {
         }
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) entity.worldObj;
         final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
-        final IPhaseState currentState = peek.getState();
-        final PhaseContext phaseContext = peek.getContext();
+        final IPhaseState currentState = peek.state;
+        final PhaseContext phaseContext = peek.context;
 
         if (item.stackSize != 0 && item.getItem() != null) {
-            if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+            if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
                     final Collection<ItemDropData> itemStacks = multimap.get(entity.getUniqueID());
@@ -655,7 +656,7 @@ public final class EntityUtil {
             entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
-            if (currentState.getPhase().doesCaptureEntityDrops(currentState)) {
+            if (CauseTracker.ENABLED && currentState.getPhase().doesCaptureEntityDrops(currentState)) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     // We are capturing per entity drop
                     phaseContext.getCapturedEntityItemDropSupplier().get().put(entity.getUniqueID(), entityitem);
@@ -704,10 +705,10 @@ public final class EntityUtil {
         }
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
         final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
-        final IPhaseState currentState = peek.getState();
-        final PhaseContext phaseContext = peek.getContext();
+        final IPhaseState currentState = peek.state;
+        final PhaseContext phaseContext = peek.context;
 
-        if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+        if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
             if (currentState.tracksEntitySpecificDrops()) {
                 final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
                 final Collection<ItemDropData> itemStacks = multimap.get(player.getUniqueID());
@@ -758,7 +759,7 @@ public final class EntityUtil {
             entityitem.motionZ += Math.sin((double) f3) * (double) f2;
         }
         // FIFTH - Capture the entity maybe?
-        if (currentState.getPhase().doesCaptureEntityDrops(currentState)) {
+        if (CauseTracker.ENABLED && currentState.getPhase().doesCaptureEntityDrops(currentState)) {
             if (currentState.tracksEntitySpecificDrops()) {
                 // We are capturing per entity drop
                 phaseContext.getCapturedEntityItemDropSupplier().get().put(player.getUniqueID(), entityitem);

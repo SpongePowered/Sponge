@@ -85,7 +85,7 @@ public final class PluginPhase extends TrackingPhase {
                 final IMixinWorldTickEvent worldTickEvent = phaseContext
                         .firstNamed(InternalNamedCauses.Tracker.TICK_EVENT, IMixinWorldTickEvent.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a WorldTickEvent but we're not!!!", phaseContext));
-                final Object listener = phaseContext.firstNamed(NamedCause.SOURCE, Object.class)
+                final Object listener = phaseContext.getSource(Object.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
 
                 phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
@@ -134,7 +134,7 @@ public final class PluginPhase extends TrackingPhase {
                 final IMixinWorldTickEvent worldTickEvent = phaseContext
                         .firstNamed(InternalNamedCauses.Tracker.TICK_EVENT, IMixinWorldTickEvent.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a WorldTickEvent but we're not!!!", phaseContext));
-                final Object listener = phaseContext.firstNamed(NamedCause.SOURCE, Object.class)
+                final Object listener = phaseContext.getSource(Object.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
 
                 phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {

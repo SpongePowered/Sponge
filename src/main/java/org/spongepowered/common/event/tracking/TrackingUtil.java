@@ -129,8 +129,8 @@ public final class TrackingUtil {
                 .addEntityCaptures();
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseData current = causeTracker.getStack().peek();
-        final IPhaseState currentState = current.getState();
-        currentState.getPhase().appendNotifierPreBlockTick(causeTracker, pos, currentState, current.getContext(), phaseContext);
+        final IPhaseState currentState = current.state;
+        currentState.getPhase().appendNotifierPreBlockTick(causeTracker, pos, currentState, current.context, phaseContext);
         // Now actually switch to the new phase
         causeTracker.switchToPhase(WorldPhase.Tick.BLOCK, phaseContext.complete());
         block.updateTick(minecraftWorld, pos, state, random);
@@ -147,8 +147,8 @@ public final class TrackingUtil {
                 .addBlockCaptures();
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseData current = causeTracker.getStack().peek();
-        final IPhaseState currentState = current.getState();
-        currentState.getPhase().appendNotifierPreBlockTick(causeTracker, pos, currentState, current.getContext(), phaseContext);
+        final IPhaseState currentState = current.state;
+        currentState.getPhase().appendNotifierPreBlockTick(causeTracker, pos, currentState, current.context, phaseContext);
         // Now actually switch to the new phase
         causeTracker.switchToPhase(WorldPhase.Tick.RANDOM_BLOCK, phaseContext.complete());
         block.randomTick(minecraftWorld, pos, state, random);
@@ -215,7 +215,7 @@ public final class TrackingUtil {
     }
 
     public static void associateEntityCreator(PhaseContext context, net.minecraft.entity.Entity minecraftEntity, WorldServer minecraftWorld) {
-        context.firstNamed(NamedCause.SOURCE, Entity.class).ifPresent(tickingEntity -> {
+        context.getSource(Entity.class).ifPresent(tickingEntity -> {
             final IMixinEntity mixinEntity = EntityUtil.toMixin(tickingEntity);
             Stream.<Supplier<Optional<UUID>>>of(
                     () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)

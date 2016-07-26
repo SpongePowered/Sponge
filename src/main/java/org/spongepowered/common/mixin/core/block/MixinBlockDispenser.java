@@ -44,6 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -90,16 +91,20 @@ public abstract class MixinBlockDispenser extends MixinBlock {
 
     @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM))
     private void onDispenseHead(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
-        ((IMixinWorldServer) worldIn).getCauseTracker().switchToPhase(BlockPhase.State.DISPENSE, PhaseContext.start()
-            .add(NamedCause.source(((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(state, state, pos, 3)))
-                .addBlockCaptures()
-                .addCaptures()
-                .complete());
+        if (CauseTracker.ENABLED) {
+            ((IMixinWorldServer) worldIn).getCauseTracker().switchToPhase(BlockPhase.State.DISPENSE, PhaseContext.start()
+                    .add(NamedCause.source(((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(state, state, pos, 3)))
+                    .addBlockCaptures()
+                    .addCaptures()
+                    .complete());
+        }
     }
 
     @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM, shift = At.Shift.AFTER))
     private void onDispenseReturn(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
-        ((IMixinWorldServer) worldIn).getCauseTracker().completePhase();
+        if (CauseTracker.ENABLED) {
+            ((IMixinWorldServer) worldIn).getCauseTracker().completePhase();
+        }
     }
 
 }

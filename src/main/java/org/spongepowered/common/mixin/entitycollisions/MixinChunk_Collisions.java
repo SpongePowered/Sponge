@@ -93,7 +93,7 @@ public class MixinChunk_Collisions {
             final PhaseContext phaseContext = spongeWorld.getCauseTracker().getStack().peekContext();
 
             return Stream.<Supplier<Optional<Boolean>>>of(
-                    () -> phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).map(tickBlock -> {
+                    () -> phaseContext.getSource(BlockSnapshot.class).map(tickBlock -> {
                         BlockType blockType = tickBlock.getState().getType();
                         IModData_Collisions spongeBlock = (IModData_Collisions) blockType;
                         if (spongeBlock.requiresCacheRefresh()) {
@@ -103,7 +103,7 @@ public class MixinChunk_Collisions {
 
                         return !((spongeBlock.getMaxCollisions() >= 0) && (listToFill.size() >= spongeBlock.getMaxCollisions()));
                     }),
-                    () -> phaseContext.firstNamed(NamedCause.SOURCE, IModData_Collisions.class).map(spongeEntity -> {
+                    () -> phaseContext.getSource(IModData_Collisions.class).map(spongeEntity -> {
                             if (spongeEntity.requiresCacheRefresh()) {
                                 spongeEntity.initializeCollisionState(this.worldObj);
                                 spongeEntity.requiresCacheRefresh(false);

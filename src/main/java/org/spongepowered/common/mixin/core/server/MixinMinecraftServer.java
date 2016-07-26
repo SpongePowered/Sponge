@@ -351,10 +351,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
-        causeTracker.switchToPhase(WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                .add(NamedCause.source(worldServer))
-                .addCaptures()
-                .complete());
+        if (CauseTracker.ENABLED) {
+            causeTracker.switchToPhase(WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+                    .add(NamedCause.source(worldServer))
+                    .addCaptures()
+                    .complete());
+        }
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
         LOG.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
@@ -378,7 +380,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 //        world.theChunkProviderServer.chunkLoadOverride = chunkLoadOverride;
         this.clearCurrentTask();
-        causeTracker.completePhase();
+        if (CauseTracker.ENABLED) {
+            causeTracker.completePhase();
+        }
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})

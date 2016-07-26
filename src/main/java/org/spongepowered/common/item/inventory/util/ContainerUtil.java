@@ -28,13 +28,13 @@ import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -86,9 +86,9 @@ public final class ContainerUtil {
     public static void performBlockInventoryDrops(WorldServer worldServer, double x, double y, double z, IInventory inventory) {
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldServer;
         final PhaseData currentPhase = mixinWorld.getCauseTracker().getStack().peek();
-        final IPhaseState currentState = currentPhase.getState();
-        if (currentState.tracksBlockSpecificDrops()) {
-            final PhaseContext context = currentPhase.getContext();
+        final IPhaseState currentState = currentPhase.state;
+        if (CauseTracker.ENABLED && currentState.tracksBlockSpecificDrops()) {
+            final PhaseContext context = currentPhase.context;
             if (currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 final Multimap<BlockPos, EntityItem> multimap = context.getBlockItemDropSupplier().get();
                 final BlockPos pos = new BlockPos(x, y, z);

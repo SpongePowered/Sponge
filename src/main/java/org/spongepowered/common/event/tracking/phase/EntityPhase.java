@@ -78,7 +78,7 @@ public final class EntityPhase extends TrackingPhase {
             @Override
             void unwind(CauseTracker causeTracker, PhaseContext context) {
                 final Entity dyingEntity =
-                        context.firstNamed(NamedCause.SOURCE, Entity.class)
+                        context.getSource(Entity.class)
                                 .orElseThrow(PhaseUtil.throwWithContext("Dying entity not found!", context));
                 final DamageSource damageSource = context.firstNamed(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class).get();
                 final Cause cause = Cause.source(
@@ -201,7 +201,7 @@ public final class EntityPhase extends TrackingPhase {
         DEATH_UPDATE() {
             @Override
             void unwind(CauseTracker causeTracker, PhaseContext context) {
-                final Entity dyingEntity = context.firstNamed(NamedCause.SOURCE, Entity.class)
+                final Entity dyingEntity = context.getSource(Entity.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Dying entity not found!", context));
                 context.getCapturedItemsSupplier()
                         .ifPresentAndNotEmpty(items -> {
@@ -304,7 +304,7 @@ public final class EntityPhase extends TrackingPhase {
 //                // Throw our event now
 //                SpongeImpl.postEvent(portalEvent);
 //
-//                final IMixinEntity mixinEntity = context.firstNamed(NamedCause.SOURCE, IMixinEntity.class)
+//                final IMixinEntity mixinEntity = context.getSource(IMixinEntity.class)
 //                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be teleporting an entity!", context));
 //                final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(mixinEntity);
 //
@@ -385,7 +385,7 @@ public final class EntityPhase extends TrackingPhase {
             @Nullable
             @Override
             public net.minecraft.entity.Entity returnTeleportResult(PhaseContext context, MoveEntityEvent.Teleport.Portal event) {
-                final net.minecraft.entity.Entity teleportingEntity = context.firstNamed(NamedCause.SOURCE, net.minecraft.entity.Entity.class)
+                final net.minecraft.entity.Entity teleportingEntity = context.getSource(net.minecraft.entity.Entity.class)
                                 .orElseThrow(PhaseUtil.throwWithContext("Expected to be teleporting an entity!", context));
                 // The rest of this is to be handled in the phase.
                 if (event.isCancelled()) {
@@ -434,7 +434,7 @@ public final class EntityPhase extends TrackingPhase {
 
         @Override
         public void assignEntityCreator(PhaseContext context, Entity entity) {
-            final IMixinEntity mixinEntity = context.firstNamed(NamedCause.SOURCE, IMixinEntity.class)
+            final IMixinEntity mixinEntity = context.getSource(IMixinEntity.class)
                             .orElseThrow(PhaseUtil.throwWithContext("Dying Entity not found!", context));
             Stream.<Supplier<Optional<UUID>>>of(
                     () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).map(Identifiable::getUniqueId),

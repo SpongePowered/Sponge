@@ -153,7 +153,7 @@ public final class WorldPhase extends TrackingPhase {
         public static final IPhaseState ENTITY = new EntityTickPhaseState();
 
         public static final IPhaseState DIMENSION = new DimensionTickPhaseState();
-        public static final IPhaseState TILE_ENTITY = new TileEntityTickPhsaeState();
+        public static final IPhaseState TILE_ENTITY = new TileEntityTickPhaseState();
         public static final IPhaseState BLOCK_EVENT = new BlockEventTickPhaseState();
         public static final IPhaseState PLAYER = new PlayerTickPhaseState();
         public static final IPhaseState WEATHER = new WeatherTickPhaseState();
@@ -263,7 +263,7 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         Location<World> getLocationSourceFromContext(PhaseContext context) {
-            return context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+            return context.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking over a block!", context))
                     .getLocation()
                     .get();
@@ -271,7 +271,7 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
-            final BlockSnapshot tickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+            final BlockSnapshot tickingBlock = phaseContext.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", phaseContext));
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
@@ -315,14 +315,14 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
-            final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+            final BlockSnapshot tickingBlock = context.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", context));
             builder.named(NamedCause.notifier(tickingBlock));
         }
 
         @Override
         public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
-            final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+            final BlockSnapshot tickingBlock = context.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
             blockEvent.setCurrentTickBlock(tickingBlock);
             final Location<World> blockLocation = tickingBlock.getLocation().get();
@@ -343,7 +343,7 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public void appendPreBlockProtectedCheck(Cause.Builder builder, PhaseContext context, CauseTracker causeTracker) {
-            context.firstNamed(NamedCause.SOURCE, Entity.class).ifPresent(entity -> {
+            context.getSource(Entity.class).ifPresent(entity -> {
                 final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
                 Stream.<Supplier<Optional<User>>>of(
                         () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR),
@@ -359,7 +359,7 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public void assignEntityCreator(PhaseContext context, Entity entity) {
-            final Entity tickingEntity = context.firstNamed(NamedCause.SOURCE, Entity.class)
+            final Entity tickingEntity = context.getSource(Entity.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", context));
             final IMixinEntity mixinEntity = EntityUtil.toMixin(tickingEntity);
             Stream.<Supplier<Optional<UUID>>>of(
@@ -377,7 +377,7 @@ public final class WorldPhase extends TrackingPhase {
         @SuppressWarnings("unchecked")
         @Override
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
-            final Entity tickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class)
+            final Entity tickingEntity = phaseContext.getSource(Entity.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
             final IMixinEntity mixinEntity = EntityUtil.toMixin(tickingEntity);
             phaseContext.getCapturedEntitySupplier()
@@ -532,7 +532,7 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public Cause generateTeleportCause(PhaseContext context) {
-            final Entity entity = context.firstNamed(NamedCause.SOURCE, Entity.class)
+            final Entity entity = context.getSource(Entity.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking an entity!", context));
             return Cause
                     .source(EntityTeleportCause.builder()
@@ -546,13 +546,13 @@ public final class WorldPhase extends TrackingPhase {
         @Override
         public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction,
                 PhaseContext context) {
-            GeneralFunctions.processUserBreakage(blockChange, minecraftWorld, snapshotTransaction, context.firstNamed(NamedCause.SOURCE, Entity.class).get());
+            GeneralFunctions.processUserBreakage(blockChange, minecraftWorld, snapshotTransaction, context.getSource(Entity.class).get());
         }
 
 
         @Override
         public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
-            final Entity tickingEntity = context.firstNamed(NamedCause.SOURCE, Entity.class)
+            final Entity tickingEntity = context.getSource(Entity.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", context));
             builder.named(NamedCause.owner(tickingEntity));
             final IMixinEntity mixinTickingEntity = EntityUtil.toMixin(tickingEntity);
@@ -615,21 +615,21 @@ public final class WorldPhase extends TrackingPhase {
         }
     }
 
-    private static class TileEntityTickPhsaeState extends LocationBasedTickPhaseState {
+    private static class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
 
-        TileEntityTickPhsaeState() {
+        TileEntityTickPhaseState() {
         }
 
         @Override
         Location<World> getLocationSourceFromContext(PhaseContext context) {
-            return context.firstNamed(NamedCause.SOURCE, TileEntity.class)
+            return context.getSource(TileEntity.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking over a TileEntity!", context))
                     .getLocation();
         }
 
         @Override
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
-            final TileEntity tickingTile = phaseContext.firstNamed(NamedCause.SOURCE, TileEntity.class)
+            final TileEntity tickingTile = phaseContext.getSource(TileEntity.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> {
@@ -677,14 +677,14 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
-            final TileEntity tickingTile = context.firstNamed(NamedCause.SOURCE, TileEntity.class)
+            final TileEntity tickingTile = context.getSource(TileEntity.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a TileEntity!", context));
             builder.named(NamedCause.notifier(tickingTile));
         }
 
         @Override
         public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
-            final TileEntity tickingTile = context.firstNamed(NamedCause.SOURCE, TileEntity.class)
+            final TileEntity tickingTile = context.getSource(TileEntity.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
             blockEvent.setCurrentTickTileEntity(tickingTile);
             final Location<World> blockLocation = tickingTile.getLocation();
@@ -705,7 +705,7 @@ public final class WorldPhase extends TrackingPhase {
         @Override
         public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
                 WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-            context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).ifPresent(snapshot -> {
+            context.getSource(BlockSnapshot.class).ifPresent(snapshot -> {
                 final Location<World> location = snapshot.getLocation().get();
                 TrackingUtil.getNotifierOrOwnerFromBlock(location)
                         .ifPresent(user -> {
@@ -719,9 +719,9 @@ public final class WorldPhase extends TrackingPhase {
         public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
             final Location<World> location = Stream.<Supplier<Optional<Location<World>>>>
                     of(
-                    () -> context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).map(snapshot -> snapshot.getLocation().get()),
-                    () -> context.firstNamed(NamedCause.SOURCE, TileEntity.class).map(Locatable::getLocation),
-                    () -> context.firstNamed(NamedCause.SOURCE, IMixinBlockEventData.class).map(data ->
+                    () -> context.getSource(BlockSnapshot.class).map(snapshot -> snapshot.getLocation().get()),
+                    () -> context.getSource(TileEntity.class).map(Locatable::getLocation),
+                    () -> context.getSource(IMixinBlockEventData.class).map(data ->
                             new Location<>((World) minecraftWorld, VecHelper.toVector3d(data.getEventBlockPosition())))
             )
                     .map(Supplier::get)
@@ -743,7 +743,7 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public void assignEntityCreator(PhaseContext context, Entity entity) {
-            final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+            final BlockSnapshot tickingBlock = context.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", context));
             final Location<World> location = tickingBlock.getLocation().get();
             TrackingUtil.getNotifierOrOwnerFromBlock(location)
@@ -788,8 +788,8 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
-            final Optional<BlockSnapshot> blockSnapshot = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-            final Optional<TileEntity> tileEntity = context.firstNamed(NamedCause.SOURCE, TileEntity.class);
+            final Optional<BlockSnapshot> blockSnapshot = context.getSource(BlockSnapshot.class);
+            final Optional<TileEntity> tileEntity = context.getSource(TileEntity.class);
             if (blockSnapshot.isPresent()) {
                 builder.named(NamedCause.notifier(blockSnapshot.get()));
             } else if (tileEntity.isPresent()) {
@@ -806,19 +806,19 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public void assignEntityCreator(PhaseContext context, Entity entity) {
-            final Player player = context.firstNamed(NamedCause.SOURCE, Player.class)
+            final Player player = context.getSource(Player.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking a player!", context));
             EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
         }
 
         @Override
         public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
-            blockEvent.setSourceUser(context.firstNamed(NamedCause.SOURCE, Player.class).get());
+            blockEvent.setSourceUser(context.getSource(Player.class).get());
         }
 
         @Override
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
-            final Entity tickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class)
+            final Entity tickingEntity = phaseContext.getSource(Entity.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
             phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
                 final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
@@ -860,7 +860,7 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
-            builder.named(NamedCause.OWNER, context.firstNamed(NamedCause.SOURCE, Player.class).get());
+            builder.named(NamedCause.OWNER, context.getSource(Player.class).get());
         }
     }
 
@@ -1028,7 +1028,7 @@ public final class WorldPhase extends TrackingPhase {
 
     @Override
     public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
-        return phaseData.getState() instanceof State && phaseData.getState() != State.WORLD_SPAWNER_SPAWNING;
+        return phaseData.state instanceof State && phaseData.state != State.WORLD_SPAWNER_SPAWNING;
     }
 
     @Override
@@ -1089,7 +1089,7 @@ public final class WorldPhase extends TrackingPhase {
         if (phaseState instanceof TickPhaseState) {
             ((TickPhaseState) phaseState).appendPreBlockProtectedCheck(builder, context, causeTracker);
         }
-        context.firstNamed(NamedCause.SOURCE, Player.class).ifPresent(player -> builder.named(NamedCause.notifier(player)));
+        context.getSource(Player.class).ifPresent(player -> builder.named(NamedCause.notifier(player)));
     }
 
     @Override

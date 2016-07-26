@@ -90,12 +90,12 @@ public class PacketUtil {
 
             }*/
 
-            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
-            final IMixinWorldServer world = (IMixinWorldServer) packetPlayer.worldObj;
-            final CauseTracker causeTracker = world.getCauseTracker();
-            if (packetIn instanceof CPacketAnimation || packetIn instanceof CPacketClientSettings) {
+            if (!CauseTracker.ENABLED && (packetIn instanceof CPacketAnimation || packetIn instanceof CPacketClientSettings)) {
                 packetIn.processPacket(netHandler);
             } else {
+                final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
+                final IMixinWorldServer world = (IMixinWorldServer) packetPlayer.worldObj;
+                final CauseTracker causeTracker = world.getCauseTracker();
                 final PacketPhase.IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
                 if (packetState == null) {
                     throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());

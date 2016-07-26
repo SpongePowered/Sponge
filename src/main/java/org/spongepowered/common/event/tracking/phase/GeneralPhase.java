@@ -45,7 +45,6 @@ import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -67,7 +66,6 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
@@ -152,7 +150,7 @@ public final class GeneralPhase extends TrackingPhase {
         if (state == State.COMMAND) {
             final ICommand command = phaseContext.firstNamed(InternalNamedCauses.General.COMMAND, ICommand.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a command, but none found!", phaseContext));
-            final ICommandSender sender = phaseContext.firstNamed(NamedCause.SOURCE, ICommandSender.class)
+            final ICommandSender sender = phaseContext.getSource(ICommandSender.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(list -> GeneralFunctions.processBlockCaptures(list, causeTracker, state, phaseContext));
@@ -294,7 +292,7 @@ public final class GeneralPhase extends TrackingPhase {
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
         // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
         // case in point for WorldTick event listeners since the players are captured non-deterministically
-        final Cause.Builder builder = Cause.source(unwinding.firstNamed(NamedCause.SOURCE, Object.class).get());
+        final Cause.Builder builder = Cause.source(unwinding.getSource(Object.class).get());
         final World world = causeTracker.getWorld();
         // Creates the block events accordingly to the transaction arrays
         GeneralFunctions.iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world);
@@ -410,7 +408,7 @@ public final class GeneralPhase extends TrackingPhase {
 
     @Override
     public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
-        return phaseData.getState() == Post.UNWINDING;
+        return phaseData.state == Post.UNWINDING;
     }
 
     @Override
@@ -440,7 +438,7 @@ public final class GeneralPhase extends TrackingPhase {
 
     @Override
     public boolean ignoresItemPreMerging(IPhaseState currentState) {
-        return currentState == State.COMMAND || super.ignoresItemPreMerging(currentState);
+        return currentState == State.COMMAND || currentState == State.COMPLETE || super.ignoresItemPreMerging(currentState);
     }
 
     @Override
@@ -454,7 +452,7 @@ public final class GeneralPhase extends TrackingPhase {
             unwindingState.getPhase()
                     .associateNeighborStateNotifier(unwindingState, unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
         } else if (state == State.COMMAND) {
-            context.firstNamed(NamedCause.SOURCE, Player.class)
+            context.getSource(Player.class)
                     .ifPresent(player -> ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos))
                             .setBlockNotifier(notifyPos, player.getUniqueId()));
 

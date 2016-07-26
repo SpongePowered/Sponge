@@ -642,7 +642,7 @@ public final class PacketPhase extends TrackingPhase {
 
             @Override
             public void assignEntityCreator(PhaseContext context, Entity entity) {
-                final Player player = context.firstNamed(NamedCause.SOURCE, Player.class)
+                final Player player = context.getSource(Player.class)
                                 .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a packet, but no player found!", context));
                 EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
             }
@@ -730,7 +730,7 @@ public final class PacketPhase extends TrackingPhase {
     public boolean populateCauseForNotifyNeighborEvent(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker,
             IMixinChunk mixinChunk, BlockPos pos) {
         if (!super.populateCauseForNotifyNeighborEvent(state, context, builder, causeTracker, mixinChunk, pos)) {
-            final Player player = context.firstNamed(NamedCause.SOURCE, Player.class)
+            final Player player = context.getSource(Player.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Processing a Player PAcket, expecting a player, but had none!", context));
             builder.named(NamedCause.notifier(player));
         }
@@ -740,7 +740,7 @@ public final class PacketPhase extends TrackingPhase {
     @Override
     public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
             WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        final Player player = context.firstNamed(NamedCause.SOURCE, Player.class)
+        final Player player = context.getSource(Player.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Expected to be tracking a player, but not!", context));
         ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos)).setBlockNotifier(notifyPos, player.getUniqueId());
 
@@ -768,7 +768,7 @@ public final class PacketPhase extends TrackingPhase {
             return;
         }
         final Packet<?> packetIn = phaseContext.firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, Packet.class).get();
-        final EntityPlayerMP player = phaseContext.firstNamed(NamedCause.SOURCE, EntityPlayerMP.class).get();
+        final EntityPlayerMP player = phaseContext.getSource(EntityPlayerMP.class).get();
         final Class<? extends Packet<?>> packetInClass = (Class<? extends Packet<?>>) packetIn.getClass();
 
         final PacketFunction unwindFunction = this.packetUnwindMap.get(packetInClass);

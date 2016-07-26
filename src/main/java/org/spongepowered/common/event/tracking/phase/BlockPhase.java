@@ -58,7 +58,7 @@ public final class BlockPhase extends TrackingPhase {
 
         @Override
         public void assignEntityCreator(PhaseContext context, Entity entity) {
-            context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+            context.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not processing over a block!", context));
         }
 
@@ -87,14 +87,14 @@ public final class BlockPhase extends TrackingPhase {
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
         if (state == State.BLOCK_DECAY) {
-            final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+            final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Could not find a decaying block snapshot!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DECAY_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
         } else if (state == State.BLOCK_DROP_ITEMS) {
-            final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+            final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Could not find a block dropping items!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DROP_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
@@ -103,7 +103,7 @@ public final class BlockPhase extends TrackingPhase {
         } else if (state == State.RESTORING_BLOCKS) {
             // do nothing for now.
         } else if (state == State.DISPENSE) {
-            final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+            final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Could not find a block dispensing items!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DISPENSE.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));

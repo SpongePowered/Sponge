@@ -74,7 +74,7 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
      */
     @Inject(method = "doMove", at = @At("HEAD"))
     public void onDoMoveHead(World worldIn, BlockPos pos, EnumFacing direction, boolean extending, CallbackInfoReturnable<Boolean> ci) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote && CauseTracker.ENABLED) {
             final CauseTracker causeTracker = ((IMixinWorldServer) worldIn).getCauseTracker();
 
             final IBlockState currentState = worldIn.getBlockState(pos);
@@ -93,7 +93,7 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
     @SuppressWarnings("unchecked")
     @Inject(method = "doMove", at = @At("RETURN"), cancellable = true)
     public void onDoMoveReturn(World worldIn, BlockPos pos, EnumFacing direction, boolean extending, CallbackInfoReturnable<Boolean> ci) {
-        if (!worldIn.isRemote) {
+        if (!worldIn.isRemote && CauseTracker.ENABLED) {
             final CauseTracker causeTracker = ((IMixinWorldServer) worldIn).getCauseTracker();
             final PhaseContext context = causeTracker.getStack().peekContext();
             context.firstNamed(InternalNamedCauses.Piston.DUMMY_CALLBACK, MutableWrapper.class)

@@ -441,7 +441,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                     // Sponge Start - notify the cause tracker
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
-                    final boolean tracksEntitySpecificDrops = causeTracker.getStack().peekState().tracksEntityDeaths();
+                    final boolean tracksEntitySpecificDrops = CauseTracker.ENABLED && causeTracker.getStack().peekState().tracksEntityDeaths();
                     if (!tracksEntitySpecificDrops) {
                         causeTracker.switchToPhase(EntityPhase.State.DEATH, PhaseContext.start()
                                 .add(NamedCause.source(this))
@@ -618,7 +618,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
     private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
-        if (!entityLivingBase.worldObj.isRemote) {
+        if (!entityLivingBase.worldObj.isRemote && CauseTracker.ENABLED) {
             final CauseTracker causeTracker = ((IMixinWorldServer) entityLivingBase.worldObj).getCauseTracker();
             causeTracker.switchToPhase(EntityPhase.State.DEATH_UPDATE, PhaseContext.start()
                     .addCaptures()

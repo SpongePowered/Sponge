@@ -62,6 +62,16 @@ public class PhaseContext {
     private final ArrayList<NamedCause> contextObjects = new ArrayList<>(10);
     @Nullable private Cause cause = null;
 
+    @Nullable private CapturedBlocksSupplier blocksSupplier;
+    @Nullable private BlockItemDropsSupplier blockItemDropsSupplier;
+    @Nullable private BlockItemEntityDropsSupplier blockItemEntityDropsSupplier;
+    @Nullable private CapturedItemsSupplier capturedItemsSupplier;
+    @Nullable private CapturedEntitiesSupplier capturedEntitiesSupplier;
+    @Nullable private CapturedItemStackSupplier capturedItemStackSupplier;
+    @Nullable private EntityItemDropsSupplier entityItemDropsSupplier;
+    @Nullable private EntityItemEntityDropsSupplier entityItemEntityDropsSupplier;
+    private Object source;
+
     public static PhaseContext start() {
         return new PhaseContext();
     }
@@ -72,40 +82,71 @@ public class PhaseContext {
         }
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.contextObjects.add(namedCause);
+        if (namedCause.getName().equals(NamedCause.SOURCE)) {
+            this.source = namedCause.getCauseObject();
+        }
         return this;
     }
 
     public PhaseContext addBlockCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, new BlockItemEntityDropsSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, new BlockItemDropsSupplier()));
+        CapturedBlocksSupplier blocksSupplier = new CapturedBlocksSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, blocksSupplier));
+        this.blocksSupplier = blocksSupplier;
+        BlockItemEntityDropsSupplier blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, blockItemEntityDropsSupplier));
+        this.blockItemEntityDropsSupplier = blockItemEntityDropsSupplier;
+        BlockItemDropsSupplier blockItemDropsSupplier = new BlockItemDropsSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, blockItemDropsSupplier));
+        this.blockItemDropsSupplier = blockItemDropsSupplier;
         return this;
     }
 
     public PhaseContext addCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, new BlockItemDropsSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, new BlockItemEntityDropsSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, new CapturedItemsSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, new CapturedItemStackSupplier()));
+        CapturedBlocksSupplier blocksSupplier = new CapturedBlocksSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, blocksSupplier));
+        this.blocksSupplier = blocksSupplier;
+        BlockItemEntityDropsSupplier blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, blockItemEntityDropsSupplier));
+        this.blockItemEntityDropsSupplier = blockItemEntityDropsSupplier;
+        BlockItemDropsSupplier blockItemDropsSupplier = new BlockItemDropsSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, blockItemDropsSupplier));
+        this.blockItemDropsSupplier = blockItemDropsSupplier;
+        CapturedItemsSupplier capturedItemsSupplier = new CapturedItemsSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, capturedItemsSupplier));
+        this.capturedItemsSupplier = capturedItemsSupplier;
+        CapturedEntitiesSupplier capturedEntitiesSupplier = new CapturedEntitiesSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, capturedEntitiesSupplier));
+        this.capturedEntitiesSupplier = capturedEntitiesSupplier;
+        CapturedItemStackSupplier capturedItemStackSupplier = new CapturedItemStackSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, capturedItemStackSupplier));
+        this.capturedItemStackSupplier = capturedItemStackSupplier;
         return this;
     }
 
     public PhaseContext addEntityCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, new CapturedItemsSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, new CapturedItemStackSupplier()));
+        CapturedItemsSupplier capturedItemsSupplier = new CapturedItemsSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, capturedItemsSupplier));
+        this.capturedItemsSupplier = capturedItemsSupplier;
+        CapturedEntitiesSupplier capturedEntitiesSupplier = new CapturedEntitiesSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, capturedEntitiesSupplier));
+        this.capturedEntitiesSupplier = capturedEntitiesSupplier;
+        CapturedItemStackSupplier capturedItemStackSupplier = new CapturedItemStackSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, capturedItemStackSupplier));
+        this.capturedItemStackSupplier = capturedItemStackSupplier;
         return this;
     }
 
     public PhaseContext addEntityDropCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, new EntityItemDropsSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_ITEM_DROPS, new EntityItemEntityDropsSupplier()));
+        EntityItemDropsSupplier entityItemDropsSupplier = new EntityItemDropsSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, entityItemDropsSupplier));
+        this.entityItemDropsSupplier = entityItemDropsSupplier;
+        EntityItemEntityDropsSupplier entityItemEntityDropsSupplier = new EntityItemEntityDropsSupplier();
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_ITEM_DROPS, entityItemEntityDropsSupplier));
+        this.entityItemEntityDropsSupplier = entityItemEntityDropsSupplier;
         return this;
     }
 
@@ -171,6 +212,17 @@ public class PhaseContext {
         return Optional.empty();
     }
 
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> getSource(Class<T> sourceClass) {
+        if (this.source == null) {
+            return Optional.empty();
+        }
+        if (sourceClass.isInstance(this.source)) {
+            return Optional.of((T) this.source);
+        }
+        return Optional.empty();
+    }
+
     @SuppressWarnings({"unchecked", "rawtypes"})
     public List<Entity> getCapturedEntities() throws IllegalStateException {
         return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, CapturedEntitiesSupplier.class)
@@ -180,21 +232,26 @@ public class PhaseContext {
 
     @SuppressWarnings("unchecked")
     public CapturedSupplier<Entity> getCapturedEntitySupplier() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedEntitiesSupplier.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity spawns!", this));
+        if (this.capturedEntitiesSupplier == null) {
+            throw PhaseUtil.throwWithContext("Intended to capture entity spawns!", this).get();
+        }
+        return this.capturedEntitiesSupplier;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public List<EntityItem> getCapturedItems() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEMS, CapturedItemsSupplier.class)
-                .map(CapturedItemsSupplier::get)
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture dropped item entities!", this));
+        if (this.capturedItemsSupplier == null) {
+            throw PhaseUtil.throwWithContext("Intended to capture dropped item entities!", this).get();
+        }
+        return this.capturedItemsSupplier.get();
     }
 
     @SuppressWarnings("unchecked")
     public CapturedSupplier<EntityItem> getCapturedItemsSupplier() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEMS, (Class<CapturedSupplier<EntityItem>>) (Class<?>) CapturedItemsSupplier.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture dropped item entities!", this));
+        if (this.capturedItemsSupplier == null) {
+            throw PhaseUtil.throwWithContext("Intended to capture dropped item entities!", this).get();
+        }
+        return this.capturedItemsSupplier;
     }
 
     @SuppressWarnings("unchecked")
@@ -206,48 +263,57 @@ public class PhaseContext {
 
     @SuppressWarnings("unchecked")
     public CapturedSupplier<BlockSnapshot> getCapturedBlockSupplier() throws IllegalStateException {
-        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, (Class<CapturedSupplier<BlockSnapshot>>) (Class<?>) CapturedBlocksSupplier.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this));
+        if (this.blocksSupplier == null) {
+            throw PhaseUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this).get();
+        }
+        return this.blocksSupplier;
     }
 
     public Multimap<BlockPos, ItemDropData> getCapturedBlockDrops() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, BlockItemDropsSupplier.class)
-                .map(BlockItemDropsSupplier::get)
-                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block drops", this));
+        if (this.blockItemDropsSupplier == null) {
+            throw PhaseUtil.throwWithContext("Expected to be capturing block drops!", this).get();
+        }
+        return this.blockItemDropsSupplier.get();
     }
 
     @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<BlockPos, ItemDropData> getBlockDropSupplier() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS,
-                (Class<CapturedMultiMapSupplier<BlockPos, ItemDropData>>) (Class<?>) BlockItemDropsSupplier.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to track block item drops!", this));
+        if (this.blockItemDropsSupplier == null) {
+            throw PhaseUtil.throwWithContext("Expected to be capturing block drops!", this).get();
+        }
+        return this.blockItemDropsSupplier;
     }
 
     @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<BlockPos, EntityItem> getBlockItemDropSupplier() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS,
-                (Class<CapturedMultiMapSupplier<BlockPos, EntityItem>>) (Class<?>) BlockItemEntityDropsSupplier.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to track block item drops!", this));
+        if (this.blockItemEntityDropsSupplier == null) {
+            throw PhaseUtil.throwWithContext("Intended to track block item drops!", this).get();
+        }
+        return this.blockItemEntityDropsSupplier;
     }
 
     @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<UUID, ItemDropData> getCapturedEntityDropSupplier() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS,
-                (Class<CapturedMultiMapSupplier<UUID, ItemDropData>>) (Class<?>) EntityItemDropsSupplier.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
+        if (this.entityItemDropsSupplier == null) {
+            throw PhaseUtil.throwWithContext("Intended to capture entity drops!", this).get();
+        }
+        return this.entityItemDropsSupplier;
     }
 
     @SuppressWarnings("unchecked")
     public CapturedMultiMapSupplier<UUID, EntityItem> getCapturedEntityItemDropSupplier() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_ITEM_DROPS,
-                (Class<CapturedMultiMapSupplier<UUID, EntityItem>>) (Class<?>) EntityItemEntityDropsSupplier.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
+        if (this.entityItemEntityDropsSupplier == null) {
+            throw PhaseUtil.throwWithContext("Intended to capture entity drops!", this).get();
+        }
+        return this.entityItemEntityDropsSupplier;
     }
 
     @SuppressWarnings("unchecked")
     public CapturedSupplier<ItemDropData> getCapturedItemStackSupplier() throws IllegalStateException {
-        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, (Class<CapturedSupplier<ItemDropData>>) (Class<?>) CapturedItemStackSupplier.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing ItemStack drops from entities, but we're not capturing them!", this));
+        if (this.capturedItemStackSupplier == null) {
+            throw PhaseUtil.throwWithContext("Expected to be capturing ItemStack drops from entities!", this).get();
+        }
+        return this.capturedItemStackSupplier;
     }
 
     public CapturePlayer getCapturedPlayerSupplier() throws IllegalStateException {

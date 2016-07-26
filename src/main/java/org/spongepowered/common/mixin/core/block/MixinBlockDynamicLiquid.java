@@ -56,7 +56,7 @@ public abstract class MixinBlockDynamicLiquid {
         }
 
         PhaseData data = ((IMixinWorldServer) worldIn).getCauseTracker().getStack().peek();
-        Optional<BlockSnapshot> block = data.getContext().firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
+        Optional<BlockSnapshot> block = data.context.getSource(BlockSnapshot.class);
         if (!block.isPresent()) {
             // safety measure
             return;

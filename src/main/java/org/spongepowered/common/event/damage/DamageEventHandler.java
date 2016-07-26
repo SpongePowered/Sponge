@@ -67,7 +67,6 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -456,7 +455,7 @@ public class DamageEventHandler {
         if (entity.worldObj instanceof IMixinWorldServer) {
             IMixinWorldServer spongeWorld = (IMixinWorldServer) entity.worldObj;
             final PhaseData peek = spongeWorld.getCauseTracker().getStack().peek();
-            return peek.getState().getPhase().createDestructionDamageSource(peek.getState(), peek.getContext(), entity).orElse(null);
+            return peek.state.getPhase().createDestructionDamageSource(peek.state, peek.context, entity).orElse(null);
         }
         return null;
     }

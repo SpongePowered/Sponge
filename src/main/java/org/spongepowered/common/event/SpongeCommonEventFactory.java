@@ -193,9 +193,9 @@ public class SpongeCommonEventFactory {
             CauseTracker causeTracker = spongeWorld.getCauseTracker();
             PhaseContext context = causeTracker.getStack().peekContext();
 
-            final Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-            final Optional<TileEntity> currentTickingTileEntity = context.firstNamed(NamedCause.SOURCE, TileEntity.class);
-            final Optional<Entity> currentTickingEntity = context.firstNamed(NamedCause.SOURCE, Entity.class);
+            final Optional<BlockSnapshot> currentTickingBlock = context.getSource(BlockSnapshot.class);
+            final Optional<TileEntity> currentTickingTileEntity = context.getSource(TileEntity.class);
+            final Optional<Entity> currentTickingEntity = context.getSource(Entity.class);
             if (currentTickingBlock.isPresent()) {
                 cause = Cause.of(NamedCause.source(currentTickingBlock.get()));
             } else if (currentTickingTileEntity.isPresent()) {
@@ -221,7 +221,7 @@ public class SpongeCommonEventFactory {
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
         final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
         final PhaseData peek = causeTracker.getStack().peek();
-        final PhaseContext context = peek.getContext();
+        final PhaseContext context = peek.context;
         final BlockSnapshot snapshot = world.createSnapshot(pos.getX(), pos.getY(), pos.getZ());
         final Map<Direction, BlockState> neighbors = new HashMap<>();
 
@@ -243,7 +243,7 @@ public class SpongeCommonEventFactory {
         final Cause.Builder builder = Cause.source(snapshot);
         final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(pos);
 
-        peek.getState().getPhase().populateCauseForNotifyNeighborEvent(peek.getState(), context, builder, causeTracker, mixinChunk, pos);
+        peek.state.getPhase().populateCauseForNotifyNeighborEvent(peek.state, context, builder, causeTracker, mixinChunk, pos);
 
         NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(builder.build(), originalNeighbors, neighbors);
         SpongeCommonEventFactory.processingInternalForgeEvent = true;
@@ -373,7 +373,7 @@ public class SpongeCommonEventFactory {
             IMixinEntity spongeEntity = (IMixinEntity) entity;
             if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
                 final PhaseData peek = causeTracker.getStack().peek();
-                final Optional<User> notifier = peek.getContext().firstNamed(NamedCause.NOTIFIER, User.class);
+                final Optional<User> notifier = peek.context.firstNamed(NamedCause.NOTIFIER, User.class);
                 if (notifier.isPresent()) {
                     IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
                     spongeChunk.addTrackedBlockPosition(block, pos, notifier.get(), PlayerTracker.Type.NOTIFIER);
@@ -394,7 +394,7 @@ public class SpongeCommonEventFactory {
                                                                                          ? ProjectileSource.UNKNOWN
                                                                                          : projectileSource);
         final Optional<User> notifier = causeTracker.getStack().peek()
-                .getContext()
+                .context
                 .firstNamed(NamedCause.NOTIFIER, User.class);
         notifier.ifPresent(user -> builder.named(NamedCause.OWNER, user));
 
@@ -446,8 +446,8 @@ public class SpongeCommonEventFactory {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) fromTransform.getExtent();
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         final PhaseData peek = causeTracker.getStack().peek();
-        final IPhaseState state = peek.getState();
-        final PhaseContext context = peek.getContext();
+        final IPhaseState state = peek.state;
+        final PhaseContext context = peek.context;
 
         final Cause teleportCause = state.getPhase().generateTeleportCause(state, context);
 

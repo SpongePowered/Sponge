@@ -419,7 +419,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
     public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote || (this.worldObj instanceof IMixinWorldServer && ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack().peek().getState().ignoresEntityCollisions())) {
+        if (this.worldObj.isRemote || (this.worldObj instanceof IMixinWorldServer && ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack()
+                .peek().state.ignoresEntityCollisions())) {
             return;
         }
 
@@ -432,7 +433,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         final PhaseData peek = causeTracker.getStack().peek();
 
         if (event == null || event.isCancelled()) {
-            if (event == null && !peek.getState().getPhase().isTicking(peek.getState())) {
+            if (event == null && !peek.state.getPhase().isTicking(peek.state)) {
                 return;
             }
             listToFill.clear();
@@ -443,7 +444,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"))
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote || (this.worldObj instanceof IMixinWorldServer && ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack().peek().getState().ignoresEntityCollisions())) {
+        if (this.worldObj.isRemote || (this.worldObj instanceof IMixinWorldServer && ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack()
+                .peek().state.ignoresEntityCollisions())) {
             return;
         }
 
@@ -456,7 +458,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         final PhaseData peek = causeTracker.getStack().peek();
 
         if (event == null || event.isCancelled()) {
-            if (event == null && !peek.getState().getPhase().isTicking(peek.getState())) {
+            if (event == null && !peek.state.getPhase().isTicking(peek.state)) {
                 return;
             }
             listToFill.clear();
@@ -603,7 +605,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             // cancelled.
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
             final PhaseData peek = causeTracker.getStack().peek();
-            final boolean requiresCapturing = peek.getState().getPhase().requiresBlockCapturing(peek.getState());
+            final boolean requiresCapturing = peek.state.getPhase().requiresBlockCapturing(peek.state);
             if (!requiresCapturing || SpongeImplHooks.blockHasTileEntity(newBlock, newState)) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.
@@ -892,7 +894,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkGenerator;populate(II)V"))
     private void onChunkPopulate(IChunkGenerator generator, CallbackInfo callbackInfo) {
-        if (this.worldObj instanceof WorldServer) {
+        if (CauseTracker.ENABLED && this.worldObj instanceof WorldServer) {
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
             causeTracker.switchToPhase(WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                     .addCaptures()
@@ -902,7 +904,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setChunkModified()V"))
     private void onChunkPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
-        if (this.worldObj instanceof WorldServer) {
+        if (CauseTracker.ENABLED && this.worldObj instanceof WorldServer) {
             ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
 
         }

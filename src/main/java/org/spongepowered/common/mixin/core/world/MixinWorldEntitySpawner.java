@@ -95,11 +95,13 @@ public abstract class MixinWorldEntitySpawner {
     @Inject(method = "findChunksForSpawning", at = @At(value = "HEAD"))
     private void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServer);
-        CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.switchToPhase(WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
-            .add(NamedCause.source(worldServer))
-            .addCaptures()
-            .complete());
+        if (CauseTracker.ENABLED) {
+            CauseTracker causeTracker = spongeWorld.getCauseTracker();
+            causeTracker.switchToPhase(WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
+                .add(NamedCause.source(worldServer))
+                .addCaptures()
+                .complete());
+        }
         spongeWorld.getTimingsHandler().mobSpawn.startTiming();
 
     }
@@ -108,8 +110,10 @@ public abstract class MixinWorldEntitySpawner {
     @Inject(method = "findChunksForSpawning", at = @At(value = "RETURN"))
     private void onFindChunksForSpawningReturn(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServer);
-        CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.completePhase();
+        if (CauseTracker.ENABLED) {
+            CauseTracker causeTracker = spongeWorld.getCauseTracker();
+            causeTracker.completePhase();
+        }
         spawnerEntityClass = null;
         spawnerEntityType = null;
         spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
@@ -119,18 +123,22 @@ public abstract class MixinWorldEntitySpawner {
     @Inject(method = "performWorldGenSpawning", at = @At(value = "HEAD"))
     private static void onPerformWorldGenSpawningHead(World worldServer, Biome biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServer);
-        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.switchToPhase(WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
-            .addCaptures()
-            .add(NamedCause.source(worldServer))
-            .complete());
+        if (CauseTracker.ENABLED) {
+            final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+            causeTracker.switchToPhase(WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
+                .addCaptures()
+                .add(NamedCause.source(worldServer))
+                .complete());
+        }
     }
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "RETURN"))
     private static void onPerformWorldGenSpawningReturn(World worldServer, Biome biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldServer;
-        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.completePhase();
+        if (CauseTracker.ENABLED) {
+            final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+            causeTracker.completePhase();
+        }
         spawnerEntityClass = null;
         spawnerEntityType = null;
     }

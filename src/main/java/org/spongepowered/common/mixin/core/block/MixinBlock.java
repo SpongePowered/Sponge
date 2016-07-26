@@ -69,6 +69,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -248,7 +249,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Redirect(method = "dropBlockAsItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;dropBlockAsItemWithChance(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;FI)V"))
     private void onDropItemWithFortuneChances(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, float chance, int fortune) {
-        if (world instanceof IMixinWorldServer) {
+        if (world instanceof IMixinWorldServer && CauseTracker.ENABLED) {
             TrackingUtil.performBlockDrop(block, (IMixinWorldServer) world, pos, state, chance, fortune);
             return;
         }
@@ -288,9 +289,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         if (allowTileDrops && worldIn instanceof IMixinWorldServer) {
             final IMixinWorldServer mixin = (IMixinWorldServer) worldIn;
             final PhaseData currentPhase = mixin.getCauseTracker().getStack().peek();
-            final IPhaseState currentState = currentPhase.getState();
+            final IPhaseState currentState = currentPhase.state;
             if (currentState.tracksBlockSpecificDrops()) {
-                final PhaseContext context = currentPhase.getContext();
+                final PhaseContext context = currentPhase.context;
                 final Multimap<BlockPos, ItemDropData> multimap = context.getCapturedBlockDrops();
                 final Collection<ItemDropData> itemStacks = multimap.get(pos);
                 SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(stack).position(VecHelper.toVector3d(pos)).build());

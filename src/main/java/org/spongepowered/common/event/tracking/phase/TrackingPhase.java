@@ -337,7 +337,7 @@ public abstract class TrackingPhase {
 
 
     public void appendPreBlockProtectedCheck(Cause.Builder builder, IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker) {
-        context.firstNamed(NamedCause.SOURCE, Player.class).ifPresent(player -> builder.named(NamedCause.notifier(player)));
+        context.getSource(Player.class).ifPresent(player -> builder.named(NamedCause.notifier(player)));
     }
 
     public boolean isTicking(IPhaseState state) {
