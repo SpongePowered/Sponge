@@ -51,6 +51,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
@@ -442,6 +443,30 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
+    public Set<Entity> getIntersectingEntities(AABB box, Predicate<Entity> filter) {
+        checkRange(box.getMin().getX(), box.getMin().getY(), box.getMin().getZ());
+        checkRange(box.getMax().getX(), box.getMax().getY(), box.getMax().getZ());
+        return this.extent.getIntersectingEntities(box, filter);
+    }
+
+    @Override
+    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Predicate<EntityHit> filter) {
+        // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
+        final Vector3i max = this.blockMax.add(Vector3i.ONE);
+        return this.extent.getIntersectingEntities(start, end,
+                Functional.predicateAnd(hit -> VecHelper.inBounds(hit.getEntity().getLocation().getPosition(), this.blockMin, max), filter));
+    }
+
+    @Override
+    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance,
+            Predicate<EntityHit> filter) {
+        // Order matters! Bounds filter before the argument filter so it doesn't see out of bounds entities
+        final Vector3i max = this.blockMax.add(Vector3i.ONE);
+        return this.extent.getIntersectingEntities(start, direction, distance,
+                Functional.predicateAnd(hit -> VecHelper.inBounds(hit.getEntity().getLocation().getPosition(), this.blockMin, max), filter));
+    }
+
+    @Override
     public Optional<Entity> getEntity(UUID uuid) {
         // TODO 1.9 gabizou this is for you
         return null;
@@ -527,6 +552,26 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
 
     @Override public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
         this.extent.setNotifier(x, y, z, uuid);
+    }
+
+    @Override
+    public Optional<AABB> getBlockSelectionBox(int x, int y, int z) {
+        checkRange(x, y, z);
+        return this.extent.getBlockSelectionBox(x, y, z);
+    }
+
+    @Override
+    public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
+        checkRange(box.getMin().getX(), box.getMin().getY(), box.getMin().getZ());
+        checkRange(box.getMax().getX(), box.getMax().getY(), box.getMax().getZ());
+        return this.extent.getIntersectingBlockCollisionBoxes(box);
+    }
+
+    @Override
+    public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
+        checkRange(box.getMin().getX(), box.getMin().getY(), box.getMin().getZ());
+        checkRange(box.getMax().getX(), box.getMax().getY(), box.getMax().getZ());
+        return this.extent.getIntersectingCollisionBoxes(owner, box);
     }
 
     @Override
