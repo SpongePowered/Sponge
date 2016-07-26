@@ -49,6 +49,7 @@ import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
@@ -628,6 +629,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         SpongeImpl.postEvent(event);
         if (!event.isMessageCancelled()) {
             event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
+        }
+    }
+
+    @Inject(method = "processRightClickBlock", at = @At(value = "HEAD"))
+    public void onProcessPlayerBlockPlacement(CPacketPlayerTryUseItemOnBlock packetIn, CallbackInfo ci) {
+        if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
         }
     }
 
