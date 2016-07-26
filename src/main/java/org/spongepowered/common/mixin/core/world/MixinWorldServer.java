@@ -1234,11 +1234,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag) {
         this.builder.reset();
-        Location<org.spongepowered.api.world.World> location = new Location<>(this, VecHelper.toVector3i(pos));
         this.builder.blockState((BlockState) state)
                 .extendedState((BlockState) extended)
-                .worldId(location.getExtent().getUniqueId())
-                .position(location.getBlockPosition());
+                .worldId(this.getUniqueId())
+                .position(VecHelper.toVector3i(pos));
         Optional<UUID> creator = getCreator(pos.getX(), pos.getY(), pos.getZ());
         Optional<UUID> notifier = getNotifier(pos.getX(), pos.getY(), pos.getZ());
         if (creator.isPresent()) {

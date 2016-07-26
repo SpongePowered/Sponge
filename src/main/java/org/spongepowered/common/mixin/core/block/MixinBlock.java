@@ -39,7 +39,6 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.IBlockAccess;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
@@ -49,9 +48,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
@@ -85,7 +82,6 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 
 @NonnullByDefault
 @Mixin(value = Block.class, priority = 999)
@@ -196,20 +192,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public void setTickRandomly(boolean tickRandomly) {
         this.needsRandomTick = tickRandomly;
-    }
-
-    @Inject(method = "randomTick", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
-    public void callRandomTickEvent(net.minecraft.world.World world, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        if (world.isRemote) {
-            return;
-        }
-
-        BlockSnapshot blockSnapshot = ((World) world).createSnapshot(VecHelper.toVector3i(pos));
-        final TickBlockEvent event = SpongeEventFactory.createTickBlockEvent(Cause.of(NamedCause.source(world)), blockSnapshot);
-        SpongeImpl.postEvent(event);
-        if(event.isCancelled()) {
-            ci.cancel();
-        }
     }
 
     @Override

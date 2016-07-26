@@ -43,9 +43,13 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.TickBlockEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
@@ -123,6 +127,11 @@ public final class TrackingUtil {
         final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state.getActualState(minecraftWorld, pos), pos, 0);
+        final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Cause.of(NamedCause.source(minecraftWorld)), snapshot);
+        SpongeImpl.postEvent(event);
+        if(event.isCancelled()) {
+            return;
+        }
         final PhaseContext phaseContext = PhaseContext.start()
                 .add(NamedCause.source(snapshot))
                 .addBlockCaptures()
@@ -141,6 +150,11 @@ public final class TrackingUtil {
         final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state.getActualState(minecraftWorld, pos), pos, 0);
+        final TickBlockEvent event = SpongeEventFactory.createTickBlockEventRandom(Cause.of(NamedCause.source(minecraftWorld)), currentTickBlock);
+        SpongeImpl.postEvent(event);
+        if(event.isCancelled()) {
+            return;
+        }
         final PhaseContext phaseContext = PhaseContext.start()
                 .add(NamedCause.source(currentTickBlock))
                 .addEntityCaptures()
