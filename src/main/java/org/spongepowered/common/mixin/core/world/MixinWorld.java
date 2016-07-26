@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.GenericMath;
+import com.flowpowered.math.vector.Vector2d;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -79,7 +80,6 @@ import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -749,28 +749,35 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityHit> filter) {
+        // Ensure that the direction has unit length
+        direction = direction.normalize();
+        final Set<EntityHit> intersecting = new HashSet<>();
+        // If the direction is vertical only, we don't need to do any chunk tracing, just defer immediately to the containing chunk
+        if (direction.getX() == 0 && direction.getZ() == 0) {
+            return ((IMixinChunk) getChunkAtBlock(start.toInt()).get()).getIntersectingEntities(
+                    start, direction, distance, filter, start.getY(), start.getY() + direction.getY() * distance, intersecting
+            );
+        }
         // Adapted from BlockRay
         final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
         // Figure out the direction of the ray for each axis
         final int xPlaneIncrement = direction.getX() >= 0 ? chunkWidth : -chunkWidth;
         final int zPlaneIncrement = direction.getZ() >= 0 ? chunkWidth : -chunkWidth;
         // First planes are for the chunk that contains the coordinates
-        final double xInChunk = start.getX() % chunkWidth;
-        final double zInChunk = start.getZ() % chunkWidth;
+        double xInChunk = start.getX() % chunkWidth;
+        double zInChunk = start.getZ() % chunkWidth;
         int xPlaneNext = (int) (start.getX() - xInChunk);
         int zPlaneNext = (int) (start.getZ() - zInChunk);
-        // Correct the next planes for the direction when inside the chunk
-        if (xInChunk != 0 && direction.getX() >= 0) {
+        // Correct the next planes to they start just behind the starting position
+        if (xInChunk != 0 && direction.getX() < 0) {
             xPlaneNext += chunkWidth;
         }
-        if (zInChunk != 0 && direction.getZ() >= 0) {
+        if (zInChunk != 0 && direction.getZ() < 0) {
             zPlaneNext += chunkWidth;
         }
         // Compute the first intersection solutions for each plane
         double xPlaneT = (xPlaneNext - start.getX()) / direction.getX();
         double zPlaneT = (zPlaneNext - start.getZ()) / direction.getZ();
-        // Trace the chunks in 2D to find which contain possibly intersecting entities
-        final Set<EntityHit> intersecting = new HashSet<>();
         // Keep track of the last distance using the t multiplier
         double currentT = 0;
         // Keep tack of the last intersection y coordinate
@@ -779,23 +786,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
         double zCurrent = start.getZ();
         // Trace each chunks until the remaining distance goes below 0
         double remainingDistance = distance;
+        // Trace the chunks in 2D to find which contain possibly intersecting entities
         do {
             final double nextT;
             final double xNext;
             final double yNext;
             final double zNext;
             // Find the closest intersection and its coordinates
-            if (xPlaneT == zPlaneT) {
-                nextT = xPlaneT;
-                // Update current position
-                xNext = xPlaneNext;
-                zNext = zPlaneNext;
-                // Prepare next intersection
-                xPlaneNext += xPlaneIncrement;
-                zPlaneNext += zPlaneIncrement;
-                xPlaneT = (xPlaneNext - start.getX()) / direction.getX();
-                zPlaneT = (zPlaneNext - start.getZ()) / direction.getZ();
-            } else if (xPlaneT < zPlaneT) {
+            if (xPlaneT < zPlaneT) {
                 nextT = xPlaneT;
                 // Update current position
                 xNext = xPlaneNext;
@@ -814,19 +812,31 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
             // Don't go over the distance when calculating the next intersection y
             yNext = direction.getY() * Math.min(nextT, distance) + start.getY();
-            // Get the coordinates of the chunk that was last entered (correct for entering from the back plane)
-            final int xChunk = xCurrent % chunkWidth == 0 && direction.getX() < 0 ? (int) xCurrent - chunkWidth : GenericMath.floor(xCurrent);
-            final int zChunk = zCurrent % chunkWidth == 0 && direction.getZ() < 0 ? (int) zCurrent - chunkWidth : GenericMath.floor(zCurrent);
-            // Get the chunk and call the intersection method to perform the task locally
-            final Optional<Chunk> chunk = getChunkAtBlock(xChunk, 0, zChunk);
-            if (chunk.isPresent()) {
-                System.out.println(chunk.get().getPosition());
-                setBlockType((int) xCurrent, (int) yCurrent, (int) zCurrent, BlockTypes.GOLD_BLOCK);
-                setBlockType((int) xNext, (int) yNext, (int) zNext, BlockTypes.DIAMOND_BLOCK);
-                ((IMixinChunk) chunk.get()).getIntersectingEntities(new Vector3d(xCurrent, yCurrent, zCurrent), direction, remainingDistance, filter,
-                        yCurrent, yNext, intersecting);
+            // Ignore the first few intersections behind the starting position
+            // although we still use them to position the current coordinates on a chunk boundary
+            if (nextT >= 0) {
+                // Get the coordinates of the chunk that was last entered (correct for entering from the back plane)
+                xInChunk = xCurrent % chunkWidth;
+                zInChunk = zCurrent % chunkWidth;
+                final int xChunk = (int) (xCurrent - (xInChunk == 0 && direction.getX() < 0 ? chunkWidth : xInChunk));
+                final int zChunk = (int) (zCurrent - (zInChunk == 0 && direction.getZ() < 0 ? chunkWidth : zInChunk));
+                // Make sure the start position in the chunk is not before the world start position
+                final Vector3d chunkStart = currentT < 0 ? start : new Vector3d(xCurrent, yCurrent, zCurrent);
+                // Get the chunk and call the intersection method to perform the task locally
+                final Optional<Chunk> chunk = getChunkAtBlock(xChunk, 0, zChunk);
+                if (chunk.isPresent()) {
+                    ((IMixinChunk) chunk.get())
+                            .getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
+                }
+                // If the intersections are near another chunk, its entities might be partially in the current chunk, so include it also
+                final IMixinChunk nearIntersections = getChunkNearIntersections(xChunk, zChunk, xCurrent, zCurrent, xNext, zNext);
+                if (nearIntersections != null) {
+                    nearIntersections
+                            .getIntersectingEntities(chunkStart, direction, remainingDistance, filter, chunkStart.getY(), yNext, intersecting);
+
+                }
                 // Remove the chunk from the distance
-                remainingDistance -= nextT - currentT;
+                remainingDistance -= nextT - Math.max(0, currentT);
             }
             // Update the current intersection to the new one
             currentT = nextT;
@@ -835,7 +845,61 @@ public abstract class MixinWorld implements World, IMixinWorld {
             zCurrent = zNext;
         } while (remainingDistance >= 0);
         return intersecting;
-        // TODO: fix entities being missed when only part of the AABB is the chunk
+    }
+
+    private IMixinChunk getChunkNearIntersections(int xChunk, int zChunk, double xCurrent, double zCurrent, double xNext, double zNext) {
+        final int chunkWidth = SpongeChunkLayout.CHUNK_SIZE.getX();
+        // Chunk corner coordinates
+        final Vector2d c1 = new Vector2d(xChunk, zChunk);
+        final Vector2d c2 = new Vector2d(xChunk + chunkWidth, zChunk);
+        final Vector2d c3 = new Vector2d(xChunk, zChunk + chunkWidth);
+        final Vector2d c4 = new Vector2d(xChunk + chunkWidth, zChunk + chunkWidth);
+        // The square of the distance we consider as being near
+        final int nearDistance2 = 2 * 2;
+        // Under the assumption that both intersections aren't on the same face
+        // Look for two intersection being near the same corner
+        final boolean d11 = c1.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
+        final boolean d21 = c1.distanceSquared(xNext, zNext) <= nearDistance2;
+        if (d11 && d21) {
+            // Near corner -x, -z
+            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk - chunkWidth).orElse(null);
+        }
+        final boolean d12 = c2.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
+        final boolean d22 = c2.distanceSquared(xNext, zNext) <= nearDistance2;
+        if (d12 && d22) {
+            // Near corner +x, -z
+            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk - chunkWidth).orElse(null);
+        }
+        final boolean d13 = c3.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
+        final boolean d23 = c3.distanceSquared(xNext, zNext) <= nearDistance2;
+        if (d13 && d23) {
+            // Near corner -x, +z
+            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk + chunkWidth).orElse(null);
+        }
+        final boolean d14 = c4.distanceSquared(xCurrent, zCurrent) <= nearDistance2;
+        final boolean d24 = c4.distanceSquared(xNext, zNext) <= nearDistance2;
+        if (d14 && d24) {
+            // Near corner +x, +z
+            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk + chunkWidth).orElse(null);
+        }
+        // Look for two intersections being near the corners on the same face
+        if (d11 && d23 || d21 && d13) {
+            // Near face -x
+            return (IMixinChunk) getChunkAtBlock(xChunk - chunkWidth, 0, zChunk).orElse(null);
+        }
+        if (d11 && d22 || d21 && d12) {
+            // Near face -z
+            return (IMixinChunk) getChunkAtBlock(xChunk, 0, zChunk - chunkWidth).orElse(null);
+        }
+        if (d14 && d22 || d24 && d12) {
+            // Near face +x
+            return (IMixinChunk) getChunkAtBlock(xChunk + chunkWidth, 0, zChunk).orElse(null);
+        }
+        if (d14 && d23 || d24 && d13) {
+            // Near face +z
+            return (IMixinChunk) getChunkAtBlock(xChunk, 0, zChunk + chunkWidth).orElse(null);
+        }
+        return null;
     }
 
     @Nullable
