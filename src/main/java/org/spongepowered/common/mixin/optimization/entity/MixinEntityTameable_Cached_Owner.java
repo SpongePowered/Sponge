@@ -29,6 +29,7 @@ import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.passive.MixinEntityAnimal;
 
@@ -48,6 +49,7 @@ public abstract class MixinEntityTameable_Cached_Owner extends MixinEntityAnimal
      * @return The owner id string
      */
     @Nullable
+    @Overwrite
     public UUID getOwnerId() {
         if (this.cachedOwnerId == null) {
             this.cachedOwnerId = Optional.fromNullable((UUID) ((Optional) this.dataManager.get(OWNER_UNIQUE_ID)).orNull());
@@ -61,6 +63,7 @@ public abstract class MixinEntityTameable_Cached_Owner extends MixinEntityAnimal
      *
      * @param ownerUuid The owner id to set
      */
+    @Overwrite
     public void setOwnerId(@Nullable UUID ownerUuid) {
         this.cachedOwnerId = Optional.fromNullable(ownerUuid);
         this.dataManager.set(OWNER_UNIQUE_ID, this.cachedOwnerId);
