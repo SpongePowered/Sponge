@@ -39,6 +39,9 @@ public class OptimizationCategory extends ConfigCategory {
     @Setting(value = "chunk-map-caching", comment = "Caches chunks internally for faster returns when querying at various positions")
     private boolean useCachedChunkMap = true;
 
+    @Setting(value = "cache-tameable-owners", comment = "Caches tameable entities owners to avoid constant lookups against data watchers. If mods cause issue, disable.")
+    private boolean cacheTameableOwners = true;
+
     public boolean useBlockStateLookupPatch() {
         return this.blockStateLookup;
     }
@@ -50,4 +53,9 @@ public class OptimizationCategory extends ConfigCategory {
     public boolean isUseCachedChunkMap() {
         return this.useCachedChunkMap;
     }
+
+    public boolean useCacheTameableOwners() {
+        return this.cacheTameableOwners;
+    }
+
 }

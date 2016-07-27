@@ -86,6 +86,8 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::isUseCachedChunkMap)
             .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Chunk_Cache",
                     OptimizationCategory::isUseCachedChunkMap)
+            .put("org.spongepowered.common.mixin.optimization.entity.MixinEntityTameable_Cached_Owner",
+                    OptimizationCategory::useCacheTameableOwners)
             .build();
 
 }
