@@ -90,7 +90,8 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     (module) -> true) // TODO the velocity changes need to be sent to the client
             .put("org.spongepowered.common.mixin.optimization.MixinExplosion_Explosion",
                     (module) -> true) // TODO the velocity changes need to be sent to the client
-
+            .put("org.spongepowered.common.mixin.optimization.entity.MixinEntityTameable_Cached_Owner",
+                    OptimizationCategory::useCacheTameableOwners)
             .build();
 
 }

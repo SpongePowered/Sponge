@@ -46,6 +46,9 @@ public class OptimizationCategory extends ConfigCategory {
     @Setting(value = "drops-pre-merge", comment = PRE_MERGE_COMMENT)
     private boolean preItemDropMerge = true;
 
+    @Setting(value = "cache-tameable-owners", comment = "Caches tameable entities owners to avoid constant lookups against data watchers. If mods cause issue, disable.")
+    private boolean cacheTameableOwners = true;
+
     public boolean useIgnoreUloadedChunkLightingPatch() {
         return this.ignoreUnloadedChunkLighting;
     }
@@ -56,6 +59,11 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean doDropsPreMergeItemDrops() {
         return this.preItemDropMerge;
+    }
+
+
+    public boolean useCacheTameableOwners() {
+        return this.cacheTameableOwners;
     }
 
 }

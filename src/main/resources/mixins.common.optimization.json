@@ -6,6 +6,7 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
+        "entity.MixinEntityTameable_Cached_Owner",
         "world.MixinWorld_Lighting",
         "world.MixinWorldServer_Lighting",
         "world.MixinChunk_Chunk_Cache",
