@@ -137,6 +137,9 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
     @Override
     public Optional<User> getTrackedPlayer(String nbtKey) {
         final UUID uuid = this.getTrackedUniqueId(nbtKey);
+        if (uuid == null) {
+            return Optional.empty();
+        }
         // get player if online
         Player player = Sponge.getServer().getPlayer(uuid).orElse(null);
         if (player != null) {
