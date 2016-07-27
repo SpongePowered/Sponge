@@ -126,7 +126,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private int tickCounter;
     @Shadow private String motd;
     @Shadow public WorldServer[] worldServers;
-    @Shadow private boolean serverStopped;
 
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void addChatMessage(ITextComponent message);
@@ -617,7 +616,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             if (worldserver != null)
             {
                 // Sponge start - check auto save interval in world config
-                if (this.isDedicatedServer() && !this.serverStopped) {
+                if (this.isDedicatedServer() && this.isServerRunning()) {
                     final IMixinWorldServer spongeWorld = (IMixinWorldServer) worldserver;
                     final int autoSaveInterval = spongeWorld.getActiveConfig().getConfig().getWorld().getAutoSaveInterval();
                     final boolean logAutoSave = spongeWorld.getActiveConfig().getConfig().getLogging().worldAutoSaveLogging();
