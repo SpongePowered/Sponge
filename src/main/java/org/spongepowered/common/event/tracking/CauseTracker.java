@@ -69,11 +69,6 @@ import javax.annotation.Nullable;
 public final class CauseTracker {
 
     public static final boolean ENABLED = Booleans.parseBoolean(System.getProperty("sponge.causeTracking"), true);
-    static {
-        new PrettyPrinter(100).add("CauseTracking").centre().hr()
-                .add("%s : %s", "Enabled", ENABLED)
-                .trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
-    }
 
     public static final int DEFAULT_QUEUE_SIZE = 16;
 
