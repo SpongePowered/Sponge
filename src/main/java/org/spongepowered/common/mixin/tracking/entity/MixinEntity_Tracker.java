@@ -24,16 +24,20 @@
  */
 package org.spongepowered.common.mixin.tracking.entity;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.profile.SpongeProfileManager;
+import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -43,10 +47,17 @@ import javax.annotation.Nullable;
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1111)
 public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
 
+    private SpongeProfileManager spongeProfileManager;
+    private UserStorageService userStorageService;
     @Shadow public net.minecraft.world.World worldObj;
 
     @Override
     public void trackEntityUniqueId(String nbtKey, @Nullable UUID uuid) {
+        if (NbtDataUtil.SPONGE_ENTITY_CREATOR.equals(nbtKey)) {
+            this.creator = uuid;
+        } else if (NbtDataUtil.SPONGE_ENTITY_NOTIFIER.equals(nbtKey)) {
+            this.notifier = uuid;
+        }
         final NBTTagCompound spongeData = getSpongeData();
         if (!spongeData.hasKey(nbtKey)) {
             if (uuid == null) {
@@ -68,6 +79,9 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
 
     @Override
     public Optional<UUID> getCreator() {
+        if (this.creator != null) {
+            return Optional.of(this.creator);
+        }
         Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
         if (user.isPresent()) {
             return Optional.of(user.get().getUniqueId());
@@ -78,6 +92,9 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
 
     @Override
     public Optional<UUID> getNotifier() {
+        if (this.notifier != null) {
+            return Optional.of(this.notifier);
+        }
         Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
         if (user.isPresent()) {
             return Optional.of(user.get().getUniqueId());
@@ -86,27 +103,66 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         }
     }
 
-    @Override
-    public Optional<User> getTrackedPlayer(String nbtKey) {
+    @Nullable
+    private UUID getTrackedUniqueId(String nbtKey) {
+        if (this.creator != null && NbtDataUtil.SPONGE_ENTITY_CREATOR.equals(nbtKey)) {
+            return this.creator;
+        } else if (this.notifier != null && NbtDataUtil.SPONGE_ENTITY_NOTIFIER.equals(nbtKey)) {
+            return this.notifier;
+        }
         NBTTagCompound nbt = getSpongeData();
         if (!nbt.hasKey(nbtKey)) {
-            return Optional.empty();
+            return null;
         }
         NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
 
 
         if (!creatorNbt.hasKey(NbtDataUtil.UUID + "Most") && !creatorNbt.hasKey(NbtDataUtil.UUID + "Least")) {
-            return Optional.empty();
+            return null;
         }
 
-        UUID uuid = creatorNbt.getUniqueId(NbtDataUtil.UUID);
+        UUID uniqueId = creatorNbt.getUniqueId(NbtDataUtil.UUID);
+        if (NbtDataUtil.SPONGE_ENTITY_CREATOR.equals(nbtKey)) {
+            this.creator = uniqueId;
+        } else if (NbtDataUtil.SPONGE_ENTITY_NOTIFIER.equals(nbtKey)) {
+            this.notifier = uniqueId;
+        }
+        return uniqueId;
+    }
+
+    @Nullable private UUID creator;
+    @Nullable private UUID notifier;
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Optional<User> getTrackedPlayer(String nbtKey) {
+        final UUID uuid = this.getTrackedUniqueId(nbtKey);
         // get player if online
-        EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
+        Player player = Sponge.getServer().getPlayer(uuid).orElse(null);
         if (player != null) {
-            return Optional.of((User)player);
+            return Optional.of(player);
         }
         // player is not online, get user from storage if one exists
-        return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
+        if (this.spongeProfileManager == null) {
+            this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
+        }
+        if (this.userStorageService == null) {
+            this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
+        }
+
+        // check username cache
+        String username = SpongeUsernameCache.getLastKnownUsername(uuid);
+        if (username == null) {
+            // check mojang cache
+            Optional<GameProfile> profile = this.spongeProfileManager.getCache().getById(uuid);
+            if (profile.isPresent()) {
+                return this.userStorageService.get(profile.get());
+            }
+
+            this.spongeProfileManager.getGameProfileQueryTask().queueUuid(uuid);
+        }
+
+        return this.userStorageService.get(GameProfile.of(uuid, username));
     }
 
 }

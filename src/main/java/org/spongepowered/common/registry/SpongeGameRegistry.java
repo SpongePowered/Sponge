@@ -261,8 +261,11 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public <T extends ResettableBuilder<?, ? super T>> T createBuilder(Class<T> builderClass) {
         checkNotNull(builderClass, "Builder class was null!");
-        checkArgument(this.builderSupplierMap.containsKey(builderClass), "Could not find a Supplier for the provided class: " + builderClass.getCanonicalName());
-        return (T) this.builderSupplierMap.get(builderClass).get();
+        final Supplier<?> supplier = this.builderSupplierMap.get(builderClass);
+        if (supplier == null) {
+            throw new IllegalArgumentException("Could not find a Supplier for the provided builder class: " + builderClass.getCanonicalName());
+        }
+        return (T) supplier.get();
     }
 
     @SuppressWarnings("unchecked")

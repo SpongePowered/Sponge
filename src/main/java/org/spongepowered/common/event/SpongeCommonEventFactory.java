@@ -64,6 +64,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
@@ -215,6 +216,22 @@ public class SpongeCommonEventFactory {
         CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(cause, spEntities, (World) world);
         SpongeImpl.postEvent(event);
         return event;
+    }
+
+    public static boolean handleChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos) {
+        final CauseTracker causeTracker = worldIn.getCauseTracker();
+        PhaseData data = causeTracker.getStack().peek();
+        Optional<BlockSnapshot> block = data.context.getSource(BlockSnapshot.class);
+        if (!block.isPresent()) {
+            // safety measure
+            return false;
+        }
+
+        Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
+        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(Cause.source(block.get()).build(), ImmutableList.of(location),
+                (World) worldIn);
+        SpongeImpl.postEvent(event);
+        return event.isCancelled();
     }
 
     @SuppressWarnings("rawtypes")
