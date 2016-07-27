@@ -236,14 +236,12 @@ public final class GeneralPhase extends TrackingPhase {
         final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlockSupplier().orEmptyList();
         final List<Entity> contextEntities = postContext.getCapturedEntitySupplier().orEmptyList();
         final List<Entity> contextItems = (List<Entity>) (List<?>) postContext.getCapturedItemsSupplier().orEmptyList();
-        final List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
-        if (contextBlocks.isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty() && invalidTransactions.isEmpty()) {
+        if (contextBlocks.isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty()) {
             return;
         }
         if (!contextBlocks.isEmpty()) {
             final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
             contextBlocks.clear();
-            invalidTransactions.clear();
             processBlockTransactionListsPost(postContext, blockSnapshots, causeTracker, unwindingState, unwindingContext);
         }
         if (!contextEntities.isEmpty()) {

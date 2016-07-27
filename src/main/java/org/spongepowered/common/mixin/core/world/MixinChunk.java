@@ -79,6 +79,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -166,6 +167,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow public abstract byte[] getBiomeArray();
     @Shadow public abstract void setBiomeArray(byte[] biomeArray);
     @Shadow public abstract int getTopFilledSegment();
+    @Shadow public abstract void checkLight();
     // @formatter:on
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
@@ -419,8 +421,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
     public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote || (this.worldObj instanceof IMixinWorldServer && ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack()
-                .peek().state.ignoresEntityCollisions())) {
+        if (this.worldObj.isRemote || ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack().peek().state.ignoresEntityCollisions()) {
             return;
         }
 
@@ -444,8 +445,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"))
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote || (this.worldObj instanceof IMixinWorldServer && ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack()
-                .peek().state.ignoresEntityCollisions())) {
+        if (this.worldObj.isRemote || ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack().peek().state.ignoresEntityCollisions()) {
             return;
         }
 
@@ -894,7 +894,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkGenerator;populate(II)V"))
     private void onChunkPopulate(IChunkGenerator generator, CallbackInfo callbackInfo) {
-        if (CauseTracker.ENABLED && this.worldObj instanceof WorldServer) {
+        if (CauseTracker.ENABLED && !this.worldObj.isRemote) {
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
             causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                     .addCaptures()
@@ -904,7 +904,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setChunkModified()V"))
     private void onChunkPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
-        if (CauseTracker.ENABLED && this.worldObj instanceof WorldServer) {
+        if (CauseTracker.ENABLED && !this.worldObj.isRemote) {
             ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
 
         }
