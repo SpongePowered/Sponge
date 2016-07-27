@@ -770,7 +770,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return false;
     }
 
-    @Inject(method = "saveAllChunks", at = @At(value = "INVOKE", args = "log=true", target = "Lnet/minecraft/world/gen/ChunkProviderServer;getLoadedChunks()Ljava/util/Collection;"), cancellable = true)
+    @Inject(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;getLoadedChunks()Ljava/util/Collection;"), cancellable = true)
     public void onSaveAllChunks(boolean saveAllChunks, IProgressUpdate progressCallback, CallbackInfo ci) {
         Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPost(Cause.of(NamedCause.source(SpongeImpl.getServer())), this));
         // The chunk GC handles all queuing for chunk unloads so we cancel here to avoid it during a save.
