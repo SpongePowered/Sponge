@@ -55,7 +55,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.event.tracking.phase.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
@@ -80,7 +80,7 @@ public final class TrackingUtil {
     public static void tickEntity(CauseTracker causeTracker, net.minecraft.entity.Entity entityIn) {
         checkArgument(entityIn instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entityIn);
         checkNotNull(entityIn, "Cannot capture on a null ticking entity!");
-        causeTracker.switchToPhase(WorldPhase.Tick.ENTITY, PhaseContext.start()
+        causeTracker.switchToPhase(TickPhase.Tick.ENTITY, PhaseContext.start()
                 .add(NamedCause.source(entityIn))
                 .addEntityCaptures()
                 .addBlockCaptures()
@@ -95,7 +95,7 @@ public final class TrackingUtil {
     public static void tickRidingEntity(CauseTracker causeTracker, net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        causeTracker.switchToPhase(WorldPhase.Tick.ENTITY, PhaseContext.start()
+        causeTracker.switchToPhase(TickPhase.Tick.ENTITY, PhaseContext.start()
                 .add(NamedCause.source(entity))
                 .addEntityCaptures()
                 .addBlockCaptures()
@@ -108,7 +108,7 @@ public final class TrackingUtil {
     }
 
     public static void tickTileEntity(CauseTracker causeTracker, ITickable tile) {
-        causeTracker.switchToPhase(WorldPhase.Tick.TILE_ENTITY, PhaseContext.start()
+        causeTracker.switchToPhase(TickPhase.Tick.TILE_ENTITY, PhaseContext.start()
                 .add(NamedCause.source(tile))
                 .addEntityCaptures()
                 .addBlockCaptures()
@@ -141,7 +141,7 @@ public final class TrackingUtil {
         final IPhaseState currentState = current.state;
         currentState.getPhase().appendNotifierPreBlockTick(causeTracker, pos, currentState, current.context, phaseContext);
         // Now actually switch to the new phase
-        causeTracker.switchToPhase(WorldPhase.Tick.BLOCK, phaseContext.complete());
+        causeTracker.switchToPhase(TickPhase.Tick.BLOCK, phaseContext.complete());
         block.updateTick(minecraftWorld, pos, state, random);
         causeTracker.completePhase();
     }
@@ -164,7 +164,7 @@ public final class TrackingUtil {
         final IPhaseState currentState = current.state;
         currentState.getPhase().appendNotifierPreBlockTick(causeTracker, pos, currentState, current.context, phaseContext);
         // Now actually switch to the new phase
-        causeTracker.switchToPhase(WorldPhase.Tick.RANDOM_BLOCK, phaseContext.complete());
+        causeTracker.switchToPhase(TickPhase.Tick.RANDOM_BLOCK, phaseContext.complete());
         block.randomTick(minecraftWorld, pos, state, random);
         causeTracker.completePhase();
     }
@@ -172,7 +172,7 @@ public final class TrackingUtil {
     public static void tickWorldProvider(IMixinWorldServer worldServer) {
         final CauseTracker causeTracker = worldServer.getCauseTracker();
         final WorldProvider worldProvider = ((WorldServer) worldServer).provider;
-        causeTracker.switchToPhase(WorldPhase.Tick.DIMENSION, PhaseContext.start()
+        causeTracker.switchToPhase(TickPhase.Tick.DIMENSION, PhaseContext.start()
                 .add(NamedCause.source(worldProvider))
                 .addBlockCaptures()
                 .addEntityCaptures()
@@ -199,7 +199,7 @@ public final class TrackingUtil {
         blockEvent.getSourceUser().ifPresent(user -> phaseContext.add(NamedCause.notifier(user)));
 
         phaseContext.complete();
-        causeTracker.switchToPhase(WorldPhase.Tick.BLOCK_EVENT, phaseContext);
+        causeTracker.switchToPhase(TickPhase.Tick.BLOCK_EVENT, phaseContext);
         boolean result = currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         causeTracker.completePhase();
         return result;

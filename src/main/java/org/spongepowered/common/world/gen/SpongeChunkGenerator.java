@@ -72,7 +72,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.event.tracking.phase.GenerationPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
@@ -331,7 +331,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                 timing.startTimingIfSync();
             }
             if (CauseTracker.ENABLED) {
-                causeTracker.switchToPhase(WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
+                causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()
                         .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, type))
                         .addEntityCaptures()
                         .complete());
@@ -380,7 +380,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                 if (populator instanceof StructureOceanMonument) {
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
                     if (CauseTracker.ENABLED) {
-                        causeTracker.switchToPhase(WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
+                        causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()
                                 .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType()))
                                 .addEntityCaptures()
                                 .complete());

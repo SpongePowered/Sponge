@@ -52,7 +52,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.event.tracking.phase.GenerationPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
@@ -97,7 +97,7 @@ public abstract class MixinWorldEntitySpawner {
         IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServer);
         if (CauseTracker.ENABLED) {
             CauseTracker causeTracker = spongeWorld.getCauseTracker();
-            causeTracker.switchToPhase(WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
+            causeTracker.switchToPhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
                 .add(NamedCause.source(worldServer))
                 .addCaptures()
                 .complete());
@@ -125,7 +125,7 @@ public abstract class MixinWorldEntitySpawner {
         IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServer);
         if (CauseTracker.ENABLED) {
             final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-            causeTracker.switchToPhase(WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
+            causeTracker.switchToPhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
                 .addCaptures()
                 .add(NamedCause.source(worldServer))
                 .complete());

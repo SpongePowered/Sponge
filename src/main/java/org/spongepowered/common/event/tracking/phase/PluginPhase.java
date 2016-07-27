@@ -302,7 +302,7 @@ public final class PluginPhase extends TrackingPhase {
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
-            return state instanceof BlockPhase.State || state instanceof EntityPhase.State || state == WorldPhase.State.TERRAIN_GENERATION;
+            return state instanceof BlockPhase.State || state instanceof EntityPhase.State || state == GenerationPhase.State.TERRAIN_GENERATION;
         }
 
         @Override

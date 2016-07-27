@@ -103,7 +103,6 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.PortalAgentTypes;
@@ -143,8 +142,9 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
-import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.event.tracking.phase.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -253,7 +253,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "createBonusChest", at = @At(value = "HEAD"))
     public void onCreateBonusChest(CallbackInfo ci) {
         if (CauseTracker.ENABLED) {
-            this.getCauseTracker().switchToPhase(WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+            this.getCauseTracker().switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                     .add(NamedCause.source(this))
                     .addCaptures()
                     .complete());
@@ -489,7 +489,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.provider, chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
             {
                 if (CauseTracker.ENABLED) {
-                    causeTracker.switchToPhase(WorldPhase.Tick.WEATHER, PhaseContext.start()
+                    causeTracker.switchToPhase(TickPhase.Tick.WEATHER, PhaseContext.start()
                             .addCaptures()
                             .add(NamedCause.source(this))
                             .complete());
@@ -561,7 +561,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (this.weatherIceAndSnowEnabled && SpongeImplHooks.canDoRainSnowIce(this.provider, chunk) && this.rand.nextInt(16) == 0)
             {
                 // Sponge Start - Enter weather phase for snow and ice and flooding.
-                causeTracker.switchToPhase(WorldPhase.Tick.WEATHER, PhaseContext.start()
+                causeTracker.switchToPhase(TickPhase.Tick.WEATHER, PhaseContext.start()
                         .addCaptures()
                         .add(NamedCause.source(this))
                         .complete());

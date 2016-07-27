@@ -88,7 +88,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.event.tracking.phase.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
@@ -896,7 +896,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     private void onChunkPopulate(IChunkGenerator generator, CallbackInfo callbackInfo) {
         if (CauseTracker.ENABLED && this.worldObj instanceof WorldServer) {
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-            causeTracker.switchToPhase(WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+            causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                     .addCaptures()
                     .complete());
         }

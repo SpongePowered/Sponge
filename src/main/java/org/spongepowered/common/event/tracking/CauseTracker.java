@@ -116,14 +116,16 @@ public final class CauseTracker {
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
         final IPhaseState currentState = this.stack.peek().state;
-        if (this.isVerbose && this.stack.size() > 6 && currentState.isExpectedForReEntrance()) {
-            // This printing is to detect possibilities of a phase not being cleared properly
-            // and resulting in a "runaway" phase state accumulation.
-            printRunawayPhase(state, phaseContext);
-        }
-        if (!currentState.canSwitchTo(state) && (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING)) {
-            // This is to detect incompatible phase switches.
-            printPhaseIncompatibility(currentState, state);
+        if (this.isVerbose) {
+            if (this.stack.size() > 6 && currentState.isExpectedForReEntrance()) {
+                // This printing is to detect possibilities of a phase not being cleared properly
+                // and resulting in a "runaway" phase state accumulation.
+                printRunawayPhase(state, phaseContext);
+            }
+            if (!currentState.canSwitchTo(state) && state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING) {
+                // This is to detect incompatible phase switches.
+                printPhaseIncompatibility(currentState, state);
+            }
         }
 
         this.stack.push(state, phaseContext);
@@ -132,7 +134,7 @@ public final class CauseTracker {
     public void completePhase() {
         final PhaseData currentPhaseData = this.stack.peek();
         final IPhaseState state = currentPhaseData.state;
-        if (this.stack.size() > 6 && state.isExpectedForReEntrance() && this.isVerbose) {
+        if (this.isVerbose && this.stack.size() > 6 && state.isExpectedForReEntrance()) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumulation.
             PrettyPrinter printer = new PrettyPrinter(60);

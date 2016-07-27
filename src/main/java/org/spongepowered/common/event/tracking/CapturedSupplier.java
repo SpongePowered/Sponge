@@ -63,7 +63,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
     }
 
     public final List<T> orEmptyList() {
-        return orElse(Collections.emptyList());
+        return this.captured == null ? Collections.EMPTY_LIST : this.captured;
     }
 
     public final Stream<T> stream() {

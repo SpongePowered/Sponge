@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
@@ -53,16 +52,13 @@ import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
@@ -78,7 +74,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -86,63 +81,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-public final class WorldPhase extends TrackingPhase {
-
-    public enum State implements IPhaseState {
-        CHUNK_LOADING,
-        WORLD_SPAWNER_SPAWNING() {
-
-        },
-        POPULATOR_RUNNING(BlockPhase.State.BLOCK_DECAY, BlockPhase.State.BLOCK_DROP_ITEMS, BlockPhase.State.RESTORING_BLOCKS, State.WORLD_SPAWNER_SPAWNING, GeneralPhase.Post.UNWINDING) {
-            @Override
-            public boolean canSwitchTo(IPhaseState state) { // Because populators are possibly re-entrant due to mods
-                return super.canSwitchTo(state) || state == POPULATOR_RUNNING;
-            }
-        },
-        TERRAIN_GENERATION(BlockPhase.State.BLOCK_DECAY, BlockPhase.State.BLOCK_DROP_ITEMS, BlockPhase.State.RESTORING_BLOCKS, State.POPULATOR_RUNNING, State.WORLD_SPAWNER_SPAWNING,
-                GeneralPhase.Post.UNWINDING);
-
-        private final Set<IPhaseState> compatibleStates;
-
-        State() {
-            this(ImmutableSet.of());
-        }
-
-        State(ImmutableSet<IPhaseState> states) {
-            this.compatibleStates = states;
-        }
-
-        State(IPhaseState... states) {
-            this(ImmutableSet.copyOf(states));
-        }
-
-
-        @Override
-        public WorldPhase getPhase() {
-            return TrackingPhases.WORLD;
-        }
-
-        @Override
-        public boolean canSwitchTo(IPhaseState state) {
-            return this.compatibleStates.contains(state);
-        }
-
-        @Override
-        public boolean isExpectedForReEntrance() {
-            return true;
-        }
-
-        public boolean captureEntitySpawn(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
-            final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
-            if (minecraftEntity instanceof EntityItem) {
-                return context.getCapturedItems().add((EntityItem) minecraftEntity);
-            } else {
-                return context.getCapturedEntities().add(entity);
-            }
-        }
-
-
-    }
+public final class TickPhase extends TrackingPhase {
 
     public static final class Tick {
 
@@ -174,7 +113,7 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
-            return state instanceof BlockPhase.State || state instanceof EntityPhase.State || state == State.TERRAIN_GENERATION;
+            return state instanceof BlockPhase.State || state instanceof EntityPhase.State || state == GenerationPhase.State.TERRAIN_GENERATION;
         }
 
         @Override
@@ -251,7 +190,7 @@ public final class WorldPhase extends TrackingPhase {
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
-            return super.canSwitchTo(state) || state == State.CHUNK_LOADING;
+            return super.canSwitchTo(state) || state == GenerationPhase.State.CHUNK_LOADING;
         }
 
     }
@@ -912,137 +851,35 @@ public final class WorldPhase extends TrackingPhase {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext context) {
-        if (state instanceof TickPhaseState) {
-            ((TickPhaseState) state).processPostTick(causeTracker, context);
-        } else if (state == State.TERRAIN_GENERATION) {
-            final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
-            final List<Entity> spawnedItems = context.getCapturedItemsSupplier()
-                    .orEmptyList()
-                    .stream()
-                    .map(EntityUtil::fromNative)
-                    .collect(Collectors.toList());
-            if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
-                return;
-            }
-            if (!spawnedEntities.isEmpty()) {
-                if (!spawnedItems.isEmpty()) { // We shouldn't separate the entities whatsoever.
-                    spawnedEntities.addAll(spawnedItems);
-                }
-                final Cause cause = Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).named("World",  causeTracker.getWorld())
-                        .build();
-                final SpawnEntityEvent.Spawner
-                        event =
-                        SpongeEventFactory.createSpawnEntityEventSpawner(cause, spawnedEntities, causeTracker.getWorld());
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    for (Entity entity : event.getEntities()) {
-                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                    }
-                }
-            }
-        } else if (state == State.POPULATOR_RUNNING) {
-            final PopulatorType runningGenerator = context.firstNamed(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
-            final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
-            final List<Entity> spawnedItems = context.getCapturedItemsSupplier()
-                    .orEmptyList()
-                    .stream()
-                    .map(EntityUtil::fromNative)
-                    .collect(Collectors.toList());
-            if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
-                return;
-            }
-            if (!spawnedEntities.isEmpty()) {
-                if (!spawnedItems.isEmpty()) { // We shouldn't separate the entities whatsoever.
-                    spawnedEntities.addAll(spawnedItems);
-                }
-                final Cause.Builder cause = Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).named("World",  causeTracker.getWorld());
-                if (runningGenerator != null) { // There are corner cases where a populator may not have a proper type.
-                    cause.named(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, runningGenerator);
-                }
-                final SpawnEntityEvent.Spawner
-                        event =
-                        SpongeEventFactory.createSpawnEntityEventSpawner(cause.build(), spawnedEntities, causeTracker.getWorld());
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    for (Entity entity : event.getEntities()) {
-                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                    }
-                }
-            }
-            // Blocks do not matter one bit.
-        } else if (state == State.WORLD_SPAWNER_SPAWNING) {
-            final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
-            final List<Entity> spawnedItems = context.getCapturedItemsSupplier()
-                    .orEmptyList()
-                    .stream()
-                    .map(EntityUtil::fromNative)
-                    .collect(Collectors.toList());;
-            if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
-                return;
-            }
-            if (!spawnedEntities.isEmpty()) {
-                if (!spawnedItems.isEmpty()) { // We shouldn't separate the entities whatsoever.
-                    spawnedEntities.addAll(spawnedItems);
-                }
-                final Cause cause = Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).named("World", causeTracker.getWorld()).build();
-
-                final SpawnEntityEvent.Spawner
-                        event =
-                        SpongeEventFactory.createSpawnEntityEventSpawner(cause, spawnedEntities, causeTracker.getWorld());
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
-                    for (Entity entity : event.getEntities()) {
-                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                    }
-                }
-            }
-
-            context.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, state, context));
-        }
-
+        ((TickPhaseState) state).processPostTick(causeTracker, context);
     }
 
-    WorldPhase(TrackingPhase parent) {
+    TickPhase(TrackingPhase parent) {
         super(parent);
     }
 
     @Override
-    public WorldPhase addChild(TrackingPhase child) {
+    public TickPhase addChild(TrackingPhase child) {
         super.addChild(child);
         return this;
     }
 
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return currentState instanceof TickPhaseState;
-    }
-
-    @Override
-    public boolean ignoresBlockEvent(IPhaseState phaseState) {
-        return phaseState instanceof State;
-    }
-
-
-    @Override
-    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
-        return phaseData.state instanceof State && phaseData.state != State.WORLD_SPAWNER_SPAWNING;
+        return true;
     }
 
     @Override
     public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
-        if (state instanceof TickPhaseState) {
-            ((TickPhaseState) state).associateAdditionalBlockChangeCauses(context, builder, causeTracker);
-        }
+        ((TickPhaseState) state).associateAdditionalBlockChangeCauses(context, builder, causeTracker);
     }
 
     @Override
     public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
-        if (phaseState instanceof TickPhaseState) {
-            ((TickPhaseState) phaseState).associateBlockEventNotifier(context, causeTracker, pos, blockEvent);
-        }
+        ((TickPhaseState) phaseState).associateBlockEventNotifier(context, causeTracker, pos, blockEvent);
     }
 
     @Override
@@ -1056,44 +893,22 @@ public final class WorldPhase extends TrackingPhase {
     @Override
     public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
             WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        if (state instanceof TickPhaseState) {
-            ((TickPhaseState) state).associateNeighborBlockNotifier(context, sourcePos, block, notifyPos, minecraftWorld, notifier);
-        }
-    }
-
-    @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
-        if (phaseState instanceof TickPhaseState) {
-            return super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
-        }
-        return ((State) phaseState).captureEntitySpawn(phaseState, context, entity, chunkX, chunkZ);
-    }
-
-    @Override
-    protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> entities) {
-        super.processPostEntitySpawns(causeTracker, unwindingState, entities);
+        ((TickPhaseState) state).associateNeighborBlockNotifier(context, sourcePos, block, notifyPos, minecraftWorld, notifier);
     }
 
     @Override
     public Cause generateTeleportCause(IPhaseState state, PhaseContext context) {
-        return state instanceof TickPhaseState ? ((TickPhaseState) state).generateTeleportCause(context) : super.generateTeleportCause(state, context);
-    }
-
-    @Override
-    public boolean isWorldGeneration(IPhaseState state) {
-        return state instanceof State;
+        return ((TickPhaseState) state).generateTeleportCause(context);
     }
 
     @Override
     public void appendPreBlockProtectedCheck(Cause.Builder builder, IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker) {
-        if (phaseState instanceof TickPhaseState) {
-            ((TickPhaseState) phaseState).appendPreBlockProtectedCheck(builder, context, causeTracker);
-        }
+        ((TickPhaseState) phaseState).appendPreBlockProtectedCheck(builder, context, causeTracker);
         context.getSource(Player.class).ifPresent(player -> builder.named(NamedCause.notifier(player)));
     }
 
     @Override
     public boolean isTicking(IPhaseState state) {
-        return state instanceof TickPhaseState;
+        return true;
     }
 }

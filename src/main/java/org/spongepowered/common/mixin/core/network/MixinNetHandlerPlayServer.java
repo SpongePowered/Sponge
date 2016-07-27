@@ -114,7 +114,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.event.tracking.phase.TickPhase;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
@@ -208,7 +208,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) playerEntity.worldObj;
         final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
-        causeTracker.switchToPhase(WorldPhase.Tick.PLAYER, PhaseContext.start()
+        causeTracker.switchToPhase(TickPhase.Tick.PLAYER, PhaseContext.start()
                 .add(NamedCause.source(playerEntity))
                 .addCaptures()
                 .addEntityDropCaptures()
@@ -219,7 +219,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 continue;
             }
             final IMixinWorldServer otherMixinWorldServer = (IMixinWorldServer) worldServer;
-            otherMixinWorldServer.getCauseTracker().switchToPhase(WorldPhase.Tick.PLAYER, PhaseContext.start()
+            otherMixinWorldServer.getCauseTracker().switchToPhase(TickPhase.Tick.PLAYER, PhaseContext.start()
                     .add(NamedCause.source(playerEntity))
                     .addCaptures()
                     .addEntityDropCaptures()

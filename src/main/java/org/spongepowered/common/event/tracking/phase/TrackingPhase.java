@@ -91,7 +91,7 @@ public abstract class TrackingPhase {
      * the {@link IPhaseState} provded, as different states require different
      * handling.
      *
-     * <p>Examples of this include: {@link PacketPhase}, {@link WorldPhase}, etc.
+     * <p>Examples of this include: {@link PacketPhase}, {@link TickPhase}, etc.
      * </p>
      *
      * <p>Note that the {@link CauseTracker} is only provided for easy access
@@ -236,7 +236,7 @@ public abstract class TrackingPhase {
 
     /**
      * Associates any notifiers and owners for tracking as to what caused
-     * the next {@link WorldPhase.Tick} to enter for a block to be updated.
+     * the next {@link TickPhase.Tick} to enter for a block to be updated.
      * The interesting thing is that since the current state and context
      * are already known, we can associate the notifiers/owners appropriately.
      * This may have the side effect of a long winded "bubble down" from
