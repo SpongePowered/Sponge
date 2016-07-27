@@ -179,6 +179,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     private SpongeProfileManager spongeProfileManager;
     private UserStorageService userStorageService;
     private Timing timing;
+    @Nullable private UUID creator;
+    @Nullable private UUID notifier;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -891,7 +893,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     /**
      * @author blood - May 28th, 2016
      *
-     * @reason - rewritten to support {@link DisplaceEntityEvent.Portal}
+     * @reason - rewritten to support {@link DisplaceEntityEvent.Teleport.Portal}
      *
      * @param toDimensionId The id of target dimension.
      */
@@ -1117,25 +1119,33 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Optional<User> getTrackedPlayer(String nbtKey) {
+        if (this.creator != null && NbtDataUtil.SPONGE_ENTITY_CREATOR.equals(nbtKey)) {
+            return userForUUID(this.creator);
+        } else if (this.notifier != null && NbtDataUtil.SPONGE_ENTITY_NOTIFIER.equals(nbtKey)) {
+            return userForUUID(this.notifier);
+        }
         NBTTagCompound nbt = getSpongeData();
         if (!nbt.hasKey(nbtKey)) {
-           return Optional.empty();
-        } else {
-            NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
-
-            if (!creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_MOST) || !creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
-                return Optional.empty();
-            }
-
-            UUID uuid = new UUID(creatorNbt.getLong(NbtDataUtil.WORLD_UUID_MOST), creatorNbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
-            if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
-                creatorNbt.removeTag(NbtDataUtil.WORLD_UUID_MOST);
-                creatorNbt.removeTag(NbtDataUtil.WORLD_UUID_LEAST);
-                return Optional.empty();
-            }
-            // player is not online, get user from storage if one exists
-            return userForUUID(uuid);
+            return Optional.empty();
         }
+        NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
+
+        if (!creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_MOST) && !creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
+            return Optional.empty();
+        }
+
+        UUID uuid = new UUID(creatorNbt.getLong(NbtDataUtil.WORLD_UUID_MOST), creatorNbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
+        if (SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
+            creatorNbt.removeTag(NbtDataUtil.WORLD_UUID_MOST);
+            creatorNbt.removeTag(NbtDataUtil.WORLD_UUID_LEAST);
+            return Optional.empty();
+        }
+        if (NbtDataUtil.SPONGE_ENTITY_CREATOR.equals(nbtKey)) {
+            this.creator = uuid;
+        } else if (NbtDataUtil.SPONGE_ENTITY_NOTIFIER.equals(nbtKey)) {
+            this.notifier = uuid;
+        }
+        return userForUUID(uuid);
     }
 
     private Optional<User> userForUUID(UUID uuid) {
@@ -1173,7 +1183,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         if (uuid != null && SpongeImpl.getGlobalConfig().getConfig().getWorld().getInvalidLookupUuids().contains(uuid)) {
             bannedUuid = true;
         }
-
+        if (NbtDataUtil.SPONGE_ENTITY_CREATOR.equals(nbtKey)) {
+            this.creator = uuid;
+        } else if (NbtDataUtil.SPONGE_ENTITY_NOTIFIER.equals(nbtKey)) {
+            this.notifier = uuid;
+        }
         if (!bannedUuid && !getSpongeData().hasKey(nbtKey)) {
             if (uuid == null) {
                 return;
