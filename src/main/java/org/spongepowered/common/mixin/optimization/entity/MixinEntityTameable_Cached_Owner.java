@@ -56,6 +56,7 @@ public abstract class MixinEntityTameable_Cached_Owner extends MixinEntityAnimal
      *
      * @param ownerUuid The owner id to set
      */
+    @Overwrite
     public void setOwnerId(String ownerUuid) {
         this.cachedOwnerId = ownerUuid;
         this.dataWatcher.updateObject(17, ownerUuid);
