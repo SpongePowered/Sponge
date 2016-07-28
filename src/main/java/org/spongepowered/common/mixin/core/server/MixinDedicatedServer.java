@@ -46,6 +46,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.net.InetSocketAddress;
@@ -95,16 +96,18 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
         final WorldServer worldServer = (WorldServer) worldIn;
         // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
         final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
-        final Cause.Builder builder = Cause.source(playerIn);
         final PhaseData peek = causeTracker.getStack().peek();
         final IPhaseState phaseState = peek.state;
-        phaseState.getPhase().appendPreBlockProtectedCheck(builder, phaseState, peek.context, causeTracker);
-
-        Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
-        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), ImmutableList.of(location), (World) worldIn);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            return true;
+        if (phaseState == null || (phaseState != PacketPhase.General.PLACE_BLOCK && phaseState != PacketPhase.General.USE_ITEM && 
+                phaseState != PacketPhase.General.INTERACTION)) {
+            final Cause.Builder builder = Cause.source(playerIn);
+            phaseState.getPhase().appendPreBlockProtectedCheck(builder, phaseState, peek.context, causeTracker);
+            Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
+            ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), ImmutableList.of(location), (World) worldIn);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return true;
+            }
         }
 
         BlockPos spawnPoint = worldIn.getSpawnPoint();
