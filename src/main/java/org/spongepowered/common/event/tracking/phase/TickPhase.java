@@ -319,26 +319,24 @@ public final class TickPhase extends TrackingPhase {
             final Entity tickingEntity = phaseContext.getSource(Entity.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
             final IMixinEntity mixinEntity = EntityUtil.toMixin(tickingEntity);
+            final Optional<User> creator = mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            final Optional<User> notifier = mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                                 .entity(tickingEntity)
                                 .type(InternalSpawnTypes.PASSIVE)
                                 .build());
-                        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
-                                .ifPresent(creator -> builder.named(NamedCause.notifier(creator)));
-                        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
-                                .ifPresent(creator -> builder.named(NamedCause.owner(creator)));
+                        notifier.ifPresent(user -> builder.named(NamedCause.notifier(user)));
+                        creator.ifPresent(user -> builder.named(NamedCause.owner(user)));
                         final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, causeTracker.getWorld());
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             for (Entity entity : event.getEntities()) {
                                 Stream.<Supplier<Optional<UUID>>>of(
-                                        () -> mixinEntity
-                                                .getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
+                                        () -> notifier
                                                 .map(Identifiable::getUniqueId),
-                                        () -> mixinEntity
-                                                .getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
+                                        () -> creator
                                                 .map(Identifiable::getUniqueId)
                                 )
                                         .map(Supplier::get)
@@ -363,10 +361,8 @@ public final class TickPhase extends TrackingPhase {
                                 .entity(tickingEntity)
                                 .type(InternalSpawnTypes.DROPPED_ITEM)
                                 .build());
-                        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
-                                .ifPresent(creator -> builder.named(NamedCause.notifier(creator)));
-                        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
-                                .ifPresent(creator -> builder.named(NamedCause.owner(creator)));
+                        notifier.ifPresent(user -> builder.named(NamedCause.notifier(user)));
+                        creator.ifPresent(user -> builder.named(NamedCause.owner(user)));
                         final DropItemEvent.Custom event = SpongeEventFactory
                                 .createDropItemEventCustom(builder.build(), capturedEntities, causeTracker.getWorld());
                         SpongeImpl.postEvent(event);
@@ -391,22 +387,50 @@ public final class TickPhase extends TrackingPhase {
                                         .block(snapshot)
                                         .type(InternalSpawnTypes.DROPPED_ITEM)
                                         .build());
-                                mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).ifPresent(user -> builder.named(NamedCause.notifier(user)));
-                                mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).ifPresent(user -> builder.named(NamedCause.owner(user)));
+                                notifier.ifPresent(user -> builder.named(NamedCause.notifier(user)));
+                                creator.ifPresent(user -> builder.named(NamedCause.owner(user)));
                                 builder.build();
                                 final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
                                 final DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(builder.build(), items, causeTracker.getWorld());
                                 SpongeImpl.postEvent(event);
                                 if (!event.isCancelled()) {
                                     for (Entity entity : event.getEntities()) {
-                                        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).ifPresent(creator ->
-                                                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.getUniqueId()));
+                                        creator.ifPresent(user ->
+                                                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId()));
                                         causeTracker.getMixinWorld().forceSpawnEntity(entity);
                                     }
                                 }
                             }
                         }
 
+                    });
+            phaseContext.getCapturedItemStackSupplier()
+                    .ifPresentAndNotEmpty(drops -> {
+                        final List<EntityItem> items = drops.stream()
+                                .map(drop -> drop.create(causeTracker.getMinecraftWorld()))
+                                .collect(Collectors.toList());
+                        final Cause.Builder builder = Cause.source(
+                                EntitySpawnCause.builder()
+                                        .entity(tickingEntity)
+                                        .type(InternalSpawnTypes.PLACEMENT)
+                                        .build()
+                        );
+                        notifier.ifPresent(user -> builder.named(NamedCause.notifier(user)));
+                        creator.ifPresent(user -> builder.named(NamedCause.owner(user)));
+                        final Cause cause = builder.build();
+                        final List<Entity> entities = items
+                                .stream()
+                                .map(EntityUtil::fromNative)
+                                .collect(Collectors.toList());
+                        if (!entities.isEmpty()) {
+                            DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities, causeTracker.getWorld());
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                for (Entity droppedItem : event.getEntities()) {
+                                    causeTracker.getMixinWorld().forceSpawnEntity(droppedItem);
+                                }
+                            }
+                        }
                     });
             this.fireMovementEvents(EntityUtil.toNative(tickingEntity), Cause.source(tickingEntity).build());
         }

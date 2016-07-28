@@ -186,11 +186,6 @@ public class SpongeTimingsFactory implements TimingsFactory {
         return ofSafe(plugin != null ? plugin.getName() : "Minecraft - Invalid Plugin", name);
     }
 
-    // used for events
-    public static Timing ofSafe(PluginContainer plugin, String name, boolean isMod) {
-        return ofSafe(plugin.getName(), name);
-    }
-
     public static TimingHandler ofSafe(String name, Timing groupHandler) {
         return ofSafe(null, name, groupHandler);
     }

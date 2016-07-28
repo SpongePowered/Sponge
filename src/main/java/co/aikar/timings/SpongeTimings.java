@@ -119,11 +119,11 @@ public final class SpongeTimings {
     }
 
     public static Timing getModTimings(PluginContainer plugin, String context) {
-        return SpongeTimingsFactory.ofSafe(plugin, context, true);
+        return Timings.of(plugin.getName(), context, TimingsManager.MOD_EVENT_HANDLER);
     }
 
     public static Timing getPluginTimings(PluginContainer plugin, String context) {
-        return SpongeTimingsFactory.ofSafe(plugin, context, false);
+        return Timings.of(plugin.getName(), context, TimingsManager.PLUGIN_EVENT_HANDLER);
     }
 
     public static Timing getCancelTasksTimer() {
