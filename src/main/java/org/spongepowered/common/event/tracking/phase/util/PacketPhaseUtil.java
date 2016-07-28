@@ -25,14 +25,17 @@
 package org.spongepowered.common.event.tracking.phase.util;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketSetSlot;
+import net.minecraft.util.EnumHand;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
 import java.util.List;
 
@@ -98,5 +101,26 @@ public final class PacketPhaseUtil {
                 capturedTransactions.add(slotTransaction);
             }
         }
+    }
+
+    public static void handlePlayerSlotRestore(EntityPlayerMP player, ItemStack itemStack, EnumHand hand) {
+        if (itemStack == null || itemStack == ItemTypeRegistryModule.NONE) {
+            return;
+        }
+
+        player.isChangingQuantityOnly = false;
+        int slotId = 0;
+        if (hand == EnumHand.OFF_HAND) {
+            player.inventory.offHandInventory[0] = (net.minecraft.item.ItemStack) itemStack;
+            slotId = (player.inventory.mainInventory.length + InventoryPlayer.getHotbarSize());
+        } else {
+            player.inventory.mainInventory[player.inventory.currentItem] = (net.minecraft.item.ItemStack) itemStack;
+            final Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
+            slotId = slot.slotNumber;
+        }
+
+        player.openContainer.detectAndSendChanges();
+        player.isChangingQuantityOnly = false;
+        player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotId, (net.minecraft.item.ItemStack) itemStack));
     }
 }

@@ -36,13 +36,13 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketClientSettings;
-import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.network.play.server.SPacketOpenWindow;
-import net.minecraft.network.play.server.SPacketSetSlot;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IInteractionObject;
 import org.apache.logging.log4j.Level;
@@ -86,6 +86,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
@@ -112,7 +113,7 @@ public interface PacketFunction {
         if (entity == null) {
             // Something happened?
         }
-        final Optional<ItemStack> itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
+        //final Optional<ItemStack> itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
         final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
         EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_NOTIFIER, player.getUniqueID());
@@ -508,9 +509,7 @@ public interface PacketFunction {
     }
 
     PacketFunction CREATIVE = (packet, state, player, context) -> {
-        final CPacketCreativeInventoryAction creativeInventoryAction = (CPacketCreativeInventoryAction) packet;
-
-
+        //final CPacketCreativeInventoryAction creativeInventoryAction = (CPacketCreativeInventoryAction) packet;
     };
 
     PacketFunction INVENTORY = (packet, state, player, context) -> {
@@ -614,7 +613,7 @@ public interface PacketFunction {
         // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
         final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class)
                 .orElseThrow(PhaseUtil.throwWithContext("Expected the used item stack to place a block, but got nothing!", context));
-        final ItemStackSnapshot snapshot = itemStack.createSnapshot();
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         context.getCapturedEntitySupplier()
                 .ifPresentAndNotEmpty(entities -> {
                     final Cause cause = Cause.source(EntitySpawnCause.builder()
@@ -635,14 +634,9 @@ public interface PacketFunction {
                         originalBlocks -> {
                             boolean success = GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state,
                                     context);
-                            if (!success) {
-                                player.isChangingQuantityOnly = false;
-                                player.inventory.mainInventory[player.inventory.currentItem] = (net.minecraft.item.ItemStack) itemStack;
-                                final Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
-                                player.openContainer.detectAndSendChanges();
-                                player.isChangingQuantityOnly = false;
-                                player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slot.slotNumber, (net.minecraft.item
-                                        .ItemStack) itemStack));
+                            if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
+                                EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
+                                PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, (net.minecraft.item.ItemStack) itemStack, hand);
                             }
                         });
     };

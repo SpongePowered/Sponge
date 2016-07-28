@@ -88,8 +88,8 @@ import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.IdentityHashMap;
@@ -623,7 +623,7 @@ public final class PacketPhase extends TrackingPhase {
                 if (itemstack != null) {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, itemstack));
                 } else {
-                    context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, ItemStackSnapshot.NONE.createStack()));
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, ItemTypeRegistryModule.NONE));
                 }
                 context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_POSITION, placeBlock.getPos()));
                 context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_FACING, placeBlock.getDirection()));
