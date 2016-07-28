@@ -26,6 +26,9 @@ package org.spongepowered.common.mixin.core.server;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C07PacketPlayerDigging;
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.BlockPos;
@@ -90,20 +93,24 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
     public boolean isBlockProtected(net.minecraft.world.World worldIn, BlockPos pos, EntityPlayer playerIn) {
         // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
         final CauseTracker causeTracker = ((IMixinWorld) worldIn).getCauseTracker();
-        Cause cause = causeTracker.getCurrentCause();
-        if (cause == null) {
-            causeTracker.setCurrentNotifier((User) playerIn);
-            cause = Cause.of(NamedCause.source(playerIn));
-        } else if (!causeTracker.hasNotifier()) {
-            causeTracker.setCurrentNotifier((User) playerIn);
-            cause = cause.merge(Cause.of(NamedCause.notifier(playerIn)));
-        }
-
-        Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
-        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, ImmutableList.of(location), (World) worldIn);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            return true;
+        Packet<?> currentPacket = causeTracker.getCurrentPlayerPacket();
+        // Don't fire pre events for interact packets
+        if (currentPacket == null || (!(currentPacket instanceof C08PacketPlayerBlockPlacement) && !(currentPacket instanceof C07PacketPlayerDigging))) {
+            Cause cause = causeTracker.getCurrentCause();
+            if (cause == null) {
+                causeTracker.setCurrentNotifier((User) playerIn);
+                cause = Cause.of(NamedCause.source(playerIn));
+            } else if (!causeTracker.hasNotifier()) {
+                causeTracker.setCurrentNotifier((User) playerIn);
+                cause = cause.merge(Cause.of(NamedCause.notifier(playerIn)));
+            }
+    
+            Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
+            ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, ImmutableList.of(location), (World) worldIn);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                return true;
+            }
         }
 
         BlockPos spawnPoint = worldIn.getSpawnPoint();
