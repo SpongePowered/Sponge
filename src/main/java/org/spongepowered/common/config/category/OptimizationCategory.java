@@ -50,7 +50,7 @@ public class OptimizationCategory extends ConfigCategory {
     private boolean cacheTameableOwners = true;
 
     public boolean useIgnoreUloadedChunkLightingPatch() {
-        return this.ignoreUnloadedChunkLighting;
+        return false && this.ignoreUnloadedChunkLighting; // For now, disable the patch until the lighting issues this caused can be fixed.
     }
 
     public boolean isUseCachedChunkMap() {
