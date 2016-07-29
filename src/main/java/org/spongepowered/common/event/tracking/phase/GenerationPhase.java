@@ -29,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.SpongeImpl;
@@ -39,6 +40,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +58,7 @@ public class GenerationPhase extends TrackingPhase {
                 if (spawnedEntities.isEmpty()) {
                     return;
                 }
-                final Cause cause = Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).named("World", causeTracker.getWorld()).build();
+                final Cause cause = Cause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE).named("World", causeTracker.getWorld()).build();
 
                 final SpawnEntityEvent.Spawner
                         event =
@@ -88,13 +90,20 @@ public class GenerationPhase extends TrackingPhase {
                 if (spawnedEntities.isEmpty()) {
                     return;
                 }
-                final Cause.Builder cause = Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).named("World",  causeTracker.getWorld());
-                if (runningGenerator != null) { // There are corner cases where a populator may not have a proper type.
-                    cause.named(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, runningGenerator);
+                final Cause.Builder causeBuilder = Cause.builder();
+                Cause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE).named("World",  causeTracker.getWorld());
+                if (InternalPopulatorTypes.ANIMAL.equals(runningGenerator)) {
+                    causeBuilder.named(NamedCause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE))
+                            .named(NamedCause.of(InternalNamedCauses.General.ANIMAL_SPAWNER, runningGenerator));
+                } else if (runningGenerator != null) {
+                    causeBuilder.named(NamedCause.source(InternalSpawnTypes.SpawnCauses.STRUCTURE_SPAWNING))
+                            .named(NamedCause.of(InternalNamedCauses.WorldGeneration.STRUCTURE, runningGenerator));
+                } else {
+                    causeBuilder.named(NamedCause.source(InternalSpawnTypes.SpawnCauses.STRUCTURE_SPAWNING));
                 }
                 final SpawnEntityEvent.Spawner
                         event =
-                        SpongeEventFactory.createSpawnEntityEventSpawner(cause.build(), spawnedEntities, causeTracker.getWorld());
+                        SpongeEventFactory.createSpawnEntityEventSpawner(causeBuilder.build(), spawnedEntities, causeTracker.getWorld());
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     for (Entity entity : event.getEntities()) {
@@ -112,7 +121,7 @@ public class GenerationPhase extends TrackingPhase {
                 if (spawnedEntities.isEmpty()) {
                     return;
                 }
-                final Cause cause = Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).named("World",  causeTracker.getWorld())
+                final Cause cause = Cause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE).named("World",  causeTracker.getWorld())
                         .build();
                 final SpawnEntityEvent.Spawner
                         event =

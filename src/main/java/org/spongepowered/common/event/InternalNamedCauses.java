@@ -33,6 +33,7 @@ public final class InternalNamedCauses {
 
         public static final String CAPTURED_POPULATOR = "PopulatorType";
         public static final String CHUNK_PROVIDER = "ChunkProvider";
+        public static final String STRUCTURE = "Structure";
 
         private WorldGeneration() {
         }
@@ -89,6 +90,7 @@ public final class InternalNamedCauses {
         public static final String BLOCK_BREAK_POSITION = "BreakingBlockPosition";
         public static final String PLUGIN_CAUSE = "PluginCause";
         public static final String BLOCK_CHANGE = "BlockChangeFlag";
+        public static final String ANIMAL_SPAWNER = "AnimalSpawner";
 
         private General() {
         }

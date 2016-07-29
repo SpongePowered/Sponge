@@ -218,7 +218,7 @@ public final class TickPhase extends TrackingPhase {
                     .ifPresentAndNotEmpty(entities -> {
                         final Cause cause = Cause.source(BlockSpawnCause.builder()
                                 .block(tickingBlock)
-                                .type(InternalSpawnTypes.PLACEMENT)
+                                .type(InternalSpawnTypes.BLOCK_SPAWNING)
                                 .build())
                                 .build();
                         final SpawnEntityEvent
@@ -604,7 +604,7 @@ public final class TickPhase extends TrackingPhase {
                         // TODO the entity spawn causes are not likely valid, need to investigate further.
                         final Cause cause = Cause.source(BlockSpawnCause.builder()
                                 .block(tickingTile.getLocation().createSnapshot())
-                                .type(InternalSpawnTypes.PLACEMENT)
+                                .type(InternalSpawnTypes.BLOCK_SPAWNING)
                                 .build())
                                 .build();
                         final SpawnEntityEvent
@@ -719,7 +719,7 @@ public final class TickPhase extends TrackingPhase {
                     .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
-                        final Cause cause = Cause.source(InternalSpawnTypes.CUSTOM_SPAWN)
+                        final Cause cause = Cause.source(InternalSpawnTypes.SpawnCauses.CUSTOM_SPAWN)
                                 .build();
                         final SpawnEntityEvent
                                 spawnEntityEvent =
@@ -732,7 +732,7 @@ public final class TickPhase extends TrackingPhase {
                     });
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
-                        final Cause cause = Cause.source(InternalSpawnTypes.CUSTOM_SPAWN)
+                        final Cause cause = Cause.source(InternalSpawnTypes.SpawnCauses.CUSTOM_SPAWN)
                                 .build();
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
                         for (EntityItem entity : items) {
