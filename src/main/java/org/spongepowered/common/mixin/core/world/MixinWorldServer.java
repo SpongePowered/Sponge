@@ -1058,20 +1058,20 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         EnumSet<EnumFacing> directions = EnumSet.allOf(EnumFacing.class);
         directions.remove(skipSide);
-
-        final CauseTracker causeTracker = this.getCauseTracker();
-
         final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
+        if (event == null || !event.isCancelled()) {
+            final CauseTracker causeTracker = this.getCauseTracker();
             for (EnumFacing facing : EnumFacing.values()) {
-                final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                if (event.getNeighbors().keySet().contains(direction)) {
-                    causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+                if (event != null) {
+                    final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+                    if (!event.getNeighbors().keySet().contains(direction)) {
+                        continue;
+                    }
                 }
+
+                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
             }
         }
-
     }
 
     /**
@@ -1085,16 +1085,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        final CauseTracker causeTracker = this.getCauseTracker();
-
         final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, EnumSet.allOf(EnumFacing.class));
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
+        if (event == null || !event.isCancelled()) {
+            final CauseTracker causeTracker = this.getCauseTracker();
             for (EnumFacing facing : EnumFacing.values()) {
-                final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                if (event.getNeighbors().keySet().contains(direction)) {
-                    causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+                if (event != null) {
+                    final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+                    if (!event.getNeighbors().keySet().contains(direction)) {
+                        continue;
+                    }
                 }
+
+                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
             }
         }
     }

@@ -104,6 +104,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -238,6 +239,11 @@ public class SpongeCommonEventFactory {
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
         final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
         final PhaseData peek = causeTracker.getStack().peek();
+        // Don't fire notify events during world gen
+        if (peek.state == GenerationPhase.State.TERRAIN_GENERATION) {
+            return null;
+        }
+
         final PhaseContext context = peek.context;
         final BlockSnapshot snapshot = world.createSnapshot(pos.getX(), pos.getY(), pos.getZ());
         final Map<Direction, BlockState> neighbors = new HashMap<>();
