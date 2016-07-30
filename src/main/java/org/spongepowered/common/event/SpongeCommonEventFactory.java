@@ -240,7 +240,7 @@ public class SpongeCommonEventFactory {
         final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
         final PhaseData peek = causeTracker.getStack().peek();
         // Don't fire notify events during world gen
-        if (peek.state == GenerationPhase.State.TERRAIN_GENERATION) {
+        if (peek.state.getPhase().isWorldGeneration(peek.state)) {
             return null;
         }
 
