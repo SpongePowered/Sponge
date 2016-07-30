@@ -32,9 +32,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.asm.mixin.Final;
@@ -52,7 +54,9 @@ import org.spongepowered.common.event.tracking.phase.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.util.Map;
 import java.util.Optional;
@@ -72,6 +76,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     private static final short XZ_MASK = 0xF;
     private static final short Y_SHORT_MASK = 0xFF;
     private static final int Y_INT_MASK = 0xFFFFFF;
+    private SpongeProfileManager spongeProfileManager;
+    private UserStorageService userStorageService;
 
     @Shadow @Final private World worldObj;
     @Shadow @Final public int xPosition;
@@ -83,6 +89,14 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     public Map<Integer, PlayerTracker> trackedIntBlockPositions = Maps.newHashMap();
     public Map<Short, PlayerTracker> trackedShortBlockPositions = Maps.newHashMap();
+
+    @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
+    public void onConstructed(World world, int x, int z, CallbackInfo ci) {
+        if (((org.spongepowered.api.world.World)world).getUniqueId() != null) { // Client worlds have no UUID
+            this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
+            this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
+        }
+    }
 
     @Override
     public void addTrackedBlockPosition(Block block, BlockPos pos, User user, PlayerTracker.Type trackerType) {
@@ -192,13 +206,19 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     }
 
     private Optional<User> getUserFromId(UUID uuid) {
-        // get player if online
-        EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
-        if (player != null) {
-            return Optional.of((User) player);
+        // check username cache
+        String username = SpongeUsernameCache.getLastKnownUsername(uuid);
+        if (username == null) {
+            // check mojang cache
+            Optional<GameProfile> profile = this.spongeProfileManager.getCache().getById(uuid);
+            if (profile.isPresent()) {
+                return this.userStorageService.get(profile.get());
+            }
+
+            this.spongeProfileManager.getGameProfileQueryTask().queueUuid(uuid);
         }
-        // player is not online, get user from storage if one exists
-        return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
+
+        return this.userStorageService.get(GameProfile.of(uuid, username));
     }
 
     @Override
