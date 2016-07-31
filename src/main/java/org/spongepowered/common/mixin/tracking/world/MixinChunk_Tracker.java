@@ -91,7 +91,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     public Map<Short, PlayerTracker> trackedShortBlockPositions = Maps.newHashMap();
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
-    public void onConstructed(World world, int x, int z, CallbackInfo ci) {
+    public void onConstructedTracker(World world, int x, int z, CallbackInfo ci) {
         if (((org.spongepowered.api.world.World)world).getUniqueId() != null) { // Client worlds have no UUID
             this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
             this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
