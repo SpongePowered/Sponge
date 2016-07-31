@@ -93,6 +93,8 @@ public final class BlockPhase extends TrackingPhase {
                     .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DECAY_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
+            phaseContext.getCapturedBlockSupplier()
+                    .ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, phaseContext));
         } else if (state == State.BLOCK_DROP_ITEMS) {
             final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Could not find a block dropping items!", phaseContext));
