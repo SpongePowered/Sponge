@@ -1296,10 +1296,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
     public void onBlockFallenUpon(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity, float fallDistance) {
-        if (block == Blocks.air) {
-            // ignore air blocks
-            return;
-        }
 
         if (world.isRemote) {
             block.onFallenUpon(world, pos, entity, fallDistance);
