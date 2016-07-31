@@ -30,10 +30,8 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.extent.EntityUniverse;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -80,7 +78,7 @@ public interface IMixinChunk {
 
     void setScheduledForUnload(Long scheduled);
 
-    Set<EntityUniverse.EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance,
-            Predicate<EntityUniverse.EntityHit> filter, double entryY, double exitY, Set<EntityUniverse.EntityHit> intersections);
+    void getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityUniverse.EntityHit> filter,
+            double entryY, double exitY, Set<EntityUniverse.EntityHit> intersections);
 
 }
