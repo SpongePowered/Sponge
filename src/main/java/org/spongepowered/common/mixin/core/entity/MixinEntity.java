@@ -118,6 +118,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 import java.util.EnumSet;
@@ -622,10 +623,7 @@ public abstract class MixinEntity implements IMixinEntity {
             return Optional.empty();
         }
         try {
-            return Optional.of(new AABB(
-                new Vector3d(boundingBox.minX, boundingBox.minY, boundingBox.minZ),
-                new Vector3d(boundingBox.maxX, boundingBox.maxY, boundingBox.maxZ))
-            );
+            return Optional.of(VecHelper.toSponge(boundingBox));
         } catch (IllegalArgumentException exception) {
             // Bounding box is degenerate, the entity doesn't actually have one
             return Optional.empty();

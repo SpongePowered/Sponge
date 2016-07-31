@@ -980,8 +980,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Nullable
     private Vector2d getEntryAndExitY(Vector3d start, Vector3d end, Vector3d direction, double distance) {
         // Modified from AABB.intersects(ray)
-        final Vector3i min = getBlockMin();
-        final Vector3i max = getBlockMax().add(Vector3i.ONE);
+        // Increase the bounds to the whole chunk plus a margin of two blocks
+        final Vector3i min = getBlockMin().sub(2, 2, 2);
+        final Vector3i max = getBlockMax().add(3, 3, 3);
         // Find the intersections on the -x and +x planes, oriented by direction
         final double txMin;
         final double txMax;
@@ -1024,7 +1025,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     @Override
-    public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance,
+    public void getIntersectingEntities(Vector3d start, Vector3d direction, double distance,
             java.util.function.Predicate<EntityHit> filter, double entryY, double exitY, Set<EntityHit> intersections) {
         // Order the entry and exit y coordinates by magnitude
         final double yMin = Math.min(entryY, exitY);
@@ -1036,7 +1037,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         for (int i = lowestSubChunk; i <= highestSubChunk; i++) {
             getIntersectingEntities(this.entityLists[i], start, direction, distance, filter, intersections);
         }
-        return intersections;
     }
 
     private void getIntersectingEntities(Collection<Entity> entities, Vector3d start, Vector3d direction, double distance,
