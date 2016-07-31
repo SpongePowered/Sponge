@@ -84,7 +84,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -930,6 +929,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     public Set<org.spongepowered.api.entity.Entity> getIntersectingEntities(AABB box,
             java.util.function.Predicate<org.spongepowered.api.entity.Entity> filter) {
+        checkNotNull(box, "box");
+        checkNotNull(filter, "filter");
         final List<Entity> entities = new ArrayList<>();
         getEntitiesOfTypeWithinAAAB(net.minecraft.entity.Entity.class, VecHelper.toMC(box), entities,
             entity -> filter.test((org.spongepowered.api.entity.Entity) entity));
@@ -954,6 +955,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Override
     public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, java.util.function.Predicate<EntityHit> filter) {
+        checkNotNull(start, "start");
+        checkNotNull(end, "end");
+        checkNotNull(filter, "filter");
         final Vector3d diff = end.sub(start);
         return getIntersectingEntities(start, end, diff.normalize(), diff.length(), filter);
     }
@@ -961,6 +965,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance,
             java.util.function.Predicate<EntityHit> filter) {
+        checkNotNull(start, "start");
+        checkNotNull(direction, "direction");
+        checkNotNull(filter, "filter");
         direction = direction.normalize();
         return getIntersectingEntities(start, start.add(direction.mul(distance)), direction, distance, filter);
     }

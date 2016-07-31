@@ -723,29 +723,39 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Set<Entity> getIntersectingEntities(AABB box, Predicate<Entity> filter) {
+        checkNotNull(box, "box");
+        checkNotNull(filter, "filter");
         return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMC(box), entity -> filter.test((Entity) entity))
             .stream().map(entity -> (Entity) entity).collect(Collectors.toSet());
     }
 
     @Override
     public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
+        checkNotNull(box, "box");
         return getCollisionBoxes(VecHelper.toMC(box)).stream().map(VecHelper::toSponge).collect(Collectors.toSet());
     }
 
     @Override
     public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
+        checkNotNull(owner, "owner");
+        checkNotNull(box, "box");
         return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMC(box)).stream().map(VecHelper::toSponge).
             collect(Collectors.toSet());
     }
 
     @Override
     public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d end, Predicate<EntityHit> filter) {
+        checkNotNull(start, "start");
+        checkNotNull(end, "end");
         final Vector3d diff = end.sub(start);
         return getIntersectingEntities(start, diff.normalize(), diff.length(), filter);
     }
 
     @Override
     public Set<EntityHit> getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityHit> filter) {
+        checkNotNull(start, "start");
+        checkNotNull(direction, "direction");
+        checkNotNull(filter, "filter");
         // Ensure that the direction has unit length
         direction = direction.normalize();
         // If the direction is vertical only, we don't need to do any chunk tracing, just defer immediately to the containing chunk
