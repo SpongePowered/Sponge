@@ -530,6 +530,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Redirect(method = "processPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;playerConqueredTheEnd:Z"))
     private boolean throwMoveEvent(EntityPlayerMP playerMP, CPacketPlayer packetIn) {
         if (!playerMP.playerConqueredTheEnd) {
+
+            // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
+            // We don't fire an event to avoid confusing plugins.
+            if (!packetIn.moving && !packetIn.rotating) {
+                return playerMP.playerConqueredTheEnd;
+            }
+
             // Sponge Start - Movement event
             Player player = (Player) this.playerEntity;
             IMixinEntityPlayerMP mixinPlayer = (IMixinEntityPlayerMP) this.playerEntity;
@@ -546,6 +553,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
             boolean rotationOnly = !packetIn.moving && packetIn.rotating;
+
             if (rotationOnly) {
                 // Correct the to location so it's not misrepresented to plugins, only when player rotates without moving
                 // In this case it's only a rotation update, which isn't related to the to location
