@@ -104,7 +104,7 @@ public class PacketUtil {
                     PhaseContext context = PhaseContext.start()
                             .add(NamedCause.source(packetPlayer))
                             .add(NamedCause.of(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer))
-                            .addCaptures()
+                            //.addCaptures()
                             .add(NamedCause.of(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn))
                             .add(NamedCause.of(InternalNamedCauses.Packet.CURSOR, cursor))
                             .add(NamedCause.of(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative));

@@ -89,8 +89,16 @@ public class PhaseContext {
         return this;
     }
 
+    private void checkBlockSuppliers() {
+        checkState(this.blocksSupplier == null, "BlocksSuppler is already set!");
+        checkState(this.blockItemEntityDropsSupplier == null, "BlockItemEntityDropsSupplier is already set!");
+        checkState(this.blockItemDropsSupplier == null, "BlockItemDropsSupplier is already set!");
+    }
+
     public PhaseContext addBlockCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        this.checkBlockSuppliers();
+
         CapturedBlocksSupplier blocksSupplier = new CapturedBlocksSupplier();
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, blocksSupplier));
         this.blocksSupplier = blocksSupplier;
@@ -105,6 +113,11 @@ public class PhaseContext {
 
     public PhaseContext addCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        this.checkBlockSuppliers();
+        checkState(this.capturedItemsSupplier == null, "CapturedItemsSupplier is already set!");
+        checkState(this.capturedEntitiesSupplier == null, "CapturedEntitiesSupplier is already set!");
+        checkState(this.capturedItemStackSupplier == null, "CapturedItemStackSupplier is already set!");
+
         CapturedBlocksSupplier blocksSupplier = new CapturedBlocksSupplier();
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, blocksSupplier));
         this.blocksSupplier = blocksSupplier;
@@ -128,6 +141,10 @@ public class PhaseContext {
 
     public PhaseContext addEntityCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        checkState(this.capturedItemsSupplier == null, "CapturedItemsSupplier is already set!");
+        checkState(this.capturedEntitiesSupplier == null, "CapturedEntitiesSupplier is already set!");
+        checkState(this.capturedItemStackSupplier == null, "CapturedItemStackSupplier is already set!");
+
         CapturedItemsSupplier capturedItemsSupplier = new CapturedItemsSupplier();
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, capturedItemsSupplier));
         this.capturedItemsSupplier = capturedItemsSupplier;
@@ -142,6 +159,9 @@ public class PhaseContext {
 
     public PhaseContext addEntityDropCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        checkState(this.entityItemDropsSupplier == null, "EntityItemDropsSupplier is already set!");
+        checkState(this.entityItemEntityDropsSupplier == null, "EntityItemEntityDropsSupplier is already set!");
+
         EntityItemDropsSupplier entityItemDropsSupplier = new EntityItemDropsSupplier();
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, entityItemDropsSupplier));
         this.entityItemDropsSupplier = entityItemDropsSupplier;

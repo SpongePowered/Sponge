@@ -122,7 +122,7 @@ public final class PacketPhase extends TrackingPhase {
     final static int CLICK_INSIDE_WINDOW    = 0x01 << 16 << 0;
     final static int CLICK_OUTSIDE_WINDOW   = 0x01 << 16 << 1;
     final static int CLICK_ANYWHERE         = CLICK_INSIDE_WINDOW | CLICK_OUTSIDE_WINDOW;
-    
+
     // Modes flags
     final static int MODE_CLICK             = 0x01 << 9 << ClickType.PICKUP.ordinal();
     final static int MODE_SHIFT_CLICK       = 0x01 << 9 << ClickType.QUICK_MOVE.ordinal();
@@ -131,7 +131,7 @@ public final class PacketPhase extends TrackingPhase {
     final static int MODE_DROP              = 0x01 << 9 << ClickType.THROW.ordinal();
     final static int MODE_DRAG              = 0x01 << 9 << ClickType.QUICK_CRAFT.ordinal();
     final static int MODE_DOUBLE_CLICK      = 0x01 << 9 << ClickType.PICKUP_ALL.ordinal();
-    
+
     // Drag mode flags, bitmasked from button and only set if MODE_DRAG
     final static int DRAG_MODE_SPLIT_ITEMS  = 0x01 << 6 << 0;
     final static int DRAG_MODE_ONE_ITEM     = 0x01 << 6 << 1;
@@ -183,8 +183,8 @@ public final class PacketPhase extends TrackingPhase {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 super.populateContext(playerMP, packet, context);
-                context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
-                context.addEntityDropCaptures();
+                context
+                        .add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
             }
 
             @Override
@@ -364,7 +364,7 @@ public final class PacketPhase extends TrackingPhase {
 
         /**
          * We care a lot
-         * 
+         *
          * @param stateId state
          */
         Inventory(int stateId) {
@@ -373,7 +373,7 @@ public final class PacketPhase extends TrackingPhase {
 
         /**
          * We care about some things
-         * 
+         *
          * @param stateId flags we care about
          * @param stateMask caring mask
          */
@@ -397,6 +397,10 @@ public final class PacketPhase extends TrackingPhase {
             if (playerMP.openContainer != null) {
                 ((IMixinContainer) playerMP.openContainer).setCaptureInventory(true);
             }
+            context
+                    .addBlockCaptures()
+                    .addEntityCaptures()
+                    .addEntityDropCaptures();
         }
 
         @Nullable
@@ -463,7 +467,9 @@ public final class PacketPhase extends TrackingPhase {
                 if (stack != null) {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
                 }
-                context.addEntityDropCaptures();
+                context.addEntityDropCaptures()
+                        .addEntityCaptures()
+                        .addBlockCaptures();
             }
 
             @Override
@@ -517,6 +523,10 @@ public final class PacketPhase extends TrackingPhase {
                         context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
                     }
                 }
+
+                context.addEntityDropCaptures()
+                        .addEntityCaptures()
+                        .addBlockCaptures();
             }
 
             @Override
@@ -548,7 +558,9 @@ public final class PacketPhase extends TrackingPhase {
                 if (stack != null) {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
                 }
-                context.addEntityDropCaptures();
+                context.addEntityDropCaptures()
+                        .addEntityCaptures()
+                        .addBlockCaptures();
             }
 
             @Override
@@ -582,7 +594,9 @@ public final class PacketPhase extends TrackingPhase {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
                     context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
                 }
-                context.addEntityDropCaptures();
+                context.addEntityDropCaptures()
+                        .addEntityCaptures()
+                        .addBlockCaptures();
             }
 
             @Override
@@ -600,6 +614,14 @@ public final class PacketPhase extends TrackingPhase {
             }
         },
         CREATIVE_INVENTORY {
+
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                context
+                        .addEntityCaptures()
+                        .addEntityDropCaptures();
+            }
+
             @Override
             public boolean ignoresItemPreMerges() {
                 return true;
@@ -627,6 +649,11 @@ public final class PacketPhase extends TrackingPhase {
                 }
                 context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_POSITION, placeBlock.getPos()));
                 context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_FACING, placeBlock.getDirection()));
+
+                context
+                        .addBlockCaptures()
+                        .addEntityCaptures()
+                        .addEntityDropCaptures();
             }
 
             @Override
@@ -660,6 +687,11 @@ public final class PacketPhase extends TrackingPhase {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.HAND_USED, placeBlock.getHand()));
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, itemstack));
                 }
+
+                context
+                        .addEntityCaptures()
+                        .addEntityDropCaptures()
+                        .addBlockCaptures();
             }
         },
         INVALID() {
@@ -679,7 +711,10 @@ public final class PacketPhase extends TrackingPhase {
         CLOSE_WINDOW {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                context.add(NamedCause.of(InternalNamedCauses.Packet.OPEN_CONTAINER, playerMP.openContainer));
+                context
+                        .add(NamedCause.of(InternalNamedCauses.Packet.OPEN_CONTAINER, playerMP.openContainer))
+                        .addEntityCaptures()
+                        .addEntityDropCaptures();
             }
         },
         UPDATE_SIGN,

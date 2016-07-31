@@ -213,7 +213,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 .add(NamedCause.source(playerEntity))
                 .addCaptures()
                 .addEntityDropCaptures()
-                .addBlockCaptures()
+                //.addBlockCaptures()
                 .complete());
         for (WorldServer worldServer : WorldManager.getWorlds()) {
             if (worldServer == mixinWorldServer) { // we don't care about entering the phase for this world server of which we already entered
@@ -224,7 +224,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     .add(NamedCause.source(playerEntity))
                     .addCaptures()
                     .addEntityDropCaptures()
-                    .addBlockCaptures()
+                    //.addBlockCaptures()
                     .complete());
         }
         playerEntity.onUpdateEntity();
