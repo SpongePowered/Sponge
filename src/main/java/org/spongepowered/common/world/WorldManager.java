@@ -132,9 +132,9 @@ public final class WorldManager {
                 final Integer world2DimId = ((IMixinWorldServer) world2).getDimensionId();
                 return world1DimId - world2DimId;
             };
-            
+
     private static boolean isVanillaRegistered = false;
-            
+
     static {
         WorldManager.registerVanillaTypesAndDimensions();
     }
@@ -592,7 +592,6 @@ public final class WorldManager {
                         properties),
                 properties.doesGenerateSpawnOnLoad());
 
-        reorderWorldsVanillaFirst();
         return Optional.of(worldServer);
     }
 
@@ -730,10 +729,8 @@ public final class WorldManager {
             SpongeImpl.getLogger().info("Loading world [{}] ({})", ((org.spongepowered.api.world.World) worldServer).getName(), getDimensionType
                     (dimensionId).get().getName());
         }
-
-        reorderWorldsVanillaFirst();
     }
-    
+
     public static WorldInfo createWorldInfoFromSettings(Path currentSaveRoot, org.spongepowered.api.world.DimensionType dimensionType, int
             dimensionId, String worldFolderName, WorldSettings worldSettings, String generatorOptions) {
         final MinecraftServer server = SpongeImpl.getServer();
@@ -780,6 +777,9 @@ public final class WorldManager {
         weakWorldByWorld.put(worldServer, worldServer);
 
         ((IMixinMinecraftServer) SpongeImpl.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
+
+        // Mods expect 'MinecraftServer.worldServers' to already be updated when 'WorldEvent.Load' is fired
+        reorderWorldsVanillaFirst();
 
         SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) worldServer));
 
