@@ -48,6 +48,7 @@
         "block.MixinBlockFarmland",
         "block.MixinBlockFence",
         "block.MixinBlockFenceGate",
+        "block.MixinBlockFire",
         "block.MixinBlockFlower",
         "block.MixinBlockFurnace",
         "block.MixinBlockGrass",
