@@ -726,21 +726,26 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkNotNull(box, "box");
         checkNotNull(filter, "filter");
         return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMC(box), entity -> filter.test((Entity) entity))
-            .stream().map(entity -> (Entity) entity).collect(Collectors.toSet());
+                .stream()
+                .map(entity -> (Entity) entity)
+                .collect(Collectors.toSet());
     }
 
     @Override
     public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
         checkNotNull(box, "box");
-        return getCollisionBoxes(VecHelper.toMC(box)).stream().map(VecHelper::toSponge).collect(Collectors.toSet());
+        return getCollisionBoxes(VecHelper.toMC(box)).stream()
+                .map(VecHelper::toSponge)
+                .collect(Collectors.toSet());
     }
 
     @Override
     public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
         checkNotNull(owner, "owner");
         checkNotNull(box, "box");
-        return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMC(box)).stream().map(VecHelper::toSponge).
-            collect(Collectors.toSet());
+        return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMC(box)).stream()
+                .map(VecHelper::toSponge)
+                .collect(Collectors.toSet());
     }
 
     @Override
