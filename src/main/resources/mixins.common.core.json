@@ -143,6 +143,7 @@
         "data.types.MixinBlockWallEnumType",
         "data.types.MixinBossInfoColor",
         "data.types.MixinBossInfoOverlay",
+        "data.types.MixinEntityArrowPickupStatus",
         "data.types.MixinEnumBannerPattern",
         "data.types.MixinEnumChatVisibility",
         "data.types.MixinEnumDifficulty",

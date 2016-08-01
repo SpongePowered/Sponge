@@ -382,6 +382,7 @@ public final class CommonModuleRegistry {
             .registerModule(BossBarOverlay.class, new BossBarOverlayRegistryModule())
             .registerModule(PortalAgentType.class, PortalAgentRegistryModule.getInstance())
             .registerModule(HandType.class, HandTypeRegistryModule.getInstance())
+            .registerModule(PickupRule.class, new PickupRuleRegistryModule())
             ;
     }
 
