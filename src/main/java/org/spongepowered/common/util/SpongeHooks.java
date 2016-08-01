@@ -40,7 +40,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -55,10 +54,10 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.LoggingCategory;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.mixin.plugin.interfaces.IModData;
+import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
+import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.WorldManager;
@@ -499,16 +498,17 @@ public class SpongeHooks {
         for (WorldServer world : WorldManager.getWorlds()) {
             ((IMixinWorldServer) world).setActiveConfig(SpongeHooks.getActiveConfig(world, true));
             for (Entity entity : world.loadedEntityList) {
-                if (entity instanceof IModData) {
-                    IModData spongeEntity = (IModData) entity;
-                    spongeEntity.requiresCacheRefresh(true);
+                if (entity instanceof IModData_Activation) {
+                    ((IModData_Activation) entity).requiresActivationCacheRefresh(true);
+                }
+                if (entity instanceof IModData_Collisions) {
+                    ((IModData_Collisions) entity).requiresCollisionsCacheRefresh(true);
                 }
             }
         }
         for (BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
-            if (blockType instanceof IModData) {
-                IModData spongeBlock = (IModData) blockType;
-                spongeBlock.requiresCacheRefresh(true);
+            if (blockType instanceof IModData_Collisions) {
+                ((IModData_Collisions) blockType).requiresCollisionsCacheRefresh(true);
             }
         }
     }

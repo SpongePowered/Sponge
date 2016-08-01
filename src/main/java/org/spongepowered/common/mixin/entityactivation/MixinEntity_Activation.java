@@ -47,7 +47,6 @@ public abstract class MixinEntity_Activation implements Entity, IModData_Activat
     public long activatedTick = Integer.MIN_VALUE;
     private EntityType entityType;
     private int activationRange;
-    private String modId;
     private boolean refreshCache = false;
 
     @Shadow public World worldObj;
@@ -103,22 +102,12 @@ public abstract class MixinEntity_Activation implements Entity, IModData_Activat
     }
 
     @Override
-    public String getModDataId() {
-        return this.modId;
-    }
-
-    @Override
-    public void setModDataId(String mod) {
-        this.modId = mod;
-    }
-
-    @Override
-    public void requiresCacheRefresh(boolean flag) {
+    public void requiresActivationCacheRefresh(boolean flag) {
         this.refreshCache = flag;
     }
 
     @Override
-    public boolean requiresCacheRefresh() {
+    public boolean requiresActivationCacheRefresh() {
         return this.refreshCache;
     }
 }

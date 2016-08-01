@@ -156,7 +156,8 @@ import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
-import org.spongepowered.common.mixin.plugin.interfaces.IModData;
+import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
+import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -324,9 +325,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             mixinChunkProvider.setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
 //            ((ChunkProviderServer) this.getChunkProvider()).chunkLoadOverride = !this.activeConfig.getConfig().getWorld().getDenyChunkRequests();
             for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
-                if (entity instanceof IModData) {
-                    IModData spongeEntity = (IModData) entity;
-                    spongeEntity.requiresCacheRefresh(true);
+                if (entity instanceof IModData_Activation) {
+                    ((IModData_Activation) entity).requiresActivationCacheRefresh(true);
+                }
+                if (entity instanceof IModData_Collisions) {
+                    ((IModData_Collisions) entity).requiresCollisionsCacheRefresh(true);
                 }
             }
         }

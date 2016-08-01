@@ -96,17 +96,17 @@ public class MixinChunk_Collisions {
                     () -> phaseContext.getSource(BlockSnapshot.class).map(tickBlock -> {
                         BlockType blockType = tickBlock.getState().getType();
                         IModData_Collisions spongeBlock = (IModData_Collisions) blockType;
-                        if (spongeBlock.requiresCacheRefresh()) {
+                        if (spongeBlock.requiresCollisionsCacheRefresh()) {
                             spongeBlock.initializeCollisionState(this.worldObj);
-                            spongeBlock.requiresCacheRefresh(false);
+                            spongeBlock.requiresCollisionsCacheRefresh(false);
                         }
 
                         return !((spongeBlock.getMaxCollisions() >= 0) && (listToFill.size() >= spongeBlock.getMaxCollisions()));
                     }),
                     () -> phaseContext.getSource(IModData_Collisions.class).map(spongeEntity -> {
-                            if (spongeEntity.requiresCacheRefresh()) {
+                            if (spongeEntity.requiresCollisionsCacheRefresh()) {
                                 spongeEntity.initializeCollisionState(this.worldObj);
-                                spongeEntity.requiresCacheRefresh(false);
+                                spongeEntity.requiresCollisionsCacheRefresh(false);
                             }
 
                             return !((spongeEntity.getMaxCollisions() >= 0) && (listToFill.size() >= spongeEntity.getMaxCollisions()));

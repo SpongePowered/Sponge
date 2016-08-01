@@ -70,12 +70,12 @@ public abstract class MixinBlock_Collisions implements IModData_Collisions {
     }
 
     @Override
-    public void requiresCacheRefresh(boolean flag) {
+    public void requiresCollisionsCacheRefresh(boolean flag) {
         this.refreshCache = flag;
     }
 
     @Override
-    public boolean requiresCacheRefresh() {
+    public boolean requiresCollisionsCacheRefresh() {
         return this.refreshCache;
     }
 

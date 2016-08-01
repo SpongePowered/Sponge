@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.mixin.plugin.entityactivation.interfaces;
 
-import org.spongepowered.common.mixin.plugin.interfaces.IModData;
-
-public interface IModData_Activation extends IModData {
+public interface IModData_Activation {
 
     // entity activation
     void inactiveTick();
@@ -42,5 +40,9 @@ public interface IModData_Activation extends IModData {
     int getActivationRange();
 
     void setActivationRange(int range);
+
+    void requiresActivationCacheRefresh(boolean flag);
+
+    boolean requiresActivationCacheRefresh();
 
 }

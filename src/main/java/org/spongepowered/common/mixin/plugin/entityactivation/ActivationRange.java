@@ -158,7 +158,6 @@ public class ActivationRange {
             return false;
         }
 
-        spongeEntity.setModDataId(type.getModId());
         byte activationType = spongeEntity.getActivationType();
         EntityActivationModCategory entityMod = config.getModList().get(type.getModId());
         int defaultActivationRange = config.getDefaultRanges().get(activationTypeMappings.get(activationType));
@@ -273,9 +272,9 @@ public class ActivationRange {
 
                     IModData_Activation spongeEntity = (IModData_Activation) entity;
                     // check if activation cache needs to be updated
-                    if (spongeEntity.requiresCacheRefresh()) {
+                    if (spongeEntity.requiresActivationCacheRefresh()) {
                         ActivationRange.initializeEntityActivationState(entity);
-                        spongeEntity.requiresCacheRefresh(false);
+                        spongeEntity.requiresActivationCacheRefresh(false);
                     }
                     // check for entity type overrides
                     byte activationType = ((IModData_Activation) entity).getActivationType();
