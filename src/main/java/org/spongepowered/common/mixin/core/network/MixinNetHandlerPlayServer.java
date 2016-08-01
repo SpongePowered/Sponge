@@ -371,7 +371,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 from = this.lastMoveLocation;
             }
 
-            Vector3d torot = new Vector3d(packetIn.getPitch(), packetIn.getYaw(), 0);
+            Vector3d torot = new Vector3d(packetIn.getPitch() % 360.0F, packetIn.getYaw() % 360.0F, 0);
             Location<World> to = new Location<>(player.getWorld(), packetIn.getPositionX(), packetIn.getPositionY(), packetIn.getPositionZ());
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
@@ -707,7 +707,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         }
                         return;
                     }
-    
+
                     // This must be fired here since we are unable to properly revert a cursor in creative mode due to how mojang handles it
                     dropEvent = SpongeCommonEventFactory.callCreativeDropInventoryEvent(this.playerEntity, itemstack, packetIn);
                     if (dropEvent.isCancelled()) {
@@ -719,7 +719,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         return;
                     }
                 }
-    
+
                 if (clickedHotbar) {
                     if (itemstack == null)
                     {
@@ -729,7 +729,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     {
                         this.playerEntity.inventoryContainer.putStackInSlot(packetIn.getSlotId(), itemstack);
                     }
-    
+
                     this.playerEntity.inventoryContainer.setCanCraft(this.playerEntity, true);
                 } else if (clickedOutside && this.itemDropThreshold < 200) {
                     this.itemDropThreshold += 20;
