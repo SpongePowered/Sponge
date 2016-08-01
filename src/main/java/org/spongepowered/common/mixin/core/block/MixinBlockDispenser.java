@@ -95,7 +95,8 @@ public abstract class MixinBlockDispenser extends MixinBlock {
             ((IMixinWorldServer) worldIn).getCauseTracker().switchToPhase(BlockPhase.State.DISPENSE, PhaseContext.start()
                     .add(NamedCause.source(((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(state, state, pos, 3)))
                     .addBlockCaptures()
-                    .addCaptures()
+                    .addEntityCaptures()
+                    .addEntityDropCaptures()
                     .complete());
         }
     }

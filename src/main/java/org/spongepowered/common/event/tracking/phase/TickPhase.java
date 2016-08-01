@@ -935,4 +935,9 @@ public final class TickPhase extends TrackingPhase {
     public boolean isTicking(IPhaseState state) {
         return true;
     }
+
+    @Override
+    public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
+        return true;
+    }
 }

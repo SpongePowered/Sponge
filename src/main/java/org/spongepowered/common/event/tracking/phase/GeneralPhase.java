@@ -314,6 +314,14 @@ public final class GeneralPhase extends TrackingPhase {
             }
         }
 
+        // Finally check the post event
+        if (postEvent.isCancelled()) {
+            // Of course, if post is cancelled, just mark all transactions as invalid.
+            for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+                transaction.setValid(false);
+            }
+        }
+
         // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
         // Because after, we will restore all the invalid transactions in reverse order.
         for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
@@ -330,7 +338,7 @@ public final class GeneralPhase extends TrackingPhase {
                 if (unwindingState.tracksBlockSpecificDrops()) {
                     // Cancel any block drops or harvests for the block change.
                     // This prevents unnecessary spawns.
-                    final BlockPos position = ((IMixinLocation) (Object) transaction.getOriginal().getLocation()).getBlockPos();
+                    final BlockPos position = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
                     postContext.getBlockDropSupplier().ifPresentAndNotEmpty(map -> {
                         if (map.containsKey(position)) {
                             map.get(position).clear();

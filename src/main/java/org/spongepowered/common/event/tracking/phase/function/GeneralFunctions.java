@@ -190,6 +190,15 @@ public class GeneralFunctions {
             }
         }
 
+        // Finally check the post event
+        if (postEvent.isCancelled()) {
+            // Of course, if post is cancelled, just mark all transactions as invalid.
+            noCancelledTransactions = false;
+            for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+                transaction.setValid(false);
+            }
+        }
+
         // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
         // Because after, we will restore all the invalid transactions in reverse order.
         for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
