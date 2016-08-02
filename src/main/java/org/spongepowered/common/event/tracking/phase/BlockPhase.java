@@ -24,10 +24,22 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -36,8 +48,15 @@ import org.spongepowered.common.event.tracking.phase.function.BlockFunction;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.MutableWrapper;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
+import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class BlockPhase extends TrackingPhase {
 
@@ -89,12 +108,44 @@ public final class BlockPhase extends TrackingPhase {
         if (state == State.BLOCK_DECAY) {
             final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Could not find a decaying block snapshot!", phaseContext));
+            final Location<World> worldLocation = blockSnapshot.getLocation().get();
+            final BlockPos blockPos = ((IMixinLocation) (Object) worldLocation).getBlockPos();
+            final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
+            final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(blockPos);
+            final Optional<User> notifier = mixinChunk.getBlockNotifier(blockPos);
+            final Optional<User> creator = mixinChunk.getBlockOwner(blockPos);
+
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DECAY_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, phaseContext));
+            phaseContext.getCapturedItemStackSupplier()
+                    .ifPresentAndNotEmpty(drops -> {
+                        final List<EntityItem> items = drops.stream()
+                                .map(drop -> drop.create(causeTracker.getMinecraftWorld()))
+                                .collect(Collectors.toList());
+                        final Cause.Builder builder = Cause.source(
+                                BlockSpawnCause.builder()
+                                        .block(blockSnapshot)
+                                        .type(InternalSpawnTypes.BLOCK_SPAWNING)
+                                        .build()
+                        );
+                        notifier.ifPresent(user -> builder.named(NamedCause.notifier(user)));
+                        creator.ifPresent(user -> builder.named(NamedCause.owner(user)));
+                        final Cause cause = builder.build();
+                        final List<Entity> entities = (List<Entity>) (List<?>) items;
+                        if (!entities.isEmpty()) {
+                            DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities, causeTracker.getWorld());
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                for (Entity droppedItem : event.getEntities()) {
+                                    mixinWorld.forceSpawnEntity(droppedItem);
+                                }
+                            }
+                        }
+                    });
         } else if (state == State.BLOCK_DROP_ITEMS) {
             final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Could not find a block dropping items!", phaseContext));
@@ -102,6 +153,40 @@ public final class BlockPhase extends TrackingPhase {
                     .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DROP_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
+            final Location<World> worldLocation = blockSnapshot.getLocation().get();
+            final BlockPos blockPos = ((IMixinLocation) (Object) worldLocation).getBlockPos();
+            final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
+            final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(blockPos);
+            final Optional<User> notifier = mixinChunk.getBlockNotifier(blockPos);
+            final Optional<User> creator = mixinChunk.getBlockOwner(blockPos);
+
+            phaseContext.getCapturedBlockSupplier()
+                    .ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, phaseContext));
+            phaseContext.getCapturedItemStackSupplier()
+                    .ifPresentAndNotEmpty(drops -> {
+                        final List<EntityItem> items = drops.stream()
+                                .map(drop -> drop.create(causeTracker.getMinecraftWorld()))
+                                .collect(Collectors.toList());
+                        final Cause.Builder builder = Cause.source(
+                                BlockSpawnCause.builder()
+                                        .block(blockSnapshot)
+                                        .type(InternalSpawnTypes.BLOCK_SPAWNING)
+                                        .build()
+                        );
+                        notifier.ifPresent(user -> builder.named(NamedCause.notifier(user)));
+                        creator.ifPresent(user -> builder.named(NamedCause.owner(user)));
+                        final Cause cause = builder.build();
+                        final List<Entity> entities = (List<Entity>) (List<?>) items;
+                        if (!entities.isEmpty()) {
+                            DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities, causeTracker.getWorld());
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                for (Entity droppedItem : event.getEntities()) {
+                                    mixinWorld.forceSpawnEntity(droppedItem);
+                                }
+                            }
+                        }
+                    });
         } else if (state == State.RESTORING_BLOCKS) {
             // do nothing for now.
         } else if (state == State.DISPENSE) {

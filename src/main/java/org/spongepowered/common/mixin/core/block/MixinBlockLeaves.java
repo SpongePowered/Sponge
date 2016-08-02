@@ -31,6 +31,7 @@ import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -43,6 +44,7 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -52,10 +54,11 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.util.TreeTypeResolver;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -93,26 +96,47 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         return result;
     }
 
-    @Redirect(method = "destroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z") )
-    private boolean onDestroyLeaves(net.minecraft.world.World worldIn, BlockPos pos) {
-        IMixinWorldServer spongeWorld = (IMixinWorldServer) worldIn;
-        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        final boolean isBlockAlready = CauseTracker.ENABLED && causeTracker.getStack().current() != TrackingPhases.BLOCK;
-        final IPhaseState currentState = causeTracker.getStack().peek().state;
-        final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
-        final IBlockState blockState = worldIn.getBlockState(pos);
-        final IBlockState actualState = blockState.getActualState(worldIn, pos);
-        if (isBlockAlready && !isWorldGen) {
-            causeTracker.switchToPhase(BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
-                    .add(NamedCause.source(spongeWorld.createSpongeBlockSnapshot(blockState, actualState, pos, 3)))
-                    .addCaptures()
-                    .complete());
+    /**
+     * @author gabizou - August 2nd, 2016
+     * @reason Rewrite to handle both drops and the change state for leaves
+     * that are considered to be decaying, so the drops do not leak into
+     * whatever previous phase is being handled in. Since the issue is that
+     * the block change takes place in a different phase (more than likely),
+     * the drops are either "lost" or not considered for drops because the
+     * blocks didn't change according to whatever previous phase.
+     *
+     * @param worldIn The world in
+     * @param pos The position
+     */
+    @Overwrite
+    private void destroy(World worldIn, BlockPos pos) {
+        // Sponge Start - Cause tracking
+        if (CauseTracker.ENABLED && !worldIn.isRemote) {
+            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldIn;
+            final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
+            final PhaseData peek = causeTracker.getStack().peek();
+            final IPhaseState currentState = peek.state;
+            final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
+            final boolean isBlockAlready = causeTracker.getStack().current() != TrackingPhases.BLOCK;
+            final IBlockState blockState = worldIn.getBlockState(pos);
+            final IBlockState actualState = blockState.getActualState(worldIn, pos);
+            if (isBlockAlready && !isWorldGen) {
+                causeTracker.switchToPhase(BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
+                        .add(NamedCause.source(mixinWorldServer.createSpongeBlockSnapshot(blockState, actualState, pos, 3)))
+                        .addCaptures()
+                        .complete());
+            }
+            this.dropBlockAsItem(worldIn, pos, blockState, 0);
+            worldIn.setBlockToAir(pos);
+            if (isBlockAlready && !isWorldGen) {
+                causeTracker.completePhase();
+            }
+            return;
         }
-        boolean result = worldIn.setBlockToAir(pos);
-        if (isBlockAlready && !isWorldGen) {
-            causeTracker.completePhase();
-        }
-        return result;
+        // Sponge End
+        this.dropBlockAsItem(worldIn, pos, worldIn.getBlockState(pos), 0);
+        worldIn.setBlockToAir(pos);
+
     }
 
     protected ImmutableTreeData getTreeData(IBlockState blockState) {

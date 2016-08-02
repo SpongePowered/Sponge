@@ -54,6 +54,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -100,6 +101,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract String getUnlocalizedName();
     @Shadow public abstract Material getMaterial(IBlockState state);
     @Shadow public abstract IBlockState shadow$getDefaultState();
+    @Shadow public abstract void dropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {

@@ -73,6 +73,7 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -85,9 +86,9 @@ public final class TickPhase extends TrackingPhase {
 
     public static final class Tick {
 
-        public static final IPhaseState BLOCK = new BlockTickPhaseState();
+        public static final IPhaseState BLOCK = new BlockTickPhaseState("BlockTickPhase");
 
-        public static final IPhaseState RANDOM_BLOCK = new BlockTickPhaseState();
+        public static final IPhaseState RANDOM_BLOCK = new BlockTickPhaseState("RandomBlockTickPhase");
 
         public static final IPhaseState ENTITY = new EntityTickPhaseState();
 
@@ -197,7 +198,10 @@ public final class TickPhase extends TrackingPhase {
 
     private static class BlockTickPhaseState extends LocationBasedTickPhaseState {
 
-        BlockTickPhaseState() {
+        private final String name;
+
+        BlockTickPhaseState(String name) {
+            this.name = name;
         }
 
         @Override
@@ -273,6 +277,10 @@ public final class TickPhase extends TrackingPhase {
             context.firstNamed(NamedCause.NOTIFIER, User.class).ifPresent(blockEvent::setSourceUser);
         }
 
+        @Override
+        public String toString() {
+            return this.name;
+        }
     }
 
     private static class EntityTickPhaseState extends TickPhaseState {
@@ -418,10 +426,7 @@ public final class TickPhase extends TrackingPhase {
                         notifier.ifPresent(user -> builder.named(NamedCause.notifier(user)));
                         creator.ifPresent(user -> builder.named(NamedCause.owner(user)));
                         final Cause cause = builder.build();
-                        final List<Entity> entities = items
-                                .stream()
-                                .map(EntityUtil::fromNative)
-                                .collect(Collectors.toList());
+                        final List<Entity> entities = (List<Entity>) (List<?>) items;
                         if (!entities.isEmpty()) {
                             DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities, causeTracker.getWorld());
                             SpongeImpl.postEvent(event);
@@ -522,6 +527,10 @@ public final class TickPhase extends TrackingPhase {
             mixinTickingEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).ifPresent(user -> builder.named(NamedCause.notifier(user)));
         }
 
+        @Override
+        public String toString() {
+            return "EntityTickPhase";
+        }
     }
 
     private static class DimensionTickPhaseState extends TickPhaseState {
@@ -575,6 +584,10 @@ public final class TickPhase extends TrackingPhase {
         @Override
         public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
 
+        }
+        @Override
+        public String toString() {
+            return "DimensionTickPhase";
         }
     }
 
@@ -657,6 +670,11 @@ public final class TickPhase extends TrackingPhase {
             final IMixinChunk mixinChunk = (IMixinChunk) worldServer.getChunkFromBlockCoords(blockPos);
             mixinChunk.getBlockNotifier(blockPos).ifPresent(blockEvent::setSourceUser);
             context.firstNamed(NamedCause.NOTIFIER, User.class).ifPresent(blockEvent::setSourceUser);
+        }
+
+        @Override
+        public String toString() {
+            return "TileEntityTickPhase";
         }
     }
 
@@ -760,6 +778,11 @@ public final class TickPhase extends TrackingPhase {
             }
 
         }
+
+        @Override
+        public String toString() {
+            return "BlockEventTickPhase";
+        }
     }
 
     private static class PlayerTickPhaseState extends TickPhaseState {
@@ -825,6 +848,11 @@ public final class TickPhase extends TrackingPhase {
         public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
             builder.named(NamedCause.OWNER, context.getSource(Player.class).get());
         }
+
+        @Override
+        public String toString() {
+            return "PlayerTickPhase";
+        }
     }
 
     private static class WeatherTickPhaseState extends TickPhaseState {
@@ -872,6 +900,11 @@ public final class TickPhase extends TrackingPhase {
         @Override
         public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
 
+        }
+
+        @Override
+        public String toString() {
+            return "WeatherTickPhase";
         }
     }
 
