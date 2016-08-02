@@ -30,10 +30,15 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.tileentity.TileEntityEnderChest;
+import net.minecraft.util.ITickable;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.tileentity.TileEntityTypes;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
@@ -115,6 +120,27 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
     public String getIdForName(String name) {
         final String id = NAME_TO_ID_MAPPING.get(name);
         return id == null ? name : id;
+    }
+
+    public void doTileEntityRegistration(Class clazz, String name) {
+        final String id = TileEntityTypeRegistryModule.getInstance().getIdForName(name);
+        boolean canTick = false;
+        try {
+            if (ITickable.class.isAssignableFrom(clazz)) {
+                String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "update" : "func_73660_a";
+                Class<?> declaringClazz = clazz.getMethod(mapping).getDeclaringClass();
+                if (!declaringClazz.equals(TileEntityChest.class) && !declaringClazz.equals(TileEntityEnderChest.class)) {
+                    canTick = true;
+                }
+            }
+        } catch (Throwable e) {
+            // ignore
+        }
+
+        final TileEntityType tileEntityType =
+                new SpongeTileEntityType((Class<? extends org.spongepowered.api.block.tileentity.TileEntity>) clazz, name, id, canTick);
+
+        TileEntityTypeRegistryModule.getInstance().registerAdditionalCatalog(tileEntityType);
     }
 
     TileEntityTypeRegistryModule() { }

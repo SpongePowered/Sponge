@@ -116,22 +116,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Inject(method = "addMapping(Ljava/lang/Class;Ljava/lang/String;)V", at = @At(value = "RETURN"))
     private static void onRegister(Class clazz, String name, CallbackInfo callbackInfo) {
         if (clazz != null) {
-            final String id = TileEntityTypeRegistryModule.getInstance().getIdForName(name);
-            boolean canTick = false;
-            try  {
-                if (ITickable.class.isAssignableFrom(clazz)) {
-                    String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "update" : "func_73660_a";
-                    Class<?> declaringClazz = clazz.getMethod(mapping).getDeclaringClass();
-                    if (!declaringClazz.equals(TileEntityChest.class) && !declaringClazz.equals(TileEntityEnderChest.class)) {
-                        canTick = true;
-                    }
-                }
-            }  catch (Throwable e)  {
-                // ignore
-            }
-
-            final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name, id, canTick);
-            TileEntityTypeRegistryModule.getInstance().registerAdditionalCatalog(tileEntityType);
+            TileEntityTypeRegistryModule.getInstance().doTileEntityRegistration(clazz, name);
         }
     }
 
