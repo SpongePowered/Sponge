@@ -81,6 +81,8 @@ shadowJar {
         include dependency('org.mariadb.jdbc:mariadb-java-client')
         include dependency('com.h2database:h2')
         include dependency('org.xerial:sqlite-jdbc')
+
+        include dependency('om.github.ben-manes.caffeine:caffeine:')
     }
 
     // We include multiple JDBC drivers, so we need to merge the service file to enable them all
