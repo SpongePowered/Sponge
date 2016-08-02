@@ -75,7 +75,6 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -374,9 +373,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public Optional<Entity> createEntity(EntityType type, Vector3d position) {
-        checkNotNull(type, "The entity type cannot be null!");
-        checkNotNull(position, "The position cannot be null!");
+    public Entity createEntity(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
+        checkArgument(type != null, "The entity type cannot be null!");
+        checkArgument(position != null, "The position cannot be null!");
 
         Entity entity = null;
 
@@ -387,11 +386,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         if (entityClass.isAssignableFrom(EntityPlayerMP.class) || entityClass.isAssignableFrom(EntityDragonPart.class)) {
             // Unable to construct these
-            return Optional.empty();
+            throw new IllegalArgumentException("Cannot construct " + type.getId() + " please look to using entity types correctly!");
         }
 
         net.minecraft.world.World world = (net.minecraft.world.World) (Object) this;
 
+        // TODO - archetypes should solve the problem of calling the correct constructor
         // Not all entities have a single World parameter as their constructor
         if (entityClass.isAssignableFrom(EntityLightningBolt.class)) {
             entity = (Entity) new EntityLightningBolt(world, x, y, z, false);
@@ -415,7 +415,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 entity = ConstructorUtils.invokeConstructor(entityClass, this);
                 ((net.minecraft.entity.Entity) entity).setPosition(x, y, z);
             } catch (Exception e) {
-                SpongeImpl.getLogger().error(ExceptionUtils.getStackTrace(e));
+                throw new RuntimeException("There was an issue attempting to construct " + type.getId(), e);
             }
         }
 
@@ -438,7 +438,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             ((EntityPainting) entity).art = EnumArt.KEBAB;
         }
 
-        return Optional.ofNullable(entity);
+        return entity;
     }
 
     @Override

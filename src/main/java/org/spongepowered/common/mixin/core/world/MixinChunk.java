@@ -780,7 +780,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     // Continuing the rest of the implementation
 
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> createEntity(EntityType type, Vector3d position) {
+    public org.spongepowered.api.entity.Entity createEntity(EntityType type, Vector3d position)
+            throws IllegalArgumentException, IllegalStateException {
         return this.world.createEntity(type, this.chunkPos.mul(16).toDouble().add(position.min(15, this.blockMax.getY(), 15)));
     }
 

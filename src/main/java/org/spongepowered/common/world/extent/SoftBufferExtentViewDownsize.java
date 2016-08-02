@@ -495,7 +495,7 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public Optional<Entity> createEntity(EntityType type, Vector3d position) {
+    public Entity createEntity(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
         checkRange(position.getX(), position.getY(), position.getZ());
         return this.extent.createEntity(type, position);
     }
