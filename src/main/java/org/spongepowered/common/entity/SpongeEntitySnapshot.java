@@ -426,9 +426,9 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return entity;
             }
         }
-        Optional<Entity> newEntity = world.get().createEntity(getType(), this.position);
-        if (newEntity.isPresent()) {
-            net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity.get();
+        Entity newEntity = world.get().createEntity(getType(), this.position);
+        if (newEntity != null) {
+            net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;
             if(this.compound != null) {
                 nmsEntity.readFromNBT(this.compound);
             }

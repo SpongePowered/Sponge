@@ -148,7 +148,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z", remap = false))
     private boolean onAddEntityTask(Set<EntityAITasks.EntityAITaskEntry> set, Object entry, int priority, EntityAIBase base) {
         ((IMixinEntityAIBase) base).setGoal((Goal<?>) this);
-        if (((IMixinEntity) this.owner).isInConstructPhase()) {
+        if (this.owner == null || ((IMixinEntity) this.owner).isInConstructPhase()) {
             // Event is fired in firePostConstructEvents
             return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
         }

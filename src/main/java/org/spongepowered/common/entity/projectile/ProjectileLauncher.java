@@ -234,14 +234,14 @@ public class ProjectileLauncher {
         if (!opType.isPresent()) {
             return Optional.empty();
         }
-        Optional<Entity> projectile = loc.getExtent().createEntity(opType.get(), loc.getPosition());
-        if (!projectile.isPresent()) {
+        Entity projectile = loc.getExtent().createEntity(opType.get(), loc.getPosition());
+        if (projectile == null) {
             return Optional.empty();
         }
-        if (projectile.get() instanceof EntityThrowable) {
-            configureThrowable((EntityThrowable) projectile.get());
+        if (projectile instanceof EntityThrowable) {
+            configureThrowable((EntityThrowable) projectile);
         }
-        return doLaunch(loc.getExtent(), (P) projectile.get(), createCause(source));
+        return doLaunch(loc.getExtent(), (P) projectile, createCause(source));
     }
 
     // Internal
