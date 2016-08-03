@@ -65,23 +65,23 @@ public class ParticleOptionRegistryModule implements CatalogRegistryModule<Parti
 
     @Override
     public void registerDefaults() {
-        this.registerOption("block_state", "blockState", BlockState.class);
-        this.registerOption("color", "color", Color.class);
-        this.registerOption("count", "count", Integer.class, value -> value < 1 ? new IllegalStateException("Count must be at least 1") : null);
-        this.registerOption("item_stack_snapshot", "itemStackSnapshot", ItemStackSnapshot.class);
-        this.registerOption("note", "note", NotePitch.class);
-        this.registerOption("offset", "offset", Vector3d.class);
-        this.registerOption("scale", "scale", Double.class);
-        this.registerOption("velocity", "velocity", Vector3d.class);
+        this.registerOption("block_state", BlockState.class);
+        this.registerOption("color", Color.class);
+        this.registerOption("count", Integer.class, value -> value < 1 ? new IllegalStateException("Count must be at least 1") : null);
+        this.registerOption("item_stack_snapshot", ItemStackSnapshot.class);
+        this.registerOption("note", NotePitch.class);
+        this.registerOption("offset", Vector3d.class);
+        this.registerOption("scale", Double.class);
+        this.registerOption("velocity", Vector3d.class);
     }
 
-    private <V> void registerOption(String mapping, String id, Class<V> valueType) {
-        this.registerOption(mapping, id, valueType, null);
+    private <V> void registerOption(String id, Class<V> valueType) {
+        this.registerOption(id, valueType, null);
     }
 
-    private <V> void registerOption(String mapping, String id, Class<V> valueType, @Nullable Function<V, IllegalStateException> valueValidator) {
-        SpongeParticleOption<?> option = new SpongeParticleOption<>(id, valueType, valueValidator);
-        this.particleOptionsMappings.put(mapping, option);
+    private <V> void registerOption(String id, Class<V> valueType, @Nullable Function<V, IllegalStateException> valueValidator) {
+        SpongeParticleOption<?> option = new SpongeParticleOption<>("minecraft:" + id, id, valueType, valueValidator);
+        this.particleOptionsMappings.put(id, option);
         this.particleOptions.put(id, option);
     }
 }

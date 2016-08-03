@@ -25,25 +25,28 @@
 package org.spongepowered.common.effect.particle;
 
 import org.spongepowered.api.effect.particle.ParticleOption;
+import org.spongepowered.common.SpongeCatalogType;
 
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class SpongeParticleOption<V> implements ParticleOption<V> {
+public class SpongeParticleOption<V> extends SpongeCatalogType implements ParticleOption<V> {
 
-    private final String id;
+    private final String name;
     private final Class<V> valueType;
     @Nullable private final Function<V, IllegalStateException> valueValidator;
 
-    public SpongeParticleOption(String id, Class<V> valueType, @Nullable Function<V, IllegalStateException> valueValidator) {
+    public SpongeParticleOption(String id, String name, Class<V> valueType,
+            @Nullable Function<V, IllegalStateException> valueValidator) {
+        super(id);
         this.valueValidator = valueValidator;
         this.valueType = valueType;
-        this.id = id;
+        this.name = name;
     }
 
-    public SpongeParticleOption(String id, Class<V> valueType) {
-        this(id, valueType, null);
+    public SpongeParticleOption(String id, String name, Class<V> valueType) {
+        this(id, name, valueType, null);
     }
 
     @Nullable
@@ -60,12 +63,7 @@ public class SpongeParticleOption<V> implements ParticleOption<V> {
     }
 
     @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
     public String getName() {
-        return this.id;
+        return this.name;
     }
 }

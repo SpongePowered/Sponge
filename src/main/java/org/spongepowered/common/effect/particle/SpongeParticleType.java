@@ -36,13 +36,21 @@ import java.util.Optional;
 
 public class SpongeParticleType extends SpongeCatalogType implements ParticleType {
 
+    private final String name;
     private final EnumParticleTypes internalType;
     private final Map<ParticleOption<?>, Object> options;
 
-    public SpongeParticleType(String id, EnumParticleTypes internalType, Map<ParticleOption<?>, Object> options) {
+    public SpongeParticleType(String id, String name, EnumParticleTypes internalType,
+            Map<ParticleOption<?>, Object> options) {
         super(id);
         this.options = ImmutableMap.copyOf(options);
         this.internalType = internalType;
+        this.name = name;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 
     public EnumParticleTypes getInternalType() {
