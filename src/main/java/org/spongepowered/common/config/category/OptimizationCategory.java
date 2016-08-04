@@ -49,8 +49,15 @@ public class OptimizationCategory extends ConfigCategory {
     @Setting(value = "cache-tameable-owners", comment = "Caches tameable entities owners to avoid constant lookups against data watchers. If mods cause issue, disable.")
     private boolean cacheTameableOwners = true;
 
+    @Setting(value = "inline-block-position-checks", comment = "Inlines a simple check for whether a BlockPosition is valid\n"
+                                                               + "in a world. By patching the check, the JVM can optimize the\n"
+                                                               + "method further while reducing the number of operations performed\n"
+                                                               + "for such a simple check. This may however break mods that alter\n"
+                                                               + "world heights and can thus be disabled in those cases.")
+    private boolean inlineBlockPositionChecks = true;
+
     public boolean useIgnoreUloadedChunkLightingPatch() {
-        return false && this.ignoreUnloadedChunkLighting; // For now, disable the patch until the lighting issues this caused can be fixed.
+        return this.ignoreUnloadedChunkLighting;
     }
 
     public boolean isUseCachedChunkMap() {
@@ -66,4 +73,7 @@ public class OptimizationCategory extends ConfigCategory {
         return this.cacheTameableOwners;
     }
 
+    public boolean isInlineBlockPositionChecks() {
+        return this.inlineBlockPositionChecks;
+    }
 }

@@ -28,22 +28,16 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(World.class)
 public abstract class MixinWorld_Lighting {
-
-    private static final String WORLD_GET_CHUNK =
-            "Lnet/minecraft/world/World;getChunkFromBlockCoords(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/world/chunk/Chunk;";
 
     @Shadow protected IChunkProvider chunkProvider;
 
@@ -52,35 +46,26 @@ public abstract class MixinWorld_Lighting {
     @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
 
     @Shadow @Final public boolean isRemote;
-    @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract int getSkylightSubtracted();
+    @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
+    @Shadow public abstract Chunk getChunkFromBlockCoords(BlockPos pos);
 
     /**
-     * Adds an injection check on the World where if the chunk is not loaded
-     * at the desired location, the chunk is not loaded. Note that in the
-     * case of {@link WorldServer}, this is bypassed entirely to use
-     * a more optimized chunk loaded check.
+     * @author gabizou
+     * @reason Adds a redirector to use instead of an injector to avoid duplicate chunk area loaded lookups.
+     * This is overridden in MixinWorldServer_Lighting.
      *
-     * @param pos The position of the block
-     * @param callbackInfo The callback info to return and cancel if necessary
+     * @param thisWorld This world
+     * @param pos The block position to check light for
+     * @param radius The radius, always 17
+     * @param allowEmtpy Whether to allow empty chunks, always false
+     * @param lightType The light type
+     * @param samePosition The block position to check light for, again.
+     * @return True if the area is loaded
      */
-    @Inject(method = "getLight(Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "INVOKE", target = WORLD_GET_CHUNK), cancellable = true)
-    private void checkChunkLoadedForLight(BlockPos pos, CallbackInfoReturnable<Integer> callbackInfo) {
-        if (!this.isBlockLoaded(pos)) {
-            callbackInfo.setReturnValue(0);
-            callbackInfo.cancel();
-        }
-    }
-
-    @Inject(method = "checkLightFor", at = @At(value = "HEAD"), cancellable = true)
-    public void onCheckLightFor(EnumSkyBlock lightType, BlockPos pos, CallbackInfoReturnable<Boolean> callbackInfo) {
-        if (!this.isRemote) {
-            final Chunk chunk = this.chunkProvider.getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4);
-            if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
-                callbackInfo.setReturnValue(false);
-                callbackInfo.cancel();
-            }
-        }
+    @Redirect(method = "checkLightFor", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;IZ)Z"))
+    protected boolean spongeIsAreaLoadedForCheckingLight(World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumSkyBlock lightType, BlockPos samePosition) {
+        return isAreaLoaded(pos, radius, allowEmtpy);
     }
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Multimap;
@@ -33,6 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -71,6 +73,9 @@ public class PhaseContext {
     @Nullable private CapturedItemStackSupplier capturedItemStackSupplier;
     @Nullable private EntityItemDropsSupplier entityItemDropsSupplier;
     @Nullable private EntityItemEntityDropsSupplier entityItemEntityDropsSupplier;
+    @Nullable private User owner;
+    @Nullable private User notifier;
+
     private Object source;
 
     public static PhaseContext start() {
@@ -86,6 +91,26 @@ public class PhaseContext {
         if (namedCause.getName().equals(NamedCause.SOURCE)) {
             this.source = namedCause.getCauseObject();
         }
+        return this;
+    }
+
+    public PhaseContext owner(User owner) {
+        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        if (this.owner != null) {
+            throw new IllegalStateException("Owner for this phase context is already set!");
+        }
+        this.owner = checkNotNull(owner, "Owner cannot be null!");
+        this.contextObjects.add(NamedCause.owner(owner));
+        return this;
+    }
+
+    public PhaseContext notifier(User notifier) {
+        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        if (this.notifier != null) {
+            throw new IllegalStateException("Notifier for this phase context is already set!");
+        }
+        this.notifier = checkNotNull(notifier, "Notifier cannot be null!");
+        this.contextObjects.add(NamedCause.notifier(notifier));
         return this;
     }
 
@@ -242,6 +267,14 @@ public class PhaseContext {
             return Optional.of((T) this.source);
         }
         return Optional.empty();
+    }
+
+    public Optional<User> getOwner() {
+        return Optional.ofNullable(this.owner);
+    }
+
+    public Optional<User> getNotifier() {
+        return Optional.ofNullable(this.notifier);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -502,12 +535,12 @@ public class PhaseContext {
                 return false;
             }
             CaptureFlag that = (CaptureFlag) o;
-            return flag == that.flag;
+            return this.flag == that.flag;
         }
 
         @Override
         public int hashCode() {
-            return com.google.common.base.Objects.hashCode(flag);
+            return com.google.common.base.Objects.hashCode(this.flag);
         }
 
         public void addFlag(BlockChangeFlag flag) {

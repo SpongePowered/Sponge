@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableMap;
 import org.spongepowered.asm.lib.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.category.OptimizationCategory;
 import org.spongepowered.common.config.type.GlobalConfig;
@@ -52,7 +53,13 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         final GlobalConfig globalConfig = SpongeImpl.getGlobalConfig().getConfig();
         if (globalConfig.getModules().useOptimizations()) {
-            return mixinEnabledMappings.get(mixinClassName).apply(globalConfig.getOptimizations());
+            final Function<OptimizationCategory, Boolean> optimizationCategoryBooleanFunction = mixinEnabledMappings.get(mixinClassName);
+            if (optimizationCategoryBooleanFunction == null) {
+                new PrettyPrinter(50).add("Could not find function for optimization patch").centre().hr()
+                        .add("Missing function for class: " + mixinClassName)
+                        .trace();
+            }
+            return optimizationCategoryBooleanFunction.apply(globalConfig.getOptimizations());
         }
         return false;
     }
@@ -92,6 +99,14 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     (module) -> true) // TODO the velocity changes need to be sent to the client
             .put("org.spongepowered.common.mixin.optimization.entity.MixinEntityTameable_Cached_Owner",
                     OptimizationCategory::useCacheTameableOwners)
+            .put("org.spongepowered.common.mixin.optimization.util.math.MixinMutableBlockPos_Inline_Valid_BlockPos",
+                    OptimizationCategory::isInlineBlockPositionChecks)
+            .put("org.spongepowered.common.mixin.optimization.util.math.MixinVec3i_Inline_Valid_BlockPos",
+                    OptimizationCategory::isInlineBlockPositionChecks)
+            .put("org.spongepowered.common.mixin.optimization.world.MixinWorld_Inline_Valid_BlockPos",
+                    OptimizationCategory::isInlineBlockPositionChecks)
+            .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Lighting_Inline_Valid_BlockPos",
+                    (module) -> module.isInlineBlockPositionChecks() && module.useIgnoreUloadedChunkLightingPatch())
             .build();
 
 }

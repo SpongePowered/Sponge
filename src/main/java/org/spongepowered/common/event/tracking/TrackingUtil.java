@@ -80,12 +80,17 @@ public final class TrackingUtil {
     public static void tickEntity(CauseTracker causeTracker, net.minecraft.entity.Entity entityIn) {
         checkArgument(entityIn instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entityIn);
         checkNotNull(entityIn, "Cannot capture on a null ticking entity!");
-        causeTracker.switchToPhase(TickPhase.Tick.ENTITY, PhaseContext.start()
+        final PhaseContext phaseContext = PhaseContext.start()
                 .add(NamedCause.source(entityIn))
                 .addEntityCaptures()
-                .addBlockCaptures()
+                .addBlockCaptures();
+        final IMixinEntity mixinEntity = EntityUtil.toMixin(entityIn);
+        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).ifPresent(notifier -> phaseContext.add(NamedCause.notifier(notifier)));
+        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).ifPresent(creator -> phaseContext.add(NamedCause.owner(creator)));
+
+        causeTracker.switchToPhase(TickPhase.Tick.ENTITY, phaseContext
                 .complete());
-        final Timing entityTiming = EntityUtil.toMixin(entityIn).getTimingsHandler();
+        final Timing entityTiming = mixinEntity.getTimingsHandler();
         entityTiming.startTiming();
         entityIn.onUpdate();
         entityTiming.stopTiming();
@@ -95,12 +100,16 @@ public final class TrackingUtil {
     public static void tickRidingEntity(CauseTracker causeTracker, net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        causeTracker.switchToPhase(TickPhase.Tick.ENTITY, PhaseContext.start()
+        final PhaseContext phaseContext = PhaseContext.start()
                 .add(NamedCause.source(entity))
                 .addEntityCaptures()
-                .addBlockCaptures()
+                .addBlockCaptures();
+        final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
+        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).ifPresent(notifier -> phaseContext.add(NamedCause.notifier(notifier)));
+        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).ifPresent(creator -> phaseContext.add(NamedCause.owner(creator)));
+        causeTracker.switchToPhase(TickPhase.Tick.ENTITY, phaseContext
                 .complete());
-        final Timing entityTiming = EntityUtil.toMixin(entity).getTimingsHandler();
+        final Timing entityTiming = mixinEntity.getTimingsHandler();
         entityTiming.startTiming();
         entity.updateRidden();
         entityTiming.stopTiming();
@@ -108,14 +117,19 @@ public final class TrackingUtil {
     }
 
     public static void tickTileEntity(CauseTracker causeTracker, ITickable tile) {
-        causeTracker.switchToPhase(TickPhase.Tick.TILE_ENTITY, PhaseContext.start()
-                .add(NamedCause.source(tile))
-                .addEntityCaptures()
-                .addBlockCaptures()
-                .complete());
         checkArgument(tile instanceof TileEntity, "ITickable %s is not a TileEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
+        final PhaseContext phaseContext = PhaseContext.start()
+                .add(NamedCause.source(tile))
+                .addEntityCaptures()
+                .addBlockCaptures();
+        final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
+        final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(tileEntity.getPos());
+        mixinChunk.getBlockNotifier(tileEntity.getPos()).ifPresent(notifier -> phaseContext.notifier(notifier));
+        mixinChunk.getBlockOwner(tileEntity.getPos()).ifPresent(owner -> phaseContext.owner(owner));
         final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tile;
+        causeTracker.switchToPhase(TickPhase.Tick.TILE_ENTITY, phaseContext
+                .complete());
         mixinTileEntity.getTimingsHandler().startTiming();
         tile.update();
         mixinTileEntity.getTimingsHandler().stopTiming();

@@ -25,64 +25,13 @@
 package org.spongepowered.common.mixin.optimization.world;
 
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.EnumSkyBlock;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 
-@Mixin(WorldServer.class)
-public abstract class MixinWorldServer_Lighting extends MixinWorld_Lighting {
-
-    /**
-     * @author gabizou - April 8th, 2016
-     *
-     * Instead of providing chunks which has potential chunk loads,
-     * we simply get the chunk directly from the chunk provider, if it is loaded
-     * and return the light value accordingly.
-     *
-     * @param pos The block position
-     * @return The light at the desired block position
-     */
-    @Override
-    public int getLight(BlockPos pos) {
-        if (pos.getY() < 0) {
-            return 0;
-        } else {
-            if (pos.getY() >= 256) {
-                pos = new BlockPos(pos.getX(), 255, pos.getZ());
-            }
-            // Sponge Start - Use our hook to get the chunk only if it is loaded
-            // return this.getChunkFromBlockCoords(pos).getLightSubtracted(pos, 0);
-            final Chunk chunk = this.chunkProvider.getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4);
-            return chunk == null ? 0 : chunk.getLightSubtracted(pos, 0);
-            // Sponge End
-        }
-    }
-
-    /**
-     * @author gabizou - August 4th, 2016
-     * @reason Overrides the same method from MixinWorld_Lighting that redirects
-     * {@link #isAreaLoaded(BlockPos, int, boolean)} to simplify the check to
-     * whether the chunk's neighbors are loaded. Since the passed radius is always
-     * 17, the check is simply checking for whether neighboring chunks are loaded
-     * properly.
-     *
-     * @param thisWorld This world
-     * @param pos The block position to check light for
-     * @param radius The radius, always 17
-     * @param allowEmtpy Whether to allow empty chunks, always false
-     * @param lightType The light type
-     * @param samePosition The block position to check light for, again.
-     * @return True if the chunk is loaded and neighbors are loaded
-     */
-    @Override
-    protected boolean spongeIsAreaLoadedForCheckingLight(World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumSkyBlock lightType,
-            BlockPos samePosition) {
-        final Chunk chunk = this.chunkProvider.getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4);
-        return !(chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded());
-    }
+@Mixin(value = WorldServer.class, priority = 1200)
+public abstract class MixinWorldServer_Lighting_Inline_Valid_BlockPos extends MixinWorld_Lighting {
 
     /**
      * @author gabizou - April 8th, 2016
@@ -98,7 +47,7 @@ public abstract class MixinWorldServer_Lighting extends MixinWorld_Lighting {
      */
     @Override
     public int getLight(BlockPos pos, boolean checkNeighbors) {
-        if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000) {
+        if (((IMixinBlockPos) pos).isValidXZPosition()) { // Sponge - Replace with inlined method
             if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness()) {
                 int i1 = this.getLight(pos.up(), false);
                 int i = this.getLight(pos.east(), false);
@@ -141,4 +90,5 @@ public abstract class MixinWorldServer_Lighting extends MixinWorld_Lighting {
             return 15;
         }
     }
+
 }

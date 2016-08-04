@@ -377,21 +377,14 @@ public class DamageEventHandler {
             }
             return Cause.builder().addAll(causeObjects).build();
         } else if (damageSource instanceof BlockDamageSource) {
-            List<NamedCause> causeObjects = new ArrayList<>();
+            final Cause.Builder builder = Cause.source(damageSource);
             Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
             BlockPos blockPos = ((IMixinLocation) (Object) location).getBlockPos();
-            Optional<User> owner = ((IMixinChunk) ((net.minecraft.world.World) location.getExtent())
-                .getChunkFromBlockCoords(blockPos)).getBlockOwner(blockPos);
-            Optional<User> notifier = ((IMixinChunk) ((net.minecraft.world.World) location.getExtent())
-                .getChunkFromBlockCoords(blockPos)).getBlockNotifier(blockPos);
-            causeObjects.add(NamedCause.source(damageSource));
-            if (notifier.isPresent()) {
-                causeObjects.add(NamedCause.notifier(notifier.get()));
-            }
-            if (owner.isPresent()) {
-                causeObjects.add(NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
-            }
-            return Cause.builder().addAll(causeObjects).build();
+            final IMixinChunk mixinChunk = (IMixinChunk) ((net.minecraft.world.World) location.getExtent())
+                    .getChunkFromBlockCoords(blockPos);
+            mixinChunk.getBlockNotifier(blockPos).ifPresent(notifier -> builder.named(NamedCause.notifier(notifier)));
+            mixinChunk.getBlockOwner(blockPos).ifPresent(owner -> builder.named(NamedCause.of(DamageEntityEvent.CREATOR, owner)));
+            return builder.build();
         } else {
             return Cause.of(NamedCause.source(damageSource));
         }
