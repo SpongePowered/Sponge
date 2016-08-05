@@ -90,10 +90,10 @@ import java.util.Optional;
 public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
-    private boolean hasCollideLogic = false;
-    private boolean hasCollideWithStateLogic = false;
-    private boolean requiresLocationCheckForLight = false;
-    private boolean requiresLocationCheckForOpacity = false;
+    private boolean hasCollideLogic;
+    private boolean hasCollideWithStateLogic;
+    private boolean requiresLocationCheckForLight;
+    private boolean requiresLocationCheckForOpacity;
     private Timing timing;
 
     @Shadow private boolean needsRandomTick;
