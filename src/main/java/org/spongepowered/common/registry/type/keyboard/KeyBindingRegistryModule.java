@@ -104,10 +104,10 @@ public class KeyBindingRegistryModule implements CatalogRegistryModule<KeyBindin
         return ImmutableSet.copyOf(this.keyBindings.values());
     }
 
-    private static SpongeKeyBinding buildDefaultBinding(String name, KeyCategory keyCategory, int internalId, String translationKey) {
+    private static SpongeKeyBinding buildDefaultBinding(String id, KeyCategory keyCategory, int internalId, String translationKey) {
         Text displayName = Sponge.getRegistry().getTranslationById("key." + translationKey).map(translation -> (Text) Text.of(translation))
-                .orElseGet(() -> Text.of(name));
-        SpongeKeyBinding keyBinding = new SpongeKeyBinding("minecraft", name, (SpongeKeyCategory) keyCategory, displayName, true);
+                .orElseGet(() -> Text.of(id));
+        SpongeKeyBinding keyBinding = new SpongeKeyBinding("minecraft", id, (SpongeKeyCategory) keyCategory, displayName, true);
         keyBinding.setInternalId(internalId);
         return keyBinding;
     }
@@ -116,27 +116,27 @@ public class KeyBindingRegistryModule implements CatalogRegistryModule<KeyBindin
     public void registerDefaults() {
         Map<String, SpongeKeyBinding> mappings = new HashMap<>();
         mappings.put("attack", buildDefaultBinding("attack", KeyCategories.GAMEPLAY, 0, "attack"));
-        mappings.put("pick_block", buildDefaultBinding("pickBlock", KeyCategories.GAMEPLAY, 1, "pickItem"));
-        mappings.put("use_item", buildDefaultBinding("useItem", KeyCategories.GAMEPLAY, 2, "use"));
+        mappings.put("pick_block", buildDefaultBinding("pick_block", KeyCategories.GAMEPLAY, 1, "pickItem"));
+        mappings.put("use_item", buildDefaultBinding("use_item", KeyCategories.GAMEPLAY, 2, "use"));
         registerAndClearMappings(KeyBindings.Gameplay.class, mappings);
-        mappings.put("drop_item", buildDefaultBinding("dropItem", KeyCategories.INVENTORY, 3, "drop"));
-        mappings.put("hotbar_1", buildDefaultBinding("hotbar1", KeyCategories.INVENTORY, 4, "hotbar.1"));
-        mappings.put("hotbar_2", buildDefaultBinding("hotbar2", KeyCategories.INVENTORY, 5, "hotbar.2"));
-        mappings.put("hotbar_3", buildDefaultBinding("hotbar3", KeyCategories.INVENTORY, 6, "hotbar.3"));
-        mappings.put("hotbar_4", buildDefaultBinding("hotbar4", KeyCategories.INVENTORY, 7, "hotbar.4"));
-        mappings.put("hotbar_5", buildDefaultBinding("hotbar5", KeyCategories.INVENTORY, 8, "hotbar.5"));
-        mappings.put("hotbar_6", buildDefaultBinding("hotbar6", KeyCategories.INVENTORY, 9, "hotbar.6"));
-        mappings.put("hotbar_7", buildDefaultBinding("hotbar7", KeyCategories.INVENTORY, 10, "hotbar.7"));
-        mappings.put("hotbar_8", buildDefaultBinding("hotbar8", KeyCategories.INVENTORY, 11, "hotbar.8"));
-        mappings.put("hotbar_9", buildDefaultBinding("hotbar9", KeyCategories.INVENTORY, 12, "hotbar.9"));
+        mappings.put("drop_item", buildDefaultBinding("drop_item", KeyCategories.INVENTORY, 3, "drop"));
+        mappings.put("hotbar_1", buildDefaultBinding("hotbar_1", KeyCategories.INVENTORY, 4, "hotbar.1"));
+        mappings.put("hotbar_2", buildDefaultBinding("hotbar_2", KeyCategories.INVENTORY, 5, "hotbar.2"));
+        mappings.put("hotbar_3", buildDefaultBinding("hotbar_3", KeyCategories.INVENTORY, 6, "hotbar.3"));
+        mappings.put("hotbar_4", buildDefaultBinding("hotbar_4", KeyCategories.INVENTORY, 7, "hotbar.4"));
+        mappings.put("hotbar_5", buildDefaultBinding("hotbar_5", KeyCategories.INVENTORY, 8, "hotbar.5"));
+        mappings.put("hotbar_6", buildDefaultBinding("hotbar_6", KeyCategories.INVENTORY, 9, "hotbar.6"));
+        mappings.put("hotbar_7", buildDefaultBinding("hotbar_7", KeyCategories.INVENTORY, 10, "hotbar.7"));
+        mappings.put("hotbar_8", buildDefaultBinding("hotbar_8", KeyCategories.INVENTORY, 11, "hotbar.8"));
+        mappings.put("hotbar_9", buildDefaultBinding("hotbar_9", KeyCategories.INVENTORY, 12, "hotbar.9"));
         mappings.put("inventory", buildDefaultBinding("inventory", KeyCategories.INVENTORY, 13, "inventory"));
-        mappings.put("swap_hand_items", buildDefaultBinding("swapHandItems", KeyCategories.INVENTORY, 14, "swapHands"));
+        mappings.put("swap_hand_items", buildDefaultBinding("swap_hand_items", KeyCategories.INVENTORY, 14, "swapHands"));
         registerAndClearMappings(KeyBindings.Inventory.class, mappings);
         mappings.put("fullscreen", buildDefaultBinding("fullscreen", KeyCategories.MISC, 15, "fullscreen"));
         mappings.put("screenshot", buildDefaultBinding("screenshot", KeyCategories.MISC, 16, "screenshot"));
-        mappings.put("smooth_camera", buildDefaultBinding("smoothCamera", KeyCategories.MISC, 17, "smoothCamera"));
-        mappings.put("spectator_outlines", buildDefaultBinding("spectatorOutlines", KeyCategories.MISC, 18, "spectatorOutlines"));
-        mappings.put("toggle_perspective", buildDefaultBinding("togglePerspective", KeyCategories.MISC, 19, "togglePerspective"));
+        mappings.put("smooth_camera", buildDefaultBinding("smooth_camera", KeyCategories.MISC, 17, "smoothCamera"));
+        mappings.put("spectator_outlines", buildDefaultBinding("spectator_outlines", KeyCategories.MISC, 18, "spectatorOutlines"));
+        mappings.put("toggle_perspective", buildDefaultBinding("toggle_perspective", KeyCategories.MISC, 19, "togglePerspective"));
         registerAndClearMappings(KeyBindings.Misc.class, mappings);
         mappings.put("backward", buildDefaultBinding("backward", KeyCategories.MOVEMENT, 20, "back"));
         mappings.put("forward", buildDefaultBinding("forward", KeyCategories.MOVEMENT, 21, "forward"));
@@ -148,7 +148,7 @@ public class KeyBindingRegistryModule implements CatalogRegistryModule<KeyBindin
         registerAndClearMappings(KeyBindings.Movement.class, mappings);
         mappings.put("chat", buildDefaultBinding("chat", KeyCategories.MULTIPLAYER, 27, "chat"));
         mappings.put("command", buildDefaultBinding("command", KeyCategories.MULTIPLAYER, 28, "command"));
-        mappings.put("player_list", buildDefaultBinding("playerList", KeyCategories.MULTIPLAYER, 29, "playerList"));
+        mappings.put("player_list", buildDefaultBinding("player_list", KeyCategories.MULTIPLAYER, 29, "playerList"));
         registerAndClearMappings(KeyBindings.Multiplayer.class, mappings);
     }
 

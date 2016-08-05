@@ -57,6 +57,7 @@ public class SpongeKeyBindingBuilder implements KeyBinding.Builder {
     public KeyBinding.Builder id(String id) {
         checkNotNull(id, "id");
         checkArgument(!id.isEmpty(), "The id may not be empty");
+        checkArgument(id.indexOf(' ') == -1, "The id may not contain any spaces.");
         this.id = id;
         return this;
     }

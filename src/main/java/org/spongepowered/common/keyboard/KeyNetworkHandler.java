@@ -41,7 +41,7 @@ import org.spongepowered.api.keyboard.KeyBinding;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.network.message.MessageKeyState;
 import org.spongepowered.common.network.message.MessageKeyboardData;
 import org.spongepowered.common.network.message.SpongeMessageHandler;
