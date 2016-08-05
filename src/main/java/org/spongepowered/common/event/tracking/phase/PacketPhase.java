@@ -713,6 +713,7 @@ public final class PacketPhase extends TrackingPhase {
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 context
                         .add(NamedCause.of(InternalNamedCauses.Packet.OPEN_CONTAINER, playerMP.openContainer))
+                        .addBlockCaptures()
                         .addEntityCaptures()
                         .addEntityDropCaptures();
             }
