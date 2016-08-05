@@ -754,6 +754,9 @@ public interface PacketFunction {
                 }
 
             });
+            context.getCapturedBlockSupplier()
+                    .ifPresentAndNotEmpty(blocks ->
+                            GeneralFunctions.processBlockCaptures(blocks, ((IMixinWorldServer) player.worldObj).getCauseTracker(), state, context));
         }
     });
     PacketFunction ENCHANTMENT = ((packet, state, player, context) -> {
