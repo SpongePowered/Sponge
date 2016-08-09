@@ -122,15 +122,16 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
         return id == null ? name : id;
     }
 
-    public void doTileEntityRegistration(Class clazz, String name) {
+    @SuppressWarnings("unchecked")
+    public void doTileEntityRegistration(Class<?> clazz, String name) {
         final String id = TileEntityTypeRegistryModule.getInstance().getIdForName(name);
-        boolean canTick = false;
+        boolean canTick = true;
         try {
             if (ITickable.class.isAssignableFrom(clazz)) {
                 String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "update" : "func_73660_a";
                 Class<?> declaringClazz = clazz.getMethod(mapping).getDeclaringClass();
-                if (!declaringClazz.equals(TileEntityChest.class) && !declaringClazz.equals(TileEntityEnderChest.class)) {
-                    canTick = true;
+                if (declaringClazz.equals(TileEntityChest.class) || declaringClazz.equals(TileEntityEnderChest.class)) {
+                    canTick = false;
                 }
             }
         } catch (Throwable e) {
