@@ -34,9 +34,6 @@ import java.util.Optional;
 public class SmeltablePropertyStore extends AbstractItemStackPropertyStore<SmeltableProperty> {
 
     @Override protected Optional<SmeltableProperty> getFor(ItemStack itemStack) {
-        if(FurnaceRecipes.instance().getSmeltingResult(itemStack) != null) {
-            return Optional.of(new SmeltableProperty(true));
-        }
-        return Optional.of(new SmeltableProperty(false));
+        return Optional.of(new SmeltableProperty(FurnaceRecipes.instance().getSmeltingResult(itemStack) != null));
     }
 }
