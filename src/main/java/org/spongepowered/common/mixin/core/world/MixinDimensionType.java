@@ -42,6 +42,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.world.WorldManager;
 
 @Mixin(DimensionType.class)
@@ -62,6 +63,9 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
         this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimensionType$getId
                 ()).resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
         this.context = new Context(Context.DIMENSION_KEY, this.sanitizedId);
+        if (!WorldManager.isDimensionRegistered(idIn)) {
+            DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog((org.spongepowered.api.world.DimensionType)(Object) this);
+        }
     }
 
     public String dimensionType$getId() {

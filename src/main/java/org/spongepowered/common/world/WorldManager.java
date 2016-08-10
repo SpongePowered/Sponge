@@ -53,6 +53,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.io.FileUtils;
 import org.spongepowered.api.Sponge;
@@ -256,8 +257,8 @@ public final class WorldManager {
         return dimensionTypeByTypeId.keySet().toIntArray();
     }
 
-    public static Optional<Path> getWorldFolder(int dimensionId) {
-        return Optional.ofNullable(dimensionPathByDimensionId.get(dimensionId));
+    public static Optional<Path> getWorldFolder(DimensionType dimensionType) {
+        return Optional.ofNullable(dimensionPathByDimensionId.get(dimensionType.getId()));
     }
 
     public static boolean isDimensionRegistered(int dimensionId) {
@@ -324,6 +325,21 @@ public final class WorldManager {
         if (((IMixinWorldInfo) properties).getDimensionId() != null && freeDimensionId) {
             dimensionBits.clear(((IMixinWorldInfo) properties).getDimensionId());
         }
+    }
+
+    // used by SpongeForge client
+    public static void unregisterAllWorldSettings() {
+        worldPropertiesByFolderName.clear();
+        worldPropertiesByWorldUuid.clear();
+        worldUuidByFolderName.clear();
+        worldByDimensionId.clear();
+        dimensionTypeByTypeId.clear();
+        dimensionTypeByDimensionId.clear();
+        dimensionPathByDimensionId.clear();
+        dimensionBits.clear();
+        weakWorldByWorld.clear();
+        unregisterableDimensions.clear();
+        isVanillaRegistered = false;
     }
 
     public static Optional<WorldProperties> getWorldProperties(String folderName) {
@@ -640,7 +656,7 @@ public final class WorldManager {
             }
 
             // Step 1 - Grab the world's data folder
-            final Optional<Path> optWorldFolder = getWorldFolder(dimensionId);
+            final Optional<Path> optWorldFolder = getWorldFolder(dimensionType);
             if (!optWorldFolder.isPresent()) {
                 SpongeImpl.getLogger().error("An attempt was made to load a world with dimension id [{}] that has no registered world folder!",
                         dimensionId);
@@ -693,8 +709,6 @@ public final class WorldManager {
                 worldInfo = createWorldInfoFromSettings(currentSavesDir, (org.spongepowered.api.world.DimensionType) (Object) dimensionType,
                         dimensionId, worldFolderName, worldSettings, generatorOptions);
             }
-
-            final WorldProperties properties = (WorldProperties) worldInfo;
 
             // Safety check to ensure we'll get a unique id no matter what
             if (((WorldProperties) worldInfo).getUniqueId() == null) {
@@ -778,9 +792,6 @@ public final class WorldManager {
 
         ((IMixinMinecraftServer) SpongeImpl.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
 
-        // Mods expect 'MinecraftServer.worldServers' to already be updated when 'WorldEvent.Load' is fired
-        reorderWorldsVanillaFirst();
-
         SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) worldServer));
 
         if (prepareSpawn) {
@@ -805,6 +816,7 @@ public final class WorldManager {
         ((IMixinMinecraftServer) SpongeImpl.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
     }
 
+    // used by SpongeForge only
     public static void reorderWorldsVanillaFirst() {
         final List<WorldServer> worldServers = new ArrayList<>(worldByDimensionId.values());
         final List<WorldServer> sorted = new LinkedList<>();
@@ -918,15 +930,15 @@ public final class WorldManager {
                             dimensionId, DimensionTypes.OVERWORLD.getName());
                 }
 
-                final Optional<org.spongepowered.api.world.DimensionType> optDimensionType
-                        = Sponge.getRegistry().getType(org.spongepowered.api.world.DimensionType.class, dimensionTypeId);
-                if (!optDimensionType.isPresent()) {
+                org.spongepowered.api.world.DimensionType dimensionType
+                        = Sponge.getRegistry().getType(org.spongepowered.api.world.DimensionType.class, dimensionTypeId).orElse(null);
+                if (dimensionType == null) {
                     SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Defaulting to [{}]...",
                             worldFolderName, DimensionTypes.OVERWORLD.getName());
+                    dimensionType = DimensionTypes.OVERWORLD;
                 }
-                final DimensionType dimensionType = (DimensionType) (Object) optDimensionType.get();
-                spongeDataCompound.setString(NbtDataUtil.DIMENSION_TYPE, dimensionTypeId);
 
+                spongeDataCompound.setString(NbtDataUtil.DIMENSION_TYPE, dimensionTypeId);
                 if (!spongeDataCompound.hasUniqueId(NbtDataUtil.UUID)) {
                     SpongeImpl.getLogger().error("World [{}] (DIM{}) has no valid unique identifier. This is a critical error and should be reported"
                             + " to Sponge ASAP.", worldFolderName, dimensionId);
@@ -939,7 +951,7 @@ public final class WorldManager {
                     continue;
                 }
 
-                registerDimension(dimensionId, dimensionType, true);
+                registerDimension(dimensionId, (DimensionType)(Object) dimensionType, true);
                 registerDimensionPath(dimensionId, rootPath.resolve(worldFolderName));
             }
         } catch (IOException e) {
@@ -1119,6 +1131,9 @@ public final class WorldManager {
 
         if (optWorldServer.isPresent()) {
             return Optional.of(optWorldServer.get().getSaveHandler().getWorldDirectory().toPath());
+        } else if (SpongeImpl.getServer() != null) {
+            SaveHandler saveHandler = (SaveHandler) SpongeImpl.getServer().getActiveAnvilConverter().getSaveLoader(SpongeImpl.getServer().getFolderName(), false);
+            return Optional.of(saveHandler.getWorldDirectory().toPath());
         }
 
         return Optional.empty();
