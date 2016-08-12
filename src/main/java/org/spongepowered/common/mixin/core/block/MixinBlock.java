@@ -80,8 +80,8 @@ import java.util.Random;
 public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
-    private boolean hasCollideLogic = false;
-    private boolean hasCollideWithStateLogic = false;
+    private boolean hasCollideLogic;
+    private boolean hasCollideWithStateLogic;
     private Timing timing;
 
     @Shadow private boolean needsRandomTick;
@@ -95,19 +95,21 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow(prefix = "shadow$")
     public abstract IBlockState shadow$getDefaultState();
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
         // Determine which blocks can avoid executing un-needed event logic
         // This will allow us to avoid running event logic for blocks that do nothing such as grass collisions
         // -- blood
 
+        this.hasCollideLogic = true;
+        this.hasCollideWithStateLogic = true;
         // onEntityCollidedWithBlock
         try {
             String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollidedWithBlock" : "func_176199_a";
             Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, Entity.class };
             Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            if (!clazz.equals(Block.class)) {
-                this.hasCollideLogic = true;
+            if (clazz.equals(Block.class)) {
+                this.hasCollideLogic = false;
             }
         } catch (Throwable ex) {
             // ignore
@@ -118,8 +120,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollidedWithBlock" : "func_180634_a";
             Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class, Entity.class };
             Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            if (!clazz.equals(Block.class)) {
-                this.hasCollideWithStateLogic = true;
+            if (clazz.equals(Block.class)) {
+                this.hasCollideWithStateLogic = false;
             }
         } catch (Throwable ex) {
             // ignore
