@@ -63,6 +63,10 @@ public class RegistryHelper {
             }
             try {
                 Object value = mapFunction.apply(f.getName());
+                if (value == null) {
+                    // check for minecraft id
+                    value = mapFunction.apply("minecraft:" + f.getName());
+                }
                 if (value == null && !ignore) {
                     SpongeImpl.getLogger().warn("Skipping {}.{}", f.getDeclaringClass().getName(), f.getName());
                     continue;

@@ -70,6 +70,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinIntegratedServer;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
+import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
@@ -333,7 +334,6 @@ public final class WorldManager {
         worldPropertiesByWorldUuid.clear();
         worldUuidByFolderName.clear();
         worldByDimensionId.clear();
-        dimensionTypeByTypeId.clear();
         dimensionTypeByDimensionId.clear();
         dimensionPathByDimensionId.clear();
         dimensionBits.clear();
@@ -668,8 +668,8 @@ public final class WorldManager {
 
             // Step 2 - See if we are allowed to load it
             if (dimensionId != 0) {
-                final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((org.spongepowered.api.world.DimensionType) (Object) dimensionType)
-                        .getId(), worldFolderName);
+                final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((IMixinDimensionType)(Object) dimensionType)
+                        .getFolderName(), worldFolderName);
                 if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
                     SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder, dimensionId);
                     continue;
@@ -930,12 +930,12 @@ public final class WorldManager {
                             dimensionId, DimensionTypes.OVERWORLD.getName());
                 }
 
+                dimensionTypeId = fixDimensionTypeId(dimensionTypeId);
                 org.spongepowered.api.world.DimensionType dimensionType
                         = Sponge.getRegistry().getType(org.spongepowered.api.world.DimensionType.class, dimensionTypeId).orElse(null);
                 if (dimensionType == null) {
-                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Defaulting to [{}]...",
-                            worldFolderName, DimensionTypes.OVERWORLD.getName());
-                    dimensionType = DimensionTypes.OVERWORLD;
+                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Skipping...", worldFolderName);
+                    continue;
                 }
 
                 spongeDataCompound.setString(NbtDataUtil.DIMENSION_TYPE, dimensionTypeId);
@@ -957,6 +957,23 @@ public final class WorldManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    // Checks if the saved dimension type contains a modid and if not, attempts to locate one
+    public static String fixDimensionTypeId(String name) {
+        // Since we now store the modid, we need to support older save files that only include id without modid.
+        if (!name.contains(":")) {
+            for (org.spongepowered.api.world.DimensionType type : Sponge.getRegistry().getAllOf(org.spongepowered.api.world.DimensionType.class)) {
+                String typeId = (type.getId().substring(type.getId().lastIndexOf(":") + 1));
+                if (typeId.equals(name)) {
+                    return type.getId();
+                    // Note: We don't update the NBT here but instead fix it on next
+                    //       world save in case there are 2 types using same name.
+                }
+            }
+        }
+
+        return name;
     }
 
     public static CompletableFuture<Optional<WorldProperties>> copyWorld(WorldProperties worldProperties, String copyName) {
@@ -1131,9 +1148,6 @@ public final class WorldManager {
 
         if (optWorldServer.isPresent()) {
             return Optional.of(optWorldServer.get().getSaveHandler().getWorldDirectory().toPath());
-        } else if (SpongeImpl.getServer() != null) {
-            SaveHandler saveHandler = (SaveHandler) SpongeImpl.getServer().getActiveAnvilConverter().getSaveLoader(SpongeImpl.getServer().getFolderName(), false);
-            return Optional.of(saveHandler.getWorldDirectory().toPath());
         }
 
         return Optional.empty();

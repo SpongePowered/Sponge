@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
@@ -53,16 +54,20 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     @Shadow public abstract String getName();
 
     private String sanitizedId;
+    private String folderName;
     private SpongeConfig<DimensionConfig> config;
     private volatile Context context;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class <? extends WorldProvider > clazzIn,
             CallbackInfo ci) {
-        this.sanitizedId = this.getName().toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
-        this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimensionType$getId
-                ()).resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
-        this.context = new Context(Context.DIMENSION_KEY, this.sanitizedId);
+        String dimName = enumName.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
+        this.folderName = dimName;
+        this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimName)
+                .resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
+        this.sanitizedId = SpongeImplHooks.getModIdFromClass(clazzIn) + ":" + dimName;
+        String contextId = this.sanitizedId.replace(":", ".");
+        this.context = new Context(Context.DIMENSION_KEY, contextId);
         if (!WorldManager.isDimensionRegistered(idIn)) {
             DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog((org.spongepowered.api.world.DimensionType)(Object) this);
         }
@@ -75,6 +80,11 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     @Intrinsic
     public String dimensionType$getName() {
         return this.getName();
+    }
+
+    @Override
+    public String getFolderName() {
+        return this.folderName;
     }
 
     @SuppressWarnings("unchecked")

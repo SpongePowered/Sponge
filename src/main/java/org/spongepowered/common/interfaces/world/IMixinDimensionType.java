@@ -33,4 +33,6 @@ public interface IMixinDimensionType {
     SpongeConfig<DimensionConfig> getDimensionConfig();
 
     Context getContext();
+
+    String getFolderName();
 }
