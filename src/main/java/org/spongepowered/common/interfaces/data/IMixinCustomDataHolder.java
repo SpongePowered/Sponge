@@ -24,11 +24,15 @@
  */
 package org.spongepowered.common.interfaces.data;
 
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,5 +62,24 @@ public interface IMixinCustomDataHolder {
     <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value);
 
     DataTransactionResult removeCustom(Key<?> key);
+
+    default void removeCustomFromNbt(DataManipulator<?, ?> manipulator) {
+        if (this instanceof IMixinEntity) {
+            final NBTTagCompound spongeData = ((IMixinEntity) this).getSpongeData();
+            if (spongeData.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
+                final NBTTagList tagList = spongeData.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
+                if (!tagList.hasNoTags()) {
+                    for (int i = 0; i < tagList.tagCount(); i++) {
+                        final NBTTagCompound tag = tagList.getCompoundTagAt(i);
+                        final String dataClass = tag.getString("DataClass");
+                        if (dataClass.equalsIgnoreCase(manipulator.getClass().getName())) {
+                            tagList.removeTag(i);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 }

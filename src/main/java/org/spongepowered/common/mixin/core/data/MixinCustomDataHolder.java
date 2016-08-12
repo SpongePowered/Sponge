@@ -93,6 +93,7 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
         }
         if (manipulator != null) {
             this.manipulators.remove(manipulator);
+            this.removeCustomFromNbt(manipulator);
             return DataTransactionResult.builder().replace(manipulator.getValues()).result(DataTransactionResult.Type.SUCCESS).build();
         } else {
             return DataTransactionResult.failNoData();
@@ -155,6 +156,7 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
             final DataManipulator<?, ?> manipulator = iterator.next();
             if (manipulator.getKeys().size() == 1 && manipulator.supports(key)) {
                 iterator.remove();
+                removeCustomFromNbt(manipulator);
                 return DataTransactionResult.builder()
                     .replace(manipulator.getValues())
                     .result(DataTransactionResult.Type.SUCCESS)
