@@ -53,6 +53,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.io.FileUtils;
 import org.spongepowered.api.Sponge;
@@ -1145,6 +1146,9 @@ public final class WorldManager {
 
         if (optWorldServer.isPresent()) {
             return Optional.of(optWorldServer.get().getSaveHandler().getWorldDirectory().toPath());
+        } else if (SpongeImpl.getServer() != null) {
+            SaveHandler saveHandler = (SaveHandler) SpongeImpl.getServer().getActiveAnvilConverter().getSaveLoader(SpongeImpl.getServer().getFolderName(), false);
+            return Optional.of(saveHandler.getWorldDirectory().toPath());
         }
 
         return Optional.empty();
