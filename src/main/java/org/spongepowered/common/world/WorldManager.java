@@ -257,8 +257,8 @@ public final class WorldManager {
         return dimensionTypeByTypeId.keySet().toIntArray();
     }
 
-    public static Optional<Path> getWorldFolder(DimensionType dimensionType) {
-        return Optional.ofNullable(dimensionPathByDimensionId.get(dimensionType.getId()));
+    public static Optional<Path> getWorldFolder(DimensionType dimensionType, int dimensionId) {
+        return Optional.ofNullable(dimensionPathByDimensionId.get(dimensionId));
     }
 
     public static boolean isDimensionRegistered(int dimensionId) {
@@ -655,7 +655,7 @@ public final class WorldManager {
             }
 
             // Step 1 - Grab the world's data folder
-            final Optional<Path> optWorldFolder = getWorldFolder(dimensionType);
+            final Optional<Path> optWorldFolder = getWorldFolder(dimensionType, dimensionId);
             if (!optWorldFolder.isPresent()) {
                 SpongeImpl.getLogger().error("An attempt was made to load a world with dimension id [{}] that has no registered world folder!",
                         dimensionId);
@@ -910,8 +910,12 @@ public final class WorldManager {
                     continue;
                 }
 
-                final int dimensionId = spongeDataCompound.getInteger(NbtDataUtil.DIMENSION_ID);
+                int dimensionId = spongeDataCompound.getInteger(NbtDataUtil.DIMENSION_ID);
 
+                if (dimensionId == Integer.MIN_VALUE) {
+                    // temporary fix for existing worlds created with wrong dimension id
+                    dimensionId = WorldManager.getNextFreeDimensionId();
+                }
                 // We do not handle Vanilla dimensions, skip them
                 if (dimensionId == 0 || dimensionId == -1 || dimensionId == 1) {
                     continue;
