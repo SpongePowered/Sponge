@@ -227,6 +227,20 @@ public final class EntityUtil {
         return entityPlayerMP;
     }
 
+    public static boolean isEntityDead(org.spongepowered.api.entity.Entity entity) {
+        return isEntityDead((net.minecraft.entity.Entity) entity);
+    }
+
+    public static boolean isEntityDead(net.minecraft.entity.Entity entity) {
+        if (entity instanceof EntityLivingBase) {
+            EntityLivingBase base = (EntityLivingBase) entity;
+            return base.getHealth() <= 0 || base.deathTime > 0 || base.dead;
+        } else {
+            return entity.isDead;
+        }
+    }
+
+
     static final class EntityTrace {
 
         Entity entity;

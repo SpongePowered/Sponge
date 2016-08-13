@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
@@ -50,11 +51,11 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
@@ -62,6 +63,7 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -361,6 +363,10 @@ public interface PacketFunction {
 
     PacketFunction ACTION = (packet, state, player, context) -> {
         final CauseTracker causeTracker = ((IMixinWorldServer) player.worldObj).getCauseTracker();
+        final ItemStack usedStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class)
+                .orElse(null);
+        final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
+        final Entity spongePlayer = EntityUtil.fromNative(player);
         if (state == PacketPhase.Inventory.DROP_ITEM) {
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks ->
@@ -369,7 +375,7 @@ public interface PacketFunction {
             context.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
                         final Cause cause = Cause.source(EntitySpawnCause.builder()
-                                .entity(EntityUtil.fromNative(player))
+                                .entity(spongePlayer)
                                 .type(InternalSpawnTypes.DROPPED_ITEM)
                                 .build())
                                 .build();
@@ -399,7 +405,7 @@ public interface PacketFunction {
             context.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
                         final Cause cause = Cause.source(EntitySpawnCause.builder()
-                                .entity(EntityUtil.fromNative(player))
+                                .entity(spongePlayer)
                                 .type(InternalSpawnTypes.DROPPED_ITEM)
                                 .build())
                                 .build();
@@ -429,7 +435,7 @@ public interface PacketFunction {
                             return;
                         }
                         final Cause cause = Cause.source(EntitySpawnCause.builder()
-                                .entity(EntityUtil.fromNative(player))
+                                .entity(spongePlayer)
                                 .type(InternalSpawnTypes.DROPPED_ITEM)
                                 .build())
                                 .build();
@@ -462,25 +468,67 @@ public interface PacketFunction {
                         printer.trace(System.err);
                     });
             context.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
-                final Cause cause = Cause.source(EntitySpawnCause.builder()
-                        .entity(EntityUtil.fromNative(player))
-                        .type(InternalSpawnTypes.PLACEMENT)
-                        .build())
-                        .build();
-                final DropItemEvent.Dispense
-                        dispense =
-                        SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld());
-                SpongeImpl.postEvent(dispense);
-                if (!dispense.isCancelled()) {
-                    processSpawnedEntities(player, causeTracker, dispense);
+                final List<Entity> projectiles = new ArrayList<>(entities.size());
+                final List<Entity> spawnEggs = new ArrayList<>(entities.size());
+                final List<Entity> normalPlacement = new ArrayList<>(entities.size());
+                for (Entity entity : entities) {
+                    if (entity instanceof Projectile || entity instanceof EntityThrowable) {
+                        projectiles.add(entity);
+                    } else if (usedSnapshot.getType() == ItemTypes.SPAWN_EGG) {
+                        spawnEggs.add(entity);
+                    } else {
+                        normalPlacement.add(entity);
+                    }
+                }
+                if (!projectiles.isEmpty()) {
+                    final Cause cause = Cause.source(
+                            EntitySpawnCause.builder()
+                                    .entity(spongePlayer)
+                                    .type(InternalSpawnTypes.PROJECTILE)
+                                    .build())
+                            .named(NamedCause.of("UsedItem", usedSnapshot))
+                            .owner(player)
+                            .build();
+                    final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, projectiles, causeTracker.getWorld());
+                    if (!SpongeImpl.postEvent(event)) {
+                        processSpawnedEntities(player, causeTracker, event);
+                    }
+                }
+                if (!spawnEggs.isEmpty()) {
+                    final Cause cause = Cause.source(
+                            EntitySpawnCause.builder()
+                                    .entity(spongePlayer)
+                                    .type(InternalSpawnTypes.SPAWN_EGG)
+                                    .build())
+                            .named(NamedCause.of("UsedItem", usedSnapshot))
+                            .owner(player)
+                            .build();
+                    final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, spawnEggs, causeTracker.getWorld());
+                    if (!SpongeImpl.postEvent(event)) {
+                        processSpawnedEntities(player, causeTracker, event);
+                    }
+                }
+                if (!normalPlacement.isEmpty()) {
+                    final Cause cause = Cause.source(
+                            EntitySpawnCause.builder()
+                                    .entity(spongePlayer)
+                                    .type(InternalSpawnTypes.PLACEMENT)
+                                    .build())
+                            .build();
+                    final DropItemEvent.Dispense
+                            dispense =
+                            SpongeEventFactory.createDropItemEventDispense(cause, normalPlacement, causeTracker.getWorld());
+                    if (!SpongeImpl.postEvent(dispense)) {
+                        processSpawnedEntities(player, causeTracker, dispense);
 
+                    }
                 }
             });
 
             context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
                 final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
                 final Cause cause = Cause.source(EntitySpawnCause.builder()
-                        .entity(EntityUtil.fromNative(player))
+                        .entity(spongePlayer)
                         .type(InternalSpawnTypes.DROPPED_ITEM)
                         .build())
                         .build();

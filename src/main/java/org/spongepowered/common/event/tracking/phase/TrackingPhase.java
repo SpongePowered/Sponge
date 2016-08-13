@@ -253,16 +253,8 @@ public abstract class TrackingPhase {
         final Chunk chunk = causeTracker.getMinecraftWorld().getChunkFromBlockCoords(pos);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         if (chunk != null && !chunk.isEmpty()) {
-            Optional<User> owner = mixinChunk.getBlockOwner(pos);
-            Optional<User> notifier = mixinChunk.getBlockNotifier(pos);
-            if (notifier.isPresent()) {
-                User user = notifier.get();
-                newContext.add(NamedCause.notifier(user));
-            }
-            if (owner.isPresent()) {
-                User user = owner.get();
-                newContext.add(NamedCause.owner(user));
-            }
+            mixinChunk.getBlockOwner(pos).ifPresent(newContext::owner);
+            mixinChunk.getBlockNotifier(pos).ifPresent(newContext::notifier);
         }
     }
 

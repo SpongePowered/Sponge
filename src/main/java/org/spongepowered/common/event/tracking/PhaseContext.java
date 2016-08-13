@@ -28,9 +28,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Multimap;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -42,6 +45,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.phase.ItemDropData;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -545,6 +549,63 @@ public class PhaseContext {
 
         public void addFlag(BlockChangeFlag flag) {
             this.flag = flag;
+        }
+    }
+
+    public static final class CaptureBlockSnapshotForTile {
+
+        @Nullable private BlockSnapshot snapshot;
+        private IBlockState tileState;
+        private IBlockState actualState;
+        private BlockPos tilePosition;
+        private TileEntity owningEntity;
+        private WorldServer worldServer;
+
+        public CaptureBlockSnapshotForTile(TileEntity tileEntity, WorldServer worldServer) {
+            this.owningEntity = tileEntity;
+            this.worldServer = worldServer;
+            this.tilePosition = tileEntity.getPos();
+            this.tileState = worldServer.getBlockState(tileEntity.getPos());
+            this.actualState = this.tileState.getActualState(worldServer, this.tilePosition);
+        }
+
+        public BlockSnapshot getSnapshot() {
+            if (this.snapshot == null) {
+                this.snapshot = ((IMixinWorldServer) this.worldServer).createSpongeBlockSnapshot(this.tileState, this.actualState, this.tilePosition, 0);
+            }
+            return this.snapshot;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            CaptureBlockSnapshotForTile that = (CaptureBlockSnapshotForTile) o;
+            return com.google.common.base.Objects.equal(this.snapshot, that.snapshot) &&
+                   com.google.common.base.Objects.equal(this.tileState, that.tileState) &&
+                   com.google.common.base.Objects.equal(this.tilePosition, that.tilePosition) &&
+                   com.google.common.base.Objects.equal(this.owningEntity, that.owningEntity) &&
+                   com.google.common.base.Objects.equal(this.worldServer, that.worldServer);
+        }
+
+        @Override
+        public int hashCode() {
+            return com.google.common.base.Objects.hashCode(this.snapshot, this.tileState, this.tilePosition, this.owningEntity, this.worldServer);
+        }
+
+        @Override
+        public String toString() {
+            return com.google.common.base.Objects.toStringHelper(this)
+                    .add("tileState", this.tileState)
+                    .add("actualState", this.actualState)
+                    .add("tilePosition", this.tilePosition)
+                    .add("owningEntity", this.owningEntity)
+                    .add("worldServer", this.worldServer)
+                    .toString();
         }
     }
 }

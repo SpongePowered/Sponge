@@ -26,7 +26,12 @@ package org.spongepowered.common.event.tracking.phase;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.CombatEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -34,8 +39,10 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -45,6 +52,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.teleport.EntityTeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
+import org.spongepowered.api.event.entity.BreedEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -56,6 +64,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -73,7 +82,6 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
@@ -216,18 +224,42 @@ public final class TickPhase extends TrackingPhase {
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
             final BlockSnapshot tickingBlock = phaseContext.getSource(BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", phaseContext));
+            final Optional<User> owner = phaseContext.getOwner();
+            final Optional<User> notifier = phaseContext.getNotifier();
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
-                        final Cause cause = Cause.source(BlockSpawnCause.builder()
+                        // Separate experience from other entities
+                        final List<Entity> experience = new ArrayList<>(entities.size());
+                        final List<Entity> nonExpEntities = new ArrayList<>(entities.size());
+                        for (Entity entity : entities) {
+                            if (entity instanceof EntityXPOrb) {
+                                experience.add(entity);
+                                continue;
+                            }
+                            nonExpEntities.add(entity);
+                        }
+                        if (!experience.isEmpty()) {
+                            final Cause.Builder builder = Cause.builder();
+                            builder.named(NamedCause.source(BlockSpawnCause.builder()
+                                    .block(tickingBlock)
+                                    .type(InternalSpawnTypes.EXPERIENCE)
+                                    .build()));
+                            notifier.ifPresent(builder::notifier);
+                            owner.ifPresent(builder::owner);
+                            SpongeEventFactory.createSpawnEntityEvent(builder.build(), experience, causeTracker.getWorld());
+                        }
+                        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
                                 .block(tickingBlock)
                                 .type(InternalSpawnTypes.BLOCK_SPAWNING)
-                                .build())
-                                .build();
+                                .build());
+                        notifier.ifPresent(builder::notifier);
+                        owner.ifPresent(builder::owner);
+                        final Cause cause = builder.build();
                         final SpawnEntityEvent
                                 spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+                                SpongeEventFactory.createSpawnEntityEvent(cause, nonExpEntities, causeTracker.getWorld());
                         SpongeImpl.postEvent(spawnEntityEvent);
                         for (Entity entity : spawnEntityEvent.getEntities()) {
                             TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
@@ -331,13 +363,83 @@ public final class TickPhase extends TrackingPhase {
             final Optional<User> notifier = mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
+                        final List<Entity> experience = new ArrayList<Entity>(entities.size());
+                        final List<Entity> nonExp = new ArrayList<Entity>(entities.size());
+                        final List<Entity> breeding = new ArrayList<Entity>(entities.size());
+                        final List<Entity> projectile = new ArrayList<Entity>(entities.size());
+                        for (Entity entity : entities) {
+                            if (entity instanceof EntityXPOrb) {
+                                experience.add(entity);
+                            } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
+                                breeding.add(entity);
+                            } else if (entity instanceof Projectile) {
+                                projectile.add(entity);
+                            } else {
+                                nonExp.add(entity);
+                            }
+                        }
+
+                        if (!experience.isEmpty()) {
+                            final Cause.Builder builder = Cause.source(
+                                    EntitySpawnCause.builder()
+                                            .entity(tickingEntity)
+                                            .type(InternalSpawnTypes.EXPERIENCE)
+                                            .build()
+                            );
+                            notifier.ifPresent(builder::notifier);
+                            creator.ifPresent(builder::owner);
+                            if (EntityUtil.isEntityDead(tickingEntity)) {
+                                if (tickingEntity instanceof EntityLivingBase) {
+                                    CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
+                                    if (entry != null) {
+                                        if (entry.damageSrc != null) {
+                                            builder.named(NamedCause.of("LastDamageSource", entry.damageSrc));
+                                        }
+                                    }
+                                }
+                            }
+                            final SpawnEntityEvent
+                                    event =
+                                    SpongeEventFactory.createSpawnEntityEvent(builder.build(), experience, causeTracker.getWorld());
+                            if (!SpongeImpl.postEvent(event)) {
+                                for (Entity entity : event.getEntities()) {
+                                    TrackingUtil.associateEntityCreator(phaseContext, entity, causeTracker.getMinecraftWorld());
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                }
+                            }
+                        }
+                        if (!breeding.isEmpty()) {
+                            final Cause.Builder builder = Cause.source(
+                                    EntitySpawnCause.builder()
+                                            .entity(tickingEntity)
+                                            .type(InternalSpawnTypes.BREEDING)
+                                            .build()
+                            );
+                            if (tickingEntity instanceof EntityAnimal) {
+                                final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getPlayerInLove();
+                                if (playerInLove != null) {
+                                    builder.named(NamedCause.of("Player", playerInLove));
+                                }
+                            }
+                            SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), breeding, causeTracker.getWorld());
+                            if (!SpongeImpl.postEvent(event)) {
+                                for (Entity entity : event.getEntities()) {
+                                    TrackingUtil.associateEntityCreator(phaseContext, entity, causeTracker.getMinecraftWorld());
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                }
+                            }
+                        }
+                        if (!projectile.isEmpty()) {
+
+                        }
+
                         final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                                 .entity(tickingEntity)
                                 .type(InternalSpawnTypes.PASSIVE)
                                 .build());
-                        notifier.ifPresent(user -> builder.named(NamedCause.notifier(user)));
-                        creator.ifPresent(user -> builder.named(NamedCause.owner(user)));
-                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, causeTracker.getWorld());
+                        notifier.ifPresent(builder::notifier);
+                        creator.ifPresent(builder::owner);
+                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), nonExp, causeTracker.getWorld());
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             for (Entity entity : event.getEntities()) {
@@ -420,7 +522,7 @@ public final class TickPhase extends TrackingPhase {
                         final Cause.Builder builder = Cause.source(
                                 EntitySpawnCause.builder()
                                         .entity(tickingEntity)
-                                        .type(InternalSpawnTypes.PLACEMENT)
+                                        .type(InternalSpawnTypes.DROPPED_ITEM)
                                         .build()
                         );
                         notifier.ifPresent(user -> builder.named(NamedCause.notifier(user)));
@@ -607,6 +709,11 @@ public final class TickPhase extends TrackingPhase {
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
             final TileEntity tickingTile = phaseContext.getSource(TileEntity.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
+            final PhaseContext.CaptureBlockSnapshotForTile capturedSnapshot = phaseContext
+                    .firstNamed(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, PhaseContext.CaptureBlockSnapshotForTile.class)
+                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a snapshot for a ticking tile entity!", phaseContext));
+            final Optional<User> notifier = phaseContext.getNotifier();
+            final Optional<User> owner = phaseContext.getOwner();
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> {
                         GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
@@ -614,26 +721,60 @@ public final class TickPhase extends TrackingPhase {
 
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
-                        // TODO the entity spawn causes are not likely valid, need to investigate further.
-                        final Cause cause = Cause.source(BlockSpawnCause.builder()
-                                .block(tickingTile.getLocation().createSnapshot())
+                        // Separate experience from other entities
+                        final List<Entity> experience = new ArrayList<>(entities.size());
+                        final List<Entity> nonExpEntities = new ArrayList<>(entities.size());
+                        for (Entity entity : entities) {
+                            if (entity instanceof EntityXPOrb) {
+                                experience.add(entity);
+                                continue;
+                            }
+                            nonExpEntities.add(entity);
+                        }
+                        if (!experience.isEmpty()) { // Experience needs to have the proper spawn type
+                            final Cause.Builder builder = Cause.builder();
+                            builder.named(NamedCause.source(
+                                    BlockSpawnCause.builder()
+                                            .block(capturedSnapshot.getSnapshot())
+                                            .type(InternalSpawnTypes.EXPERIENCE)
+                                            .build()
+                                    )
+                            );
+                            notifier.ifPresent(builder::notifier);
+                            owner.ifPresent(builder::owner);
+                            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), experience, causeTracker.getWorld());
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                for (Entity entity : event.getEntities()) {
+                                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                }
+                            }
+
+                        } // Otherwise, just go ahead
+                        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
+                                .block(capturedSnapshot.getSnapshot())
                                 .type(InternalSpawnTypes.BLOCK_SPAWNING)
-                                .build())
-                                .build();
+                                .build());
+                        notifier.ifPresent(builder::notifier);
+                        owner.ifPresent(builder::owner);
+                        final Cause cause = builder.build();
                         final SpawnEntityEvent
                                 spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+                                SpongeEventFactory.createSpawnEntityEvent(cause, nonExpEntities, causeTracker.getWorld());
                         SpongeImpl.postEvent(spawnEntityEvent);
-                        for (Entity entity : spawnEntityEvent.getEntities()) {
-                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                        if (!spawnEntityEvent.isCancelled()) {
+                            for (Entity entity : spawnEntityEvent.getEntities()) {
+                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
                         }
                     });
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         final Cause cause = Cause.source(BlockSpawnCause.builder()
-                                .block(tickingTile.getLocation().createSnapshot())
-                                .type(InternalSpawnTypes.PLACEMENT)
+                                .block(capturedSnapshot.getSnapshot())
+                                .type(InternalSpawnTypes.BLOCK_SPAWNING)
                                 .build())
                                 .build();
                         final ArrayList<Entity> capturedEntities = new ArrayList<>();
@@ -644,9 +785,11 @@ public final class TickPhase extends TrackingPhase {
                                 spawnEntityEvent =
                                 SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld());
                         SpongeImpl.postEvent(spawnEntityEvent);
-                        for (Entity entity : spawnEntityEvent.getEntities()) {
-                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                        if (!spawnEntityEvent.isCancelled()) {
+                            for (Entity entity : spawnEntityEvent.getEntities()) {
+                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
                         }
                     });
         }

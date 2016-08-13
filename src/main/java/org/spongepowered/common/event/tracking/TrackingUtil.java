@@ -85,8 +85,10 @@ public final class TrackingUtil {
                 .addEntityCaptures()
                 .addBlockCaptures();
         final IMixinEntity mixinEntity = EntityUtil.toMixin(entityIn);
-        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).ifPresent(notifier -> phaseContext.add(NamedCause.notifier(notifier)));
-        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).ifPresent(creator -> phaseContext.add(NamedCause.owner(creator)));
+        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
+                .ifPresent(phaseContext::notifier);
+        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
+                .ifPresent(phaseContext::owner);
 
         causeTracker.switchToPhase(TickPhase.Tick.ENTITY, phaseContext
                 .complete());
@@ -105,8 +107,10 @@ public final class TrackingUtil {
                 .addEntityCaptures()
                 .addBlockCaptures();
         final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
-        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).ifPresent(notifier -> phaseContext.add(NamedCause.notifier(notifier)));
-        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).ifPresent(creator -> phaseContext.add(NamedCause.owner(creator)));
+        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
+                .ifPresent(phaseContext::notifier);
+        mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
+                .ifPresent(phaseContext::owner);
         causeTracker.switchToPhase(TickPhase.Tick.ENTITY, phaseContext
                 .complete());
         final Timing entityTiming = mixinEntity.getTimingsHandler();
@@ -124,10 +128,20 @@ public final class TrackingUtil {
                 .addEntityCaptures()
                 .addBlockCaptures();
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
-        final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(tileEntity.getPos());
-        mixinChunk.getBlockNotifier(tileEntity.getPos()).ifPresent(notifier -> phaseContext.notifier(notifier));
-        mixinChunk.getBlockOwner(tileEntity.getPos()).ifPresent(owner -> phaseContext.owner(owner));
+        final WorldServer worldServer = causeTracker.getMinecraftWorld();
+        final BlockPos tilePosition = tileEntity.getPos();
+        final IMixinChunk mixinChunk = (IMixinChunk) worldServer.getChunkFromBlockCoords(tilePosition);
+
+        // Add notifier and owner so we don't have to perform lookups during the phases and other processing
+        mixinChunk.getBlockNotifier(tilePosition)
+                .ifPresent(phaseContext::notifier);
+        mixinChunk.getBlockOwner(tilePosition)
+                .ifPresent(phaseContext::owner);
+
         final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tile;
+        // Add the block snapshot of the tile entity for caches to avoid creating multiple snapshots during processing
+        // This is a lazy evaluating snapshot to avoid the overhead of snapshot creation
+        phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, new PhaseContext.CaptureBlockSnapshotForTile(tileEntity, worldServer)));
         causeTracker.switchToPhase(TickPhase.Tick.TILE_ENTITY, phaseContext
                 .complete());
         mixinTileEntity.getTimingsHandler().startTiming();
@@ -243,22 +257,17 @@ public final class TrackingUtil {
     }
 
     public static void associateEntityCreator(PhaseContext context, net.minecraft.entity.Entity minecraftEntity, WorldServer minecraftWorld) {
-        context.getSource(Entity.class).ifPresent(tickingEntity -> {
-            final IMixinEntity mixinEntity = EntityUtil.toMixin(tickingEntity);
-            Stream.<Supplier<Optional<UUID>>>of(
-                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
-                            .map(Identifiable::getUniqueId),
-                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
-                            .map(Identifiable::getUniqueId)
-            )
-                    .map(Supplier::get)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .findFirst()
-                    .ifPresent(uuid -> EntityUtil.toMixin(minecraftEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid));
-            mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
-                    .ifPresent(creator -> EntityUtil.toMixin(minecraftEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.getUniqueId()));
-        });
+        Stream.<Supplier<Optional<UUID>>>of(
+                () -> context.getNotifier()
+                        .map(Identifiable::getUniqueId),
+                () -> context.getNotifier()
+                        .map(Identifiable::getUniqueId)
+        )
+                .map(Supplier::get)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst()
+                .ifPresent(uuid -> EntityUtil.toMixin(minecraftEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid));
 
     }
 
