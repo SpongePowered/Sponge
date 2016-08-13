@@ -424,7 +424,7 @@ public final class WorldManager {
 
     public static void unloadQueuedWorlds() {
         while (unloadQueue.peek() != null) {
-            unloadWorld(unloadQueue.poll(), false, true, true, false);
+            unloadWorld(unloadQueue.poll(), true);
         }
 
         unloadQueue.clear();
@@ -436,7 +436,7 @@ public final class WorldManager {
     }
 
     // TODO Result
-    public static boolean unloadWorld(WorldServer worldServer, boolean checkConfig, boolean save, boolean throwEvent, boolean force) {
+    public static boolean unloadWorld(WorldServer worldServer, boolean checkConfig) {
         checkNotNull(worldServer);
         final MinecraftServer server = SpongeImpl.getServer();
 
@@ -445,8 +445,8 @@ public final class WorldManager {
             return false;
         }
 
-        // Force is only true if we're stopping server. Vanilla sometimes doesn't remove player entities from world first
-        if (!force) {
+        // Vanilla sometimes doesn't remove player entities from world first
+        if (server.isServerRunning()) {
             if (!worldServer.playerEntities.isEmpty()) {
                 return false;
             }
@@ -463,10 +463,7 @@ public final class WorldManager {
         final int dimensionId = mixinWorldServer.getDimensionId();
 
         try {
-            // We do not perform a save when stopping server as that happens before the actual unload call
-            if (save) {
-                saveWorld(worldServer, true);
-            }
+            saveWorld(worldServer, true);
         } catch (MinecraftException e) {
             e.printStackTrace();
         } finally {
@@ -478,12 +475,10 @@ public final class WorldManager {
             reorderWorldsVanillaFirst();
         }
 
-        if (throwEvent) {
-            SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
-                    worldServer));
-        }
+        SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
+                worldServer));
 
-        if (force && unregisterableDimensions.contains(dimensionId)) {
+        if (!server.isServerRunning() && unregisterableDimensions.contains(dimensionId)) {
             unregisterDimension(dimensionId);
         }
 
