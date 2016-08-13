@@ -87,7 +87,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.api.event.item.inventory.CreativeInventoryEvent;
+import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
@@ -450,23 +450,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
             // Sponge start - handle CreativeInventoryEvent
             if (itemValidCheck && itemValidCheck2) {
-                CreativeInventoryEvent.Drop dropEvent = null;
                 if (!ignoresCreative) {
-                    CreativeInventoryEvent clickEvent = SpongeCommonEventFactory.callCreativeClickInventoryEvent(this.playerEntity, packetIn);
+                    ClickInventoryEvent.Creative clickEvent = SpongeCommonEventFactory.callCreativeClickInventoryEvent(this.playerEntity, packetIn);
                     if (clickEvent.isCancelled()) {
-                        // Reset slot on client
-                        if (packetIn.getSlotId() >= 0) {
-                            this.playerEntity.connection.sendPacket(
-                                    new SPacketSetSlot(this.playerEntity.inventoryContainer.windowId, packetIn.getSlotId(),
-                                            this.playerEntity.inventoryContainer.getSlot(packetIn.getSlotId()).getStack()));
-                            this.playerEntity.connection.sendPacket(new SPacketSetSlot(-1, -1, null));
-                        }
-                        return;
-                    }
-
-                    // This must be fired here since we are unable to properly revert a cursor in creative mode due to how mojang handles it
-                    dropEvent = SpongeCommonEventFactory.callCreativeDropInventoryEvent(this.playerEntity, itemstack, packetIn);
-                    if (dropEvent.isCancelled()) {
                         // Reset slot on client
                         if (packetIn.getSlotId() >= 0) {
                             this.playerEntity.connection.sendPacket(
@@ -488,23 +474,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     this.playerEntity.inventoryContainer.setCanCraft(this.playerEntity, true);
                 } else if (clickedOutside && this.itemDropThreshold < 200) {
                     this.itemDropThreshold += 20;
-                    if (dropEvent != null) {
-                        for (org.spongepowered.api.entity.Entity entity : dropEvent.getEntities()) {
-                            if (entity instanceof EntityItem) {
-                                EntityItem entityitem = (EntityItem) entity;
-                                entityitem.setAgeToCreativeDespawnTime();
-                                // Ignore spawn event as we handle this above
-                                this.playerEntity.worldObj.spawnEntityInWorld(entityitem);
-                            }
-                        }
-                    }
-                    // Sponge - handled above
-                    /*EntityItem entityitem = this.playerEntity.dropPlayerItemWithRandomChoice(itemstack, true);
+                    EntityItem entityitem = this.playerEntity.dropItem(itemstack, true);
 
                     if (entityitem != null)
                     {
                         entityitem.setAgeToCreativeDespawnTime();
-                    }*/
+                    }
                 }
             }
             // Sponge end

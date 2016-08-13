@@ -58,6 +58,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -79,7 +80,7 @@ import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
-import org.spongepowered.api.event.item.inventory.CreativeInventoryEvent;
+import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -104,7 +105,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.EntityPhase;
-import org.spongepowered.common.event.tracking.phase.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -116,7 +116,6 @@ import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -144,8 +143,9 @@ public class SpongeCommonEventFactory {
     public static int lastPrimaryPacketTick = 0;
     public static EntityPlayerMP lastAnimationPlayer = null;
 
-    public static boolean callPlayerChangeInventoryPickupEvent(EntityPlayer player, ItemStack itemToPickup, int pickupDelay, UUID creator) {
-        int slotId = ((IMixinInventoryPlayer) player.inventory).getFirstAvailableSlot(itemToPickup);
+    public static boolean callPlayerChangeInventoryPickupEvent(EntityPlayer player, EntityItem itemToPickup, int pickupDelay, UUID creator) {
+        ItemStack itemStack = itemToPickup.getEntityItem();
+        int slotId = ((IMixinInventoryPlayer) player.inventory).getFirstAvailableSlot(itemStack);
         Slot slot = null;
         if (slotId != -1) {
             if (slotId < InventoryPlayer.getHotbarSize()) {
@@ -162,10 +162,10 @@ public class SpongeCommonEventFactory {
             ItemStackSnapshot targetSnapshot = null;
             if (sourceSnapshot != ItemStackSnapshot.NONE) {
                 // combined slot
-                targetSnapshot = org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemToPickup).quantity(itemToPickup.stackSize + slot.getStack().stackSize).build().createSnapshot();
+                targetSnapshot = org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemStack).quantity(itemStack.stackSize + slot.getStack().stackSize).build().createSnapshot();
             } else {
                 // empty slot
-                targetSnapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemToPickup).createSnapshot();
+                targetSnapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot();
             }
 
             ((SpongeItemStackSnapshot) targetSnapshot).setCreator(creator);
@@ -174,7 +174,7 @@ public class SpongeCommonEventFactory {
             ImmutableList<SlotTransaction> transactions =
                     new ImmutableList.Builder<SlotTransaction>().add(slotTransaction).build();
             ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(Cause.of(NamedCause.source(player)),
-                    (Inventory) player.inventoryContainer, transactions);
+                    (Item) itemToPickup, (Inventory) player.inventoryContainer, transactions);
             if (SpongeImpl.postEvent(event)) {
                 return false;
             }
@@ -634,7 +634,7 @@ public class SpongeCommonEventFactory {
     }
 
 
-    public static CreativeInventoryEvent.Click callCreativeClickInventoryEvent(EntityPlayerMP player, CPacketCreativeInventoryAction packetIn) {
+    public static ClickInventoryEvent.Creative callCreativeClickInventoryEvent(EntityPlayerMP player, CPacketCreativeInventoryAction packetIn) {
         Cause cause = Cause.of(NamedCause.owner(player));
         // Creative doesn't inform server of cursor status
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
@@ -647,36 +647,9 @@ public class SpongeCommonEventFactory {
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
             }
         }
-        CreativeInventoryEvent.Click event = SpongeEventFactory.createCreativeInventoryEventClick(cause, cursorTransaction,
+        ClickInventoryEvent.Creative event = SpongeEventFactory.createClickInventoryEventCreative(cause, cursorTransaction,
                 (org.spongepowered.api.item.inventory.Container) player.openContainer,
                 ((IMixinContainer) player.openContainer).getCapturedTransactions());
-        SpongeImpl.postEvent(event);
-        return event;
-    }
-
-    public static CreativeInventoryEvent.Drop callCreativeDropInventoryEvent(EntityPlayerMP player, ItemStack itemstack, CPacketCreativeInventoryAction packetIn) {
-        // Creative doesn't inform server of cursor status
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
-
-        EntityItem entityitem;
-        if (itemstack == null) {
-            // create dummy item
-            entityitem = new EntityItem(player.worldObj, player.posX, player.posY, player.posZ, (net.minecraft.item.ItemStack) ItemStackSnapshot.NONE.createStack());
-        } else {
-            entityitem = player.dropItem(itemstack, true);
-        }
-
-        List<Entity> entityList = new ArrayList<>();
-        entityList.add((Entity) entityitem);
-
-        SpawnCause spawnCause = EntitySpawnCause.builder()
-                .entity((Entity) player)
-                .type(SpawnTypes.DROPPED_ITEM)
-                .build();
-        final Cause cause = Cause.source(spawnCause).owner(player).build();
-        CreativeInventoryEvent.Drop event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, entityList,
-                ContainerUtil.fromNative(player.openContainer), (World) player.worldObj,
-                ContainerUtil.toMixin(player.openContainer).getCapturedTransactions());
         SpongeImpl.postEvent(event);
         return event;
     }

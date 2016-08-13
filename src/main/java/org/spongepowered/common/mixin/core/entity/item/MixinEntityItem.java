@@ -231,7 +231,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
 
     @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
     public void onPlayerItemPickup(EntityPlayer entityIn, CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(entityIn, this.getEntityItem(), this.delayBeforeCanPickup, ((Entity)(Object) this).getCreator().orElse(null))) {
+        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(entityIn, (EntityItem)(Object) this, this.delayBeforeCanPickup, ((Entity)(Object) this).getCreator().orElse(null))) {
             ci.cancel();
         }
     }
