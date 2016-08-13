@@ -86,7 +86,6 @@ import org.spongepowered.common.util.FunctionalUtil;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.persistence.JsonTranslator;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -141,7 +140,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     private UUID uuid;
     private Integer dimensionId;
-    private String dimensionFolder;
     private DimensionType dimensionType = DimensionTypes.OVERWORLD;
     private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
     private boolean isMod, generateBonusChest, isValid = true;
@@ -216,14 +214,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         if (this.worldConfig != null) {
              return false;
         }
-        Path dimensionPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(this.getDimensionFolder());
-        if (dimensionPath.toFile().exists()) {
-            this.dimensionFolder = this.dimensionType.getId().replace(":", "_");
-            dimensionPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(this.getDimensionFolder());
-        }
 
         this.worldConfig =
-                new SpongeConfig<>(SpongeConfig.Type.WORLD, dimensionPath
+                new SpongeConfig<>(SpongeConfig.Type.WORLD, ((IMixinDimensionType) this.dimensionType).getConfigPath()
                                 .resolve(this.levelName)
                                 .resolve("world.conf"),
                         SpongeImpl.ECOSYSTEM_ID);
@@ -281,14 +274,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setWorldTime(long time) {
         this.worldTime = time;
-    }
-
-    private String getDimensionFolder() {
-        if (this.dimensionFolder == null) {
-            this.dimensionFolder = ((IMixinDimensionType) this.dimensionType).getFolderName();
-        }
-
-        return this.dimensionFolder;
     }
 
     @Override
@@ -559,7 +544,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public boolean isEnabled() {
         if (!this.worldConfig.getConfig().isConfigEnabled()) {
-            return SpongeHooks.getActiveConfig(this.getDimensionFolder(), this.getWorldName()).getConfig().getWorld().isWorldEnabled();
+            return SpongeHooks.getActiveConfig(((IMixinDimensionType) this.dimensionType).getConfigPath(), this.getWorldName()).getConfig().getWorld().isWorldEnabled();
         }
         return this.worldConfig.getConfig().getWorld().isWorldEnabled();
     }
@@ -572,7 +557,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public boolean loadOnStartup() {
         if (!this.worldConfig.getConfig().isConfigEnabled()) {
-            return SpongeHooks.getActiveConfig(this.getDimensionFolder(), this.getWorldName()).getConfig().getWorld().loadOnStartup();
+            return SpongeHooks.getActiveConfig(((IMixinDimensionType) this.dimensionType).getConfigPath(), this.getWorldName()).getConfig().getWorld().loadOnStartup();
         }
         return this.worldConfig.getConfig().getWorld().loadOnStartup();
     }
@@ -585,7 +570,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public boolean doesKeepSpawnLoaded() {
         if (!this.worldConfig.getConfig().isConfigEnabled()) {
-            return SpongeHooks.getActiveConfig(this.getDimensionFolder(), this.getWorldName()).getConfig().getWorld().getKeepSpawnLoaded();
+            return SpongeHooks.getActiveConfig(((IMixinDimensionType) this.dimensionType).getConfigPath(), this.getWorldName()).getConfig().getWorld().getKeepSpawnLoaded();
         }
         return this.worldConfig.getConfig().getWorld().getKeepSpawnLoaded();
     }
@@ -597,7 +582,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean doesGenerateSpawnOnLoad() {
-        return SpongeHooks.getActiveConfig(this.getDimensionFolder(), this.getWorldName()).getConfig().getWorld().getGenerateSpawnOnLoad();
+        return SpongeHooks.getActiveConfig(((IMixinDimensionType) this.dimensionType).getConfigPath(), this.getWorldName()).getConfig().getWorld().getGenerateSpawnOnLoad();
     }
 
     @Override

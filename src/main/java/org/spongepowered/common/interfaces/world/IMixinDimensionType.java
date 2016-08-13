@@ -28,11 +28,17 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 
+import java.nio.file.Path;
+
 public interface IMixinDimensionType {
 
     SpongeConfig<DimensionConfig> getDimensionConfig();
 
     Context getContext();
 
-    String getFolderName();
+    String getEnumName();
+
+    String getModId();
+
+    Path getConfigPath();
 }

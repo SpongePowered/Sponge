@@ -457,8 +457,8 @@ public class SpongeHooks {
         return getActiveConfig(world, false);
     }
 
-    public static SpongeConfig<?> getActiveConfig(String dimensionType, String worldFolder) {
-        if (dimensionType == null) {
+    public static SpongeConfig<?> getActiveConfig(Path dimensionPath, String worldFolder) {
+        if (dimensionPath == null) {
             // If no dimension type, go global
             return SpongeImpl.getGlobalConfig();
         }
@@ -473,11 +473,10 @@ public class SpongeHooks {
         }
 
         // No in-memory config objects, lookup from disk.
-        final Path dimFolderPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimensionType);
-        final Path dimConfPath = dimFolderPath.resolve("dimension.conf");
+        final Path dimConfPath = dimensionPath.resolve("dimension.conf");
 
         if (worldFolder != null) {
-            final Path worldConfPath = dimFolderPath.resolve(worldFolder).resolve("world.conf");
+            final Path worldConfPath = dimensionPath.resolve(worldFolder).resolve("world.conf");
 
             final SpongeConfig<WorldConfig> worldConfig = new SpongeConfig<>(SpongeConfig.Type.WORLD, worldConfPath, SpongeImpl.ECOSYSTEM_ID);
             if (worldConfig.getConfig().isConfigEnabled()) {

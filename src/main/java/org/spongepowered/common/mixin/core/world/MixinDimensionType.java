@@ -46,6 +46,8 @@ import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.world.WorldManager;
 
+import java.nio.file.Path;
+
 @Mixin(DimensionType.class)
 @Implements(value = @Interface(iface = org.spongepowered.api.world.DimensionType.class, prefix = "dimensionType$"))
 public abstract class MixinDimensionType implements IMixinDimensionType {
@@ -54,7 +56,9 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     @Shadow public abstract String getName();
 
     private String sanitizedId;
-    private String folderName;
+    private String enumName;
+    private String modId;
+    private Path configPath;
     private SpongeConfig<DimensionConfig> config;
     private volatile Context context;
 
@@ -62,10 +66,11 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     public void onConstruct(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class <? extends WorldProvider > clazzIn,
             CallbackInfo ci) {
         String dimName = enumName.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
-        this.folderName = dimName;
-        this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimName)
-                .resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
-        this.sanitizedId = SpongeImplHooks.getModIdFromClass(clazzIn) + ":" + dimName;
+        this.enumName = dimName;
+        this.modId = SpongeImplHooks.getModIdFromClass(clazzIn);
+        this.configPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(this.modId).resolve(this.enumName);
+        this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
+        this.sanitizedId = modId + ":" + dimName;
         String contextId = this.sanitizedId.replace(":", ".");
         this.context = new Context(Context.DIMENSION_KEY, contextId);
         if (!WorldManager.isDimensionRegistered(idIn)) {
@@ -83,8 +88,18 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     }
 
     @Override
-    public String getFolderName() {
-        return this.folderName;
+    public String getEnumName() {
+        return this.enumName;
+    }
+
+    @Override
+    public String getModId() {
+        return this.modId;
+    }
+
+    @Override
+    public Path getConfigPath() {
+        return this.configPath;
     }
 
     @SuppressWarnings("unchecked")
