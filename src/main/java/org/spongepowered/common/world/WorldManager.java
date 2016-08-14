@@ -229,6 +229,10 @@ public final class WorldManager {
         dimensionPathByDimensionId.put(dimensionId, dimensionDataRoot);
     }
 
+    public static Optional<Path> getDimensionPath(int dimensionId) {
+        return Optional.ofNullable(dimensionPathByDimensionId.get(dimensionId));
+    }
+
     public static Optional<DimensionType> getDimensionType(int dimensionId) {
         return Optional.ofNullable(dimensionTypeByDimensionId.get(dimensionId));
     }
@@ -665,7 +669,8 @@ public final class WorldManager {
             if (dimensionId != 0) {
                 final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((IMixinDimensionType)(Object) dimensionType).getConfigPath(), worldFolderName);
                 if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
-                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder, dimensionId);
+                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder.getFileName().toString(),
+                            dimensionId);
                     continue;
                 }
             }
@@ -934,7 +939,8 @@ public final class WorldManager {
                 org.spongepowered.api.world.DimensionType dimensionType
                         = Sponge.getRegistry().getType(org.spongepowered.api.world.DimensionType.class, dimensionTypeId).orElse(null);
                 if (dimensionType == null) {
-                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Skipping...", worldFolderName);
+                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Skipping...",
+                            worldFolderName, dimensionId);
                     continue;
                 }
 

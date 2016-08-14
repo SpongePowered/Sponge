@@ -216,20 +216,22 @@ public final class EntityUtil {
             return entityPlayerMP;
         } // else { // Sponge - Remove unecessary
 
+        final WorldServer toWorldServer = SpongeImpl.getServer().worldServerForDimension(suggestedDimensionId);
+        int targetDimensionId = ((IMixinWorldServer) toWorldServer).getDimensionId();
+
         // Sponge Start - Rewrite for vanilla mechanics since multiworlds can change world providers and
         // dimension id's
         if (fromWorldServer.provider instanceof WorldProviderSurface) {
-            if (suggestedDimensionId == 1) {
+            if (targetDimensionId == 1) {
                 entityPlayerMP.addStat(AchievementList.THE_END);
-            } else if (suggestedDimensionId == -1) {
+            } else if (targetDimensionId == -1) {
                 entityPlayerMP.addStat(AchievementList.PORTAL);
             }
         }
         // Sponge End
 
-        final WorldServer toWorldServer = SpongeImpl.getServer().worldServerForDimension(suggestedDimensionId);
 
-        ((IMixinPlayerList) entityPlayerMP.mcServer.getPlayerList()).transferPlayerToDimension(entityPlayerMP, suggestedDimensionId, toWorldServer.getDefaultTeleporter());
+        ((IMixinPlayerList) entityPlayerMP.mcServer.getPlayerList()).transferPlayerToDimension(entityPlayerMP, targetDimensionId, toWorldServer.getDefaultTeleporter());
         entityPlayerMP.connection.sendPacket(new SPacketEffect(1032, BlockPos.ORIGIN, 0, false));
 
         // Sponge Start - entityPlayerMP has been moved below to refreshXpHealthAndFood

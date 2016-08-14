@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 @Mixin(ServerWorldEventHandler.class)
-public abstract class MixinWorldManager {
+public abstract class MixinServerWorldEventHandler {
 
     @Shadow @Final private WorldServer theWorldServer;
 

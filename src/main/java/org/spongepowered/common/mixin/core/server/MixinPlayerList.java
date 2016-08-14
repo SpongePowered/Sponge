@@ -204,11 +204,10 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         WorldServer worldServer = this.mcServer.worldServerForDimension(playerIn.dimension);
         BlockPos randomizedSpawnPos = null;
 
-        if (worldServer == null) {
-            SpongeImpl.getLogger().warn("Player [{}] has attempted to login to unloaded dimension [{}]. This is not safe so we have moved them to "
+        if (((IMixinWorldServer) worldServer).getDimensionId() != playerIn.dimension) {
+            SpongeImpl.getLogger().warn("Player [{}] has attempted to login to unloaded world [{}]. This is not safe so we have moved them to "
                     + "the default world's spawn point.", playerIn.getName(), playerIn.dimension);
-            worldServer = WorldManager.getWorldByDimensionId(0).get();
-            randomizedSpawnPos = ((IMixinWorldProvider) worldServer.provider).getRandomizedSpawnPoint();
+            randomizedSpawnPos = VecHelper.toBlockPos(((World) worldServer).getSpawnLocation().getBlockPosition());
         }
 
         // Sponge start - fire login event
