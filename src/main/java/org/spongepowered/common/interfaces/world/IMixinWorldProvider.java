@@ -24,7 +24,11 @@
  */
 package org.spongepowered.common.interfaces.world;
 
+import net.minecraft.entity.player.EntityPlayerMP;
+
 public interface IMixinWorldProvider {
 
     void setGeneratorSettings(String generatorSettings);
+
+    int getRespawnDimension(EntityPlayerMP playerMP);
 }
