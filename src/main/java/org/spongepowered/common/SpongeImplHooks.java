@@ -152,7 +152,7 @@ public final class SpongeImplHooks {
     }
 
     public static String getModIdFromClass(Class<?> clazz) {
-        return "";
+        return clazz.getName().startsWith("net.minecraft.") ? "minecraft" : "unknown";
     }
 
     public static void registerPortalAgentType(@Nullable Teleporter teleporter) {

@@ -786,6 +786,9 @@ public final class WorldManager {
 
         ((IMixinMinecraftServer) SpongeImpl.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
 
+        // Set the worlds on the Minecraft server
+        reorderWorldsVanillaFirst();
+
         SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) worldServer));
 
         if (prepareSpawn) {
@@ -810,7 +813,6 @@ public final class WorldManager {
         ((IMixinMinecraftServer) SpongeImpl.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
     }
 
-    // used by SpongeForge only
     public static void reorderWorldsVanillaFirst() {
         final List<WorldServer> worldServers = new ArrayList<>(worldByDimensionId.values());
         final List<WorldServer> sorted = new LinkedList<>();
