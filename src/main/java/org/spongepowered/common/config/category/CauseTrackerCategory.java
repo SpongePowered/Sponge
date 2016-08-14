@@ -47,15 +47,15 @@ public class CauseTrackerCategory extends ConfigCategory {
     boolean reportWorldTickDifferentWorlds = false;
 
     public boolean isVerbose() {
-        return isVerbose;
+        return this.isVerbose;
     }
 
     public void setVerbose(boolean verbose) {
-        isVerbose = verbose;
+        this.isVerbose = verbose;
     }
 
     public boolean reportWorldTickDifferences() {
-        return reportWorldTickDifferentWorlds;
+        return this.reportWorldTickDifferentWorlds;
     }
 
     public void setReportWorldTickDifferentWorlds(boolean reportWorldTickDifferentWorlds) {

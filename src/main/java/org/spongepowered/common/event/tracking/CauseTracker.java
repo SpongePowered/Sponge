@@ -72,12 +72,12 @@ public final class CauseTracker {
 
     public static final int DEFAULT_QUEUE_SIZE = 16;
 
-    public static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) -> {
-        context.forEach(namedCause -> {
-            printer.add("        - Name: %s", namedCause.getName());
-            printer.addWrapped(100, "          Object: %s", namedCause.getCauseObject());
-        });
-    };
+    public static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) ->
+            context.forEach(namedCause -> {
+                        printer.add("        - Name: %s", namedCause.getName());
+                        printer.addWrapped(100, "          Object: %s", namedCause.getCauseObject());
+                    }
+            );
 
     public static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
         printer.add("  - Phase: %s", data.state);
@@ -117,7 +117,7 @@ public final class CauseTracker {
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
         final IPhaseState currentState = this.stack.peek().state;
         if (this.isVerbose) {
-            if (this.stack.size() > 6 && currentState.isExpectedForReEntrance()) {
+            if (this.stack.size() > 6 && !currentState.isExpectedForReEntrance()) {
                 // This printing is to detect possibilities of a phase not being cleared properly
                 // and resulting in a "runaway" phase state accumulation.
                 printRunawayPhase(state, phaseContext);
@@ -134,12 +134,32 @@ public final class CauseTracker {
     public void completePhase() {
         final PhaseData currentPhaseData = this.stack.peek();
         final IPhaseState state = currentPhaseData.state;
-        if (this.isVerbose && this.stack.size() > 6 && state.isExpectedForReEntrance()) {
+        final boolean isEmpty = this.stack.isEmpty();
+        if (isEmpty) {
+            if (this.isVerbose) {
+                // The random occurrence that we're told to complete a phase
+                // while a world is being changed unknowingly.
+                new PrettyPrinter(60).add("Unexpected ").centre().hr()
+                        .add("Sponge's tracking system is very dependent on knowing when\n"
+                             + "a change to any world takes place, however, we have been told\n"
+                             + "to complete a \"phase\" without having entered any phases.\n"
+                             + "This is an error usually on Sponge's part, so a report\n"
+                             + "is required on the issue tracker on GitHub.").hr()
+                        .add("  %s : %s", "Affected World", this.targetWorld)
+                        .add("StackTrace:")
+                        .add(new Exception())
+                        .trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+
+            }
+            return;
+        }
+        if (this.isVerbose && this.stack.size() > 6 && state != GeneralPhase.Post.UNWINDING && !state.isExpectedForReEntrance()) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumulation.
-            PrettyPrinter printer = new PrettyPrinter(60);
+            final PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Completing Phase").centre().hr();
             printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
+            printer.add("  %s : %s", "Affected World", this.targetWorld);
             printer.addWrapped(60, "%s : %s", "Completing phase", state);
             printer.add(" Phases Remaining:");
             this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
@@ -183,6 +203,7 @@ public final class CauseTracker {
         final PrettyPrinter printer = new PrettyPrinter(40);
         printer.add("Switching Phase").centre().hr();
         printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
+        printer.add("  %s : %s", "Affected World", this.targetWorld);
         printer.add("  %s : %s", "Entering Phase", state.getPhase());
         printer.add("  %s : %s", "Entering State", state);
         CONTEXT_PRINTER.accept(printer, context);
@@ -197,6 +218,7 @@ public final class CauseTracker {
         PrettyPrinter printer = new PrettyPrinter(80);
         printer.add("Switching Phase").centre().hr();
         printer.add("Phase incompatibility detected! Attempting to switch to an invalid phase!");
+        printer.add("  %s : %s", "Affected World", this.targetWorld);
         printer.add("  %s : %s", "Current Phase", currentState.getPhase());
         printer.add("  %s : %s", "Current State", currentState);
         printer.add("  %s : %s", "Entering incompatible Phase", incompatibleState.getPhase());
@@ -213,6 +235,7 @@ public final class CauseTracker {
         printer.add(header).centre().hr()
                 .add("%s %s", subHeader, state)
                 .addWrapped(40, "%s :", "PhaseContext");
+        printer.add("  %s : %s", "Affected World", this.targetWorld);
         CONTEXT_PRINTER.accept(printer, context);
         printer.addWrapped(60, "%s :", "Phases remaining");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
@@ -322,6 +345,21 @@ public final class CauseTracker {
         // Now we need to do some of our own logic to see if we need to capture.
         final PhaseData phaseData = this.getStack().peek();
         final IPhaseState phaseState = phaseData.state;
+        final boolean isComplete = phaseState == GeneralPhase.State.COMPLETE;
+        if (CauseTracker.ENABLED && this.isVerbose && isComplete) {
+            // The random occurrence that we're told to complete a phase
+            // while a world is being changed unknowingly.
+            new PrettyPrinter(60).add("Unexpected World Change Detected").centre().hr()
+                    .add("Sponge's tracking system is very dependent on knowing when\n"
+                         + "a change to any world takes place, however there are chances\n"
+                         + "where Sponge does not know of changes that mods may perform.\n"
+                         + "In cases like this, it is best to report to Sponge to get this\n"
+                         + "change tracked correctly and accurately.").hr()
+                    .add("StackTrace:")
+                    .add(new Exception())
+                    .trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+
+        }
         if (CauseTracker.ENABLED && phaseState.getPhase().requiresBlockCapturing(phaseState)) {
             try {
                 // Default, this means we've captured the block. Keeping with the semantics

@@ -339,4 +339,8 @@ public abstract class TrackingPhase {
     public boolean handlesOwnPhaseCompletion(IPhaseState state) {
         return false;
     }
+
+    public boolean requiresDimensionTransferBetweenWorlds(IPhaseState state) {
+        return false;
+    }
 }

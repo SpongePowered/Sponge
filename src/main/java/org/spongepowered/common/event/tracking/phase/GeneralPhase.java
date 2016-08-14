@@ -454,6 +454,11 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
     @Override
+    public boolean requiresBlockCapturing(IPhaseState currentState) {
+        return currentState != State.COMPLETE;
+    }
+
+    @Override
     public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
             WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (state == Post.UNWINDING) {

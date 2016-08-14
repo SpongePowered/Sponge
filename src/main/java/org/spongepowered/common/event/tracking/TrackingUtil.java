@@ -260,7 +260,7 @@ public final class TrackingUtil {
         Stream.<Supplier<Optional<UUID>>>of(
                 () -> context.getNotifier()
                         .map(Identifiable::getUniqueId),
-                () -> context.getNotifier()
+                () -> context.getOwner()
                         .map(Identifiable::getUniqueId)
         )
                 .map(Supplier::get)

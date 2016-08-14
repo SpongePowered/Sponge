@@ -37,12 +37,12 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 @Mixin(BlockFalling.class)
 public class MixinBlockFalling {
@@ -60,7 +60,7 @@ public class MixinBlockFalling {
                 BlockSnapshot snapshot = ((org.spongepowered.api.world.World) world).createSnapshot(actualPos.getX(), actualPos.getY(), actualPos.getZ());
                 SpawnCause spawnCause = BlockSpawnCause.builder()
                         .block(snapshot)
-                        .type(SpawnTypes.FALLING_BLOCK)
+                        .type(InternalSpawnTypes.FALLING_BLOCK)
                         .build();
                 Transform<org.spongepowered.api.world.World> worldTransform = new Transform<>((org.spongepowered.api.world.World) world, position);
                 ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(spawnCause)),
