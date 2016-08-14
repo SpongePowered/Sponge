@@ -222,13 +222,13 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         final Optional<T> optional = get(containerClass);
         if (optional.isPresent()) {
             return optional;
-        } else { // try harder
-            final Optional<DataProcessor> processorOptional = SpongeDataManager.getInstance().getWildImmutableProcessor(containerClass);
-            if (processorOptional.isPresent()) {
-                if (processorOptional.get().supports(this.entityType)) {
-                    return Optional
-                            .of((T) SpongeDataManager.getInstance().getWildBuilderForImmutable(containerClass).get().create().asImmutable());
-                }
+        }
+        // try harder
+        final Optional<DataProcessor> processorOptional = SpongeDataManager.getInstance().getWildImmutableProcessor(containerClass);
+        if (processorOptional.isPresent()) {
+            if (processorOptional.get().supports(this.entityType)) {
+                return Optional
+                        .of((T) SpongeDataManager.getInstance().getWildBuilderForImmutable(containerClass).get().create().asImmutable());
             }
         }
         return Optional.empty();
@@ -283,7 +283,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<EntitySnapshot> with(ImmutableDataManipulator<?, ?> valueContainer) {
-        return Optional.of(createBuilder().add((ImmutableDataManipulator) valueContainer).build());
+        return Optional.of(createBuilder().add(valueContainer).build());
     }
 
     @SuppressWarnings("rawtypes")
@@ -404,9 +404,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     public Optional<NBTTagCompound> getCompound() {
         if (this.compound == null) {
             return Optional.empty();
-        } else {
-            return Optional.of(this.compound.copy());
         }
+        return Optional.of(this.compound.copy());
     }
 
     @Override
@@ -468,7 +467,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public EntityArchetype createArchetype() {
-        throw new UnsupportedOperationException();
+        EntityArchetype.Builder builder = new SpongeEntityArchetypeBuilder();
+        builder.type(this.entityType);
+        if (this.compound != null) {
+            builder.entityData(NbtTranslator.getInstance().translate(this.compound));
+        }
+        return builder.build();
     }
 
     @Override

@@ -35,7 +35,7 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.BlockPalette;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
@@ -48,7 +48,7 @@ public class ByteArrayMutableBlockBuffer extends AbstractBlockBuffer implements 
     @SuppressWarnings("ConstantConditions")
     private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
 
-    private final Palette palette;
+    private final BlockPalette palette;
     private final byte[] blocks;
 
     public ByteArrayMutableBlockBuffer(Vector3i start, Vector3i size) {
@@ -59,17 +59,17 @@ public class ByteArrayMutableBlockBuffer extends AbstractBlockBuffer implements 
         this(GlobalPalette.instance, blocks, start, size);
     }
 
-    public ByteArrayMutableBlockBuffer(Palette palette, Vector3i start, Vector3i size) {
+    public ByteArrayMutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size) {
         this(palette, new byte[size.getX() * size.getY() * size.getZ()], start, size);
     }
 
-    public ByteArrayMutableBlockBuffer(Palette palette, byte[] blocks, Vector3i start, Vector3i size) {
+    public ByteArrayMutableBlockBuffer(BlockPalette palette, byte[] blocks, Vector3i start, Vector3i size) {
         super(start, size);
         this.blocks = blocks;
         this.palette = palette;
     }
 
-    public Palette getPalette() {
+    public BlockPalette getPalette() {
         return this.palette;
     }
 

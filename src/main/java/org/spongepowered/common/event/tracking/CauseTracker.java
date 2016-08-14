@@ -567,44 +567,4 @@ public final class CauseTracker {
         }
     }
 
-    public boolean setBlockStateWithFlag(BlockPos pos, IBlockState newState, BlockChangeFlag flag) {
-        final net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
-        final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
-        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-        final Block newBlock = newState.getBlock();
-        // Sponge Start - Up to this point, we've copied exactly what Vanilla minecraft does.
-        final IBlockState currentState = chunk.getBlockState(pos);
-
-        if (currentState == newState) {
-            // Some micro optimization in case someone is trying to set the new state to the same as current
-            return false;
-        }
-
-        // Sponge End - continue with vanilla mechanics
-        final IBlockState iblockstate = mixinChunk.setBlockState(pos, newState, currentState, null, flag);
-
-        if (iblockstate == null) {
-            return false;
-        }
-        if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
-            minecraftWorld.theProfiler.startSection("checkLight");
-            minecraftWorld.checkLight(pos);
-            minecraftWorld.theProfiler.endSection();
-        }
-
-        if (chunk.isPopulated()) {
-            minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, flag.updateNeighbors() ? 3 : 2);
-        }
-
-        if (!minecraftWorld.isRemote && flag.updateNeighbors()) {
-            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
-
-            if (newState.hasComparatorInputOverride()) {
-                minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
-            }
-        }
-
-        return true;
-    }
-
 }

@@ -144,7 +144,6 @@ public class SpongeGameRegistry implements GameRegistry {
         registerModulePhase();
         SpongeVillagerRegistry.registerVanillaTrades();
         DataRegistrar.setupSerialization(SpongeImpl.getGame());
-        DataSerializers.registerSerializers(SpongeImpl.getGame().getDataManager());
     }
 
 

@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.util.persistence.data;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 
 import net.minecraft.nbt.NBTTagCompound;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.api.data.DataManager;
 
 import java.util.Optional;
 
@@ -46,21 +46,21 @@ public class NBTTranslationTest {
         DataManager service = Mockito.mock(DataManager.class);
         DataBuilder<FakeSerializable> builder = new FakeBuilder();
         Mockito.stub(service.getBuilder(FakeSerializable.class)).toReturn(Optional.of(builder));
-        DataContainer container = new MemoryDataContainer();
+        DataContainer container = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
         container.set(DataQuery.of("foo"), "bar");
         FakeSerializable temp = new FakeSerializable("bar", 7, 10.0D, "nested");
         container.set(DataQuery.of("myFake"), temp);
         NBTTagCompound compound = NbtTranslator.getInstance().translateData(container);
         DataView translatedContainer = NbtTranslator.getInstance().translateFrom(compound);
-        assertTrue(container.equals(translatedContainer));
+        assertEquals(container, translatedContainer);
     }
 
     @Test
     public void testDotContainerKeys() {
-        final DataContainer container = new MemoryDataContainer().set(DataQuery.of("my.key.to.data"), 1);
+        final DataContainer container = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED).set(DataQuery.of("my.key.to.data"), 1);
         NBTTagCompound compound = NbtTranslator.getInstance().translateData(container);
         DataView translatedContainer = NbtTranslator.getInstance().translateFrom(compound);
-        assertTrue(container.equals(translatedContainer));
+        assertEquals(container, translatedContainer);
     }
 
 }

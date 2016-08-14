@@ -28,27 +28,33 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.schematic.PaletteType;
-import org.spongepowered.api.world.schematic.PaletteTypes;
+import org.spongepowered.api.world.schematic.BlockPalette;
+import org.spongepowered.api.world.schematic.BlockPaletteType;
+import org.spongepowered.api.world.schematic.BlockPaletteTypes;
 
 import java.util.Collection;
 import java.util.Optional;
 
-public class GlobalPalette implements Palette {
+public class GlobalPalette implements BlockPalette {
 
     public static GlobalPalette instance = new GlobalPalette();
 
     private final int length;
 
     private GlobalPalette() {
-        // TOOD this length is incorrect
-        this.length = Sponge.getRegistry().getAllOf(BlockState.class).size();
+        int highest = 0;
+        for (BlockState state : Sponge.getRegistry().getAllOf(BlockState.class)) {
+            int id = Block.BLOCK_STATE_IDS.get((IBlockState) state);
+            if (id > highest) {
+                highest = id;
+            }
+        }
+        this.length = highest;
     }
 
     @Override
-    public PaletteType getType() {
-        return PaletteTypes.GLOBAL;
+    public BlockPaletteType getType() {
+        return BlockPaletteTypes.GLOBAL;
     }
 
     @Override

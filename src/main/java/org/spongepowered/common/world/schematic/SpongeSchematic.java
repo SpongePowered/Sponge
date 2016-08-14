@@ -24,12 +24,10 @@
  */
 package org.spongepowered.common.world.schematic;
 
-import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
@@ -42,20 +40,18 @@ public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic 
 
     private DataView metadata;
 
-    public SpongeSchematic(SpongeArchetypeVolume volume,
-            DataView metadata) {
-        super(volume.getBacking(), volume.getTileEntityArchetypes(), volume.getEntityArchetypes());
+    public SpongeSchematic(SpongeArchetypeVolume volume, DataView metadata) {
+        super(volume.getBacking(), volume.getTileEntityArchetypes());
         this.metadata = metadata;
     }
 
-    public SpongeSchematic(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles, Map<Vector3f, EntityArchetype> entities) {
-        super(backing, tiles, entities);
+    public SpongeSchematic(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles) {
+        super(backing, tiles);
         this.metadata = new MemoryDataContainer();
     }
 
-    public SpongeSchematic(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles, Map<Vector3f, EntityArchetype> entities,
-            DataView metadata) {
-        super(backing, tiles, entities);
+    public SpongeSchematic(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles, DataView metadata) {
+        super(backing, tiles);
         this.metadata = metadata;
     }
 

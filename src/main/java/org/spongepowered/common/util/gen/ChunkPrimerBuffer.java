@@ -38,7 +38,7 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.BlockPalette;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
@@ -68,7 +68,7 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     }
 
     @Override
-    public Palette getPalette() {
+    public BlockPalette getPalette() {
         return GlobalPalette.instance;
     }
 

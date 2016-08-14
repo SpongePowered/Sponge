@@ -566,7 +566,7 @@ public final class DataSerializers {
 
             @Override
             public String getId() {
-                return "sponge:complex_d";
+                return "sponge:complexd";
             }
 
             @Override
@@ -599,7 +599,7 @@ public final class DataSerializers {
 
             @Override
             public String getId() {
-                return "sponge:complex_f";
+                return "sponge:complexf";
             }
 
             @Override
@@ -636,7 +636,7 @@ public final class DataSerializers {
 
             @Override
             public String getId() {
-                return "sponge:quaternion_d";
+                return "sponge:quaterniond";
             }
 
             @Override
@@ -673,7 +673,7 @@ public final class DataSerializers {
 
             @Override
             public String getId() {
-                return "sponge:quaternion_f";
+                return "sponge:quaternionf";
             }
 
             @Override
@@ -899,7 +899,7 @@ public final class DataSerializers {
 
             @Override
             public String getId() {
-                return "sponge:zone_date_time";
+                return "sponge:zoned_date_time";
             }
 
             @Override
@@ -964,7 +964,7 @@ public final class DataSerializers {
 
             @Override
             public String getId() {
-                return "sponge:java_instant";
+                return "sponge:instant";
             }
 
             @Override
@@ -1003,6 +1003,7 @@ public final class DataSerializers {
         dataManager.registerTranslator(LocalDate.class, LOCAL_DATE_DATA_SERIALIZER);
         dataManager.registerTranslator(LocalDateTime.class, LOCAL_DATE_TIME_DATA_SERIALIZER);
         dataManager.registerTranslator(ZonedDateTime.class, ZONED_DATE_TIME_DATA_SERIALIZER);
+        dataManager.registerTranslator(Instant.class, INSTANT_DATA_SERIALIZER);
     }
 
 }

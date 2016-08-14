@@ -24,12 +24,10 @@
  */
 package org.spongepowered.common.world.schematic;
 
-import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -41,7 +39,7 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.BlockPalette;
 import org.spongepowered.common.util.gen.AbstractBlockBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 
@@ -52,17 +50,15 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
 
     private final MutableBlockVolume backing;
     private final Map<Vector3i, TileEntityArchetype> tiles;
-    private final Map<Vector3f, EntityArchetype> entities;
 
-    public SpongeArchetypeVolume(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles, Map<Vector3f, EntityArchetype> entities) {
+    public SpongeArchetypeVolume(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles) {
         super(backing.getBlockMin(), backing.getBlockSize());
         this.backing = backing;
         this.tiles = ImmutableMap.copyOf(tiles);
-        this.entities = ImmutableMap.copyOf(entities);
     }
 
     @Override
-    public Palette getPalette() {
+    public BlockPalette getPalette() {
         return ((AbstractBlockBuffer) this.backing).getPalette();
     }
 
@@ -75,12 +71,6 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
     public Map<Vector3i, TileEntityArchetype> getTileEntityArchetypes() {
         return this.tiles;
     }
-
-    @Override
-    public Map<Vector3f, EntityArchetype> getEntityArchetypes() {
-        return this.entities;
-    }
-
     @Override
     public MutableBlockVolumeWorker<? extends ArchetypeVolume> getBlockWorker(Cause cause) {
         return new SpongeMutableBlockVolumeWorker<>(this, cause);
@@ -96,7 +86,6 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
             TileEntityArchetype archetype = this.tiles.get(pos);
             archetype.apply(location.add(pos), cause);
         }
-        // TODO apply entities
     }
 
     @Override

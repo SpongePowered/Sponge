@@ -30,8 +30,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.world.schematic.PaletteType;
-import org.spongepowered.api.world.schematic.PaletteTypes;
+import org.spongepowered.api.world.schematic.BlockPaletteType;
+import org.spongepowered.api.world.schematic.BlockPaletteTypes;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.world.schematic.BimapPalette;
 import org.spongepowered.common.world.schematic.GlobalPalette;
@@ -42,12 +42,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<PaletteType> {
+public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<BlockPaletteType> {
 
-    @RegisterCatalog(PaletteTypes.class) private final Map<String, PaletteType> paletteMappings = Maps.newHashMap();
+    @RegisterCatalog(BlockPaletteTypes.class) private final Map<String, BlockPaletteType> paletteMappings = Maps.newHashMap();
 
     @Override
-    public void registerAdditionalCatalog(PaletteType extraCatalog) {
+    public void registerAdditionalCatalog(BlockPaletteType extraCatalog) {
         checkNotNull(extraCatalog);
         String id = extraCatalog.getId();
         checkArgument(id.indexOf(' ') == -1, "Palette Type ID " + id + " may not contain a space");
@@ -55,12 +55,12 @@ public class PaletteTypeRegistryModule implements SpongeAdditionalCatalogRegistr
     }
 
     @Override
-    public Optional<PaletteType> getById(String id) {
+    public Optional<BlockPaletteType> getById(String id) {
         return Optional.ofNullable(this.paletteMappings.get(id));
     }
 
     @Override
-    public Collection<PaletteType> getAll() {
+    public Collection<BlockPaletteType> getAll() {
         return ImmutableList.copyOf(this.paletteMappings.values());
     }
 

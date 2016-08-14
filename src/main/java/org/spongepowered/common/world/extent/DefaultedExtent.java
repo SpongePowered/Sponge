@@ -25,13 +25,11 @@
 package org.spongepowered.common.world.extent;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.util.DiscreteTransform3;
@@ -158,6 +156,10 @@ public interface DefaultedExtent extends Extent {
 
     @Override
     default ArchetypeVolume createArchetypeVolume(Vector3i min, Vector3i max, Vector3i origin) {
+        Vector3i tmin = min.min(max);
+        Vector3i tmax = max.max(min);
+        min = tmin;
+        max = tmax;
         Extent area = getExtentView(min, max);
         BimapPalette palette = new BimapPalette();
         area.getBlockWorker(SpongeImpl.getImplementationCause()).iterate((v, x, y, z) -> {
@@ -175,8 +177,6 @@ public interface DefaultedExtent extends Extent {
             backing = new IntArrayMutableBlockBuffer(palette, min.sub(origin), max.sub(min).add(1, 1, 1));
         }
         Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
-        Map<Vector3f, EntityArchetype> entities = Maps.newHashMap();
-        // TODO populate these maps
         area.getBlockWorker(SpongeImpl.getImplementationCause()).iterate((extent, x, y, z) -> {
             BlockState state = extent.getBlock(x, y, z);
             backing.setBlock(x - ox, y - oy, z - oz, state, SpongeImpl.getImplementationCause());
@@ -185,8 +185,7 @@ public interface DefaultedExtent extends Extent {
                 tiles.put(new Vector3i(x - ox, y - oy, z - oz), tile.get().createArchetype());
             }
         });
-        SpongeArchetypeVolume volume = new SpongeArchetypeVolume(backing, tiles, entities);
-        // TODO create entity archetypes
+        SpongeArchetypeVolume volume = new SpongeArchetypeVolume(backing, tiles);
         return volume;
     }
 

@@ -24,25 +24,29 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
+import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.schematic.PaletteTypes;
+import org.spongepowered.api.world.schematic.BlockPalette;
+import org.spongepowered.api.world.schematic.BlockPaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.util.gen.ByteArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.IntArrayMutableBlockBuffer;
@@ -51,6 +55,7 @@ import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.SpongeSchematic;
 
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -107,10 +112,10 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         if (offset == null) {
             offset = new int[3];
         }
-        if (offset.length < 3) {
+        if (offset.length != 3) {
             throw new InvalidDataException("Schematic offset was not of length 3");
         }
-        Palette palette;
+        BlockPalette palette;
         Optional<DataView> paletteData = view.getView(DataQueries.Schematic.PALETTE);
         int palette_max = view.getInt(DataQueries.Schematic.PALETTE_MAX).orElse(0xFFFF);
         if (paletteData.isPresent()) {
@@ -166,16 +171,31 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             index++;
         }
         Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
-        Map<Vector3f, EntityArchetype> entities = Maps.newHashMap();
-        // TODO tile entities and entities
+        List<DataView> tiledata = view.getViewList(DataQueries.Schematic.TILEENTITY_DATA).orElse(null);
+        if (tiledata != null) {
+            for (DataView tile : tiledata) {
+                int[] pos = (int[]) tile.get(DataQueries.Schematic.TILEENTITY_POS).get();
+                if (offset.length != 3) {
+                    throw new InvalidDataException("Schematic tileentity pos was not of length 3");
+                }
+                TileEntityType type = TileEntityTypeRegistryModule.getInstance()
+                        .getForClass(TileEntity.nameToClassMap.get(tile.getString(DataQuery.of("id")).get()));
+                TileEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
+                        .state(buffer.getBlock(pos[0] - offset[0], pos[1] - offset[1], pos[2] - offset[2]))
+                        .tileData(tile)
+                        .tile(type)
+                        .build();
+                tiles.put(new Vector3i(pos[0] - offset[0], pos[1] - offset[1], pos[2] - offset[2]), archetype);
+            }
+        }
 
-        Schematic schematic = new SpongeSchematic(buffer, tiles, entities, metadata);
+        Schematic schematic = new SpongeSchematic(buffer, tiles, metadata);
         return schematic;
     }
 
     @Override
     public DataContainer translate(Schematic schematic) throws InvalidDataException {
-        DataContainer data = new NonCloningDataContainer();
+        DataContainer data = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
         final int xMin = schematic.getBlockMin().getX();
         final int yMin = schematic.getBlockMin().getY();
         final int zMin = schematic.getBlockMin().getZ();
@@ -198,7 +218,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         int[] offset = new int[] {-xMin, -yMin, -zMin};
         data.set(DataQueries.Schematic.OFFSET, offset);
 
-        Palette palette = schematic.getPalette();
+        BlockPalette palette = schematic.getPalette();
         ByteArrayOutputStream buffer = new ByteArrayOutputStream(width * height * length);
 
         for (int y = 0; y < height; y++) {
@@ -221,7 +241,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
 
         data.set(DataQueries.Schematic.BLOCK_DATA, buffer.toByteArray());
 
-        if (palette.getType() == PaletteTypes.LOCAL) {
+        if (palette.getType() == BlockPaletteTypes.LOCAL) {
             DataQuery paletteQuery = DataQueries.Schematic.PALETTE;
             for (BlockState state : palette.getEntries()) {
                 // getOrAssign to skip the optional, it will never assign
@@ -229,7 +249,19 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             }
             data.set(DataQueries.Schematic.PALETTE_MAX, palette.getHighestId());
         }
-        // TODO tile entities and entities
+        List<DataView> tileEntities = Lists.newArrayList();
+        for (Map.Entry<Vector3i, TileEntityArchetype> entry : schematic.getTileEntityArchetypes().entrySet()) {
+            Vector3i pos = entry.getKey();
+            DataContainer tiledata = entry.getValue().getTileData();
+            int[] apos = new int[]{pos.getX() - xMin, pos.getY() - yMin, pos.getZ() - zMin};
+            tiledata.set(DataQueries.Schematic.TILEENTITY_POS, apos);
+            if(!tiledata.contains(DataQueries.CONTENT_VERSION)) {
+                // Set a default content version of 1
+                tiledata.set(DataQueries.CONTENT_VERSION, 1);
+            }
+            tileEntities.add(tiledata);
+        }
+        data.set(DataQueries.Schematic.TILEENTITY_DATA, tileEntities);
 
         return data;
     }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.block;
 
+import com.google.common.base.Objects;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -138,5 +139,10 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
         builder.tileData = NbtTranslator.getInstance().translate(this.data);
         builder.blockState = this.blockState;
         return builder.build();
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this).add("type", this.type).add("state", this.blockState).add("data", this.data).toString();
     }
 }

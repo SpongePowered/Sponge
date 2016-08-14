@@ -1,25 +1,43 @@
 /*
- * Copyright (c) 2015-2016 VoxelBox <http://engine.thevoxelbox.com>.
- * All Rights Reserved.
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package org.spongepowered.common.world.schematic;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.world.extent.ArchetypeVolume;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.schematic.PaletteType;
-import org.spongepowered.api.world.schematic.PaletteTypes;
+import org.spongepowered.api.world.schematic.BlockPalette;
+import org.spongepowered.api.world.schematic.BlockPaletteType;
+import org.spongepowered.api.world.schematic.BlockPaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.schematic.Schematic.Builder;
 import org.spongepowered.common.SpongeImpl;
@@ -33,10 +51,8 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
 
     private ArchetypeVolume volume;
     private Extent view;
-    private Palette palette;
-    private PaletteType type = PaletteTypes.LOCAL;
-    private Vector3i origin;
-    private boolean storeEntities;
+    private BlockPalette palette;
+    private BlockPaletteType type = BlockPaletteTypes.LOCAL;
     private DataView metadata;
     private Map<String, Object> metaValues = Maps.newHashMap();
 
@@ -53,28 +69,16 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
     }
 
     @Override
-    public Builder palette(Palette palette) {
+    public Builder palette(BlockPalette palette) {
         this.palette = palette;
         this.type = palette.getType();
         return this;
     }
 
     @Override
-    public Builder paletteType(PaletteType type) {
+    public Builder paletteType(BlockPaletteType type) {
         this.type = type;
         this.palette = null;
-        return this;
-    }
-
-    @Override
-    public Builder origin(Vector3i origin) {
-        this.origin = origin;
-        return this;
-    }
-
-    @Override
-    public Builder storeEntities(boolean state) {
-        this.storeEntities = state;
         return this;
     }
 
@@ -92,14 +96,24 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
 
     @Override
     public Builder from(Schematic value) {
-        // TODO Auto-generated method stub
-        return null;
+        this.volume = value;
+        this.view = null;
+        this.palette = value.getPalette();
+        this.type = this.palette.getType();
+        this.metadata = value.getMetadata();
+        this.metaValues.clear();
+        return this;
     }
 
     @Override
     public Builder reset() {
-        // TODO Auto-generated method stub
-        return null;
+        this.volume = null;
+        this.view = null;
+        this.palette = null;
+        this.type = BlockPaletteTypes.LOCAL;
+        this.metadata = null;
+        this.metaValues.clear();
+        return this;
     }
 
     @Override
@@ -118,7 +132,6 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             size = this.view.getBlockSize();
         }
         Map<Vector3i, TileEntityArchetype> tiles = this.volume.getTileEntityArchetypes();
-        Map<Vector3f, EntityArchetype> entities = this.volume.getEntityArchetypes();
         if (this.metadata == null) {
             this.metadata = new MemoryDataContainer();
         }
@@ -137,7 +150,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             this.view.getBlockWorker(SpongeImpl.getImplementationCause()).iterate((v, x, y, z) -> {
                 volume.setBlock(x, y, z, v.getBlock(x, y, z), SpongeImpl.getImplementationCause());
             });
-            return new SpongeSchematic(volume, tiles, entities, this.metadata);
+            return new SpongeSchematic(volume, tiles, this.metadata);
         }
         return new SpongeSchematic((SpongeArchetypeVolume) this.volume, this.metadata);
     }

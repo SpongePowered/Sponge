@@ -32,7 +32,9 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.ConfigurateTranslator;
+import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.data.persistence.LegacySchematicTranslator;
 import org.spongepowered.common.data.persistence.SchematicTranslator;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
@@ -83,7 +85,7 @@ public class DataTranslatorRegistryModule implements AlternateCatalogRegistryMod
 
     @Override
     public void registerDefaults() {
-        // Others are registered in DataSerializers#registerSerializers
+        DataSerializers.registerSerializers(SpongeImpl.getGame().getDataManager());
         registerAdditionalCatalog(LegacySchematicTranslator.get());
         registerAdditionalCatalog(SchematicTranslator.get());
         registerAdditionalCatalog(ConfigurateTranslator.instance());

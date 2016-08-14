@@ -292,5 +292,4 @@ public final class BlockPhase extends TrackingPhase {
         return state == State.RESTORING_BLOCKS && (updateFlag & 1) == 0;
     }
 
-
 }

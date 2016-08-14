@@ -27,15 +27,15 @@ package org.spongepowered.common.world.schematic;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.schematic.PaletteType;
-import org.spongepowered.api.world.schematic.PaletteTypes;
+import org.spongepowered.api.world.schematic.BlockPalette;
+import org.spongepowered.api.world.schematic.BlockPaletteType;
+import org.spongepowered.api.world.schematic.BlockPaletteTypes;
 
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Optional;
 
-public class BimapPalette implements Palette {
+public class BimapPalette implements BlockPalette {
 
     private static final int DEFAULT_ALLOCATION_SIZE = 64;
 
@@ -55,8 +55,8 @@ public class BimapPalette implements Palette {
     }
 
     @Override
-    public PaletteType getType() {
-        return PaletteTypes.LOCAL;
+    public BlockPaletteType getType() {
+        return BlockPaletteTypes.LOCAL;
     }
 
     @Override

@@ -30,22 +30,18 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.entity.EntityTypes.UNKNOWN;
 
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
-import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
@@ -56,12 +52,10 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArchetype> implements EntityArchetype.Builder {
 
-    EntityType entityType = UNKNOWN; // -These two fields can never be null
-    DataContainer entityData;                    // This can be empty, but cannot be null.
+    EntityType entityType = UNKNOWN;
+    DataContainer entityData;
 
     public SpongeEntityArchetypeBuilder() {
         super(EntityArchetype.class, DataVersions.EntityArchetype.BASE_VERSION);
@@ -70,7 +64,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     @Override
     public EntityArchetype.Builder reset() {
         this.entityType = UNKNOWN;
-        this.entityData = new MemoryDataContainer();
+        this.entityData = null;
         return this;
     }
 
@@ -96,8 +90,6 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
             builder.entityData(container.getView(DataQueries.EntityArchetype.ENTITY_DATA)
                     .orElseThrow(() -> new InvalidDataException("No DataView found for the TileEntity data tag!"))
             );
-        } else {
-            builder.entityData(new MemoryDataContainer());
         }
         return Optional.of(builder.build());
     }
@@ -107,7 +99,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         checkNotNull(type, "EntityType cannot be null!");
         checkArgument(type != UNKNOWN, "EntityType cannot be set to UNKNOWN!");
         if (this.entityType != type) {
-            this.entityData = new MemoryDataContainer();
+            this.entityData = null;
         }
         this.entityType = type;
         return this;
@@ -169,9 +161,14 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
 
     @Override
     public EntityArchetype build() {
-        checkState(!this.entityData.isEmpty());
         checkNotNull(this.entityType);
         checkState(this.entityType != UNKNOWN);
+        if(this.entityData == null) {
+            this.entityData = new MemoryDataContainer();
+        } else {
+            this.entityData.remove(DataQuery.of("Pos"));
+            this.entityData.remove(DataQuery.of("UUID"));
+        }
         return new SpongeEntityArchetype(this);
     }
 }

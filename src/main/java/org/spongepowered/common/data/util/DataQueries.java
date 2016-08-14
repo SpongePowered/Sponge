@@ -35,6 +35,7 @@ public final class DataQueries {
     public static final DataQuery BANNER_COLOR = of("DyeColor");
 
     // TileEntity
+    public static final DataQuery CONTENT_VERSION = of("ContentVersion");
     public static final DataQuery TILE_TYPE = of("tileType");
     public static final DataQuery WORLD = of("world");
     public static final DataQuery X_POS = of("x");
@@ -219,6 +220,9 @@ public final class DataQueries {
         public static final DataQuery PALETTE = of("Palette");
         public static final DataQuery PALETTE_MAX = of("PaletteMax");
         public static final DataQuery BLOCK_DATA = of("BlockData");
+        
+        public static final DataQuery TILEENTITY_DATA = of("TileEntities");
+        public static final DataQuery TILEENTITY_POS = of("Pos");
 
         public static final DataQuery LEGACY_MATERIALS = of("Materials");
         

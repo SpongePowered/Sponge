@@ -44,6 +44,7 @@ import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.GoalType;
@@ -108,7 +109,7 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.gen.populator.*;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
 import org.spongepowered.api.world.gen.type.MushroomType;
-import org.spongepowered.api.world.schematic.PaletteType;
+import org.spongepowered.api.world.schematic.BlockPaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.SpongeImpl;
@@ -120,6 +121,7 @@ import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.data.builder.data.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
+import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.ai.*;
 import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
@@ -292,6 +294,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(EntityTeleportCause.Builder.class, SpongeEntityTeleportCauseBuilder::new)
             .registerBuilderSupplier(PortalTeleportCause.Builder.class, SpongePortalTeleportCauseBuilder::new)
             .registerBuilderSupplier(ServerBossBar.Builder.class, ServerBossBarBuilder::new)
+            .registerBuilderSupplier(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
             .registerBuilderSupplier(TileEntityArchetype.Builder.class, SpongeTileEntityArchetypeBuilder::new)
             .registerBuilderSupplier(Schematic.Builder.class, SpongeSchematicBuilder::new)
         ;
@@ -397,7 +400,7 @@ public final class CommonModuleRegistry {
             .registerModule(PortalAgentType.class, PortalAgentRegistryModule.getInstance())
             .registerModule(HandType.class, HandTypeRegistryModule.getInstance())
             .registerModule(PickupRule.class, new PickupRuleRegistryModule())
-            .registerModule(PaletteType.class, new PaletteTypeRegistryModule())
+            .registerModule(BlockPaletteType.class, new PaletteTypeRegistryModule())
             ;
     }
 

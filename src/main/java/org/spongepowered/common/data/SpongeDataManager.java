@@ -342,7 +342,7 @@ public final class SpongeDataManager implements DataManager {
         checkNotNull(translator, "DataTranslator for : " + objectClass + " cannot be null!");
         checkArgument(translator.getToken().isAssignableFrom(objectClass), "DataTranslator is not compatible with the target object class: " + objectClass);
         if (!this.dataSerializerMap.containsKey(checkNotNull(objectClass, "Target class cannot be null!"))) {
-            this.dataSerializerMap.put(objectClass, checkNotNull(translator, "DataTranslator for " + objectClass + " cannot be null!"));
+            this.dataSerializerMap.put(objectClass, translator);
             DataTranslatorRegistryModule.getInstance().registerAdditionalCatalog(translator);
         } else {
             throw new IllegalStateException("Already registered the DataTranslator for " + objectClass.getCanonicalName());

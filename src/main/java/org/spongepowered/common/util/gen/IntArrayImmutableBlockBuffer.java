@@ -36,7 +36,7 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
-import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.BlockPalette;
 import org.spongepowered.common.world.extent.ImmutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBlockViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
@@ -62,7 +62,7 @@ public class IntArrayImmutableBlockBuffer extends AbstractBlockBuffer implements
     }
 
     @Override
-    public Palette getPalette() {
+    public BlockPalette getPalette() {
         return GlobalPalette.instance;
     }
 

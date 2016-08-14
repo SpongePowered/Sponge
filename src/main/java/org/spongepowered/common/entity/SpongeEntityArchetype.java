@@ -28,7 +28,6 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.DataContainer;
@@ -55,16 +54,13 @@ import java.util.Arrays;
 
 public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot> implements EntityArchetype {
 
-    final EntityType entityType;
-
     SpongeEntityArchetype(SpongeEntityArchetypeBuilder builder) {
         super(builder.entityType, NbtTranslator.getInstance().translateData(builder.entityData));
-        this.entityType = builder.entityType;
     }
 
     @Override
     public EntityType getType() {
-        return this.entityType;
+        return this.type;
     }
 
     @Override
@@ -74,7 +70,6 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @Override
     public boolean apply(Location<World> location, Cause cause) {
-        final NBTTagCompound data = (NBTTagCompound) this.data.copy();
         final Vector3d position = location.getPosition();
         final double x = position.getX();
         final double y = position.getY();
@@ -83,7 +78,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final World world = location.getExtent();
         final WorldServer worldServer = (WorldServer) world;
 
-        final Entity entity = EntityList.createEntityFromNBT(data, worldServer);
+        final Entity entity = EntityList.createEntityFromNBT(this.data, worldServer);
 
         final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entity);
         final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(spongeEntity), world);
@@ -105,8 +100,8 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     @Override
     public EntitySnapshot toSnapshot(Location<World> location) {
         final SpongeEntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
-        builder.entityType = this.entityType;
-        builder.compound = (NBTTagCompound) this.data.copy();
+        builder.entityType = this.type;
+        builder.compound = this.data.copy();
         builder.worldId = location.getExtent().getUniqueId();
         builder.position = location.getPosition();
         return builder.build();
