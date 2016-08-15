@@ -109,13 +109,17 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         // This will allow us to avoid running event logic for blocks that do nothing such as grass collisions
         // -- blood
 
+        this.hasCollideLogic = true;
+        this.hasCollideWithStateLogic = true;
+        this.requiresLocationCheckForLight = true;
+        this.requiresLocationCheckForOpacity = true;
         // onEntityCollidedWithBlock
         try {
             String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollidedWithBlock" : "func_176199_a";
             Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, Entity.class };
             Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            if (!clazz.equals(Block.class)) {
-                this.hasCollideLogic = true;
+            if (clazz.equals(Block.class)) {
+                this.hasCollideLogic = false;
             }
         } catch (Throwable ex) {
             // ignore
@@ -126,8 +130,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollidedWithBlock" : "func_180634_a";
             Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, IBlockState.class, Entity.class };
             Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            if (!clazz.equals(Block.class)) {
-                this.hasCollideWithStateLogic = true;
+            if (clazz.equals(Block.class)) {
+                this.hasCollideWithStateLogic = false;
             }
         } catch (Throwable ex) {
             // ignore
@@ -137,8 +141,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         try {
             Class<?>[] args = {IBlockState.class, IBlockAccess.class, BlockPos.class};
             Class<?> clazz = this.getClass().getMethod("getLightValue", args).getDeclaringClass();
-            if (!clazz.equals(Block.class)) {
-                this.requiresLocationCheckForLight = true;
+            if (clazz.equals(Block.class)) {
+                this.requiresLocationCheckForLight = false;
             }
         } catch (Throwable throwable) {
             // Ignore
@@ -148,8 +152,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         try {
             Class<?>[] args = {IBlockState.class, IBlockAccess.class, BlockPos.class};
             Class<?> clazz = this.getClass().getMethod("getLightOpacity", args).getDeclaringClass();
-            if (!clazz.equals(Block.class)) {
-                this.requiresLocationCheckForOpacity = true;
+            if (clazz.equals(Block.class)) {
+                this.requiresLocationCheckForOpacity = false;
             }
         } catch (Throwable throwable) {
             // Ignore
