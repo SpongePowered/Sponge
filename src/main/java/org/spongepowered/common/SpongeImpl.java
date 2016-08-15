@@ -52,7 +52,6 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 import javax.annotation.Nullable;
@@ -68,13 +67,15 @@ public final class SpongeImpl {
 
     public static final String API_ID = "spongeapi";
     public static final String API_NAME = firstNonNull(getPackage().getSpecificationTitle(), "SpongeAPI");
-    public static final Optional<String> API_VERSION = Optional.ofNullable(getPackage().getSpecificationVersion());
+    public static final String API_VERSION = firstNonNull(getPackage().getSpecificationVersion(), "dev");
 
     public static final String ECOSYSTEM_ID = "sponge";
     public static final String ECOSYSTEM_NAME = "Sponge";
 
-    public static final Optional<String> IMPLEMENTATION_NAME = Optional.ofNullable(getPackage().getImplementationTitle());
-    public static final Optional<String> IMPLEMENTATION_VERSION =  Optional.ofNullable(getPackage().getImplementationVersion());
+    public static final String IMPLEMENTATION_NAME = firstNonNull(getPackage().getImplementationTitle(), ECOSYSTEM_ID);
+    private static final String IMPLEMENTATION_VERSION_ACTUAL  = firstNonNull(getPackage().getImplementationVersion(), "dev");
+    // Dev time doesn't have variable replacements, just print dev...
+    public static final String IMPLEMENTATION_VERSION = "$version".equals(IMPLEMENTATION_VERSION_ACTUAL) ? "dev" : IMPLEMENTATION_VERSION_ACTUAL;
 
     // TODO: Keep up to date
     public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.10.2", 210);
@@ -86,7 +87,6 @@ public final class SpongeImpl {
     private static SpongeImpl instance;
 
     @Nullable private static SpongeConfig<GlobalConfig> globalConfig;
-
 
     public static final Random random = new Random();
 

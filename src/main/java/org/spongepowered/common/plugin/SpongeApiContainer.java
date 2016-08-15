@@ -49,7 +49,7 @@ public final class SpongeApiContainer extends AbstractPluginContainer {
 
     @Override
     public Optional<String> getVersion() {
-        return SpongeImpl.API_VERSION;
+        return Optional.of(SpongeImpl.API_VERSION);
     }
 
     @Override
@@ -61,5 +61,4 @@ public final class SpongeApiContainer extends AbstractPluginContainer {
     public Optional<Game> getInstance() {
         return Optional.of(SpongeImpl.getGame());
     }
-
 }
