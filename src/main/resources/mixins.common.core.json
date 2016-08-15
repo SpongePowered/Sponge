@@ -170,6 +170,7 @@
         "command.MixinEntitySelectorScore",
         "command.server.MixinCommandSummon",
         "command.server.MixinCommandTeleport",
+        "command.server.MixinCommandTP",
         "entity.MixinArmorEquipable",
         "entity.MixinEntity",
         "entity.MixinEntityAreaEffectCloud",
