@@ -229,6 +229,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
     @Shadow public abstract boolean hasNoGravity();
     @Shadow public abstract void setNoGravity(boolean noGravity);
+    @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
 
 
     // @formatter:on

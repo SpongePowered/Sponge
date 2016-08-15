@@ -25,8 +25,10 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
@@ -43,6 +45,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -52,13 +55,16 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -89,6 +95,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
@@ -160,6 +167,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow @Nullable public abstract EntityLivingBase getAttackingEntity();
     @Shadow protected abstract void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source);
     @Shadow protected abstract boolean canDropLoot();
+    @Shadow public abstract Random getRNG();
 
     @Override
     public Vector3d getHeadRotation() {
@@ -567,6 +575,111 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             return true;
         }
         return false;
+    }
+
+    /**
+     * @author Aaron1011 - August 15, 2016 - An overwrite avoids the need for a local-capture inject and two redirects
+     */
+    // TODO: Investigate mixing into setPositionAndUpdate to catch more teleports
+    @Overwrite
+    public boolean attemptTeleport(double x, double y, double z)
+    {
+        double d0 = this.posX;
+        double d1 = this.posY;
+        double d2 = this.posZ;
+        this.posX = x;
+        this.posY = y;
+        this.posZ = z;
+        boolean flag = false;
+        BlockPos blockpos = new BlockPos((Entity) (Object) this);
+        World world = this.worldObj;
+        Random random = this.getRNG();
+
+        if (world.isBlockLoaded(blockpos))
+        {
+            boolean flag1 = false;
+
+            while (!flag1 && blockpos.getY() > 0)
+            {
+                BlockPos blockpos1 = blockpos.down();
+                IBlockState iblockstate = world.getBlockState(blockpos1);
+
+                if (iblockstate.getMaterial().blocksMovement())
+                {
+                    flag1 = true;
+                }
+                else
+                {
+                    --this.posY;
+                    blockpos = blockpos1;
+                }
+            }
+
+            if (flag1)
+            {
+                // Sponge start
+                Transform<org.spongepowered.api.world.World> fromTransform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
+                Transform<org.spongepowered.api.world.World> toTransform = this.getTransform().setPosition(new Vector3d(this.posX, this.posY, this.posZ));
+
+                MoveEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform, false);
+                if (event.isCancelled()) {
+                    this.posX = d0;
+                    this.posY = d1;
+                    this.posZ = d2;
+                    return false;
+                }
+                Vector3d position = event.getToTransform().getPosition();
+                this.rotationYaw = (float) event.getToTransform().getYaw();
+                this.rotationPitch = (float) event.getToTransform().getPitch();
+                this.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
+                // Sponge end
+
+                if (world.getCollisionBoxes((Entity) (Object) this, this.getEntityBoundingBox()).isEmpty() && !world.containsAnyLiquid(this.getEntityBoundingBox()))
+                {
+                    flag = true;
+                }
+            }
+        }
+
+        if (!flag)
+        {
+            // Sponge start - this is technically a teleport, since it sends packets to players and calls 'updateEntityWithOptionalForce' - even though it doesn't really move the entity at all
+            Transform<org.spongepowered.api.world.World> transform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
+            MoveEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform, false);
+            if (event.isCancelled()) {
+                return false;
+            }
+            Vector3d position = event.getToTransform().getPosition();
+            this.rotationYaw = (float) event.getToTransform().getYaw();
+            this.rotationPitch = (float) event.getToTransform().getPitch();
+            this.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
+            // Sponge end
+            
+            return false;
+        }
+        else
+        {
+            int i = 128;
+
+            for (int j = 0; j < 128; ++j)
+            {
+                double d6 = (double)j / 127.0D;
+                float f = (random.nextFloat() - 0.5F) * 0.2F;
+                float f1 = (random.nextFloat() - 0.5F) * 0.2F;
+                float f2 = (random.nextFloat() - 0.5F) * 0.2F;
+                double d3 = d0 + (this.posX - d0) * d6 + (random.nextDouble() - 0.5D) * (double)this.width * 2.0D;
+                double d4 = d1 + (this.posY - d1) * d6 + random.nextDouble() * (double)this.height;
+                double d5 = d2 + (this.posZ - d2) * d6 + (random.nextDouble() - 0.5D) * (double)this.width * 2.0D;
+                world.spawnParticle(EnumParticleTypes.PORTAL, d3, d4, d5, (double)f, (double)f1, (double)f2, new int[0]);
+            }
+
+            if ((Object) this instanceof EntityCreature)
+            {
+                ((EntityCreature) (Object) this).getNavigator().clearPathEntity();
+            }
+
+            return true;
+        }
     }
 
     @Override
