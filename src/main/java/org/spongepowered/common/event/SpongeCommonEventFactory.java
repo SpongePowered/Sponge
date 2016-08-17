@@ -229,7 +229,12 @@ public class SpongeCommonEventFactory {
         }
 
         Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
-        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(Cause.source(block.get()).build(), ImmutableList.of(location),
+        final Cause.Builder builder = Cause.source(block.get());
+        final Optional<User> notifier = causeTracker.getStack().peek()
+                .context
+                .firstNamed(NamedCause.NOTIFIER, User.class);
+        notifier.ifPresent(user -> builder.named(NamedCause.OWNER, user));
+        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), ImmutableList.of(location),
                 (World) worldIn);
         SpongeImpl.postEvent(event);
         return event.isCancelled();
