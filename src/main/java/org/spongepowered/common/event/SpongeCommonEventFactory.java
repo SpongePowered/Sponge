@@ -233,7 +233,7 @@ public class SpongeCommonEventFactory {
         final Optional<User> notifier = causeTracker.getStack().peek()
                 .context
                 .firstNamed(NamedCause.NOTIFIER, User.class);
-        notifier.ifPresent(user -> builder.named(NamedCause.OWNER, user));
+        notifier.ifPresent(user -> builder.named(NamedCause.NOTIFIER, user));
         ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), ImmutableList.of(location),
                 (World) worldIn);
         SpongeImpl.postEvent(event);
