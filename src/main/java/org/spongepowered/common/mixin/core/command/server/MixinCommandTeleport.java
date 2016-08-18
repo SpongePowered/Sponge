@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.command.server;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
-import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
 import net.minecraft.command.server.CommandTeleport;
@@ -39,15 +38,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.entity.EntityUtil;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -138,7 +131,7 @@ public abstract class MixinCommandTeleport extends CommandBase {
             double x = p_189862_1_.getAmount();
             double y = p_189862_2_.getAmount();
             double z = p_189862_3_.getAmount();
-            MoveEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(player, x, y, z, f, f1);
+            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, x, y, z, f, f1);
             if (event.isCancelled()) {
                 return;
             }
@@ -159,7 +152,7 @@ public abstract class MixinCommandTeleport extends CommandBase {
             double x = p_189862_1_.getResult();
             double y = p_189862_2_.getResult();
             double z = p_189862_3_.getResult();
-            MoveEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(p_189862_0_, x, y, z, f2, f3);
+            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(p_189862_0_, x, y, z, f2, f3);
             if (event.isCancelled()) {
                 return;
             }

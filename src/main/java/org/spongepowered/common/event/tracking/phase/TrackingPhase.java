@@ -43,6 +43,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -280,7 +281,10 @@ public abstract class TrackingPhase {
     public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final WorldServer minecraftWorld = (WorldServer) minecraftEntity.worldObj;
-        phaseState.assignEntityCreator(context, entity);
+        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
+        if (user != null) {
+            entity.setCreator(user.getUniqueId());
+        }
         final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE,
                 Arrays.asList(entity), (World) minecraftWorld);
         SpongeImpl.postEvent(event);

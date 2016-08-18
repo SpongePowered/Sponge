@@ -27,9 +27,7 @@ package org.spongepowered.common.event.spawn;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.common.AbstractEntitySpawnCauseBuilder;
 import org.spongepowered.api.event.cause.entity.spawn.common.AbstractSpawnCauseBuilder;
 import org.spongepowered.api.world.weather.Weather;
 

@@ -57,4 +57,9 @@ public interface IMixinEntityLivingBase {
     void applyArmorDamage(EntityLivingBase entityLivingBase, DamageSource source, DamageEntityEvent entityEvent, DamageModifier modifier);
 
     boolean hookModAttack(EntityLivingBase entityLivingBase, DamageSource source, float amount);
+
+    default boolean properlyOverridesOnDeathForCauseTrackerCompletion() {
+        return false;
+    }
+
 }

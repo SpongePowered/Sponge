@@ -81,8 +81,8 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.function.PacketFunction;
-import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.util.PacketFunction;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -200,7 +200,7 @@ public final class PacketPhase extends TrackingPhase {
                 Iterator<Entity> iterator = capturedEntities.iterator();
                 while (iterator.hasNext()) {
                     Entity currentEntity = iterator.next();
-                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, playerMP.getUniqueID());
+                    currentEntity.setCreator(playerMP.getUniqueID());
                 }
                 final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
                 return SpongeEventFactory.createClickInventoryEventDropFull(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
@@ -235,7 +235,7 @@ public final class PacketPhase extends TrackingPhase {
                 final Iterator<Entity> iterator = capturedEntities.iterator();
                 while (iterator.hasNext()) {
                     final Entity currentEntity = iterator.next();
-                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, playerMP.getUniqueID());
+                    currentEntity.setCreator(playerMP.getUniqueID());
                 }
                 final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
                 return SpongeEventFactory.createClickInventoryEventDropSingle(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
@@ -667,12 +667,6 @@ public final class PacketPhase extends TrackingPhase {
                 spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.NOTIFIER);
             }
 
-            @Override
-            public void assignEntityCreator(PhaseContext context, Entity entity) {
-                final Player player = context.getSource(Player.class)
-                                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a packet, but no player found!", context));
-                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
-            }
         },
         OPEN_INVENTORY,
         REQUEST_RESPAWN,
@@ -767,7 +761,7 @@ public final class PacketPhase extends TrackingPhase {
             IMixinChunk mixinChunk, BlockPos pos) {
         if (!super.populateCauseForNotifyNeighborEvent(state, context, builder, causeTracker, mixinChunk, pos)) {
             final Player player = context.getSource(Player.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Processing a Player PAcket, expecting a player, but had none!", context));
+                    .orElseThrow(TrackingUtil.throwWithContext("Processing a Player PAcket, expecting a player, but had none!", context));
             builder.named(NamedCause.notifier(player));
         }
         return true;
@@ -777,7 +771,7 @@ public final class PacketPhase extends TrackingPhase {
     public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
             WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         final Player player = context.getSource(Player.class)
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be tracking a player, but not!", context));
+                        .orElseThrow(TrackingUtil.throwWithContext("Expected to be tracking a player, but not!", context));
         ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos)).setBlockNotifier(notifyPos, player.getUniqueId());
 
     }

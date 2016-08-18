@@ -24,16 +24,12 @@
  */
 package org.spongepowered.common.mixin.optimization;
 
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.event.tracking.phase.ItemDropData;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.event.tracking.ItemDropData;
 
 import java.util.Collection;
-
-import javax.annotation.Nullable;
 
 @Mixin(value = SpongeImplHooks.class, remap = false)
 public class MixinSpongeImplHooks_Item_Pre_Merge {

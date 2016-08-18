@@ -33,7 +33,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -44,10 +44,8 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.function.BlockFunction;
-import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
-import org.spongepowered.common.event.tracking.phase.util.MutableWrapper;
-import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.MutableWrapper;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -76,12 +74,6 @@ public final class BlockPhase extends TrackingPhase {
         }
 
         @Override
-        public void assignEntityCreator(PhaseContext context, Entity entity) {
-            context.getSource(BlockSnapshot.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Not processing over a block!", context));
-        }
-
-        @Override
         public BlockPhase getPhase() {
             return TrackingPhases.BLOCK;
         }
@@ -107,7 +99,7 @@ public final class BlockPhase extends TrackingPhase {
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
         if (state == State.BLOCK_DECAY) {
             final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Could not find a decaying block snapshot!", phaseContext));
+                    .orElseThrow(TrackingUtil.throwWithContext("Could not find a decaying block snapshot!", phaseContext));
             final Location<World> worldLocation = blockSnapshot.getLocation().get();
             final BlockPos blockPos = ((IMixinLocation) (Object) worldLocation).getBlockPos();
             final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
@@ -116,11 +108,28 @@ public final class BlockPhase extends TrackingPhase {
             final Optional<User> creator = mixinChunk.getBlockOwner(blockPos);
 
             phaseContext.getCapturedItemsSupplier()
-                    .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DECAY_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
+                    .ifPresentAndNotEmpty(items -> {
+                        // Nothing happens here yet for some reason.
+                    });
             phaseContext.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
+                    .ifPresentAndNotEmpty(entities -> {
+                        final Cause cause = Cause.source(BlockSpawnCause.builder()
+                                .block(blockSnapshot)
+                                .type(InternalSpawnTypes.BLOCK_SPAWNING)
+                                .build())
+                                .build();
+                        final SpawnEntityEvent
+                                event =
+                                SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            for (Entity entity : event.getEntities()) {
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        }
+                    });
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, phaseContext));
+                    .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, causeTracker, state, phaseContext));
             phaseContext.getCapturedItemStackSupplier()
                     .ifPresentAndNotEmpty(drops -> {
                         final List<EntityItem> items = drops.stream()
@@ -148,11 +157,46 @@ public final class BlockPhase extends TrackingPhase {
                     });
         } else if (state == State.BLOCK_DROP_ITEMS) {
             final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Could not find a block dropping items!", phaseContext));
+                    .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
-                    .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DROP_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
+                    .ifPresentAndNotEmpty(items -> {
+                        final Cause cause = Cause.source(
+                                BlockSpawnCause.builder()
+                                        .block(blockSnapshot)
+                                        .type(InternalSpawnTypes.DROPPED_ITEM)
+                                        .build())
+                                .build();
+                        final ArrayList<Entity> entities = new ArrayList<>();
+                        for (EntityItem item : items) {
+                            entities.add(EntityUtil.fromNative(item));
+                        }
+                        final DropItemEvent.Destruct
+                                event =
+                                SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            for (Entity entity : event.getEntities()) {
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        }
+                    });
             phaseContext.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
+                    .ifPresentAndNotEmpty(entities -> {
+                        final Cause cause = Cause.source(BlockSpawnCause.builder()
+                                .block(blockSnapshot)
+                                .type(InternalSpawnTypes.BLOCK_SPAWNING)
+                                .build())
+                                .build();
+                        final SpawnEntityEvent
+                                event =
+                                SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            for (Entity entity : event.getEntities()) {
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        }
+                    });
             final Location<World> worldLocation = blockSnapshot.getLocation().get();
             final BlockPos blockPos = ((IMixinLocation) (Object) worldLocation).getBlockPos();
             final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
@@ -161,7 +205,7 @@ public final class BlockPhase extends TrackingPhase {
             final Optional<User> creator = mixinChunk.getBlockOwner(blockPos);
 
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, phaseContext));
+                    .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, causeTracker, state, phaseContext));
             phaseContext.getCapturedItemStackSupplier()
                     .ifPresentAndNotEmpty(drops -> {
                         final List<EntityItem> items = drops.stream()
@@ -191,14 +235,49 @@ public final class BlockPhase extends TrackingPhase {
             // do nothing for now.
         } else if (state == State.DISPENSE) {
             final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Could not find a block dispensing items!", phaseContext));
+                    .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dispensing items!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
-                    .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DISPENSE.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
+                    .ifPresentAndNotEmpty(items -> {
+                        final Cause cause = Cause.source(
+                                BlockSpawnCause.builder()
+                                        .block(blockSnapshot)
+                                        .type(InternalSpawnTypes.DISPENSE)
+                                        .build())
+                                .build();
+                        final ArrayList<Entity> entities = new ArrayList<>();
+                        for (EntityItem item : items) {
+                            entities.add(EntityUtil.fromNative(item));
+                        }
+                        final DropItemEvent.Dispense
+                                event =
+                                SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            for (Entity entity : event.getEntities()) {
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        }
+                    });
             phaseContext.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
+                    .ifPresentAndNotEmpty(entities -> {
+                        final Cause cause = Cause.source(BlockSpawnCause.builder()
+                                .block(blockSnapshot)
+                                .type(InternalSpawnTypes.BLOCK_SPAWNING)
+                                .build())
+                                .build();
+                        final SpawnEntityEvent
+                                event =
+                                SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            for (Entity entity : event.getEntities()) {
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        }
+                    });
         } else if (state == State.PISTON_MOVING) {
             final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
-            if (!GeneralFunctions.processBlockCaptures(capturedBlocks, causeTracker, state, phaseContext)) {
+            if (!TrackingUtil.processBlockCaptures(capturedBlocks, causeTracker, state, phaseContext)) {
                 phaseContext.firstNamed(InternalNamedCauses.Piston.DUMMY_CALLBACK, MutableWrapper.class)
                         .map(wrapper -> ((MutableWrapper<CallbackInfoReturnable<Boolean>>) wrapper).getObj())
                         .ifPresent(callback -> callback.setReturnValue(false));

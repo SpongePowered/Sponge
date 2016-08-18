@@ -382,7 +382,7 @@ public abstract class MixinEntity implements IMixinEntity {
             return false;
         }
 
-        MoveEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
+        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((net.minecraft.entity.Entity) (Object) this, location);
         if (event.isCancelled()) {
             return false;
         } else {
@@ -938,6 +938,16 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
+    public Optional<User> getCreatorUser() {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<User> getNotifierUser() {
+        return Optional.empty();
+    }
+
+    @Override
     public void trackEntityUniqueId(String nbtKey, @Nullable UUID uuid) {
     }
 
@@ -953,12 +963,10 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public void setCreator(@Nullable UUID uuid) {
-        trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid);
     }
 
     @Override
     public void setNotifier(@Nullable UUID uuid) {
-        trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_NOTIFIER, uuid);
     }
 
     @Override

@@ -424,8 +424,8 @@ public class SpongeCommand {
                     builder.append(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "EntityType: "))
                             .append(Text.of(TextColors.BLUE, TextStyles.RESET, spongeEntity.getType().getId()));
                     src.sendMessage(builder.build());
-                    final Optional<User> owner = mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                    final Optional<User> notifier = mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+                    final Optional<User> owner = mixinEntity.getCreatorUser();
+                    final Optional<User> notifier = mixinEntity.getNotifierUser();
                     src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Owner: ", TextColors.BLUE, TextStyles.RESET,
                             owner));
                     src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Notifier: ", TextColors.BLUE, TextStyles.RESET,

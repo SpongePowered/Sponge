@@ -101,6 +101,8 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
         if (phaseState == null || (phaseState != PacketPhase.General.PLACE_BLOCK && phaseState != PacketPhase.General.USE_ITEM && 
                 phaseState != PacketPhase.General.INTERACTION)) {
             final Cause.Builder builder = Cause.source(playerIn);
+            peek.context.getNotifier().ifPresent(builder::notifier);
+            peek.context.getOwner().ifPresent(builder::owner);
             phaseState.getPhase().appendPreBlockProtectedCheck(builder, phaseState, peek.context, causeTracker);
             Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
             ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), ImmutableList.of(location), (World) worldIn);

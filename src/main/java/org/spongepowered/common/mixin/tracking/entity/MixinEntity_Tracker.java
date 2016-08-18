@@ -103,6 +103,16 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         }
     }
 
+    @Override
+    public void setCreator(@Nullable UUID uuid) {
+        trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid);
+    }
+
+    @Override
+    public void setNotifier(@Nullable UUID uuid) {
+        trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_NOTIFIER, uuid);
+    }
+
     @Nullable
     private UUID getTrackedUniqueId(String nbtKey) {
         if (this.creator != null && NbtDataUtil.SPONGE_ENTITY_CREATOR.equals(nbtKey)) {
@@ -133,6 +143,22 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
     @Nullable private UUID creator;
     @Nullable private UUID notifier;
 
+    @Override
+    public Optional<User> getCreatorUser() {
+        if (this.creator != null) {
+            return getUserForUuid(this.creator);
+        }
+        return getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+    }
+
+    @Override
+    public Optional<User> getNotifierUser() {
+        if (this.notifier != null) {
+            return getUserForUuid(this.notifier);
+        }
+        return getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Optional<User> getTrackedPlayer(String nbtKey) {
@@ -140,6 +166,11 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         if (uuid == null) {
             return Optional.empty();
         }
+        return getUserForUuid(uuid);
+
+    }
+
+    private Optional<User> getUserForUuid(UUID uuid) {
         // get player if online
         Player player = Sponge.getServer().getPlayer(uuid).orElse(null);
         if (player != null) {

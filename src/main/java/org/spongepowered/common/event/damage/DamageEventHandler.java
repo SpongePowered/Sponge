@@ -61,6 +61,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -354,26 +355,22 @@ public class DamageEventHandler {
             net.minecraft.entity.Entity source = damageSource.getEntity();
             List<NamedCause> causeObjects = new ArrayList<>();
             causeObjects.add(NamedCause.source(damageSource));
-            if (!(source instanceof EntityPlayer)) {
-                Optional<User> owner = source == null ? Optional.empty() : ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                if (owner.isPresent()) {
-                    causeObjects.add(NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
-                }
+            if (!(source instanceof EntityPlayer) && source != null) {
+                final IMixinEntity mixinEntity = EntityUtil.toMixin(source);
+                mixinEntity.getNotifierUser().ifPresent(notifier -> causeObjects.add(NamedCause.notifier(notifier)));
+                mixinEntity.getCreatorUser().ifPresent(owner -> causeObjects.add(NamedCause.owner(owner)));
+
             }
             return Cause.builder().addAll(causeObjects).build();
         } else if (damageSource instanceof EntityDamageSource) {
             net.minecraft.entity.Entity source = damageSource.getEntity();
             List<NamedCause> causeObjects = new ArrayList<>();
             causeObjects.add(NamedCause.source(damageSource));
-            if (!(source instanceof EntityPlayer)) {
-                Optional<User> owner = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                Optional<User> notifier = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
-                if (notifier.isPresent()) {
-                    causeObjects.add(NamedCause.notifier(notifier.get()));
-                }
-                if (owner.isPresent() && !(source instanceof EntityPlayer)) {
-                    causeObjects.add(NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
-                }
+            if (!(source instanceof EntityPlayer) && source != null) {
+
+                final IMixinEntity mixinEntity = EntityUtil.toMixin(source);
+                mixinEntity.getNotifier().ifPresent(notifier -> causeObjects.add(NamedCause.notifier(notifier)));
+                mixinEntity.getCreator().ifPresent(creator -> causeObjects.add(NamedCause.of(DamageEntityEvent.CREATOR, creator)));
             }
             return Cause.builder().addAll(causeObjects).build();
         } else if (damageSource instanceof BlockDamageSource) {

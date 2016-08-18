@@ -54,14 +54,19 @@ import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
@@ -73,24 +78,33 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.cause.entity.teleport.PortalTeleportCause;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.ItemDropData;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.EntityPhase;
+import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -100,6 +114,7 @@ import org.spongepowered.common.world.WorldManager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 
@@ -144,7 +159,7 @@ public final class EntityUtil {
     public static Entity transferEntityToDimension(IMixinEntity mixinEntity, int toSuggestedDimension) {
         final Entity entity = toNative(mixinEntity);
         // handle portal event
-        MoveEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(entity, toSuggestedDimension, null);
+        MoveEntityEvent.Teleport.Portal event = handleDisplaceEntityPortalEvent(entity, toSuggestedDimension, null);
         if (event == null || event.isCancelled()) {
             return null;
         }
@@ -238,6 +253,180 @@ public final class EntityUtil {
         } else {
             return entity.isDead;
         }
+    }
+
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Location<World> location) {
+        Transform<World> fromTransform = ((IMixinEntity) entityIn).getTransform();
+        Transform<World> toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
+        return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform, false);
+    }
+
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, double posX, double posY, double posZ, float yaw, float pitch) {
+        Transform<World> fromTransform = ((IMixinEntity) entityIn).getTransform();
+        Transform<World> toTransform = fromTransform.setPosition(new Vector3d(posX, posY, posZ)).setRotation(new Vector3d(pitch, yaw, 0));
+        return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform, false);
+    }
+
+    public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Transform<World> fromTransform, Transform<World> toTransform, boolean apiCall) {
+
+        // Use origin world to get correct cause
+        IMixinWorldServer spongeWorld = (IMixinWorldServer) fromTransform.getExtent();
+        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        final PhaseData peek = causeTracker.getStack().peek();
+        final IPhaseState state = peek.state;
+        final PhaseContext context = peek.context;
+
+        final Cause teleportCause = state.getPhase().generateTeleportCause(state, context);
+
+        MoveEntityEvent.Teleport event = SpongeEventFactory.createMoveEntityEventTeleport(teleportCause, fromTransform, toTransform, (org.spongepowered.api.entity.Entity) entityIn);
+        SpongeImpl.postEvent(event);
+        return event;
+    }
+
+    @Nullable
+    public static MoveEntityEvent.Teleport.Portal handleDisplaceEntityPortalEvent(Entity entityIn, int targetDimensionId, @Nullable Teleporter teleporter) {
+        SpongeImplHooks.registerPortalAgentType(teleporter);
+        final MinecraftServer mcServer = SpongeImpl.getServer();
+        final IMixinPlayerList mixinPlayerList = (IMixinPlayerList) mcServer.getPlayerList();
+        final IMixinEntity mixinEntity = (IMixinEntity) entityIn;
+        final Transform<World> fromTransform = mixinEntity.getTransform();
+        final int fromDimensionId = entityIn.dimension;
+        final WorldServer fromWorld = ((WorldServer) entityIn.worldObj);
+        final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
+        // handle the end
+        if (targetDimensionId == 1 && fromWorld.provider instanceof WorldProviderEnd) {
+            targetDimensionId = 0;
+        }
+        WorldServer toWorld = mcServer.worldServerForDimension(targetDimensionId);
+        final IMixinWorldServer toMixinWorld = (IMixinWorldServer) toWorld;
+        if (teleporter == null) {
+            teleporter = toWorld.getDefaultTeleporter();
+        }
+        final SpongeConfig<?> activeConfig = fromMixinWorld.getActiveConfig();
+        String worldName = "";
+        String teleporterClassName = teleporter.getClass().getName();
+
+        // check for new destination in config
+        if (teleporterClassName.equals("net.minecraft.world.Teleporter")) {
+            if (toWorld.provider instanceof WorldProviderHell) {
+                worldName = activeConfig.getConfig().getWorld().getPortalAgents().get("minecraft:default_nether");
+            } else if (toWorld.provider instanceof WorldProviderEnd) {
+                worldName = activeConfig.getConfig().getWorld().getPortalAgents().get("minecraft:default_the_end");
+            }
+        } else { // custom
+            worldName = activeConfig.getConfig().getWorld().getPortalAgents().get("minecraft:" + teleporter.getClass().getSimpleName());
+        }
+
+        if (worldName != null && !worldName.equals("")) {
+            for (WorldProperties worldProperties : Sponge.getServer().getAllWorldProperties()) {
+                if (worldProperties.getWorldName().equalsIgnoreCase(worldName)) {
+                    Optional<World> spongeWorld = Sponge.getServer().loadWorld(worldProperties);
+                    if (spongeWorld.isPresent()) {
+                        toWorld = (WorldServer) spongeWorld.get();
+                        teleporter = toWorld.getDefaultTeleporter();
+                        ((IMixinTeleporter) teleporter).setPortalType(targetDimensionId);
+                    }
+                }
+            }
+        }
+
+        adjustEntityPostionForTeleport(mixinPlayerList, entityIn, fromWorld, toWorld);
+        if (entityIn instanceof EntityPlayerMP) {
+            // disable packets from being sent to clients to avoid syncing issues, this is re-enabled before the event
+            ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) entityIn).connection).setAllowClientLocationUpdate(false);
+        }
+
+        final PhaseContext context = PhaseContext.start();
+        context.add(NamedCause.source(mixinEntity))
+                .add(NamedCause.of(InternalNamedCauses.Teleporting.FROM_WORLD, fromWorld))
+                .add(NamedCause.of(InternalNamedCauses.Teleporting.TARGET_WORLD, toWorld))
+                .add(NamedCause.of(InternalNamedCauses.Teleporting.TARGET_TELEPORTER, teleporter))
+                .add(NamedCause.of(InternalNamedCauses.Teleporting.FROM_TRANSFORM, fromTransform))
+                .addBlockCaptures()
+                .addEntityCaptures();
+        final Cause teleportCause = Cause.of(NamedCause.source(PortalTeleportCause.builder()
+                        .agent((PortalAgent) teleporter)
+                        .type(TeleportTypes.PORTAL)
+                        .build()
+                )
+        );
+        context.complete();
+        fromMixinWorld.getCauseTracker().switchToPhase(EntityPhase.State.LEAVING_DIMENSION, context);
+
+        final CauseTracker toCauseTracker = toMixinWorld.getCauseTracker();
+        toCauseTracker.switchToPhase(EntityPhase.State.CHANGING_TO_DIMENSION, context);
+
+        if (entityIn.isEntityAlive() && !(fromWorld.provider instanceof WorldProviderEnd)) {
+            fromWorld.theProfiler.startSection("placing");
+            // need to use placeInPortal to support mods
+            teleporter.placeInPortal(entityIn, entityIn.rotationYaw);
+            fromWorld.theProfiler.endSection();
+        }
+
+        // Complete phases, just because we need to. The phases don't actually do anything, because the processing resides here.
+        toCauseTracker.completePhase();
+        fromMixinWorld.getCauseTracker().completePhase();
+        // Grab the exit location of entity after being placed into portal
+        final Transform<World> portalExitTransform = mixinEntity.getTransform().setExtent((World) toWorld);
+        final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(teleportCause, fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);
+
+        SpongeImpl.postEvent(event);
+        if (entityIn instanceof EntityPlayerMP) {
+            ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) entityIn).connection).setAllowClientLocationUpdate(true);
+        }
+        final Vector3i chunkPosition = mixinEntity.getLocation().getChunkPosition();
+        final IMixinTeleporter toMixinTeleporter = (IMixinTeleporter) teleporter;
+
+        if (event.isCancelled()) {
+            // update cache
+            ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+            mixinEntity.setLocationAndAngles(fromTransform);
+            return event;
+        }
+
+        final Transform<World> toTransform = event.getToTransform();
+        final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
+
+        if (!portalExitTransform.equals(toTransform)) {
+            // if plugin set to same world, just set the transform
+            if (fromWorld == toTransform.getExtent()) {
+                // force cancel so we know to skip remaining logic
+                event.setCancelled(true);
+                // update cache
+                toMixinTeleporter.removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+                mixinEntity.setLocationAndAngles(toTransform);
+                if (entityIn instanceof EntityPlayerMP) {
+                    EntityPlayerMP player = (EntityPlayerMP) entityIn;
+                    // close any open inventory
+                    player.closeScreen();
+                    // notify client
+                    player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
+                }
+                return event;
+            }
+        } else {
+            if (toWorld.provider instanceof WorldProviderEnd) {
+                BlockPos blockpos = entityIn.worldObj.getTopSolidOrLiquidBlock(toWorld.getSpawnPoint());
+                entityIn.moveToBlockPosAndAngles(blockpos, entityIn.rotationYaw, entityIn.rotationPitch);
+            }
+        }
+
+        // Attempt to create the portal
+        if (event.isCancelled()) {
+            return null;
+        }
+
+        if (!capturedBlocks.isEmpty()
+            && !TrackingUtil.processBlockCaptures(capturedBlocks, toCauseTracker, EntityPhase.State.CHANGING_TO_DIMENSION, context)) {
+            toMixinTeleporter.removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+        }
+
+        if (!event.getKeepsVelocity()) {
+            entityIn.motionX = 0;
+            entityIn.motionY = 0;
+            entityIn.motionZ = 0;
+        }
+        return event;
     }
 
 

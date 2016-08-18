@@ -51,25 +51,26 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(TileEntityHopper.class)
 public abstract class MixinTileEntityHopper extends MixinTileEntityLockable implements Hopper, IMixinCustomNameable {
 
     @Shadow private int transferCooldown;
-    @Shadow private String customName;
+    @Shadow @Nullable private String customName;
 
     @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"))
     private static void onPutDrop(IInventory inventory, EntityItem entityItem, CallbackInfoReturnable<Boolean> callbackInfo) {
         IMixinEntity spongeEntity = (IMixinEntity) entityItem;
-        Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-        if (owner.isPresent()) {
+        spongeEntity.getCreatorUser().ifPresent(owner -> {
             if (inventory instanceof TileEntity) {
                 TileEntity te = (TileEntity) inventory;
                 BlockPos pos = te.getPos();
                 IMixinChunk spongeChunk = (IMixinChunk) te.getWorld().getChunkFromBlockCoords(pos);
-                spongeChunk.addTrackedBlockPosition(te.getBlockType(), pos, owner.get(), PlayerTracker.Type.NOTIFIER);
+                spongeChunk.addTrackedBlockPosition(te.getBlockType(), pos, owner, PlayerTracker.Type.NOTIFIER);
             }
-        }
+        });
     }
 
     @Override

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.function;
+package org.spongepowered.common.event.tracking.phase.util;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
@@ -78,11 +78,10 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.ItemDropData;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PacketPhase;
-import org.spongepowered.common.event.tracking.phase.util.PacketPhaseUtil;
-import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -119,7 +118,7 @@ public interface PacketFunction {
         //final Optional<ItemStack> itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
         final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
-        EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_NOTIFIER, player.getUniqueID());
+        EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
 
         if (state == PacketPhase.General.ATTACK_ENTITY) {
             context.getCapturedItemsSupplier()
@@ -135,7 +134,7 @@ public interface PacketFunction {
                     });
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks ->
-                            GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context));
+                            TrackingUtil.processBlockCaptures(blocks, causeTracker, state, context));
             context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
                 for (Map.Entry<UUID, Collection<ItemDropData>> entry : map.asMap().entrySet()) {
                     final UUID key = entry.getKey();
@@ -232,7 +231,7 @@ public interface PacketFunction {
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     for (Entity spawnedEntity : event.getEntities()) {
-                        EntityUtil.toMixin(spawnedEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                        spawnedEntity.setCreator(player.getUniqueID());
                         mixinWorldServer.forceSpawnEntity(spawnedEntity);
                     }
                 }
@@ -263,7 +262,7 @@ public interface PacketFunction {
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     for (Entity spawnedEntity : event.getEntities()) {
-                        EntityUtil.toMixin(spawnedEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                        spawnedEntity.setCreator(player.getUniqueID());
                         mixinWorldServer.forceSpawnEntity(spawnedEntity);
                     }
                 }
@@ -279,7 +278,7 @@ public interface PacketFunction {
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     for (Entity spawnedEntity : event.getEntities()) {
-                        EntityUtil.toMixin(spawnedEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                        spawnedEntity.setCreator(player.getUniqueID());
                         mixinWorldServer.forceSpawnEntity(spawnedEntity);
                     }
                 }
@@ -319,7 +318,7 @@ public interface PacketFunction {
                             SpongeImpl.postEvent(event);
                             if (!event.isCancelled()) {
                                 for (Entity droppedItem : event.getEntities()) {
-                                    EntityUtil.toMixin(droppedItem).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                    droppedItem.setCreator(player.getUniqueID());
                                     mixinWorldServer.forceSpawnEntity(droppedItem);
                                 }
                             }
@@ -347,7 +346,7 @@ public interface PacketFunction {
                     SpongeImpl.postEvent(event);
                     if (!event.isCancelled()) {
                         for (Entity droppedItem : event.getEntities()) {
-                            EntityUtil.toMixin(droppedItem).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                            droppedItem.setCreator(player.getUniqueID());
                             mixinWorldServer.forceSpawnEntity(droppedItem);
                         }
                     }
@@ -357,7 +356,7 @@ public interface PacketFunction {
         }
         context.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(snapshots ->
-                        GeneralFunctions.processBlockCaptures(snapshots, causeTracker, state, context)
+                        TrackingUtil.processBlockCaptures(snapshots, causeTracker, state, context)
                 );
     };
 
@@ -370,7 +369,7 @@ public interface PacketFunction {
         if (state == PacketPhase.Inventory.DROP_ITEM) {
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks ->
-                            GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context)
+                            TrackingUtil.processBlockCaptures(blocks, causeTracker, state, context)
                     );
             context.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
@@ -400,7 +399,7 @@ public interface PacketFunction {
         } else if (state == PacketPhase.Inventory.DROP_INVENTORY) {
 
             context.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context));
+                    .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, causeTracker, state, context));
 
             context.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
@@ -426,7 +425,7 @@ public interface PacketFunction {
         } else if (state == PacketPhase.General.INTERACTION) {
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks ->
-                            GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context)
+                            TrackingUtil.processBlockCaptures(blocks, causeTracker, state, context)
                     );
 
             context.getCapturedItemsSupplier()
@@ -552,7 +551,7 @@ public interface PacketFunction {
     };
     static void processSpawnedEntities(EntityPlayerMP player, CauseTracker causeTracker, SpawnEntityEvent event) {
         for (Entity entity : event.getEntities()) {
-            EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+            entity.setCreator(player.getUniqueID());
             causeTracker.getMixinWorld().forceSpawnEntity(entity);
         }
     }
@@ -564,9 +563,9 @@ public interface PacketFunction {
     PacketFunction INVENTORY = (packet, state, player, context) -> {
         ((IMixinContainer) player.openContainer).setCaptureInventory(false);
         final CPacketClickWindow packetIn = context.firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, CPacketClickWindow.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing the packet used, but no packet was captured!", context));
+                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing the packet used, but no packet was captured!", context));
         final ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing the cursor item in use, but found none.", context));
+                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing the cursor item in use, but found none.", context));
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(lastCursor, newCursor);
 
@@ -650,7 +649,7 @@ public interface PacketFunction {
                 });
         context.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(
-                        originalBlocks -> GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state, context));
+                        originalBlocks -> TrackingUtil.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state, context));
 
     });
     PacketFunction PLACE_BLOCK = (packet, state, player, context) -> {
@@ -661,7 +660,7 @@ public interface PacketFunction {
         final World spongeWorld = (World) mixinWorld;
         // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
         final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Expected the used item stack to place a block, but got nothing!", context));
+                .orElseThrow(TrackingUtil.throwWithContext("Expected the used item stack to place a block, but got nothing!", context));
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         context.getCapturedEntitySupplier()
                 .ifPresentAndNotEmpty(entities -> {
@@ -681,7 +680,7 @@ public interface PacketFunction {
         context.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(
                         originalBlocks -> {
-                            boolean success = GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state,
+                            boolean success = TrackingUtil.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state,
                                     context);
                             if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
                                 EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
@@ -692,7 +691,7 @@ public interface PacketFunction {
     PacketFunction HELD_ITEM_CHANGE = ((packet, state, player, context) -> {
         final CPacketHeldItemChange itemChange = (CPacketHeldItemChange) packet;
         final int previousSlot = context.firstNamed(InternalNamedCauses.Packet.PREVIOUS_HIGHLIGHTED_SLOT, Integer.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Expected a previous highlighted slot, got nothing.", context));
+                .orElseThrow(TrackingUtil.throwWithContext("Expected a previous highlighted slot, got nothing.", context));
         final Container inventoryContainer = player.inventoryContainer;
         final InventoryPlayer inventory = player.inventory;
         final Slot sourceSlot = inventoryContainer.getSlot(previousSlot + inventory.mainInventory.length);
@@ -718,9 +717,9 @@ public interface PacketFunction {
     });
     PacketFunction CLOSE_WINDOW = ((packet, state, player, context) -> {
         final Container container = context.firstNamed(InternalNamedCauses.Packet.OPEN_CONTAINER, Container.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Expected the open container object, but had nothing!", context));
+                .orElseThrow(TrackingUtil.throwWithContext("Expected the open container object, but had nothing!", context));
         ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Expected a cursor item stack, but had nothing!", context));
+                .orElseThrow(TrackingUtil.throwWithContext("Expected a cursor item stack, but had nothing!", context));
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         final Cause cause = Cause.source(player).build();
@@ -768,7 +767,7 @@ public interface PacketFunction {
                     SpongeImpl.postEvent(drop);
                     if (!drop.isCancelled()) {
                         for (Entity droppedItem : drop.getEntities()) {
-                            EntityUtil.toMixin(droppedItem).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                            droppedItem.setCreator(player.getUniqueID());
                             ((IMixinWorldServer) player.getServerWorld()).forceSpawnEntity(droppedItem);
                         }
                     }
@@ -795,7 +794,7 @@ public interface PacketFunction {
                     SpongeImpl.postEvent(drop);
                     if (!drop.isCancelled()) {
                         for (Entity droppedItem : drop.getEntities()) {
-                            EntityUtil.toMixin(droppedItem).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                            droppedItem.setCreator(player.getUniqueID());
                             ((IMixinWorldServer) player.getServerWorld()).forceSpawnEntity(droppedItem);
                         }
                     }
@@ -804,7 +803,7 @@ public interface PacketFunction {
             });
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks ->
-                            GeneralFunctions.processBlockCaptures(blocks, ((IMixinWorldServer) player.worldObj).getCauseTracker(), state, context));
+                            TrackingUtil.processBlockCaptures(blocks, ((IMixinWorldServer) player.worldObj).getCauseTracker(), state, context));
         }
     });
     PacketFunction ENCHANTMENT = ((packet, state, player, context) -> {
@@ -819,7 +818,7 @@ public interface PacketFunction {
     PacketFunction CLIENT_STATUS = ((packet, state, player, context) -> {
         if (state == PacketPhase.Inventory.OPEN_INVENTORY) {
             final ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected a cursor item stack, but had nothing!", context));
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected a cursor item stack, but had nothing!", context));
             final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
             final InteractInventoryEvent.Open
@@ -870,13 +869,14 @@ public interface PacketFunction {
     });
     PacketFunction MOVEMENT = (packet, state, player, context) -> {
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
-        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, mixinWorldServer.getCauseTracker(), state, context));
+        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil
+                .processBlockCaptures(blocks, mixinWorldServer.getCauseTracker(), state, context));
     };
 
     PacketFunction UNKONWN_PACKET = (packet, state, player, context) -> {
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.getServerWorld();
         final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
-        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context));
+        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, causeTracker, state, context));
         context.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
             final Cause cause = Cause.source(EntitySpawnCause.builder()
                     .entity((Player) player)
@@ -887,7 +887,7 @@ public interface PacketFunction {
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
                 for (Entity spawnedEntity : event.getEntities()) {
-                    EntityUtil.toMixin(spawnedEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                    spawnedEntity.setCreator(player.getUniqueID());
                     mixinWorldServer.forceSpawnEntity(spawnedEntity);
                 }
             }
@@ -903,7 +903,7 @@ public interface PacketFunction {
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
                 for (Entity spawnedEntity : event.getEntities()) {
-                    EntityUtil.toMixin(spawnedEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                    spawnedEntity.setCreator(player.getUniqueID());
                     mixinWorldServer.forceSpawnEntity(spawnedEntity);
                 }
             }
@@ -943,7 +943,7 @@ public interface PacketFunction {
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             for (Entity droppedItem : event.getEntities()) {
-                                EntityUtil.toMixin(droppedItem).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                droppedItem.setCreator(player.getUniqueID());
                                 mixinWorldServer.forceSpawnEntity(droppedItem);
                             }
                         }
@@ -971,7 +971,7 @@ public interface PacketFunction {
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     for (Entity droppedItem : event.getEntities()) {
-                        EntityUtil.toMixin(droppedItem).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                        droppedItem.setCreator(player.getUniqueID());
                         mixinWorldServer.forceSpawnEntity(droppedItem);
                     }
                 }

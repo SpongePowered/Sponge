@@ -39,6 +39,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthDa
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 
 import java.util.Map;
 import java.util.Optional;
@@ -65,7 +66,7 @@ public class HealthDataProcessor extends AbstractEntityDataProcessor<EntityLivin
         float health = ((Double) keyValues.get(Keys.HEALTH)).floatValue();
         entity.setHealth(health);
         if (health == 0) {
-            entity.onDeath(DamageSource.generic);
+            entity.attackEntityFrom(DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE, 10000F);
         }
         return true;
     }

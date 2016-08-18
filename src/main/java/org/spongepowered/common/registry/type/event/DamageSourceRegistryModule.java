@@ -32,6 +32,7 @@ import org.spongepowered.api.registry.util.RegistrationDependency;
 @RegistrationDependency(DamageTypeRegistryModule.class)
 public final class DamageSourceRegistryModule implements RegistryModule {
 
+    public static final net.minecraft.util.DamageSource IGNORED_DAMAGE_SOURCE = new net.minecraft.util.DamageSource("spongespecific").setDamageBypassesArmor().setDamageAllowedInCreativeMode();
     public static net.minecraft.util.DamageSource DAMAGESOURCE_POISON;
     public static net.minecraft.util.DamageSource DAMAGESOURCE_MELTING;
 

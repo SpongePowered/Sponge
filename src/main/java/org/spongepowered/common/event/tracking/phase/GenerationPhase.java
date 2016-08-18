@@ -148,9 +148,6 @@ public final class GenerationPhase extends TrackingPhase {
             return true;
         }
 
-        boolean captureEntitySpawn(PhaseContext context, Entity entity) {
-            return context.getCapturedEntities().add(entity);
-        }
 
         Cause provideSpawnCause(CauseTracker causeTracker, PhaseContext context) {
             return Cause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE).named("World", causeTracker.getWorld()).build();
@@ -264,7 +261,7 @@ public final class GenerationPhase extends TrackingPhase {
 
     @Override
     public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
-        return ((GeneralGenerationPhaseState) phaseState).captureEntitySpawn(context, entity);
+        return context.getCapturedEntities().add(entity);
     }
 
     @Override

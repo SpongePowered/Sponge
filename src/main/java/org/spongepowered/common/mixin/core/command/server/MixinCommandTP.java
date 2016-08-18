@@ -40,6 +40,7 @@ import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 import java.util.EnumSet;
@@ -129,7 +130,7 @@ public abstract class MixinCommandTP extends CommandBase {
                     {
                         // Sponge start
                         EntityPlayerMP player = (EntityPlayerMP) entity;
-                        MoveEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
+                        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
                         if (event.isCancelled()) {
                             return;
                         }
@@ -141,7 +142,7 @@ public abstract class MixinCommandTP extends CommandBase {
                     else
                     {
                         // Sponge Start - Events
-                        MoveEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
+                        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
                         if (event.isCancelled()) {
                             return;
                         }
@@ -211,7 +212,7 @@ public abstract class MixinCommandTP extends CommandBase {
             double x = p_189863_1_.getAmount();
             double y = p_189863_2_.getAmount();
             double z = p_189863_3_.getAmount();
-            MoveEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(player, x, y, z, f, f1);
+            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, x, y, z, f, f1);
             if (event.isCancelled()) {
                 return;
             }
@@ -232,7 +233,7 @@ public abstract class MixinCommandTP extends CommandBase {
             double x = p_189863_1_.getResult();
             double y = p_189863_2_.getResult();
             double z = p_189863_3_.getResult();
-            MoveEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(p_189863_0_, x, y, z, f2, f3);
+            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(p_189863_0_, x, y, z, f2, f3);
             if (event.isCancelled()) {
                 return;
             }

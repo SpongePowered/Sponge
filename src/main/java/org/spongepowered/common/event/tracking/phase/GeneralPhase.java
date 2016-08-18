@@ -60,8 +60,8 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
-import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -149,11 +149,11 @@ public final class GeneralPhase extends TrackingPhase {
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
         if (state == State.COMMAND) {
             final ICommand command = phaseContext.firstNamed(InternalNamedCauses.General.COMMAND, ICommand.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a command, but none found!", phaseContext));
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a command, but none found!", phaseContext));
             final ICommandSender sender = phaseContext.getSource(ICommandSender.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(list -> GeneralFunctions.processBlockCaptures(list, causeTracker, state, phaseContext));
+                    .ifPresentAndNotEmpty(list -> TrackingUtil.processBlockCaptures(list, causeTracker, state, phaseContext));
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         // TODO the entity spawn causes are not likely valid, need to investigate further.
@@ -169,7 +169,7 @@ public final class GeneralPhase extends TrackingPhase {
                             final Player player = isPlayer ? (Player) sender : null;
                             for (Entity entity : spawnEntityEvent.getEntities()) {
                                 if (isPlayer) {
-                                    EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+                                    EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
                                 }
                                 causeTracker.getMixinWorld().forceSpawnEntity(entity);
                             }
@@ -212,7 +212,7 @@ public final class GeneralPhase extends TrackingPhase {
                                     final Player player = isPlayer ? (Player) sender : null;
                                     for (Entity entity : destruct.getEntities()) {
                                         if (isPlayer) {
-                                            EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+                                            EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
                                         }
                                         causeTracker.getMixinWorld().forceSpawnEntity(entity);
                                     }
@@ -223,9 +223,9 @@ public final class GeneralPhase extends TrackingPhase {
                     });
         } else if (state == Post.UNWINDING) {
             final IPhaseState unwindingState = phaseContext.firstNamed(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be unwinding a phase, but no phase found!", phaseContext));
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no phase found!", phaseContext));
             final PhaseContext unwindingContext = phaseContext.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be unwinding a phase, but no context found!", phaseContext));
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no context found!", phaseContext));
             this.postDispatch(causeTracker, unwindingState, unwindingContext, phaseContext);
         }
     }
@@ -268,9 +268,9 @@ public final class GeneralPhase extends TrackingPhase {
     public static void processBlockTransactionListsPost(PhaseContext postContext, List<BlockSnapshot> snapshotsToProcess, CauseTracker causeTracker,
             IPhaseState unwindingState, PhaseContext unwinding) {
         final List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
-        ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[GeneralFunctions.EVENT_COUNT];
-        ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[GeneralFunctions.EVENT_COUNT];
-        for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
+        ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[TrackingUtil.EVENT_COUNT];
+        ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[TrackingUtil.EVENT_COUNT];
+        for (int i = 0; i < TrackingUtil.EVENT_COUNT; i++) {
             transactionBuilders[i] = new ImmutableList.Builder<>();
         }
         final List<ChangeBlockEvent> blockEvents = new ArrayList<>();
@@ -279,11 +279,11 @@ public final class GeneralPhase extends TrackingPhase {
         for (BlockSnapshot snapshot : snapshotsToProcess) {
             // This processes each snapshot to assign them to the correct event in the next area, with the
             // correct builder array entry.
-            GeneralFunctions.TRANSACTION_PROCESSOR.apply(transactionBuilders)
-                    .accept(GeneralFunctions.TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
+            TrackingUtil.TRANSACTION_PROCESSOR.apply(transactionBuilders)
+                    .accept(TrackingUtil.TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
         }
 
-        for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
+        for (int i = 0; i < TrackingUtil.EVENT_COUNT; i++) {
             // Build each event array
             transactionArrays[i] = transactionBuilders[i].build();
         }
@@ -293,11 +293,11 @@ public final class GeneralPhase extends TrackingPhase {
         final Cause.Builder builder = Cause.source(unwinding.getSource(Object.class).get());
         final World world = causeTracker.getWorld();
         // Creates the block events accordingly to the transaction arrays
-        GeneralFunctions.iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world);
+        TrackingUtil.iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world);
         // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
         final ChangeBlockEvent.Post
                 postEvent =
-                GeneralFunctions.throwMultiEventsAndCreatePost(transactionArrays, blockEvents, mainEvents, builder, world);
+                TrackingUtil.throwMultiEventsAndCreatePost(transactionArrays, blockEvents, mainEvents, builder, world);
 
         if (postEvent == null) { // Means that we have had no actual block changes apparently?
             return;
@@ -373,9 +373,9 @@ public final class GeneralPhase extends TrackingPhase {
 
             // Handle item drops captured
             final BlockPos pos = ((IMixinLocation) (Object) oldBlockSnapshot.getLocation().get()).getBlockPos();
-            capturedBlockDrops.ifPresentAndNotEmpty(map -> GeneralFunctions
+            capturedBlockDrops.ifPresentAndNotEmpty(map -> TrackingUtil
                     .spawnItemDataForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, unwindingPhaseContext, unwindingState));
-            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> GeneralFunctions
+            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> TrackingUtil
                     .spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, unwindingPhaseContext, unwindingState));
 
             SpongeHooks.logBlockAction(builder, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
@@ -463,9 +463,9 @@ public final class GeneralPhase extends TrackingPhase {
             WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (state == Post.UNWINDING) {
             final IPhaseState unwindingState = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Intended to be unwinding a phase but no phase unwinding found!", context));
+                    .orElseThrow(TrackingUtil.throwWithContext("Intended to be unwinding a phase but no phase unwinding found!", context));
             final PhaseContext unwindingContext = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Intended to be unwinding a phase with a context, but no context found!", context));
+                    .orElseThrow(TrackingUtil.throwWithContext("Intended to be unwinding a phase with a context, but no context found!", context));
             unwindingState.getPhase()
                     .associateNeighborStateNotifier(unwindingState, unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
         } else if (state == State.COMMAND) {

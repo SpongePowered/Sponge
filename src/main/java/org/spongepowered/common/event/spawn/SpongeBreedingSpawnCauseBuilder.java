@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.cause.entity.spawn.BreedingSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.common.AbstractEntitySpawnCauseBuilder;
 

@@ -22,21 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.function;
+package org.spongepowered.common.event.tracking;
 
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.event.tracking.CauseTracker;
+public final class MutableWrapper<T> {
 
-import java.util.List;
+    private T obj;
 
-public interface EntityListConsumer<E extends Entity> {
+    public MutableWrapper(T obj) {
+        this.obj = obj;
+    }
 
-    EntityListConsumer<Entity> FORCE_SPAWN = (list, causeTracker) -> {
-        for (Entity entity : list) {
-            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-        }
-    };
+    public T getObj() {
+        return this.obj;
+    }
 
-    void apply(List<? extends E> list, CauseTracker causeTracker);
-
+    public void setObj(T obj) {
+        this.obj = obj;
+    }
 }

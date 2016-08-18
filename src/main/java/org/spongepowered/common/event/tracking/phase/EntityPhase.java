@@ -30,27 +30,23 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
-import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
@@ -60,9 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -79,7 +73,7 @@ public final class EntityPhase extends TrackingPhase {
             void unwind(CauseTracker causeTracker, PhaseContext context) {
                 final Entity dyingEntity =
                         context.getSource(Entity.class)
-                                .orElseThrow(PhaseUtil.throwWithContext("Dying entity not found!", context));
+                                .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
                 final DamageSource damageSource = context.firstNamed(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class).get();
                 final Cause cause = Cause.source(
                         EntitySpawnCause.builder()
@@ -90,6 +84,9 @@ public final class EntityPhase extends TrackingPhase {
                         .build();
                 final boolean isPlayer = dyingEntity instanceof EntityPlayer;
                 final EntityPlayer entityPlayer = isPlayer ? (EntityPlayer) dyingEntity : null;
+                final Optional<User> notifier = context.getNotifier();
+                final Optional<User> owner = context.getOwner();
+                final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
                 context.getCapturedEntitySupplier()
                         .ifPresentAndNotEmpty(entities -> {
                             // Separate experience orbs from other entity drops
@@ -187,7 +184,9 @@ public final class EntityPhase extends TrackingPhase {
                                 }
                             }
                             for (Entity entity : destruct.getEntities()) {
-                                TrackingUtil.associateEntityCreator(context, entity, causeTracker.getMinecraftWorld());
+                                if (entityCreator != null) {
+                                    EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                                }
                                 causeTracker.getMixinWorld().forceSpawnEntity(entity);
                             }
                         }
@@ -202,7 +201,7 @@ public final class EntityPhase extends TrackingPhase {
             @Override
             void unwind(CauseTracker causeTracker, PhaseContext context) {
                 final Entity dyingEntity = context.getSource(Entity.class)
-                        .orElseThrow(PhaseUtil.throwWithContext("Dying entity not found!", context));
+                        .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
                 context.getCapturedItemsSupplier()
                         .ifPresentAndNotEmpty(items -> {
                             final DamageSource damageSource = context.firstNamed(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class).get();
@@ -290,7 +289,7 @@ public final class EntityPhase extends TrackingPhase {
                     printer.trace(System.err);
                 });
                 context.getCapturedBlockSupplier()
-                        .ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, DEATH_UPDATE, context));
+                        .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, causeTracker, DEATH_UPDATE, context));
 
             }
         },
@@ -386,7 +385,7 @@ public final class EntityPhase extends TrackingPhase {
             @Override
             public net.minecraft.entity.Entity returnTeleportResult(PhaseContext context, MoveEntityEvent.Teleport.Portal event) {
                 final net.minecraft.entity.Entity teleportingEntity = context.getSource(net.minecraft.entity.Entity.class)
-                                .orElseThrow(PhaseUtil.throwWithContext("Expected to be teleporting an entity!", context));
+                                .orElseThrow(TrackingUtil.throwWithContext("Expected to be teleporting an entity!", context));
                 // The rest of this is to be handled in the phase.
                 if (event.isCancelled()) {
                     return null;
@@ -418,7 +417,8 @@ public final class EntityPhase extends TrackingPhase {
         PLAYER_WAKE_UP() {
             @Override
             void unwind(CauseTracker causeTracker, PhaseContext context) {
-                context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, this, context));
+                context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil
+                        .processBlockCaptures(blocks, causeTracker, this, context));
             }
         };
 
@@ -430,20 +430,6 @@ public final class EntityPhase extends TrackingPhase {
         @Override
         public boolean tracksEntitySpecificDrops() {
             return true;
-        }
-
-        @Override
-        public void assignEntityCreator(PhaseContext context, Entity entity) {
-            final IMixinEntity mixinEntity = context.getSource(IMixinEntity.class)
-                            .orElseThrow(PhaseUtil.throwWithContext("Dying Entity not found!", context));
-            Stream.<Supplier<Optional<UUID>>>of(
-                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).map(Identifiable::getUniqueId),
-                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).map(Identifiable::getUniqueId))
-                    .map(Supplier::get)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .findFirst()
-                    .ifPresent(creator -> EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator));
         }
 
         @Nullable
@@ -468,7 +454,7 @@ public final class EntityPhase extends TrackingPhase {
     public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         if (phaseState == State.CHANGING_TO_DIMENSION) {
             final WorldServer worldServer = context.firstNamed(InternalNamedCauses.Teleporting.TARGET_WORLD, WorldServer.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to capture the target World for a teleport!", context));
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to capture the target World for a teleport!", context));
             ((IMixinWorldServer) worldServer).forceSpawnEntity(entity);
             return true;
         }

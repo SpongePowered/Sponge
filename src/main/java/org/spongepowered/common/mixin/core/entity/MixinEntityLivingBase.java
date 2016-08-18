@@ -79,6 +79,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -87,9 +88,11 @@ import org.spongepowered.common.event.damage.DamageObject;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -220,6 +223,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return Text.of(this.getUniqueID().toString());
     }
 
+    protected boolean tracksEntityDeaths = false;
+
     /**
      * @author blood - May 12th, 2016
      * @author gabizou - June 4th, 2016 - Update for 1.9.4 and Cause Tracker changes
@@ -238,8 +243,35 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (!SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, cause)) {
             return;
         }
+        // Double check that the CauseTracker is already capturing the Death phase
+        final CauseTracker causeTracker;
+        if (!this.worldObj.isRemote) {
+            causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+            final PhaseData peek = causeTracker.getStack().peek();
+            final IPhaseState state = peek.state;
+            this.tracksEntityDeaths = CauseTracker.ENABLED && !causeTracker.getStack().peekState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
+            if (this.tracksEntityDeaths) {
+                final PhaseContext context = PhaseContext.start()
+                        .add(NamedCause.source(this))
+                        .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, cause));
+                this.getNotifierUser().ifPresent(context::notifier);
+                this.getCreatorUser().ifPresent(context::owner);
+                causeTracker.switchToPhase(EntityPhase.State.DEATH, context
+                        .addCaptures()
+                        .addEntityDropCaptures()
+                        .complete());
+            }
+        } else {
+            causeTracker = null;
+            this.tracksEntityDeaths = false;
+        }
         // Sponge End
         if (this.dead) {
+            // Sponge Start - ensure that we finish the tracker if necessary
+            if (causeTracker != null && this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
+                causeTracker.completePhase();
+            }
+            // Sponge End
             return;
         }
 
@@ -274,6 +306,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         // Sponge Start - Don't send the state if this is a human. Fixes ghost items on client.
         if (!((EntityLivingBase) (Object) this instanceof EntityHuman)) {
             this.worldObj.setEntityState((EntityLivingBase) (Object) this, (byte) 3);
+        }
+        if (causeTracker != null && this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
+            this.tracksEntityDeaths = false;
+            causeTracker.completePhase();
         }
         // Sponge End
     }
@@ -449,19 +485,20 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                     // Sponge Start - notify the cause tracker
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
-                    final boolean tracksEntitySpecificDrops = CauseTracker.ENABLED && causeTracker.getStack().peekState().tracksEntityDeaths();
-                    if (!tracksEntitySpecificDrops) {
-                        causeTracker.switchToPhase(EntityPhase.State.DEATH, PhaseContext.start()
+                    final boolean enterDeathPhase = CauseTracker.ENABLED && !causeTracker.getStack().peekState().tracksEntityDeaths();
+                    if (enterDeathPhase) {
+                        final PhaseContext context = PhaseContext.start()
                                 .add(NamedCause.source(this))
-                                .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, source))
-                                .add(this.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).map(NamedCause::owner).orElse(null))
-                                .add(this.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).map(NamedCause::notifier).orElse(null))
+                                .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, source));
+                        this.getCreatorUser().ifPresent(context::owner);
+                        this.getNotifierUser().ifPresent(context::notifier);
+                        causeTracker.switchToPhase(EntityPhase.State.DEATH, context
                                 .addCaptures()
                                 .addEntityDropCaptures()
                                 .complete());
                     }
                     this.onDeath(source);
-                    if (!tracksEntitySpecificDrops) {
+                    if (enterDeathPhase) {
                         causeTracker.completePhase();
                     }
                     // Sponge End
@@ -531,7 +568,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             final Cause cause = DamageEventHandler.generateCauseFor(damageSource);
 
             DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(cause, originalFunctions, this, originalDamage);
-            Sponge.getEventManager().post(event);
+            if (damageSource != DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) { // Basically, don't throw an event if it's our own damage source
+                Sponge.getEventManager().post(event);
+            }
             if (event.isCancelled()) {
                 return false;
             }
@@ -621,7 +660,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 Transform<org.spongepowered.api.world.World> fromTransform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
                 Transform<org.spongepowered.api.world.World> toTransform = this.getTransform().setPosition(new Vector3d(this.posX, this.posY, this.posZ));
 
-                MoveEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform, false);
+                MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform, false);
                 if (event.isCancelled()) {
                     this.posX = d0;
                     this.posY = d1;
@@ -645,7 +684,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         {
             // Sponge start - this is technically a teleport, since it sends packets to players and calls 'updateEntityWithOptionalForce' - even though it doesn't really move the entity at all
             Transform<org.spongepowered.api.world.World> transform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
-            MoveEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform, false);
+            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform, false);
             if (event.isCancelled()) {
                 return false;
             }

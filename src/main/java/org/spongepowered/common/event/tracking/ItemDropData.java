@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase;
+package org.spongepowered.common.event.tracking;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

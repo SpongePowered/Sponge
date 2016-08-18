@@ -100,8 +100,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.PlayerPhase;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -442,7 +445,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // If coming from end, fire a teleport event for plugins
         if (conqueredEnd) {
             // When leaving the end, players are never placed inside the teleporter but instead "respawned" in the target world
-            MoveEntityEvent.Teleport teleportEvent = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entityPlayerMP, location);
+            MoveEntityEvent.Teleport teleportEvent = EntityUtil.handleDisplaceEntityTeleportEvent(entityPlayerMP, location);
             if (teleportEvent.isCancelled()) {
                 entityPlayerMP.playerConqueredTheEnd = false;
                 return entityPlayerMP;
@@ -596,7 +599,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
      */
     @Override
     public void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter) {
-        MoveEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, teleporter);
+        MoveEntityEvent.Teleport.Portal event = EntityUtil.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, teleporter);
         if (event == null || event.isCancelled()) {
             return;
         }
@@ -707,7 +710,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Override
     public void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world.Teleporter teleporter) {
         // rewritten completely to handle our portal event
-        MoveEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(entityIn, toWorld.provider.getDimensionType().getId(), teleporter);
+        MoveEntityEvent.Teleport.Portal event = EntityUtil
+                .handleDisplaceEntityPortalEvent(entityIn, toWorld.provider.getDimensionType().getId(), teleporter);
         if (event == null || event.isCancelled()) {
             return;
         }
@@ -761,6 +765,18 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         // Remove player reference from scoreboard
         ((IMixinServerScoreboard) ((Player) player).getScoreboard()).removePlayer(player, false);
+    }
+
+    @Redirect(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;removeEntity(Lnet/minecraft/entity/Entity;)V"))
+    private void onPlayerRemoveFromWorldFromDisconnect(WorldServer world, Entity player, EntityPlayerMP playerMP) {
+        final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
+        causeTracker.switchToPhase(PlayerPhase.State.PLAYER_LOGOUT, PhaseContext.start()
+                .add(NamedCause.source(playerMP))
+                .addCaptures()
+                .complete()
+        );
+        world.removeEntity(player);
+        causeTracker.completePhase();
     }
 
     @Inject(method = "saveAllPlayerData()V", at = @At("RETURN"))

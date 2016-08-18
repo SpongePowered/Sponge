@@ -28,9 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
-import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.MobSpawnerSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.common.AbstractBlockSpawnCauseBuilder;
 import org.spongepowered.api.event.cause.entity.spawn.common.AbstractSpawnCauseBuilder;
 
 public class SpongeMobSpawnerSpawnCauseBuilder extends AbstractSpawnCauseBuilder<MobSpawnerSpawnCause, MobSpawnerSpawnCause.Builder>

@@ -35,6 +35,7 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -44,8 +45,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Optional;
 
@@ -80,6 +83,28 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     private boolean interactPrimeCancelled;
     private boolean stateDirty;
     private boolean detonationCancelled;
+
+    private boolean isCorrectlyOverridden;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void onCreeperConstructedVerifyDeathCompletion(CallbackInfo callbackInfo) {
+
+    }
+
+    @Inject(method = "onDeath", at = @At("RETURN"))
+    private void onDeath(DamageSource damageSource, CallbackInfoReturnable<Boolean> ci) {
+        if (!this.worldObj.isRemote && this.tracksEntityDeaths) {
+            ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
+            this.tracksEntityDeaths = false;
+        }
+
+
+    }
+
+    @Override
+    public boolean properlyOverridesOnDeathForCauseTrackerCompletion() {
+        return this.isCorrectlyOverridden;
+    }
 
     // FusedExplosive Impl
 
@@ -161,19 +186,19 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
         } else if (isPrimed() && state == STATE_IDLE && !shouldDefuse(getCause(this.defuseCause))) {
             ci.cancel();
         } else if (getCreeperState() != state) {
-            stateDirty = true;
+            this.stateDirty = true;
         }
     }
 
     @Inject(method = "setCreeperState(I)V", at = @At("RETURN"))
     protected void postStateChange(int state, CallbackInfo ci) {
-        if (stateDirty) {
+        if (this.stateDirty) {
             if (state == STATE_PRIMED) {
                 postPrime(getCause(this.primeCause));
             } else if (state == STATE_IDLE) {
                 postDefuse(getCause(this.defuseCause));
             }
-            stateDirty = false;
+            this.stateDirty = false;
         }
     }
 

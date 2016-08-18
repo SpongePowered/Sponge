@@ -56,7 +56,7 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.event.tracking.phase.ItemDropData;
+import org.spongepowered.common.event.tracking.ItemDropData;
 
 import java.util.Collection;
 import java.util.Iterator;

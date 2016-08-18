@@ -88,13 +88,13 @@ public final class SpongeMessageHandler {
             Entity entity = sender.worldObj.getEntityByID(message.entityId);
             if (entity != null) {
                 IMixinEntity spongeEntity = (IMixinEntity) entity;
-                owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+                owner = spongeEntity.getCreatorUser();
+                notifier = spongeEntity.getNotifierUser();
             }
         }
 
-        ownerName = owner.isPresent() ? owner.get().getName() : "";
-        notifierName = notifier.isPresent() ? notifier.get().getName() : "";
+        ownerName = owner.map(User::getName).orElse("");
+        notifierName = notifier.map(User::getName).orElse("");
 
         channel.sendTo(player, new MessageTrackerDataResponse(ownerName, notifierName));
     }

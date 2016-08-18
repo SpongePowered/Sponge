@@ -26,8 +26,10 @@ package org.spongepowered.common.event.tracking.phase;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
@@ -52,7 +54,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.teleport.EntityTeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
-import org.spongepowered.api.event.entity.BreedEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -69,8 +70,6 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
-import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -143,10 +142,6 @@ public final class TickPhase extends TrackingPhase {
 
         }
 
-        public void appendPreBlockProtectedCheck(Cause.Builder builder, PhaseContext context, CauseTracker causeTracker) {
-
-        }
-
         public Cause generateTeleportCause(PhaseContext context) {
             return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.UNKNOWN).build()));
         }
@@ -159,12 +154,6 @@ public final class TickPhase extends TrackingPhase {
 
 
         abstract Location<World> getLocationSourceFromContext(PhaseContext context);
-
-        @Override
-        public void appendPreBlockProtectedCheck(Cause.Builder builder, PhaseContext context, CauseTracker causeTracker) {
-            TrackingUtil.getNotifierOrOwnerFromBlock(getLocationSourceFromContext(context))
-                    .ifPresent(user -> builder.named(NamedCause.notifier(user)));
-        }
 
         @Override
         public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
@@ -192,12 +181,6 @@ public final class TickPhase extends TrackingPhase {
 
 
         @Override
-        public void assignEntityCreator(PhaseContext context, Entity entity) {
-            TrackingUtil.getNotifierOrOwnerFromBlock(getLocationSourceFromContext(context))
-                    .ifPresent(user -> EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId()));
-        }
-
-        @Override
         public boolean canSwitchTo(IPhaseState state) {
             return super.canSwitchTo(state) || state == GenerationPhase.State.CHUNK_LOADING;
         }
@@ -215,7 +198,7 @@ public final class TickPhase extends TrackingPhase {
         @Override
         Location<World> getLocationSourceFromContext(PhaseContext context) {
             return context.getSource(BlockSnapshot.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking over a block!", context))
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over a block!", context))
                     .getLocation()
                     .get();
         }
@@ -223,11 +206,12 @@ public final class TickPhase extends TrackingPhase {
         @Override
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
             final BlockSnapshot tickingBlock = phaseContext.getSource(BlockSnapshot.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", phaseContext));
+                    .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Block!", phaseContext));
             final Optional<User> owner = phaseContext.getOwner();
             final Optional<User> notifier = phaseContext.getNotifier();
+            final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
+                    .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         // Separate experience from other entities
@@ -262,7 +246,9 @@ public final class TickPhase extends TrackingPhase {
                                 SpongeEventFactory.createSpawnEntityEvent(cause, nonExpEntities, causeTracker.getWorld());
                         SpongeImpl.postEvent(spawnEntityEvent);
                         for (Entity entity : spawnEntityEvent.getEntities()) {
-                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                            if (entityCreator != null) {
+                                EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                            }
                             causeTracker.getMixinWorld().forceSpawnEntity(entity);
                         }
                     });
@@ -282,7 +268,9 @@ public final class TickPhase extends TrackingPhase {
                                 SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld());
                         SpongeImpl.postEvent(spawnEntityEvent);
                         for (Entity entity : spawnEntityEvent.getEntities()) {
-                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                            if (entityCreator != null) {
+                                EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                            }
                             causeTracker.getMixinWorld().forceSpawnEntity(entity);
                         }
                     });
@@ -291,14 +279,14 @@ public final class TickPhase extends TrackingPhase {
         @Override
         public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
             final BlockSnapshot tickingBlock = context.getSource(BlockSnapshot.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", context));
+                    .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Block!", context));
             builder.named(NamedCause.notifier(tickingBlock));
         }
 
         @Override
         public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
             final BlockSnapshot tickingBlock = context.getSource(BlockSnapshot.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
             blockEvent.setCurrentTickBlock(tickingBlock);
             final Location<World> blockLocation = tickingBlock.getLocation().get();
             final WorldServer worldServer = (WorldServer) blockLocation.getExtent();
@@ -320,47 +308,14 @@ public final class TickPhase extends TrackingPhase {
         EntityTickPhaseState() {
         }
 
-        @Override
-        public void appendPreBlockProtectedCheck(Cause.Builder builder, PhaseContext context, CauseTracker causeTracker) {
-            context.getSource(Entity.class).ifPresent(entity -> {
-                final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
-                Stream.<Supplier<Optional<User>>>of(
-                        () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR),
-                        () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
-                )
-                        .map(Supplier::get)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .findFirst()
-                        .ifPresent(user -> builder.named(NamedCause.notifier(user)));
-            });
-        }
-
-        @Override
-        public void assignEntityCreator(PhaseContext context, Entity entity) {
-            final Entity tickingEntity = context.getSource(Entity.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", context));
-            final IMixinEntity mixinEntity = EntityUtil.toMixin(tickingEntity);
-            Stream.<Supplier<Optional<UUID>>>of(
-                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).map(Identifiable::getUniqueId),
-                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).map(Identifiable::getUniqueId)
-            )
-                    .map(Supplier::get)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .findFirst()
-                    .ifPresent(uuid -> EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid));
-
-        }
-
         @SuppressWarnings("unchecked")
         @Override
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
             final Entity tickingEntity = phaseContext.getSource(Entity.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
-            final IMixinEntity mixinEntity = EntityUtil.toMixin(tickingEntity);
-            final Optional<User> creator = mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-            final Optional<User> notifier = mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+                    .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
+            final Optional<User> creator = phaseContext.getOwner();
+            final Optional<User> notifier = phaseContext.getNotifier();
+            final User entityCreator = notifier.orElseGet(() -> creator.orElse(null));
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         final List<Entity> experience = new ArrayList<Entity>(entities.size());
@@ -403,7 +358,9 @@ public final class TickPhase extends TrackingPhase {
                                     SpongeEventFactory.createSpawnEntityEvent(builder.build(), experience, causeTracker.getWorld());
                             if (!SpongeImpl.postEvent(event)) {
                                 for (Entity entity : event.getEntities()) {
-                                    TrackingUtil.associateEntityCreator(phaseContext, entity, causeTracker.getMinecraftWorld());
+                                    if (entityCreator != null) {
+                                        EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                                    }
                                     causeTracker.getMixinWorld().forceSpawnEntity(entity);
                                 }
                             }
@@ -424,7 +381,9 @@ public final class TickPhase extends TrackingPhase {
                             SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), breeding, causeTracker.getWorld());
                             if (!SpongeImpl.postEvent(event)) {
                                 for (Entity entity : event.getEntities()) {
-                                    TrackingUtil.associateEntityCreator(phaseContext, entity, causeTracker.getMinecraftWorld());
+                                    if (entityCreator != null) {
+                                        EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                                    }
                                     causeTracker.getMixinWorld().forceSpawnEntity(entity);
                                 }
                             }
@@ -443,20 +402,9 @@ public final class TickPhase extends TrackingPhase {
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             for (Entity entity : event.getEntities()) {
-                                Stream.<Supplier<Optional<UUID>>>of(
-                                        () -> notifier
-                                                .map(Identifiable::getUniqueId),
-                                        () -> creator
-                                                .map(Identifiable::getUniqueId)
-                                )
-                                        .map(Supplier::get)
-                                        .filter(Optional::isPresent)
-                                        .map(Optional::get)
-                                        .findFirst()
-                                        .ifPresent(uuid ->
-                                                EntityUtil.toMixin(entity)
-                                                        .trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid)
-                                        );
+                                if (entityCreator != null) {
+                                    entity.setCreator(entityCreator.getUniqueId());
+                                }
                                 causeTracker.getMixinWorld().forceSpawnEntity(entity);
                             }
                         }
@@ -478,14 +426,15 @@ public final class TickPhase extends TrackingPhase {
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             for (Entity entity : event.getEntities()) {
-                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity),
-                                        causeTracker.getMinecraftWorld());
+                                if (entityCreator != null) {
+                                    EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                                }
                                 causeTracker.getMixinWorld().forceSpawnEntity(entity);
                             }
                         }
                     });
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
+                    .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
             phaseContext.getBlockItemDropSupplier()
                     .ifPresentAndNotEmpty(map -> {
                         final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
@@ -497,16 +446,15 @@ public final class TickPhase extends TrackingPhase {
                                         .block(snapshot)
                                         .type(InternalSpawnTypes.DROPPED_ITEM)
                                         .build());
-                                notifier.ifPresent(user -> builder.named(NamedCause.notifier(user)));
-                                creator.ifPresent(user -> builder.named(NamedCause.owner(user)));
+                                notifier.ifPresent(builder::notifier);
+                                creator.ifPresent(builder::owner);
                                 builder.build();
                                 final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
                                 final DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(builder.build(), items, causeTracker.getWorld());
                                 SpongeImpl.postEvent(event);
                                 if (!event.isCancelled()) {
                                     for (Entity entity : event.getEntities()) {
-                                        creator.ifPresent(user ->
-                                                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId()));
+                                        creator.ifPresent(user -> entity.setCreator(user.getUniqueId()));
                                         causeTracker.getMixinWorld().forceSpawnEntity(entity);
                                     }
                                 }
@@ -603,7 +551,7 @@ public final class TickPhase extends TrackingPhase {
         @Override
         public Cause generateTeleportCause(PhaseContext context) {
             final Entity entity = context.getSource(Entity.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking an entity!", context));
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking an entity!", context));
             return Cause
                     .source(EntityTeleportCause.builder()
                             .entity(entity)
@@ -613,20 +561,32 @@ public final class TickPhase extends TrackingPhase {
                     .build();
         }
 
+        @SuppressWarnings("OptionalGetWithoutIsPresent")
         @Override
-        public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction,
+        public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> transaction,
                 PhaseContext context) {
-            GeneralFunctions.processUserBreakage(blockChange, minecraftWorld, snapshotTransaction, context.getSource(Entity.class).get());
+            if (blockChange == BlockChange.BREAK) {
+                final Entity tickingEntity = context.getSource(Entity.class).get();
+                final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
+                for (EntityHanging entityHanging : EntityUtil.findHangingEntities(minecraftWorld, blockPos)) {
+                    if (entityHanging instanceof EntityItemFrame) {
+                        final EntityItemFrame frame = (EntityItemFrame) entityHanging;
+                        if (tickingEntity != null) {
+                            frame.dropItemOrSelf(EntityUtil.toNative(tickingEntity), true);
+                        }
+                        frame.setDead();
+                    }
+                }
+            }
         }
 
 
         @Override
         public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
             final Entity tickingEntity = context.getSource(Entity.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", context));
+                    .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
             builder.named(NamedCause.owner(tickingEntity));
-            final IMixinEntity mixinTickingEntity = EntityUtil.toMixin(tickingEntity);
-            mixinTickingEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).ifPresent(user -> builder.named(NamedCause.notifier(user)));
+            context.getNotifier().ifPresent(builder::notifier);
         }
 
         @Override
@@ -643,7 +603,7 @@ public final class TickPhase extends TrackingPhase {
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> {
-                        GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
+                        TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
                     });
 
             phaseContext.getCapturedEntitySupplier()
@@ -701,22 +661,23 @@ public final class TickPhase extends TrackingPhase {
         @Override
         Location<World> getLocationSourceFromContext(PhaseContext context) {
             return context.getSource(TileEntity.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking over a TileEntity!", context))
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over a TileEntity!", context))
                     .getLocation();
         }
 
         @Override
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
             final TileEntity tickingTile = phaseContext.getSource(TileEntity.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
+                    .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
             final PhaseContext.CaptureBlockSnapshotForTile capturedSnapshot = phaseContext
                     .firstNamed(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, PhaseContext.CaptureBlockSnapshotForTile.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a snapshot for a ticking tile entity!", phaseContext));
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a snapshot for a ticking tile entity!", phaseContext));
             final Optional<User> notifier = phaseContext.getNotifier();
             final Optional<User> owner = phaseContext.getOwner();
+            final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> {
-                        GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
+                        TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
                     });
 
             phaseContext.getCapturedEntitySupplier()
@@ -746,7 +707,9 @@ public final class TickPhase extends TrackingPhase {
                             SpongeImpl.postEvent(event);
                             if (!event.isCancelled()) {
                                 for (Entity entity : event.getEntities()) {
-                                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                    if (entityCreator != null) {
+                                        EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                                    }
                                     causeTracker.getMixinWorld().forceSpawnEntity(entity);
                                 }
                             }
@@ -765,7 +728,9 @@ public final class TickPhase extends TrackingPhase {
                         SpongeImpl.postEvent(spawnEntityEvent);
                         if (!spawnEntityEvent.isCancelled()) {
                             for (Entity entity : spawnEntityEvent.getEntities()) {
-                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                if (entityCreator != null) {
+                                    EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                                }
                                 causeTracker.getMixinWorld().forceSpawnEntity(entity);
                             }
                         }
@@ -787,7 +752,9 @@ public final class TickPhase extends TrackingPhase {
                         SpongeImpl.postEvent(spawnEntityEvent);
                         if (!spawnEntityEvent.isCancelled()) {
                             for (Entity entity : spawnEntityEvent.getEntities()) {
-                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                if (entityCreator != null) {
+                                    EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                                }
                                 causeTracker.getMixinWorld().forceSpawnEntity(entity);
                             }
                         }
@@ -797,14 +764,14 @@ public final class TickPhase extends TrackingPhase {
         @Override
         public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
             final TileEntity tickingTile = context.getSource(TileEntity.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a TileEntity!", context));
+                    .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
             builder.named(NamedCause.notifier(tickingTile));
         }
 
         @Override
         public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
             final TileEntity tickingTile = context.getSource(TileEntity.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
             blockEvent.setCurrentTickTileEntity(tickingTile);
             final Location<World> blockLocation = tickingTile.getLocation();
             final WorldServer worldServer = (WorldServer) blockLocation.getExtent();
@@ -852,7 +819,7 @@ public final class TickPhase extends TrackingPhase {
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .findFirst()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be throwing a block event for a tile entity or a snapshot but got none!",
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be throwing a block event for a tile entity or a snapshot but got none!",
                             context));
             final Vector3d position = location.getPosition();
             final BlockPos sourcePos = VecHelper.toBlockPos(position);
@@ -866,18 +833,12 @@ public final class TickPhase extends TrackingPhase {
         }
 
         @Override
-        public void assignEntityCreator(PhaseContext context, Entity entity) {
-            final BlockSnapshot tickingBlock = context.getSource(BlockSnapshot.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", context));
-            final Location<World> location = tickingBlock.getLocation().get();
-            TrackingUtil.getNotifierOrOwnerFromBlock(location)
-                    .ifPresent(user -> EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId()));
-        }
-
-        @Override
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+            final Optional<User> notifier = phaseContext.getNotifier();
+            final Optional<User> owner = phaseContext.getOwner();
+            final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
+                    .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         final Cause cause = Cause.source(InternalSpawnTypes.SpawnCauses.CUSTOM_SPAWN)
@@ -887,7 +848,9 @@ public final class TickPhase extends TrackingPhase {
                                 SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
                         SpongeImpl.postEvent(spawnEntityEvent);
                         for (Entity entity : spawnEntityEvent.getEntities()) {
-                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                            if (entityCreator != null) {
+                                EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                            }
                             causeTracker.getMixinWorld().forceSpawnEntity(entity);
                         }
                     });
@@ -904,7 +867,9 @@ public final class TickPhase extends TrackingPhase {
                                 SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld());
                         SpongeImpl.postEvent(spawnEntityEvent);
                         for (Entity entity : spawnEntityEvent.getEntities()) {
-                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                            if (entityCreator != null) {
+                                EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                            }
                             causeTracker.getMixinWorld().forceSpawnEntity(entity);
                         }
                     });
@@ -934,24 +899,17 @@ public final class TickPhase extends TrackingPhase {
         }
 
         @Override
-        public void assignEntityCreator(PhaseContext context, Entity entity) {
-            final Player player = context.getSource(Player.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Not ticking a player!", context));
-            EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
-        }
-
-        @Override
         public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
             blockEvent.setSourceUser(context.getSource(Player.class).get());
         }
 
         @Override
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
-            final Entity tickingEntity = phaseContext.getSource(Entity.class)
-                    .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
+            final Player player = phaseContext.getSource(Player.class)
+                    .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", phaseContext));
             phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
                 final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
-                        .entity(tickingEntity)
+                        .entity(player)
                         .type(InternalSpawnTypes.PASSIVE)
                         .build());
                 final SpawnEntityEvent
@@ -959,13 +917,13 @@ public final class TickPhase extends TrackingPhase {
                         SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, causeTracker.getWorld());
                 SpongeImpl.postEvent(spawnEntityEvent);
                 for (Entity entity : spawnEntityEvent.getEntities()) {
-                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                    EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
                     causeTracker.getMixinWorld().forceSpawnEntity(entity);
                 }
             });
             phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
                 final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
-                        .entity(tickingEntity)
+                        .entity(player)
                         .type(InternalSpawnTypes.DROPPED_ITEM)
                         .build());
                 final ArrayList<Entity> capturedEntities = new ArrayList<>();
@@ -978,12 +936,12 @@ public final class TickPhase extends TrackingPhase {
                         SpongeEventFactory.createSpawnEntityEvent(builder.build(), capturedEntities, causeTracker.getWorld());
                 SpongeImpl.postEvent(spawnEntityEvent);
                 for (Entity entity : spawnEntityEvent.getEntities()) {
-                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                    EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
                     causeTracker.getMixinWorld().forceSpawnEntity(entity);
                 }
             });
             phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
-                GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
+                TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
             });
         }
 
@@ -1014,7 +972,6 @@ public final class TickPhase extends TrackingPhase {
                         SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, causeTracker.getWorld());
                 SpongeImpl.postEvent(spawnEntityEvent);
                 for (Entity entity : spawnEntityEvent.getEntities()) {
-                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
                     causeTracker.getMixinWorld().forceSpawnEntity(entity);
                 }
             });
@@ -1032,12 +989,11 @@ public final class TickPhase extends TrackingPhase {
                         SpongeEventFactory.createSpawnEntityEvent(builder.build(), capturedEntities, causeTracker.getWorld());
                 SpongeImpl.postEvent(spawnEntityEvent);
                 for (Entity entity : spawnEntityEvent.getEntities()) {
-                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
                     causeTracker.getMixinWorld().forceSpawnEntity(entity);
                 }
             });
             phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
-                GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
+                TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
             });
         }
         @Override
@@ -1103,7 +1059,6 @@ public final class TickPhase extends TrackingPhase {
 
     @Override
     public void appendPreBlockProtectedCheck(Cause.Builder builder, IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker) {
-        ((TickPhaseState) phaseState).appendPreBlockProtectedCheck(builder, context, causeTracker);
         context.getSource(Player.class).ifPresent(player -> builder.named(NamedCause.notifier(player)));
     }
 

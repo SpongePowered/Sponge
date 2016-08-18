@@ -65,6 +65,10 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     Optional<User> getTrackedPlayer(String nbtKey);
 
+    Optional<User> getCreatorUser();
+
+    Optional<User> getNotifierUser();
+
     void trackEntityUniqueId(String nbtKey, @Nullable UUID uuid);
 
     NBTTagCompound getEntityData();

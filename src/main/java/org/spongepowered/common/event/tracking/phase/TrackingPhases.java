@@ -33,6 +33,7 @@ public final class TrackingPhases {
     public static final PacketPhase PACKET = new PacketPhase(TrackingPhases.GENERAL);
     public static final PluginPhase PLUGIN = new PluginPhase(null).addChild(TrackingPhases.ENTITY).addChild(TrackingPhases.BLOCK);
     public static final GenerationPhase GENERATION = new GenerationPhase(null);
+    public static final PlayerPhase PLAYER = new PlayerPhase(TrackingPhases.GENERAL);
 
     private TrackingPhases() {
     }

@@ -25,12 +25,9 @@
 package org.spongepowered.common.event.spawn;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.common.AbstractEntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.common.AbstractSpawnCause;
 import org.spongepowered.api.world.weather.Weather;
-import org.spongepowered.common.weather.SpongeWeather;
 
 public class SpongeWeatherSpawnCause extends AbstractSpawnCause implements WeatherSpawnCause {
 

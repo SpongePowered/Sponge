@@ -29,21 +29,17 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
-import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.event.forge.IMixinWorldTickEvent;
@@ -84,25 +80,17 @@ public final class PluginPhase extends TrackingPhase {
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final IMixinWorldTickEvent worldTickEvent = phaseContext
                         .firstNamed(InternalNamedCauses.Tracker.TICK_EVENT, IMixinWorldTickEvent.class)
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a WorldTickEvent but we're not!!!", phaseContext));
+                        .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a WorldTickEvent but we're not!!!", phaseContext));
                 final Object listener = phaseContext.getSource(Object.class)
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
+                        .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
 
                 phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
                     if (causeTracker.getMinecraftWorld() != worldTickEvent.getWorld()
                         && SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().reportWorldTickDifferences()) {
                         logWarningOfDifferentWorldchanges(causeTracker, worldTickEvent, listener);
                     }
-                    GeneralFunctions.processBlockCaptures(blocks, causeTracker, this, phaseContext);
+                    TrackingUtil.processBlockCaptures(blocks, causeTracker, this, phaseContext);
                 });
-            }
-
-            @Override
-            public void assignEntityCreator(PhaseContext context, Entity entity) {
-                context.getCapturedPlayer()
-                        .ifPresent(player -> EntityUtil.toMixin(entity)
-                                .trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId())
-                        );
             }
 
             @Override
@@ -133,26 +121,18 @@ public final class PluginPhase extends TrackingPhase {
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final IMixinWorldTickEvent worldTickEvent = phaseContext
                         .firstNamed(InternalNamedCauses.Tracker.TICK_EVENT, IMixinWorldTickEvent.class)
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a WorldTickEvent but we're not!!!", phaseContext));
+                        .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a WorldTickEvent but we're not!!!", phaseContext));
                 final Object listener = phaseContext.getSource(Object.class)
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
+                        .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
 
                 phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
                     if (causeTracker.getMinecraftWorld() != worldTickEvent.getWorld()
                         && SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().reportWorldTickDifferences()) {
                         logWarningOfDifferentWorldchanges(causeTracker, worldTickEvent, listener);
                     }
-                    GeneralFunctions.processBlockCaptures(blocks, causeTracker, this, phaseContext);
+                    TrackingUtil.processBlockCaptures(blocks, causeTracker, this, phaseContext);
 
                 });
-            }
-
-            @Override
-            public void assignEntityCreator(PhaseContext context, Entity entity) {
-                context.getCapturedPlayer()
-                        .ifPresent(player -> EntityUtil.toMixin(entity)
-                                .trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId())
-                        );
             }
 
             @Override
@@ -182,22 +162,14 @@ public final class PluginPhase extends TrackingPhase {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final Object listener = phaseContext.getSource(Object.class)
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
+                        .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
 
                 phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
                     if (SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().reportWorldTickDifferences()) {
                         logWarningOfDifferentWorldchanges(causeTracker, listener);
                     }
-                    GeneralFunctions.processBlockCaptures(blocks, causeTracker, this, phaseContext);
+                    TrackingUtil.processBlockCaptures(blocks, causeTracker, this, phaseContext);
                 });
-            }
-
-            @Override
-            public void assignEntityCreator(PhaseContext context, Entity entity) {
-                context.getCapturedPlayer()
-                        .ifPresent(player -> EntityUtil.toMixin(entity)
-                                .trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId())
-                        );
             }
 
             @Override
@@ -227,22 +199,14 @@ public final class PluginPhase extends TrackingPhase {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final Object listener = phaseContext.getSource(Object.class)
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
+                        .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
 
                 phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
                     if (SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().reportWorldTickDifferences()) {
                         logWarningOfDifferentWorldchanges(causeTracker, listener);
                     }
-                    GeneralFunctions.processBlockCaptures(blocks, causeTracker, this, phaseContext);
+                    TrackingUtil.processBlockCaptures(blocks, causeTracker, this, phaseContext);
                 });
-            }
-
-            @Override
-            public void assignEntityCreator(PhaseContext context, Entity entity) {
-                context.getCapturedPlayer()
-                        .ifPresent(player -> EntityUtil.toMixin(entity)
-                                .trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId())
-                        );
             }
 
             @Override
@@ -344,7 +308,7 @@ public final class PluginPhase extends TrackingPhase {
 
             });
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(snapshots -> GeneralFunctions.processBlockCaptures(snapshots, causeTracker, state, phaseContext));
+                    .ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, causeTracker, state, phaseContext));
         } else if (state instanceof Listener) {
             ((Listener) state).processPostTick(causeTracker, phaseContext);
         }

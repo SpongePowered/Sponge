@@ -116,6 +116,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
 import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -123,7 +124,13 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.phase.EntityPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
@@ -209,6 +216,28 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (!SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause)) {
             return;
         }
+        // Double check that the CauseTracker is already capturing the Death phase
+        final CauseTracker causeTracker;
+        final boolean tracksEntityDeaths;
+        if (!this.worldObj.isRemote) {
+            causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+            final PhaseData peek = causeTracker.getStack().peek();
+            final IPhaseState state = peek.state;
+            tracksEntityDeaths = CauseTracker.ENABLED && causeTracker.getStack().peekState().tracksEntityDeaths();
+            if (state != EntityPhase.State.DEATH && !state.tracksEntityDeaths()) {
+                if (!tracksEntityDeaths) {
+                    causeTracker.switchToPhase(EntityPhase.State.DEATH, PhaseContext.start()
+                            .add(NamedCause.source(this))
+                            .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, cause))
+                            .addCaptures()
+                            .addEntityDropCaptures()
+                            .complete());
+                }
+            }
+        } else {
+            causeTracker = null;
+            tracksEntityDeaths = false;
+        }
 
         boolean flag = this.worldObj.getGameRules().getBoolean("showDeathMessages");
         this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
@@ -251,6 +280,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.addStat(StatList.DEATHS);
         this.takeStat(StatList.TIME_SINCE_DEATH);
         this.getCombatTracker().reset();
+        // Sponge Start - Finish cause tracker
+        if (causeTracker != null && tracksEntityDeaths) {
+            causeTracker.completePhase();
+        }
     }
 
     @Override
