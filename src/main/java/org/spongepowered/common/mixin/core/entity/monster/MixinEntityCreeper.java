@@ -32,10 +32,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.DamageSource;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -88,7 +88,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onCreeperConstructedVerifyDeathCompletion(CallbackInfo callbackInfo) {
-
+        this.isCorrectlyOverridden = ((EntityCreeper) (Object) this).getClass() == EntityCreeper.class;
     }
 
     @Inject(method = "onDeath", at = @At("RETURN"))
@@ -97,8 +97,6 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
             ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
             this.tracksEntityDeaths = false;
         }
-
-
     }
 
     @Override
