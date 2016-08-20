@@ -254,7 +254,7 @@ public class SpongeCommandManager implements CommandManager {
     public CommandResult process(CommandSource source, String commandLine) {
         CommandResult commandResult = CommandResult.empty();
         final String[] argSplit = commandLine.split(" ", 2);
-        final org.spongepowered.api.event.command.CommandProcessEvent.Pre eventPre = SpongeEventFactory.createCommandProcessEventPre(Cause.of(NamedCause.source(source)), argSplit.length > 1 ? argSplit[1] : "", argSplit[0]);
+        final CommandProcessEvent.Pre eventPre = SpongeEventFactory.createCommandProcessEventPre(Cause.of(NamedCause.source(source)), argSplit.length > 1 ? argSplit[1] : "", argSplit[0]);
         Sponge.getGame().getEventManager().post(eventPre);
         if (eventPre.isCancelled()) {
             return commandResult;
