@@ -24,29 +24,19 @@
  */
 package org.spongepowered.common.command;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.command.CommandMessageFormatting.error;
-import static org.spongepowered.api.util.SpongeApiTranslationHelper.t;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandCallable;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandManager;
-import org.spongepowered.api.command.CommandMapping;
-import org.spongepowered.api.command.CommandPermissionException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.InvocationCommandException;
+import org.spongepowered.api.command.*;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
 import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.command.CommandProcessEvent;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -57,23 +47,17 @@ import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
+import javax.annotation.Nullable;
+import javax.inject.Inject;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-import javax.activation.CommandMap;
-import javax.annotation.Nullable;
-import javax.inject.Inject;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.api.command.CommandMessageFormatting.error;
+import static org.spongepowered.api.util.SpongeApiTranslationHelper.t;
 
 /**
  * A simple implementation of {@link CommandManager}.
@@ -255,7 +239,7 @@ public class SpongeCommandManager implements CommandManager {
     public CommandResult process(CommandSource source, String commandLine) {
         final String[] argSplit = commandLine.split(" ", 2);
         final SendCommandEvent event = SpongeEventFactory.createSendCommandEvent(Cause.of(NamedCause.source(source)),
-            argSplit.length > 1 ? argSplit[1] : "", argSplit[0], CommandResult.empty());
+                argSplit.length > 1 ? argSplit[1] : "", argSplit[0], CommandResult.empty());
         Sponge.getGame().getEventManager().post(event);
         if (event.isCancelled()) {
             return event.getResult();
@@ -269,9 +253,17 @@ public class SpongeCommandManager implements CommandManager {
             commandLine = commandLine + ' ' + event.getArguments();
         }
 
+        CommandResult commandResult = CommandResult.empty();
+
         try {
             try {
-                return this.dispatcher.process(source, commandLine);
+                final CommandProcessEvent.Before eventBefore = SpongeEventFactory.creatCommandProcessEventBefore(Cause.of(NamedCause.source(source)), argSplit.length > 1 ? argSplit[1] : "", argSplit[0]);
+                Sponge.getGame().getEventManager().post(eventBefore);
+                if (eventBefore.isCancelled()) {
+                    return commandResult;
+                }
+
+                commandResult = this.dispatcher.process(source, commandLine);
             } catch (InvocationCommandException ex) {
                 if (ex.getCause() != null) {
                     throw ex.getCause();
@@ -314,7 +306,11 @@ public class SpongeCommandManager implements CommandManager {
             this.log.error(TextSerializers.PLAIN.serialize(t("Error occurred while executing command '%s' for source %s: %s", commandLine, source.toString(), String
                     .valueOf(thr.getMessage()))), thr);
         }
-        return CommandResult.empty();
+
+        final CommandProcessEvent.After eventAfter = SpongeEventFactory.creatCommandProcessEventAfter(Cause.of(NamedCause.source(source)), argSplit.length > 1 ? argSplit[1] : "", argSplit[0], commandResult);
+        Sponge.getGame().getEventManager().post(eventAfter);
+
+        return commandResult;
     }
 
     @Override
