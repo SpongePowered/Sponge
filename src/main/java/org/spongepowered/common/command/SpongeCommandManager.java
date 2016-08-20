@@ -257,7 +257,7 @@ public class SpongeCommandManager implements CommandManager {
 
         try {
             try {
-                final CommandProcessEvent.Before eventBefore = SpongeEventFactory.creatCommandProcessEventBefore(Cause.of(NamedCause.source(source)), argSplit.length > 1 ? argSplit[1] : "", argSplit[0]);
+                final CommandProcessEvent.Pre eventBefore = SpongeEventFactory.createCommandProcessEventPre(Cause.of(NamedCause.source(source)), argSplit.length > 1 ? argSplit[1] : "", argSplit[0]);
                 Sponge.getGame().getEventManager().post(eventBefore);
                 if (eventBefore.isCancelled()) {
                     return commandResult;
@@ -307,7 +307,7 @@ public class SpongeCommandManager implements CommandManager {
                     .valueOf(thr.getMessage()))), thr);
         }
 
-        final CommandProcessEvent.After eventAfter = SpongeEventFactory.creatCommandProcessEventAfter(Cause.of(NamedCause.source(source)), argSplit.length > 1 ? argSplit[1] : "", argSplit[0], commandResult);
+        final CommandProcessEvent.Post eventAfter = SpongeEventFactory.createCommandProcessEventPost(Cause.of(NamedCause.source(source)), argSplit.length > 1 ? argSplit[1] : "", argSplit[0], commandResult);
         Sponge.getGame().getEventManager().post(eventAfter);
 
         return commandResult;
