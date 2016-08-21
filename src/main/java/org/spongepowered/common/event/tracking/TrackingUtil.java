@@ -416,7 +416,12 @@ public final class TrackingUtil {
         );
         context.getNotifier().ifPresent(builder::notifier);
         context.getOwner().ifPresent(builder::owner);
-        state.getPhase().associateAdditionalCauses(state, context, builder, causeTracker);
+        try {
+            state.getPhase().associateAdditionalCauses(state, context, builder, causeTracker);
+        } catch (Exception e) {
+            // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
+            // try catch to avoid bombing on performing block changes.
+        }
         final org.spongepowered.api.world.World world = causeTracker.getWorld();
         // Creates the block events accordingly to the transaction arrays
         iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world); // Needs to throw events
@@ -657,7 +662,9 @@ public final class TrackingUtil {
         SpongeImpl.postEvent(destruct);
         if (!destruct.isCancelled()) {
             for (Entity entity : destruct.getEntities()) {
-                EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                if (entityCreator != null) {
+                    EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                }
                 causeTracker.getMixinWorld().forceSpawnEntity(entity);
             }
         }

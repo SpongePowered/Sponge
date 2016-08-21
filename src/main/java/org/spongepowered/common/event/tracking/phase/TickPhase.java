@@ -1030,7 +1030,6 @@ public final class TickPhase extends TrackingPhase {
 
     @Override
     public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
-        ((TickPhaseState) state).associateAdditionalBlockChangeCauses(context, builder, causeTracker);
     }
 
     @Override
