@@ -574,7 +574,7 @@ public final class WorldManager {
                 ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
             }
             
-            if(!properties.getWorldName().equals(worldName)) {
+            if (!properties.getWorldName().equals(worldName)) {
             	((IMixinWorldInfo) properties).setWorldName(worldName);
             }
 
