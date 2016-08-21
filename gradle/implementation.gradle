@@ -83,6 +83,7 @@ shadowJar {
         include dependency('org.xerial:sqlite-jdbc')
 
         include dependency('com.github.ben-manes.caffeine:caffeine')
+        include dependency('com.github.ben-manes.caffeine:guava')
     }
 
     // We include multiple JDBC drivers, so we need to merge the service file to enable them all
