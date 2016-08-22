@@ -573,6 +573,10 @@ public final class WorldManager {
             if (((IMixinWorldInfo) properties).getDimensionId() == null || ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
                 ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
             }
+            
+            if (!properties.getWorldName().equals(worldName)) {
+            	((IMixinWorldInfo) properties).setWorldName(worldName);
+            }
 
             registerWorldProperties(properties);
 
