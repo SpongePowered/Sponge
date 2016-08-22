@@ -60,7 +60,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
     @Shadow public int currentItem;
     @Shadow public EntityPlayer player;
     @Shadow @Final public ItemStack[] mainInventory;
-    @Shadow @Final public ItemStack[] armorInventory;
+    @Shadow @Final private ItemStack[][] allInventories;
 
     @Shadow public abstract int getInventoryStackLimit();
 
@@ -128,23 +128,20 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
 
     /**
      * @author blood - October 7th, 2015
+     * @author Minecrell - August 22nd, 2016 - Updated to 1.10
      * @reason Prevents inventory from being cleared until after events.
      */
     @Overwrite
     public void dropAllItems() {
-        int i;
-
-        for (i = 0; i < this.mainInventory.length; ++i) {
-            if (this.mainInventory[i] != null) {
-                this.player.dropItem(this.mainInventory[i], true, false);
-                // this.mainInventory[i] = null;  // Sponge - we handle this in EntityPlayer onDeath
-            }
-        }
-
-        for (i = 0; i < this.armorInventory.length; ++i) {
-            if (this.armorInventory[i] != null) {
-                this.player.dropItem(this.armorInventory[i], true, false);
-                //this.armorInventory[i] = null; // Sponge - we handle this in EntityPlayer onDeath
+        for (ItemStack[] aitemstack : this.allInventories)
+        {
+            for (int i = 0; i < aitemstack.length; ++i)
+            {
+                if (aitemstack[i] != null)
+                {
+                    this.player.dropItem(aitemstack[i], true, false);
+                    //aitemstack[i] = null; // Sponge - we handle this after calling the death event
+                }
             }
         }
     }
