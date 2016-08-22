@@ -85,7 +85,7 @@ public abstract class MixinCommandTeleport extends CommandBase {
                 // Guard against any possible re-entrance
                 boolean shouldNotify = shouldNotifyCommandListener;
 
-                func_189862_a(entity, commandbase$coordinatearg, commandbase$coordinatearg1, commandbase$coordinatearg2, commandbase$coordinatearg3, commandbase$coordinatearg4);
+                doTeleport(entity, commandbase$coordinatearg, commandbase$coordinatearg1, commandbase$coordinatearg2, commandbase$coordinatearg3, commandbase$coordinatearg4);
                 if (shouldNotifyCommandListener) {
                     notifyCommandListener(sender, this, "commands.tp.success.coordinates", new Object[] {entity.getName(), Double.valueOf(commandbase$coordinatearg.getResult()), Double.valueOf(commandbase$coordinatearg1.getResult()), Double.valueOf(commandbase$coordinatearg2.getResult())});
                 }
@@ -99,7 +99,7 @@ public abstract class MixinCommandTeleport extends CommandBase {
      * @author Aaron1011 - August 15, 2016 - Muliple modification points are needed, so an overwrite is easier
      */
     @Overwrite
-    private static void func_189862_a(Entity p_189862_0_, CommandBase.CoordinateArg p_189862_1_, CommandBase.CoordinateArg p_189862_2_, CommandBase.CoordinateArg p_189862_3_, CommandBase.CoordinateArg p_189862_4_, CommandBase.CoordinateArg p_189862_5_)
+    private static void doTeleport(Entity p_189862_0_, CommandBase.CoordinateArg p_189862_1_, CommandBase.CoordinateArg p_189862_2_, CommandBase.CoordinateArg p_189862_3_, CommandBase.CoordinateArg p_189862_4_, CommandBase.CoordinateArg p_189862_5_)
     {
         if (p_189862_0_ instanceof EntityPlayerMP)
         {

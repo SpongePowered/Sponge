@@ -30,7 +30,6 @@ import net.minecraft.command.CommandException;
 import net.minecraft.command.CommandTP;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.WrongUsageException;
-import net.minecraft.command.server.CommandTeleport;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -41,7 +40,6 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -50,7 +48,7 @@ import java.util.Set;
 public abstract class MixinCommandTP extends CommandBase {
 
     // This boolean is added in order to make minimal changes to 'execute'.
-    // It is set to true if the events fired in 'func_189863_a' are not cancelled.
+    // It is set to true if the events fired in 'teleportEntityToCoordinates' are not cancelled.
     // This allows us to prevent calling 'notifyCommandListener' if the event is cancelled.
     private static boolean shouldNotifyCommandListener = false;
 
@@ -106,7 +104,7 @@ public abstract class MixinCommandTP extends CommandBase {
                     // Guard against any possible re-entrance
                     boolean shouldNotify = shouldNotifyCommandListener;
 
-                    func_189863_a(entity, commandbase$coordinatearg, commandbase$coordinatearg1, commandbase$coordinatearg2, commandbase$coordinatearg3, commandbase$coordinatearg4);
+                    teleportEntityToCoordinates(entity, commandbase$coordinatearg, commandbase$coordinatearg1, commandbase$coordinatearg2, commandbase$coordinatearg3, commandbase$coordinatearg4);
                     if (shouldNotifyCommandListener) {
                         notifyCommandListener(sender, this, "commands.tp.success.coordinates", new Object[] {entity.getName(), Double.valueOf(commandbase$coordinatearg.getResult()), Double.valueOf(commandbase$coordinatearg1.getResult()), Double.valueOf(commandbase$coordinatearg2.getResult())});
                     }
@@ -162,7 +160,7 @@ public abstract class MixinCommandTP extends CommandBase {
      * @author Aaron1011 - August 15, 2016 - Muliple modification points are needed, so an overwrite is easier
      */
     @Overwrite
-    private static void func_189863_a(Entity p_189863_0_, CommandBase.CoordinateArg p_189863_1_, CommandBase.CoordinateArg p_189863_2_, CommandBase.CoordinateArg p_189863_3_, CommandBase.CoordinateArg p_189863_4_, CommandBase.CoordinateArg p_189863_5_)
+    private static void teleportEntityToCoordinates(Entity p_189863_0_, CommandBase.CoordinateArg p_189863_1_, CommandBase.CoordinateArg p_189863_2_, CommandBase.CoordinateArg p_189863_3_, CommandBase.CoordinateArg p_189863_4_, CommandBase.CoordinateArg p_189863_5_)
     {
         if (p_189863_0_ instanceof EntityPlayerMP)
         {
