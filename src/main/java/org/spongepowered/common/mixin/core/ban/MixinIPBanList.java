@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.ban;
 
+import io.netty.channel.local.LocalAddress;
 import net.minecraft.server.management.UserList;
 import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListEntry;
@@ -33,7 +34,9 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.NetworkUtil;
 
 import java.io.File;
 import java.net.InetAddress;
@@ -46,7 +49,7 @@ import java.util.List;
 @Mixin(UserListIPBans.class) // This is a bad MCP name, it's really IPBanList
 public abstract class MixinIPBanList extends UserList<String, UserListIPBansEntry> {
 
-    @Shadow public abstract String addressToString(SocketAddress address);
+    private static final String LOCAL_ADDRESS = "local";
 
     public MixinIPBanList(File saveFile) {
         super(saveFile);
@@ -54,7 +57,7 @@ public abstract class MixinIPBanList extends UserList<String, UserListIPBansEntr
 
     @Override
     public boolean hasEntry(String object) {
-        if (object.equals("local")) { // Check for single player
+        if (object.equals(LOCAL_ADDRESS)) { // Check for single player
             return false;
         }
 
@@ -67,7 +70,7 @@ public abstract class MixinIPBanList extends UserList<String, UserListIPBansEntr
 
     @Override
     public UserListIPBansEntry getEntry(String object) {
-        if (object.equals("local")) { // Check for single player
+        if (object.equals(LOCAL_ADDRESS)) { // Check for single player
             return null;
         }
 
@@ -80,7 +83,7 @@ public abstract class MixinIPBanList extends UserList<String, UserListIPBansEntr
 
     @Override
     public void removeEntry(String object) {
-        if (object.equals("local")) { // Check for single player
+        if (object.equals(LOCAL_ADDRESS)) { // Check for single player
             return;
         }
 
@@ -109,4 +112,15 @@ public abstract class MixinIPBanList extends UserList<String, UserListIPBansEntr
     public boolean isEmpty() {
         return Sponge.getServiceManager().provideUnchecked(BanService.class).getIpBans().isEmpty();
     }
+
+    /**
+     * @author Minecrell - August 22nd, 2016
+     * @reason Use InetSocketAddress#getHostString() where possible (instead of
+     *     inspecting SocketAddress#toString()) to support IPv6 addresses
+     */
+    @Overwrite
+    public String addressToString(SocketAddress address) {
+        return NetworkUtil.getHostString(address);
+    }
+
 }

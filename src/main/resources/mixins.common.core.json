@@ -168,6 +168,8 @@
         "command.MixinSubject",
         "command.MixinEntitySelector",
         "command.MixinEntitySelectorScore",
+        "command.server.MixinCommandBanIp",
+        "command.server.MixinCommandPardonIp",
         "command.server.MixinCommandSummon",
         "command.server.MixinCommandTeleport",
         "command.server.MixinCommandTP",

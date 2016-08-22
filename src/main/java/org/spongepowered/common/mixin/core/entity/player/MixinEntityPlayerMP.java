@@ -30,6 +30,7 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
+import io.netty.channel.local.LocalAddress;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
@@ -145,9 +146,12 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LanguageUtil;
+import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
@@ -399,6 +403,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public PlayerConnection getConnection() {
         return (PlayerConnection) this.connection;
+    }
+
+    /**
+     * @author Minecrell - August 22nd, 2016
+     * @reason Use InetSocketAddress#getHostString() where possible (instead of
+     *     inspecting SocketAddress#toString()) to support IPv6 addresses
+     */
+    @Overwrite
+    public String getPlayerIP() {
+        return NetworkUtil.getHostString(this.connection.netManager.getRemoteAddress());
     }
 
     // this needs to be overridden from EntityPlayer so we can force a resend of the experience level
