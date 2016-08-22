@@ -194,6 +194,7 @@ public final class SpongeImplHooks {
     }
 
     public static int getChunkBlockLightOpacity(IBlockState state, net.minecraft.world.World worldObj, int x, int y, int z) {
-        return 0;
+        return state.getLightOpacity();
     }
+
 }
