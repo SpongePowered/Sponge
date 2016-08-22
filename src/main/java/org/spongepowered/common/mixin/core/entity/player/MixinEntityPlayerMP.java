@@ -30,7 +30,6 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
-import io.netty.channel.local.LocalAddress;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
@@ -150,8 +149,6 @@ import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;

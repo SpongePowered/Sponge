@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.ban;
 
-import io.netty.channel.local.LocalAddress;
+import static org.spongepowered.common.util.NetworkUtil.LOCAL_ADDRESS;
+
 import net.minecraft.server.management.UserList;
-import net.minecraft.server.management.UserListBans;
-import net.minecraft.server.management.UserListEntry;
 import net.minecraft.server.management.UserListIPBans;
 import net.minecraft.server.management.UserListIPBansEntry;
 import org.spongepowered.api.Sponge;
@@ -35,7 +34,6 @@ import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.NetworkUtil;
 
 import java.io.File;
@@ -48,8 +46,6 @@ import java.util.List;
 
 @Mixin(UserListIPBans.class) // This is a bad MCP name, it's really IPBanList
 public abstract class MixinIPBanList extends UserList<String, UserListIPBansEntry> {
-
-    private static final String LOCAL_ADDRESS = "local";
 
     public MixinIPBanList(File saveFile) {
         super(saveFile);
