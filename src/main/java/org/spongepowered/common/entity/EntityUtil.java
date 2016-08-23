@@ -58,7 +58,6 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.DimensionType;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderEnd;
@@ -292,7 +291,6 @@ public final class EntityUtil {
         final IMixinPlayerList mixinPlayerList = (IMixinPlayerList) mcServer.getPlayerList();
         final IMixinEntity mixinEntity = (IMixinEntity) entityIn;
         final Transform<World> fromTransform = mixinEntity.getTransform();
-        final int fromDimensionId = entityIn.dimension;
         final WorldServer fromWorld = ((WorldServer) entityIn.worldObj);
         final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
         // handle the end
@@ -700,43 +698,37 @@ public final class EntityUtil {
         toWorld.getChunkProvider().loadChunk((int) entity.posX >> 4, (int) entity.posZ >> 4);
 
         if (entity instanceof EntityPlayerMP && ((EntityPlayerMP) entity).connection != null) {
-            EntityPlayerMP entityplayermp1 = (EntityPlayerMP) entity;
-            final IMixinWorldServer toMixinWorld = (IMixinWorldServer) toWorld;
-            final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
+            EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entity;
             // Support vanilla clients going into custom dimensions
-            final DimensionType fromClientDimensionType = WorldManager.getClientDimensionType(fromWorld.provider.getDimensionType());
-            final DimensionType toClientDimensionType = WorldManager.getClientDimensionType(toWorld.provider.getDimensionType());
-            // Support vanilla clients going into custom dimensions
-            final Integer worldDimensionId = ((IMixinWorldServer) toWorld).getDimensionId();
-            if (((IMixinEntityPlayerMP) entityplayermp1).usesCustomClient()) {
-                WorldManager.sendDimensionRegistration(entityplayermp1, toWorld.provider);
+            final int fromDimensionId = WorldManager.getDimensionId(fromWorld.provider);
+            final int toDimensionId = WorldManager.getDimensionId(toWorld.provider);
+            if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
+                WorldManager.sendDimensionRegistration(entityPlayerMP, toWorld.provider);
             } else {
-                final int fromClientDimensionTypeId = fromClientDimensionType.getId();
-                final int toClientDimensionTypeId = toClientDimensionType.getId();
                 // Force vanilla client to refresh their chunk cache if same dimension
-                if (currentDim != targetDim && fromClientDimensionTypeId == toClientDimensionTypeId) {
-                    entityplayermp1.connection.sendPacket(
-                            new SPacketRespawn(toClientDimensionTypeId >= 0 ? -1 : 0, toWorld.getDifficulty(),
-                                    toWorld.getWorldInfo().getTerrainType(), entityplayermp1.interactionManager.getGameType()));
+                if (currentDim != targetDim && fromDimensionId == toDimensionId) {
+                    entityPlayerMP.connection.sendPacket(
+                            new SPacketRespawn(toDimensionId >= 0 ? -1 : 0, toWorld.getDifficulty(),
+                                    toWorld.getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
                 }
             }
 
-            entityplayermp1.connection.sendPacket(
-                    new SPacketRespawn(toClientDimensionType.getId(), toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                            entityplayermp1.interactionManager.getGameType()));
+            entityPlayerMP.connection.sendPacket(
+                    new SPacketRespawn(toDimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
+                            entityPlayerMP.interactionManager.getGameType()));
             entity.setWorld(toWorld);
-            entityplayermp1.connection.setPlayerLocation(entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ,
-                    entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
-            entityplayermp1.setSneaking(false);
-            mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
-            toWorld.getPlayerChunkMap().addPlayer(entityplayermp1);
-            toWorld.spawnEntityInWorld(entityplayermp1);
-            mcServer.getPlayerList().getPlayerList().add(entityplayermp1);
-            entityplayermp1.interactionManager.setWorld(toWorld);
-            entityplayermp1.addSelfToInternalCraftingInventory();
-            entityplayermp1.setHealth(entityplayermp1.getHealth());
-            for (Object effect : entityplayermp1.getActivePotionEffects()) {
-                entityplayermp1.connection.sendPacket(new SPacketEntityEffect(entityplayermp1.getEntityId(), (PotionEffect) effect));
+            entityPlayerMP.connection.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
+                    entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
+            entityPlayerMP.setSneaking(false);
+            mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
+            toWorld.getPlayerChunkMap().addPlayer(entityPlayerMP);
+            toWorld.spawnEntityInWorld(entityPlayerMP);
+            mcServer.getPlayerList().getPlayerList().add(entityPlayerMP);
+            entityPlayerMP.interactionManager.setWorld(toWorld);
+            entityPlayerMP.addSelfToInternalCraftingInventory();
+            entityPlayerMP.setHealth(entityPlayerMP.getHealth());
+            for (Object effect : entityPlayerMP.getActivePotionEffects()) {
+                entityPlayerMP.connection.sendPacket(new SPacketEntityEffect(entityPlayerMP.getEntityId(), (PotionEffect) effect));
             }
         } else {
             entity.setWorld(toWorld);

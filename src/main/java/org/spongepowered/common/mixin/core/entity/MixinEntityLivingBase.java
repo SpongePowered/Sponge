@@ -657,20 +657,24 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             if (flag1)
             {
                 // Sponge start
-                Transform<org.spongepowered.api.world.World> fromTransform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
-                Transform<org.spongepowered.api.world.World> toTransform = this.getTransform().setPosition(new Vector3d(this.posX, this.posY, this.posZ));
-
-                MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform, false);
-                if (event.isCancelled()) {
-                    this.posX = d0;
-                    this.posY = d1;
-                    this.posZ = d2;
-                    return false;
+                if (!world.isRemote) {
+                    Transform<org.spongepowered.api.world.World> fromTransform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
+                    Transform<org.spongepowered.api.world.World> toTransform = this.getTransform().setPosition(new Vector3d(this.posX, this.posY, this.posZ));
+    
+                    MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform, false);
+                    if (event.isCancelled()) {
+                        this.posX = d0;
+                        this.posY = d1;
+                        this.posZ = d2;
+                        return false;
+                    }
+                    Vector3d position = event.getToTransform().getPosition();
+                    this.rotationYaw = (float) event.getToTransform().getYaw();
+                    this.rotationPitch = (float) event.getToTransform().getPitch();
+                    this.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
+                } else {
+                    this.setPositionAndUpdate(this.posX, this.posY, this.posZ);
                 }
-                Vector3d position = event.getToTransform().getPosition();
-                this.rotationYaw = (float) event.getToTransform().getYaw();
-                this.rotationPitch = (float) event.getToTransform().getPitch();
-                this.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
                 // Sponge end
 
                 if (world.getCollisionBoxes((Entity) (Object) this, this.getEntityBoundingBox()).isEmpty() && !world.containsAnyLiquid(this.getEntityBoundingBox()))
@@ -683,17 +687,21 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (!flag)
         {
             // Sponge start - this is technically a teleport, since it sends packets to players and calls 'updateEntityWithOptionalForce' - even though it doesn't really move the entity at all
-            Transform<org.spongepowered.api.world.World> transform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
-            MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform, false);
-            if (event.isCancelled()) {
-                return false;
+            if (!world.isRemote) {
+                Transform<org.spongepowered.api.world.World> transform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
+                MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, transform, transform, false);
+                if (event.isCancelled()) {
+                    return false;
+                }
+                Vector3d position = event.getToTransform().getPosition();
+                this.rotationYaw = (float) event.getToTransform().getYaw();
+                this.rotationPitch = (float) event.getToTransform().getPitch();
+                this.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
+            } else {
+                this.setPositionAndUpdate(d0, d1, d2);
             }
-            Vector3d position = event.getToTransform().getPosition();
-            this.rotationYaw = (float) event.getToTransform().getYaw();
-            this.rotationPitch = (float) event.getToTransform().getPitch();
-            this.setPositionAndUpdate(position.getX(), position.getY(), position.getZ());
             // Sponge end
-            
+
             return false;
         }
         else

@@ -118,6 +118,7 @@ public final class WorldManager {
     private static final Int2ObjectOpenHashMap<WorldServer> worldByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>(3);
     private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid =  new HashMap<>(3);
+    private static final Map<Integer, String> worldFolderByDimensionId = new HashMap<>();
     private static final BiMap<String, UUID> worldUuidByFolderName =  HashBiMap.create(3);
     private static final BitSet dimensionBits = new BitSet(Long.SIZE << 4);
     private static final Map<WorldServer, WorldServer> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
@@ -301,6 +302,10 @@ public final class WorldManager {
         return Optional.ofNullable(worldByDimensionId.get(dimensionId));
     }
 
+    public static Optional<String> getWorldFolderByDimensionId(int dimensionId) {
+        return Optional.ofNullable(worldFolderByDimensionId.get(dimensionId));
+    }
+
     public static int[] getLoadedWorldDimensionIds() {
         return worldByDimensionId.keySet().toIntArray();
     }
@@ -320,6 +325,7 @@ public final class WorldManager {
         worldPropertiesByFolderName.put(properties.getWorldName(), properties);
         worldPropertiesByWorldUuid.put(properties.getUniqueId(), properties);
         worldUuidByFolderName.put(properties.getWorldName(), properties.getUniqueId());
+        worldFolderByDimensionId.put(((IMixinWorldInfo) properties).getDimensionId(), properties.getWorldName());
     }
 
     public static void unregisterWorldProperties(WorldProperties properties, boolean freeDimensionId) {
@@ -338,6 +344,7 @@ public final class WorldManager {
         worldPropertiesByWorldUuid.clear();
         worldUuidByFolderName.clear();
         worldByDimensionId.clear();
+        worldFolderByDimensionId.clear();
         dimensionTypeByDimensionId.clear();
         dimensionPathByDimensionId.clear();
         dimensionBits.clear();
@@ -396,7 +403,9 @@ public final class WorldManager {
         }
 
         setUuidOnProperties(getCurrentSavesDirectory().get(), (WorldProperties) worldInfo);
-        ((IMixinWorldInfo) worldInfo).setDimensionId(Integer.MIN_VALUE);
+        if (((IMixinWorldInfo) worldInfo).getDimensionId() == null || ((IMixinWorldInfo) worldInfo).getDimensionId() == Integer.MIN_VALUE) {
+            ((IMixinWorldInfo) worldInfo).setDimensionId(WorldManager.getNextFreeDimensionId());
+        }
         ((IMixinWorldInfo) worldInfo).setDimensionType(archetype.getDimensionType());
         ((WorldProperties) worldInfo).setGeneratorType(archetype.getGeneratorType());
         ((IMixinWorldInfo) worldInfo).getWorldConfig().save();
@@ -573,19 +582,12 @@ public final class WorldManager {
                 SpongeImpl.getLogger().error("Unable to load world [{}]. No world properties was found!", worldName);
                 return Optional.empty();
             }
-
-            if (((IMixinWorldInfo) properties).getDimensionId() == null || ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
-                ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
-            }
-
-            registerWorldProperties(properties);
-
-        } else {
-            if (((IMixinWorldInfo) properties).getDimensionId() == null || ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
-                ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
-            }
         }
+        registerWorldProperties(properties);
 
+        if (((IMixinWorldInfo) properties).getDimensionId() == null || ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
+            ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
+        }
         setUuidOnProperties(getCurrentSavesDirectory().get(), properties);
 
         final WorldInfo worldInfo = (WorldInfo) properties;
@@ -669,7 +671,7 @@ public final class WorldManager {
             if (dimensionId != 0) {
                 final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((IMixinDimensionType)(Object) dimensionType).getConfigPath(), worldFolderName);
                 if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
-                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder.getFileName().toString(),
+                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder,
                             dimensionId);
                     continue;
                 }
@@ -952,11 +954,12 @@ public final class WorldManager {
                 }
 
                 if (isDimensionRegistered(dimensionId)) {
-                    SpongeImpl.getLogger().error("World [{}] (DIM{}) has already been registered (likely by a mod). Going to print existing "
-                            + "registration", worldFolderName, dimensionId);
+                    SpongeImpl.getLogger().error("Unable to register dim id ({}) from world folder [{}]. This dim id has already been registered "
+                            + "from world folder [{}].", dimensionId, worldFolderName, worldFolderByDimensionId.get(dimensionId));
                     continue;
                 }
 
+                worldFolderByDimensionId.put(dimensionId, worldFolderName);
                 registerDimension(dimensionId, (DimensionType)(Object) dimensionType, true);
                 registerDimensionPath(dimensionId, rootPath.resolve(worldFolderName));
             }
@@ -1106,17 +1109,6 @@ public final class WorldManager {
 
     }
 
-    public static DimensionType getClientDimensionType(DimensionType serverDimensionType) {
-        switch (serverDimensionType) {
-            case OVERWORLD:
-            case NETHER:
-            case THE_END:
-                return serverDimensionType;
-            default:
-                return DimensionType.OVERWORLD;
-        }
-    }
-
     public static void sendDimensionRegistration(EntityPlayerMP playerMP, WorldProvider provider) {
         // Do nothing in Common
     }
@@ -1164,5 +1156,9 @@ public final class WorldManager {
 
     public static Map<WorldServer, WorldServer> getWeakWorldMap() {
         return weakWorldByWorld;
+    }
+
+    public static int getDimensionId(WorldProvider provider) {
+        return provider.getDimensionType().getId();
     }
 }

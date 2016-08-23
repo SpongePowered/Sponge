@@ -572,11 +572,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Redirect(method = "addServerStatsToSnooper", at = @At(value = "FIELD", target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;", opcode = Opcodes.GETFIELD))
     private WorldProvider onGetWorldProviderForSnooper(WorldServer world) {
-        if (world instanceof IMixinWorldServer) {
-            this.dimensionId = ((IMixinWorldServer) world).getDimensionId();
-        } else {
-            this.dimensionId = world.provider.getDimensionType().getId();
-        }
+        this.dimensionId = WorldManager.getDimensionId(world.provider);
         return world.provider;
     }
 

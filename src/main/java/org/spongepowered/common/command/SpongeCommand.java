@@ -77,14 +77,15 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
 import java.text.DecimalFormat;
@@ -153,7 +154,10 @@ public class SpongeCommand {
 
     // TODO: Have some sort of separator between outputs for each world/dimension/global/whatever (that are exactly one line?)
     private abstract static class ConfigUsingExecutor implements CommandExecutor {
-        ConfigUsingExecutor() {
+        private boolean requireWorldLoaded;
+
+        ConfigUsingExecutor(boolean requireWorldLoaded) {
+            this.requireWorldLoaded = requireWorldLoaded;
         }
 
         @Override
@@ -173,11 +177,11 @@ public class SpongeCommand {
             if (args.hasAny("world")) {
                 for (WorldProperties properties : args.<WorldProperties>getAll("world")) {
                     Optional<World> world = SpongeImpl.getGame().getServer().getWorld(properties.getUniqueId());
-                    if (!world.isPresent()) {
+                    if (!world.isPresent() && this.requireWorldLoaded) {
                         throw new CommandException(Text.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
                     }
-                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorldServer) world.get()).getWorldConfig(),
-                            world.get(), src, args)));
+                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorldInfo) properties).getWorldConfig(),
+                            world.orElse(null), src, args)));
                     ++successes;
                 }
             }
@@ -214,7 +218,7 @@ public class SpongeCommand {
                 .description(Text.of("Print chunk information, optionally dump"))
                 .arguments(optional(seq(literal(Text.of("dump"), "dump"), optional(literal(Text.of("dump-all"), "all")))))
                 .permission("sponge.command.chunks")
-                .executor(new ConfigUsingExecutor() {
+                .executor(new ConfigUsingExecutor(true) {
                     @Override
                     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
                         CommandResult res = super.execute(src, args);
@@ -263,7 +267,7 @@ public class SpongeCommand {
                     }
 
                     protected Text getChunksInfo(WorldServer worldserver) {
-                        return Text.of(NEWLINE_TEXT, key("Dimension: "), value(worldserver.provider.getDimensionType().getId()), NEWLINE_TEXT,
+                        return Text.of(NEWLINE_TEXT, key("Dimension: "), value(WorldManager.getDimensionId(worldserver.provider)), NEWLINE_TEXT,
                                 key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), NEWLINE_TEXT,
                                 key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), NEWLINE_TEXT,
                                 key("Entities: "), value(worldserver.loadedEntityList.size()), NEWLINE_TEXT,
@@ -281,7 +285,7 @@ public class SpongeCommand {
                 .description(Text.of("Inspect the Sponge config"))
                 .arguments(seq(string(Text.of("key")), optional(string(Text.of("value")))))
                 .permission("sponge.command.config")
-                .executor(new ConfigUsingExecutor() {
+                .executor(new ConfigUsingExecutor(false) {
                     @Override
                     protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
                         final Optional<String> key = args.getOne("key");
@@ -309,7 +313,7 @@ public class SpongeCommand {
         return CommandSpec.builder()
                 .description(Text.of("Reload the Sponge game"))
                 .permission("sponge.command.reload")
-                .executor(new ConfigUsingExecutor() {
+                .executor(new ConfigUsingExecutor(false) {
                     @Override
                     protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
                         config.reload();
@@ -324,7 +328,7 @@ public class SpongeCommand {
         return CommandSpec.builder()
                 .description(Text.of("Save the configuration"))
                 .permission("sponge.command.save")
-                .executor(new ConfigUsingExecutor() {
+                .executor(new ConfigUsingExecutor(false) {
                     @Override
                     protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
                         config.save();

@@ -40,6 +40,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
@@ -197,4 +199,21 @@ public final class SpongeImplHooks {
         return state.getLightOpacity();
     }
 
+    public static BlockPos getRandomizedSpawnPoint(WorldServer worldServer) {
+        BlockPos ret = worldServer.getSpawnPoint();
+
+        boolean isAdventure = worldServer.getWorldInfo().getGameType() == GameType.ADVENTURE;
+        int spawnFuzz = Math.max(0, worldServer.getMinecraftServer().getSpawnRadius(worldServer));
+        int border = MathHelper.floor_double(worldServer.getWorldBorder().getClosestDistance(ret.getX(), ret.getZ()));
+        if (border < spawnFuzz) spawnFuzz = border;
+
+        if (!worldServer.provider.getHasNoSky() && !isAdventure && spawnFuzz != 0)
+        {
+            if (spawnFuzz < 2) spawnFuzz = 2;
+            int spawnFuzzHalf = spawnFuzz / 2;
+            ret = worldServer.getTopSolidOrLiquidBlock(ret.add(worldServer.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, worldServer.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
+        }
+
+        return ret;
+    }
 }
