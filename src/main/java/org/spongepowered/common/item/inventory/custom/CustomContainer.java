@@ -26,7 +26,7 @@ package org.spongepowered.common.item.inventory.custom;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ICrafting;
+import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 
@@ -105,12 +105,12 @@ public class CustomContainer extends Container {
         // This would not be needed if the Container enforces the same restrictions on slots as vanilla
 
         // Cursor Item
-        for (ICrafting crafter : crafters) {
+        for (IContainerListener crafter : listeners) {
             crafter.updateCraftingInventory(this, this.getInventory());
         }
         // Inventory
         for (int i = 0; i < this.inventorySlots.size(); ++i) {
-            for (ICrafting crafter : crafters) {
+            for (IContainerListener crafter : listeners) {
                 crafter.sendSlotContents(this, i, this.inventorySlots.get(i).getStack());
             }
         }
