@@ -34,6 +34,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
+import net.minecraft.block.BlockRedstoneRepeater;
+import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
@@ -326,6 +328,7 @@ public final class TrackingUtil {
     }
 
     private static void associateBlockChangeWithSnapshot(IPhaseState phaseState, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot, List<BlockSnapshot> capturedSnapshots) {
+        Block originalBlock = currentState.getBlock();
         if (phaseState == BlockPhase.State.BLOCK_DECAY) {
             if (newBlock == Blocks.AIR) {
                 snapshot.blockChange = BlockChange.DECAY;
@@ -334,13 +337,24 @@ public final class TrackingUtil {
         } else if (newBlock == Blocks.AIR) {
             snapshot.blockChange = BlockChange.BREAK;
             capturedSnapshots.add(snapshot);
-        } else if (newBlock != currentState.getBlock()) {
+        } else if (newBlock != originalBlock && !forceModify(originalBlock, newBlock)) {
             snapshot.blockChange = BlockChange.PLACE;
             capturedSnapshots.add(snapshot);
         } else {
             snapshot.blockChange = BlockChange.MODIFY;
             capturedSnapshots.add(snapshot);
         }
+    }
+
+    private static boolean forceModify(Block originalBlock, Block newBlock) {
+        if (originalBlock instanceof BlockRedstoneRepeater && newBlock instanceof BlockRedstoneRepeater) {
+            return true;
+        }
+        if (originalBlock instanceof BlockRedstoneTorch && newBlock instanceof BlockRedstoneTorch) {
+            return true;
+        }
+
+        return false;
     }
 
     private TrackingUtil() {
