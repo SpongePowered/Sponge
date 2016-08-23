@@ -582,25 +582,18 @@ public final class WorldManager {
                 SpongeImpl.getLogger().error("Unable to load world [{}]. No world properties was found!", worldName);
                 return Optional.empty();
             }
-            
-            if (((IMixinWorldInfo) properties).getDimensionId() == null || ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
-                ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
-            }
-            
+
             if (!properties.getWorldName().equals(worldName)) {
-            	((IMixinWorldInfo) properties).setWorldName(worldName);
+                ((IMixinWorldInfo) properties).setWorldName(worldName);
             }
-            
-            setUuidOnProperties(getCurrentSavesDirectory().get(), properties);
-            
-            registerWorldProperties(properties);
-        } else {
-            if (((IMixinWorldInfo) properties).getDimensionId() == null || ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
-                ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
-            }
-            
-            setUuidOnProperties(getCurrentSavesDirectory().get(), properties);
         }
+        
+        if (((IMixinWorldInfo) properties).getDimensionId() == null || ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
+           ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
+        }
+            
+        setUuidOnProperties(getCurrentSavesDirectory().get(), properties);
+        registerWorldProperties(properties);
 
         final WorldInfo worldInfo = (WorldInfo) properties;
         ((IMixinWorldInfo) worldInfo).createWorldConfig();
