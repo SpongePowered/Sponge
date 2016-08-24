@@ -62,11 +62,16 @@ import org.spongepowered.api.data.type.SkeletonType;
 import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.api.data.type.ZombieType;
 import org.spongepowered.api.data.type.ZombieTypes;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 
 /**
  * A standard class where all various "constants" for various data are stored.
@@ -140,10 +145,23 @@ public final class DataConstants {
     public static final Vector3d DEFAULT_LEFT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_LEFTLEG_ROTATION);
     public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTLEG_ROTATION);
 
+    public static final short MINIMUM_SPAWNER_MAXIMUM_SPAWN_DELAY = 1;
+    public static final short DEFAULT_SPAWNER_REMAINING_DELAY = 20;
+    public static final short DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY = 200;
+    public static final short DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY = 800;
+    public static final short DEFAULT_SPAWNER_SPAWN_COUNT = 4;
+    public static final short DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES = 6;
+    public static final short DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE = 16;
+    public static final short DEFAULT_SPAWNER_SPAWN_RANGE = 4;
+    public static final WeightedSerializableObject<EntityArchetype> DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN = new WeightedSerializableObject<>
+            (EntityUtil.archetype(Catalog.DEFAULT_SPAWNER_ENTITY), 1);
+
+
     public static final class Catalog {
 
         public static final SkeletonType DEFAULT_SKELETON = SkeletonTypes.NORMAL;
         public static final DyeColor DEFAULT_SHEEP_COLOR = DyeColors.WHITE;
+        public static final EntityType DEFAULT_SPAWNER_ENTITY = EntityTypes.PIG;
 
         private Catalog() {}
 

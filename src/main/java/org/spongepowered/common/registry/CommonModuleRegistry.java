@@ -139,12 +139,7 @@ import org.spongepowered.common.event.damage.*;
 import org.spongepowered.common.event.entity.teleport.SpongeEntityTeleportCauseBuilder;
 import org.spongepowered.common.event.entity.teleport.SpongePortalTeleportCauseBuilder;
 import org.spongepowered.common.event.entity.teleport.SpongeTeleportCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeBlockSpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeBreedingSpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeEntitySpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeMobSpawnerSpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeSpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeWeatherSpawnCauseBuilder;
+import org.spongepowered.common.event.spawn.*;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
@@ -187,6 +182,7 @@ import org.spongepowered.common.registry.type.text.*;
 import org.spongepowered.common.registry.type.world.*;
 import org.spongepowered.common.registry.type.world.gen.BiomeTreeTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.BiomeTypeRegistryModule;
+import org.spongepowered.common.registry.type.world.gen.DungeonMobRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.PopulatorObjectRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryModule;
 import org.spongepowered.common.scheduler.SpongeTaskBuilder;
@@ -320,6 +316,7 @@ public final class CommonModuleRegistry {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void registerCommonModules(SpongeGameRegistry registry) {
+        // Catalog registries
         registry.registerModule(new ArgumentRegistryModule())
             .registerModule(AITaskType.class, AITaskTypeModule.getInstance())
             .registerModule(ArmorType.class, new ArmorTypeRegistryModule())
@@ -424,6 +421,10 @@ public final class CommonModuleRegistry {
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
             .registerModule(ZombieType.class, ZombieTypeRegistryModule.getInstance())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
+            .registerModule(ZombieType.class, ZombieTypeRegistryModule.getInstance())
+
+            // Miscellaneous Registries
+            .registerModule(DungeonMobRegistryModule.getInstance())
             ;
     }
 

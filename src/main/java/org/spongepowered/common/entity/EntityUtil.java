@@ -34,6 +34,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
@@ -72,6 +73,8 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.Professions;
 import org.spongepowered.api.data.type.ZombieTypes;
+import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -113,6 +116,7 @@ import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 import org.spongepowered.common.world.WorldManager;
 
@@ -1068,5 +1072,21 @@ public final class EntityUtil {
             return stack;
         }
         return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static Optional<EntityType> fromNameToType(String name) {
+        // EntityList includes all forge mods with *unedited* entity names
+        Class<?> clazz = EntityList.NAME_TO_CLASS.get(name);
+        if(clazz == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(EntityTypeRegistryModule.getInstance().getForClass((Class<? extends Entity>) clazz));
+    }
+
+    // I'm lazy, but this is better than using the convenience method
+    public static EntityArchetype archetype(EntityType type) {
+        return new SpongeEntityArchetypeBuilder().type(type).build();
     }
 }

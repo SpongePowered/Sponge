@@ -24,22 +24,25 @@
  */
 package org.spongepowered.common.world.gen.builders;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.world.gen.feature.WorldGenDungeons;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
-import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.weighted.LootTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.gen.populator.Dungeon;
 import org.spongepowered.api.world.gen.populator.Dungeon.Builder;
-import org.spongepowered.common.interfaces.world.gen.IWorldGenDungeons;
+
+import javax.annotation.Nullable;
 
 public class DungeonBuilder implements Dungeon.Builder {
 
     private VariableAmount attempts;
-    private MobSpawnerData data;
+    private @Nullable MobSpawnerData data;
+    private @Nullable WeightedTable<EntityArchetype> choices;
     private LootTable<ItemStackSnapshot> items;
 
     public DungeonBuilder() {
@@ -48,68 +51,35 @@ public class DungeonBuilder implements Dungeon.Builder {
 
     @Override
     public Builder attempts(VariableAmount attempts) {
-        this.attempts = attempts;
+        this.attempts = checkNotNull(attempts, "attempts");
         return this;
     }
 
     @Override
     public Builder mobSpawnerData(MobSpawnerData data) {
-        this.data = data;
+        this.data = checkNotNull(data, "data");
+        this.choices = null;
         return this;
     }
 
     @Override
-    public Builder minimumSpawnDelay(short delay) {
-        this.data.set(Keys.SPAWNER_MINIMUM_DELAY, delay);
-        return this;
-    }
-
-    @Override
-    public Builder maximumSpawnDelay(short delay) {
-        this.data.set(Keys.SPAWNER_MAXIMUM_DELAY, delay);
-        return this;
-    }
-
-    @Override
-    public Builder spawnCount(short count) {
-        this.data.set(Keys.SPAWNER_SPAWN_COUNT, count);
-        return this;
-    }
-
-    @Override
-    public Builder maximumNearbyEntities(short count) {
-        this.data.set(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, count);
-        return this;
-    }
-
-    @Override
-    public Builder requiredPlayerRange(short range) {
-        this.data.set(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, range);
-        return this;
-    }
-
-    @Override
-    public Builder spawnRange(short range) {
-        this.data.set(Keys.SPAWNER_SPAWN_RANGE, range);
-        return this;
-    }
-
-    @Override
-    public Builder possibleEntities(WeightedTable<EntitySnapshot> entities) {
-        this.data.set(Keys.SPAWNER_ENTITIES, entities);
+    public Builder choices(WeightedTable<EntityArchetype> choices) {
+        this.choices = checkNotNull(choices, "choices");
+        this.data = null;
         return this;
     }
 
     @Override
     public Builder possibleItems(LootTable<ItemStackSnapshot> items) {
-        this.items = items;
+        this.items = checkNotNull(items, "items");
         return this;
     }
 
     @Override
     public Builder from(Dungeon value) {
         attempts(value.getAttemptsPerChunk());
-        mobSpawnerData(value.getSpawnerData());
+        value.getMobSpawnerData().ifPresent(this::mobSpawnerData);
+        value.getChoices().ifPresent(this::choices);
         this.items = new LootTable<>();
         this.items.addAll(value.getPossibleContents());
         return this;
@@ -118,8 +88,8 @@ public class DungeonBuilder implements Dungeon.Builder {
     @Override
     public Builder reset() {
         this.attempts = VariableAmount.fixed(8);
-        //TODO pending mobspawnerdata
-        //this.data = Sponge.getSpongeRegistry().getManipulatorRegistry().getBuilder(MobSpawnerData.class).get().create();
+        this.data = null;
+        this.choices = null;
         this.items = new LootTable<>();
         return this;
     }
@@ -128,7 +98,12 @@ public class DungeonBuilder implements Dungeon.Builder {
     public Dungeon build() throws IllegalStateException {
         Dungeon populator = (Dungeon) new WorldGenDungeons();
         populator.setAttemptsPerChunk(this.attempts);
-        ((IWorldGenDungeons) populator).setSpawnerData(this.data);
+        if (this.data != null) {
+            populator.setMobSpawnerData(this.data);
+        }
+        if (this.choices != null) {
+            populator.setChoices(this.choices);
+        }
         populator.getPossibleContents().clearPool();
         populator.getPossibleContents().addAll(this.items);
         return populator;

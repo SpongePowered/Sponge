@@ -29,21 +29,20 @@ import static org.spongepowered.common.data.value.SpongeValueFactory.boundedBuil
 
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.immutable.ImmutableWeightedCollectionValue;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeMobSpawnerData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeEntityToSpawnValue;
+import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeWeightedCollectionValue;
-import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 
 import java.util.stream.Collectors;
 
@@ -56,8 +55,8 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
     private final short maxNearby;
     private final short playerRange;
     private final short spawnRange;
-    private final WeightedSerializableObject<EntitySnapshot> nextToSpawn;
-    private final WeightedTable<EntitySnapshot> entitiesToSpawn;
+    private final WeightedSerializableObject<EntityArchetype> nextToSpawn;
+    private final WeightedTable<EntityArchetype> entitiesToSpawn;
 
     private final ImmutableBoundedValue<Short> remainingValue;
     private final ImmutableBoundedValue<Short> minValue;
@@ -66,18 +65,19 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
     private final ImmutableBoundedValue<Short> nearbyValue;
     private final ImmutableBoundedValue<Short> playerRangeValue;
     private final ImmutableBoundedValue<Short> spawnRangeValue;
-    private final ImmutableNextEntityToSpawnValue nextValue;
-    private final ImmutableWeightedCollectionValue<EntitySnapshot> toSpawnValue;
+    private final ImmutableValue<WeightedSerializableObject<EntityArchetype>> nextValue;
+    private final ImmutableWeightedCollectionValue<EntityArchetype> toSpawnValue;
 
     public ImmutableSpongeMobSpawnerData() {
-        this((short) 20, (short) 200, (short) 800, (short) 4, (short) 6, (short) 16, (short) 4,
-                new WeightedSerializableObject<>(new SpongeEntitySnapshotBuilder().type(EntityTypes.PIG).build(), 1),
-                new WeightedTable<>());
+        this(DataConstants.DEFAULT_SPAWNER_REMAINING_DELAY, DataConstants.DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY,
+                DataConstants.DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY, DataConstants.DEFAULT_SPAWNER_SPAWN_COUNT,
+                DataConstants.DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES, DataConstants.DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE,
+                DataConstants.DEFAULT_SPAWNER_SPAWN_RANGE, DataConstants.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN, new WeightedTable<>());
     }
 
     public ImmutableSpongeMobSpawnerData(short remaining, short minSpawnDelay, short maxSpawnDelay, short count, short maxNearby,
-                                         short playerRange, short spawnRange, WeightedSerializableObject<EntitySnapshot> nextToSpawn,
-                                         WeightedTable<EntitySnapshot> entitiesToSpawn) {
+                                         short playerRange, short spawnRange, WeightedSerializableObject<EntityArchetype> nextToSpawn,
+                                         WeightedTable<EntityArchetype> entitiesToSpawn) {
         super(ImmutableMobSpawnerData.class);
         this.remaining = remaining;
         this.minSpawnDelay = minSpawnDelay;
@@ -87,7 +87,7 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
         this.playerRange = playerRange;
         this.spawnRange = spawnRange;
         this.nextToSpawn = checkNotNull(nextToSpawn);
-        this.entitiesToSpawn = checkNotNull(entitiesToSpawn).stream().collect(Collectors.toCollection(WeightedTable<EntitySnapshot>::new));
+        this.entitiesToSpawn = checkNotNull(entitiesToSpawn).stream().collect(Collectors.toCollection(WeightedTable<EntityArchetype>::new));
 
         this.remainingValue = boundedBuilder(Keys.SPAWNER_REMAINING_DELAY)
                 .defaultValue((short) 20)
@@ -138,7 +138,8 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
                 .actualValue(spawnRange)
                 .build()
                 .asImmutable();
-        this.nextValue = new ImmutableSpongeEntityToSpawnValue(this.nextToSpawn);
+        this.nextValue = new ImmutableSpongeValue<>(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, DataConstants.DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN,
+                this.nextToSpawn);
         this.toSpawnValue = new ImmutableSpongeWeightedCollectionValue<>(Keys.SPAWNER_ENTITIES, this.entitiesToSpawn);
 
         registerGetters();
@@ -180,49 +181,13 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    public ImmutableNextEntityToSpawnValue nextEntityToSpawn() {
+    public ImmutableValue<WeightedSerializableObject<EntityArchetype>> nextEntityToSpawn() {
         return this.nextValue;
     }
 
     @Override
-    public ImmutableWeightedCollectionValue<EntitySnapshot> possibleEntitiesToSpawn() {
+    public ImmutableWeightedCollectionValue<EntityArchetype> possibleEntitiesToSpawn() {
         return this.toSpawnValue;
-    }
-
-    public short getRemaining() {
-        return this.remaining;
-    }
-
-    public short getMinSpawnDelay() {
-        return this.minSpawnDelay;
-    }
-
-    public short getMaxSpawnDelay() {
-        return this.maxSpawnDelay;
-    }
-
-    public short getCount() {
-        return this.count;
-    }
-
-    public short getMaxNearby() {
-        return this.maxNearby;
-    }
-
-    public short getPlayerRange() {
-        return this.playerRange;
-    }
-
-    public short getSpawnRange() {
-        return this.spawnRange;
-    }
-
-    public WeightedSerializableObject<EntitySnapshot> getNextToSpawn() {
-        return this.nextToSpawn;
-    }
-
-    public WeightedTable<EntitySnapshot> getEntitiesToSpawn() {
-        return this.entitiesToSpawn;
     }
 
     @Override
@@ -264,15 +229,15 @@ public class ImmutableSpongeMobSpawnerData extends AbstractImmutableData<Immutab
         registerKeyValue(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, ImmutableSpongeMobSpawnerData.this::nextEntityToSpawn);
         registerKeyValue(Keys.SPAWNER_ENTITIES, ImmutableSpongeMobSpawnerData.this::possibleEntitiesToSpawn);
 
-        registerFieldGetter(Keys.SPAWNER_REMAINING_DELAY, ImmutableSpongeMobSpawnerData.this::getRemaining);
-        registerFieldGetter(Keys.SPAWNER_MINIMUM_DELAY, ImmutableSpongeMobSpawnerData.this::getMinSpawnDelay);
-        registerFieldGetter(Keys.SPAWNER_MAXIMUM_DELAY, ImmutableSpongeMobSpawnerData.this::getMaxSpawnDelay);
-        registerFieldGetter(Keys.SPAWNER_SPAWN_COUNT, ImmutableSpongeMobSpawnerData.this::getCount);
-        registerFieldGetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, ImmutableSpongeMobSpawnerData.this::getMaxNearby);
-        registerFieldGetter(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, ImmutableSpongeMobSpawnerData.this::getPlayerRange);
-        registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, ImmutableSpongeMobSpawnerData.this::getSpawnRange);
-        registerFieldGetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, ImmutableSpongeMobSpawnerData.this::getNextToSpawn);
-        registerFieldGetter(Keys.SPAWNER_ENTITIES, ImmutableSpongeMobSpawnerData.this::getEntitiesToSpawn);
+        registerFieldGetter(Keys.SPAWNER_REMAINING_DELAY, () -> this.remaining);
+        registerFieldGetter(Keys.SPAWNER_MINIMUM_DELAY, () -> this.minSpawnDelay);
+        registerFieldGetter(Keys.SPAWNER_MAXIMUM_DELAY, () -> this.maxSpawnDelay);
+        registerFieldGetter(Keys.SPAWNER_SPAWN_COUNT, () -> this.count);
+        registerFieldGetter(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, () -> this.maxNearby);
+        registerFieldGetter(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, () -> this.playerRange);
+        registerFieldGetter(Keys.SPAWNER_SPAWN_RANGE, () -> spawnRange);
+        registerFieldGetter(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, () -> this.nextToSpawn);
+        registerFieldGetter(Keys.SPAWNER_ENTITIES, () -> this.entitiesToSpawn);
 
     }
 }
