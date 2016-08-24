@@ -44,14 +44,12 @@ import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketSpawnPlayer;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
@@ -331,7 +329,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     }
 
     public boolean setSkinUuid(UUID skin) {
-        if (!((MinecraftServer) Sponge.getServer()).isServerInOnlineMode()) {
+        if (!SpongeImpl.getServer().isServerInOnlineMode()) {
             // Skins only work when online-mode = true
             return false;
         }

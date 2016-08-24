@@ -26,7 +26,6 @@ package org.spongepowered.common.service.permission;
 
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListOpsEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.context.Context;
@@ -102,9 +101,8 @@ public class UserSubject extends SpongeSubject {
         // Query op level from server ops list based on player's game profile
         UserListOpsEntry entry = SpongePermissionService.getOps().getEntry(this.player);
         if (entry == null) {
-            return ((MinecraftServer) Sponge.getServer()).getPlayerList().canSendCommands(this.player) ? ((MinecraftServer) Sponge.getServer())
-                    .getOpPermissionLevel() : 0; // Take care of singleplayer commands -- unless an op level is specified, this player follows
-                    // global rules
+            // Take care of singleplayer commands -- unless an op level is specified, this player follows global rules
+            return SpongeImpl.getServer().getPlayerList().canSendCommands(this.player) ? SpongeImpl.getServer().getOpPermissionLevel() : 0;
         } else {
             return entry.getPermissionLevel();
         }

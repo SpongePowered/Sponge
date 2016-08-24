@@ -34,8 +34,6 @@ import net.minecraft.command.EntitySelector;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandPermissionException;
@@ -49,8 +47,6 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
-import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
@@ -100,10 +96,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
                     .getTranslationById(TRANSLATION_NO_PERMISSION).get()));
         }
 
-        CommandHandler handler = (CommandHandler) (source instanceof ICommandSender
-                                                   ? ((ICommandSender) source)
-                                                   : ((IMixinCommandSource) source).asICommandSender()
-        ).getServer().getCommandManager();
+        CommandHandler handler = (CommandHandler) SpongeImpl.getServer().getCommandManager();
         final ICommandSender mcSender = WrapperICommandSender.of(source);
         final String[] splitArgs = splitArgs(arguments);
         int usernameIndex = handler.getUsernameIndex(this.command, splitArgs);
@@ -223,7 +216,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
             return ImmutableList.of();
         }
         @SuppressWarnings("unchecked")
-        List<String> suggestions = this.command.getTabCompletionOptions((MinecraftServer) Sponge.getServer(),
+        List<String> suggestions = this.command.getTabCompletionOptions(SpongeImpl.getServer(),
                 WrapperICommandSender.of(source), arguments.split(" ", -1), targetPosition == null ? null : VecHelper.toBlockPos(targetPosition));
         if (suggestions == null) {
             return ImmutableList.of();
