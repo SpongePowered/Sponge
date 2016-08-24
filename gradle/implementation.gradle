@@ -37,16 +37,14 @@ shadowJar {
 
     classifier = ''
 
-    // Exclude ForgeGradle classes from shaded JAR
-    exclude 'dummyThing'
-    exclude 'Version.java.template'
-
     // Wait for reobf task to be fully configured
     afterEvaluate {
         // Include obfuscated classes
         from zipTree(reobfJar.jar)
     }
+}
 
+shadowJar ext.shadowConfiguration = {
     dependencies {
         // SpongeCommon and Mixin
         include project(common.path)
@@ -86,12 +84,6 @@ shadowJar {
         include dependency('com.github.ben-manes.caffeine:guava')
     }
 
-    // We include multiple JDBC drivers, so we need to merge the service file to enable them all
-    mergeServiceFiles()
-
-    // Prevent other dependencies replacing our license file
-    exclude 'LICENSE', 'NOTICE'
-
     from(zipTree(common.configurations.fastutil.first())) {
         include 'it/unimi/dsi/fastutil/bytes/AbstractByte2ObjectFunction*'
         include 'it/unimi/dsi/fastutil/bytes/AbstractByte2ObjectMap*'
@@ -128,6 +120,16 @@ shadowJar {
         include 'it/unimi/dsi/fastutil/objects/Object2LongMap*'
         include 'it/unimi/dsi/fastutil/objects/Object2LongOpenHashMap*'
     }
+
+    // Exclude ForgeGradle classes from shaded JAR
+    exclude 'dummyThing'
+    exclude 'Version.java.template'
+
+    // Prevent other dependencies replacing our license file
+    exclude 'LICENSE', 'NOTICE'
+
+    // We include multiple JDBC drivers, so we need to merge the service file to enable them all
+    mergeServiceFiles()
 }
 
 artifacts {
