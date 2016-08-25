@@ -56,6 +56,11 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.GeneralPhase;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -271,7 +276,32 @@ public class SpongeCommandManager implements CommandManager {
 
         try {
             try {
-                return this.dispatcher.process(source, commandLine);
+                if (CauseTracker.ENABLED) {
+                    final String commandUsed = commandLine;
+                    Sponge.getServer().getWorlds().forEach(world -> {
+                        final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
+                        mixinWorld.getCauseTracker().switchToPhase(GeneralPhase.State.COMMAND, PhaseContext.start()
+                                .add(NamedCause.source(source))
+                                .add(NamedCause.of(InternalNamedCauses.General.COMMAND, commandUsed))
+                                .addCaptures()
+                                .addEntityDropCaptures()
+                                .complete());
+                    });
+                }
+                final CommandResult result = this.dispatcher.process(source, commandLine);
+                if (CauseTracker.ENABLED) {
+                    Sponge.getServer().getWorlds().forEach(world -> {
+                        final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
+                        try {
+                            mixinWorld.getCauseTracker().completePhase();
+                        } catch (Exception e) {
+                            // Basically, we don't do anything because the worlds that were created during the
+                            // command being executed. However, we still will process any additional captures that took place
+                            // during the command's phase.
+                        }
+                    });
+                }
+                return result;
             } catch (InvocationCommandException ex) {
                 if (ex.getCause() != null) {
                     throw ex.getCause();

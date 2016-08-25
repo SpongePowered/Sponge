@@ -225,6 +225,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow @Override public abstract ChunkProviderServer getChunkProvider();
     @Shadow protected abstract void playerCheckLight();
     @Shadow protected abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
+    @Shadow private boolean canAddEntity(net.minecraft.entity.Entity entityIn) {
+        return false; // Shadowed
+    }
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, CallbackInfo callbackInfo) {
@@ -980,7 +983,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
-        return getCauseTracker().spawnEntity(EntityUtil.fromNative(entity));
+        return canAddEntity(entity) && getCauseTracker().spawnEntity(EntityUtil.fromNative(entity));
     }
 
 
