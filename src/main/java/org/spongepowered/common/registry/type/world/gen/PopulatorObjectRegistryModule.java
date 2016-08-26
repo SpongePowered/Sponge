@@ -100,6 +100,8 @@ public class PopulatorObjectRegistryModule implements AdditionalCatalogRegistryM
         IBlockState jleaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
         IBlockState leaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
         IWorldGenTrees trees = (IWorldGenTrees) new WorldGenTrees(false, 4, jlog, jleaf, true);
+        trees.setId("minecraft:jungle");
+        trees.setName("Jungle tree");
         trees.setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));
         this.populatorObjectMappings.put("jungle", (PopulatorObject) trees);
         this.populatorObjectMappings.put("mega_jungle", (PopulatorObject) new WorldGenMegaJungle(false, 10, 20, jlog, jleaf));
@@ -110,7 +112,7 @@ public class PopulatorObjectRegistryModule implements AdditionalCatalogRegistryM
         this.populatorObjectMappings.put("swamp", (PopulatorObject) new WorldGenSwamp());
 
         // Mushrooms
-        this.populatorObjectMappings.put("brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM));
-        this.populatorObjectMappings.put("red", (PopulatorObject) new WorldGenBigMushroom(Blocks.RED_MUSHROOM));
+        this.populatorObjectMappings.put("brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM_BLOCK));
+        this.populatorObjectMappings.put("red", (PopulatorObject) new WorldGenBigMushroom(Blocks.RED_MUSHROOM_BLOCK));
     }
 }

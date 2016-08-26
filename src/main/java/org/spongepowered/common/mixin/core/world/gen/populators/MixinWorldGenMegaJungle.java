@@ -42,6 +42,16 @@ public abstract class MixinWorldGenMegaJungle extends WorldGenHugeTrees implemen
     }
 
     @Override
+    public String getId() {
+        return "minecraft:mega_jungle";
+    }
+
+    @Override
+    public String getName() {
+        return "Mega jungle tree";
+    }
+
+    @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {
         return this.ensureGrowable((net.minecraft.world.World) world, null, new BlockPos(x, y, z), this.baseHeight);
     }

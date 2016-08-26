@@ -43,10 +43,32 @@ public abstract class MixinWorldGenTrees extends MixinWorldGenAbstractTree imple
 
     @Shadow private int minTreeHeight;
 
+    private String id = "minecraft:oak";
+    private String name = "Oak tree";
     private VariableAmount minHeight = VariableAmount.fixed(4);
 
     @Shadow
     public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public void setName(String name) {
+        this.name = name;
+    }
 
     @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {

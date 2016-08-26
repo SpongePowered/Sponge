@@ -31,14 +31,41 @@ import net.minecraft.world.gen.feature.WorldGenMegaPineTree;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Random;
 
 @Mixin(WorldGenMegaPineTree.class)
 public abstract class MixinWorldGenMegaPineTree extends WorldGenHugeTrees implements PopulatorObject {
+    
+    private String id;
+    private String name;
 
     public MixinWorldGenMegaPineTree(boolean a, int b, int c, IBlockState d, IBlockState e) {
         super(a, b, c, d, e);
+    }
+
+    @Inject(method = "<init>(ZZ)V", at = @At("RETURN"))
+    public void onConstructed(boolean notify, boolean useExtraRandomHeightIn, CallbackInfo ci) {
+        if (useExtraRandomHeightIn) {
+            this.id = "minecraft:mega_tall_taiga";
+            this.name = "Mega tall taiga tree";
+        } else {
+            this.id = "minecraft:mega_pointy_taiga";
+            this.name = "Mega pointy taiga tree";
+        }
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 
     @Override

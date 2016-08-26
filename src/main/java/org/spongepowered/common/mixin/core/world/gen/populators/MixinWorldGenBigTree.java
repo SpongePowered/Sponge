@@ -49,6 +49,16 @@ public abstract class MixinWorldGenBigTree extends WorldGenAbstractTree implemen
     public abstract boolean validTreeLocation();
 
     @Override
+    public String getId() {
+        return "minecraft:mega_oak";
+    }
+
+    @Override
+    public String getName() {
+        return "Mega oak tree";
+    }
+
+    @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {
         this.world = (net.minecraft.world.World) world;
         this.basePos = new BlockPos(x, y, z);

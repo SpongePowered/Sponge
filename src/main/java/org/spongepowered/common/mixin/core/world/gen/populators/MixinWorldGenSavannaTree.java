@@ -43,6 +43,16 @@ public abstract class MixinWorldGenSavannaTree extends MixinWorldGenAbstractTree
     public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);
 
     @Override
+    public String getId() {
+        return "minecraft:savanna";
+    }
+
+    @Override
+    public String getName() {
+        return "Savanna tree";
+    }
+
+    @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {
         net.minecraft.world.World worldIn = (net.minecraft.world.World) world;
         int i = 5;

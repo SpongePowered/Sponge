@@ -45,6 +45,16 @@ public abstract class MixinWorldGenSwamp extends MixinWorldGenAbstractTree imple
     public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);
 
     @Override
+    public String getId() {
+        return "minecraft:swamp";
+    }
+
+    @Override
+    public String getName() {
+        return "Swamp tree";
+    }
+
+    @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {
         net.minecraft.world.World worldIn = (net.minecraft.world.World) world;
         int i;

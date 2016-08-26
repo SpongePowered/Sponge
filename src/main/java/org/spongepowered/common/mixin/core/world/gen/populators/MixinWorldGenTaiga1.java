@@ -44,6 +44,16 @@ public abstract class MixinWorldGenTaiga1 extends MixinWorldGenAbstractTree impl
     public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);
 
     @Override
+    public String getId() {
+        return "minecraft:pointy_taiga";
+    }
+
+    @Override
+    public String getName() {
+        return "Pointy taiga tree";
+    }
+
+    @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {
         net.minecraft.world.World worldIn = (net.minecraft.world.World) world;
         int i = 7;

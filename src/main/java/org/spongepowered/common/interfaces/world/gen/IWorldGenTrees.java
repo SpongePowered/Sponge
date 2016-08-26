@@ -28,6 +28,10 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 
 public interface IWorldGenTrees {
 
+    void setId(String id);
+
+    void setName(String name);
+
     void setMinHeight(VariableAmount height);
-    
+
 }

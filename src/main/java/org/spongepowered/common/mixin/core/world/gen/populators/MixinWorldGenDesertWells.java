@@ -60,6 +60,16 @@ public abstract class MixinWorldGenDesertWells extends WorldGenerator implements
     }
 
     @Override
+    public String getId() {
+        return "minecraft:desert_well";
+    }
+
+    @Override
+    public String getName() {
+        return "Desert Well";
+    }
+
+    @Override
     public PopulatorType getType() {
         return PopulatorTypes.DESERT_WELL;
     }

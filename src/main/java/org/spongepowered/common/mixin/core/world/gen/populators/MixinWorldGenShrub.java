@@ -40,6 +40,16 @@ public abstract class MixinWorldGenShrub implements PopulatorObject {
     public abstract boolean generate(net.minecraft.world.World worldIn, Random p_180709_2_, BlockPos p_180709_3_);
 
     @Override
+    public String getId() {
+        return "minecraft:jungle_bush";
+    }
+
+    @Override
+    public String getName() {
+        return "Jungle bush";
+    }
+
+    @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {
         return true;
     }

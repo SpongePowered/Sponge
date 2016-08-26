@@ -43,6 +43,16 @@ public abstract class MixinWorldGenCanopyTree extends WorldGenAbstractTree imple
     }
 
     @Override
+    public String getId() {
+        return "minecraft:canopy";
+    }
+
+    @Override
+    public String getName() {
+        return "Canopy tree";
+    }
+
+    @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {
         net.minecraft.world.World worldIn = (net.minecraft.world.World) world;
         int i = 6;

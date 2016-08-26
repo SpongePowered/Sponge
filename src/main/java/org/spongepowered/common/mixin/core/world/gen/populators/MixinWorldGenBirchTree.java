@@ -33,14 +33,41 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Random;
 
 @Mixin(WorldGenBirchTree.class)
 public abstract class MixinWorldGenBirchTree extends MixinWorldGenAbstractTree implements PopulatorObject {
+    
+    private String id;
+    private String name;
 
     @Shadow
     public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);
+
+    @Inject(method = "<init>(ZZ)V", at = @At("RETURN"))
+    public void onConstructed(boolean notify, boolean useExtraRandomHeightIn, CallbackInfo ci) {
+        if (useExtraRandomHeightIn) {
+            this.id = "minecraft:mega_birch";
+            this.name = "Mega birch tree";
+        } else {
+            this.id = "minecraft:birch";
+            this.name = "Birch tree";
+        }
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
 
     @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {

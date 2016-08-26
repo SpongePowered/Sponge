@@ -64,11 +64,36 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
     private WeightedTable<PopulatorObject> types;
     private Function<Location<Extent>, PopulatorObject> override = null;
     private VariableAmount mushroomsPerChunk;
+    private String id;
+    private String name;
 
     @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
         this.types = new WeightedTable<>();
         this.mushroomsPerChunk = VariableAmount.fixed(1);
+    }
+
+    @Inject(method = "<init>(Lnet/minecraft/block/Block;)V", at = @At("RETURN") )
+    public void onConstructed(Block block, CallbackInfo ci) {
+        this.types = new WeightedTable<>();
+        this.mushroomsPerChunk = VariableAmount.fixed(1);
+        if(block == Blocks.RED_MUSHROOM_BLOCK) {
+            this.id = "minecraft:red";
+            this.name = "Red mushroom";
+        } else {
+            this.id = "minecraft:brown";
+            this.name = "Brown mushroom";
+        }
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 
     @Override
