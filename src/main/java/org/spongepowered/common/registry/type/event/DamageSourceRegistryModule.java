@@ -32,13 +32,14 @@ import org.spongepowered.api.registry.util.RegistrationDependency;
 @RegistrationDependency(DamageTypeRegistryModule.class)
 public final class DamageSourceRegistryModule implements RegistryModule {
 
-    public static final net.minecraft.util.DamageSource IGNORED_DAMAGE_SOURCE = new net.minecraft.util.DamageSource("spongespecific").setDamageBypassesArmor().setDamageAllowedInCreativeMode();
+    public static net.minecraft.util.DamageSource IGNORED_DAMAGE_SOURCE;
     public static net.minecraft.util.DamageSource DAMAGESOURCE_POISON;
     public static net.minecraft.util.DamageSource DAMAGESOURCE_MELTING;
 
     @Override
     public void registerDefaults() {
         try {
+            IGNORED_DAMAGE_SOURCE = (new net.minecraft.util.DamageSource("spongespecific")).setDamageBypassesArmor().setDamageAllowedInCreativeMode();
             DAMAGESOURCE_POISON = (new net.minecraft.util.DamageSource("poison")).setDamageBypassesArmor().setMagicDamage();
             DAMAGESOURCE_MELTING = (new net.minecraft.util.DamageSource("melting")).setDamageBypassesArmor().setFireDamage();
             DamageSources.class.getDeclaredField("DROWNING").set(null, (DamageSource) net.minecraft.util.DamageSource.drown);
