@@ -34,11 +34,12 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.BlockUtil;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -53,16 +54,13 @@ public class SpongeTeleportHelper implements TeleportHelper {
     public Optional<Location<World>> getSafeLocation(Location<World> location, int height, int width) {
         final World world = location.getExtent();
 
-        // Get the vectors to check, and get the block types with them.
-        // The vectors should be sorted by distance from the centre of the checking region, so
-        // this makes it easier to try to get close, because we can just iterate and get progressively further out.
-        final List<Vector3i> sortedList = getBlockLocations(location, height, width);
-
         // We cache the various block lookup results so we don't check a block twice.
         final Map<Vector3i, BlockData> blockCache = new HashMap<>();
 
-        for (Vector3i currentTarget : sortedList) {
-
+        // Get the vectors to check, and get the block types with them.
+        // The vectors should be sorted by distance from the centre of the checking region, so
+        // this makes it easier to try to get close, because we can just iterate and get progressively further out.
+        Optional<Vector3i> result = getBlockLocations(location, height, width).filter(currentTarget -> {
             // Get the block, add it to the cache.
             BlockData block = getBlockData(currentTarget, world, blockCache);
 
@@ -74,9 +72,15 @@ public class SpongeTeleportHelper implements TeleportHelper {
                         && isFloorSafe(currentTarget, world, blockCache)) {
 
                     // This position should be safe. Get the center of the block to spawn into.
-                    return Optional.of(new Location<>(world, currentTarget.toDouble().add(0.5, 0, 0.5)));
+                    return true;
                 }
             }
+
+            return false;
+        }).findFirst();
+
+        if (result.isPresent()) {
+            return Optional.of(new Location<>(world, result.get().toDouble().add(0.5, 0, 0.5)));
         }
 
         // No vectors matched, so return an empty optional.
@@ -100,7 +104,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
         return getBlockData(currentTarget.sub(0, 2, 0), world, blockCache).isSafeFloor;
     }
 
-    private List<Vector3i> getBlockLocations(Location<World> worldLocation, int height, int width) {
+    private Stream<Vector3i> getBlockLocations(Location<World> worldLocation, int height, int width) {
         // We don't want to warp outside of the world border, so we want to check that we're within it.
         WorldBorder worldBorder = (WorldBorder) worldLocation.getExtent().getWorldBorder();
         int worldBorderMinX = GenericMath.floor(worldBorder.minX());
@@ -135,9 +139,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
         }
 
         // Sort them according to the distance to the provided worldLocation.
-        return vectors.stream()
-                .sorted((first, second) -> Integer.compare(vectorLocation.distanceSquared(first), vectorLocation.distanceSquared(second)))
-                .collect(Collectors.toList());
+        return vectors.stream().sorted(Comparator.comparingInt(vectorLocation::distanceSquared));
     }
 
     private BlockData getBlockData(Vector3i vector3i, World world, Map<Vector3i, BlockData> cache) {
