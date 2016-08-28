@@ -55,10 +55,7 @@ configurations {
 dependencies {
     compile api
     compile('org.spongepowered:mixin:0.5.11-SNAPSHOT') {
-        transitive = false
-    }
-    compile('net.minecraft:launchwrapper:1.11') {
-        transitive = false
+        exclude module: 'launchwrapper'
     }
 
     fastutil 'it.unimi.dsi:fastutil:7.0.12'
@@ -71,6 +68,10 @@ dependencies {
     runtime 'org.mariadb.jdbc:mariadb-java-client:1.4.6'
     compile 'com.h2database:h2:1.4.192'
     runtime 'org.xerial:sqlite-jdbc:3.8.11.2'
+
+    forgeGradleMcDeps('net.minecraft:launchwrapper:1.11') {
+        transitive = false
+    }
 }
 
 // Include API dependencies in our POM
