@@ -10,10 +10,6 @@ buildscript {
             url = 'http://files.minecraftforge.net/maven'
         }
         maven {
-            name = 'minecrell'
-            url = 'http://repo.minecrell.net/releases'
-        }
-        maven {
             name = 'sponge'
             url = 'http://repo.spongepowered.org/maven'
         }
@@ -21,10 +17,10 @@ buildscript {
 
     dependencies {
         // VanillaGradle contains a custom ForgeGradle extension for SpongeCommon (see below)
-        classpath 'net.minecrell:VanillaGradle:2.0.3_1'
+        classpath 'gradle.plugin.net.minecrell:vanillagradle:2.2-2'
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
         classpath 'gradle.plugin.net.minecrell:licenser:0.2.1'
-        classpath 'gradle.plugin.org.spongepowered:spongegradle:0.6'
+        classpath 'gradle.plugin.org.spongepowered:spongegradle:0.7'
         classpath 'org.spongepowered:mixingradle:0.4-SNAPSHOT'
     }
 }
@@ -32,7 +28,7 @@ buildscript {
 // Apply our custom ForgeGradle extension for SpongeCommon
 // Compared to the regular tweaker-server plugin, SpongeCommon has all run tasks disabled
 // and the Minecraft workspace defined as "provided" so they won't conflict with the implementation
-apply plugin: 'net.minecrell.vanilla.server.library'
+apply plugin: 'net.minecrell.vanillagradle.server'
 
 // Create task to resolve SpongeAPI revision
 apply from: 'api-revision.gradle'
@@ -58,10 +54,7 @@ configurations {
 
 dependencies {
     compile api
-    compile('org.spongepowered:mixin:0.5.11-SNAPSHOT') {
-        exclude module: 'launchwrapper'
-        exclude module: 'guava'
-    }
+    compile 'org.spongepowered:mixin:0.5.11-SNAPSHOT'
 
     fastutil 'it.unimi.dsi:fastutil:7.0.12'
 

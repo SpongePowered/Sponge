@@ -15,7 +15,6 @@ minecraft {
     mappings = 'snapshot_20160822'
 
     runDir = 'run'
-    atSource sourceSets.main
 
     // We don't use the obfuscated dev jar currently
     makeObfSourceJar = false
@@ -75,9 +74,6 @@ jar {
 
 // Don't upload temp jar to Maven repository
 configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
-
-// Reobfuscate to SRG mappings
-reobf.jar.mappingType = 'SEARGE'
 
 task devJar(type: Jar) {
     classifier = 'dev'

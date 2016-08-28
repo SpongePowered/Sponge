@@ -53,6 +53,12 @@ public final class SpongeApiContainer extends AbstractPluginContainer {
     }
 
     @Override
+    public Optional<String> getMinecraftVersion() {
+        // Return the same Minecraft version as returned by the implementation
+        return SpongeImpl.getPlugin().getMinecraftVersion();
+    }
+
+    @Override
     public Logger getLogger() {
         return SpongeImpl.getSlf4jLogger();
     }
