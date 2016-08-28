@@ -99,16 +99,16 @@ public final class DataSerializers {
 
             @Override
             public UUID translate(DataView view) throws InvalidDataException {
-                final long least = view.getLong(Queries.UUID_LEAST).orElseThrow(invalidDataQuery(Queries.UUID_LEAST));
                 final long most = view.getLong(Queries.UUID_MOST).orElseThrow(invalidDataQuery(Queries.UUID_MOST));
-                return new UUID(least, most);
+                final long least = view.getLong(Queries.UUID_LEAST).orElseThrow(invalidDataQuery(Queries.UUID_LEAST));
+                return new UUID(most, least);
             }
 
             @Override
             public DataContainer translate(UUID obj) throws InvalidDataException {
                 return new MemoryDataContainer()
-                        .set(Queries.UUID_LEAST, obj.getLeastSignificantBits())
-                        .set(Queries.UUID_MOST, obj.getMostSignificantBits());
+                        .set(Queries.UUID_MOST, obj.getMostSignificantBits())
+                        .set(Queries.UUID_LEAST, obj.getLeastSignificantBits());
             }
 
             @Override
