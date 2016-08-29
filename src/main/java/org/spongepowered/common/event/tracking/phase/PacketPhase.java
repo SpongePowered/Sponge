@@ -718,6 +718,15 @@ public final class PacketPhase extends TrackingPhase {
             public boolean ignoresItemPreMerges() {
                 return true;
             }
+
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                context
+                        .addBlockCaptures()
+                        .addEntityCaptures()
+                        .addEntityDropCaptures();
+
+            }
         },
         RESOURCE_PACK,
         STOP_RIDING_JUMP,

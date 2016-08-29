@@ -107,7 +107,6 @@ public interface PacketFunction {
 
     PacketFunction IGNORED = (packet, state, player, context) -> {
     };
-    PacketFunction HANDLED_EXTERNALLY = IGNORED;
 
     PacketFunction USE_ENTITY = (packet, state, player, context) -> {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
@@ -980,6 +979,8 @@ public interface PacketFunction {
         });
 
     };
+
+    PacketFunction HANDLED_EXTERNALLY = UNKONWN_PACKET;
 
     void unwind(Packet<?> packet, PacketPhase.IPacketState state, EntityPlayerMP player, PhaseContext context);
 
