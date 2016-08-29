@@ -41,6 +41,7 @@ import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -496,7 +497,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void openInventory(Inventory inventory, Cause cause) throws IllegalArgumentException {
+    public org.spongepowered.api.item.inventory.Container openInventory(Inventory inventory, Cause cause) throws IllegalArgumentException {
         if (inventory instanceof IInteractionObject) {
             String guid = ((IInteractionObject) inventory).getGuiID();
             if ("EntityHorse".equals(guid)) {
@@ -505,10 +506,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             }
             if ("minecraft:crafting_table".equals(guid) || "minecraft:anvil".equals(guid) || "minecraft:enchanting_table".equals(guid)) {
                 displayGui(((IInteractionObject) inventory));
-                return;
+                return ((org.spongepowered.api.item.inventory.Container) this.openContainer);
             }
         }
         displayGUIChest(((IInventory) inventory));
+        return ((org.spongepowered.api.item.inventory.Container) this.openContainer);
     }
 
     @Override
