@@ -326,6 +326,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         ((MinecraftServer) (Object) this).getPlayerProfileCache().save();
     }
 
+    @Inject(method = "stopServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;flush()V"), locals = LocalCapture.CAPTURE_FAILHARD)
+    public void onServerStoppingUnloadWorld(CallbackInfo ci, int i, WorldServer worldserver) {
+        Sponge.getEventManager().post(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(this)), (World) worldserver));
+    }
+
     /**
      * @author Zidane - June 15th, 2015
      * @author blood - December 23rd, 2015
