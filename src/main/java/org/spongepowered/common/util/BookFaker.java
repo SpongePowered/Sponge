@@ -58,7 +58,10 @@ public class BookFaker {
         receiver.sendPacket(new SPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
 
         // Next we tell the client to open the Book GUI
-        receiver.sendPacket(new SPacketCustomPayload("MC|BOpen", new PacketBuffer(Unpooled.buffer())));
+        // 0 for the main hand, 1 for the offhand
+        PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
+        packetbuffer.writeInt(0);
+        receiver.sendPacket(new SPacketCustomPayload("MC|BOpen", packetbuffer));
 
         // Now we can remove the fake Book since it's contents will have already
         // been transferred to the GUI
