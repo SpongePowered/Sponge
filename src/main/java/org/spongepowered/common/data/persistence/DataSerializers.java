@@ -99,19 +99,19 @@ public final class DataSerializers {
 
             @Override
             public Optional<UUID> deserialize(DataView view) throws InvalidDataException {
-                if (!view.contains(Queries.UUID_LEAST, Queries.UUID_MOST)) {
+                if (!view.contains(Queries.UUID_MOST, Queries.UUID_LEAST)) {
                     return Optional.empty();
                 }
-                final long least = view.getLong(Queries.UUID_LEAST).orElseThrow(invalidDataQuery(Queries.UUID_LEAST));
                 final long most = view.getLong(Queries.UUID_MOST).orElseThrow(invalidDataQuery(Queries.UUID_MOST));
-                return Optional.of(new UUID(least, most));
+                final long least = view.getLong(Queries.UUID_LEAST).orElseThrow(invalidDataQuery(Queries.UUID_LEAST));
+                return Optional.of(new UUID(most, least));
             }
 
             @Override
             public DataContainer serialize(UUID obj) throws InvalidDataException {
                 return new MemoryDataContainer()
-                        .set(Queries.UUID_LEAST, obj.getLeastSignificantBits())
-                        .set(Queries.UUID_MOST, obj.getMostSignificantBits());
+                        .set(Queries.UUID_MOST, obj.getMostSignificantBits())
+                        .set(Queries.UUID_LEAST, obj.getLeastSignificantBits());
             }
         };
         VECTOR_2_D_DATA_SERIALIZER = new DataSerializer<Vector2d>() {
