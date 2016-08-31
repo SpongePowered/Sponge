@@ -217,6 +217,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow @Final @Mutable private Teleporter worldTeleporter;
     @Shadow @Final private WorldServer.ServerBlockEventList[] blockEventQueue;
     @Shadow private int blockEventCacheIndex;
+    @Shadow private int updateEntityTick;
 
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
     @Shadow public abstract void createBonusChest();
@@ -252,6 +253,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.chunkGCTickInterval = this.getActiveConfig().getConfig().getWorld().getTickInterval();
         this.weatherIceAndSnowEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherIceAndSnow();
         this.weatherThunderEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherThunder();
+        this.updateEntityTick = 0;
     }
 
     @Inject(method = "createBonusChest", at = @At(value = "HEAD"))
@@ -664,13 +666,31 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return true;
     }
 
-    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;onWorldUpdateEntities()V"))
-    private void onDimensionUpdateEntities(WorldProvider worldProvider) {
+    /**
+     * @author blood - August 30th, 2016
+     *
+     * @reason Always allow entity cleanup to occur. This prevents issues such as a plugin 
+     *         generating chunks with no players causing entities not getting cleaned up.
+     */
+    @Overwrite
+    public void updateEntities() {
+        // Sponge start
+        /* 
+        if (this.playerEntities.isEmpty()) {
+            if (this.updateEntityTick++ >= 300) {
+                return;
+            }
+        } else {
+            this.resetUpdateEntityTick();
+        }*/
+        // Sponge end
+
         if (CauseTracker.ENABLED) {
             TrackingUtil.tickWorldProvider(this);
         } else {
-            worldProvider.onWorldUpdateEntities();
+            this.provider.onWorldUpdateEntities();
         }
+        super.updateEntities();
     }
 
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
