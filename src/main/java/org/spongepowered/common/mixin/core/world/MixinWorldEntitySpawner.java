@@ -55,6 +55,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.GenerationPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.List;
@@ -220,4 +221,10 @@ public abstract class MixinWorldEntitySpawner {
         return !event.isCancelled();
     }
 
+    @Inject(method = "canCreatureTypeSpawnAtLocation", at = @At("HEAD"), cancellable = true)
+    private static void canCreatureTypeSpawnAtLocation(EntityLiving.SpawnPlacementType spawnPlacementTypeIn, World worldIn, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        if (((IMixinChunkProviderServer) worldIn.getChunkProvider()).getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4) == null) {
+            cir.setReturnValue(false);
+        }
+    }
 }

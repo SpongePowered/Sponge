@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.gen;
 
 import com.flowpowered.math.vector.Vector3i;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.IChunkLoader;
@@ -41,7 +42,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.GenerationPhase;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -97,6 +103,23 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 //        return false;
 //    }
 
+    @Inject(method = "provideChunk", at = @At(value = "INVOKE", args = "log=true", target = "Lnet/minecraft/util/math/ChunkPos;chunkXZ2Int(II)J"))
+    public void onProvideChunkStart(int x, int z, CallbackInfoReturnable<Chunk> cir) {
+        if (CauseTracker.ENABLED) {
+            final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+            causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+                    .addCaptures()
+                    .complete());
+        }
+    }
+
+    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populateChunk(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", shift = Shift.AFTER))
+    public void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
+        if (CauseTracker.ENABLED) {
+            ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
+        }
+    }
+
     @Inject(method = "unloadQueuedChunks", at = @At("HEAD"))
     public void onUnloadQueuedChunksStart(CallbackInfoReturnable<Boolean> ci) {
         ((IMixinWorldServer) this.worldObj).getTimingsHandler().doChunkUnload.startTiming();
@@ -122,5 +145,12 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Override
     public void setMaxChunkUnloads(int maxUnloads) {
         this.maxChunkUnloads = maxUnloads;
+    }
+
+    @Override
+    public Chunk getChunkIfLoaded(int x, int z) {
+        long i = ChunkPos.chunkXZ2Int(x, z);
+        Chunk chunk = this.id2ChunkMap.get(i);
+        return chunk;
     }
 }

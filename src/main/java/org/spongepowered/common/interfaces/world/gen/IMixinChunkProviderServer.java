@@ -24,7 +24,22 @@
  */
 package org.spongepowered.common.interfaces.world.gen;
 
+import net.minecraft.world.chunk.Chunk;
+
+import javax.annotation.Nullable;
+
 public interface IMixinChunkProviderServer {
+
+    /**
+     * Gets the chunk at the desired position. If there is no
+     * loaded chunk at the position, {@code null} is returned.
+     *
+     * @param x The chunk x position
+     * @param z The chunk z position
+     * @return The chunk, if loaded
+     */
+    @Nullable
+    Chunk getChunkIfLoaded(int x, int z);
 
     void setMaxChunkUnloads(int maxUnloads);
 }

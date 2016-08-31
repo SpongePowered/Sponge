@@ -134,6 +134,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -305,7 +306,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             return Optional.empty();
         }
         final WorldServer worldserver = (WorldServer) (Object) this;
-        return Optional.ofNullable((Chunk) worldserver.getChunkProvider().getLoadedChunk(x, z));
+        return Optional.ofNullable((Chunk) ((IMixinChunkProviderServer) worldserver.getChunkProvider()).getChunkIfLoaded(x, z));
     }
 
     @Override
@@ -486,7 +487,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return Optional.empty();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Iterable<Chunk> getLoadedChunks() {
         return (Iterable) ((ChunkProviderServer) this.getChunkProvider()).getLoadedChunks();
@@ -1301,9 +1302,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                 if (this.isBlockLoaded(blockpos) && this.worldBorder.contains(blockpos)) {
                     try {
-                        this.theProfiler.startSection(tileentity.getClass().getSimpleName());
+                        //this.theProfiler.startSection(tileentity.getClass().getSimpleName());
                         ((ITickable) tileentity).update();
-                        this.theProfiler.endSection();
+                        //this.theProfiler.endSection();
                     } catch (Throwable throwable) {
                         this.stopTimingTickTileEntityCrash(tileentity); // Sponge
                         CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");

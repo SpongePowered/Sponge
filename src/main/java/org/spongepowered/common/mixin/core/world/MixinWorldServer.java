@@ -658,7 +658,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             posX = fromPos.getX();
             posZ = fromPos.getZ();
         }
-        final net.minecraft.world.chunk.Chunk chunk = this.getChunkProvider().getLoadedChunk(posX >> 4, posZ >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(posX >> 4, posZ >> 4);
         if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
             return false;
         }
@@ -1049,14 +1049,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Sponge start - Cause tracking
         final PhaseData peek = this.causeTracker.getStack().peek();
         if (!CauseTracker.ENABLED || peek.state.getPhase().ignoresBlockUpdateTick(peek)) {
-            state.getBlock().updateTick((WorldServer) (Object) this, pos, this.getBlockState(pos), random);
+            state.getBlock().updateTick((WorldServer) (Object) this, pos, state, random);
             // THIS NEEDS TO BE SET BACK TO FALSE OR ELSE ALL HELL BREAKS LOOSE!
             // No seriously, if this is not set back to false, all future updates are processed immediately
             // and various things get caught under the Unwinding Phase.
             this.scheduledUpdatesAreImmediate = false;
             return;
         }
-        TrackingUtil.updateTickBlock(this.causeTracker, state.getBlock(), pos, this.getBlockState(pos), random);
+        TrackingUtil.updateTickBlock(this.causeTracker, state.getBlock(), pos, state, random);
         // Sponge end
         this.scheduledUpdatesAreImmediate = false;
     }
@@ -1224,7 +1224,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.rotationUpdates.remove(entityIn);
     }
 
-
     @Override
     public void onSpongeEntityAdded(net.minecraft.entity.Entity entity) {
         this.onEntityAdded(entity);
@@ -1343,7 +1342,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         xEnd = xEnd >> 4;
         zEnd = zEnd >> 4;
 
-        Chunk base = (Chunk) this.getChunkProvider().getLoadedChunk(xStart, zStart);
+        Chunk base = (Chunk) ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(xStart, zStart);
         if (base == null) {
             return false;
         }

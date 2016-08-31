@@ -35,10 +35,12 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 import java.util.List;
 
@@ -53,6 +55,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
     @Shadow public abstract Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract void notifyLightSet(BlockPos pos);
+    @Shadow public abstract IChunkProvider getChunkProvider();
 
     @Shadow @Nullable private TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) {
         return null; // Shadowed
@@ -155,10 +158,11 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
         if (!((IMixinBlockPos) pos).isValidPosition()) {
             // Sponge End
             return type.defaultLightValue;
-        } else if (!this.isBlockLoaded(pos)) {
-            return type.defaultLightValue;
         } else {
-            Chunk chunk = this.getChunkFromBlockCoords(pos);
+            Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
+            if (chunk == null) {
+                return type.defaultLightValue;
+            }
             return chunk.getLightFor(type, pos);
         }
     }
