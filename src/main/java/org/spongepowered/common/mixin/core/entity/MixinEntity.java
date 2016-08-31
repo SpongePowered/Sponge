@@ -117,6 +117,7 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.text.SpongeTexts;
@@ -356,6 +357,17 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public Random getRandom() {
         return this.rand;
+    }
+
+    @Inject(method = "setPosition", at = @At("HEAD"))
+    public void onSetPosition(double x, double y, double z, CallbackInfo ci) {
+        net.minecraft.entity.Entity entity = (net.minecraft.entity.Entity)(Object) this;
+        if (entity instanceof EntityPlayerMP) {
+            EntityPlayerMP player = (EntityPlayerMP) entity;
+            if (player.connection != null) {
+                ((IMixinNetHandlerPlayServer) player.connection).captureCurrentPlayerPosition();
+            }
+        }
     }
 
     public Vector3d getPosition() {

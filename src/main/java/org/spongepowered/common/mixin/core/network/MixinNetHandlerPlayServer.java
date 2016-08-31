@@ -175,6 +175,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     private boolean allowClientLocationUpdate = true;
     @Nullable private Item lastItem;
 
+    @Override
+    public void captureCurrentPlayerPosition() {
+        this.captureCurrentPosition();
+    }
 
     @Override
     public Map<String, ResourcePack> getSentResourcePacks() {
