@@ -179,6 +179,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.chunkGCTickInterval = this.getActiveConfig().getConfig().getWorld().getTickInterval();
         this.weatherIceAndSnowEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherIceAndSnow();
         this.weatherThunderEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherThunder();
+        this.updateEntityTick = 0;
     }
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
@@ -553,13 +554,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Overwrite
     public void updateEntities()
     {
+        // Sponge start - Always allow entity cleanup to occur.  This prevents
+        // issues such as a plugin generating chunks with no players causing
+        // entities not getting cleaned up.
+        /*
         if (this.playerEntities.isEmpty()) {
             if (this.updateEntityTick++ >= 1200) {
                 return;
             }
         } else {
             this.resetUpdateEntityTick();
-        }
+        }*/
+        // Sponge end
 
         this.theProfiler.startSection("entities");
         this.theProfiler.startSection("global");
