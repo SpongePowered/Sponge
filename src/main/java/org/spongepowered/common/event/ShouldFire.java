@@ -46,4 +46,7 @@ public class ShouldFire {
     public static boolean CHANGE_BLOCK_EVENT_PLACE = false;
     public static boolean CHANGE_BLOCK_EVENT_POST = false;
 
+    public static boolean MOUNT_ENTITY_EVENT = false;
+    public static boolean DISMOUNT_ENTITY_EVENT = false;
+
 }
