@@ -61,11 +61,6 @@ public final class SpongeTargetedLocationData extends AbstractSingleData<Vector3
     }
 
     @Override
-    public int compareTo(TargetedLocationData o) {
-        return this.getValue().compareTo(o.target().get());
-    }
-
-    @Override
     public Value<Vector3d> target() {
         return new SpongeValue<>(this.usedKey, this.getValue());
     }

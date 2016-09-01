@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableVariantData;
 import org.spongepowered.api.data.manipulator.mutable.VariantData;
@@ -67,11 +66,6 @@ public abstract class AbstractSingleCatalogData<T extends CatalogType, M extends
     @Override
     public I asImmutable() {
         return ImmutableDataCachingUtil.getManipulator(this.immutableClass, getValue());
-    }
-
-    @Override
-    public int compareTo(M o) {
-        return o.get(this.usedKey).get().getId().compareToIgnoreCase(this.getValue().getId());
     }
 
     @Override

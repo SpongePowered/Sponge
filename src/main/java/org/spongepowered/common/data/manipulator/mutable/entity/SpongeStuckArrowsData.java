@@ -26,7 +26,6 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -77,13 +76,6 @@ public class SpongeStuckArrowsData extends AbstractIntData<StuckArrowsData, Immu
     @Override
     public ImmutableStuckArrowsData asImmutable() {
         return new ImmutableSpongeStuckArrowsData(this.getValue());
-    }
-
-    @Override
-    public int compareTo(StuckArrowsData o) {
-        return ComparisonChain.start()
-                .compare((int) this.getValue(), o.stuckArrows().get().intValue())
-                .result();
     }
 
     @Override

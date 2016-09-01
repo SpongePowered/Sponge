@@ -31,7 +31,6 @@ import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFlu
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
 import org.spongepowered.common.data.manipulator.immutable.extra.ImmutableSpongeFluidItemData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshot;
 
@@ -58,11 +57,6 @@ public class SpongeFluidItemData extends AbstractSingleData<FluidStackSnapshot, 
     @Override
     public ImmutableFluidItemData asImmutable() {
         return new ImmutableSpongeFluidItemData(this.getValue());
-    }
-
-    @Override
-    public int compareTo(FluidItemData o) {
-        return 0;
     }
 
     @Override

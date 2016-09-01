@@ -85,10 +85,6 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
     @Override
     public abstract I asImmutable();
 
-    // Again, overriding for generics
-    @Override
-    public abstract int compareTo(M o);
-
     protected T getValue() {
         return this.value;
     }

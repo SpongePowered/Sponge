@@ -30,7 +30,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBlockItemData;
 import org.spongepowered.api.data.manipulator.mutable.item.BlockItemData;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBlockItemData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.util.DataConstants;
@@ -72,11 +71,6 @@ public class SpongeBlockItemData extends AbstractSingleData<BlockState, BlockIte
     @Override
     public ImmutableBlockItemData asImmutable() {
         return new ImmutableSpongeBlockItemData(this.getValue());
-    }
-
-    @Override
-    public int compareTo(BlockItemData o) {
-        return BlockUtil.BLOCK_STATE_COMPARATOR.compare(getValue(), o.get(Keys.ITEM_BLOCKSTATE).get());
     }
 
 }

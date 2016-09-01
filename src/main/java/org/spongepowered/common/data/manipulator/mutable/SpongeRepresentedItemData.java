@@ -32,7 +32,6 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItem
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedItemData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
@@ -63,11 +62,6 @@ public class SpongeRepresentedItemData extends AbstractSingleData<ItemStackSnaps
     @Override
     public ImmutableRepresentedItemData asImmutable() {
         return new ImmutableSpongeRepresentedItemData(this.getValue());
-    }
-
-    @Override
-    public int compareTo(RepresentedItemData o) {
-        return ItemStackComparators.ALL.compare(o.item().get().createStack(), this.getValue().createStack());
     }
 
     @Override

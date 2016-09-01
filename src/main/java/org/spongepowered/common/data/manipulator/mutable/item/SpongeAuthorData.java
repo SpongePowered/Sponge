@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.item;
 
-import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
@@ -35,7 +33,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeAuthorData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -74,14 +71,6 @@ public class SpongeAuthorData extends AbstractSingleData<Text, AuthorData, Immut
     @Override
     public ImmutableAuthorData asImmutable() {
         return new ImmutableSpongeAuthorData(this.getValue());
-    }
-
-    @Override
-    public int compareTo(AuthorData o) {
-        return ComparisonChain.start()
-                .compare(TextSerializers.JSON.serialize(o.get(Keys.BOOK_AUTHOR).get()),
-                        TextSerializers.JSON.serialize(this.getValue()))
-                .result();
     }
 
 }

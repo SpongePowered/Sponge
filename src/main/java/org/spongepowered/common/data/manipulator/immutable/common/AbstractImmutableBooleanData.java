@@ -72,11 +72,4 @@ public abstract class AbstractImmutableBooleanData<I extends ImmutableDataManipu
             .set(this.usedKey, this.value);
     }
 
-    @Override
-    public int compareTo(I o) {
-        return ComparisonChain.start()
-            .compare(o.get(this.usedKey).get(), this.getValue())
-            .result();
-    }
-
 }

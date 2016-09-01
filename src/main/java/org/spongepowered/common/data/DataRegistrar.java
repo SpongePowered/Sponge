@@ -74,7 +74,6 @@ import org.spongepowered.common.data.builder.util.weighted.BaseAndVarianceBuilde
 import org.spongepowered.common.data.builder.util.weighted.FixedBuilder;
 import org.spongepowered.common.data.builder.util.weighted.OptionalVarianceBuilder;
 import org.spongepowered.common.data.builder.world.LocationBuilder;
-import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.manipulator.immutable.*;
 import org.spongepowered.common.data.manipulator.immutable.block.*;
 import org.spongepowered.common.data.manipulator.immutable.entity.*;
@@ -112,7 +111,6 @@ public class DataRegistrar {
 
     @SuppressWarnings("unchecked")
     public static void setupSerialization(Game game) {
-        KeyRegistry.registerKeys();
         SpongeDataManager dataManager = SpongeDataManager.getInstance();
 
         // TileEntities

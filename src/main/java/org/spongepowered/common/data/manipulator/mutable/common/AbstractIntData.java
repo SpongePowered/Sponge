@@ -44,11 +44,6 @@ public abstract class AbstractIntData<M extends DataManipulator<M, I>, I extends
     }
 
     @Override
-    public int compareTo(M o) {
-        return o.get(this.usedKey).get() - this.getValue();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .set(this.usedKey, this.getValue());

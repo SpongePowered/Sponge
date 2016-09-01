@@ -27,9 +27,7 @@ package org.spongepowered.common.data.manipulator.mutable.common;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -69,13 +67,6 @@ public abstract class AbstractBooleanData<M extends DataManipulator<M, I>, I ext
     @Override
     public M copy() {
         return (M) ReflectionUtil.createInstance(this.getClass(), this.getValue());
-    }
-
-    @Override
-    public int compareTo(M o) {
-        return ComparisonChain.start()
-            .compare(o.get(this.usedKey).get(), this.getValue())
-            .result();
     }
 
     @Override

@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.key.Key;
@@ -43,7 +42,6 @@ import org.spongepowered.common.data.value.mutable.SpongeMapValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -85,21 +83,6 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M, I>,
     @Override
     protected MapValue<K, V> getValueGetter() {
         return new SpongeMapValue<>(this.usedKey, this.getValue());
-    }
-
-    // Again, overriding for generics
-    @Override
-    public int compareTo(M o) {
-        final Map<K, V> thisMap = getValue();
-        final Map<K, V> otherMap = o.asMap();
-        final Set<K> thisKeySet = thisMap.keySet();
-        final Set<K> otherKeySet = otherMap.keySet();
-        final Collection<V> thisValueSet = thisMap.values();
-        final Collection<V> otherValueSet = otherMap.values();
-        return ComparisonChain.start()
-            .compare(thisKeySet.containsAll(otherKeySet), otherKeySet.containsAll(thisKeySet))
-            .compare(thisValueSet.containsAll(otherValueSet), otherValueSet.containsAll(thisValueSet))
-            .result();
     }
 
     @Override

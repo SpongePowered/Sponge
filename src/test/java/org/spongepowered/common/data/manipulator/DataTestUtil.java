@@ -35,13 +35,12 @@ import org.spongepowered.api.extra.fluid.FluidTypes;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.data.DataRegistrar;
 import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.type.SpongeCommonFluidType;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
+import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,6 +58,7 @@ final class DataTestUtil {
 
         when(mockGame.getDataManager()).thenReturn(SpongeDataManager.getInstance());
         DataRegistrar.setupSerialization(mockGame);
+        KeyRegistryModule.getInstance().registerDefaults();
         final List<Object[]> list = new ArrayList<>();
 
         final Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> manipulatorBuilderMap = getBuilderMap();
@@ -76,9 +76,9 @@ final class DataTestUtil {
 
     @SuppressWarnings("unchecked")
     private static void generateKeyMap() throws Exception {
-        Method mapGetter = KeyRegistry.class.getDeclaredMethod("getKeyMap");
+        Field mapGetter = KeyRegistryModule.class.getDeclaredField("keyMap");
         mapGetter.setAccessible(true);
-        final Map<String, Key<?>> mapping = (Map<String, Key<?>>) mapGetter.invoke(null);
+        final Map<String, Key<?>> mapping = (Map<String, Key<?>>) mapGetter.get(KeyRegistryModule.getInstance());
         for (Field field : Keys.class.getDeclaredFields()) {
             if (!mapping.containsKey(field.getName().toLowerCase())) {
                 continue;

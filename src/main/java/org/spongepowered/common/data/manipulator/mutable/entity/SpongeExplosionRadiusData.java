@@ -62,11 +62,6 @@ public class SpongeExplosionRadiusData extends AbstractSingleData<Optional<Integ
     }
 
     @Override
-    public int compareTo(ExplosionRadiusData that) {
-        return compare(this, that);
-    }
-
-    @Override
     public OptionalValue<Integer> explosionRadius() {
         return new SpongeOptionalValue<>(Keys.EXPLOSION_RADIUS, getValue());
     }

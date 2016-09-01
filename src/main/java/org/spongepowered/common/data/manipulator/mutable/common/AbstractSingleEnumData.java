@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -60,11 +59,6 @@ public abstract class AbstractSingleEnumData<E extends Enum<E>, M extends DataMa
         checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.immutableClass = checkNotNull(immutableClass);
         this.defaultValue = checkNotNull(defaultValue);
-    }
-
-    @Override
-    public int compareTo(M o) {
-        return o.get(this.usedKey).get().ordinal() - this.getValue().ordinal();
     }
 
     @Override

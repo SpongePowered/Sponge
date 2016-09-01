@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableLockableData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
@@ -47,11 +46,6 @@ public class SpongeLockableData extends AbstractSingleData<String, LockableData,
     @Override
     public Value<String> lockToken() {
         return this.getValueGetter();
-    }
-
-    @Override
-    public int compareTo(LockableData o) {
-        return this.getValue().compareTo(o.lockToken().get());
     }
 
     @Override

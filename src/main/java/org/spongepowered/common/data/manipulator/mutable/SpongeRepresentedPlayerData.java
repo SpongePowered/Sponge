@@ -121,9 +121,4 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
         return new ImmutableSpongeRepresentedPlayerData(this.getValue());
     }
 
-    @Override
-    public int compareTo(RepresentedPlayerData o) {
-        return this.getValue().getUniqueId().compareTo(o.owner().get().getUniqueId());
-    }
-
 }

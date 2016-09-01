@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.mutable.item;
 
 import com.google.common.collect.Sets;
-import com.google.common.primitives.Booleans;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -46,12 +45,6 @@ public class SpongeBreakableData extends AbstractSingleSetData<BlockType, Breaka
 
     public SpongeBreakableData(Set<BlockType> breakable) {
         super(BreakableData.class, Sets.newHashSet(breakable), Keys.BREAKABLE_BLOCK_TYPES, ImmutableSpongeBreakableData.class);
-    }
-
-    @Override
-    public int compareTo(BreakableData o) {
-        return Booleans.compare(o.breakable().containsAll(getValue()),
-                getValue().containsAll(o.breakable().get()));
     }
 
     @Override

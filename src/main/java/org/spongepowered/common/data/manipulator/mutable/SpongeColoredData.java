@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.manipulator.mutable;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
@@ -59,11 +58,6 @@ public class SpongeColoredData extends AbstractSingleData<Color, ColoredData, Im
     @Override
     public ImmutableColoredData asImmutable() {
         return new ImmutableSpongeColoredData(getValue());
-    }
-
-    @Override
-    public int compareTo(ColoredData o) {
-        return o.get(Keys.COLOR).get().getRgb() - this.getValue().getRgb();
     }
 
     @Override

@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
-import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableNoteData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.NoteData;
@@ -57,13 +55,6 @@ public class SpongeNoteData extends AbstractSingleData<NotePitch, NoteData, Immu
     @Override
     public ImmutableNoteData asImmutable() {
         return new ImmutableSpongeNoteData(this.getValue());
-    }
-
-    @Override
-    public int compareTo(NoteData o) {
-        return ComparisonChain.start()
-                .compare(note().get().getId(), o.note().get().getId())
-                .result();
     }
 
     @Override

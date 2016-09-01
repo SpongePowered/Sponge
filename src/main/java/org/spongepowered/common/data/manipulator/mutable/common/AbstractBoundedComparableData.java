@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -37,7 +36,6 @@ import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
@@ -89,14 +87,6 @@ public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M e
         } else {
             return ImmutableDataCachingUtil.getManipulator(this.immutableClass, this.getValue(), this.lowerBound, this.upperBound, this.defaultValue);
         }
-    }
-
-    @Override
-    public int compareTo(M o) {
-        return this.comparator.compare(o.get(this.usedKey)
-                .orElseThrow(() -> new IllegalArgumentException("Expected key does not have a value for Manipulator: " + o)),
-                this.getValue()
-        );
     }
 
     @Override

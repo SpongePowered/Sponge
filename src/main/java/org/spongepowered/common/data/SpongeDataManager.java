@@ -540,4 +540,8 @@ public final class SpongeDataManager implements DataManager {
     public Collection<NbtValueProcessor<?, ?>> getNbtValueProcessors(NbtDataType type) {
         return this.nbtValueTable.column(type).values();
     }
+
+    public static boolean areRegistrationsComplete() {
+        return !allowRegistrations;
+    }
 }

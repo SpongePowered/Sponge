@@ -48,11 +48,6 @@ public class SpongeFluidTankData extends AbstractMappedData<Direction, List<Flui
     }
 
     @Override
-    public int compareTo(FluidTankData o) {
-        return 0;
-    }
-
-    @Override
     public MapValue<Direction, List<FluidStackSnapshot>> fluids() {
         return getValueGetter();
     }

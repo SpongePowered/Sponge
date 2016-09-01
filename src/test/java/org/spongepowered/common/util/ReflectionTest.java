@@ -27,6 +27,7 @@ package org.spongepowered.common.util;
 import static org.spongepowered.common.util.ReflectionUtil.createInstance;
 import static org.spongepowered.common.util.ReflectionUtil.findConstructor;
 
+import com.google.common.reflect.TypeToken;
 import org.junit.Test;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
@@ -96,7 +97,7 @@ public class ReflectionTest {
         final Key<Value<Double>> key = new Key<Value<Double>>() {
             @SuppressWarnings({"unchecked", "rawtypes"})
             @Override
-            public Class<Value<Double>> getValueClass() {
+            public TypeToken<Value<Double>> getValueToken() {
                 return (Class<Value<Double>>) (Class) Value.class;
             }
 
