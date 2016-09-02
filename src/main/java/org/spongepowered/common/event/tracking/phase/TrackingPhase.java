@@ -285,8 +285,10 @@ public abstract class TrackingPhase {
         if (user != null) {
             entity.setCreator(user.getUniqueId());
         }
+        final ArrayList<Entity> entities = new ArrayList<>(1);
+        entities.add(entity);
         final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE,
-                Arrays.asList(entity), (World) minecraftWorld);
+                entities, (World) minecraftWorld);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
             ((IMixinWorldServer) minecraftWorld).forceSpawnEntity(entity);

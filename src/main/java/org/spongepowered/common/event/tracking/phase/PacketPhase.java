@@ -800,6 +800,13 @@ public final class PacketPhase extends TrackingPhase {
         return ((IPacketState) currentState).ignoresItemPreMerges();
     }
 
+    @Override
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        return this.allowEntitySpawns(phaseState)
+               ? context.getCapturedEntities().add(entity)
+               : super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext phaseContext) {

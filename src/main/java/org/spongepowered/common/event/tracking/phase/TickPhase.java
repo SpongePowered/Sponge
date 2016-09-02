@@ -1024,6 +1024,11 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        return context.getCapturedEntities().add(entity);
+    }
+
+    @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
         return true;
     }
