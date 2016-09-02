@@ -66,11 +66,11 @@ import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Axis;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.common.data.SpongeDataManager;
 
-import java.awt.Color;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
@@ -99,6 +99,10 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key> {
     private static final TypeToken<Value<Double>> DOUBLE_VALUE_TOKEN = new TypeToken<Value<Double>>() {};
     private static final TypeToken<Value<Integer>> INTEGER_VALUE_TOKEN = new TypeToken<Value<Integer>>() {};
     private static final TypeToken<MutableBoundedValue<Integer>> BOUNDED_INTEGER_VALUE_TOKEN = new TypeToken<MutableBoundedValue<Integer>>() {};
+    public static final TypeToken<Value<Vector3d>>
+            VECTOR_3D_VALUE_TOKEN =
+            new TypeToken<Value<Vector3d>>() {
+            };
 
     public static KeyRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -119,7 +123,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key> {
         this.keyMap.put("sign_lines", makeListKey(TEXT_TOKEN, of("SignLines"), "sponge:sign_lines", "Sign Lines"));
         this.keyMap.put("skull_type", makeSingleKey(new TypeToken<SkullType>() {}, new TypeToken<Value<SkullType>>() {}, of("SkullType"), "sponge:skull_type", "Skull Type"));
         this.keyMap.put("is_sneaking", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("IsSneaking"), "sponge:sneaking", "Is Sneaking"));
-        this.keyMap.put("velocity", makeSingleKey(VECTOR_3D_TOKEN, new TypeToken<Value<Vector3d>>() {}, of("Velocity"), "sponge:velocity", "Velocity"));
+        this.keyMap.put("velocity", makeSingleKey(VECTOR_3D_TOKEN, VECTOR_3D_VALUE_TOKEN, of("Velocity"), "sponge:velocity", "Velocity"));
         this.keyMap.put("food_level", makeSingleKey(INTEGER_TOKEN, INTEGER_VALUE_TOKEN, of("FoodLevel"), "sponge:food_level", "Food Level"));
         this.keyMap.put("saturation", makeSingleKey(DOUBLE_TOKEN, DOUBLE_VALUE_TOKEN, of("FoodSaturationLevel"), "sponge:food_saturation_level", "Food Saturation Level"));
         this.keyMap.put("exhaustion", makeSingleKey(DOUBLE_TOKEN, DOUBLE_VALUE_TOKEN, of("FoodExhaustionLevel"), "sponge:food_exhaustion_level", ""));
@@ -142,7 +146,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key> {
         this.keyMap.put("command", makeSingleKey(STRING_TOKEN, new TypeToken<Value<String>>() {}, of("Command"), "sponge:command", "Command"));
         this.keyMap.put("success_count", makeSingleKey(INTEGER_TOKEN, INTEGER_VALUE_TOKEN, of("SuccessCount"), "sponge:success_count", "SuccessCount"));
         this.keyMap.put("tracks_output", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("TracksOutput"), "sponge:tracks_output", "Tracks Output"));
-        this.keyMap.put("last_command_output", makeOptionalKey(TEXT_TOKEN, , of("LastCommandOutput"), "sponge:last_command_output", "Last Command Output", ));
+        this.keyMap.put("last_command_output", makeOptionalKey(new TypeToken<Optional<Text>>() {}, new TypeToken<OptionalValue<Text>>() {}, of("LastCommandOutput"), "sponge:last_command_output", "Last Command Output"));
         this.keyMap.put("trade_offers", makeListKey(new TypeToken<TradeOffer>() {}, of("TradeOffers"), "sponge:trade_offers", "Trade Offers"));
         this.keyMap.put("dye_color", makeSingleKey(new TypeToken<DyeColor>() {}, new TypeToken<Value<DyeColor>>() {}, of("DyeColor"), "sponge:dye_color", "Dye Color"));
         this.keyMap.put("firework_flight_modifier", makeSingleKey(INTEGER_TOKEN, new TypeToken<BoundedValue<Integer>>() {}, of("FlightModifier"), "sponge:flight_modifier", "Flight Modifier"));
@@ -184,7 +188,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key> {
         this.keyMap.put("is_sitting", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("IsSitting"), "sponge:is_sitting", "Is Sitting"));
         this.keyMap.put("is_sheared", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("IsSheared"), "sponge:is_sheared", "Is Sheared"));
         this.keyMap.put("pig_saddle", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("IsPigSaddled"), "sponge:is_pig_saddled", "Is Pig Saddled"));
-        this.keyMap.put("tamed_owner", makeOptionalKey(OPTIONAL_UUID_TOKEN, new TypeToken<OptionalValue<UUID>>() {}, of("TamerUUID"), "sponge:tamer_uuid", "Tamer UUID", ));
+        this.keyMap.put("tamed_owner", makeOptionalKey(OPTIONAL_UUID_TOKEN, new TypeToken<OptionalValue<UUID>>() {}, of("TamerUUID"), "sponge:tamer_uuid", "Tamer UUID"));
         this.keyMap.put("is_wet", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("IsWet"), "sponge:is_wet", "Is Wet"));
         this.keyMap.put("elder_guardian", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("Elder"), "sponge:elder", "Elder"));
         this.keyMap.put("coal_type", makeSingleKey(new TypeToken<CoalType>() {}, new TypeToken<Value<CoalType>>() {}, of("CoalType"), "sponge:coal_type", "Coal Type"));
@@ -289,15 +293,15 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key> {
         this.keyMap.put("hide_miscellaneous", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("HideMiscellaneous"), "sponge:hide_miscellaneous", "Hide Miscellaneous"));
         this.keyMap.put("potion_effects", makeListKey(new TypeToken<PotionEffect>() {}, of("PotionEffects"), "sponge:potion_effects", "Potion Effects"));
         this.keyMap.put("body_rotations", makeMapKey(new TypeToken<BodyPart>() {}, VECTOR_3D_TOKEN, of("BodyRotations"), "sponge:body_rotations", "Body Rotations"));
-        this.keyMap.put("head_rotation", makeSingleKey(VECTOR_3D_TOKEN, new TypeToken<Value<Vector3d>>() {}, of("HeadRotation"), "sponge:head_rotation", "Head Rotation"));
-        this.keyMap.put("chest_rotation", makeSingleKey(VECTOR_3D_TOKEN, new TypeToken<Value<Vector3d>>() {}, of("ChestRotation"), "sponge:chest_rotation", "Chest Rotation"));
-        this.keyMap.put("left_arm_rotation", makeSingleKey(VECTOR_3D_TOKEN, new TypeToken<Value<Vector3d>>() {}, of("LeftArmRotation"), "sponge:left_arm_rotation", "Left Arm Rotation"));
-        this.keyMap.put("right_arm_rotation", makeSingleKey(VECTOR_3D_TOKEN, new TypeToken<Value<Vector3d>>() {}, of("RightArmRotation"), "sponge:right_arm_rotation", "Right Arm Rotation"));
-        this.keyMap.put("left_leg_rotation", makeSingleKey(VECTOR_3D_TOKEN, new TypeToken<Value<Vector3d>>() {}, of("LeftLegRotation"), "sponge:left_leg_rotation", "Left Leg Rotation"));
-        this.keyMap.put("right_leg_rotation", makeSingleKey(VECTOR_3D_TOKEN, new TypeToken<Value<Vector3d>>() {}, of("RightLegRotation"), "sponge:right_leg_rotation", "Right Leg Rotation"));
-        this.keyMap.put("beacon_primary_effect", makeOptionalKey(new TypeToken<PotionEffectType>() {}, , of("BeaconPrimaryEffect"), "sponge:beacon_primary_effect", "Beacon Primary Effect", ));
-        this.keyMap.put("beacon_secondary_effect", makeOptionalKey(new TypeToken<PotionEffectType>() {}, , of("BeaconSecondaryEffect"), "sponge:beacon_secondary_effect", "Beacon Secondary Effect", ));
-        this.keyMap.put("targeted_location", makeSingleKey(VECTOR_3D_TOKEN, new TypeToken<Value<Vector3d>>() {}, of("TargetedVector3d"), "sponge:targeted_vector_3d", "Targeted Vector3d"));
+        this.keyMap.put("head_rotation", makeSingleKey(VECTOR_3D_TOKEN, VECTOR_3D_VALUE_TOKEN, of("HeadRotation"), "sponge:head_rotation", "Head Rotation"));
+        this.keyMap.put("chest_rotation", makeSingleKey(VECTOR_3D_TOKEN, VECTOR_3D_VALUE_TOKEN, of("ChestRotation"), "sponge:chest_rotation", "Chest Rotation"));
+        this.keyMap.put("left_arm_rotation", makeSingleKey(VECTOR_3D_TOKEN, VECTOR_3D_VALUE_TOKEN, of("LeftArmRotation"), "sponge:left_arm_rotation", "Left Arm Rotation"));
+        this.keyMap.put("right_arm_rotation", makeSingleKey(VECTOR_3D_TOKEN, VECTOR_3D_VALUE_TOKEN, of("RightArmRotation"), "sponge:right_arm_rotation", "Right Arm Rotation"));
+        this.keyMap.put("left_leg_rotation", makeSingleKey(VECTOR_3D_TOKEN, VECTOR_3D_VALUE_TOKEN, of("LeftLegRotation"), "sponge:left_leg_rotation", "Left Leg Rotation"));
+        this.keyMap.put("right_leg_rotation", makeSingleKey(VECTOR_3D_TOKEN, VECTOR_3D_VALUE_TOKEN, of("RightLegRotation"), "sponge:right_leg_rotation", "Right Leg Rotation"));
+        this.keyMap.put("beacon_primary_effect", makeOptionalKey(new TypeToken<Optional<PotionEffectType>>() {}, new TypeToken<OptionalValue<PotionEffectType>>() {}, of("BeaconPrimaryEffect"), "sponge:beacon_primary_effect", "Beacon Primary Effect", ));
+        this.keyMap.put("beacon_secondary_effect", makeOptionalKey(new TypeToken<Optional<PotionEffectType>>() {}, new TypeToken<OptionalValue<PotionEffectType>>() {}, of("BeaconSecondaryEffect"), "sponge:beacon_secondary_effect", "Beacon Secondary Effect", ));
+        this.keyMap.put("targeted_location", makeSingleKey(VECTOR_3D_TOKEN, VECTOR_3D_VALUE_TOKEN, of("TargetedVector3d"), "sponge:targeted_vector_3d", "Targeted Vector3d"));
         this.keyMap.put("fuse_duration", makeSingleKey(INTEGER_TOKEN, INTEGER_VALUE_TOKEN, of("FuseDuration"), "sponge:fuse_duration", "Fuse Duration"));
         this.keyMap.put("ticks_remaining", makeSingleKey(INTEGER_TOKEN, INTEGER_VALUE_TOKEN, of("TicksRemaining"), "sponge:ticks_remaining", "Ticks Remaining"));
         this.keyMap.put("explosion_radius", makeSingleKey(INTEGER_TOKEN, INTEGER_VALUE_TOKEN, of("ExplosionRadius"), "sponge:explosion_radius", "Explosion Radius"));
