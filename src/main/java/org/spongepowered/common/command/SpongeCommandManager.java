@@ -56,6 +56,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -276,7 +277,7 @@ public class SpongeCommandManager implements CommandManager {
 
         try {
             try {
-                if (CauseTracker.ENABLED) {
+                if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                     final String commandUsed = commandLine;
                     Sponge.getServer().getWorlds().forEach(world -> {
                         final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
@@ -289,7 +290,7 @@ public class SpongeCommandManager implements CommandManager {
                     });
                 }
                 final CommandResult result = this.dispatcher.process(source, commandLine);
-                if (CauseTracker.ENABLED) {
+                if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                     Sponge.getServer().getWorlds().forEach(world -> {
                         final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
                         try {

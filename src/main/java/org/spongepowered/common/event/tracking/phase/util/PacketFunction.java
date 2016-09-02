@@ -513,12 +513,9 @@ public interface PacketFunction {
                                     .type(InternalSpawnTypes.PLACEMENT)
                                     .build())
                             .build();
-                    final DropItemEvent.Dispense
-                            dispense =
-                            SpongeEventFactory.createDropItemEventDispense(cause, normalPlacement, causeTracker.getWorld());
-                    if (!SpongeImpl.postEvent(dispense)) {
-                        processSpawnedEntities(player, causeTracker, dispense);
-
+                    final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, normalPlacement, causeTracker.getWorld());
+                    if (!SpongeImpl.postEvent(event)) {
+                        processSpawnedEntities(player, causeTracker, event);
                     }
                 }
             });
