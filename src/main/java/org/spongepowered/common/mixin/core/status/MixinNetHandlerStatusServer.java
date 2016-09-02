@@ -30,31 +30,41 @@ import net.minecraft.network.status.client.CPacketServerQuery;
 import net.minecraft.network.status.server.SPacketServerInfo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.NetHandlerStatusServer;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.network.status.SpongeStatusClient;
 import org.spongepowered.common.network.status.SpongeStatusResponse;
 
 @Mixin(NetHandlerStatusServer.class)
 public abstract class MixinNetHandlerStatusServer {
 
+    @Shadow @Final private static ITextComponent EXIT_MESSAGE;
+
     @Shadow @Final private MinecraftServer server;
     @Shadow @Final private NetworkManager networkManager;
+    @Shadow private boolean handled;
 
-    @Inject(method = "processServerQuery", at = @At("HEAD"), cancellable = true)
-    public void processServerQuery(CPacketServerQuery packetIn, CallbackInfo callbackInfo) {
-        // Clone the response
-        ServerStatusResponse response = SpongeStatusResponse.post(this.server, new SpongeStatusClient(this.networkManager));
-        if (response != null) {
-            this.networkManager.sendPacket(new SPacketServerInfo(response));
+    /**
+     * @author Minecrell - January 18th, 2015
+     * @reason Post the server status ping event for plugins.
+     */
+    @Overwrite
+    public void processServerQuery(CPacketServerQuery packetIn) {
+        if (this.handled) {
+            this.networkManager.closeChannel(EXIT_MESSAGE);
         } else {
-            this.networkManager.closeChannel(null);
+            this.handled = true;
+
+            ServerStatusResponse response = SpongeStatusResponse.post(this.server, new SpongeStatusClient(this.networkManager));
+            if (response != null) {
+                this.networkManager.sendPacket(new SPacketServerInfo(response));
+            } else {
+                this.networkManager.closeChannel(null);
+            }
         }
-        callbackInfo.cancel();
     }
 
 }
