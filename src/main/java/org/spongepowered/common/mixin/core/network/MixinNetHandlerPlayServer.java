@@ -614,7 +614,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             this.playerEntity.isChangingQuantityOnly = false;
 
             // if cancelled, force client itemstack update
-            if (!ItemStack.areItemStacksEqual(this.playerEntity.inventory.getCurrentItem(), packetIn.getStack()) || !result) {
+            if ((!ItemStack.areItemStacksEqual(this.playerEntity.inventory.getCurrentItem(), packetIn.getStack()) || !result) && (slot != null && this.playerEntity.openContainer != null)) {
                 this.sendPacket(new S2FPacketSetSlot(this.playerEntity.openContainer.windowId, slot.slotNumber,
                         this.playerEntity.inventory.getCurrentItem()));
             }
