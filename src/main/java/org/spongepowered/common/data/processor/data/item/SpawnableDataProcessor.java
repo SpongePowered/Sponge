@@ -27,7 +27,9 @@ package org.spongepowered.common.data.processor.data.item;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableSpawnableData;
@@ -37,11 +39,12 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeSpawnableData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.Optional;
 
@@ -55,9 +58,10 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
     @Override
     public boolean set(ItemStack itemStack, EntityType value) {
         final String name = EntityList.CLASS_TO_NAME.get((Class<? extends Entity>) value.getEntityClass());
-        final int id = EntityList.NAME_TO_ID.get(name);
-        if (EntityList.ENTITY_EGGS.containsKey(id)) {
-            itemStack.setItemDamage(id);
+        if (EntityList.ENTITY_EGGS.containsKey(name)) {
+            final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(itemStack);
+            final NBTTagCompound subCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.SPAWNABLE_ENTITY_TAG);
+            subCompound.setString(NbtDataUtil.ENTITY_TYPE_ID, name);
             return true;
         }
         return false;
@@ -65,11 +69,10 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
 
     @Override
     public Optional<EntityType> getVal(ItemStack itemStack) {
-        final Class<?> entity = EntityList.getClassFromID(itemStack.getItemDamage());
-        for (EntityType type : SpongeImpl.getRegistry().getAllOf(EntityType.class)) {
-            if (type.getEntityClass().equals(entity)) {
-                return Optional.of(type);
-            }
+        final String name = ItemMonsterPlacer.getEntityIdFromItem(itemStack);
+        if (name != null) {
+            final Class<? extends Entity> entity = EntityList.NAME_TO_CLASS.get(name);
+            return Optional.ofNullable(EntityTypeRegistryModule.getInstance().getForClass(entity));
         }
         return Optional.empty();
     }
@@ -91,16 +94,19 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (supports(container)) {
-            ItemStack stack = (ItemStack) container;
-            Optional<EntityType> old = getVal(stack);
-            if (!old.isPresent()) {
-                return DataTransactionResult.successNoData();
-            }
-            stack.setItemDamage(0);
-            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+        if (!supports(container)) {
+            return DataTransactionResult.failNoData();
         }
-        return DataTransactionResult.failNoData();
+        ItemStack itemStack = (ItemStack) container;
+        Optional<EntityType> old = getVal(itemStack);
+        if (!old.isPresent()) {
+            return DataTransactionResult.successNoData();
+        }
+        try {
+            NbtDataUtil.getItemCompound(itemStack).get().removeTag(NbtDataUtil.SPAWNABLE_ENTITY_TAG);
+            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+        } catch (Exception e) {
+            return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
+        }
     }
-
 }

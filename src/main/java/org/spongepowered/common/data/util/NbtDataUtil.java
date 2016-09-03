@@ -114,6 +114,8 @@ public final class NbtDataUtil {
 
     public static final String CHUNK_DATA_LEVEL = "Level";
     public static final String CHUNK_DATA_SECTIONS = "Sections";
+    
+    public static final String SPAWNABLE_ENTITY_TAG = "EntityTag";
 
     // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
     public static final byte TAG_END = 0;
