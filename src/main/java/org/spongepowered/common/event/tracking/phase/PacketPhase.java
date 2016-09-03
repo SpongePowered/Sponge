@@ -712,7 +712,18 @@ public final class PacketPhase extends TrackingPhase {
                         .addEntityDropCaptures();
             }
         },
-        UPDATE_SIGN,
+        UPDATE_SIGN {
+
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                context
+                        .addBlockCaptures()
+                        .addEntityCaptures()
+                        .addEntityDropCaptures();
+
+            }
+        },
+
         HANDLED_EXTERNALLY() {
             @Override
             public boolean ignoresItemPreMerges() {
