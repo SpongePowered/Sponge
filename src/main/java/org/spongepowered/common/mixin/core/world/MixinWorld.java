@@ -89,11 +89,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
@@ -135,7 +131,6 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeChunkPreGenerate;
@@ -1002,45 +997,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         EntityPlayer player = (EntityPlayer) entityPlayer;
         IMixinEntity mixinEntity = (IMixinEntity) player;
         return predicate.apply(player) && !mixinEntity.isVanished();
-    }
-
-    /**
-     * @author gabizou - February 7th, 2016
-     *
-     * This will short circuit all other patches such that we control the
-     * entities being loaded by chunkloading and can throw our bulk entity
-     * event. This will bypass Forge's hook for individual entity events,
-     * but the SpongeModEventManager will still successfully throw the
-     * appropriate event and cancel the entities otherwise contained.
-     *
-     * @param entities The entities being loaded
-     * @param callbackInfo The callback info
-     */
-    @Final
-    @Inject(method = "loadEntities", at = @At("HEAD"), cancellable = true)
-    private void spongeLoadEntities(Collection<net.minecraft.entity.Entity> entities, CallbackInfo callbackInfo) {
-        if (entities.isEmpty()) {
-            // just return, no entities to load!
-            callbackInfo.cancel();
-            return;
-        }
-        List<Entity> entityList = new ArrayList<>();
-        for (net.minecraft.entity.Entity entity : entities) {
-            entityList.add((Entity) entity);
-        }
-        SpawnCause cause = SpawnCause.builder().type(InternalSpawnTypes.CHUNK_LOAD).build();
-        List<NamedCause> causes = new ArrayList<>();
-        causes.add(NamedCause.source(cause));
-        causes.add(NamedCause.of("World", this));
-        SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, this);
-        SpongeImpl.postEvent(chunkLoad);
-        if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {
-            for (Entity successful : chunkLoad.getEntities()) {
-                this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
-                this.onEntityAdded((net.minecraft.entity.Entity) successful);
-            }
-        }
-        callbackInfo.cancel();
     }
 
     @Inject(method = "playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V", at = @At("HEAD"), cancellable = true)

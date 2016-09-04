@@ -159,6 +159,7 @@ import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
@@ -986,6 +987,47 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Redirect(method = "addWeatherEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     public int getDimensionIdForWeatherEffect(DimensionType id) {
         return this.getDimensionId();
+    }
+
+
+    /**
+     * @author gabizou - February 7th, 2016
+     * @author gabizou - September 3rd, 2016 - Moved from MixinWorld since WorldServer overrides the method.
+     *
+     * This will short circuit all other patches such that we control the
+     * entities being loaded by chunkloading and can throw our bulk entity
+     * event. This will bypass Forge's hook for individual entity events,
+     * but the SpongeModEventManager will still successfully throw the
+     * appropriate event and cancel the entities otherwise contained.
+     *
+     * @param entities The entities being loaded
+     * @param callbackInfo The callback info
+     */
+    @Final
+    @Inject(method = "loadEntities", at = @At("HEAD"), cancellable = true)
+    private void spongeLoadEntities(Collection<net.minecraft.entity.Entity> entities, CallbackInfo callbackInfo) {
+        if (entities.isEmpty()) {
+            // just return, no entities to load!
+            callbackInfo.cancel();
+            return;
+        }
+        List<Entity> entityList = new ArrayList<>();
+        for (net.minecraft.entity.Entity entity : entities) {
+            entityList.add((Entity) entity);
+        }
+        SpawnCause cause = SpawnCause.builder().type(InternalSpawnTypes.CHUNK_LOAD).build();
+        List<NamedCause> causes = new ArrayList<>();
+        causes.add(NamedCause.source(cause));
+        causes.add(NamedCause.of("World", this));
+        SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, this);
+        SpongeImpl.postEvent(chunkLoad);
+        if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {
+            for (Entity successful : chunkLoad.getEntities()) {
+                this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
+                this.onEntityAdded((net.minecraft.entity.Entity) successful);
+            }
+        }
+        callbackInfo.cancel();
     }
 
     // ------------------------- Start Cause Tracking overrides of Minecraft World methods ----------
