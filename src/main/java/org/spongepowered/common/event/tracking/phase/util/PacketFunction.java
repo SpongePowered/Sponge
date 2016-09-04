@@ -682,7 +682,7 @@ public interface PacketFunction {
                 .ifPresentAndNotEmpty(entities -> {
                     final Cause cause = Cause.source(EntitySpawnCause.builder()
                             .entity(EntityUtil.fromNative(player))
-                            .type(InternalSpawnTypes.SPAWN_EGG)
+                            .type(itemStack.getItem() == ItemTypes.SPAWN_EGG ? InternalSpawnTypes.SPAWN_EGG : InternalSpawnTypes.PLACEMENT)
                             .build())
                             .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
                             .build();

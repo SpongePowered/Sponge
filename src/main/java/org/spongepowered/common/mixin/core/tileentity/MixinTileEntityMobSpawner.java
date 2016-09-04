@@ -28,9 +28,11 @@ import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.tileentity.TileEntityMobSpawner;
 import org.spongepowered.api.block.tileentity.MobSpawner;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.List;
 
@@ -59,5 +61,10 @@ public abstract class MixinTileEntityMobSpawner extends MixinTileEntity implemen
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         // TODO manipulators.add(getMobSpawnerData());
+    }
+
+    @Override
+    public SpawnType getTickedSpawnType() {
+        return InternalSpawnTypes.MOB_SPAWNER;
     }
 }

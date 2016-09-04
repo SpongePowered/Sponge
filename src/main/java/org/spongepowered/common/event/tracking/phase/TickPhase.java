@@ -72,6 +72,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -675,6 +676,7 @@ public final class TickPhase extends TrackingPhase {
             final Optional<User> notifier = phaseContext.getNotifier();
             final Optional<User> owner = phaseContext.getOwner();
             final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
+            final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tickingTile;
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> {
                         TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
@@ -717,7 +719,7 @@ public final class TickPhase extends TrackingPhase {
                         } // Otherwise, just go ahead
                         final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
                                 .block(capturedSnapshot.getSnapshot())
-                                .type(InternalSpawnTypes.BLOCK_SPAWNING)
+                                .type(mixinTileEntity.getTickedSpawnType())
                                 .build());
                         notifier.ifPresent(builder::notifier);
                         owner.ifPresent(builder::owner);

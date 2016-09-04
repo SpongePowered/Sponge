@@ -60,13 +60,23 @@ public final class BlockPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
         BLOCK_DECAY,
-        RESTORING_BLOCKS,
+        RESTORING_BLOCKS(false),
         DISPENSE,
         BLOCK_DROP_ITEMS,
         BLOCK_ADDED,
         BLOCK_BREAK,
         PISTON_MOVING,
         ;
+
+        private final boolean allowsSpawns;
+
+        State() {
+            this.allowsSpawns = true;
+        }
+
+        State(boolean allowsSpawns) {
+            this.allowsSpawns = allowsSpawns;
+        }
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
@@ -91,7 +101,7 @@ public final class BlockPhase extends TrackingPhase {
 
     @Override
     public boolean allowEntitySpawns(IPhaseState currentState) {
-        return currentState != State.RESTORING_BLOCKS;
+        return ((State) currentState).allowsSpawns;
     }
 
     @SuppressWarnings("unchecked")
@@ -113,10 +123,16 @@ public final class BlockPhase extends TrackingPhase {
                     });
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
-                        final Cause cause = Cause.source(BlockSpawnCause.builder()
+                        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
                                 .block(blockSnapshot)
                                 .type(InternalSpawnTypes.BLOCK_SPAWNING)
-                                .build())
+                                .build());
+                        phaseContext.getNotifier()
+                                .ifPresent(builder::notifier);
+                        phaseContext.getOwner()
+                                .ifPresent(builder::owner);
+
+                        final Cause cause = builder
                                 .build();
                         final SpawnEntityEvent
                                 event =
@@ -160,11 +176,16 @@ public final class BlockPhase extends TrackingPhase {
                     .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
-                        final Cause cause = Cause.source(
-                                BlockSpawnCause.builder()
-                                        .block(blockSnapshot)
-                                        .type(InternalSpawnTypes.DROPPED_ITEM)
-                                        .build())
+                        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
+                                .block(blockSnapshot)
+                                .type(InternalSpawnTypes.DROPPED_ITEM)
+                                .build());
+                        phaseContext.getNotifier()
+                                .ifPresent(builder::notifier);
+                        phaseContext.getOwner()
+                                .ifPresent(builder::owner);
+
+                        final Cause cause = builder
                                 .build();
                         final ArrayList<Entity> entities = new ArrayList<>();
                         for (EntityItem item : items) {
@@ -182,10 +203,16 @@ public final class BlockPhase extends TrackingPhase {
                     });
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
-                        final Cause cause = Cause.source(BlockSpawnCause.builder()
+                        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
                                 .block(blockSnapshot)
-                                .type(InternalSpawnTypes.BLOCK_SPAWNING)
-                                .build())
+                                .type(InternalSpawnTypes.DROPPED_ITEM)
+                                .build());
+                        phaseContext.getNotifier()
+                                .ifPresent(builder::notifier);
+                        phaseContext.getOwner()
+                                .ifPresent(builder::owner);
+
+                        final Cause cause = builder
                                 .build();
                         final SpawnEntityEvent
                                 event =
@@ -238,11 +265,16 @@ public final class BlockPhase extends TrackingPhase {
                     .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dispensing items!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
-                        final Cause cause = Cause.source(
-                                BlockSpawnCause.builder()
-                                        .block(blockSnapshot)
-                                        .type(InternalSpawnTypes.DISPENSE)
-                                        .build())
+                        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
+                                .block(blockSnapshot)
+                                .type(InternalSpawnTypes.DISPENSE)
+                                .build());
+                        phaseContext.getNotifier()
+                                .ifPresent(builder::notifier);
+                        phaseContext.getOwner()
+                                .ifPresent(builder::owner);
+
+                        final Cause cause = builder
                                 .build();
                         final ArrayList<Entity> entities = new ArrayList<>();
                         for (EntityItem item : items) {
@@ -260,17 +292,27 @@ public final class BlockPhase extends TrackingPhase {
                     });
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
-                        final Cause cause = Cause.source(BlockSpawnCause.builder()
+                        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
                                 .block(blockSnapshot)
-                                .type(InternalSpawnTypes.BLOCK_SPAWNING)
-                                .build())
+                                .type(InternalSpawnTypes.DISPENSE)
+                                .build());
+                        phaseContext.getNotifier()
+                                .ifPresent(builder::notifier);
+                        phaseContext.getOwner()
+                                .ifPresent(builder::owner);
+
+                        final Cause cause = builder
                                 .build();
                         final SpawnEntityEvent
                                 event =
                                 SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
                         SpongeImpl.postEvent(event);
+                        final User user = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
                         if (!event.isCancelled()) {
                             for (Entity entity : event.getEntities()) {
+                                if (user != null) {
+                                    EntityUtil.toMixin(entity).setCreator(user.getUniqueId());
+                                }
                                 causeTracker.getMixinWorld().forceSpawnEntity(entity);
                             }
                         }
@@ -286,6 +328,12 @@ public final class BlockPhase extends TrackingPhase {
 
     }
 
+    @Override
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        return this.allowEntitySpawns(phaseState)
+               ? context.getCapturedEntities().add(entity)
+               : super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
+    }
 
     @Override
     public boolean isRestoring(IPhaseState state, PhaseContext phaseContext, int updateFlag) {
