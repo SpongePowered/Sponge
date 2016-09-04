@@ -398,7 +398,25 @@ public final class TickPhase extends TrackingPhase {
                             }
                         }
                         if (!projectile.isEmpty()) {
+                            final Cause.Builder builder = Cause.source(
+                                    EntitySpawnCause.builder()
+                                            .entity(tickingEntity)
+                                            .type(InternalSpawnTypes.PROJECTILE)
+                                            .build()
+                            );
 
+                            notifier.ifPresent(builder::notifier);
+                            creator.ifPresent(builder::owner);
+                            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), projectile, causeTracker.getWorld());
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                for (Entity entity : event.getEntities()) {
+                                    if (entityCreator != null) {
+                                        entity.setCreator(entityCreator.getUniqueId());
+                                    }
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                }
+                            }
                         }
 
                         final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
