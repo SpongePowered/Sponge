@@ -101,7 +101,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -146,6 +145,7 @@ public abstract class MixinEntity implements IMixinEntity {
     private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
     private static final String FIRE_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;inFire:Lnet/minecraft/util/DamageSource;";
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
+    private static final String RIDING_ENTITY_FIELD = "Lnet/minecraft/entity/Entity;ridingEntity:Lnet/minecraft/entity/Entity;";
     @SuppressWarnings("unused")
 	private static final String
             ENTITY_ITEM_INIT =
@@ -279,19 +279,23 @@ public abstract class MixinEntity implements IMixinEntity {
         this.isConstructing = false;
     }
 
-    @Inject(method = "addPassenger(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"), cancellable = true)
-    public void onAddPassenger(net.minecraft.entity.Entity passenger, CallbackInfo ci) {
-        if (!this.worldObj.isRemote && ShouldFire.MOUNT_ENTITY_EVENT) {
-            if (SpongeImpl.postEvent(SpongeEventFactory.createMountEntityEvent(Cause.of(NamedCause.source(passenger)), this))) {
+    @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z", at = @At(value = "FIELD", target = RIDING_ENTITY_FIELD, ordinal = 0),
+            cancellable = true)
+    public void onStartRiding(net.minecraft.entity.Entity vehicle, boolean force, CallbackInfoReturnable ci) {
+        if (!this.worldObj.isRemote && ShouldFire.RIDE_ENTITY_EVENT_MOUNT) {
+            if (SpongeImpl.postEvent(SpongeEventFactory.createRideEntityEventMount(Cause.of(NamedCause.source(this)), (Entity) vehicle))) {
                 ci.cancel();
             }
         }
     }
 
-    @Inject(method = "removePassenger(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"))
-    public void onRemovePassenger(net.minecraft.entity.Entity passenger, CallbackInfo ci) {
-        if (!this.worldObj.isRemote && ShouldFire.DISMOUNT_ENTITY_EVENT) {
-            SpongeImpl.postEvent(SpongeEventFactory.createDismountEntityEvent(Cause.of(NamedCause.source(passenger)), this));
+    @Inject(method = "dismountRidingEntity()V", at = @At(value = "FIELD", target = RIDING_ENTITY_FIELD, ordinal = 1), cancellable = true)
+    public void onDismountRidingEntity(CallbackInfo ci) {
+        if (!this.worldObj.isRemote && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
+            if (SpongeImpl.postEvent(SpongeEventFactory.
+                    createRideEntityEventDismount(Cause.of(NamedCause.source(this)), (Entity) this.getRidingEntity()))) {
+                ci.cancel();
+            }
         }
     }
 
