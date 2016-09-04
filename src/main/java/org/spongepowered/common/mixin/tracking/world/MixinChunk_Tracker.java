@@ -105,7 +105,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             return;
         } else {
             IMixinWorldServer spongeWorld = (IMixinWorldServer) this.worldObj;
-            if (spongeWorld.getCauseTracker().getStack().peekState().ignoresBlockTracking()) {
+            if (spongeWorld.getCauseTracker().getCurrentState().ignoresBlockTracking()) {
                 // Don't track chunk gen
                 return;
             }

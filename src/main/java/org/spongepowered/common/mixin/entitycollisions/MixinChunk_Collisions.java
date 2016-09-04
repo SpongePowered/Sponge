@@ -90,7 +90,7 @@ public class MixinChunk_Collisions {
                 return true;
             }
 
-            final PhaseContext phaseContext = spongeWorld.getCauseTracker().getStack().peekContext();
+            final PhaseContext phaseContext = spongeWorld.getCauseTracker().getCurrentContext();
 
             return Stream.<Supplier<Optional<Boolean>>>of(
                     () -> phaseContext.getSource(BlockSnapshot.class).map(tickBlock -> {

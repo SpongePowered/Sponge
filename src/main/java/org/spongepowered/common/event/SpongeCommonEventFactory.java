@@ -171,7 +171,7 @@ public class SpongeCommonEventFactory {
         } else {
             IMixinWorldServer spongeWorld = (IMixinWorldServer) world;
             CauseTracker causeTracker = spongeWorld.getCauseTracker();
-            PhaseContext context = causeTracker.getStack().peekContext();
+            PhaseContext context = causeTracker.getCurrentContext();
 
             final Optional<BlockSnapshot> currentTickingBlock = context.getSource(BlockSnapshot.class);
             final Optional<TileEntity> currentTickingTileEntity = context.getSource(TileEntity.class);
@@ -199,7 +199,7 @@ public class SpongeCommonEventFactory {
 
     public static boolean handleChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos) {
         final CauseTracker causeTracker = worldIn.getCauseTracker();
-        PhaseData data = causeTracker.getStack().peek();
+        PhaseData data = causeTracker.getCurrentPhaseData();
         Optional<BlockSnapshot> block = data.context.getSource(BlockSnapshot.class);
         if (!block.isPresent()) {
             // safety measure
@@ -208,7 +208,7 @@ public class SpongeCommonEventFactory {
 
         Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
         final Cause.Builder builder = Cause.source(block.get());
-        final Optional<User> notifier = causeTracker.getStack().peek()
+        final Optional<User> notifier = causeTracker.getCurrentPhaseData()
                 .context
                 .firstNamed(NamedCause.NOTIFIER, User.class);
         notifier.ifPresent(user -> builder.named(NamedCause.NOTIFIER, user));
@@ -221,7 +221,7 @@ public class SpongeCommonEventFactory {
     @SuppressWarnings("rawtypes")
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
         final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
-        final PhaseData peek = causeTracker.getStack().peek();
+        final PhaseData peek = causeTracker.getCurrentPhaseData();
         // Don't fire notify events during world gen
         if (peek.state.getPhase().isWorldGeneration(peek.state)) {
             return null;
@@ -337,7 +337,7 @@ public class SpongeCommonEventFactory {
         if (!cancelled) {
             IMixinEntity spongeEntity = (IMixinEntity) entity;
             if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
-                final PhaseData peek = causeTracker.getStack().peek();
+                final PhaseData peek = causeTracker.getCurrentPhaseData();
                 final Optional<User> notifier = peek.context.firstNamed(NamedCause.NOTIFIER, User.class);
                 if (notifier.isPresent()) {
                     IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
@@ -358,7 +358,7 @@ public class SpongeCommonEventFactory {
         final Cause.Builder builder = Cause.source(projectile).named("ProjectileSource", projectileSource == null
                                                                                          ? ProjectileSource.UNKNOWN
                                                                                          : projectileSource);
-        final Optional<User> notifier = causeTracker.getStack().peek()
+        final Optional<User> notifier = causeTracker.getCurrentPhaseData()
                 .context
                 .firstNamed(NamedCause.NOTIFIER, User.class);
         notifier.ifPresent(user -> builder.named(NamedCause.OWNER, user));

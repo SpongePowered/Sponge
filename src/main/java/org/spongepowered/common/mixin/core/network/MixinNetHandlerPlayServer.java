@@ -333,7 +333,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
         if (this.playerEntity.interactionManager.isCreative()) {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.playerEntity.getServerWorld();
-            final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
+            final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
             final PhaseContext context = peek.context;
             final boolean ignoresCreative = context.firstNamed(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class).get();
             boolean clickedOutside = packetIn.getSlotId() < 0;
@@ -544,7 +544,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         if (actionResult != EnumActionResult.SUCCESS) {
             SpongeCommonEventFactory.ignoreRightClickAirEvent = true;
             final CauseTracker causeTracker = ((IMixinWorldServer) player.worldObj).getCauseTracker();
-            final PhaseData peek = causeTracker.getStack().peek();
+            final PhaseData peek = causeTracker.getCurrentPhaseData();
             final ItemStack itemStack = peek.context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
             PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
         }

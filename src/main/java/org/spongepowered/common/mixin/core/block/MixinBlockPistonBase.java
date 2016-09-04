@@ -95,7 +95,7 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
     public void onDoMoveReturn(World worldIn, BlockPos pos, EnumFacing direction, boolean extending, CallbackInfoReturnable<Boolean> ci) {
         if (!worldIn.isRemote && CauseTracker.ENABLED) {
             final CauseTracker causeTracker = ((IMixinWorldServer) worldIn).getCauseTracker();
-            final PhaseContext context = causeTracker.getStack().peekContext();
+            final PhaseContext context = causeTracker.getCurrentContext();
             context.firstNamed(InternalNamedCauses.Piston.DUMMY_CALLBACK, MutableWrapper.class)
                     .ifPresent(wrapper -> ((MutableWrapper<CallbackInfoReturnable<Boolean>>) wrapper).setObj(ci));
             causeTracker.completePhase();

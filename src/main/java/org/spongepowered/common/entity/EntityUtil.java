@@ -274,7 +274,7 @@ public final class EntityUtil {
         // Use origin world to get correct cause
         IMixinWorldServer spongeWorld = (IMixinWorldServer) fromTransform.getExtent();
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        final PhaseData peek = causeTracker.getStack().peek();
+        final PhaseData peek = causeTracker.getCurrentPhaseData();
         final IPhaseState state = peek.state;
         final PhaseContext context = peek.context;
 
@@ -832,7 +832,7 @@ public final class EntityUtil {
             return null;
         }
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) entity.worldObj;
-        final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
+        final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
 
@@ -905,7 +905,7 @@ public final class EntityUtil {
             return null;
         }
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
-        final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
+        final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
 

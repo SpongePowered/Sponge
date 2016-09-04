@@ -222,9 +222,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         final boolean tracksEntityDeaths;
         if (!this.worldObj.isRemote) {
             causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-            final PhaseData peek = causeTracker.getStack().peek();
+            final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
-            tracksEntityDeaths = CauseTracker.ENABLED && causeTracker.getStack().peekState().tracksEntityDeaths();
+            tracksEntityDeaths = CauseTracker.ENABLED && causeTracker.getCurrentState().tracksEntityDeaths();
             if (state != EntityPhase.State.DEATH && !state.tracksEntityDeaths()) {
                 if (!tracksEntityDeaths) {
                     causeTracker.switchToPhase(EntityPhase.State.DEATH, PhaseContext.start()

@@ -85,7 +85,7 @@ public final class ContainerUtil {
      */
     public static void performBlockInventoryDrops(WorldServer worldServer, double x, double y, double z, IInventory inventory) {
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldServer;
-        final PhaseData currentPhase = mixinWorld.getCauseTracker().getStack().peek();
+        final PhaseData currentPhase = mixinWorld.getCauseTracker().getCurrentPhaseData();
         final IPhaseState currentState = currentPhase.state;
         if (CauseTracker.ENABLED && currentState.tracksBlockSpecificDrops()) {
             final PhaseContext context = currentPhase.context;

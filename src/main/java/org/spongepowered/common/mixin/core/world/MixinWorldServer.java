@@ -626,7 +626,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 BlockPos pos = new BlockPos(k1 + j, i2 + extendedblockstorage.getYLocation(), l1 + k);
                                 IMixinBlock spongeBlock = (IMixinBlock) block;
                                 spongeBlock.getTimingsHandler().startTiming();
-                                final PhaseData currentTuple = causeTracker.getStack().peek();
+                                final PhaseData currentTuple = causeTracker.getCurrentPhaseData();
                                 final IPhaseState phaseState = currentTuple.state;
                                 if (!CauseTracker.ENABLED || phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.context)) {
                                     block.randomTick((WorldServer) (Object) this, pos, iblockstate, this.rand);
@@ -702,7 +702,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        final PhaseData phaseData = causeTracker.getStack().peek();
+        final PhaseData phaseData = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = phaseData.state;
         if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, phaseData.context) || phaseState.getPhase().ignoresBlockUpdateTick(phaseData)) {
             block.updateTick(worldIn, pos, state, rand);
@@ -719,7 +719,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
         if (CauseTracker.ENABLED) {
             final CauseTracker causeTracker = this.getCauseTracker();
-            final PhaseData currentPhase = causeTracker.getStack().peek();
+            final PhaseData currentPhase = causeTracker.getCurrentPhaseData();
             final IPhaseState phaseState = currentPhase.state;
             if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
                 return list.add((BlockEventData) obj);
@@ -741,7 +741,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             fireBlockEvent(event);
         }
         final CauseTracker causeTracker = this.getCauseTracker();
-        final IPhaseState phaseState = causeTracker.getStack().peekState();
+        final IPhaseState phaseState = causeTracker.getCurrentState();
         if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
             return fireBlockEvent(event);
         }
@@ -844,7 +844,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        final IPhaseState phaseState = causeTracker.getStack().peekState();
+        final IPhaseState phaseState = causeTracker.getCurrentState();
 
         if (phaseState.getPhase().ignoresScheduledUpdates(phaseState)) {
             this.tmpScheduledObj = sbu;
@@ -913,7 +913,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public boolean setBlock(int x, int y, int z, BlockState blockState, BlockChangeFlag flag, Cause cause) {
         checkBlockBounds(x, y, z);
         final CauseTracker causeTracker = this.getCauseTracker();
-        final PhaseData peek = causeTracker.getStack().peek();
+        final PhaseData peek = causeTracker.getCurrentPhaseData();
         boolean isWorldGen = CauseTracker.ENABLED && peek.state.getPhase().isWorldGeneration(peek.state);
         boolean handlesOwnCompletion = CauseTracker.ENABLED && peek.state.getPhase().handlesOwnPhaseCompletion(peek.state);
         if (!isWorldGen) {
@@ -1047,7 +1047,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void immediateBlockTick(BlockPos pos, IBlockState state, Random random) {
         this.scheduledUpdatesAreImmediate = true;
         // Sponge start - Cause tracking
-        final PhaseData peek = this.causeTracker.getStack().peek();
+        final PhaseData peek = this.causeTracker.getCurrentPhaseData();
         if (!CauseTracker.ENABLED || peek.state.getPhase().ignoresBlockUpdateTick(peek)) {
             state.getBlock().updateTick((WorldServer) (Object) this, pos, state, random);
             // THIS NEEDS TO BE SET BACK TO FALSE OR ELSE ALL HELL BREAKS LOOSE!
@@ -1131,7 +1131,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        final IPhaseState state = causeTracker.getStack().peekState();
+        final IPhaseState state = causeTracker.getCurrentState();
         if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
             entityIn.onUpdate();
             return;
@@ -1143,7 +1143,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     protected void onUpdateTileEntities(ITickable tile) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        final IPhaseState state = causeTracker.getStack().peekState();
+        final IPhaseState state = causeTracker.getCurrentState();
         if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingTileTicks(state)) {
             tile.update();
             return;
@@ -1155,7 +1155,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        final IPhaseState state = causeTracker.getStack().peekState();
+        final IPhaseState state = causeTracker.getCurrentState();
         if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
             entity.onUpdate();
             return;
@@ -1168,7 +1168,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     protected void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        final IPhaseState state = causeTracker.getStack().peekState();
+        final IPhaseState state = causeTracker.getCurrentState();
         if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
             entity.updateRidden();
             return;
@@ -1237,7 +1237,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        final IPhaseState state = causeTracker.getStack().peekState();
+        final IPhaseState state = causeTracker.getCurrentState();
         if (CauseTracker.ENABLED && !state.getPhase().alreadyCapturingEntitySpawns(state)) {
             causeTracker.switchToPhase(PluginPhase.State.CUSTOM_SPAWN, PhaseContext.start()
                 .add(NamedCause.source(cause))

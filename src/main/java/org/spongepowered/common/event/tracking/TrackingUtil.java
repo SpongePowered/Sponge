@@ -215,7 +215,7 @@ public final class TrackingUtil {
                 .addBlockCaptures()
                 .addEntityCaptures();
         // We have to associate any notifiers in case of scheduled block updates from other sources
-        final PhaseData current = causeTracker.getStack().peek();
+        final PhaseData current = causeTracker.getCurrentPhaseData();
         final IPhaseState currentState = current.state;
         currentState.getPhase().appendNotifierPreBlockTick(causeTracker, pos, currentState, current.context, phaseContext);
         // Now actually switch to the new phase
@@ -238,7 +238,7 @@ public final class TrackingUtil {
                 .addEntityCaptures()
                 .addBlockCaptures();
         // We have to associate any notifiers in case of scheduled block updates from other sources
-        final PhaseData current = causeTracker.getStack().peek();
+        final PhaseData current = causeTracker.getCurrentPhaseData();
         final IPhaseState currentState = current.state;
         currentState.getPhase().appendNotifierPreBlockTick(causeTracker, pos, currentState, current.context, phaseContext);
         // Now actually switch to the new phase
@@ -285,7 +285,7 @@ public final class TrackingUtil {
 
     public static void performBlockDrop(Block block, IMixinWorldServer mixinWorld, BlockPos pos, IBlockState state, float chance, int fortune) {
         final CauseTracker causeTracker = mixinWorld.getCauseTracker();
-        final IPhaseState currentState = causeTracker.getStack().peekState();
+        final IPhaseState currentState = causeTracker.getCurrentState();
         final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState);
         if (shouldEnterBlockDropPhase) {
             causeTracker.switchToPhase(BlockPhase.State.BLOCK_DROP_ITEMS, PhaseContext.start()
@@ -571,7 +571,7 @@ public final class TrackingUtil {
             if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks
                     .blockHasTileEntity(newState.getBlock(), newState)) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
-                final PhaseData peek = causeTracker.getStack().peek();
+                final PhaseData peek = causeTracker.getCurrentPhaseData();
                 if (peek.state == GeneralPhase.Post.UNWINDING) {
                     peek.state.getPhase().unwind(causeTracker, peek.state, peek.context);
                 }
@@ -590,7 +590,7 @@ public final class TrackingUtil {
             }
 
 
-            final PhaseData peek = causeTracker.getStack().peek();
+            final PhaseData peek = causeTracker.getCurrentPhaseData();
             if (peek.state == GeneralPhase.Post.UNWINDING) {
                 peek.state.getPhase().unwind(causeTracker, peek.state, peek.context);
             }

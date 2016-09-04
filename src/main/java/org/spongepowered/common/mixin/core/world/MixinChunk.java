@@ -425,7 +425,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
     public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote || ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack().peek().state.ignoresEntityCollisions()) {
+        if (this.worldObj.isRemote || ((IMixinWorldServer) this.worldObj).getCauseTracker().getCurrentPhaseData().state.ignoresEntityCollisions()) {
             return;
         }
 
@@ -435,7 +435,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, entityIn, listToFill);
         final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-        final PhaseData peek = causeTracker.getStack().peek();
+        final PhaseData peek = causeTracker.getCurrentPhaseData();
 
         if (event == null || event.isCancelled()) {
             if (event == null && !peek.state.getPhase().isTicking(peek.state)) {
@@ -449,7 +449,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"))
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote || ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack().peek().state.ignoresEntityCollisions()) {
+        if (this.worldObj.isRemote || ((IMixinWorldServer) this.worldObj).getCauseTracker().getCurrentPhaseData().state.ignoresEntityCollisions()) {
             return;
         }
 
@@ -459,7 +459,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, null, listToFill);
         final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-        final PhaseData peek = causeTracker.getStack().peek();
+        final PhaseData peek = causeTracker.getCurrentPhaseData();
 
         if (event == null || event.isCancelled()) {
             if (event == null && !peek.state.getPhase().isTicking(peek.state)) {
@@ -608,7 +608,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             // a BlockContainer. Prevents blocks such as TNT from activating when
             // cancelled.
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-            final PhaseData peek = causeTracker.getStack().peek();
+            final PhaseData peek = causeTracker.getCurrentPhaseData();
             final boolean requiresCapturing = peek.state.getPhase().requiresBlockCapturing(peek.state);
             if (!requiresCapturing || SpongeImplHooks.blockHasTileEntity(newBlock, newState)) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)

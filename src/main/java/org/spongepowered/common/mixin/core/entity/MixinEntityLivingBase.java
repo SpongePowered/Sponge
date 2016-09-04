@@ -247,9 +247,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         final CauseTracker causeTracker;
         if (!this.worldObj.isRemote) {
             causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-            final PhaseData peek = causeTracker.getStack().peek();
+            final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
-            this.tracksEntityDeaths = CauseTracker.ENABLED && !causeTracker.getStack().peekState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
+            this.tracksEntityDeaths = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
             if (this.tracksEntityDeaths) {
                 final PhaseContext context = PhaseContext.start()
                         .add(NamedCause.source(this))
@@ -485,7 +485,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                     // Sponge Start - notify the cause tracker
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
-                    final boolean enterDeathPhase = CauseTracker.ENABLED && !causeTracker.getStack().peekState().tracksEntityDeaths();
+                    final boolean enterDeathPhase = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths();
                     if (enterDeathPhase) {
                         final PhaseContext context = PhaseContext.start()
                                 .add(NamedCause.source(this))
