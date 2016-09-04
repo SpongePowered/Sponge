@@ -53,6 +53,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.MutableWrapper;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Optional;
@@ -79,12 +80,16 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
 
             final IBlockState currentState = worldIn.getBlockState(pos);
             final SpongeBlockSnapshot snapshot = ((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(currentState, currentState, pos, 0);
-            causeTracker.switchToPhase(BlockPhase.State.PISTON_MOVING, PhaseContext.start()
+            final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunkFromBlockCoords(pos);
+            final PhaseContext phaseContext = PhaseContext.start()
                     .add(NamedCause.source(snapshot))
                     .add(NamedCause.of(InternalNamedCauses.Piston.POSITION, pos))
                     .add(NamedCause.of(InternalNamedCauses.Piston.DIRECTION, direction))
                     .add(NamedCause.of(InternalNamedCauses.Piston.DUMMY_CALLBACK, new MutableWrapper<CallbackInfoReturnable<Boolean>>(null)))
-                    .addCaptures()
+                    .addCaptures();
+            mixinChunk.getBlockNotifier(pos).ifPresent(phaseContext::notifier);
+            mixinChunk.getBlockOwner(pos).ifPresent(phaseContext::owner);
+            causeTracker.switchToPhase(BlockPhase.State.PISTON_MOVING, phaseContext
                     .complete()
             );
         }

@@ -243,7 +243,7 @@ public final class GeneralPhase extends TrackingPhase {
         if (!contextEntities.isEmpty()) {
             final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
             contextEntities.clear();
-            unwindingState.getPhase().processPostEntitySpawns(causeTracker, unwindingState, entities);
+            unwindingState.getPhase().processPostEntitySpawns(causeTracker, unwindingState, unwindingContext, entities);
         }
         if (!contextItems.isEmpty()) {
             final ArrayList<Entity> items = new ArrayList<>(contextItems);
@@ -476,4 +476,12 @@ public final class GeneralPhase extends TrackingPhase {
     public boolean ignoresScheduledUpdates(IPhaseState phaseState) {
         return phaseState == Post.UNWINDING;
     }
+
+    @Override
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        return phaseState != State.COMPLETE
+               ? context.getCapturedEntities().add(entity)
+               : super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
+    }
+
 }
