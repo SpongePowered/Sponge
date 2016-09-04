@@ -170,7 +170,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     public TileEntityArchetype build() {
         checkState(this.blockState != null, "BlockState cannot be null!");
         checkState(this.tileEntityType != null, "TileEntityType cannot be null!");
-        if (this.tileData != null) {
+        if (this.tileData == null) {
             this.tileData = new MemoryDataContainer();
         }
         return new SpongeTileEntityArchetype(this);

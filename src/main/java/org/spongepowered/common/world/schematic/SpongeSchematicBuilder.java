@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
+import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -46,6 +47,7 @@ import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.IntArrayMutableBlockBuffer;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class SpongeSchematicBuilder implements Schematic.Builder {
 
@@ -65,7 +67,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
     @Override
     public Builder volume(Extent volume) {
         this.view = volume;
-        return null;
+        return this;
     }
 
     @Override
@@ -131,7 +133,6 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             min = this.view.getBlockMin();
             size = this.view.getBlockSize();
         }
-        Map<Vector3i, TileEntityArchetype> tiles = this.volume.getTileEntityArchetypes();
         if (this.metadata == null) {
             this.metadata = new MemoryDataContainer();
         }
@@ -147,8 +148,13 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             } else {
                 volume = new IntArrayMutableBlockBuffer(this.palette, min, size);
             }
+            Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
             this.view.getBlockWorker(SpongeImpl.getImplementationCause()).iterate((v, x, y, z) -> {
                 volume.setBlock(x, y, z, v.getBlock(x, y, z), SpongeImpl.getImplementationCause());
+                Optional<TileEntity> tile = v.getTileEntity(x, y, z);
+                if (tile.isPresent()) {
+                    tiles.put(new Vector3i(x, y, z), tile.get().createArchetype());
+                }
             });
             return new SpongeSchematic(volume, tiles, this.metadata);
         }
