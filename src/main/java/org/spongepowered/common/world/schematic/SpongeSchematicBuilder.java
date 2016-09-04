@@ -1,19 +1,15 @@
 /*
  * This file is part of Sponge, licensed under the MIT License (MIT).
- *
  * Copyright (c) SpongePowered <https://www.spongepowered.org>
  * Copyright (c) contributors
- *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -28,6 +24,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
+import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -46,6 +43,7 @@ import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.IntArrayMutableBlockBuffer;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class SpongeSchematicBuilder implements Schematic.Builder {
 
@@ -65,7 +63,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
     @Override
     public Builder volume(Extent volume) {
         this.view = volume;
-        return null;
+        return this;
     }
 
     @Override
@@ -131,7 +129,6 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             min = this.view.getBlockMin();
             size = this.view.getBlockSize();
         }
-        Map<Vector3i, TileEntityArchetype> tiles = this.volume.getTileEntityArchetypes();
         if (this.metadata == null) {
             this.metadata = new MemoryDataContainer();
         }
@@ -147,12 +144,18 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             } else {
                 volume = new IntArrayMutableBlockBuffer(this.palette, min, size);
             }
+            Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
             this.view.getBlockWorker(SpongeImpl.getImplementationCause()).iterate((v, x, y, z) -> {
                 volume.setBlock(x, y, z, v.getBlock(x, y, z), SpongeImpl.getImplementationCause());
+                Optional<TileEntity> tile = v.getTileEntity(x, y, z);
+                if (tile.isPresent()) {
+                    tiles.put(new Vector3i(x, y, z), tile.get().createArchetype());
+                }
             });
             return new SpongeSchematic(volume, tiles, this.metadata);
+        } else {
+            return new SpongeSchematic((SpongeArchetypeVolume) this.volume, this.metadata);
         }
-        return new SpongeSchematic((SpongeArchetypeVolume) this.volume, this.metadata);
     }
 
 }
