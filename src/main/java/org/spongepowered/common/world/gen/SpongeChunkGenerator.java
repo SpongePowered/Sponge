@@ -231,7 +231,9 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         ImmutableBiomeArea biomeBuffer = this.cachedBiomes.getImmutableBiomeCopy();
         this.baseGenerator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
 
-        replaceBiomeBlocks(this.world, this.rand, chunkX, chunkZ, chunkprimer, biomeBuffer);
+        if (!(this.baseGenerator instanceof SpongeGenerationPopulator)) {
+            replaceBiomeBlocks(this.world, this.rand, chunkX, chunkZ, chunkprimer, biomeBuffer);
+        }
 
         // Apply the generator populators to complete the blockBuffer
         for (GenerationPopulator populator : this.genpop) {
