@@ -65,6 +65,14 @@ public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> 
 
             ITextComponent result = this.component;
             this.component = null;
+
+            // An iterator of an empty TextComponentTranslation doesn't have children. Thus, calling 'this.currentChildIterator.next()'
+            // at the end of this method will lead to a NoSuchElementException. To fix this, we
+            // initialize currentChildIterator so that the following call to 'hasNext()' will properly return 'false'' if necessary
+            if (this.children.hasNext()) {
+                this.currentChildIterator = ((IMixinChatComponent) this.children.next()).withChildren().iterator();
+            }
+
             return result;
         } else if (this.currentChildIterator == null || !this.currentChildIterator.hasNext()) {
             this.currentChildIterator = ((IMixinChatComponent) this.children.next()).withChildren().iterator();
