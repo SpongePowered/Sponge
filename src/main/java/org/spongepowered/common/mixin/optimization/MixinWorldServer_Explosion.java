@@ -45,7 +45,7 @@ import org.spongepowered.common.mixin.core.world.MixinWorld;
 import java.util.Collections;
 import java.util.List;
 
-@Mixin(WorldServer.class)
+@Mixin(value = WorldServer.class, priority = 1111)
 public abstract class MixinWorldServer_Explosion extends MixinWorld {
 
     @ModifyConstant(method = "newExplosion", constant = @Constant(intValue = 0, ordinal = 0))

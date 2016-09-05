@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.event.InternalNamedCauses;
 
@@ -45,6 +46,16 @@ final class UnwindingPhaseContext extends PhaseContext {
         add(NamedCause.of(InternalNamedCauses.Tracker.UNWINDING_STATE, unwindingState));
         this.unwindingContext = unwindingContext;
         this.unwindingState = unwindingState;
+    }
+
+    @Override
+    public Optional<User> getOwner() {
+        return this.unwindingContext.getOwner();
+    }
+
+    @Override
+    public Optional<User> getNotifier() {
+        return this.unwindingContext.getNotifier();
     }
 
     @SuppressWarnings("unchecked")

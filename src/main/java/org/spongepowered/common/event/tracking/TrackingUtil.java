@@ -304,19 +304,40 @@ public final class TrackingUtil {
 
     static boolean trackBlockChange(CauseTracker causeTracker, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos, int flags,
             PhaseContext phaseContext, IPhaseState phaseState) {
-        final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
-        final IBlockState actualState = currentState.getActualState(minecraftWorld, pos);
-        final SpongeBlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
-        final List<BlockSnapshot> capturedSnapshots = phaseContext.getCapturedBlocks();
-        final Block newBlock = newState.getBlock();
-
-        associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot, capturedSnapshots);
-        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-        final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
-        if (originalBlockState == null) {
-            capturedSnapshots.remove(originalBlockSnapshot);
-            return false;
+        if (pos.getX() == 802 && pos.getY() == 86 && pos.getZ() == -148) {
+            new PrettyPrinter(100).add("Position changing!").centre().hr()
+                    .add("The position: 802, 86, -148 is changing!!! Here is some debugging information:")
+                    .addWrapped(100, " %s : %s", "Original State", currentState)
+                    .addWrapped(100, " %s : %s", "New State", newState)
+                    .hr()
+                    .add("Exception")
+                    .add(new Exception())
+                    .trace();
         }
+        final SpongeBlockSnapshot originalBlockSnapshot;
+        final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
+        if (phaseState.shouldCaptureBlockChangeOrSkip(phaseContext, pos)) {
+            final IBlockState actualState = currentState.getActualState(minecraftWorld, pos);
+            originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
+            final List<BlockSnapshot> capturedSnapshots = phaseContext.getCapturedBlocks();
+            final Block newBlock = newState.getBlock();
+
+            associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, originalBlockSnapshot, capturedSnapshots);
+            final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+            final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
+            if (originalBlockState == null) {
+                capturedSnapshots.remove(originalBlockSnapshot);
+                return false;
+            }
+        } else {
+            originalBlockSnapshot = (SpongeBlockSnapshot) BlockSnapshot.NONE;
+            final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+            final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
+            if (originalBlockState == null) {
+                return false;
+            }
+        }
+
 
         if (newState.getLightOpacity() != currentState.getLightOpacity() || newState.getLightValue() != currentState.getLightValue()) {
             minecraftWorld.theProfiler.startSection("checkLight");
@@ -533,7 +554,7 @@ public final class TrackingUtil {
         }
     }
 
-    private static boolean performBlockAdditions(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, Cause.Builder builder, IPhaseState phaseState, PhaseContext phaseContext, boolean noCancelledTransactions) {
+    public static boolean performBlockAdditions(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, Cause.Builder builder, IPhaseState phaseState, PhaseContext phaseContext, boolean noCancelledTransactions) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();

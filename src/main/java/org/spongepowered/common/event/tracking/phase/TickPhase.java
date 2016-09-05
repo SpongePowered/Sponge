@@ -67,6 +67,7 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
@@ -153,6 +154,10 @@ public final class TickPhase extends TrackingPhase {
                     causeTracker.getMixinWorld().forceSpawnEntity(entity);
                 }
             }
+        }
+
+        public void appendExplosionContext(PhaseContext explosionContext, PhaseContext context) {
+
         }
     }
 
@@ -304,6 +309,15 @@ public final class TickPhase extends TrackingPhase {
             final IMixinChunk mixinChunk = (IMixinChunk) worldServer.getChunkFromBlockCoords(blockPos);
             mixinChunk.getBlockNotifier(blockPos).ifPresent(blockEvent::setSourceUser);
             context.firstNamed(NamedCause.NOTIFIER, User.class).ifPresent(blockEvent::setSourceUser);
+        }
+
+        @Override
+        public void appendExplosionContext(PhaseContext explosionContext, PhaseContext context) {
+            context.getOwner().ifPresent(explosionContext::owner);
+            context.getNotifier().ifPresent(explosionContext::notifier);
+            final BlockSnapshot blockSnapshot = context.getSource(BlockSnapshot.class)
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking a block", context));
+            explosionContext.add(NamedCause.source(blockSnapshot));
         }
 
         @Override
@@ -627,6 +641,15 @@ public final class TickPhase extends TrackingPhase {
         }
 
         @Override
+        public void appendExplosionContext(PhaseContext explosionContext, PhaseContext context) {
+            context.getOwner().ifPresent(explosionContext::owner);
+            context.getNotifier().ifPresent(explosionContext::notifier);
+            final Entity tickingEntity = context.getSource(Entity.class)
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking entity!", context));
+            explosionContext.add(NamedCause.source(tickingEntity));
+        }
+
+        @Override
         public String toString() {
             return "EntityTickPhase";
         }
@@ -821,6 +844,15 @@ public final class TickPhase extends TrackingPhase {
         }
 
         @Override
+        public void appendExplosionContext(PhaseContext explosionContext, PhaseContext context) {
+            context.getOwner().ifPresent(explosionContext::owner);
+            context.getNotifier().ifPresent(explosionContext::notifier);
+            final TileEntity tickingTile = context.getSource(TileEntity.class)
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
+            explosionContext.add(NamedCause.source(tickingTile));
+        }
+
+        @Override
         public String toString() {
             return "TileEntityTickPhase";
         }
@@ -989,6 +1021,15 @@ public final class TickPhase extends TrackingPhase {
         }
 
         @Override
+        public void appendExplosionContext(PhaseContext explosionContext, PhaseContext context) {
+            final Player player = context.getSource(Player.class)
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
+            explosionContext.owner(player);
+            explosionContext.notifier(player);
+            explosionContext.add(NamedCause.source(player));
+        }
+
+        @Override
         public String toString() {
             return "PlayerTickPhase";
         }
@@ -1119,5 +1160,10 @@ public final class TickPhase extends TrackingPhase {
     @Override
     public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
         return true;
+    }
+
+    @Override
+    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
+        ((TickPhaseState) currentPhaseData.state).appendExplosionContext(phaseContext, currentPhaseData.context);
     }
 }

@@ -34,6 +34,7 @@ import net.minecraft.network.play.client.CPacketClientStatus;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.tileentity.TileEntitySign;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -110,6 +111,8 @@ public class PacketUtil {
                             .add(NamedCause.of(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative));
 
                     TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
+                    context.owner((Player) packetPlayer);
+                    context.notifier((Player) packetPlayer);
                     context.complete();
                     causeTracker.switchToPhase(packetState, context);
                 } else {

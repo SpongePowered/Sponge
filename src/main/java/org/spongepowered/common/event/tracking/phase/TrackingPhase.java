@@ -43,6 +43,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -151,9 +152,13 @@ public abstract class TrackingPhase {
         final SpawnEntityEvent
                 event =
                 SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, entities, causeTracker.getWorld());
+        final User creator = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
             for (Entity entity : event.getEntities()) {
+                if (creator != null) {
+                    EntityUtil.toMixin(entity).setCreator(creator.getUniqueId());
+                }
                 causeTracker.getMixinWorld().forceSpawnEntity(entity);
             }
         }
@@ -347,5 +352,13 @@ public abstract class TrackingPhase {
 
     public boolean requiresDimensionTransferBetweenWorlds(IPhaseState state) {
         return false;
+    }
+
+    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
+
+    }
+
+    public void appendExplosionCause(PhaseData phaseData) {
+
     }
 }

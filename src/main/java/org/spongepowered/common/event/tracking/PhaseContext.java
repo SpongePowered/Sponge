@@ -42,6 +42,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -75,8 +76,8 @@ public class PhaseContext {
     @Nullable private CapturedItemStackSupplier capturedItemStackSupplier;
     @Nullable private EntityItemDropsSupplier entityItemDropsSupplier;
     @Nullable private EntityItemEntityDropsSupplier entityItemEntityDropsSupplier;
-    @Nullable private User owner;
-    @Nullable private User notifier;
+    @Nullable protected User owner;
+    @Nullable protected User notifier;
 
     private Object source;
 
@@ -208,6 +209,28 @@ public class PhaseContext {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_PLAYER, new CapturePlayer(player)));
         return this;
+    }
+
+    public PhaseContext explosion() {
+        checkState(!this.isCompleted, "CAnnot add a new object to the context if it's already marked as completed!");
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_EXPLOSION, new CaptureExplosion()));
+        return this;
+    }
+
+    public PhaseContext explosion(@Nullable Explosion explosion) {
+        checkState(!this.isCompleted, "CAnnot add a new object to the context if it's already marked as completed!");
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_EXPLOSION, new CaptureExplosion(explosion)));
+        return this;
+    }
+
+    public CaptureExplosion getCaptureExplosion() {
+        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_EXPLOSION, CaptureExplosion.class)
+                .orElseThrow(
+                        TrackingUtil.throwWithContext("Expected to be capturing an Explosion, but we're not capturing them!", this));
+    }
+
+    public Optional<Explosion> getExplosion() {
+        return getCaptureExplosion().getExplosion();
     }
 
     public PhaseContext complete() {
@@ -510,6 +533,51 @@ public class PhaseContext {
 
         public void addPlayer(EntityPlayerMP playerMP) {
             this.player = ((Player) playerMP);
+        }
+    }
+
+    public static final class CaptureExplosion {
+
+        @Nullable private Explosion explosion;
+
+        CaptureExplosion() {
+
+        }
+
+        CaptureExplosion(@Nullable Explosion explosion) {
+            this.explosion = explosion;
+        }
+
+        public Optional<Explosion> getExplosion() {
+            return Optional.ofNullable(this.explosion);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            CaptureExplosion that = (CaptureExplosion) o;
+            return com.google.common.base.Objects.equal(this.explosion, that.explosion);
+        }
+
+        @Override
+        public int hashCode() {
+            return com.google.common.base.Objects.hashCode(this.explosion);
+        }
+
+        @Override
+        public String toString() {
+            return com.google.common.base.Objects.toStringHelper(this)
+                    .add("explosion", this.explosion)
+                    .toString();
+        }
+
+        public void addExplosion(Explosion explosion) {
+            this.explosion = explosion;
         }
     }
 

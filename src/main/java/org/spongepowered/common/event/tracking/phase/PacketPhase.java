@@ -68,6 +68,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -90,6 +91,7 @@ import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.BlockChange;
 
+import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -165,6 +167,33 @@ public final class PacketPhase extends TrackingPhase {
         }
         default boolean doesCaptureEntityDrops() {
             return false;
+        }
+        /**
+         * A defaulted method to handle entities that are spawned due to packet placement during post processing.
+         * Examples can include a player placing a redstone block priming a TNT explosive.
+         *
+         * @param causeTracker The cause tracker
+         * @param phaseContext The phase context
+         * @param entities The list of entities to spawn
+         */
+        default void postSpawnEntities(CauseTracker causeTracker, PhaseContext phaseContext, ArrayList<Entity> entities) {
+            final Player player =
+                    phaseContext.getSource(Player.class)
+                            .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a player packet, but didn't get anything",
+                                    phaseContext));
+            final EntitySpawnCause cause = EntitySpawnCause.builder()
+                    .entity(player)
+                    .type(InternalSpawnTypes.PLACEMENT)
+                    .build();
+            final SpawnEntityEvent event =
+                    SpongeEventFactory.createSpawnEntityEvent(Cause.source(cause).build(), entities, causeTracker.getWorld());
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                for (Entity entity : event.getEntities()) {
+                    EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
+                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                }
+            }
         }
     }
 
@@ -830,6 +859,12 @@ public final class PacketPhase extends TrackingPhase {
         } else {
             PacketFunction.UNKONWN_PACKET.unwind(packetIn, (IPacketState) phaseState, player, phaseContext);
         }
+    }
+
+    @Override
+    protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
+            ArrayList<Entity> entities) {
+        ((IPacketState) unwindingState).postSpawnEntities(causeTracker, phaseContext, entities);
     }
 
     PacketPhase(TrackingPhase parent) {

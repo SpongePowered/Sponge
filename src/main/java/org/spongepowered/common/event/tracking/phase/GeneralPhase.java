@@ -24,8 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import static org.spongepowered.common.event.tracking.TrackingUtil.iterateChangeBlockEvents;
+
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import javafx.geometry.Pos;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
@@ -36,16 +40,20 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -61,15 +69,19 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinExplosion;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.mixin.core.world.MixinExplosion;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -80,76 +92,48 @@ import javax.annotation.Nullable;
 
 public final class GeneralPhase extends TrackingPhase {
 
-    public enum State implements IPhaseState {
-        COMMAND {
-            @Override
-            public boolean canSwitchTo(IPhaseState state) {
-                return state instanceof BlockPhase.State;
-            }
+    public static final class State {
+        public static final IPhaseState COMMAND = new CommandState();
+        public static final IPhaseState EXPLOSION = new ExplosionState();
+        public static final IPhaseState COMPLETE = new CompletePhase();
 
-            @Override
-            public boolean tracksEntitySpecificDrops() {
-                return true;
-            }
+        private State() { }
+    }
 
-        },
-        COMPLETE {
-            @Override
-            public boolean canSwitchTo(IPhaseState state) {
-                return true;
-            }
-        };
+    public static final class Post {
+        public static final IPhaseState UNWINDING = new PostState();
+
+        private Post() { }
+    }
+
+    abstract static class GeneralState implements IPhaseState {
+
+        abstract void unwind(CauseTracker causeTracker, PhaseContext context);
 
         @Override
-        public GeneralPhase getPhase() {
+        public final TrackingPhase getPhase() {
             return TrackingPhases.GENERAL;
         }
     }
 
-    public enum Post implements IPhaseState {
-        /**
-         * A specific state that is introduced for the sake of
-         * preventing leaks into other phases as various phases
-         * are unwound. This state is specifically to ignore any
-         * transactions that may take place.
-         */
-        UNWINDING;
-
-
-        @Override
-        public TrackingPhase getPhase() {
-            return TrackingPhases.GENERAL;
-        }
+    static class CommandState extends GeneralState {
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
-            return state instanceof GenerationPhase.GeneralGenerationPhaseState || state == BlockPhase.State.RESTORING_BLOCKS;
+            return state instanceof BlockPhase.State;
         }
 
         @Override
-        public boolean tracksBlockRestores() {
-            return false; // TODO - check that this really is needed.
+        public boolean tracksEntitySpecificDrops() {
+            return true;
         }
 
-    }
-
-    GeneralPhase(@Nullable TrackingPhase parent) {
-        super(parent);
-    }
-
-    @Override
-    public GeneralPhase addChild(TrackingPhase child) {
-        super.addChild(child);
-        return this;
-    }
-
-    @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        if (state == State.COMMAND) {
+        @Override
+        void unwind(CauseTracker causeTracker, PhaseContext phaseContext) {
             final CommandSource sender = phaseContext.getSource(CommandSource.class)
                     .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(list -> TrackingUtil.processBlockCaptures(list, causeTracker, state, phaseContext));
+                    .ifPresentAndNotEmpty(list -> TrackingUtil.processBlockCaptures(list, causeTracker, this, phaseContext));
             phaseContext.getCapturedEntitySupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         // TODO the entity spawn causes are not likely valid, need to investigate further.
@@ -217,13 +201,263 @@ public final class GeneralPhase extends TrackingPhase {
                             }
                         }
                     });
-        } else if (state == Post.UNWINDING) {
-            final IPhaseState unwindingState = phaseContext.firstNamed(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class)
-                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no phase found!", phaseContext));
-            final PhaseContext unwindingContext = phaseContext.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class)
-                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no context found!", phaseContext));
-            this.postDispatch(causeTracker, unwindingState, unwindingContext, phaseContext);
         }
+    }
+
+    static class ExplosionState extends GeneralState {
+        @Override
+        public boolean canSwitchTo(IPhaseState state) {
+            return true;
+        }
+
+        @Override
+        public boolean tracksEntitySpecificDrops() {
+            return true;
+        }
+
+        @Override
+        public boolean tracksBlockSpecificDrops() {
+            return true;
+        }
+
+        @Override
+        void unwind(CauseTracker causeTracker, PhaseContext context) {
+            final Optional<Explosion> explosion = context.getCaptureExplosion().getExplosion();
+            if (!explosion.isPresent()) { // More than likely never will happen
+                return;
+            }
+            final Cause cause = ((IMixinExplosion) explosion.get()).getCreatedCause();
+            context.getCapturedBlockSupplier()
+                    .ifPresentAndNotEmpty(blocks -> processBlockCaptures(blocks, explosion.get(), cause, causeTracker, context));
+            context.getCapturedEntitySupplier()
+                    .ifPresentAndNotEmpty(entities -> {
+                        final Cause.Builder builder = Cause.builder();
+                        final Object root = cause.root();
+                        if (root instanceof Entity) {
+                            builder.named(NamedCause.source(EntitySpawnCause
+                                    .builder()
+                                    .entity((Entity) root)
+                                    .type(InternalSpawnTypes.TNT_IGNITE)
+                                    .build()
+                                    )
+                            );
+                        } else if (root instanceof BlockSnapshot) {
+                            builder.named(NamedCause.source(BlockSpawnCause
+                                    .builder()
+                                    .block((BlockSnapshot) root)
+                                    .type(InternalSpawnTypes.TNT_IGNITE)
+                                    .build()
+                                    )
+                            );
+                        } else {
+                            builder.named(NamedCause.source(SpawnCause
+                                    .builder()
+                                    .type(InternalSpawnTypes.TNT_IGNITE)
+                                    .build()
+                                    )
+                            );
+                        }
+
+                        context.getNotifier().ifPresent(builder::notifier);
+                        context.getOwner().ifPresent(builder::owner);
+                        builder.named(NamedCause.of("Explosion", explosion.get()));
+                        final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
+                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            for (Entity entity : event.getEntities()) {
+                                if (user != null) {
+                                    EntityUtil.toMixin(entity).setCreator(user.getUniqueId());
+                                }
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+
+                            }
+                        }
+
+
+                    });
+
+        }
+
+        @SuppressWarnings("unchecked")
+        private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, Cause cause, CauseTracker causeTracker, PhaseContext context) {
+            if (snapshots.isEmpty()) {
+                return;
+            }
+            ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[TrackingUtil.EVENT_COUNT];
+            ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[TrackingUtil.EVENT_COUNT];
+            for (int i = 0; i < TrackingUtil.EVENT_COUNT; i++) {
+                transactionBuilders[i] = new ImmutableList.Builder<>();
+            }
+            final List<ChangeBlockEvent> blockEvents = new ArrayList<>();
+            final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
+
+            for (BlockSnapshot snapshot : snapshots) {
+                // This processes each snapshot to assign them to the correct event in the next area, with the
+                // correct builder array entry.
+                TrackingUtil.TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(TrackingUtil.TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
+            }
+            for (int i = 0; i < TrackingUtil.EVENT_COUNT; i++) {
+                // Build each event array
+                transactionArrays[i] = transactionBuilders[i].build();
+            }
+            final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
+            // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
+            // case in point for WorldTick event listeners since the players are captured non-deterministically
+            final Cause.Builder builder = Cause.source(context.getSource(Object.class)
+                    .orElseThrow(TrackingUtil.throwWithContext("There was no root source object for this phase!", context))
+            );
+            context.getNotifier().ifPresent(builder::notifier);
+            context.getOwner().ifPresent(builder::owner);
+            try {
+                this.getPhase().associateAdditionalCauses(this, context, builder, causeTracker);
+            } catch (Exception e) {
+                // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
+                // try catch to avoid bombing on performing block changes.
+            }
+            final org.spongepowered.api.world.World world = causeTracker.getWorld();
+            // Creates the block events accordingly to the transaction arrays
+            iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world); // Needs to throw events
+            // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
+
+            // Copied from TrackingUtil#throwMultiEventsAndCreatePost
+            for (BlockChange blockChange : BlockChange.values()) {
+                final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
+                if (mainEvent != null) {
+                    blockChange.suggestNamed(builder, mainEvent);
+                }
+            }
+            final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[TrackingUtil.MULTI_CHANGE_INDEX];
+
+            final ExplosionEvent.Post postEvent = SpongeEventFactory.createExplosionEventPost(cause, explosion, world, transactions);
+            if (postEvent == null) { // Means that we have had no actual block changes apparently?
+                return;
+            }
+            SpongeImpl.postEvent(postEvent);
+
+            final List<Transaction<BlockSnapshot>> invalid = new ArrayList<>();
+
+            boolean noCancelledTransactions = true;
+
+            // Iterate through the block events to mark any transactions as invalid to accumilate after (since the post event contains all
+            // transactions of the preceeding block events)
+            for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
+                if (blockEvent.isCancelled()) {
+                    noCancelledTransactions = false;
+                    // Don't restore the transactions just yet, since we're just marking them as invalid for now
+                    for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
+                        transaction.setValid(false);
+                    }
+                }
+            }
+
+            // Finally check the post event
+            if (postEvent.isCancelled()) {
+                // Of course, if post is cancelled, just mark all transactions as invalid.
+                noCancelledTransactions = false;
+                for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+                    transaction.setValid(false);
+                }
+            }
+
+            // Now we can gather the invalid transactions that either were marked as invalid from an event listener - OR - cancelled.
+            // Because after, we will restore all the invalid transactions in reverse order.
+            for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+                if (!transaction.isValid()) {
+                    invalid.add(transaction);
+                    // Cancel any block drops performed, avoids any item drops, regardless
+                    context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
+                        final BlockPos blockPos = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
+                        map.get(blockPos).clear();
+                    });
+                }
+            }
+
+            if (!invalid.isEmpty()) {
+                // We need to set this value and return it to signify that some transactions were cancelled
+                noCancelledTransactions = false;
+                // NOW we restore the invalid transactions (remember invalid transactions are from either plugins marking them as invalid
+                // or the events were cancelled), again in reverse order of which they were received.
+                for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
+                    transaction.getOriginal().restore(true, BlockChangeFlag.NONE);
+                    if (this.tracksBlockSpecificDrops()) {
+                        // Cancel any block drops or harvests for the block change.
+                        // This prevents unnecessary spawns.
+                        final BlockPos position = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
+                        context.getBlockDropSupplier().ifPresentAndNotEmpty(map -> {
+                            // Check if the mapping actually has the position to avoid unnecessary
+                            // collection creation
+                            if (map.containsKey(position)) {
+                                map.get(position).clear();
+                            }
+                        });
+                    }
+                }
+            }
+            TrackingUtil.performBlockAdditions(causeTracker, postEvent.getTransactions(), builder, this, context, noCancelledTransactions);
+        }
+
+        @Override
+        public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext, BlockPos pos) {
+            boolean match = false;
+            final Vector3i blockPos = VecHelper.toVector3i(pos);
+            for (final Iterator<BlockSnapshot> iterator = phaseContext.getCapturedBlocks().iterator(); iterator.hasNext(); ) {
+                final BlockSnapshot capturedSnapshot = iterator.next();
+                if (capturedSnapshot.getPosition().equals(blockPos)) {
+                    match = true;
+                }
+            }
+            return !match;
+        }
+    }
+
+    static final class CompletePhase extends GeneralState {
+        @Override
+        public boolean canSwitchTo(IPhaseState state) {
+            return true;
+        }
+
+        @Override
+        void unwind(CauseTracker causeTracker, PhaseContext context) {
+
+        }
+    }
+
+    static final class PostState extends GeneralState {
+
+        @Override
+        public boolean canSwitchTo(IPhaseState state) {
+            return state instanceof GenerationPhase.GeneralGenerationPhaseState || state == BlockPhase.State.RESTORING_BLOCKS;
+        }
+
+        @Override
+        public boolean tracksBlockRestores() {
+            return false; // TODO - check that this really is needed.
+        }
+        @Override
+        void unwind(CauseTracker causeTracker, PhaseContext context) {
+            final IPhaseState unwindingState = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class)
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no phase found!", context));
+            final PhaseContext unwindingContext = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class)
+                    .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no context found!", context));
+            this.getPhase().postDispatch(causeTracker, unwindingState, unwindingContext, context);
+        }
+    }
+
+
+    GeneralPhase(@Nullable TrackingPhase parent) {
+        super(parent);
+    }
+
+    @Override
+    public GeneralPhase addChild(TrackingPhase child) {
+        super.addChild(child);
+        return this;
+    }
+
+    @Override
+    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
+        ((GeneralState) state).unwind(causeTracker, phaseContext);
     }
 
     @SuppressWarnings("unchecked")
