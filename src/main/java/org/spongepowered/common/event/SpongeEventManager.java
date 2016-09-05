@@ -41,6 +41,7 @@ import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
+import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.SpongeImpl;
@@ -86,7 +87,7 @@ public class SpongeEventManager implements EventManager {
     @Inject
     public SpongeEventManager(PluginManager pluginManager) {
         this.pluginManager = checkNotNull(pluginManager, "pluginManager");
-        
+
         // Caffeine offers no control over the concurrency level of the
         // ConcurrentHashMap which backs the cache. By default this concurrency
         // level is 16. We replace the backing map before any use can occur
@@ -94,7 +95,7 @@ public class SpongeEventManager implements EventManager {
         try {
             // Cache impl class is UnboundedLocalLoadingCache which extends
             // UnboundedLocalManualCache
-            
+
             // UnboundedLocalManualCache has a field 'cache' with an
             // UnboundedLocalCache which contains the actual backing map
             Field innerCache = this.handlersCache.getClass().getSuperclass().getDeclaredField("cache");
@@ -300,6 +301,7 @@ public class SpongeEventManager implements EventManager {
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
             try {
                 handler.getTimingsHandler().startTimingIfSync();
+                ((AbstractEvent) event).currentOrder = handler.getOrder();
                 handler.handle(event);
                 handler.getTimingsHandler().stopTimingIfSync();
             } catch (Throwable e) {
@@ -308,6 +310,8 @@ public class SpongeEventManager implements EventManager {
             }
         }
         TimingsManager.PLUGIN_EVENT_HANDLER.stopTimingIfSync();
+        ((AbstractEvent) event).currentOrder = null;
+
         return event instanceof Cancellable && ((Cancellable) event).isCancelled();
     }
 
