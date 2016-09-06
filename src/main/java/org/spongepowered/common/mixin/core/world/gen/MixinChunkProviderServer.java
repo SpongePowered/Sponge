@@ -154,7 +154,9 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Redirect(method = "unloadQueuedChunks", at = @At(value = "INVOKE", args = "log=true", target = "Lit/unimi/dsi/fastutil/longs/Long2ObjectMap;get(Ljava/lang/Object;)Ljava/lang/Object;"))
     public Object onUnloadQueuedChunksGetChunk(Long2ObjectMap<Chunk> chunkMap, Object key) {
         Chunk chunk = (Chunk) chunkMap.get(key);
-        chunk.unloaded = true; // ignore unloaded flag
+        if (chunk != null) {
+            chunk.unloaded = true; // ignore unloaded flag
+        }
         return chunk;
     }
 
