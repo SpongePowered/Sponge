@@ -40,7 +40,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 import java.util.List;
 
@@ -159,7 +158,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
             // Sponge End
             return type.defaultLightValue;
         } else {
-            Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
+            Chunk chunk = this.getChunkProvider().getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4);
             if (chunk == null) {
                 return type.defaultLightValue;
             }

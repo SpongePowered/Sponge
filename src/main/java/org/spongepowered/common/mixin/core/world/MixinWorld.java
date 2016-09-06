@@ -130,7 +130,6 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeChunkPreGenerate;
@@ -301,7 +300,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             return Optional.empty();
         }
         final WorldServer worldserver = (WorldServer) (Object) this;
-        return Optional.ofNullable((Chunk) ((IMixinChunkProviderServer) worldserver.getChunkProvider()).getChunkIfLoaded(x, z));
+        return Optional.ofNullable((Chunk) worldserver.getChunkProvider().getLoadedChunk(x, z));
     }
 
     @Override
