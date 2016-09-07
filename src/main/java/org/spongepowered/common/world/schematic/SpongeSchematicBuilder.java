@@ -157,9 +157,8 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
                 }
             });
             return new SpongeSchematic(volume, tiles, this.metadata);
-        } else {
-            return new SpongeSchematic((SpongeArchetypeVolume) this.volume, this.metadata);
         }
+        return new SpongeSchematic((SpongeArchetypeVolume) this.volume, this.metadata);
     }
 
 }
