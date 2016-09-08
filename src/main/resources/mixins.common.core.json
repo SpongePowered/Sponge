@@ -394,6 +394,7 @@
         "util.MixinEnumHand",
         "util.MixinPacketThreadUtil",
         "util.datafix.MixinDataFixer",
+        "village.MixinVillage",
         "whitelist.MixinUserListWhitelist",
         "world.MixinAnvilSaveHandler",
         "world.MixinBossInfo",
@@ -473,6 +474,7 @@
         "world.gen.populators.MixinWorldGenTrees",
         "world.gen.populators.MixinWorldGenVines",
         "world.gen.populators.MixinWorldGenWaterLily",
+        "world.gen.structure.MixinMapGenStructure",
         "world.storage.MixinWorldInfo",
         "world.storage.MixinSaveHandler"
     ],

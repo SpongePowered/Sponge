@@ -189,6 +189,13 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
     }
 
 
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Inlines the isValidXZPosition check to BlockPos.
+     *
+     * @param bbox The AABB to check
+     * @return True if the AABB collides with a block
+     */
     @Overwrite
     public boolean collidesWithAnyBlock(AxisAlignedBB bbox) {
         List<AxisAlignedBB> list = Lists.<AxisAlignedBB>newArrayList();

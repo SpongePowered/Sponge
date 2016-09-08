@@ -49,7 +49,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.GenerationPhase;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -151,9 +150,9 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         this.maxChunkUnloads = maxUnloads;
     }
 
-    @Redirect(method = "unloadQueuedChunks", at = @At(value = "INVOKE", args = "log=true", target = "Lit/unimi/dsi/fastutil/longs/Long2ObjectMap;get(Ljava/lang/Object;)Ljava/lang/Object;"))
+    @Redirect(method = "unloadQueuedChunks", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/longs/Long2ObjectMap;get(Ljava/lang/Object;)Ljava/lang/Object;", remap = false))
     public Object onUnloadQueuedChunksGetChunk(Long2ObjectMap<Chunk> chunkMap, Object key) {
-        Chunk chunk = (Chunk) chunkMap.get(key);
+        Chunk chunk = chunkMap.get(key);
         if (chunk != null) {
             chunk.unloaded = true; // ignore unloaded flag
         }
@@ -169,7 +168,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Overwrite
     public Chunk getLoadedChunk(int x, int z){
         long i = ChunkPos.chunkXZ2Int(x, z);
-        Chunk chunk = (Chunk)this.id2ChunkMap.get(i);
+        Chunk chunk = this.id2ChunkMap.get(i);
 
         // Sponge start - Ignore the chunk unloaded flag as it causes
         // many issues with how we already handle unloads.

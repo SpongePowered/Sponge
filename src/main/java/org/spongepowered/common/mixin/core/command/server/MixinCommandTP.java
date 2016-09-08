@@ -92,7 +92,7 @@ public abstract class MixinCommandTP extends CommandBase {
                 }
                 else if (entity.worldObj != null)
                 {
-                    int j = 4096;
+                    // int j = 4096;
                     int lvt_6_2_ = i + 1;
                     CommandBase.CoordinateArg commandbase$coordinatearg = parseCoordinate(entity.posX, args[i], true);
                     CommandBase.CoordinateArg commandbase$coordinatearg1 = parseCoordinate(entity.posY, args[lvt_6_2_++], -4096, 4096, false);
@@ -157,7 +157,8 @@ public abstract class MixinCommandTP extends CommandBase {
     }
 
     /**
-     * @author Aaron1011 - August 15, 2016 - Muliple modification points are needed, so an overwrite is easier
+     * @author Aaron1011 - August 15, 2016
+     * @reason Muliple modification points are needed, so an overwrite is easier
      */
     @Overwrite
     private static void teleportEntityToCoordinates(Entity p_189863_0_, CommandBase.CoordinateArg p_189863_1_, CommandBase.CoordinateArg p_189863_2_, CommandBase.CoordinateArg p_189863_3_, CommandBase.CoordinateArg p_189863_4_, CommandBase.CoordinateArg p_189863_5_)

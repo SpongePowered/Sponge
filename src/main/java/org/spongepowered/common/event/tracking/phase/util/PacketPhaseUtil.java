@@ -111,16 +111,16 @@ public final class PacketPhaseUtil {
         player.isChangingQuantityOnly = false;
         int slotId = 0;
         if (hand == EnumHand.OFF_HAND) {
-            player.inventory.offHandInventory[0] = (net.minecraft.item.ItemStack) itemStack;
+            player.inventory.offHandInventory[0] = itemStack;
             slotId = (player.inventory.mainInventory.length + InventoryPlayer.getHotbarSize());
         } else {
-            player.inventory.mainInventory[player.inventory.currentItem] = (net.minecraft.item.ItemStack) itemStack;
+            player.inventory.mainInventory[player.inventory.currentItem] = itemStack;
             final Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
             slotId = slot.slotNumber;
         }
 
         player.openContainer.detectAndSendChanges();
         player.isChangingQuantityOnly = false;
-        player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotId, (net.minecraft.item.ItemStack) itemStack));
+        player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotId, itemStack));
     }
 }

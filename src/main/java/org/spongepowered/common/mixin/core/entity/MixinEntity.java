@@ -164,8 +164,10 @@ public abstract class MixinEntity implements IMixinEntity {
     private BlockState currentCollidingBlock;
     private BlockPos lastCollidedBlockPos;
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
-    private SpongeProfileManager spongeProfileManager;
-    private UserStorageService userStorageService;
+    @SuppressWarnings("unused")
+	private SpongeProfileManager spongeProfileManager;
+    @SuppressWarnings("unused")
+	private UserStorageService userStorageService;
     private Timing timing;
 
     @Shadow private UUID entityUniqueID;
@@ -281,7 +283,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z", at = @At(value = "FIELD", target = RIDING_ENTITY_FIELD, ordinal = 0),
             cancellable = true)
-    public void onStartRiding(net.minecraft.entity.Entity vehicle, boolean force, CallbackInfoReturnable ci) {
+    public void onStartRiding(net.minecraft.entity.Entity vehicle, boolean force, CallbackInfoReturnable<Boolean> ci) {
         if (!this.worldObj.isRemote && ShouldFire.RIDE_ENTITY_EVENT_MOUNT) {
             if (SpongeImpl.postEvent(SpongeEventFactory.createRideEntityEventMount(Cause.of(NamedCause.source(this)), (Entity) vehicle))) {
                 ci.cancel();

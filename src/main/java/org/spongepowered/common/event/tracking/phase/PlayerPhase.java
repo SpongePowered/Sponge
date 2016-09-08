@@ -68,7 +68,8 @@ public class PlayerPhase extends TrackingPhase {
         super(parent);
     }
 
-    @Override
+    @SuppressWarnings("unchecked")
+	@Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
         // Since currently all we have is PLAYER_LOGOUT, don't care about states.
         final Player player = phaseContext.firstNamed(NamedCause.SOURCE, Player.class)

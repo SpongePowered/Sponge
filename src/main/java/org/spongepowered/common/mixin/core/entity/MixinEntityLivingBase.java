@@ -57,7 +57,6 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -76,7 +75,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.entity.EntityUtil;
@@ -617,7 +615,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     /**
-     * @author Aaron1011 - August 15, 2016 - An overwrite avoids the need for a local-capture inject and two redirects
+     * @author Aaron1011 - August 15, 2016
+     * @reason An overwrite avoids the need for a local-capture inject and two redirects
      */
     // TODO: Investigate mixing into setPositionAndUpdate to catch more teleports
     @Overwrite
@@ -706,7 +705,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
         else
         {
-            int i = 128;
+            // int i = 128;
 
             for (int j = 0; j < 128; ++j)
             {

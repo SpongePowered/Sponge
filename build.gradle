@@ -54,7 +54,7 @@ configurations {
 
 dependencies {
     compile api
-    compile('org.spongepowered:mixin:0.5.11-SNAPSHOT') {
+    compile('org.spongepowered:mixin:0.5.13-SNAPSHOT') {
         exclude module: 'launchwrapper'
     }
 

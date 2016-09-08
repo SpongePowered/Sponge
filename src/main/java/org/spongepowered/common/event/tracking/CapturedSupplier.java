@@ -62,7 +62,8 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
         return this.captured == null ? list : this.captured;
     }
 
-    public final List<T> orEmptyList() {
+    @SuppressWarnings("unchecked")
+	public final List<T> orEmptyList() {
         return this.captured == null ? Collections.EMPTY_LIST : this.captured;
     }
 

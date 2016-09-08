@@ -729,7 +729,7 @@ public interface PacketFunction {
                                     context);
                             if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
                                 EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
-                                PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, (net.minecraft.item.ItemStack) itemStack, hand);
+                                PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
                             }
                         });
     };
