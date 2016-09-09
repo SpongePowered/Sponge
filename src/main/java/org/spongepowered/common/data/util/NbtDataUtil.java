@@ -145,6 +145,7 @@ public final class NbtDataUtil {
     public static final String CAN_GRIEF = "CanGrief";
     public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";
     public static final String PORTAL_AGENT_TYPE = "portalAgentType";
+    public static final String WORLD_SERIALIZATION_BEHAVIOR = "serializationBehavior";
 
     // Compatibility tags for Forge
     public static final String FORGE_DATA = "ForgeData";

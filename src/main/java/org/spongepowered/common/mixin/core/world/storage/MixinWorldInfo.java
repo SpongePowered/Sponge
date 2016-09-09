@@ -726,6 +726,16 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.generateBonusChest = nbt.getBoolean(NbtDataUtil.GENERATE_BONUS_CHEST);
         this.portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(nbt.getString(NbtDataUtil.PORTAL_AGENT_TYPE), this.levelName);
         this.trackedUniqueIdCount = 0;
+        if (nbt.hasKey(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR)) {
+            short saveBehavior = nbt.getShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR);
+            if (saveBehavior == 1) {
+                this.serializationBehavior = SerializationBehaviors.AUTOMATIC;
+            } else if (saveBehavior == 0) {
+                this.serializationBehavior = SerializationBehaviors.MANUAL;
+            } else {
+                this.serializationBehavior = SerializationBehaviors.NONE;
+            }
+        }
         if (nbt.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_LIST)) {
             final NBTTagList playerIdList = nbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
             for (int i = 0; i < playerIdList.tagCount(); i++) {
@@ -751,6 +761,13 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
                 this.portalAgentType = PortalAgentTypes.DEFAULT;
             }
             this.spongeNbt.setString(NbtDataUtil.PORTAL_AGENT_TYPE, this.portalAgentType.getPortalAgentClass().getName());
+            short saveBehavior = 1;
+            if (this.serializationBehavior == SerializationBehaviors.NONE) {
+                saveBehavior = -1;
+            } else if (serializationBehavior == SerializationBehaviors.MANUAL) {
+                saveBehavior = 0;
+            }
+            this.spongeNbt.setShort(NbtDataUtil.WORLD_SERIALIZATION_BEHAVIOR, saveBehavior);
             final Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
             final NBTTagList playerIdList = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
             while (iterator.hasNext()) {

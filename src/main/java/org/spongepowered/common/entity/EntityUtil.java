@@ -704,13 +704,12 @@ public final class EntityUtil {
         if (entity instanceof EntityPlayerMP && ((EntityPlayerMP) entity).connection != null) {
             EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entity;
             // Support vanilla clients going into custom dimensions
-            final int fromDimensionId = WorldManager.getDimensionId(fromWorld.provider);
             final int toDimensionId = WorldManager.getDimensionId(toWorld.provider);
             if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
                 WorldManager.sendDimensionRegistration(entityPlayerMP, toWorld.provider);
             } else {
-                // Force vanilla client to refresh their chunk cache if same dimension
-                if (currentDim != targetDim && fromDimensionId == toDimensionId) {
+                // Force vanilla client to refresh its chunk cache if same dimension type
+                if (fromWorld != toWorld && fromWorld.provider.getDimensionType() == toWorld.provider.getDimensionType()) {
                     entityPlayerMP.connection.sendPacket(
                             new SPacketRespawn(toDimensionId >= 0 ? -1 : 0, toWorld.getDifficulty(),
                                     toWorld.getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));

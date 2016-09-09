@@ -32,6 +32,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.storage.ChunkDataStream;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
@@ -178,5 +179,12 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         // Sponge end
 
         return chunk;
+    }
+
+    @Inject(method = "canSave", at = @At("HEAD"), cancellable = true)
+    public void onCanSave(CallbackInfoReturnable<Boolean> cir) {
+        if (((WorldProperties)this.worldObj.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
+            cir.setReturnValue(false);
+        }
     }
 }

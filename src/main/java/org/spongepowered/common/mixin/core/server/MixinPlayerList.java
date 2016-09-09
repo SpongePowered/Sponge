@@ -508,8 +508,15 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         final int dimensionId = WorldManager.getDimensionId(worldServer.provider);
 
         // Send dimension registration
-        WorldManager.sendDimensionRegistration(entityPlayerMP, worldServer.provider);
-
+        if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
+            WorldManager.sendDimensionRegistration(entityPlayerMP, worldServer.provider);
+        } else {
+            // Force vanilla client to refresh its chunk cache if same dimension type
+            if (fromTransform.getExtent() != worldServer && fromTransform.getExtent().getDimension().getType() == toTransform.getExtent().getDimension().getType()) {
+                entityPlayerMP.connection.sendPacket(new SPacketRespawn((dimensionId >= 0 ? -1 : 0), worldServer.getDifficulty(), worldServer
+                        .getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
+            }
+        }
         entityPlayerMP.connection.sendPacket(new SPacketRespawn(dimensionId, worldServer.getDifficulty(), worldServer
                 .getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
         entityPlayerMP.isDead = false;
@@ -612,9 +619,15 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         final int dimensionId = WorldManager.getDimensionId(toWorld.provider);
 
         // Send dimension registration
-        WorldManager.sendDimensionRegistration(playerIn, toWorld.provider);
-
-        playerIn.connection.sendPacket(new SPacketRespawn(dimensionId, fromWorld.getDifficulty(), fromWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
+        if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
+            WorldManager.sendDimensionRegistration(playerIn, toWorld.provider);
+        } else {
+            // Force vanilla client to refresh its chunk cache if same dimension type
+            if (fromWorld != toWorld && fromWorld.provider.getDimensionType() == toWorld.provider.getDimensionType()) {
+                playerIn.connection.sendPacket(new SPacketRespawn((dimensionId >= 0 ? -1 : 0), toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
+            }
+        }
+        playerIn.connection.sendPacket(new SPacketRespawn(dimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
         fromWorld.removeEntityDangerously(playerIn);
         playerIn.isDead = false;
         // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
