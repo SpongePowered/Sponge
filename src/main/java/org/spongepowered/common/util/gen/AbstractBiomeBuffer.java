@@ -27,7 +27,6 @@ package org.spongepowered.common.util.gen;
 import com.flowpowered.math.vector.Vector2i;
 import com.google.common.base.Objects;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.BiomeArea;
 import org.spongepowered.common.util.VecHelper;
 
@@ -35,7 +34,6 @@ import org.spongepowered.common.util.VecHelper;
  * Base class for biome areas. This class provides methods for retrieving the
  * size and for range checking.
  */
-@NonnullByDefault
 public abstract class AbstractBiomeBuffer implements BiomeArea {
 
     protected Vector2i start;

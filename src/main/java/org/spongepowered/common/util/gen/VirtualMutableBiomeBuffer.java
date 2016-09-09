@@ -25,13 +25,13 @@
 package org.spongepowered.common.util.gen;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
+import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.extent.StorageType;
@@ -47,66 +47,36 @@ import java.util.Arrays;
 /**
  * Mutable biome area backed by a byte array. Reusable.
  *
- * <p>Using {@link #detach()} the underlying byte array can be accessed.
- * The byte array can then be reused by calling {@link #reuse(Vector2i)}.</p>
+ * <p>Using {@link #detach()} the underlying byte array can be accessed. The
+ * byte array can then be reused by calling {@link #reuse(Vector2i)}.</p>
  */
-public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeArea {
+public final class VirtualMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeArea {
 
-    private boolean detached;
-    private final byte[] biomes;
+    private final BiomeType[] biomes;
 
-    private void checkOpen() {
-        checkState(!this.detached, "trying to use buffer after it's closed");
+    public VirtualMutableBiomeBuffer(Vector2i start, Vector2i size) {
+        super(start, size);
+        this.biomes = new BiomeType[size.getX() * size.getY()];
+        Arrays.fill(this.biomes, BiomeTypes.OCEAN);
     }
 
-    public ByteArrayMutableBiomeBuffer(Vector2i start, Vector2i size) {
-        this(new byte[size.getX() * size.getY()], start, size);
-    }
-
-    public ByteArrayMutableBiomeBuffer(byte[] biomes, Vector2i start, Vector2i size) {
+    public VirtualMutableBiomeBuffer(BiomeType[] biomes, Vector2i start, Vector2i size) {
         super(start, size);
         this.biomes = biomes;
     }
 
     @Override
     public void setBiome(int x, int z, BiomeType biome) {
-        checkOpen();
         checkRange(x, z);
 
-        this.biomes[getIndex(x, z)] = (byte) Biome.getIdForBiome((Biome) biome);
+        this.biomes[getIndex(x, z)] = biome;
     }
 
     @Override
     public BiomeType getBiome(int x, int z) {
-        checkOpen();
         checkRange(x, z);
 
-        byte biomeId = this.biomes[getIndex(x, z)];
-        BiomeType biomeType = (BiomeType) Biome.getBiomeForId(biomeId & 255);
-        return biomeType == null ? BiomeTypes.OCEAN : biomeType;
-    }
-
-    /**
-     * Gets the internal byte array, and prevents further of it through this
-     * object uses until {@link #reuse(Vector2i)} is called.
-     *
-     * @return The internal byte array.
-     */
-    public byte[] detach() {
-        checkOpen();
-
-        this.detached = true;
-        return this.biomes;
-    }
-
-    /**
-     * Gets whether this biome area is currently detached. When detached, this
-     * object is available for reuse using {@link #reuse(Vector2i)}.
-     *
-     * @return Whether this biome area is detached
-     */
-    public boolean isDetached() {
-        return this.detached;
+        return this.biomes[getIndex(x, z)];
     }
 
     /**
@@ -116,13 +86,21 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
      * @param start New start position.
      */
     public void reuse(Vector2i start) {
-        checkState(this.detached, "Cannot reuse while still in use");
-
         this.start = checkNotNull(start, "start");
         this.end = this.start.add(this.size).sub(Vector2i.ONE);
-        Arrays.fill(this.biomes, (byte) 0);
+        Arrays.fill(this.biomes, BiomeTypes.OCEAN);
+    }
 
-        this.detached = false;
+    public void fill(byte[] biomes) {
+        for (int x = 0; x < this.size.getX(); x++) {
+            for (int y = 0; y < this.size.getY(); y++) {
+                BiomeType type = this.biomes[x + y * this.size.getX()];
+                if (type instanceof VirtualBiomeType) {
+                    type = ((VirtualBiomeType) type).getPersistedType();
+                }
+                biomes[x + y * this.size.getX()] = (byte) Biome.getIdForBiome((Biome) type);
+            }
+        }
     }
 
     @Override
@@ -149,10 +127,9 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
 
     @Override
     public MutableBiomeArea getBiomeCopy(StorageType type) {
-        checkOpen();
         switch (type) {
             case STANDARD:
-                return new ByteArrayMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
+                return new VirtualMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -161,8 +138,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
 
     @Override
     public ImmutableBiomeArea getImmutableBiomeCopy() {
-        checkOpen();
-        return new ByteArrayImmutableBiomeBuffer(this.biomes, this.start, this.size);
+        return new VirtualImmutableBiomeBuffer(this.biomes, this.start, this.size);
     }
 
 }

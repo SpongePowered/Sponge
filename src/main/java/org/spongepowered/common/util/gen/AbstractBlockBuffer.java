@@ -28,7 +28,6 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.BlockVolume;
 import org.spongepowered.api.world.schematic.BlockPalette;
 import org.spongepowered.common.util.VecHelper;
@@ -36,7 +35,6 @@ import org.spongepowered.common.util.VecHelper;
 /**
  * Base class for block buffers.
  */
-@NonnullByDefault
 public abstract class AbstractBlockBuffer implements BlockVolume {
 
     protected final Vector3i start;

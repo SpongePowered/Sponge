@@ -25,10 +25,8 @@
 package org.spongepowered.common.util.gen;
 
 import com.flowpowered.math.vector.Vector2i;
-import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.extent.StorageType;
@@ -38,19 +36,20 @@ import org.spongepowered.common.world.extent.ImmutableBiomeViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
 
 /**
- * Immutable biome area, backed by a byte array. The array passed to the
- * constructor is copied to ensure that the instance is immutable.
+ * Immutable biome area, backed by a BiomeType array in order to support virtual
+ * biomes. The array passed to the constructor is copied to ensure that the
+ * instance is immutable.
  */
-public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeArea {
+public final class VirtualImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeArea {
 
-    private final byte[] biomes;
+    private final BiomeType[] biomes;
 
-    public ByteArrayImmutableBiomeBuffer(byte[] biomes, Vector2i start, Vector2i size) {
+    public VirtualImmutableBiomeBuffer(BiomeType[] biomes, Vector2i start, Vector2i size) {
         super(start, size);
         this.biomes = biomes.clone();
     }
 
-    private ByteArrayImmutableBiomeBuffer(Vector2i start, Vector2i size, byte[] biomes) {
+    private VirtualImmutableBiomeBuffer(Vector2i start, Vector2i size, BiomeType[] biomes) {
         super(start, size);
         this.biomes = biomes;
     }
@@ -58,8 +57,7 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     @Override
     public BiomeType getBiome(int x, int z) {
         checkRange(x, z);
-        BiomeType biomeType = (BiomeType) Biome.getBiomeForId(this.biomes[getIndex(x, z)] & 255);
-        return biomeType == null ? BiomeTypes.OCEAN : biomeType;
+        return this.biomes[getIndex(x, z)];
     }
 
     @Override
@@ -83,7 +81,7 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     public MutableBiomeArea getBiomeCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new ByteArrayMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
+                return new VirtualMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -99,8 +97,8 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
      * @param size The size of the area
      * @return A new buffer using the same array reference
      */
-    public static ImmutableBiomeArea newWithoutArrayClone(byte[] biomes, Vector2i start, Vector2i size) {
-        return new ByteArrayImmutableBiomeBuffer(start, size, biomes);
+    public static ImmutableBiomeArea newWithoutArrayClone(BiomeType[] biomes, Vector2i start, Vector2i size) {
+        return new VirtualImmutableBiomeBuffer(start, size, biomes);
     }
 
 }

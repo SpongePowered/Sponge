@@ -32,7 +32,6 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform3;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
@@ -51,7 +50,6 @@ import java.util.Optional;
 /**
  * Makes a {@link ChunkPrimer} usable as a {@link MutableBlockVolume}.
  */
-@NonnullByDefault
 public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
 
     private final ChunkPrimer chunkPrimer;

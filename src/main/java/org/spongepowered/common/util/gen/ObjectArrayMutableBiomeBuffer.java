@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.util.DiscreteTransform2;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
@@ -49,7 +48,6 @@ import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
-@NonnullByDefault
 public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeArea {
 
     private final Biome[] biomes;

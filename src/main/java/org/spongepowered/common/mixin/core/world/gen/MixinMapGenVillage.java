@@ -47,13 +47,20 @@ import java.util.Random;
 public abstract class MixinMapGenVillage extends MapGenStructure implements IFlaggedPopulator {
 
     @Override
-    public void populate(Extent extent, org.spongepowered.api.world.World worldIn, Random random, List<String> flags) {
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random, List<String> flags) {
         Vector3i min = extent.getBlockMin();
         World world = (World) worldIn;
         boolean flag = generateStructure(world, random, new ChunkPos((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
         if (flag) {
             flags.add(WorldGenConstants.VILLAGE_FLAG);
         }
+    }
+
+    @Override
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        World world = (World) worldIn;
+        generateStructure(world, random, new ChunkPos((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
     }
 
 }

@@ -29,7 +29,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform3;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
@@ -42,7 +41,6 @@ import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 
-@NonnullByDefault
 public class ByteArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
 
     @SuppressWarnings("ConstantConditions")
@@ -69,6 +67,7 @@ public class ByteArrayMutableBlockBuffer extends AbstractBlockBuffer implements 
         this.palette = palette;
     }
 
+    @Override
     public BlockPalette getPalette() {
         return this.palette;
     }

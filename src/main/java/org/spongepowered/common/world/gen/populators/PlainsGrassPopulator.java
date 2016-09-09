@@ -33,6 +33,7 @@ import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
@@ -98,6 +99,35 @@ public class PlainsGrassPopulator implements Populator {
             this.plant.getPossibleTypes().add(new WeightedObject<DoublePlantType>(DoublePlantTypes.SUNFLOWER, 1));
             this.plant.setPlantsPerChunk(10 * 5);
             this.plant.populate(world, extent, random);
+        }
+    }
+
+    @Override
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random random, ImmutableBiomeArea virtualBiomes) {
+        Vector3i min = extent.getBlockMin();
+        BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
+        double d0 = this.noise.getValue((chunkPos.getX() + 8) / 200.0D, (chunkPos.getZ() + 8) / 200.0D);
+
+        if (d0 < -0.8D) {
+            this.flowers.setFlowersPerChunk(15 * 64);
+            this.grass.setShrubsPerChunk(5 * 64);
+        } else {
+            this.flowers.setFlowersPerChunk(4 * 64);
+            this.grass.setShrubsPerChunk(10 * 64);
+
+            this.plant.getPossibleTypes().clear();
+            this.plant.getPossibleTypes().add(new WeightedObject<DoublePlantType>(DoublePlantTypes.GRASS, 1));
+            this.plant.setPlantsPerChunk(7 * 5);
+            this.plant.populate(world, extent, random, virtualBiomes);
+        }
+        this.flowers.populate(world, extent, random, virtualBiomes);
+        this.grass.populate(world, extent, random, virtualBiomes);
+
+        if (this.sunflowers) {
+            this.plant.getPossibleTypes().clear();
+            this.plant.getPossibleTypes().add(new WeightedObject<DoublePlantType>(DoublePlantTypes.SUNFLOWER, 1));
+            this.plant.setPlantsPerChunk(10 * 5);
+            this.plant.populate(world, extent, random, virtualBiomes);
         }
     }
 

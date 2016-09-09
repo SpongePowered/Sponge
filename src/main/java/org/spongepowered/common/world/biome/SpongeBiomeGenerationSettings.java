@@ -97,4 +97,15 @@ public class SpongeBiomeGenerationSettings implements BiomeGenerationSettings {
         }).collect(Collectors.toList());
     }
 
+    @Override
+    public BiomeGenerationSettings copy() {
+        SpongeBiomeGenerationSettings settings = new SpongeBiomeGenerationSettings();
+        settings.minHeight = this.minHeight;
+        settings.maxHeight = this.maxHeight;
+        settings.groundcover.addAll(this.groundcover);
+        settings.populators.addAll(this.populators);
+        settings.genpopulator.addAll(this.genpopulator);
+        return settings;
+    }
+
 }

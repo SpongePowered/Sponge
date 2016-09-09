@@ -24,17 +24,19 @@
  */
 package org.spongepowered.common.registry.type.world.gen;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
+import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class BiomeTypeRegistryModule implements CatalogRegistryModule<BiomeType> {
+public final class BiomeTypeRegistryModule implements AdditionalCatalogRegistryModule<BiomeType> {
 
     @RegisterCatalog(BiomeTypes.class)
     private final Map<String, BiomeType> biomeTypeMappings = Maps.newHashMap();
@@ -142,5 +144,15 @@ public final class BiomeTypeRegistryModule implements CatalogRegistryModule<Biom
         }
         // Re-map fields in case mods have changed vanilla world types
         RegistryHelper.mapFields(BiomeTypes.class, this.biomeTypeMappings);
+    }
+
+    @Override
+    public void registerAdditionalCatalog(BiomeType biome) {
+        checkNotNull(biome);
+        checkArgument(biome instanceof VirtualBiomeType, "Cannot register non-virtual biomes at this time.");
+        checkArgument(!getById(biome.getId()).isPresent(), "Duplicate biome id");
+
+        this.biomeTypes.add(biome);
+        this.biomeTypeMappings.put(biome.getId().toLowerCase(Locale.ENGLISH), biome);
     }
 }

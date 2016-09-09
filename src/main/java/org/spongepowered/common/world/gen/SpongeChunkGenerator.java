@@ -74,12 +74,11 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.GenerationPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.biome.IMixinBiome;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;
-import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
+import org.spongepowered.common.util.gen.VirtualMutableBiomeBuffer;
 import org.spongepowered.common.world.extent.SoftBufferExtentViewDownsize;
 import org.spongepowered.common.world.gen.populators.SnowPopulator;
 
@@ -106,7 +105,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     protected List<Populator> pop;
     protected Map<BiomeType, BiomeGenerationSettings> biomeSettings;
     protected final World world;
-    private final ByteArrayMutableBiomeBuffer cachedBiomes;
+    protected final VirtualMutableBiomeBuffer cachedBiomes;
 
     protected Random rand;
     private NoiseGeneratorPerlin noise4;
@@ -121,8 +120,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         this.biomeGenerator = checkNotNull(biomegen, "biomeGenerator");
 
         // Make initially empty biome cache
-        this.cachedBiomes = new ByteArrayMutableBiomeBuffer(Vector2i.ZERO, CHUNK_AREA);
-        this.cachedBiomes.detach();
+        this.cachedBiomes = new VirtualMutableBiomeBuffer(Vector2i.ZERO, CHUNK_AREA);
 
         this.genpop = Lists.newArrayList();
         this.pop = Lists.newArrayList();
@@ -143,7 +141,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             } else {
                 chunkGeneratorName = "chunkGenerator (" + base.getClass().getName() + ")";
             }
-            this.chunkGeneratorTiming = SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((IMixinWorldServer) world).getTimingsHandler().chunkPopulate);
+            this.chunkGeneratorTiming =
+                    SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((IMixinWorldServer) world).getTimingsHandler().chunkPopulate);
         }
 
     }
@@ -203,10 +202,13 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Override
     public BiomeGenerationSettings getBiomeSettings(BiomeType type) {
-        if (!this.biomeSettings.containsKey(type)) {
-            this.biomeSettings.put(type, ((IMixinBiome) type).initPopulators(this.world));
+        checkNotNull(type, "type");
+        BiomeGenerationSettings settings = this.biomeSettings.get(type);
+        if (settings == null) {
+            settings = type.createDefaultGenerationSettings((org.spongepowered.api.world.World) this.world);
+            this.biomeSettings.put(type, settings);
         }
-        return this.biomeSettings.get(type);
+        return settings;
     }
 
     @Override
@@ -224,11 +226,11 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         this.rand.setSeed(chunkX * 341873128712L + chunkZ * 132897987541L);
         this.cachedBiomes.reuse(new Vector2i(chunkX * 16, chunkZ * 16));
         this.biomeGenerator.generateBiomes(this.cachedBiomes);
+        ImmutableBiomeArea biomeBuffer = this.cachedBiomes.getImmutableBiomeCopy();
 
         // Generate base terrain
         ChunkPrimer chunkprimer = new ChunkPrimer();
         MutableBlockVolume blockBuffer = new ChunkPrimerBuffer(chunkprimer, chunkX, chunkZ);
-        ImmutableBiomeArea biomeBuffer = this.cachedBiomes.getImmutableBiomeCopy();
         this.baseGenerator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
 
         if (!(this.baseGenerator instanceof SpongeGenerationPopulator)) {
@@ -255,7 +257,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         // run our generator populators
         for (BiomeType type : uniqueBiomes) {
             if (!this.biomeSettings.containsKey(type)) {
-                this.biomeSettings.put(type, ((IMixinBiome) type).initPopulators(this.world));
+                this.biomeSettings.put(type, type.createDefaultGenerationSettings((org.spongepowered.api.world.World) this.world));
             }
             for (GenerationPopulator populator : this.biomeSettings.get(type).getGenerationPopulators()) {
                 populator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
@@ -264,8 +266,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
         // Assemble chunk
         Chunk chunk = new Chunk(this.world, chunkprimer, chunkX, chunkZ);
-        byte[] biomeArray = chunk.getBiomeArray();
-        System.arraycopy(this.cachedBiomes.detach(), 0, biomeArray, 0, biomeArray.length);
+        this.cachedBiomes.fill(chunk.getBiomeArray());
         chunk.generateSkylightMap();
         return chunk;
     }
@@ -283,13 +284,19 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         this.rand.setSeed(chunkX * i1 + chunkZ * j1 ^ this.world.getSeed());
         BlockFalling.fallInstantly = true;
 
+        // Have to regeneate the biomes so that any virtual biomes can be passed
+        // to the populator.
+        this.cachedBiomes.reuse(new Vector2i(chunkX * 16, chunkZ * 16));
+        this.biomeGenerator.generateBiomes(this.cachedBiomes);
+        ImmutableBiomeArea biomeBuffer = this.cachedBiomes.getImmutableBiomeCopy();
+
         BlockPos blockpos = new BlockPos(chunkX * 16, 0, chunkZ * 16);
         BiomeType biome = (BiomeType) this.world.getBiome(blockpos.add(16, 0, 16));
 
         org.spongepowered.api.world.Chunk chunk = (org.spongepowered.api.world.Chunk) this.world.getChunkFromChunkCoords(chunkX, chunkZ);
 
         if (!this.biomeSettings.containsKey(biome)) {
-            this.biomeSettings.put(biome, ((IMixinBiome) biome).initPopulators(this.world));
+            this.biomeSettings.put(biome, biome.createDefaultGenerationSettings((org.spongepowered.api.world.World) this.world));
         }
 
         List<Populator> populators = new ArrayList<>(this.pop);
@@ -327,7 +334,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             if (Timings.isTimingsEnabled()) {
                 timing = this.populatorTimings.get(populator.getType().getId());
                 if (timing == null) {
-                    timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getId());//, this.chunkGeneratorTiming);
+                    timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getId());// ,
+                                                                                                      // this.chunkGeneratorTiming);
                     this.populatorTimings.put(populator.getType().getId(), timing);
                 }
                 timing.startTimingIfSync();
@@ -339,9 +347,9 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                         .complete());
             }
             if (populator instanceof IFlaggedPopulator) {
-                ((IFlaggedPopulator) populator).populate(volume, spongeWorld, this.rand, flags);
+                ((IFlaggedPopulator) populator).populate(spongeWorld, volume, this.rand, biomeBuffer, flags);
             } else {
-                populator.populate(spongeWorld, volume, this.rand);
+                populator.populate(spongeWorld, volume, this.rand, biomeBuffer);
             }
             if (Timings.isTimingsEnabled()) {
                 timing.stopTimingIfSync();

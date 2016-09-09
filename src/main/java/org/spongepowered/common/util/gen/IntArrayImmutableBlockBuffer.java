@@ -30,7 +30,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform3;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
@@ -44,7 +43,6 @@ import org.spongepowered.common.world.schematic.GlobalPalette;
 
 import java.util.Arrays;
 
-@NonnullByDefault
 public class IntArrayImmutableBlockBuffer extends AbstractBlockBuffer implements ImmutableBlockVolume {
 
     @SuppressWarnings("ConstantConditions")

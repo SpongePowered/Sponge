@@ -36,8 +36,6 @@ public interface IMixinBiome {
 
     String getModId();
 
-    BiomeGenerationSettings initPopulators(World world);
-
     void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings);
 
 }

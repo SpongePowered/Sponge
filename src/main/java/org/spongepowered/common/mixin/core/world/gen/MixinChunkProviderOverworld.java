@@ -46,6 +46,8 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -66,8 +68,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ChunkBufferPrimer;
+import org.spongepowered.common.util.gen.VirtualMutableBiomeBuffer;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.AnimalPopulator;
 import org.spongepowered.common.world.gen.populators.FilteredPopulator;
@@ -223,7 +225,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
         // of the biomes that the terrain generator expects. While not an exact
         // reverse of the algorithm this should be accurate 99.997% of the time
         // (based on testing).
-        MutableBiomeArea buffer = new ByteArrayMutableBiomeBuffer(new Vector2i(x * 16 - 6, z * 16 - 6), new Vector2i(37, 37));
+        MutableBiomeArea buffer = new VirtualMutableBiomeBuffer(new Vector2i(x * 16 - 6, z * 16 - 6), new Vector2i(37, 37));
         this.biomegen.generateBiomes(buffer);
         if (this.biomesForGeneration == null || this.biomesForGeneration.length < 100) {
             this.biomesForGeneration = new Biome[100];
@@ -232,7 +234,11 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
             int absX = bx + x * 16 - 6;
             for (int bz = 0; bz < 40; bz += 4) {
                 int absZ = bz + z * 16 - 6;
-                this.biomesForGeneration[(bx / 4) + (bz / 4) * 10] = (Biome) buffer.getBiome(absX, absZ);
+                BiomeType type = buffer.getBiome(absX, absZ);
+                if (type instanceof VirtualBiomeType) {
+                    type = ((VirtualBiomeType) type).getPersistedType();
+                }
+                this.biomesForGeneration[(bx / 4) + (bz / 4) * 10] = (Biome) type;
             }
         }
         return this.biomesForGeneration;

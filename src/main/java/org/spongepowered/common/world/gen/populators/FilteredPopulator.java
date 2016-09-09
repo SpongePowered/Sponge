@@ -25,7 +25,9 @@
 package org.spongepowered.common.world.gen.populators;
 
 import com.google.common.collect.Lists;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
@@ -62,12 +64,17 @@ public class FilteredPopulator implements IFlaggedPopulator {
     }
 
     @Override
-    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand) {
-        this.wrapped.populate(world, extent, rand);
+    public void populate(World world, Extent volume, Random random) {
+        this.wrapped.populate(world, volume, random);
     }
 
     @Override
-    public void populate(Extent extent, org.spongepowered.api.world.World world, Random rand, List<String> flags) {
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand, ImmutableBiomeArea virtualBiomes) {
+        this.wrapped.populate(world, extent, rand, virtualBiomes);
+    }
+
+    @Override
+    public void populate(World world, Extent extent, Random rand, List<String> flags) {
         if (!this.check.test(extent)) {
             return;
         }
@@ -75,6 +82,17 @@ public class FilteredPopulator implements IFlaggedPopulator {
             return;
         }
         this.wrapped.populate(world, extent, rand);
+    }
+
+    @Override
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand, ImmutableBiomeArea virtualBiomes, List<String> flags) {
+        if (!this.check.test(extent)) {
+            return;
+        }
+        if (!flags.containsAll(this.requiredFlags)) {
+            return;
+        }
+        this.wrapped.populate(world, extent, rand, virtualBiomes);
     }
 
 }

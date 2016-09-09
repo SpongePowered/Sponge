@@ -88,12 +88,12 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
     private String modId;
 
     @Override
-    public BiomeGenerationSettings initPopulators(World world) {
+    public BiomeGenerationSettings createDefaultGenerationSettings(org.spongepowered.api.world.World world) {
         SpongeBiomeGenerationSettings gensettings = new SpongeBiomeGenerationSettings();
         gensettings.getPopulators().clear();
         gensettings.getGenerationPopulators().clear();
         gensettings.getGroundCoverLayers().clear();
-        buildPopulators(world, gensettings);
+        buildPopulators((World) world, gensettings);
         if (!getClass().getName().startsWith("net.minecraft")) {
             gensettings.getPopulators().add(new WrappedBiomeDecorator((Biome) (Object) this));
         } else if (!this.theBiomeDecorator.getClass().getName().startsWith("net.minecraft")) {
