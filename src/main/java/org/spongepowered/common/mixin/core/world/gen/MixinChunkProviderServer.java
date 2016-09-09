@@ -107,7 +107,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 //        return false;
 //    }
 
-    @Inject(method = "provideChunk", at = @At(value = "INVOKE", args = "log=true", target = "Lnet/minecraft/util/math/ChunkPos;chunkXZ2Int(II)J"))
+    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/ChunkPos;chunkXZ2Int(II)J"))
     public void onProvideChunkStart(int x, int z, CallbackInfoReturnable<Chunk> cir) {
         if (CauseTracker.ENABLED) {
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
