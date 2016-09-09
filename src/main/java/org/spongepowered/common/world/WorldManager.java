@@ -477,11 +477,14 @@ public final class WorldManager {
         final int dimensionId = mixinWorldServer.getDimensionId();
 
         try {
-            saveWorld(worldServer, true);
+            // Don't save if server is stopping to avoid duplicate saving.
+            if (server.isServerRunning()) {
+                saveWorld(worldServer, true);
+                mixinWorldServer.getActiveConfig().save();
+            }
         } catch (MinecraftException e) {
             e.printStackTrace();
         } finally {
-            mixinWorldServer.getActiveConfig().save();
             worldByDimensionId.remove(dimensionId);
             weakWorldByWorld.remove(worldServer);
             ((IMixinMinecraftServer) server).getWorldTickTimes().remove(dimensionId);
