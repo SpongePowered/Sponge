@@ -46,8 +46,8 @@ public class HumanInventoryLens extends MinecraftLens {
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
-        this.mainInventory = new GridInventoryLensImpl(9, 9, 3, 9, slots);
         this.hotbar = new HotbarLensImpl(0, 9, slots);
+        this.mainInventory = new GridInventoryLensImpl(9, 9, 3, 9, slots);
         this.armourInventory = new OrderedInventoryLensImpl(36, 4, 1, slots);
 
         this.addSpanningChild(this.hotbar);

@@ -74,7 +74,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
@@ -85,7 +84,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.util.PacketFunction;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
@@ -93,7 +91,6 @@ import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.IdentityHashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -173,7 +170,16 @@ public final class PacketPhase extends TrackingPhase {
 
     public enum Inventory implements IPacketState, IPhaseState {
 
+        // ORDER MATTERS. TEST IF YOU RE-ARRANGE
+
         INVENTORY,
+        PRIMARY_INVENTORY_CLICK(MODE_CLICK | MODE_DROP | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_INSIDE_WINDOW) {
+            @Override
+            public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventPrimary(cause, transaction, openContainer, slotTransactions);
+            }
+        },
         DROP_ITEM(MODE_CLICK | MODE_DROP | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_ANYWHERE) {
             @Override
             public boolean doesCaptureEntityDrops() {
@@ -197,9 +203,7 @@ public final class PacketPhase extends TrackingPhase {
                         .named(NamedCause.of("Container", openContainer))
                         .build();
 
-                Iterator<Entity> iterator = capturedEntities.iterator();
-                while (iterator.hasNext()) {
-                    Entity currentEntity = iterator.next();
+                for (Entity currentEntity : capturedEntities) {
                     currentEntity.setCreator(playerMP.getUniqueID());
                 }
                 final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
@@ -232,9 +236,7 @@ public final class PacketPhase extends TrackingPhase {
                         .named(NamedCause.of("Container", openContainer))
                         .build();
 
-                final Iterator<Entity> iterator = capturedEntities.iterator();
-                while (iterator.hasNext()) {
-                    final Entity currentEntity = iterator.next();
+                for (Entity currentEntity : capturedEntities) {
                     currentEntity.setCreator(playerMP.getUniqueID());
                 }
                 final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
@@ -253,13 +255,6 @@ public final class PacketPhase extends TrackingPhase {
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
                 return SpongeEventFactory.createClickInventoryEventNumberPress(cause, transaction, openContainer,
                         slotTransactions, usedButton);
-            }
-        },
-        PRIMARY_INVENTORY_CLICK(MODE_CLICK | MODE_DROP | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_INSIDE_WINDOW) {
-            @Override
-            public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return SpongeEventFactory.createClickInventoryEventPrimary(cause, transaction, openContainer, slotTransactions);
             }
         },
         PRIMARY_INVENTORY_SHIFT_CLICK(MODE_SHIFT_CLICK | BUTTON_PRIMARY, MASK_NORMAL) {

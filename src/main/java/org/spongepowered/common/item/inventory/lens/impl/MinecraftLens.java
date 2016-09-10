@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -31,6 +33,8 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.ChestInventoryLens;
 
 import java.lang.reflect.Constructor;
 
@@ -64,5 +68,13 @@ public abstract class MinecraftLens extends AbstractLens<IInventory, ItemStack> 
         super.invalidate(inv);
 //        inv.markDirty();    // Adapter can decide
     }
-    
+
+    @SuppressWarnings("unchecked")
+    public static MinecraftLens of(Container container, SlotCollection collection) {
+        if (container instanceof ContainerChest) {
+            return new ChestInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection);
+        }
+
+        return null;
+    }
 }

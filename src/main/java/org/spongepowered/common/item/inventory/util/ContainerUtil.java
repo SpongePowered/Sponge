@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory.util;
 
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -41,6 +42,7 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.mixin.core.inventory.MixinInventoryHelper;
 import org.spongepowered.common.util.VecHelper;
 
@@ -169,4 +171,13 @@ public final class ContainerUtil {
         }
     }
 
+    // TODO Inventory - Figure this out per container
+    public static SlotCollection countSlots(net.minecraft.inventory.Container container) {
+        if (container instanceof ContainerChest) {
+            // TODO Figure out if we're double
+            return new SlotCollection.Builder().add(27).build();
+        }
+
+        return null;
+    }
 }

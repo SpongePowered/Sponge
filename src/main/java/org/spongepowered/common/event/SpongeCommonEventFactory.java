@@ -36,6 +36,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
@@ -63,14 +64,12 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -82,7 +81,6 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -418,6 +416,13 @@ public class SpongeCommonEventFactory {
         ClickInventoryEvent.Creative event = SpongeEventFactory.createClickInventoryEventCreative(cause, cursorTransaction,
                 (org.spongepowered.api.item.inventory.Container) player.openContainer,
                 ((IMixinContainer) player.openContainer).getCapturedTransactions());
+        SpongeImpl.postEvent(event);
+        return event;
+    }
+
+    public static InteractInventoryEvent.Open callOpenInteractInventoryEvent(EntityPlayerMP player, Container container) {
+        final InteractInventoryEvent.Open event = SpongeEventFactory.createInteractInventoryEventOpen(Cause.of(NamedCause.owner(player)), new
+                Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE), (org.spongepowered.api.item.inventory.Container) (Object) container);
         SpongeImpl.postEvent(event);
         return event;
     }

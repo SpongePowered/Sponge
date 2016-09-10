@@ -26,11 +26,14 @@ package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,17 +41,23 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @NonnullByDefault
 @Mixin(Container.class)
+@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
 public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer {
-
-    private boolean captureInventory = false;
-    private List<SlotTransaction> capturedSlotTransactions = new ArrayList<>();
 
     @Shadow public List<Slot> inventorySlots;
     @Shadow public List<ItemStack> inventoryItemStacks;
@@ -61,6 +70,21 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     @Shadow
     public abstract Slot getSlot(int slotId);
+
+    private Container this$ = (Container) (Object) this;
+
+    private boolean captureInventory = false;
+    private List<SlotTransaction> capturedSlotTransactions = new ArrayList<>();
+    private Fabric<IInventory> inventory;
+    private SlotCollection slots;
+    private Lens<IInventory, ItemStack> lens;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(CallbackInfo ci) {
+        this.inventory = MinecraftFabric.of(this$);
+        this.slots = ContainerUtil.countSlots(this$);
+        this.lens = MinecraftLens.of(this$, this.slots);
+    }
 
     /**
      * @author bloodmc
@@ -151,4 +175,14 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         return this.capturedSlotTransactions;
     }
 
-}
+    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
+        return slots;
+    }
+
+    public Lens<IInventory, ItemStack> inventory$getRootLens() {
+        return lens;
+    }
+
+    public Fabric<IInventory> inventory$getInventory() {
+        return inventory;
+    }}

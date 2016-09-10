@@ -40,13 +40,16 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.ContainerChest;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
+import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
@@ -64,8 +67,14 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
+import net.minecraft.world.IInteractionObject;
+import net.minecraft.world.ILockableContainer;
+import net.minecraft.world.storage.loot.ILootContainer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
@@ -88,6 +97,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
@@ -116,7 +126,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -161,14 +170,6 @@ import javax.annotation.Nullable;
 public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, IMixinSubject, IMixinEntityPlayerMP, IMixinCommandSender,
         IMixinCommandSource {
 
-    public int newExperience = 0;
-    public int newLevel = 0;
-    public int newTotalExperience = 0;
-    public boolean keepsLevel = false;
-    private boolean sleepingIgnored;
-
-    private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
-
     @Shadow @Final public MinecraftServer mcServer;
     @Shadow @Final public PlayerInteractionManager interactionManager;
     @Shadow private String language;
@@ -185,6 +186,22 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow @Override public abstract void takeStat(StatBase stat);
     @Shadow public abstract StatisticsManagerServer getStatFile();
     @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
+
+    // Inventory
+    @Shadow public abstract void addChatMessage(ITextComponent component);
+    @Shadow public abstract void closeScreen();
+    @Shadow public abstract void getNextWindowId();
+    @Shadow public int currentWindowId;
+
+    private EntityPlayerMP this$ = (EntityPlayerMP) (Object) this;
+
+    public int newExperience = 0;
+    public int newLevel = 0;
+    public int newTotalExperience = 0;
+    public boolean keepsLevel = false;
+    private boolean sleepingIgnored;
+
+    private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -749,5 +766,67 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // ASK MUMFREY HOW TO GET THE FRIGGING SLOT FOR THE EVENT?!
 
         return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.stackSize : 1), false, true);
+    }
+
+    // ------------------------------------------ INVENTORY ---------------------------------------------------------
+
+    @Overwrite
+    public void displayGUIChest(IInventory chestInventory)
+    {
+        if (chestInventory instanceof ILootContainer && ((ILootContainer)chestInventory).getLootTable() != null && this.isSpectator())
+        {
+            this.addChatMessage((new TextComponentTranslation("container.spectatorCantOpen", new Object[0])).setStyle((new Style()).setColor(
+                    TextFormatting.RED)));
+        }
+        else
+        {
+            if (this.openContainer != this.inventoryContainer)
+            {
+                this.closeScreen();
+            }
+
+            if (chestInventory instanceof ILockableContainer)
+            {
+                ILockableContainer ilockablecontainer = (ILockableContainer)chestInventory;
+
+                if (ilockablecontainer.isLocked() && !this.canOpen(ilockablecontainer.getLockCode()) && !this.isSpectator())
+                {
+                    this.connection.sendPacket(new SPacketChat(new TextComponentTranslation("container.isLocked", new Object[] {chestInventory.getDisplayName()}), (byte)2));
+                    this.connection.sendPacket(new SPacketSoundEffect(SoundEvents.BLOCK_CHEST_LOCKED, net.minecraft.util.SoundCategory.BLOCKS, this.posX, this.posY, this.posZ, 1.0F, 1.0F));
+                    return;
+                }
+            }
+
+
+            Container container;
+            if (chestInventory instanceof IInteractionObject)
+            {
+
+                container = ((IInteractionObject)chestInventory).createContainer(this.inventory, this$);
+            }
+            else
+            {
+                container = new ContainerChest(this.inventory, chestInventory, this$);
+            }
+
+            final InteractInventoryEvent.Open event = SpongeCommonEventFactory.callOpenInteractInventoryEvent(this$, container);
+            if (event.isCancelled()) {
+                return;
+            }
+
+            this.getNextWindowId();
+
+            if (chestInventory instanceof IInteractionObject) {
+                this.connection.sendPacket(new SPacketOpenWindow(this.currentWindowId, ((IInteractionObject)chestInventory).getGuiID(), chestInventory
+                        .getDisplayName(), chestInventory.getSizeInventory()));
+            } else {
+                this.connection.sendPacket(new SPacketOpenWindow(this.currentWindowId, "minecraft:container", chestInventory.getDisplayName(),
+                        chestInventory.getSizeInventory()));
+            }
+
+            this.openContainer = container;
+            this.openContainer.windowId = this.currentWindowId;
+            this.openContainer.addListener(this$);
+        }
     }
 }

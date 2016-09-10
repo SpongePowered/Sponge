@@ -48,7 +48,7 @@ public class ContainerFabric extends MinecraftFabric {
         this(ContainerFabric.getFirstDisplayName(container), container);
     }
     
-    public ContainerFabric(Translation displayName, Container container) {
+    private ContainerFabric(Translation displayName, Container container) {
         this.displayName = displayName;
         this.container = container;
 

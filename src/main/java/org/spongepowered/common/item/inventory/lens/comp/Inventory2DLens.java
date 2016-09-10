@@ -31,10 +31,10 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 public interface Inventory2DLens<TInventory, TStack> extends OrderedInventoryLens<TInventory, TStack> {
 
-    public abstract int getWidth();
+    int getWidth();
     
-    public abstract int getHeight();
+    int getHeight();
     
-    public abstract SlotLens<IInventory, ItemStack> getSlot(SlotPos pos);
+    SlotLens<IInventory, ItemStack> getSlot(SlotPos pos);
     
 }
