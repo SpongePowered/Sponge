@@ -78,9 +78,10 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private Fabric<IInventory> inventory;
     private SlotCollection slots;
     private Lens<IInventory, ItemStack> lens;
+    private boolean initialized;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(CallbackInfo ci) {
+    private void init() {
+        this.initialized = true;
         this.inventory = MinecraftFabric.of(this$);
         this.slots = ContainerUtil.countSlots(this$);
         this.lens = MinecraftLens.of(this$, this.slots);
@@ -176,13 +177,22 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
+        if (!this.initialized) {
+            this.init();
+        }
         return slots;
     }
 
     public Lens<IInventory, ItemStack> inventory$getRootLens() {
+        if (!this.initialized) {
+            this.init();
+        }
         return lens;
     }
 
     public Fabric<IInventory> inventory$getInventory() {
+        if (!this.initialized) {
+            this.init();
+        }
         return inventory;
     }}
