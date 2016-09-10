@@ -38,6 +38,7 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -53,6 +54,7 @@ import org.spongepowered.common.event.tracking.phase.GenerationPhase;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.util.CachedLong2ObjectMap;
 import org.spongepowered.common.world.storage.SpongeChunkDataStream;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
 
@@ -66,10 +68,10 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Shadow @Final public WorldServer worldObj;
     @Shadow @Final private IChunkLoader chunkLoader;
-    @Shadow @Final private Long2ObjectMap<Chunk> id2ChunkMap;
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Shadow @Final @Mutable public Long2ObjectMap<Chunk> id2ChunkMap = new CachedLong2ObjectMap();
 
     @Shadow public abstract Chunk provideChunk(int x, int z);
-
 
     @Override
     public ChunkDataStream getGeneratedChunks() {

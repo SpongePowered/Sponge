@@ -42,6 +42,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
@@ -94,6 +95,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.GenerationPhase;
+import org.spongepowered.common.interfaces.IMixinCachable;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
@@ -122,7 +124,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.chunk.Chunk.class)
-public abstract class MixinChunk implements Chunk, IMixinChunk {
+public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     private org.spongepowered.api.world.World world;
     private UUID uuid;
@@ -130,6 +132,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     private SpongeProfileManager spongeProfileManager;
     private UserStorageService userStorageService;
     private Chunk[] neighbors = new Chunk[4];
+    private long cacheKey;
     private static final Direction[] CARDINAL_DIRECTIONS = new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
 
     private static final int NUM_XZ_BITS = 4;
@@ -194,6 +197,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
             this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
         }
+        this.cacheKey = ChunkPos.chunkXZ2Int(this.xPosition, this.zPosition);
+    }
+
+    @Override
+    public long getCacheKey() {
+        return this.cacheKey;
     }
 
     @Inject(method = "onChunkLoad()V", at = @At("RETURN"))

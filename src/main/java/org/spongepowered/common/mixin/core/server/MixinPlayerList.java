@@ -282,7 +282,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Sponge end
 
         // Support vanilla clients logging into custom dimensions
-        final int dimensionId = WorldManager.getDimensionId(worldServer.provider);
+        final int dimensionId = WorldManager.getClientDimensionId(playerIn, worldServer.provider);
 
         // Send dimension registration
         WorldManager.sendDimensionRegistration(playerIn, worldServer.provider);
@@ -505,7 +505,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // ### PHASE 5 ### Respawn player in new world
 
         // Support vanilla clients logging into custom dimensions
-        final int dimensionId = WorldManager.getDimensionId(worldServer.provider);
+        final int dimensionId = WorldManager.getClientDimensionId(entityPlayerMP, worldServer.provider);
 
         // Send dimension registration
         if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
@@ -613,10 +613,10 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
         WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
-        playerIn.dimension = WorldManager.getDimensionId(toWorld.provider);
+        playerIn.dimension = WorldManager.getClientDimensionId(playerIn, toWorld.provider);
         toWorld.getChunkProvider().loadChunk(event.getToTransform().getLocation().getChunkPosition().getX(), event.getToTransform().getLocation().getChunkPosition().getZ());
         // Support vanilla clients teleporting to custom dimensions
-        final int dimensionId = WorldManager.getDimensionId(toWorld.provider);
+        final int dimensionId = playerIn.dimension;
 
         // Send dimension registration
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
@@ -724,7 +724,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     public void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world.Teleporter teleporter) {
         // rewritten completely to handle our portal event
         MoveEntityEvent.Teleport.Portal event = EntityUtil
-                .handleDisplaceEntityPortalEvent(entityIn, WorldManager.getDimensionId(toWorld.provider), teleporter);
+                .handleDisplaceEntityPortalEvent(entityIn, WorldManager.getDimensionId(toWorld), teleporter);
         if (event == null || event.isCancelled()) {
             return;
         }

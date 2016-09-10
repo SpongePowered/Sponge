@@ -70,6 +70,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinIntegratedServer;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -1161,7 +1162,22 @@ public final class WorldManager {
         return weakWorldByWorld;
     }
 
-    public static int getDimensionId(WorldProvider provider) {
-        return provider.getDimensionType().getId();
+    public static int getClientDimensionId(EntityPlayerMP player, WorldProvider provider) {
+        if (!((IMixinEntityPlayerMP) player).usesCustomClient()) {
+            DimensionType type = provider.getDimensionType();
+            if (type == DimensionType.OVERWORLD) {
+                return 0;
+            } else if (type == DimensionType.NETHER) {
+                return -1;
+            }
+
+            return 1;
+        }
+
+        return ((IMixinWorldInfo) player.worldObj.getWorldInfo()).getDimensionId();
+    }
+
+    public static int getDimensionId(WorldServer world) {
+        return ((IMixinWorldInfo) world.getWorldInfo()).getDimensionId();
     }
 }
