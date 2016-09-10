@@ -22,11 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world.biome;
+package org.spongepowered.common.mixin.core.world.biome;
 
+import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeVoid;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
-public interface IBiomeGenPlains {
-    
-    boolean hasSunflowers();
+@Mixin(BiomeVoid.class)
+public class MixinBiomeVoid extends MixinBiome {
 
+    @Override
+    public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
+        // no super call
+    }
 }

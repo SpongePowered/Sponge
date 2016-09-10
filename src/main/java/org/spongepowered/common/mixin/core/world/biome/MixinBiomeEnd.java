@@ -25,23 +25,26 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDesert;
-import org.spongepowered.api.world.gen.PopulatorObjects;
-import org.spongepowered.api.world.gen.populator.DesertWell;
+import net.minecraft.world.biome.BiomeEnd;
+import org.spongepowered.api.world.gen.populator.ChorusFlower;
+import org.spongepowered.api.world.gen.populator.EndIsland;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
+import org.spongepowered.common.world.gen.populators.EndBiomeGenerationPopulator;
+import org.spongepowered.common.world.gen.populators.EndSpikePopulator;
 
-@Mixin(BiomeDesert.class)
-public abstract class MixinBiomeGenDesert extends MixinBiomeGenBase {
+@Mixin(BiomeEnd.class)
+public abstract class MixinBiomeEnd extends MixinBiome {
 
+    /*
+     * Add in our end biome genpop which replaces the stone blocks from
+     * generation with end stone.
+     */
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        super.buildPopulators(world, gensettings);
-        DesertWell well = DesertWell.builder()
-                .probability(1 / 1000f)
-                .wellObject(PopulatorObjects.DESERT_WELL)
-                .build();
-        gensettings.getPopulators().add(well);
+        gensettings.getGenerationPopulators().add(new EndBiomeGenerationPopulator());
+        gensettings.getPopulators().add(new EndSpikePopulator());
+        gensettings.getPopulators().add(EndIsland.builder().build());
+        gensettings.getPopulators().add(ChorusFlower.builder().build());
     }
-
 }

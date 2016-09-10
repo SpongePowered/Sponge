@@ -25,32 +25,23 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomePlains;
+import net.minecraft.world.biome.BiomeDesert;
+import org.spongepowered.api.world.gen.PopulatorObjects;
+import org.spongepowered.api.world.gen.populator.DesertWell;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.biome.IBiomeGenPlains;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
-import org.spongepowered.common.world.gen.populators.PlainsGrassPopulator;
 
-@Mixin(BiomePlains.class)
-public abstract class MixinBiomeGenPlains extends MixinBiomeGenBase implements IBiomeGenPlains {
-
-    @Shadow protected boolean sunflowers;
+@Mixin(BiomeDesert.class)
+public abstract class MixinBiomeDesert extends MixinBiome {
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        gensettings.getPopulators().add(new PlainsGrassPopulator(this.sunflowers));
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        // set flowers and grass to zero as they are handles by the plains grass
-        // populator
-        theBiomeDecorator.flowersPerChunk = 0;
-        theBiomeDecorator.grassPerChunk = 0;
         super.buildPopulators(world, gensettings);
+        DesertWell well = DesertWell.builder()
+                .probability(1 / 1000f)
+                .wellObject(PopulatorObjects.DESERT_WELL)
+                .build();
+        gensettings.getPopulators().add(well);
     }
 
-    @Override
-    public boolean hasSunflowers() {
-        return this.sunflowers;
-    }
 }

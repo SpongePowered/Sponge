@@ -46,7 +46,7 @@ import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import java.util.Iterator;
 
 @Mixin(BiomeJungle.class)
-public abstract class MixinBiomeGenJungle extends MixinBiomeGenBase {
+public abstract class MixinBiomeJungle extends MixinBiome {
 
     @Shadow @Final private boolean isEdge;
 

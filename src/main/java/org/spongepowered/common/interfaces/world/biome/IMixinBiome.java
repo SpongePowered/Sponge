@@ -22,30 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.biome;
+package org.spongepowered.common.interfaces.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeSwamp;
-import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.gen.populator.Forest;
-import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
-@Mixin(BiomeSwamp.class)
-public abstract class MixinBiomeGenSwamp extends MixinBiomeGenBase {
+public interface IMixinBiome {
 
-    @Override
-    public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-//        gensettings.getGenerationPopulators().add(new SwampLilyPopulator());
-        super.buildPopulators(world, gensettings);
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
-        Forest.Builder forest = Forest.builder();
-        forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
-        forest.type(BiomeTreeTypes.SWAMP.getPopulatorObject(), 1);
-        gensettings.getPopulators().add(0, forest.build());
-    }
+    void setId(String id);
+
+    void setModId(String modId);
+
+    String getModId();
+
+    BiomeGenerationSettings initPopulators(World world);
+
+    void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings);
 
 }
