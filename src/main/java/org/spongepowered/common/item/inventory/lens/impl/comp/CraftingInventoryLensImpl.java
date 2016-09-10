@@ -41,9 +41,9 @@ import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens
 public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements CraftingInventoryLens<IInventory, ItemStack> {
 
     private final int outputSlotIndex;
-    
+
     private final CraftingOutputSlotLens<IInventory, ItemStack> outputSlot;
-    
+
     private final GridInventoryLens<IInventory, ItemStack> craftingGrid;
 
     public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, SlotProvider<IInventory, ItemStack> slots) {
@@ -68,23 +68,24 @@ public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements 
 
     public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
         super(gridBase, width, height, rowStride, xBase, yBase, adapterType, slots);
-        this.outputSlotIndex = outputSlotIndex; 
+        this.outputSlotIndex = outputSlotIndex;
         this.outputSlot = (CraftingOutputSlotLens<IInventory, ItemStack>)slots.getSlot(this.outputSlotIndex);
-        this.craftingGrid = new GridInventoryLensImpl(this.base, this.width, this.height, slots);
+        this.craftingGrid = new GridInventoryLensImpl(this.base, this.width, this.height, this.width, slots);
         this.size += 1; // output slot
+        // Avoid the init() method in the superclass c6alling our init() too early
+        this.initOther(slots);
     }
-    
-    @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+
+    private void initOther(SlotProvider<IInventory, ItemStack> slots) {
         this.addSpanningChild(this.craftingGrid, new InventorySize(this.width, this.height));
         this.addSpanningChild(this.outputSlot);
     }
-    
+
     @Override
     public GridInventoryLens<IInventory, ItemStack> getCraftingGrid() {
         return this.craftingGrid;
     }
-    
+
     @Override
     public CraftingOutputSlotLens<IInventory, ItemStack> getOutputSlot() {
         return this.outputSlot;
@@ -99,7 +100,7 @@ public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements 
     public boolean setOutputStack(Fabric<IInventory> inv, ItemStack stack) {
         return this.outputSlot.setStack(inv, stack);
     }
-    
+
     @Override
     public int getRealIndex(Fabric<IInventory> inv, int ordinal) {
         if (!this.checkOrdinal(ordinal)) {

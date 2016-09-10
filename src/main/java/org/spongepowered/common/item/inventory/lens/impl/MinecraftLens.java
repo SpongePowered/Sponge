@@ -36,6 +36,7 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.ContainerChestInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.ContainerPlayerInventoryLens;
 
 import java.lang.reflect.Constructor;
 
@@ -75,7 +76,7 @@ public abstract class MinecraftLens extends AbstractLens<IInventory, ItemStack> 
         if (container instanceof ContainerChest) {
             return new ContainerChestInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection, ((ContainerChest) container).numRows);
         } else if (container instanceof ContainerPlayer) {
-
+            return new ContainerPlayerInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection);
         }
 
         return null;

@@ -34,6 +34,8 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryL
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
 public class ContainerPlayerInventoryLens extends MinecraftLens {
 
@@ -43,10 +45,16 @@ public class ContainerPlayerInventoryLens extends MinecraftLens {
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
-        HotbarLensImpl hotbar = new HotbarLensImpl(0, 9, slots);
-        GridInventoryLensImpl main = new GridInventoryLensImpl(9, 9, 3, 9, slots);
-        OrderedInventoryLensImpl armor = new OrderedInventoryLensImpl(36, 4, 1, slots);
+        CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl(0, 1, 2, 2, 2, slots);
+        OrderedInventoryLensImpl armor = new OrderedInventoryLensImpl((1 + 4), 4, 1, slots);
+        GridInventoryLensImpl main = new GridInventoryLensImpl(((1 + 4) + 4), 9, 3, 9, slots);
+        HotbarLensImpl hotbar = new HotbarLensImpl((((1 + 4) + 4) + 27), 9, slots);
+        SlotLensImpl offHand = new SlotLensImpl(((((1 + 4) + 4) + 27) + 9));
 
-        //CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl();
+        this.addSpanningChild(armor);
+        this.addSpanningChild(crafting);
+        this.addSpanningChild(main);
+        this.addSpanningChild(hotbar);
+        this.addSpanningChild(offHand);
     }
 }

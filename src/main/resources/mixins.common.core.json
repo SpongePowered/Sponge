@@ -319,6 +319,7 @@
         "item.data.MixinItemWrittenBook",
         "item.inventory.MixinContainer",
         "item.inventory.MixinSlot",
+        "item.inventory.MixinSlotCrafting",
         "item.inventory.TraitInventoryAdapter",
         "item.inventory.TraitInventoryObservable",
         "item.merchant.MixinMerchantRecipe",
