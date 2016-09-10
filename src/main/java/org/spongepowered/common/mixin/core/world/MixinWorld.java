@@ -32,6 +32,7 @@ import com.flowpowered.math.vector.Vector2d;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -291,7 +292,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Player> getPlayers() {
-        return (Collection<Player>) (Object) this.playerEntities;
+        return ImmutableList.copyOf((Collection<Player>) (Object) this.playerEntities);
     }
 
     @Override
