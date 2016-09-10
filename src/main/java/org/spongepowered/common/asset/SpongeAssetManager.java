@@ -41,7 +41,7 @@ import java.util.Optional;
 
 public final class SpongeAssetManager implements AssetManager {
 
-    public static final String DEFAULT_ASSET_DIR = "assets";
+    public static final String DEFAULT_ASSET_DIR = "assets/";
     public static final ClassLoader CLASS_LOADER = Sponge.class.getClassLoader();
 
     @Override
@@ -50,8 +50,8 @@ public final class SpongeAssetManager implements AssetManager {
         checkNotNull(name, "name");
         checkArgument(!name.isEmpty(), "name cannot be empty");
         PluginContainer plugin = Sponge.getPluginManager().fromInstance(instance).get();
-        Path assetDir = plugin.getAssetDirectory().orElse(Paths.get(DEFAULT_ASSET_DIR).resolve(plugin.getId().replace('.', '/')));
-        URL url = CLASS_LOADER.getResource(assetDir.resolve(name).toString().replace(File.separatorChar, '/'));
+
+        URL url = CLASS_LOADER.getResource(DEFAULT_ASSET_DIR + plugin.getId() + '/' + name);
         if (url == null) {
             return Optional.empty();
         }
