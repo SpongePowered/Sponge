@@ -26,55 +26,26 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeMesa;
-import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.biome.BiomeSwamp;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.gen.populator.Cactus;
 import org.spongepowered.api.world.gen.populator.Forest;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
-import org.spongepowered.common.world.gen.populators.MesaBiomeGenerationPopulator;
 
-import java.util.Random;
-
-@Mixin(BiomeMesa.class)
-public abstract class MixinBiomeGenMesa extends MixinBiomeGenBase {
-
-    @Shadow @Final private boolean brycePillars;
-    @Shadow @Final private boolean hasForest;
+@Mixin(BiomeSwamp.class)
+public abstract class MixinBiomeSwamp extends MixinBiome {
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        gensettings.getGenerationPopulators().add(new MesaBiomeGenerationPopulator(this.brycePillars, this.hasForest));
+//        gensettings.getGenerationPopulators().add(new SwampLilyPopulator());
         super.buildPopulators(world, gensettings);
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        gensettings.getGroundCoverLayers().clear();
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
         Forest.Builder forest = Forest.builder();
         forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
-        forest.type(BiomeTreeTypes.OAK.getPopulatorObject(), 1);
+        forest.type(BiomeTreeTypes.SWAMP.getPopulatorObject(), 1);
         gensettings.getPopulators().add(0, forest.build());
-        gensettings.getPopulators().removeAll(gensettings.getPopulators(Cactus.class));
-        Cactus cactus = Cactus.builder()
-                .cactiPerChunk(VariableAmount.baseWithOptionalAddition(0,
-                        VariableAmount.baseWithRandomAddition(1, VariableAmount.baseWithOptionalAddition(2, 3, 0.25)), 0.4))
-                .build();
-        gensettings.getPopulators().add(cactus);
-    }
-
-    /**
-     * Cancel the call to place the terrain blocks as this is instead handled
-     * through our custom genpop.
-     */
-    @Inject(method = "genTerrainBlocks(Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/world/chunk/ChunkPrimer;IID)V", at = @At("HEAD") , cancellable = true)
-    public void genTerrainBlocks(World world, Random rand, ChunkPrimer chunk, int x, int z, double stoneNoise, CallbackInfo ci) {
-        ci.cancel();
     }
 
 }

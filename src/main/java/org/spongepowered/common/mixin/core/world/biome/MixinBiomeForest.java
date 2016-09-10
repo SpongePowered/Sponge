@@ -41,7 +41,7 @@ import org.spongepowered.common.world.gen.populators.FlowerForestSupplier;
 import org.spongepowered.common.world.gen.populators.RoofedForestPopulator;
 
 @Mixin(BiomeForest.class)
-public abstract class MixinBiomeGenForest extends MixinBiomeGenBase {
+public abstract class MixinBiomeForest extends MixinBiome {
 
     @Shadow @Final private BiomeForest.Type type;
 

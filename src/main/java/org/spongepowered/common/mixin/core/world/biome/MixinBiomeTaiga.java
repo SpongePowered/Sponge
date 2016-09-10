@@ -51,7 +51,7 @@ import org.spongepowered.common.world.gen.WorldGenConstants;
 import java.util.Iterator;
 
 @Mixin(BiomeTaiga.class)
-public abstract class MixinBiomeGenTaiga extends MixinBiomeGenBase {
+public abstract class MixinBiomeTaiga extends MixinBiome {
 
     @Shadow @Final private BiomeTaiga.Type type;
 

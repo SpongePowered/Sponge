@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.biome;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -62,14 +64,18 @@ import org.spongepowered.api.world.gen.type.MushroomTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.interfaces.world.biome.IMixinBiome;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.WrappedBiomeDecorator;
 
 @NonnullByDefault
 @Mixin(Biome.class)
-public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
+public abstract class MixinBiome implements BiomeType, IMixinBiome {
 
     @Shadow @Final public String biomeName;
     @Shadow @Final public float temperature;
@@ -77,6 +83,9 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
     @Shadow public IBlockState topBlock;
     @Shadow public IBlockState fillerBlock;
     @Shadow public BiomeDecorator theBiomeDecorator;
+
+    private String id;
+    private String modId;
 
     @Override
     public BiomeGenerationSettings initPopulators(World world) {
@@ -314,6 +323,15 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
 
     }
 
+    @Inject(method = "registerBiome", at = @At("HEAD"))
+    private static void onRegisterBiome(int id, String name, Biome biome, CallbackInfo ci) {
+        final String modId = SpongeImplHooks.getModIdFromClass(biome.getClass());
+        final String biomeName = name.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
+
+        ((IMixinBiome) biome).setModId(modId);
+        ((IMixinBiome) biome).setId(modId + ":" + biomeName);
+    }
+
     @Override
     public String getName() {
         return this.biomeName;
@@ -321,7 +339,26 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
 
     @Override
     public String getId() {
-        return this.biomeName;
+        return this.id;
+    }
+
+    @Override
+    public void setId(String id) {
+        checkState(this.id == null, "Attempt made to set ID!");
+
+        this.id = id;
+    }
+
+    @Override
+    public String getModId() {
+        return this.modId;
+    }
+
+    @Override
+    public void setModId(String modId) {
+        checkState(this.modId == null, "Attempt made to set Mod ID!");
+
+        this.modId = modId;
     }
 
     @Override

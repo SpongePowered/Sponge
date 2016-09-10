@@ -45,7 +45,7 @@ import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.HellMushroomPopulator;
 
 @Mixin(BiomeHell.class)
-public abstract class MixinBiomeGenHell extends MixinBiomeGenBase {
+public abstract class MixinBiomeHell extends MixinBiome {
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {

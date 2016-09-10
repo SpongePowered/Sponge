@@ -22,29 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.biome;
+package org.spongepowered.common.interfaces.world.biome;
 
-import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeEnd;
-import org.spongepowered.api.world.gen.populator.ChorusFlower;
-import org.spongepowered.api.world.gen.populator.EndIsland;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
-import org.spongepowered.common.world.gen.populators.EndBiomeGenerationPopulator;
-import org.spongepowered.common.world.gen.populators.EndSpikePopulator;
 
-@Mixin(BiomeEnd.class)
-public abstract class MixinBiomeGenEnd extends MixinBiomeGenBase {
+public interface IMixinBiomePlains {
+    
+    boolean hasSunflowers();
 
-    /*
-     * Add in our end biome genpop which replaces the stone blocks from
-     * generation with end stone.
-     */
-    @Override
-    public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        gensettings.getGenerationPopulators().add(new EndBiomeGenerationPopulator());
-        gensettings.getPopulators().add(new EndSpikePopulator());
-        gensettings.getPopulators().add(EndIsland.builder().build());
-        gensettings.getPopulators().add(ChorusFlower.builder().build());
-    }
 }
