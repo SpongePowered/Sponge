@@ -55,9 +55,9 @@ import java.util.Collection;
 import java.util.Map;
 
 public class Query<TInventory, TStack> {
-    
+
     public static enum Type {
-        
+
         CLASS("class", ClassStrategy.class),
         TYPE("type", ItemTypeStrategy.class),
         STACK("stack", ItemStackStrategy.class),
@@ -65,9 +65,9 @@ public class Query<TInventory, TStack> {
         NAME("name", NameStrategy.class),
         EXPRESSION("expr", ExpressionStrategy.class),
         GENERIC("args", GenericStrategy.class);
-        
+
         private final String key;
-        
+
         private final Class<? extends QueryStrategy<?, ?, ?>> defaultStrategyClass;
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -79,54 +79,54 @@ public class Query<TInventory, TStack> {
         public String getKey() {
             return this.key;
         }
-        
+
         public Class<? extends QueryStrategy<?, ?, ?>> getDefaultStrategyClass() {
             return this.defaultStrategyClass;
         }
-        
+
     }
-    
+
     public abstract interface ResultAdapterProvider<TInventory, TStack> {
-        
+
         public abstract QueryResult<TInventory, TStack> getResultAdapter(Fabric<TInventory> inventory, MutableLensSet<TInventory, TStack> matches);
-        
+
     }
-    
+
     private static final Map<String, Class<? extends QueryStrategy<?, ?, ?>>> strategies
             = Maps.<String, Class<? extends QueryStrategy<?, ?, ?>>>newHashMap();
-    
+
     private static ResultAdapterProvider<?, ?> defaultResultProvider;
-    
+
     static {
         Query.registerDefaultStrategies();
         Query.setDefaultResultProvider(new MinecraftResultAdapterProvider());
     }
-    
+
     private final InventoryAdapter<TInventory, TStack> adapter;
-    
+
     private final Fabric<TInventory> inventory;
-    
+
     private final Lens<TInventory, TStack> lens;
-    
+
     private final QueryStrategy<TInventory, TStack, ?> strategy;
-    
+
     protected Query(InventoryAdapter<TInventory, TStack> adapter, QueryStrategy<TInventory, TStack, ?> strategy) {
         this.adapter = adapter;
         this.inventory = adapter.getInventory();
         this.lens = adapter.getRootLens();
         this.strategy = strategy;
     }
-    
+
     @SuppressWarnings("unchecked")
     public Inventory execute() {
         return this.execute((ResultAdapterProvider<TInventory, TStack>) Query.defaultResultProvider);
     }
-    
+
     public Inventory execute(ResultAdapterProvider<TInventory, TStack> resultProvider) {
         if (this.strategy.matches(this.lens, null, this.inventory)) {
-            return this.adapter;
+            return this.lens.getAdapter(this.inventory, null);
         }
-        
+
         return this.toResult(resultProvider, this.depthFirstSearch(this.lens));
     }
 
@@ -139,29 +139,29 @@ public class Query<TInventory, TStack> {
             InventoryAdapter<TInventory, TStack> ada = matches.getLens(0).getAdapter(this.inventory, null);
             return ada;
         }
-        
+
         if (resultProvider != null) {
             return resultProvider.getResultAdapter(this.inventory, matches);
         }
-        
+
         return ((ResultAdapterProvider<TInventory, TStack>)Query.defaultResultProvider).getResultAdapter(this.inventory, matches);
     }
 
     private MutableLensSet<TInventory, TStack> depthFirstSearch(Lens<TInventory, TStack> lens) {
         MutableLensSet<TInventory, TStack> matches = new MutableLensSetImpl<TInventory, TStack>(true);
-        
+
         for (Lens<TInventory, TStack> child : lens.getChildren()) {
             if (child == null) {
                 continue;
             }
             if (child.getChildren().size() > 0) {
                 matches.addAll(this.depthFirstSearch(child));
-            } 
+            }
             if (this.strategy.matches(child, lens, this.inventory)) {
                 matches.add(child);
             }
         }
-        
+
         // Only a single match or no matches
         if (matches.size() < 2) {
             return matches;
@@ -184,7 +184,7 @@ public class Query<TInventory, TStack> {
             matches.removeAll(child.getChildren());
             matches.add(child);
         }
-            
+
         return matches;
     }
 
@@ -239,31 +239,31 @@ public class Query<TInventory, TStack> {
         QueryStrategy<TInventory, TStack, Object> strategy = Query.<TInventory, TStack, Object>getStrategy(Type.GENERIC).with(args);
         return new Query<TInventory, TStack>(adapter, strategy);
     }
-    
+
     public static <TInventory, TStack, TArgs> QueryStrategy<TInventory, TStack, TArgs> getStrategy(Type type) {
         return Query.getStrategy(type.getKey());
     }
-    
+
     public static <TInventory, TStack, TArgs> QueryStrategy<TInventory, TStack, TArgs> getStrategy(String key) {
         @SuppressWarnings("unchecked")
         Class<? extends QueryStrategy<TInventory, TStack, TArgs>> strategyClass = (Class<? extends QueryStrategy<TInventory, TStack, TArgs>>) checkNotNull(Query.strategies.get(key), "The specified query strategy [%s], was not registered", key);
         try {
             return strategyClass.newInstance();
         } catch (Exception ex) {
-            throw new InvalidQueryStrategyException("The query strategy class %s does not provide a noargs ctor", strategyClass); 
+            throw new InvalidQueryStrategyException("The query strategy class %s does not provide a noargs ctor", strategyClass);
         }
     }
-    
+
     public static void registerStrategy(String key, Class<? extends QueryStrategy<?, ?, ?>> strategyClass) {
         try {
             @SuppressWarnings({ "unchecked", "unused" })
             Constructor<QueryStrategy<?, ?, ?>> ctor = (Constructor<QueryStrategy<?, ?, ?>>) checkNotNull(strategyClass, "strategyClass").getConstructor();
         } catch (Exception ex) {
-            throw new InvalidQueryStrategyException("The query strategy class %s does not provide a noargs ctor", strategyClass); 
+            throw new InvalidQueryStrategyException("The query strategy class %s does not provide a noargs ctor", strategyClass);
         }
         Query.strategies.put(key, strategyClass);
     }
-    
+
     public static void setDefaultResultProvider(ResultAdapterProvider<?, ?> defaultResultProvider) {
         Query.defaultResultProvider = defaultResultProvider;
     }
