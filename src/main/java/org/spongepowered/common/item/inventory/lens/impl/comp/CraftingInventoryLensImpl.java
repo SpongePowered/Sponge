@@ -27,6 +27,7 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.property.InventorySize;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingInventoryAdapter;
@@ -35,6 +36,7 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.CraftingInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
 
 
@@ -45,6 +47,7 @@ public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements 
     private final CraftingOutputSlotLens<IInventory, ItemStack> outputSlot;
 
     private final GridInventoryLens<IInventory, ItemStack> craftingGrid;
+
 
     public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, SlotProvider<IInventory, ItemStack> slots) {
         this(outputSlotIndex, gridBase, width, height, width, GridInventoryAdapter.class, slots);

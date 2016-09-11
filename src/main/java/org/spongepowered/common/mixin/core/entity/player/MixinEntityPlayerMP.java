@@ -37,11 +37,10 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -49,7 +48,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
-import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
@@ -67,14 +65,9 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.Style;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IInteractionObject;
-import net.minecraft.world.ILockableContainer;
-import net.minecraft.world.storage.loot.ILootContainer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
@@ -97,8 +90,8 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
-import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -186,6 +179,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow @Override public abstract void takeStat(StatBase stat);
     @Shadow public abstract StatisticsManagerServer getStatFile();
     @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
+    @Shadow public abstract void displayGUIChest(IInventory chestInventory);
+    @Shadow public abstract void displayGui(IInteractionObject guiOwner);
+    @Shadow public abstract void openGuiHorseInventory(EntityHorse horse, IInventory horseInventory);
 
     // Inventory
     @Shadow public abstract void addChatMessage(ITextComponent component);
@@ -503,6 +499,22 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public boolean isViewingInventory() {
         return this.openContainer != null;
+    }
+
+    @Override
+    public void openInventory(Inventory inventory, Cause cause) throws IllegalArgumentException {
+        if (inventory instanceof IInteractionObject) {
+            String guid = ((IInteractionObject) inventory).getGuiID();
+            if ("EntityHorse".equals(guid)) {
+                //displayGUIHorse(new EntityHorse(null), (IInventory) inventory);
+                // TODO horseID needed here for mc return;
+            }
+            if ("minecraft:crafting_table".equals(guid) || "minecraft:anvil".equals(guid) || "minecraft:enchanting_table".equals(guid)) {
+                displayGui(((IInteractionObject) inventory));
+                return;
+            }
+        }
+        displayGUIChest(((IInventory) inventory));
     }
 
     @Override

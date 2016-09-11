@@ -195,4 +195,6 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             this.init();
         }
         return inventory;
-    }}
+    }
+}
+

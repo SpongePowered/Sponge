@@ -34,7 +34,6 @@ import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
-import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Builder;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
@@ -167,7 +166,7 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
 
         private static InventoryTransactionResult insertStack(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, ItemStack stack) {
-            Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
+            InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
             net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
             
             int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
@@ -194,7 +193,7 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
         
         public static InventoryTransactionResult appendSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, ItemStack stack) {
-            Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
+            InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
             net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
             
             int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
