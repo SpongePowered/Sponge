@@ -46,6 +46,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.GameType;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.ServerWorldEventHandler;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
@@ -1162,9 +1163,9 @@ public final class WorldManager {
         return weakWorldByWorld;
     }
 
-    public static int getClientDimensionId(EntityPlayerMP player, WorldProvider provider) {
+    public static int getClientDimensionId(EntityPlayerMP player, World world) {
         if (!((IMixinEntityPlayerMP) player).usesCustomClient()) {
-            DimensionType type = provider.getDimensionType();
+            DimensionType type = world.provider.getDimensionType();
             if (type == DimensionType.OVERWORLD) {
                 return 0;
             } else if (type == DimensionType.NETHER) {
@@ -1174,7 +1175,7 @@ public final class WorldManager {
             return 1;
         }
 
-        return ((IMixinWorldInfo) player.worldObj.getWorldInfo()).getDimensionId();
+        return ((IMixinWorldServer) world).getDimensionId();
     }
 
     public static int getDimensionId(WorldServer world) {

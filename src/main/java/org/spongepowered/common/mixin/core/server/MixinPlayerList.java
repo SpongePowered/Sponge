@@ -282,7 +282,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Sponge end
 
         // Support vanilla clients logging into custom dimensions
-        final int dimensionId = WorldManager.getClientDimensionId(playerIn, worldServer.provider);
+        final int dimensionId = WorldManager.getClientDimensionId(playerIn, worldServer);
 
         // Send dimension registration
         WorldManager.sendDimensionRegistration(playerIn, worldServer.provider);
@@ -505,7 +505,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // ### PHASE 5 ### Respawn player in new world
 
         // Support vanilla clients logging into custom dimensions
-        final int dimensionId = WorldManager.getClientDimensionId(entityPlayerMP, worldServer.provider);
+        final int dimensionId = WorldManager.getClientDimensionId(entityPlayerMP, worldServer);
 
         // Send dimension registration
         if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
@@ -613,7 +613,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
         WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
-        playerIn.dimension = WorldManager.getClientDimensionId(playerIn, toWorld.provider);
+        playerIn.dimension = WorldManager.getClientDimensionId(playerIn, toWorld);
         toWorld.getChunkProvider().loadChunk(event.getToTransform().getLocation().getChunkPosition().getX(), event.getToTransform().getLocation().getChunkPosition().getZ());
         // Support vanilla clients teleporting to custom dimensions
         final int dimensionId = playerIn.dimension;

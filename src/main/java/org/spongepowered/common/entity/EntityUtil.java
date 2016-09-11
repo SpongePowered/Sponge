@@ -704,7 +704,7 @@ public final class EntityUtil {
         if (entity instanceof EntityPlayerMP && ((EntityPlayerMP) entity).connection != null) {
             EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entity;
             // Support vanilla clients going into custom dimensions
-            final int toDimensionId = WorldManager.getClientDimensionId(entityPlayerMP, toWorld.provider);
+            final int toDimensionId = WorldManager.getClientDimensionId(entityPlayerMP, toWorld);
             if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
                 WorldManager.sendDimensionRegistration(entityPlayerMP, toWorld.provider);
             } else {
