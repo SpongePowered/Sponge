@@ -26,17 +26,24 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
@@ -62,7 +69,7 @@ import java.util.Optional;
 @Mixin(TileEntityChest.class)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
         @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
-public abstract class MixinTileEntityChest extends MixinTileEntityLockable implements Chest, IMixinCustomNameable {
+public abstract class MixinTileEntityChest extends MixinTileEntityLockable implements Chest, IMixinCustomNameable, ILockableContainer {
 
     @Shadow public String customName;
     @Shadow public float lidAngle;
@@ -215,4 +222,29 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
     public Optional<Chest> tileentityinventory$getCarrier() {
         return Optional.of(this);
     }
+
+    @Override
+    public Optional<Inventory> getDoubleChestInventory() {
+        for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
+            BlockPos blockpos = this.pos.offset(enumfacing);
+            Block block = this.worldObj.getBlockState(blockpos).getBlock();
+
+            TileEntity tileentity1 = this.worldObj.getTileEntity(blockpos);
+
+            if (tileentity1 instanceof TileEntityChest) {
+                InventoryLargeChest inventory;
+
+                if (enumfacing != EnumFacing.WEST && enumfacing != EnumFacing.NORTH)
+                {
+                    inventory = new InventoryLargeChest("container.chestDouble", this, (TileEntityChest)tileentity1);
+                } else {
+                    inventory = new InventoryLargeChest("container.chestDouble", (TileEntityChest)tileentity1, this);
+                }
+
+                return Optional.of((Inventory) inventory);
+            }
+        }
+        return Optional.empty();
+    }
 }
+

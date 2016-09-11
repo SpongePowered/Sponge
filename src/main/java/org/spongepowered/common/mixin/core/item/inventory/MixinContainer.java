@@ -75,7 +75,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     private boolean captureInventory = false;
     private List<SlotTransaction> capturedSlotTransactions = new ArrayList<>();
-    private Fabric<IInventory> inventory;
+    private Fabric<IInventory>  inventory;
     private SlotCollection slots;
     private Lens<IInventory, ItemStack> lens;
     private boolean initialized;
