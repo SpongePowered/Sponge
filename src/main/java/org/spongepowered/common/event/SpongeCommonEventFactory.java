@@ -25,6 +25,7 @@
 package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.spongepowered.common.event.tracking.phase.util.PacketPhaseUtil.handleCustomCursor;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
@@ -36,6 +37,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
@@ -63,14 +65,12 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -82,7 +82,6 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -171,7 +170,7 @@ public class SpongeCommonEventFactory {
         } else {
             IMixinWorldServer spongeWorld = (IMixinWorldServer) world;
             CauseTracker causeTracker = spongeWorld.getCauseTracker();
-            PhaseContext context = causeTracker.getStack().peekContext();
+            PhaseContext context = causeTracker.getCurrentContext();
 
             final Optional<BlockSnapshot> currentTickingBlock = context.getSource(BlockSnapshot.class);
             final Optional<TileEntity> currentTickingTileEntity = context.getSource(TileEntity.class);
@@ -199,7 +198,7 @@ public class SpongeCommonEventFactory {
 
     public static boolean handleChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos) {
         final CauseTracker causeTracker = worldIn.getCauseTracker();
-        PhaseData data = causeTracker.getStack().peek();
+        PhaseData data = causeTracker.getCurrentPhaseData();
         Optional<BlockSnapshot> block = data.context.getSource(BlockSnapshot.class);
         if (!block.isPresent()) {
             // safety measure
@@ -208,7 +207,7 @@ public class SpongeCommonEventFactory {
 
         Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
         final Cause.Builder builder = Cause.source(block.get());
-        final Optional<User> notifier = causeTracker.getStack().peek()
+        final Optional<User> notifier = causeTracker.getCurrentPhaseData()
                 .context
                 .firstNamed(NamedCause.NOTIFIER, User.class);
         notifier.ifPresent(user -> builder.named(NamedCause.NOTIFIER, user));
@@ -221,7 +220,7 @@ public class SpongeCommonEventFactory {
     @SuppressWarnings("rawtypes")
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
         final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
-        final PhaseData peek = causeTracker.getStack().peek();
+        final PhaseData peek = causeTracker.getCurrentPhaseData();
         // Don't fire notify events during world gen
         if (peek.state.getPhase().isWorldGeneration(peek.state)) {
             return null;
@@ -337,7 +336,7 @@ public class SpongeCommonEventFactory {
         if (!cancelled) {
             IMixinEntity spongeEntity = (IMixinEntity) entity;
             if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
-                final PhaseData peek = causeTracker.getStack().peek();
+                final PhaseData peek = causeTracker.getCurrentPhaseData();
                 final Optional<User> notifier = peek.context.firstNamed(NamedCause.NOTIFIER, User.class);
                 if (notifier.isPresent()) {
                     IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
@@ -358,7 +357,7 @@ public class SpongeCommonEventFactory {
         final Cause.Builder builder = Cause.source(projectile).named("ProjectileSource", projectileSource == null
                                                                                          ? ProjectileSource.UNKNOWN
                                                                                          : projectileSource);
-        final Optional<User> notifier = causeTracker.getStack().peek()
+        final Optional<User> notifier = causeTracker.getCurrentPhaseData()
                 .context
                 .firstNamed(NamedCause.NOTIFIER, User.class);
         notifier.ifPresent(user -> builder.named(NamedCause.OWNER, user));
@@ -420,5 +419,26 @@ public class SpongeCommonEventFactory {
                 ((IMixinContainer) player.openContainer).getCapturedTransactions());
         SpongeImpl.postEvent(event);
         return event;
+    }
+
+    public static boolean callInteractInventoryOpenEvent(Cause cause, EntityPlayerMP player) {
+        ItemStackSnapshot newCursor =
+                player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
+                        : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, newCursor);
+        InteractInventoryEvent.Open event =
+                SpongeEventFactory.createInteractInventoryEventOpen(cause, cursorTransaction,
+                        (org.spongepowered.api.item.inventory.Container) player.openContainer);
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            player.closeScreen();
+            return false;
+        } else {
+            // Custom cursor
+            if (event.getCursorTransaction().getCustom().isPresent()) {
+                handleCustomCursor(player, event.getCursorTransaction().getFinal());
+            }
+            return true;
+        }
     }
 }

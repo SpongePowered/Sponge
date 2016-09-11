@@ -127,7 +127,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
         return offer(key, value);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
         return SpongeDataManager.getInstance().getRawNbtProcessor(this.getDataType(), valueContainer.getClass())
@@ -217,6 +217,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
                 .orElse(true); // we want to say we automatically support custom data
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Set<Key<?>> getKeys() {
         return SpongeDataManager.getInstance().getNbtValueProcessors(this.getDataType()).stream()

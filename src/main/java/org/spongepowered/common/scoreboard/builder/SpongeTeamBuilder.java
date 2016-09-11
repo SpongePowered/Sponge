@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.scoreboard.ScorePlayerTeam;
+import org.spongepowered.api.scoreboard.CollisionRule;
+import org.spongepowered.api.scoreboard.CollisionRules;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
@@ -38,10 +40,12 @@ import org.spongepowered.api.text.format.TextColors;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 public class SpongeTeamBuilder implements Team.Builder {
 
-    private String name;
-    private Text displayName;
+    @Nullable private String name;
+    @Nullable private Text displayName;
     private TextColor color;
     private Text prefix;
     private Text suffix;
@@ -49,6 +53,7 @@ public class SpongeTeamBuilder implements Team.Builder {
     private boolean showFriendlyInvisibles;
     private Visibility nameTagVisibility;
     private Visibility deathMessageVisibility;
+    private CollisionRule collisionRule;
     private Set<Text> members;
 
     public SpongeTeamBuilder() {
@@ -113,6 +118,12 @@ public class SpongeTeamBuilder implements Team.Builder {
     }
 
     @Override
+    public Team.Builder collisionRule(CollisionRule rule) {
+        this.collisionRule = checkNotNull(rule, "Collision rule cannot be null!");
+        return this;
+    }
+
+    @Override
     public Team.Builder members(Set<Text> members) {
         this.members = new HashSet<>(checkNotNull(members, "Members cannot be null!"));
         return this;
@@ -129,6 +140,7 @@ public class SpongeTeamBuilder implements Team.Builder {
             .suffix(value.getSuffix())
             .nameTagVisibility(value.getNameTagVisibility())
             .deathTextVisibility(value.getDeathMessageVisibility())
+            .collisionRule(value.getCollisionRule())
             .members(value.getMembers());
         return this;
     }
@@ -142,8 +154,9 @@ public class SpongeTeamBuilder implements Team.Builder {
         this.suffix = Text.of();
         this.allowFriendlyFire = false;
         this.showFriendlyInvisibles = false;
-        this.nameTagVisibility = Visibilities.ALL;
-        this.deathMessageVisibility = Visibilities.ALL;
+        this.nameTagVisibility = Visibilities.ALWAYS;
+        this.deathMessageVisibility = Visibilities.ALWAYS;
+        this.collisionRule = CollisionRules.ALWAYS;
         this.members = new HashSet<>();
         return this;
     }
@@ -162,6 +175,7 @@ public class SpongeTeamBuilder implements Team.Builder {
         team.setCanSeeFriendlyInvisibles(this.showFriendlyInvisibles);
         team.setNameTagVisibility(this.nameTagVisibility);
         team.setDeathMessageVisibility(this.deathMessageVisibility);
+        team.setCollisionRule(this.collisionRule);
         for (Text member: this.members) {
             team.addMember(member);
         }

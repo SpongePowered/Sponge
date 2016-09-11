@@ -22,26 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.biome;
+package org.spongepowered.common.mixin.core.village;
 
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.village.Village;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDesert;
-import org.spongepowered.api.world.gen.PopulatorObjects;
-import org.spongepowered.api.world.gen.populator.DesertWell;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(BiomeDesert.class)
-public abstract class MixinBiomeGenDesert extends MixinBiomeGenBase {
+@Mixin(Village.class)
+public abstract class MixinVillage {
 
-    @Override
-    public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        super.buildPopulators(world, gensettings);
-        DesertWell well = DesertWell.builder()
-                .probability(1 / 1000f)
-                .wellObject(PopulatorObjects.DESERT_WELL)
-                .build();
-        gensettings.getPopulators().add(well);
+    @Shadow private World worldObj;
+
+    @Inject(method = "isWoodDoor", at = @At("HEAD"), cancellable = true)
+    public void onIsWoodDoor(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        if (!this.worldObj.isRemote && this.worldObj.getChunkProvider().getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4) == null) {
+            cir.setReturnValue(false);
+        }
     }
-
 }

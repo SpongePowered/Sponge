@@ -41,8 +41,8 @@ import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -164,14 +164,6 @@ import javax.annotation.Nullable;
 public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, IMixinSubject, IMixinEntityPlayerMP, IMixinCommandSender,
         IMixinCommandSource {
 
-    public int newExperience = 0;
-    public int newLevel = 0;
-    public int newTotalExperience = 0;
-    public boolean keepsLevel = false;
-    private boolean sleepingIgnored;
-
-    private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
-
     @Shadow @Final public MinecraftServer mcServer;
     @Shadow @Final public PlayerInteractionManager interactionManager;
     @Shadow private String language;
@@ -182,7 +174,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public boolean playerConqueredTheEnd;
     @Shadow private float lastHealth;
     @Shadow private int lastFoodLevel;
-    @Shadow private int currentWindowId;
 
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
@@ -192,7 +183,22 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract void displayGUIChest(IInventory chestInventory);
     @Shadow public abstract void displayGui(IInteractionObject guiOwner);
     @Shadow public abstract void openGuiHorseInventory(EntityHorse horse, IInventory horseInventory);
+
+    // Inventory
+    @Shadow public abstract void addChatMessage(ITextComponent component);
+    @Shadow public abstract void closeScreen();
     @Shadow public abstract void getNextWindowId();
+    @Shadow public int currentWindowId;
+
+    private EntityPlayerMP this$ = (EntityPlayerMP) (Object) this;
+
+    public int newExperience = 0;
+    public int newLevel = 0;
+    public int newTotalExperience = 0;
+    public boolean keepsLevel = false;
+    private boolean sleepingIgnored;
+
+    private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -230,9 +236,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         final boolean tracksEntityDeaths;
         if (!this.worldObj.isRemote) {
             causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-            final PhaseData peek = causeTracker.getStack().peek();
+            final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
-            tracksEntityDeaths = CauseTracker.ENABLED && causeTracker.getStack().peekState().tracksEntityDeaths();
+            tracksEntityDeaths = CauseTracker.ENABLED && causeTracker.getCurrentState().tracksEntityDeaths();
             if (state != EntityPhase.State.DEATH && !state.tracksEntityDeaths()) {
                 if (!tracksEntityDeaths) {
                     causeTracker.switchToPhase(EntityPhase.State.DEATH, PhaseContext.start()

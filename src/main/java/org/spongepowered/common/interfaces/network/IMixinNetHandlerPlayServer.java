@@ -34,4 +34,5 @@ public interface IMixinNetHandlerPlayServer {
 
     void setAllowClientLocationUpdate(boolean flag);
 
+    void captureCurrentPlayerPosition();
 }

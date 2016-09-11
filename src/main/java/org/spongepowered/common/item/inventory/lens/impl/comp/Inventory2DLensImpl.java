@@ -39,10 +39,10 @@ import org.spongepowered.common.item.inventory.lens.comp.Inventory2DLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inventory2DLens<IInventory, net.minecraft.item.ItemStack> {
-    
+
     protected final int width;
     protected final int height;
-    
+
     protected final int xBase;
     protected final int yBase;
 
@@ -53,33 +53,34 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
     public Inventory2DLensImpl(int base, int width, int height, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
         this(base, width, height, width, adapterType, slots);
     }
-    
+
     public Inventory2DLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
         this(base, width, height, rowStride, 0, 0, adapterType, slots);
     }
-    
+
     protected Inventory2DLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
         super(base, width * height, rowStride, adapterType, slots);
-        
+
         checkArgument(width > 0, "Invalid width: %s", width);
         checkArgument(height > 0, "Invalid height: %s", height);
         checkArgument(rowStride >= width, "Invalid stride: stride=%s, width=%s", rowStride, width);
-        
+
         this.width = width;
         this.height = height;
         this.xBase = xBase;
         this.yBase = yBase;
-        
+
         this.init(null, slots);
     }
-    
+
     @Override
     protected boolean isDelayedInit() {
         return true;
     }
-    
+
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
+
         this.init(slots, true);
     }
 
@@ -88,7 +89,7 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
      * directly to this lens starting at {@link #base} and creating a
      * rectangular array of slots {@link #width} by {@link #height} assuming
      * that the target inventory is {@link #stride} slots wide.
-     * 
+     *
      * @param slots
      * @param spanning Set to true to create spanning slots, false to create
      *      normal child slots
@@ -135,7 +136,7 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
 
         return this.base + ((ordinal / this.width) * this.stride) + (ordinal % this.width);
     }
-    
+
     @Override
     public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
         return new Inventory2DAdapter(inv, this, parent);

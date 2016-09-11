@@ -36,7 +36,7 @@ import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
-import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
+import org.spongepowered.common.interfaces.world.biome.IMixinBiome;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 
 import java.util.HashMap;
@@ -133,7 +133,7 @@ public final class SpongeWorldGenerator implements WorldGenerator {
             if (!(this.biomeSettings instanceof HashMap)) {
                 this.biomeSettings = new HashMap<>(this.biomeSettings);
             }
-            this.biomeSettings.put(type, ((IBiomeGenBase) type).initPopulators(this.world));
+            this.biomeSettings.put(type, ((IMixinBiome) type).initPopulators(this.world));
         }
         return this.biomeSettings.get(type);
     }

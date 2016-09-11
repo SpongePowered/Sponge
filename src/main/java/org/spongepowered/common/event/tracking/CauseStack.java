@@ -44,49 +44,49 @@ import java.util.function.Consumer;
  * Note that the {@link PhaseContext} must be marked as {@link PhaseContext#isComplete()},
  * otherwise an {@link IllegalArgumentException} is thrown.
  */
-public final class CauseStack {
+final class CauseStack {
 
-    public static final PhaseContext EMPTY = PhaseContext.start().add(NamedCause.of("EMPTY", "EMPTY")).complete();
-    public static final PhaseData EMPTY_DATA = new PhaseData(EMPTY, GeneralPhase.State.COMPLETE);
+    private static final PhaseContext EMPTY = PhaseContext.start().add(NamedCause.of("EMPTY", "EMPTY")).complete();
+    static final PhaseData EMPTY_DATA = new PhaseData(EMPTY, GeneralPhase.State.COMPLETE);
+    private static final int DEFAULT_QUEUE_SIZE = 16;
 
     private final Deque<PhaseData> states;
 
-    CauseStack(int size) {
+    CauseStack() {
+        this(DEFAULT_QUEUE_SIZE);
+    }
+
+    private CauseStack(int size) {
         this.states = new ArrayDeque<>(size);
     }
 
-    public PhaseData peek() {
+    PhaseData peek() {
         final PhaseData phase = this.states.peek();
         return phase == null ? CauseStack.EMPTY_DATA : phase;
     }
 
-    public IPhaseState peekState() {
+    IPhaseState peekState() {
         final PhaseData peek = this.states.peek();
         return peek == null ? GeneralPhase.State.COMPLETE : peek.state;
     }
 
-    public PhaseContext peekContext() {
+    PhaseContext peekContext() {
         final PhaseData peek = this.states.peek();
         return peek == null ? CauseStack.EMPTY : peek.context;
     }
 
-    public PhaseData pop() {
+    PhaseData pop() {
         return this.states.pop();
     }
 
-    public TrackingPhase current() {
-        final PhaseData tuple = this.states.peek();
-        return tuple == null ? TrackingPhases.GENERAL : tuple.state.getPhase();
-    }
-
-    public CauseStack push(PhaseData tuple) {
+    private CauseStack push(PhaseData tuple) {
         checkNotNull(tuple, "Tuple cannot be null!");
         checkArgument(tuple.context.isComplete(), "Phase context must be complete: %s", tuple);
         this.states.push(tuple);
         return this;
     }
 
-    public CauseStack push(IPhaseState state, PhaseContext context) {
+    CauseStack push(IPhaseState state, PhaseContext context) {
         return push(new PhaseData(context, state));
     }
 

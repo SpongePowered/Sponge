@@ -22,30 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.biome;
+package org.spongepowered.common.mixin.core.item.inventory;
 
-import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeSwamp;
-import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.gen.populator.Forest;
-import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.SlotCrafting;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.server.SPacketSetSlot;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(BiomeSwamp.class)
-public abstract class MixinBiomeGenSwamp extends MixinBiomeGenBase {
+import javax.annotation.Nullable;
 
-    @Override
-    public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-//        gensettings.getGenerationPopulators().add(new SwampLilyPopulator());
-        super.buildPopulators(world, gensettings);
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
-        Forest.Builder forest = Forest.builder();
-        forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
-        forest.type(BiomeTreeTypes.SWAMP.getPopulatorObject(), 1);
-        gensettings.getPopulators().add(0, forest.build());
+@Mixin(SlotCrafting.class)
+public abstract class MixinSlotCrafting extends Slot {
+
+    @Shadow @Final private EntityPlayer thePlayer;
+
+    public MixinSlotCrafting(IInventory inventoryIn, int index, int xPosition, int yPosition) {
+        super(inventoryIn, index, xPosition, yPosition);
     }
 
+    @Override
+    public void putStack(@Nullable ItemStack stack) {
+        super.putStack(stack);
+        if (this.thePlayer instanceof EntityPlayerMP) {
+            ((EntityPlayerMP) this.thePlayer).connection.sendPacket(new SPacketSetSlot(0, 0, stack));
+        }
+    }
 }

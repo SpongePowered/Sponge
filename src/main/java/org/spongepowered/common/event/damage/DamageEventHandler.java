@@ -444,7 +444,7 @@ public class DamageEventHandler {
 
         if (entity.worldObj instanceof IMixinWorldServer) {
             IMixinWorldServer spongeWorld = (IMixinWorldServer) entity.worldObj;
-            final PhaseData peek = spongeWorld.getCauseTracker().getStack().peek();
+            final PhaseData peek = spongeWorld.getCauseTracker().getCurrentPhaseData();
             return peek.state.getPhase().createDestructionDamageSource(peek.state, peek.context, entity).orElse(null);
         }
         return null;

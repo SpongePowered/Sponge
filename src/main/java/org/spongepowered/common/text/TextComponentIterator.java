@@ -51,26 +51,46 @@ public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> 
 
     @Override
     public boolean hasNext() {
-        return this.component != null || (this.currentChildIterator != null && this.currentChildIterator.hasNext()) || this.children.hasNext();
+        return this.component != null || (this.currentChildIterator != null && this.currentChildIterator.hasNext());
     }
 
+    // In order for this method to work properly, 'currentChildIterator' must be ready to return an element
+    // (i.e its 'hasNext()' method returns true) when this method returns. If this condition can no longer be met,
+    // we're done iterating.
     @Override
     @SuppressWarnings("unchecked")
     public ITextComponent next() {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
-        if (this.component != null) {
-            this.children = this.component.childrenIterator();
 
-            ITextComponent result = this.component;
-            this.component = null;
-            return result;
-        } else if (this.currentChildIterator == null || !this.currentChildIterator.hasNext()) {
+        if (this.component != null) {
+            return this.init();
+        }
+
+        ITextComponent result = this.currentChildIterator.next();
+
+        if (!this.currentChildIterator.hasNext() && this.children.hasNext()) {
             this.currentChildIterator = ((IMixinChatComponent) this.children.next()).withChildren().iterator();
         }
 
-        return this.currentChildIterator.next();
+        return result;
+    }
+
+    private ITextComponent init() {
+        this.children = this.component.childrenIterator();
+
+        ITextComponent result = this.component;
+        this.component = null;
+
+        // An iterator of an empty TextComponentTranslation doesn't have children. Thus, calling 'this.currentChildIterator.next()'
+        // at the end of this method will lead to a NoSuchElementException. To fix this, we
+        // initialize currentChildIterator so that the following call to 'hasNext()' will properly return 'false' if necessary
+        if (this.children.hasNext()) {
+            this.currentChildIterator = ((IMixinChatComponent) this.children.next()).withChildren().iterator();
+        }
+
+        return result;
     }
 
 }

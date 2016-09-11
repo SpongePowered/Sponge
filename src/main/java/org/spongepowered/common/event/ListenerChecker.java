@@ -42,6 +42,7 @@ import java.util.function.Predicate;
 
 public class ListenerChecker {
 
+    private static final boolean ALL_TRUE = Boolean.parseBoolean(System.getProperty("sponge.shouldFireAll", "").toLowerCase());
     private static final boolean DEBUG = Boolean.parseBoolean(System.getProperty("sponge.debugShouldFire", "").toLowerCase());
 
     private final Class<?> clazz;
@@ -117,11 +118,25 @@ public class ListenerChecker {
         for (Field field: this.clazz.getDeclaredFields()) {
             if (Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())) {
                 this.fields.put(field.getName(), field);
+                if (ALL_TRUE) {
+                    if (DEBUG) {
+                        System.err.println(String.format("Forcing field %s to true!", field.getName()));
+                    }
+                    try {
+                        field.set(null, true);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
     }
 
     public <T> void updateFields(Collection<Class<? super T>> classes, Predicate<Class<?>> enable) {
+        if (ALL_TRUE) {
+            return;
+        }
+
         for (Class<?> clazz: classes) {
             this.fieldCache.getUnchecked(clazz).ifPresent(f -> {
                 boolean isEnabled = enable.test(clazz);

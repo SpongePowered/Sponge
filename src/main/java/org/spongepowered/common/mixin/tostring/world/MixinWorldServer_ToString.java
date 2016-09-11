@@ -26,6 +26,8 @@ package org.spongepowered.common.mixin.tostring.world;
 
 import com.google.common.base.Objects;
 import net.minecraft.world.WorldServer;
+
+import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.world.MixinWorld;
 
@@ -36,8 +38,8 @@ public abstract class MixinWorldServer_ToString extends MixinWorld {
     public String toString() {
         return Objects.toStringHelper(this)
                 .add("LevelName", this.worldInfo.getWorldName())
-                .add("DimensionId", this.provider.getDimensionType())
-                .add("DimensionType", this.worldInfo.getTerrainType().getWorldTypeName())
+                .add("DimensionId", this.provider.getDimensionType().getId())
+                .add("DimensionType", ((DimensionType)(Object) this.provider.getDimensionType()).getId())
                 .toString();
     }
 }

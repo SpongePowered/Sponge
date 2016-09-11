@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
 @Mixin(BiomeSnow.class)
-public abstract class MixinBiomeGenSnow extends MixinBiomeGenBase {
+public abstract class MixinBiomeSnow extends MixinBiome {
 
     @Shadow @Final private boolean superIcy;
 

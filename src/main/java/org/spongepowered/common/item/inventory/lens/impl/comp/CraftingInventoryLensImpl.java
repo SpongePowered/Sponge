@@ -44,9 +44,10 @@ public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements 
 
     private final int outputSlotIndex;
 
-    private final CraftingOutputSlotLensImpl outputSlot;
+    private final CraftingOutputSlotLens<IInventory, ItemStack> outputSlot;
 
-    private final GridInventoryLensImpl craftingGrid;
+    private final GridInventoryLens<IInventory, ItemStack> craftingGrid;
+
 
     public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, SlotProvider<IInventory, ItemStack> slots) {
         this(outputSlotIndex, gridBase, width, height, width, GridInventoryAdapter.class, slots);
@@ -71,19 +72,16 @@ public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements 
     public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
         super(gridBase, width, height, rowStride, xBase, yBase, adapterType, slots);
         this.outputSlotIndex = outputSlotIndex;
-        this.outputSlot = new CraftingOutputSlotLensImpl(0, CraftingInventory.class, (i) -> true, (i) -> true); // TODO
-                // this won't work, its always a SlotLensImpl (CraftingOutputSlotLens<IInventory, ItemStack>)slots.getSlot(this.outputSlotIndex);
-        this.craftingGrid = new GridInventoryLensImpl(this.base, this.width, this.height, rowStride, slots);
+        this.outputSlot = (CraftingOutputSlotLens<IInventory, ItemStack>)slots.getSlot(this.outputSlotIndex);
+        this.craftingGrid = new GridInventoryLensImpl(this.base, this.width, this.height, this.width, slots);
         this.size += 1; // output slot
-
-        // In init() the craftingGrid & outputSlot is still null
-        this.addSpanningChild(this.craftingGrid, new InventorySize(this.width, this.height));
-        this.addSpanningChild(this.outputSlot);
+        // Avoid the init() method in the superclass calling our init() too early
+        this.initOther(slots);
     }
 
-    @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
-
+    private void initOther(SlotProvider<IInventory, ItemStack> slots) {
+        this.addSpanningChild(this.craftingGrid, new InventorySize(this.width, this.height));
+        this.addSpanningChild(this.outputSlot);
     }
 
     @Override

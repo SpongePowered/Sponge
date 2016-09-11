@@ -25,7 +25,11 @@
 package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryLargeChest;
+import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
@@ -44,21 +48,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin({
-    net.minecraft.inventory.Slot.class,
-    InventoryPlayer.class,
-    CustomInventory.class,
-    CustomContainer.class
+        net.minecraft.inventory.Slot.class,
+        InventoryPlayer.class,
+        TileEntityChest.class,
+        TileEntityFurnace.class,
+        Container.class,
+        InventoryLargeChest.class,
+        CustomInventory.class
 })
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
 public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter {
 
-    protected EmptyInventory empty;  
+    protected EmptyInventory empty;
     protected Inventory parent;
     protected Inventory next;
     protected SlotCollection slots;
     protected List<Inventory> children = new ArrayList<Inventory>();
-    protected Iterable<Slot> slotIterator; 
-    
+    protected Iterable<Slot> slotIterator;
+
     @Override
     public Inventory parent() {
         return this.parent;
@@ -75,12 +82,12 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
     public <T extends Inventory> T next() {
         return (T) this.emptyInventory();
     }
-    
+
     @Override
     public SlotProvider<IInventory, net.minecraft.item.ItemStack> getSlotProvider() {
         return this.slots;
     }
-    
+
     @Override
     public Inventory getChild(int index) {
         if (index < 0 || index >= this.getRootLens().getChildren().size()) {
@@ -96,7 +103,7 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
         }
         return child;
     }
-    
+
     protected final EmptyInventory emptyInventory() {
         if (this.empty == null) {
             this.empty = new EmptyInventoryImpl(this);
@@ -117,5 +124,5 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
     public void inventory$clear() {
         this.getInventory().clear();
     }
-    
+
 }

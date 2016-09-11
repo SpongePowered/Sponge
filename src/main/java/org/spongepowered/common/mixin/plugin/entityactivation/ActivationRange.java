@@ -406,7 +406,7 @@ public class ActivationRange {
         // Make sure not on edge of unloaded chunk
         int x = MathHelper.floor_double(entity.posX);
         int z = MathHelper.floor_double(entity.posZ);
-        Chunk chunk = isActive ? ((WorldServer) entity.worldObj).getChunkProvider().getLoadedChunk(x >> 4, z >> 4) : null;
+        Chunk chunk = isActive ? entity.worldObj.getChunkProvider().getLoadedChunk(x >> 4, z >> 4) : null;
         if (isActive && chunk != null && !entity.worldObj.isAreaLoaded(new BlockPos(x, 0, z), 16)) {
             isActive = false;
         }

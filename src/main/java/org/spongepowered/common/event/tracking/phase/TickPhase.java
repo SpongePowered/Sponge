@@ -57,12 +57,10 @@ import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
@@ -72,7 +70,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
@@ -82,7 +80,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -144,6 +141,18 @@ public final class TickPhase extends TrackingPhase {
 
         public Cause generateTeleportCause(PhaseContext context) {
             return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.UNKNOWN).build()));
+        }
+
+        public void processPostSpawns(CauseTracker causeTracker, PhaseContext phaseContext, ArrayList<Entity> entities) {
+            final SpawnEntityEvent
+                    event =
+                    SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, entities, causeTracker.getWorld());
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                for (Entity entity : event.getEntities()) {
+                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                }
+            }
         }
     }
 
@@ -389,7 +398,25 @@ public final class TickPhase extends TrackingPhase {
                             }
                         }
                         if (!projectile.isEmpty()) {
+                            final Cause.Builder builder = Cause.source(
+                                    EntitySpawnCause.builder()
+                                            .entity(tickingEntity)
+                                            .type(InternalSpawnTypes.PROJECTILE)
+                                            .build()
+                            );
 
+                            notifier.ifPresent(builder::notifier);
+                            creator.ifPresent(builder::owner);
+                            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), projectile, causeTracker.getWorld());
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                for (Entity entity : event.getEntities()) {
+                                    if (entityCreator != null) {
+                                        entity.setCreator(entityCreator.getUniqueId());
+                                    }
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                }
+                            }
                         }
 
                         final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
@@ -589,6 +616,16 @@ public final class TickPhase extends TrackingPhase {
             context.getNotifier().ifPresent(builder::notifier);
         }
 
+
+        @Override
+        public void processPostSpawns(CauseTracker causeTracker, PhaseContext phaseContext, ArrayList<Entity> entities) {
+            final Entity tickingEntity = phaseContext.getSource(Entity.class)
+                            .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking entity!", phaseContext));
+            final Optional<User> owner = phaseContext.getOwner();
+            final Optional<User> notifier = phaseContext.getNotifier();
+            super.processPostSpawns(causeTracker, phaseContext, entities);
+        }
+
         @Override
         public String toString() {
             return "EntityTickPhase";
@@ -675,6 +712,7 @@ public final class TickPhase extends TrackingPhase {
             final Optional<User> notifier = phaseContext.getNotifier();
             final Optional<User> owner = phaseContext.getOwner();
             final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
+            final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tickingTile;
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> {
                         TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
@@ -717,7 +755,7 @@ public final class TickPhase extends TrackingPhase {
                         } // Otherwise, just go ahead
                         final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
                                 .block(capturedSnapshot.getSnapshot())
-                                .type(InternalSpawnTypes.BLOCK_SPAWNING)
+                                .type(mixinTileEntity.getTickedSpawnType())
                                 .build());
                         notifier.ifPresent(builder::notifier);
                         owner.ifPresent(builder::owner);
@@ -1021,6 +1059,18 @@ public final class TickPhase extends TrackingPhase {
     public TickPhase addChild(TrackingPhase child) {
         super.addChild(child);
         return this;
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        return context.getCapturedEntities().add(entity);
+    }
+
+    @Override
+    protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
+            ArrayList<Entity> entities) {
+        ((TickPhaseState) unwindingState).processPostSpawns(causeTracker, phaseContext, entities);
+
     }
 
     @Override

@@ -42,6 +42,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
@@ -94,6 +95,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.GenerationPhase;
+import org.spongepowered.common.interfaces.IMixinCachable;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
@@ -122,7 +124,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(net.minecraft.world.chunk.Chunk.class)
-public abstract class MixinChunk implements Chunk, IMixinChunk {
+public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     private org.spongepowered.api.world.World world;
     private UUID uuid;
@@ -130,6 +132,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     private SpongeProfileManager spongeProfileManager;
     private UserStorageService userStorageService;
     private Chunk[] neighbors = new Chunk[4];
+    private long cacheKey;
     private static final Direction[] CARDINAL_DIRECTIONS = new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
 
     private static final int NUM_XZ_BITS = 4;
@@ -194,9 +197,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
             this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
         }
+        this.cacheKey = ChunkPos.chunkXZ2Int(this.xPosition, this.zPosition);
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+    public long getCacheKey() {
+        return this.cacheKey;
+    }
+
     @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
     public void onChunkLoadInject(CallbackInfo ci) {
         if (!this.worldObj.isRemote) {
@@ -246,11 +254,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     public boolean isLoaded() {
         return this.isChunkLoaded;
-    }
-
-    @Override
-    public boolean isPopulated() {
-        return this.isTerrainPopulated;
     }
 
     @Override
@@ -427,11 +430,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return new SpongeMutableBlockVolumeWorker<>(this, cause);
     }
 
-    @SuppressWarnings({"unchecked"})
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
     public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote || ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack().peek().state.ignoresEntityCollisions()) {
+        if (this.worldObj.isRemote || ((IMixinWorldServer) this.worldObj).getCauseTracker().getCurrentPhaseData().state.ignoresEntityCollisions()) {
             return;
         }
 
@@ -441,7 +443,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, entityIn, listToFill);
         final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-        final PhaseData peek = causeTracker.getStack().peek();
+        final PhaseData peek = causeTracker.getCurrentPhaseData();
 
         if (event == null || event.isCancelled()) {
             if (event == null && !peek.state.getPhase().isTicking(peek.state)) {
@@ -455,7 +457,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"))
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote || ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack().peek().state.ignoresEntityCollisions()) {
+        if (this.worldObj.isRemote || ((IMixinWorldServer) this.worldObj).getCauseTracker().getCurrentPhaseData().state.ignoresEntityCollisions()) {
             return;
         }
 
@@ -465,7 +467,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, null, listToFill);
         final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-        final PhaseData peek = causeTracker.getStack().peek();
+        final PhaseData peek = causeTracker.getCurrentPhaseData();
 
         if (event == null || event.isCancelled()) {
             if (event == null && !peek.state.getPhase().isTicking(peek.state)) {
@@ -614,7 +616,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             // a BlockContainer. Prevents blocks such as TNT from activating when
             // cancelled.
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-            final PhaseData peek = causeTracker.getStack().peek();
+            final PhaseData peek = causeTracker.getCurrentPhaseData();
             final boolean requiresCapturing = peek.state.getPhase().requiresBlockCapturing(peek.state);
             if (!requiresCapturing || SpongeImplHooks.blockHasTileEntity(newBlock, newState)) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
@@ -694,7 +696,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
         return true;
     }
-
 
     /**
      * @author gabizou - July 25th, 2016

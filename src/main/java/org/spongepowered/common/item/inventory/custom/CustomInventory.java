@@ -89,8 +89,6 @@ public class CustomInventory implements IInventory, IInteractionObject {
                                 : ((TranslatableText) titleProperty.getValue()).getTranslation().getId();
         this.inv = new InventoryBasic(title, isCustom, count);
 
-        System.out.print("Constructing Inventory with size " + count + " and title " + title + "\n");
-
         // Updates the Inventory for all viewers on any change
         this.inv.addInventoryChangeListener(i -> viewers.forEach(v -> {
             v.openContainer.detectAndSendChanges();
@@ -116,7 +114,6 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
         // Display property?
         // TODO custom container including filters and other slot stuff
-        System.out.println("CreateContainer " + playerIn.getName());
         this.viewers.add(playerIn);
 
         return new CustomContainer(playerIn, this);
@@ -210,14 +207,12 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     @Override
     public void openInventory(EntityPlayer player) {
-        System.out.println("Open " + player.getName());
         this.viewers.add(player);
         this.inv.openInventory(player);
     }
 
     @Override
     public void closeInventory(EntityPlayer player) {
-        System.out.println("Close " + player.getName());
         this.viewers.remove(player);
         this.inv.closeInventory(player);
     }

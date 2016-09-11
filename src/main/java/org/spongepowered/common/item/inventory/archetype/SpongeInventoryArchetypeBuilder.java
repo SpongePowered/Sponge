@@ -92,10 +92,4 @@ public class SpongeInventoryArchetypeBuilder implements InventoryArchetype.Build
         return this;
     }
 
-    @Override
-    public InventoryArchetype.Builder withEvent(Class<? extends InteractInventoryEvent> type) {
-        this.events.add(type);
-        return this;
-    }
-
 }

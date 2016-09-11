@@ -5,7 +5,8 @@
     "plugin": "org.spongepowered.common.mixin.plugin.TrackingPlugin",
     "mixins": [
         "entity.MixinEntity_Tracker",
-        "world.MixinChunk_Tracker"
+        "world.MixinChunk_Tracker",
+        "world.MixinWorld_Tracker"
     ],
     "server": [
 

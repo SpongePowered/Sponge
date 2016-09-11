@@ -22,30 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.world;
+package org.spongepowered.common.mixin.core.world.biome;
 
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeDesert;
+import org.spongepowered.api.world.gen.PopulatorObjects;
+import org.spongepowered.api.world.gen.populator.DesertWell;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinCachable;
+import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
-@Mixin(Chunk.class)
-public class MixinChunk_Chunk_Cache implements IMixinCachable {
-
-    @Shadow @Final public int xPosition;
-    @Shadow @Final public int zPosition;
-
-    private long cacheKey = ChunkPos.chunkXZ2Int(this.xPosition, this.zPosition);
+@Mixin(BiomeDesert.class)
+public abstract class MixinBiomeDesert extends MixinBiome {
 
     @Override
-    public long getCacheKey() {
-        return this.cacheKey;
+    public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
+        super.buildPopulators(world, gensettings);
+        DesertWell well = DesertWell.builder()
+                .probability(1 / 1000f)
+                .wellObject(PopulatorObjects.DESERT_WELL)
+                .build();
+        gensettings.getPopulators().add(well);
     }
 
-    @Override
-    public void setCacheKey(long key) {
-        this.cacheKey = key;
-    }
 }

@@ -44,7 +44,7 @@ import org.spongepowered.common.world.gen.populators.MesaBiomeGenerationPopulato
 import java.util.Random;
 
 @Mixin(BiomeMesa.class)
-public abstract class MixinBiomeGenMesa extends MixinBiomeGenBase {
+public abstract class MixinBiomeMesa extends MixinBiome {
 
     @Shadow @Final private boolean brycePillars;
     @Shadow @Final private boolean hasForest;

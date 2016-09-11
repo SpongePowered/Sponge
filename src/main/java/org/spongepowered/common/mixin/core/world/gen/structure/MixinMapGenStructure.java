@@ -22,35 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.biome;
+package org.spongepowered.common.mixin.core.world.gen.structure;
 
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomePlains;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.structure.MapGenStructure;
+import net.minecraft.world.gen.structure.StructureStart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.biome.IBiomeGenPlains;
-import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
-import org.spongepowered.common.world.gen.populators.PlainsGrassPopulator;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(BiomePlains.class)
-public abstract class MixinBiomeGenPlains extends MixinBiomeGenBase implements IBiomeGenPlains {
+import java.util.Random;
 
-    @Shadow protected boolean sunflowers;
+@Mixin(MapGenStructure.class)
+public abstract class MixinMapGenStructure {
 
-    @Override
-    public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        gensettings.getPopulators().add(new PlainsGrassPopulator(this.sunflowers));
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        // set flowers and grass to zero as they are handles by the plains grass
-        // populator
-        theBiomeDecorator.flowersPerChunk = 0;
-        theBiomeDecorator.grassPerChunk = 0;
-        super.buildPopulators(world, gensettings);
-    }
+    @Shadow protected Long2ObjectMap<StructureStart> structureMap;
 
-    @Override
-    public boolean hasSunflowers() {
-        return this.sunflowers;
+    @Shadow protected abstract void initializeStructureData(World worldIn);
+    @Shadow public abstract void setStructureStart(int chunkX, int chunkZ, StructureStart start);
+
+    @Inject(method = "generateStructure", at = @At("HEAD"), cancellable = true)
+    public void onGenerateStructure(World worldIn, Random randomIn, ChunkPos chunkCoord, CallbackInfoReturnable<Boolean> cir) {
+        int x = (chunkCoord.chunkXPos << 4) + 8;
+        int z = (chunkCoord.chunkZPos << 4) + 8;
+        Chunk chunk = worldIn.getChunkProvider().getLoadedChunk(x, z);
+        if (chunk == null) {
+            cir.setReturnValue(false);
+        }
     }
 }

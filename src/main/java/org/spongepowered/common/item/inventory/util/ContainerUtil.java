@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.item.inventory.util;
 
+import com.google.common.base.Predicates;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.inventory.ContainerChest;
+import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -41,11 +44,19 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
+import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
 import org.spongepowered.common.mixin.core.inventory.MixinInventoryHelper;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 import java.util.Random;
+import java.util.function.Predicate;
 
 public final class ContainerUtil {
 
@@ -85,7 +96,7 @@ public final class ContainerUtil {
      */
     public static void performBlockInventoryDrops(WorldServer worldServer, double x, double y, double z, IInventory inventory) {
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldServer;
-        final PhaseData currentPhase = mixinWorld.getCauseTracker().getStack().peek();
+        final PhaseData currentPhase = mixinWorld.getCauseTracker().getCurrentPhaseData();
         final IPhaseState currentState = currentPhase.state;
         if (CauseTracker.ENABLED && currentState.tracksBlockSpecificDrops()) {
             final PhaseContext context = currentPhase.context;
@@ -169,4 +180,11 @@ public final class ContainerUtil {
         }
     }
 
+    // TODO Inventory - Figure this out per container
+    public static SlotCollection countSlots(net.minecraft.inventory.Container container) {
+        if (container instanceof ContainerPlayer) {
+            return new SlotCollection.Builder().add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false)).add(4).add(4, EquipmentSlotAdapter.class).add(36).add(1).build();
+        }
+        return new SlotCollection.Builder().add(((MinecraftInventoryAdapter) container).getInventory().getSize()).build();
+    }
 }

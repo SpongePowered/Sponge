@@ -33,6 +33,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
@@ -63,6 +64,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
 import java.util.Optional;
@@ -70,7 +72,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @Mixin(value = PlayerInteractionManager.class)
-public abstract class MixinPlayerInteractionManager {
+public abstract class MixinPlayerInteractionManager implements IMixinPlayerInteractionManager {
 
     @Shadow public EntityPlayerMP thisPlayerMP;
     @Shadow public net.minecraft.world.World theWorld;
@@ -81,7 +83,7 @@ public abstract class MixinPlayerInteractionManager {
     @Inject(method = "processRightClick", at = @At("HEAD"), cancellable = true)
     private void onProcessRightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand,
             CallbackInfoReturnable<EnumActionResult> cir) {
-        // If a CPacketTryUseItemOnBlock was just processed and didn't succeed, 
+        // If a CPacketTryUseItemOnBlock was just processed and didn't succeed,
         // ignore firing the right-click AIR event
         if (SpongeCommonEventFactory.ignoreRightClickAirEvent) {
             SpongeCommonEventFactory.ignoreRightClickAirEvent = false;
@@ -115,10 +117,12 @@ public abstract class MixinPlayerInteractionManager {
                 }
 
                 if (ilockablecontainer != null) {
+                    // TODO - fire event
                     player.displayGUIChest(ilockablecontainer);
                     return EnumActionResult.SUCCESS;
                 }
             } else if (tileentity instanceof IInventory) {
+                // TODO - fire event
                 player.displayGUIChest((IInventory) tileentity);
                 return EnumActionResult.SUCCESS;
             }
@@ -143,7 +147,7 @@ public abstract class MixinPlayerInteractionManager {
                 playerMP.connection.sendPacket(new SPacketCloseWindow(0));
 
             } else if (state.getProperties().containsKey(BlockDoor.HALF)) {
-                // Stopping a door from opening while interacting the top part will allow the door to open, we need to update the
+                // Stopping a door from opening while `g the top part will allow the door to open, we need to update the
                 // client to resolve this
                 if (state.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER) {
                     playerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up()));
@@ -168,9 +172,14 @@ public abstract class MixinPlayerInteractionManager {
             // Also, store the result instead of returning immediately
             if (event.getUseBlockResult() != Tristate.FALSE) {
                 IBlockState iblockstate = (IBlockState) currentSnapshot.getState();
-                final EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, stack, facing, offsetX, offsetY, offsetZ)
+                Container lastOpenContainer = player.openContainer;
+
+                EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, stack, facing, offsetX, offsetY, offsetZ)
                          ? EnumActionResult.SUCCESS
                          : EnumActionResult.PASS;
+
+                result = this.handleOpenEvent(lastOpenContainer, playerMP, result);
+
                 if (result != EnumActionResult.PASS) {
 
                     return result;
@@ -217,5 +226,16 @@ public abstract class MixinPlayerInteractionManager {
         return result;
         // Sponge end
         // } // Sponge - Remove unecessary else bracket
+    }
+
+    @Override
+    public EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, EnumActionResult result) {
+
+        if (lastOpenContainer != player.openContainer) {
+            if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(Cause.of(NamedCause.source(player)), (EntityPlayerMP) player)) {
+                result = EnumActionResult.FAIL;
+            }
+        }
+        return result;
     }
 }

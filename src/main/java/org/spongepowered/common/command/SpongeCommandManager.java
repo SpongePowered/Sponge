@@ -56,6 +56,7 @@ import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -276,7 +277,7 @@ public class SpongeCommandManager implements CommandManager {
 
         try {
             try {
-                if (CauseTracker.ENABLED) {
+                if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                     final String commandUsed = commandLine;
                     Sponge.getServer().getWorlds().forEach(world -> {
                         final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
@@ -289,29 +290,21 @@ public class SpongeCommandManager implements CommandManager {
                     });
                 }
                 final CommandResult result = this.dispatcher.process(source, commandLine);
-                if (CauseTracker.ENABLED) {
-                    Sponge.getServer().getWorlds().forEach(world -> {
-                        final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
-                        try {
-                            mixinWorld.getCauseTracker().completePhase();
-                        } catch (Exception e) {
-                            // Basically, we don't do anything because the worlds that were created during the
-                            // command being executed. However, we still will process any additional captures that took place
-                            // during the command's phase.
-                        }
-                    });
-                }
+                this.completeCommandPhase();
                 return result;
             } catch (InvocationCommandException ex) {
+                this.completeCommandPhase();
                 if (ex.getCause() != null) {
                     throw ex.getCause();
                 }
             } catch (CommandPermissionException ex) {
+                this.completeCommandPhase();
                 Text text = ex.getText();
                 if (text != null) {
                     source.sendMessage(error(text));
                 }
             } catch (CommandException ex) {
+                this.completeCommandPhase();
                 Text text = ex.getText();
                 if (text != null) {
                     source.sendMessage(error(text));
@@ -325,6 +318,7 @@ public class SpongeCommandManager implements CommandManager {
                 }
             }
         } catch (Throwable thr) {
+            this.completeCommandPhase();
             Text.Builder excBuilder;
             if (thr instanceof TextMessageException) {
                 Text text = ((TextMessageException) thr).getText();
@@ -389,5 +383,21 @@ public class SpongeCommandManager implements CommandManager {
     @Override
     public int size() {
         return this.dispatcher.size();
+    }
+
+    private void completeCommandPhase() {
+        if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            Sponge.getServer().getWorlds().forEach(world -> {
+                final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
+                try {
+                    mixinWorld.getCauseTracker().completePhase();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // Basically, we don't do anything because the worlds that were created during the
+                    // command being executed. However, we still will process any additional captures that took place
+                    // during the command's phase.
+                }
+            });
+        }
     }
 }

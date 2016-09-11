@@ -35,6 +35,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,6 +54,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
     @Shadow public abstract Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract void notifyLightSet(BlockPos pos);
+    @Shadow public abstract IChunkProvider getChunkProvider();
 
     @Shadow @Nullable private TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) {
         return null; // Shadowed
@@ -155,10 +157,11 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
         if (!((IMixinBlockPos) pos).isValidPosition()) {
             // Sponge End
             return type.defaultLightValue;
-        } else if (!this.isBlockLoaded(pos)) {
-            return type.defaultLightValue;
         } else {
-            Chunk chunk = this.getChunkFromBlockCoords(pos);
+            Chunk chunk = this.getChunkProvider().getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4);
+            if (chunk == null) {
+                return type.defaultLightValue;
+            }
             return chunk.getLightFor(type, pos);
         }
     }
@@ -186,6 +189,13 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
     }
 
 
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Inlines the isValidXZPosition check to BlockPos.
+     *
+     * @param bbox The AABB to check
+     * @return True if the AABB collides with a block
+     */
     @Overwrite
     public boolean collidesWithAnyBlock(AxisAlignedBB bbox) {
         List<AxisAlignedBB> list = Lists.<AxisAlignedBB>newArrayList();

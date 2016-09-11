@@ -265,8 +265,9 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> entities) {
-        super.processPostEntitySpawns(causeTracker, unwindingState, entities);
+    protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
+            ArrayList<Entity> entities) {
+        super.processPostEntitySpawns(causeTracker, unwindingState, phaseContext, entities);
     }
 
     @Override

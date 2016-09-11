@@ -82,6 +82,7 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
@@ -169,6 +170,7 @@ import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.TeleportTypeRegistryModule;
 import org.spongepowered.common.registry.type.extra.FluidTypeRegistryModule;
 import org.spongepowered.common.registry.type.item.*;
+import org.spongepowered.common.registry.type.scoreboard.CollisionRuleRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.CriteriaRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.ObjectiveDisplayModeRegistryModule;
@@ -407,6 +409,7 @@ public final class CommonModuleRegistry {
             .registerModule(HandType.class, HandTypeRegistryModule.getInstance())
             .registerModule(PickupRule.class, new PickupRuleRegistryModule())
             .registerModule(BlockPaletteType.class, new PaletteTypeRegistryModule())
+            .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
             ;
     }

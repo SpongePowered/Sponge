@@ -282,7 +282,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Sponge end
 
         // Support vanilla clients logging into custom dimensions
-        final int dimensionId = WorldManager.getDimensionId(worldServer.provider);
+        final int dimensionId = WorldManager.getClientDimensionId(playerIn, worldServer);
 
         // Send dimension registration
         WorldManager.sendDimensionRegistration(playerIn, worldServer.provider);
@@ -505,11 +505,18 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // ### PHASE 5 ### Respawn player in new world
 
         // Support vanilla clients logging into custom dimensions
-        final int dimensionId = WorldManager.getDimensionId(worldServer.provider);
+        final int dimensionId = WorldManager.getClientDimensionId(entityPlayerMP, worldServer);
 
         // Send dimension registration
-        WorldManager.sendDimensionRegistration(entityPlayerMP, worldServer.provider);
-
+        if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
+            WorldManager.sendDimensionRegistration(entityPlayerMP, worldServer.provider);
+        } else {
+            // Force vanilla client to refresh its chunk cache if same dimension type
+            if (fromTransform.getExtent() != worldServer && fromTransform.getExtent().getDimension().getType() == toTransform.getExtent().getDimension().getType()) {
+                entityPlayerMP.connection.sendPacket(new SPacketRespawn((dimensionId >= 0 ? -1 : 0), worldServer.getDifficulty(), worldServer
+                        .getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
+            }
+        }
         entityPlayerMP.connection.sendPacket(new SPacketRespawn(dimensionId, worldServer.getDifficulty(), worldServer
                 .getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
         entityPlayerMP.isDead = false;
@@ -606,15 +613,21 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
         WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
-        playerIn.dimension = WorldManager.getDimensionId(toWorld.provider);
+        playerIn.dimension = WorldManager.getClientDimensionId(playerIn, toWorld);
         toWorld.getChunkProvider().loadChunk(event.getToTransform().getLocation().getChunkPosition().getX(), event.getToTransform().getLocation().getChunkPosition().getZ());
         // Support vanilla clients teleporting to custom dimensions
-        final int dimensionId = WorldManager.getDimensionId(toWorld.provider);
+        final int dimensionId = playerIn.dimension;
 
         // Send dimension registration
-        WorldManager.sendDimensionRegistration(playerIn, toWorld.provider);
-
-        playerIn.connection.sendPacket(new SPacketRespawn(dimensionId, fromWorld.getDifficulty(), fromWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
+        if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
+            WorldManager.sendDimensionRegistration(playerIn, toWorld.provider);
+        } else {
+            // Force vanilla client to refresh its chunk cache if same dimension type
+            if (fromWorld != toWorld && fromWorld.provider.getDimensionType() == toWorld.provider.getDimensionType()) {
+                playerIn.connection.sendPacket(new SPacketRespawn((dimensionId >= 0 ? -1 : 0), toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
+            }
+        }
+        playerIn.connection.sendPacket(new SPacketRespawn(dimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
         fromWorld.removeEntityDangerously(playerIn);
         playerIn.isDead = false;
         // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
@@ -711,7 +724,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     public void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world.Teleporter teleporter) {
         // rewritten completely to handle our portal event
         MoveEntityEvent.Teleport.Portal event = EntityUtil
-                .handleDisplaceEntityPortalEvent(entityIn, WorldManager.getDimensionId(toWorld.provider), teleporter);
+                .handleDisplaceEntityPortalEvent(entityIn, WorldManager.getDimensionId(toWorld), teleporter);
         if (event == null || event.isCancelled()) {
             return;
         }

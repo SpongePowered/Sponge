@@ -185,7 +185,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         WorldServer world = (WorldServer) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
         CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
-        final IPhaseState currentState = causeTracker.getStack().peekState();
+        final IPhaseState currentState = causeTracker.getCurrentState();
         if (!currentState.tracksBlockRestores()) {
             causeTracker.switchToPhase(BlockPhase.State.RESTORING_BLOCKS,
                     PhaseContext.start()

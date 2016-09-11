@@ -74,9 +74,9 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -107,7 +107,6 @@ public interface PacketFunction {
 
     PacketFunction IGNORED = (packet, state, player, context) -> {
     };
-    PacketFunction HANDLED_EXTERNALLY = IGNORED;
 
     PacketFunction USE_ENTITY = (packet, state, player, context) -> {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
@@ -360,7 +359,7 @@ public interface PacketFunction {
                 );
     };
 
-    PacketFunction ACTION = (packet, state, player, context) -> {
+    @SuppressWarnings("unchecked") PacketFunction ACTION = (packet, state, player, context) -> {
         final CauseTracker causeTracker = ((IMixinWorldServer) player.worldObj).getCauseTracker();
         final ItemStack usedStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class)
                 .orElse(null);
@@ -470,78 +469,119 @@ public interface PacketFunction {
                 final List<Entity> projectiles = new ArrayList<>(entities.size());
                 final List<Entity> spawnEggs = new ArrayList<>(entities.size());
                 final List<Entity> normalPlacement = new ArrayList<>(entities.size());
+                final List<Entity> items = new ArrayList<>(entities.size());
                 for (Entity entity : entities) {
                     if (entity instanceof Projectile || entity instanceof EntityThrowable) {
                         projectiles.add(entity);
                     } else if (usedSnapshot.getType() == ItemTypes.SPAWN_EGG) {
                         spawnEggs.add(entity);
+                    } else if (entity instanceof EntityItem) {
+                        items.add(entity);
                     } else {
                         normalPlacement.add(entity);
                     }
                 }
                 if (!projectiles.isEmpty()) {
-                    final Cause cause = Cause.source(
-                            EntitySpawnCause.builder()
-                                    .entity(spongePlayer)
-                                    .type(InternalSpawnTypes.PROJECTILE)
-                                    .build())
-                            .named(NamedCause.of("UsedItem", usedSnapshot))
-                            .owner(player)
-                            .build();
-                    final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, projectiles, causeTracker.getWorld());
-                    if (!SpongeImpl.postEvent(event)) {
-                        processSpawnedEntities(player, causeTracker, event);
+                    if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                        final Cause cause = Cause.source(
+                                EntitySpawnCause.builder()
+                                        .entity(spongePlayer)
+                                        .type(InternalSpawnTypes.PROJECTILE)
+                                        .build())
+                                .named(NamedCause.of("UsedItem", usedSnapshot))
+                                .owner(player)
+                                .build();
+                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, projectiles, causeTracker.getWorld());
+                        if (!SpongeImpl.postEvent(event)) {
+                            processSpawnedEntities(player, causeTracker, event);
+                        }
+                    } else {
+                        processEntities(player, causeTracker, projectiles);
                     }
                 }
                 if (!spawnEggs.isEmpty()) {
-                    final Cause cause = Cause.source(
-                            EntitySpawnCause.builder()
+                    if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                        final Cause cause = Cause.source(
+                                EntitySpawnCause.builder()
+                                        .entity(spongePlayer)
+                                        .type(InternalSpawnTypes.SPAWN_EGG)
+                                        .build())
+                                .named(NamedCause.of("UsedItem", usedSnapshot))
+                                .owner(player)
+                                .build();
+                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, spawnEggs, causeTracker.getWorld());
+                        if (!SpongeImpl.postEvent(event)) {
+                            processSpawnedEntities(player, causeTracker, event);
+                        }
+                    } else {
+                        processEntities(player, causeTracker, spawnEggs);
+                    }
+                }
+                if (!items.isEmpty()) {
+                    if (ShouldFire.DROP_ITEM_EVENT_DISPENSE) {
+                        final Cause cause = Cause.source(
+                                EntitySpawnCause.builder()
                                     .entity(spongePlayer)
-                                    .type(InternalSpawnTypes.SPAWN_EGG)
-                                    .build())
-                            .named(NamedCause.of("UsedItem", usedSnapshot))
-                            .owner(player)
-                            .build();
-                    final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, spawnEggs, causeTracker.getWorld());
-                    if (!SpongeImpl.postEvent(event)) {
-                        processSpawnedEntities(player, causeTracker, event);
+                                .type(InternalSpawnTypes.DROPPED_ITEM)
+                                .build())
+                                .owner(player)
+                                .build();
+                        final DropItemEvent.Dispense dispense = SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld());
+                        if (!SpongeImpl.postEvent(dispense)) {
+                            processSpawnedEntities(player, causeTracker, dispense);
+                        }
+                    } else {
+                        processEntities(player, causeTracker, items);
                     }
                 }
                 if (!normalPlacement.isEmpty()) {
-                    final Cause cause = Cause.source(
-                            EntitySpawnCause.builder()
-                                    .entity(spongePlayer)
-                                    .type(InternalSpawnTypes.PLACEMENT)
-                                    .build())
-                            .build();
-                    final DropItemEvent.Dispense
-                            dispense =
-                            SpongeEventFactory.createDropItemEventDispense(cause, normalPlacement, causeTracker.getWorld());
-                    if (!SpongeImpl.postEvent(dispense)) {
-                        processSpawnedEntities(player, causeTracker, dispense);
-
+                    if (ShouldFire.SPAWN_ENTITY_EVENT) {
+                        final Cause cause = Cause.source(
+                                EntitySpawnCause.builder()
+                                        .entity(spongePlayer)
+                                        .type(InternalSpawnTypes.PLACEMENT)
+                                        .build())
+                                .build();
+                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, normalPlacement, causeTracker.getWorld());
+                        if (!SpongeImpl.postEvent(event)) {
+                            processSpawnedEntities(player, causeTracker, event);
+                        }
+                    } else {
+                        processEntities(player, causeTracker, normalPlacement);
                     }
                 }
             });
 
             context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
                 final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
-                final Cause cause = Cause.source(EntitySpawnCause.builder()
-                        .entity(spongePlayer)
-                        .type(InternalSpawnTypes.DROPPED_ITEM)
-                        .build())
-                        .build();
-                for (BlockSnapshot blockChange : capturedBlocks) {
-                    final Location<World> location = blockChange.getLocation().get();
-                    final Vector3d position = location.getPosition();
-                    final BlockPos blockPos = VecHelper.toBlockPos(position);
-                    final Collection<EntityItem> entityItems = map.get(blockPos);
-                    if (!entityItems.isEmpty()) {
-                        final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
-                        final DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld());
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            processSpawnedEntities(player, causeTracker, event);
+                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                    final Cause cause = Cause.source(EntitySpawnCause.builder()
+                            .entity(spongePlayer)
+                            .type(InternalSpawnTypes.DROPPED_ITEM)
+                            .build())
+                            .build();
+                    for (BlockSnapshot blockChange : capturedBlocks) {
+                        final Location<World> location = blockChange.getLocation().get();
+                        final Vector3d position = location.getPosition();
+                        final BlockPos blockPos = VecHelper.toBlockPos(position);
+                        final Collection<EntityItem> entityItems = map.get(blockPos);
+                        if (!entityItems.isEmpty()) {
+                            final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                            final DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld());
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                processSpawnedEntities(player, causeTracker, event);
+                            }
+                        }
+                    }
+                } else {
+                    for (BlockSnapshot blockChange : capturedBlocks) {
+                        final Location<World> location = blockChange.getLocation().get();
+                        final Vector3d position = location.getPosition();
+                        final BlockPos blockPos = VecHelper.toBlockPos(position);
+                        final Collection<EntityItem> entityItems = map.get(blockPos);
+                        if (!entityItems.isEmpty()) {
+                            processEntities(player, causeTracker, (Collection<Entity>) (Collection<?>) entityItems);
                         }
                     }
                 }
@@ -550,7 +590,12 @@ public interface PacketFunction {
         }
     };
     static void processSpawnedEntities(EntityPlayerMP player, CauseTracker causeTracker, SpawnEntityEvent event) {
-        for (Entity entity : event.getEntities()) {
+        List<Entity> entities = event.getEntities();
+        processEntities(player, causeTracker, entities);
+    }
+
+    static void processEntities(EntityPlayerMP player, CauseTracker causeTracker, Collection<Entity> entities) {
+        for (Entity entity : entities) {
             entity.setCreator(player.getUniqueID());
             causeTracker.getMixinWorld().forceSpawnEntity(entity);
         }
@@ -637,7 +682,7 @@ public interface PacketFunction {
                 .ifPresentAndNotEmpty(entities -> {
                     final Cause cause = Cause.source(EntitySpawnCause.builder()
                             .entity(EntityUtil.fromNative(player))
-                            .type(InternalSpawnTypes.SPAWN_EGG)
+                            .type(itemStack.getItem() == ItemTypes.SPAWN_EGG ? InternalSpawnTypes.SPAWN_EGG : InternalSpawnTypes.PLACEMENT)
                             .build())
                             .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
                             .build();
@@ -684,7 +729,7 @@ public interface PacketFunction {
                                     context);
                             if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
                                 EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
-                                PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, (net.minecraft.item.ItemStack) itemStack, hand);
+                                PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
                             }
                         });
     };
@@ -980,6 +1025,8 @@ public interface PacketFunction {
         });
 
     };
+
+    PacketFunction HANDLED_EXTERNALLY = UNKONWN_PACKET;
 
     void unwind(Packet<?> packet, PacketPhase.IPacketState state, EntityPlayerMP player, PhaseContext context);
 

@@ -22,16 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world.biome;
+package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import org.spongepowered.api.world.biome.BiomeGenerationSettings;
+import net.minecraft.world.biome.BiomeVoid;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
-public interface IBiomeGenBase {
+@Mixin(BiomeVoid.class)
+public class MixinBiomeVoid extends MixinBiome {
 
-    BiomeGenerationSettings initPopulators(World world);
-
-    void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings);
-
+    @Override
+    public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
+        // no super call
+    }
 }

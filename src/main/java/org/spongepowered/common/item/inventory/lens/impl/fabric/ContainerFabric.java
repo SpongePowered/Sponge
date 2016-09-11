@@ -39,33 +39,33 @@ import java.util.List;
 import java.util.Set;
 
 public class ContainerFabric extends MinecraftFabric {
-    
+
     private Translation displayName;
     private final Container container;
     private final Set<IInventory> all;
-    
+
     public ContainerFabric(Container container) {
         this(ContainerFabric.getFirstDisplayName(container), container);
     }
-    
-    public ContainerFabric(Translation displayName, Container container) {
+
+    private ContainerFabric(Translation displayName, Container container) {
         this.displayName = displayName;
         this.container = container;
 
         List<Slot> slots = this.container.inventorySlots;
-        
+
         Builder<IInventory> builder = ImmutableSet.<IInventory>builder();
         for (Slot slot : slots) {
             builder.add(slot.inventory);
         }
         this.all = builder.build();
     }
-    
+
     @Override
     public Collection<IInventory> allInventories() {
         return this.all;
     }
-    
+
     @Override
     public IInventory get(int index) {
         return this.container.getSlot(index).inventory;
@@ -106,7 +106,7 @@ public class ContainerFabric extends MinecraftFabric {
             inv.clear();
         }
     }
-    
+
     @Override
     public void markDirty() {
         this.container.detectAndSendChanges();

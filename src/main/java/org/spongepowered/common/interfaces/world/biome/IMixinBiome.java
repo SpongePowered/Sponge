@@ -24,9 +24,20 @@
  */
 package org.spongepowered.common.interfaces.world.biome;
 
+import net.minecraft.world.World;
+import org.spongepowered.api.world.biome.BiomeGenerationSettings;
+import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
-public interface IBiomeGenPlains {
-    
-    boolean hasSunflowers();
+public interface IMixinBiome {
+
+    void setId(String id);
+
+    void setModId(String modId);
+
+    String getModId();
+
+    BiomeGenerationSettings initPopulators(World world);
+
+    void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings);
 
 }

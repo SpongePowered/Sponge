@@ -28,11 +28,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -146,7 +146,7 @@ public final class GeneralPhase extends TrackingPhase {
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
         if (state == State.COMMAND) {
-            final ICommandSender sender = phaseContext.getSource(ICommandSender.class)
+            final CommandSource sender = phaseContext.getSource(CommandSource.class)
                     .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(list -> TrackingUtil.processBlockCaptures(list, causeTracker, state, phaseContext));
@@ -243,7 +243,7 @@ public final class GeneralPhase extends TrackingPhase {
         if (!contextEntities.isEmpty()) {
             final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
             contextEntities.clear();
-            unwindingState.getPhase().processPostEntitySpawns(causeTracker, unwindingState, entities);
+            unwindingState.getPhase().processPostEntitySpawns(causeTracker, unwindingState, unwindingContext, entities);
         }
         if (!contextItems.isEmpty()) {
             final ArrayList<Entity> items = new ArrayList<>(contextItems);
@@ -476,4 +476,12 @@ public final class GeneralPhase extends TrackingPhase {
     public boolean ignoresScheduledUpdates(IPhaseState phaseState) {
         return phaseState == Post.UNWINDING;
     }
+
+    @Override
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        return phaseState != State.COMPLETE
+               ? context.getCapturedEntities().add(entity)
+               : super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
+    }
+
 }

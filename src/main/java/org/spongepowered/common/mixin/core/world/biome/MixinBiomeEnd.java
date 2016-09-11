@@ -25,33 +25,26 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeSavanna;
-import org.spongepowered.api.data.type.DoublePlantTypes;
-import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.gen.populator.DoublePlant;
-import org.spongepowered.api.world.gen.populator.Forest;
-import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
+import net.minecraft.world.biome.BiomeEnd;
+import org.spongepowered.api.world.gen.populator.ChorusFlower;
+import org.spongepowered.api.world.gen.populator.EndIsland;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
+import org.spongepowered.common.world.gen.populators.EndBiomeGenerationPopulator;
+import org.spongepowered.common.world.gen.populators.EndSpikePopulator;
 
-@Mixin(BiomeSavanna.class)
-public abstract class MixinBiomeGenSavanna extends MixinBiomeGenBase {
+@Mixin(BiomeEnd.class)
+public abstract class MixinBiomeEnd extends MixinBiome {
 
+    /*
+     * Add in our end biome genpop which replaces the stone blocks from
+     * generation with end stone.
+     */
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        DoublePlant grass = DoublePlant.builder()
-                .type(DoublePlantTypes.GRASS, 1)
-                .perChunk(7 * 5)
-                .build();
-        gensettings.getPopulators().add(grass);
-        super.buildPopulators(world, gensettings);
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
-        Forest.Builder forest = Forest.builder();
-        forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
-        forest.type(BiomeTreeTypes.OAK.getPopulatorObject(), 1);
-        forest.type(BiomeTreeTypes.SAVANNA.getPopulatorObject(), 4);
-        gensettings.getPopulators().add(0, forest.build());
+        gensettings.getGenerationPopulators().add(new EndBiomeGenerationPopulator());
+        gensettings.getPopulators().add(new EndSpikePopulator());
+        gensettings.getPopulators().add(EndIsland.builder().build());
+        gensettings.getPopulators().add(ChorusFlower.builder().build());
     }
 }

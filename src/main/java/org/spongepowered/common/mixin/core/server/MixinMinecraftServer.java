@@ -66,6 +66,7 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ChunkTicketManager;
+import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.ChunkLayout;
@@ -572,7 +573,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Redirect(method = "addServerStatsToSnooper", at = @At(value = "FIELD", target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;", opcode = Opcodes.GETFIELD))
     private WorldProvider onGetWorldProviderForSnooper(WorldServer world) {
-        this.dimensionId = WorldManager.getDimensionId(world.provider);
+        this.dimensionId = WorldManager.getDimensionId(world);
         return world.provider;
     }
 
@@ -585,6 +586,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     private int getSaveTickInterval(int tickInterval) {
         if (!isDedicatedServer()) {
             return tickInterval;
+        } else if (!this.isServerRunning()) {
+            // Don't autosave while server is stopping
+            return this.tickCounter + 1;
         }
 
         int autoPlayerSaveInterval = SpongeImpl.getGlobalConfig().getConfig().getWorld().getAutoPlayerSaveInterval();
@@ -616,7 +620,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     final IMixinWorldServer spongeWorld = (IMixinWorldServer) worldserver;
                     final int autoSaveInterval = spongeWorld.getActiveConfig().getConfig().getWorld().getAutoSaveInterval();
                     final boolean logAutoSave = spongeWorld.getActiveConfig().getConfig().getLogging().worldAutoSaveLogging();
-                    if (autoSaveInterval <= 0) {
+                    if (autoSaveInterval <= 0 || ((WorldProperties) worldserver.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
                         if (logAutoSave) {
                             LOG.warn("Auto-saving has been disabled for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
                                         + worldserver.provider.getDimensionType().getName() + ". "

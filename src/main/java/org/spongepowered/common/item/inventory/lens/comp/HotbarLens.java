@@ -28,8 +28,8 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 
 public interface HotbarLens<TInventory, TStack> extends InventoryRowLens<TInventory, TStack> {
 
-    public abstract int getSelectedSlotIndex(Fabric<TInventory> inv);
+    int getSelectedSlotIndex(Fabric<TInventory> inv);
 
-    public abstract void setSelectedSlotIndex(Fabric<TInventory> inv, int index);
+    void setSelectedSlotIndex(Fabric<TInventory> inv, int index);
 
 }

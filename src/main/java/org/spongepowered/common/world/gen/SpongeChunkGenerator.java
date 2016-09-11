@@ -74,7 +74,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.GenerationPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
+import org.spongepowered.common.interfaces.world.biome.IMixinBiome;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;
@@ -204,7 +204,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Override
     public BiomeGenerationSettings getBiomeSettings(BiomeType type) {
         if (!this.biomeSettings.containsKey(type)) {
-            this.biomeSettings.put(type, ((IBiomeGenBase) type).initPopulators(this.world));
+            this.biomeSettings.put(type, ((IMixinBiome) type).initPopulators(this.world));
         }
         return this.biomeSettings.get(type);
     }
@@ -231,7 +231,9 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         ImmutableBiomeArea biomeBuffer = this.cachedBiomes.getImmutableBiomeCopy();
         this.baseGenerator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
 
-        replaceBiomeBlocks(this.world, this.rand, chunkX, chunkZ, chunkprimer, biomeBuffer);
+        if (!(this.baseGenerator instanceof SpongeGenerationPopulator)) {
+            replaceBiomeBlocks(this.world, this.rand, chunkX, chunkZ, chunkprimer, biomeBuffer);
+        }
 
         // Apply the generator populators to complete the blockBuffer
         for (GenerationPopulator populator : this.genpop) {
@@ -253,7 +255,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         // run our generator populators
         for (BiomeType type : uniqueBiomes) {
             if (!this.biomeSettings.containsKey(type)) {
-                this.biomeSettings.put(type, ((IBiomeGenBase) type).initPopulators(this.world));
+                this.biomeSettings.put(type, ((IMixinBiome) type).initPopulators(this.world));
             }
             for (GenerationPopulator populator : this.biomeSettings.get(type).getGenerationPopulators()) {
                 populator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
@@ -287,7 +289,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         org.spongepowered.api.world.Chunk chunk = (org.spongepowered.api.world.Chunk) this.world.getChunkFromChunkCoords(chunkX, chunkZ);
 
         if (!this.biomeSettings.containsKey(biome)) {
-            this.biomeSettings.put(biome, ((IBiomeGenBase) biome).initPopulators(this.world));
+            this.biomeSettings.put(biome, ((IMixinBiome) biome).initPopulators(this.world));
         }
 
         List<Populator> populators = new ArrayList<>(this.pop);

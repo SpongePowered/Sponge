@@ -274,7 +274,7 @@ public final class EntityUtil {
         // Use origin world to get correct cause
         IMixinWorldServer spongeWorld = (IMixinWorldServer) fromTransform.getExtent();
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        final PhaseData peek = causeTracker.getStack().peek();
+        final PhaseData peek = causeTracker.getCurrentPhaseData();
         final IPhaseState state = peek.state;
         final PhaseContext context = peek.context;
 
@@ -704,13 +704,12 @@ public final class EntityUtil {
         if (entity instanceof EntityPlayerMP && ((EntityPlayerMP) entity).connection != null) {
             EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entity;
             // Support vanilla clients going into custom dimensions
-            final int fromDimensionId = WorldManager.getDimensionId(fromWorld.provider);
-            final int toDimensionId = WorldManager.getDimensionId(toWorld.provider);
+            final int toDimensionId = WorldManager.getClientDimensionId(entityPlayerMP, toWorld);
             if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
                 WorldManager.sendDimensionRegistration(entityPlayerMP, toWorld.provider);
             } else {
-                // Force vanilla client to refresh their chunk cache if same dimension
-                if (currentDim != targetDim && fromDimensionId == toDimensionId) {
+                // Force vanilla client to refresh its chunk cache if same dimension type
+                if (fromWorld != toWorld && fromWorld.provider.getDimensionType() == toWorld.provider.getDimensionType()) {
                     entityPlayerMP.connection.sendPacket(
                             new SPacketRespawn(toDimensionId >= 0 ? -1 : 0, toWorld.getDifficulty(),
                                     toWorld.getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
@@ -832,7 +831,7 @@ public final class EntityUtil {
             return null;
         }
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) entity.worldObj;
-        final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
+        final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
 
@@ -905,7 +904,7 @@ public final class EntityUtil {
             return null;
         }
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
-        final PhaseData peek = mixinWorldServer.getCauseTracker().getStack().peek();
+        final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
 

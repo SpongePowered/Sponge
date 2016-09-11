@@ -28,6 +28,4 @@ public interface IMixinCachable {
 
     long getCacheKey();
 
-    void setCacheKey(long key);
-
 }

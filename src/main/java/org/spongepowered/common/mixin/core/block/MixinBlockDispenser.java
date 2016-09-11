@@ -41,12 +41,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Optional;
@@ -92,11 +94,20 @@ public abstract class MixinBlockDispenser extends MixinBlock {
     @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM))
     private void onDispenseHead(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
         if (CauseTracker.ENABLED) {
-            ((IMixinWorldServer) worldIn).getCauseTracker().switchToPhase(BlockPhase.State.DISPENSE, PhaseContext.start()
-                    .add(NamedCause.source(((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(state, state, pos, 3)))
+            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldIn;
+            final SpongeBlockSnapshot spongeBlockSnapshot = mixinWorldServer.createSpongeBlockSnapshot(state, state, pos, 3);
+            final PhaseContext phaseContext = PhaseContext.start()
+                    .add(NamedCause.source(spongeBlockSnapshot))
                     .addBlockCaptures()
                     .addEntityCaptures()
-                    .addEntityDropCaptures()
+                    .addEntityDropCaptures();
+            final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunkFromBlockCoords(pos);
+            mixinChunk.getBlockOwner(pos)
+                    .ifPresent(phaseContext::owner);
+            mixinChunk.getBlockNotifier(pos)
+                    .ifPresent(phaseContext::notifier);
+
+            mixinWorldServer.getCauseTracker().switchToPhase(BlockPhase.State.DISPENSE, phaseContext
                     .complete());
         }
     }

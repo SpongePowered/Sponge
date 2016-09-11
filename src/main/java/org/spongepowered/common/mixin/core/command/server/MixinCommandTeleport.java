@@ -54,7 +54,8 @@ public abstract class MixinCommandTeleport extends CommandBase {
     private static boolean shouldNotifyCommandListener = false;
 
     /**
-     * @author Aaron1011 - August 15, 2016 - Prevent 'notifyCommandListener' from being called the event is cancelled
+     * @author Aaron1011 - August 15, 2016
+     * @reason Prevent 'notifyCommandListener' from being called the event is cancelled
      */
     @Overwrite
     @Override
@@ -70,7 +71,7 @@ public abstract class MixinCommandTeleport extends CommandBase {
 
             if (entity.worldObj != null)
             {
-                int i = 4096;
+                // int i = 4096;
                 Vec3d vec3d = sender.getPositionVector();
                 int j = 1;
                 CommandBase.CoordinateArg commandbase$coordinatearg = parseCoordinate(vec3d.xCoord, args[j++], true);
@@ -96,7 +97,8 @@ public abstract class MixinCommandTeleport extends CommandBase {
     }
 
     /**
-     * @author Aaron1011 - August 15, 2016 - Muliple modification points are needed, so an overwrite is easier
+     * @author Aaron1011 - August 15, 2016
+     * @reason Muliple modification points are needed, so an overwrite is easier
      */
     @Overwrite
     private static void doTeleport(Entity p_189862_0_, CommandBase.CoordinateArg p_189862_1_, CommandBase.CoordinateArg p_189862_2_, CommandBase.CoordinateArg p_189862_3_, CommandBase.CoordinateArg p_189862_4_, CommandBase.CoordinateArg p_189862_5_)

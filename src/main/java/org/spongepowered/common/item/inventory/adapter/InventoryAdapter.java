@@ -53,14 +53,14 @@ import org.spongepowered.common.util.observer.Observer;
  */
 public interface InventoryAdapter<TInventory, TStack> extends Inventory, Observer<InventoryEventArgs> {
     
-    public abstract SlotProvider<TInventory, TStack> getSlotProvider();
+    SlotProvider<TInventory, TStack> getSlotProvider();
     
-    public abstract Lens<TInventory, TStack> getRootLens();
+    Lens<TInventory, TStack> getRootLens();
 
-    public abstract Fabric<TInventory> getInventory();
+    Fabric<TInventory> getInventory();
 
-    public abstract Inventory getChild(int index);
+    Inventory getChild(int index);
     
-    public abstract Inventory getChild(Lens<TInventory, TStack> lens);
+    Inventory getChild(Lens<TInventory, TStack> lens);
 
 }

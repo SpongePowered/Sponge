@@ -53,6 +53,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.MutableWrapper;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Optional;
@@ -79,12 +80,16 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
 
             final IBlockState currentState = worldIn.getBlockState(pos);
             final SpongeBlockSnapshot snapshot = ((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(currentState, currentState, pos, 0);
-            causeTracker.switchToPhase(BlockPhase.State.PISTON_MOVING, PhaseContext.start()
+            final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunkFromBlockCoords(pos);
+            final PhaseContext phaseContext = PhaseContext.start()
                     .add(NamedCause.source(snapshot))
                     .add(NamedCause.of(InternalNamedCauses.Piston.POSITION, pos))
                     .add(NamedCause.of(InternalNamedCauses.Piston.DIRECTION, direction))
                     .add(NamedCause.of(InternalNamedCauses.Piston.DUMMY_CALLBACK, new MutableWrapper<CallbackInfoReturnable<Boolean>>(null)))
-                    .addCaptures()
+                    .addCaptures();
+            mixinChunk.getBlockNotifier(pos).ifPresent(phaseContext::notifier);
+            mixinChunk.getBlockOwner(pos).ifPresent(phaseContext::owner);
+            causeTracker.switchToPhase(BlockPhase.State.PISTON_MOVING, phaseContext
                     .complete()
             );
         }
@@ -95,7 +100,7 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
     public void onDoMoveReturn(World worldIn, BlockPos pos, EnumFacing direction, boolean extending, CallbackInfoReturnable<Boolean> ci) {
         if (!worldIn.isRemote && CauseTracker.ENABLED) {
             final CauseTracker causeTracker = ((IMixinWorldServer) worldIn).getCauseTracker();
-            final PhaseContext context = causeTracker.getStack().peekContext();
+            final PhaseContext context = causeTracker.getCurrentContext();
             context.firstNamed(InternalNamedCauses.Piston.DUMMY_CALLBACK, MutableWrapper.class)
                     .ifPresent(wrapper -> ((MutableWrapper<CallbackInfoReturnable<Boolean>>) wrapper).setObj(ci));
             causeTracker.completePhase();

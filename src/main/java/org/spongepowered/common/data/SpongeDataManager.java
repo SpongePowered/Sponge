@@ -523,11 +523,13 @@ public final class SpongeDataManager implements DataManager {
         return Optional.ofNullable((NbtValueProcessor<E, V>) this.nbtValueTable.get(key, dataType));
     }
 
-    public Optional<NbtDataProcessor> getRawNbtProcessor(NbtDataType dataType, Class<? extends DataManipulator> aClass) {
+    @SuppressWarnings("rawtypes")
+	public Optional<NbtDataProcessor> getRawNbtProcessor(NbtDataType dataType, Class<? extends DataManipulator> aClass) {
         return Optional.ofNullable(this.nbtProcessorTable.get(checkNotNull(aClass, "Manipulator class cannot be null!"), dataType));
     }
 
-    public Optional<NbtValueProcessor> getRawNbtProcessor(NbtDataType dataType, Key<?> key) {
+    @SuppressWarnings("rawtypes")
+	public Optional<NbtValueProcessor> getRawNbtProcessor(NbtDataType dataType, Key<?> key) {
         return Optional.ofNullable(this.nbtValueTable.get(key, dataType));
     }
 

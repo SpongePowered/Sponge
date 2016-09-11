@@ -220,4 +220,10 @@ public abstract class MixinWorldEntitySpawner {
         return !event.isCancelled();
     }
 
+    @Inject(method = "canCreatureTypeSpawnAtLocation", at = @At("HEAD"), cancellable = true)
+    private static void canCreatureTypeSpawnAtLocation(EntityLiving.SpawnPlacementType spawnPlacementTypeIn, World worldIn, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+        if (worldIn.getChunkProvider().getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4) == null) {
+            cir.setReturnValue(false);
+        }
+    }
 }

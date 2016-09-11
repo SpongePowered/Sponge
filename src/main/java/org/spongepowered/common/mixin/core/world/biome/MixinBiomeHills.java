@@ -44,7 +44,7 @@ import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
 @Mixin(BiomeHills.class)
-public abstract class MixinBiomeGenHills extends MixinBiomeGenBase {
+public abstract class MixinBiomeHills extends MixinBiome {
 
     @Shadow @Final private BiomeHills.Type type;
 

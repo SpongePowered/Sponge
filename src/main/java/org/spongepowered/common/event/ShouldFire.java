@@ -26,6 +26,7 @@ package org.spongepowered.common.event;
 
 public class ShouldFire {
 
+
     // Format is event class name with underscores
     // For example: SpawnEntityEvent.Spawner becomes SPAWN_ENTITY_EVENT_SPAWNER
     // DropItemEvent becomes DROP_ITEM_EVENT
@@ -45,5 +46,12 @@ public class ShouldFire {
     public static boolean CHANGE_BLOCK_EVENT_BREAK = false;
     public static boolean CHANGE_BLOCK_EVENT_PLACE = false;
     public static boolean CHANGE_BLOCK_EVENT_POST = false;
+
+    public static boolean DROP_ITEM_EVENT = false;
+    public static boolean DROP_ITEM_EVENT_DESTRUCT = false;
+    public static boolean DROP_ITEM_EVENT_DISPENSE = false;
+
+    public static boolean RIDE_ENTITY_EVENT_MOUNT = false;
+    public static boolean RIDE_ENTITY_EVENT_DISMOUNT = false;
 
 }

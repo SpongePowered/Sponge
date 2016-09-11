@@ -37,16 +37,16 @@ import java.util.Collection;
  * @param <TInventory> Type of inventory being manipulated.
  */
 public interface Fabric<TInventory> {
-    
+
     /**
      * Return all inventories which compose this fabric, order is not guaranteed
      * or enforced.
      */
     public abstract Collection<TInventory> allInventories();
-    
+
     /**
      * Return the inventory at the specified index in the fabric.
-     * 
+     *
      * @param index
      * @return
      */
@@ -63,7 +63,7 @@ public interface Fabric<TInventory> {
     public abstract int getSize();
 
     public abstract void clear();
-    
+
     public abstract void markDirty();
-    
+
 }

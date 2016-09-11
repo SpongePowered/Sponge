@@ -22,20 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.world.gen;
+package org.spongepowered.common.mixin.core.world.biome;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import net.minecraft.world.gen.ChunkProviderServer;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeDecorator;
+import net.minecraft.world.biome.BiomeSwamp;
+import org.spongepowered.api.util.weighted.VariableAmount;
+import org.spongepowered.api.world.gen.populator.Forest;
+import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.CachedLong2ObjectMap;
+import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
-@SuppressWarnings("rawtypes")
-@Mixin(ChunkProviderServer.class)
-public class MixinChunkProviderServer_Chunk_Cache {
+@Mixin(BiomeSwamp.class)
+public abstract class MixinBiomeSwamp extends MixinBiome {
 
-    @Shadow @Final @Mutable private Long2ObjectMap id2ChunkMap = new CachedLong2ObjectMap();
+    @Override
+    public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
+//        gensettings.getGenerationPopulators().add(new SwampLilyPopulator());
+        super.buildPopulators(world, gensettings);
+        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
+        gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
+        Forest.Builder forest = Forest.builder();
+        forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
+        forest.type(BiomeTreeTypes.SWAMP.getPopulatorObject(), 1);
+        gensettings.getPopulators().add(0, forest.build());
+    }
 
 }

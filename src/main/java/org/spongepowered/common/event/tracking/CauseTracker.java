@@ -70,16 +70,14 @@ public final class CauseTracker {
 
     public static final boolean ENABLED = Booleans.parseBoolean(System.getProperty("sponge.causeTracking"), true);
 
-    public static final int DEFAULT_QUEUE_SIZE = 16;
-
-    public static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) ->
+    static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) ->
             context.forEach(namedCause -> {
                         printer.add("        - Name: %s", namedCause.getName());
                         printer.addWrapped(100, "          Object: %s", namedCause.getCauseObject());
                     }
             );
 
-    public static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
+    private static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
         printer.add("  - Phase: %s", data.state);
         printer.add("    Context:");
         data.context.forEach(namedCause -> {
@@ -95,12 +93,13 @@ public final class CauseTracker {
 
     private final WorldServer targetWorld;
 
-    private final CauseStack stack = new CauseStack(DEFAULT_QUEUE_SIZE);
+    private final CauseStack stack = new CauseStack();
 
     @Nullable private PhaseData currentProcessingState = null;
 
     private final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().isVerbose();
 
+    @SuppressWarnings("ConstantConditions")
     public CauseTracker(WorldServer targetWorld) {
         if (((IMixinWorldServer) targetWorld).getCauseTracker() != null) {
             throw new IllegalArgumentException("Attempting to create a new CauseTracker for a world that already has a CauseTracker!!");
@@ -273,8 +272,16 @@ public final class CauseTracker {
         return (IMixinWorldServer) this.targetWorld;
     }
 
-    public CauseStack getStack() {
-        return this.stack;
+    public PhaseData getCurrentPhaseData() {
+        return this.stack.peek();
+    }
+
+    public IPhaseState getCurrentState() {
+        return this.stack.peekState();
+    }
+
+    public PhaseContext getCurrentContext() {
+        return this.stack.peekContext();
     }
 
     public PhaseData getCurrentProcessingPhase() {
@@ -298,7 +305,7 @@ public final class CauseTracker {
         try {
             // Sponge start - prepare notification
             if (CauseTracker.ENABLED) {
-                final PhaseData peek = this.getStack().peek();
+                final PhaseData peek = this.stack.peek();
                 final IPhaseState state = peek.state;
                 state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos, this.targetWorld, PlayerTracker.Type.NOTIFIER);
             }
@@ -343,7 +350,7 @@ public final class CauseTracker {
         }
 
         // Now we need to do some of our own logic to see if we need to capture.
-        final PhaseData phaseData = this.getStack().peek();
+        final PhaseData phaseData = this.stack.peek();
         final IPhaseState phaseState = phaseData.state;
         final boolean isComplete = phaseState == GeneralPhase.State.COMPLETE;
         if (CauseTracker.ENABLED && this.isVerbose && isComplete) {
@@ -464,7 +471,7 @@ public final class CauseTracker {
 
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
         final WorldServer minecraftWorld = this.getMinecraftWorld();
-        final PhaseData phaseData = this.getStack().peek();
+        final PhaseData phaseData = this.stack.peek();
         final IPhaseState phaseState = phaseData.state;
         final PhaseContext context = phaseData.context;
         final TrackingPhase phase = phaseState.getPhase();
@@ -536,7 +543,7 @@ public final class CauseTracker {
 
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
         final WorldServer minecraftWorld = this.getMinecraftWorld();
-        final PhaseData phaseData = this.getStack().peek();
+        final PhaseData phaseData = this.stack.peek();
         // Sponge End - continue with vanilla mechanics
 
         final int chunkX = MathHelper.floor_double(minecraftEntity.posX / 16.0D);

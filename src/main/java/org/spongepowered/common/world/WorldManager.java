@@ -46,6 +46,7 @@ import net.minecraft.world.DimensionType;
 import net.minecraft.world.GameType;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.ServerWorldEventHandler;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
@@ -70,6 +71,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinIntegratedServer;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -477,11 +479,14 @@ public final class WorldManager {
         final int dimensionId = mixinWorldServer.getDimensionId();
 
         try {
-            saveWorld(worldServer, true);
+            // Don't save if server is stopping to avoid duplicate saving.
+            if (server.isServerRunning()) {
+                saveWorld(worldServer, true);
+                mixinWorldServer.getActiveConfig().save();
+            }
         } catch (MinecraftException e) {
             e.printStackTrace();
         } finally {
-            mixinWorldServer.getActiveConfig().save();
             worldByDimensionId.remove(dimensionId);
             weakWorldByWorld.remove(worldServer);
             ((IMixinMinecraftServer) server).getWorldTickTimes().remove(dimensionId);
@@ -1158,7 +1163,22 @@ public final class WorldManager {
         return weakWorldByWorld;
     }
 
-    public static int getDimensionId(WorldProvider provider) {
-        return provider.getDimensionType().getId();
+    public static int getClientDimensionId(EntityPlayerMP player, World world) {
+        if (!((IMixinEntityPlayerMP) player).usesCustomClient()) {
+            DimensionType type = world.provider.getDimensionType();
+            if (type == DimensionType.OVERWORLD) {
+                return 0;
+            } else if (type == DimensionType.NETHER) {
+                return -1;
+            }
+
+            return 1;
+        }
+
+        return ((IMixinWorldServer) world).getDimensionId();
+    }
+
+    public static int getDimensionId(WorldServer world) {
+        return ((IMixinWorldInfo) world.getWorldInfo()).getDimensionId();
     }
 }

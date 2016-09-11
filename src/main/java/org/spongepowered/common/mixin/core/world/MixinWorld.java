@@ -32,6 +32,7 @@ import com.flowpowered.math.vector.Vector2d;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -89,11 +90,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
@@ -134,7 +131,6 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeChunkPreGenerate;
@@ -296,7 +292,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Player> getPlayers() {
-        return (Collection<Player>) (Object) this.playerEntities;
+        return ImmutableList.copyOf((Collection<Player>) (Object) this.playerEntities);
     }
 
     @Override
@@ -486,7 +482,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return Optional.empty();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Iterable<Chunk> getLoadedChunks() {
         return (Iterable) ((ChunkProviderServer) this.getChunkProvider()).getLoadedChunks();
@@ -1003,45 +999,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return predicate.apply(player) && !mixinEntity.isVanished();
     }
 
-    /**
-     * @author gabizou - February 7th, 2016
-     *
-     * This will short circuit all other patches such that we control the
-     * entities being loaded by chunkloading and can throw our bulk entity
-     * event. This will bypass Forge's hook for individual entity events,
-     * but the SpongeModEventManager will still successfully throw the
-     * appropriate event and cancel the entities otherwise contained.
-     *
-     * @param entities The entities being loaded
-     * @param callbackInfo The callback info
-     */
-    @Final
-    @Inject(method = "loadEntities", at = @At("HEAD"), cancellable = true)
-    private void spongeLoadEntities(Collection<net.minecraft.entity.Entity> entities, CallbackInfo callbackInfo) {
-        if (entities.isEmpty()) {
-            // just return, no entities to load!
-            callbackInfo.cancel();
-            return;
-        }
-        List<Entity> entityList = new ArrayList<>();
-        for (net.minecraft.entity.Entity entity : entities) {
-            entityList.add((Entity) entity);
-        }
-        SpawnCause cause = SpawnCause.builder().type(InternalSpawnTypes.CHUNK_LOAD).build();
-        List<NamedCause> causes = new ArrayList<>();
-        causes.add(NamedCause.source(cause));
-        causes.add(NamedCause.of("World", this));
-        SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, this);
-        SpongeImpl.postEvent(chunkLoad);
-        if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {
-            for (Entity successful : chunkLoad.getEntities()) {
-                this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
-                this.onEntityAdded((net.minecraft.entity.Entity) successful);
-            }
-        }
-        callbackInfo.cancel();
-    }
-
     @Inject(method = "playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V", at = @At("HEAD"), cancellable = true)
     private void spongePlaySoundAtEntity(EntityPlayer entity, double x, double y, double z, SoundEvent name, net.minecraft.util.SoundCategory category, float volume, float pitch, CallbackInfo callbackInfo) {
         if (entity instanceof IMixinEntity) {
@@ -1301,9 +1258,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                 if (this.isBlockLoaded(blockpos) && this.worldBorder.contains(blockpos)) {
                     try {
-                        this.theProfiler.startSection(tileentity.getClass().getSimpleName());
+                        //this.theProfiler.startSection(tileentity.getClass().getSimpleName());
                         ((ITickable) tileentity).update();
-                        this.theProfiler.endSection();
+                        //this.theProfiler.endSection();
                     } catch (Throwable throwable) {
                         this.stopTimingTickTileEntityCrash(tileentity); // Sponge
                         CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");

@@ -96,7 +96,7 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
         final WorldServer worldServer = (WorldServer) worldIn;
         // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
         final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
-        final PhaseData peek = causeTracker.getStack().peek();
+        final PhaseData peek = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = peek.state;
         if (phaseState == null || (phaseState != PacketPhase.General.PLACE_BLOCK && phaseState != PacketPhase.General.USE_ITEM && 
                 phaseState != PacketPhase.General.INTERACTION)) {
