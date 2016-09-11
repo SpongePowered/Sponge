@@ -57,7 +57,7 @@ public class EquipmentSlotLensImpl extends FilteringSlotLensImpl implements Equi
     
     @Override
     public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new EquipmentSlotAdapter(inv, this);
+        return new EquipmentSlotAdapter(inv, this, parent);
     }
 
 }

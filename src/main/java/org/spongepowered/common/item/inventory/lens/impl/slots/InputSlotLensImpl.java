@@ -48,7 +48,7 @@ public class InputSlotLensImpl extends FilteringSlotLensImpl implements InputSlo
     
     @Override
     public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new InputSlotAdapter(inv, this);
+        return new InputSlotAdapter(inv, this, parent);
     }
 
 }

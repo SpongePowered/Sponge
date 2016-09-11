@@ -73,7 +73,7 @@ public class SlotLensImpl extends MinecraftLens implements SlotLens<IInventory, 
     
     @Override
     public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new SlotAdapter(inv, this);
+        return new SlotAdapter(inv, this, parent);
     }
     
     @Override

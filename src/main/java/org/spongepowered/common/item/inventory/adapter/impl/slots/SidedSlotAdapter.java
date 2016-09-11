@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory.adapter.impl.slots;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.slot.SidedSlot;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -34,8 +35,8 @@ import org.spongepowered.common.item.inventory.lens.slots.SidedSlotLens;
 
 public class SidedSlotAdapter extends FilteringSlotAdapter implements SidedSlot {
 
-    public SidedSlotAdapter(Fabric<IInventory> inventory, SidedSlotLens<IInventory, ItemStack> lens) {
-        super(inventory, lens);
+    public SidedSlotAdapter(Fabric<IInventory> inventory, SidedSlotLens<IInventory, ItemStack> lens, Inventory parent) {
+        super(inventory, lens, parent);
     }
 
     @Override

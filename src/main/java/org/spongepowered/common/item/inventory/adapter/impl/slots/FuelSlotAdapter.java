@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.slots;
 
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.slot.FuelSlot;
 
 import net.minecraft.inventory.IInventory;
@@ -34,8 +35,8 @@ import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
 public class FuelSlotAdapter extends InputSlotAdapter implements FuelSlot {
 
-    public FuelSlotAdapter(Fabric<IInventory> inventory, InputSlotLens<IInventory, ItemStack> lens) {
-        super(inventory, lens);
+    public FuelSlotAdapter(Fabric<IInventory> inventory, InputSlotLens<IInventory, ItemStack> lens, Inventory parent) {
+        super(inventory, lens, parent);
     }
 
 }
