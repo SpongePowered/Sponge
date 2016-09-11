@@ -25,6 +25,7 @@
 package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static org.spongepowered.common.event.tracking.phase.util.PacketPhaseUtil.handleCustomCursor;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
@@ -420,10 +421,24 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static InteractInventoryEvent.Open callOpenInteractInventoryEvent(EntityPlayerMP player, Container container) {
-        final InteractInventoryEvent.Open event = SpongeEventFactory.createInteractInventoryEventOpen(Cause.of(NamedCause.owner(player)), new
-                Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE), (org.spongepowered.api.item.inventory.Container) (Object) container);
+    public static boolean callInteractInventoryOpenEvent(Cause cause, EntityPlayerMP player) {
+        ItemStackSnapshot newCursor =
+                player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
+                        : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, newCursor);
+        InteractInventoryEvent.Open event =
+                SpongeEventFactory.createInteractInventoryEventOpen(cause, cursorTransaction,
+                        (org.spongepowered.api.item.inventory.Container) player.openContainer);
         SpongeImpl.postEvent(event);
-        return event;
+        if (event.isCancelled()) {
+            player.closeScreen();
+            return false;
+        } else {
+            // Custom cursor
+            if (event.getCursorTransaction().getCustom().isPresent()) {
+                handleCustomCursor(player, event.getCursorTransaction().getFinal());
+            }
+            return true;
+        }
     }
 }
