@@ -29,6 +29,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
@@ -48,6 +49,7 @@ import java.util.List;
         net.minecraft.inventory.Slot.class,
         InventoryPlayer.class,
         TileEntityChest.class,
+        TileEntityFurnace.class,
         Container.class,
         InventoryLargeChest.class
 })
