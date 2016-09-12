@@ -231,6 +231,7 @@
         "entity.item.MixinEntityMinecartContainer",
         "entity.item.MixinEntityMinecartEmpty",
         "entity.item.MixinEntityMinecartFurnace",
+        "entity.item.MixinEntityMinecartHopper",
         "entity.item.MixinEntityMinecartTNT",
         "entity.item.MixinEntityPainting",
         "entity.item.MixinEntityTNTPrimed",
