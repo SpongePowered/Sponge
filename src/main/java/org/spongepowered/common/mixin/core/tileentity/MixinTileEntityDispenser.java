@@ -59,13 +59,13 @@ import java.util.Optional;
         @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
 public abstract class MixinTileEntityDispenser extends MixinTileEntityLockable implements Dispenser, IMixinCustomNameable {
 
-    private Fabric<IInventory> inventory;
+    private Fabric<IInventory> fabric;
     private SlotCollection slots;
     private Lens<IInventory, ItemStack> lens;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.inventory = new DefaultInventoryFabric(this);
+        this.fabric = new DefaultInventoryFabric(this);
         this.slots = new SlotCollection.Builder()
                 .add(9)
                 .build();
@@ -97,15 +97,15 @@ public abstract class MixinTileEntityDispenser extends MixinTileEntityLockable i
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
-        return slots;
+        return this.slots;
     }
 
     public Lens<IInventory, ItemStack> inventory$getRootLens() {
-        return lens;
+        return this.lens;
     }
 
     public Fabric<IInventory> inventory$getInventory() {
-        return inventory;
+        return this.fabric;
     }
 
     public Optional<Dispenser> tileentityinventory$getTileEntity() {

@@ -80,13 +80,13 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
 
     @Shadow public abstract void checkForAdjacentChests();
 
-    private Fabric<IInventory> inventory;
+    private Fabric<IInventory> fabric;
     private SlotCollection slots;
     private Lens<IInventory, ItemStack> lens;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.inventory = new DefaultInventoryFabric(this);
+        this.fabric = new DefaultInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(27).build();
         this.lens = new GridInventoryLensImpl(0, 9, 3, 9, slots);
     }
@@ -203,15 +203,15 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
-        return slots;
+        return this.slots;
     }
 
     public Lens<IInventory, ItemStack> inventory$getRootLens() {
-        return lens;
+        return this.lens;
     }
 
     public Fabric<IInventory> inventory$getInventory() {
-        return inventory;
+        return this.fabric;
     }
 
     public Optional<Chest> tileentityinventory$getTileEntity() {

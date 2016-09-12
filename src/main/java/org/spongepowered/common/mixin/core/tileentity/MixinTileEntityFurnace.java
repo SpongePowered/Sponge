@@ -30,7 +30,6 @@ import static org.spongepowered.api.data.DataQuery.of;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFurnace;
-import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
@@ -51,7 +50,6 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.slots.FuelSlotLensImpl;
@@ -67,13 +65,13 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
 
     @Shadow private String furnaceCustomName;
 
-    private Fabric<IInventory> inventory;
+    private Fabric<IInventory> fabric;
     private SlotCollection slots;
     private Lens<IInventory, ItemStack> lens;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.inventory = new DefaultInventoryFabric(this);
+        this.fabric = new DefaultInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(1)
                 .add(FuelSlotAdapter.class, (i) -> new FuelSlotLensImpl(i, (s) -> TileEntityFurnace.isItemFuel((ItemStack) s) || isBucket((ItemStack) s), t -> true))
                 .add(OutputSlotAdapter.class, (i) -> new OutputSlotLensImpl(i, (s) -> false, (t) -> false))
@@ -109,15 +107,15 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
-        return slots;
+        return this.slots;
     }
 
     public Lens<IInventory, ItemStack> inventory$getRootLens() {
-        return lens;
+        return this.lens;
     }
 
     public Fabric<IInventory> inventory$getInventory() {
-        return inventory;
+        return this.fabric;
     }
 
     public Optional<Furnace> tileentityinventory$getTileEntity() {
