@@ -55,7 +55,7 @@ import java.util.List;
 
 @NonnullByDefault
 @Mixin(Container.class)
-@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "fabric$")})
+@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory")})
 public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer {
 
     @Shadow public List<Slot> inventorySlots;
