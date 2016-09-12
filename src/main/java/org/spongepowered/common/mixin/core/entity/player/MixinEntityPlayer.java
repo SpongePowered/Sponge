@@ -42,6 +42,7 @@ import net.minecraft.init.Items;
 import net.minecraft.init.MobEffects;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
@@ -121,6 +122,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow private BlockPos spawnChunk;
     @Shadow private BlockPos playerLocation;
     @Shadow protected FoodStats foodStats;
+    @Shadow public InventoryEnderChest theInventoryEnderChest;
 
     @Shadow public abstract int xpBarCap();
     @Shadow public abstract GameProfile getGameProfile();
