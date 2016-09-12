@@ -80,9 +80,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
-        this.slots = new SlotCollection.Builder()
-                .add(5)
-                .build();
+        this.slots = new SlotCollection.Builder().add(5).build();
         this.lens = new OrderedInventoryLensImpl(0, 5, 1, slots);
     }
 
