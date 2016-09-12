@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.IInventory;
@@ -227,7 +226,6 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
     public Optional<Inventory> getDoubleChestInventory() {
         for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
             BlockPos blockpos = this.pos.offset(enumfacing);
-            Block block = this.worldObj.getBlockState(blockpos).getBlock();
 
             TileEntity tileentity1 = this.worldObj.getTileEntity(blockpos);
 
