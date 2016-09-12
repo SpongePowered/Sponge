@@ -90,7 +90,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     private boolean isEnabled = true;
     private boolean loadOnStartup = true;
     private boolean keepSpawnLoaded = true;
-    private boolean generateSpawnOnLoad = true;
+    private boolean generateSpawnOnLoad = false;
     private boolean pvpEnabled = true;
     private boolean generateBonusChest = false;
     private boolean fromBuilder = false;

@@ -69,6 +69,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
@@ -149,6 +150,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private List<UUID> pendingUniqueIds = new ArrayList<>();
     private int trackedUniqueIdCount = 0;
     private SpongeConfig<WorldConfig> worldConfig;
+    @SuppressWarnings("unused")
     private ServerScoreboard scoreboard;
     private PortalAgentType portalAgentType;
 
@@ -582,7 +584,13 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean doesGenerateSpawnOnLoad() {
-        return SpongeHooks.getActiveConfig(((IMixinDimensionType) this.dimensionType).getConfigPath(), this.getWorldName()).getConfig().getWorld().getGenerateSpawnOnLoad();
+        if (!this.worldConfig.getConfig().isConfigEnabled()) {
+            DimensionConfig dimConfig = ((IMixinDimensionType) this.dimensionType).getDimensionConfig().getConfig();
+            if (dimConfig.isConfigEnabled()) {
+                return dimConfig.getWorld().getGenerateSpawnOnLoad();
+            }
+        }
+        return this.worldConfig.getConfig().getWorld().getGenerateSpawnOnLoad();
     }
 
     @Override

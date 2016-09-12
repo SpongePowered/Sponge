@@ -41,4 +41,6 @@ public interface IMixinDimensionType {
     String getModId();
 
     Path getConfigPath();
+
+    boolean shouldGenerateSpawnOnLoad();
 }

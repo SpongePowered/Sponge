@@ -61,6 +61,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     private Path configPath;
     private SpongeConfig<DimensionConfig> config;
     private volatile Context context;
+    private boolean generateSpawnOnLoad;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class <? extends WorldProvider > clazzIn,
@@ -70,12 +71,19 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
         this.modId = SpongeImplHooks.getModIdFromClass(clazzIn);
         this.configPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(this.modId).resolve(this.enumName);
         this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
+        this.generateSpawnOnLoad = idIn == 0;
+        this.config.getConfig().getWorld().setGenerateSpawnOnLoad(this.generateSpawnOnLoad);
         this.sanitizedId = modId + ":" + dimName;
         String contextId = this.sanitizedId.replace(":", ".");
         this.context = new Context(Context.DIMENSION_KEY, contextId);
         if (!WorldManager.isDimensionRegistered(idIn)) {
             DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog((org.spongepowered.api.world.DimensionType)(Object) this);
         }
+    }
+
+    @Override
+    public boolean shouldGenerateSpawnOnLoad() {
+        return this.generateSpawnOnLoad;
     }
 
     public String dimensionType$getId() {

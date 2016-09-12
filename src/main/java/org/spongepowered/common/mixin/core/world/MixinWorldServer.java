@@ -233,6 +233,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, CallbackInfo callbackInfo) {
+        this.activeConfig = SpongeHooks.getActiveConfig((WorldServer)(Object) this);
         this.prevWeather = getWeather();
         this.weatherStartTime = this.worldInfo.getWorldTotalTime();
         ((World) (Object) this).getWorldBorder().addListener(new PlayerBorderListener(this.getMinecraftServer(), dimensionId));

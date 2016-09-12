@@ -400,6 +400,8 @@ public final class WorldManager {
         if (worldInfo == null) {
             worldInfo = new WorldInfo((WorldSettings) (Object) archetype, folderName);
         } else {
+            // DimensionType must be set before world config is created to get proper path
+            ((IMixinWorldInfo) worldInfo).setDimensionType(archetype.getDimensionType());
             ((IMixinWorldInfo) worldInfo).createWorldConfig();
             ((WorldProperties) worldInfo).setGeneratorModifiers(archetype.getGeneratorModifiers());
         }
@@ -408,7 +410,6 @@ public final class WorldManager {
         if (((IMixinWorldInfo) worldInfo).getDimensionId() == null || ((IMixinWorldInfo) worldInfo).getDimensionId() == Integer.MIN_VALUE) {
             ((IMixinWorldInfo) worldInfo).setDimensionId(WorldManager.getNextFreeDimensionId());
         }
-        ((IMixinWorldInfo) worldInfo).setDimensionType(archetype.getDimensionType());
         ((WorldProperties) worldInfo).setGeneratorType(archetype.getGeneratorType());
         ((IMixinWorldInfo) worldInfo).getWorldConfig().save();
         registerWorldProperties((WorldProperties) worldInfo);
@@ -611,8 +612,7 @@ public final class WorldManager {
                 (dimensionId).get().getName());
 
         final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, new WorldSettings((WorldInfo)
-                        properties),
-                properties.doesGenerateSpawnOnLoad());
+                        properties));
 
         return Optional.of(worldServer);
     }
@@ -714,6 +714,11 @@ public final class WorldManager {
                 // create the WorldInfo
                 worldInfo = createWorldInfoFromSettings(currentSavesDir, (org.spongepowered.api.world.DimensionType) (Object) dimensionType,
                         dimensionId, worldFolderName, worldSettings, generatorOptions);
+            } else {
+                // create config
+                ((IMixinWorldInfo) worldInfo).setDimensionType((org.spongepowered.api.world.DimensionType)(Object) dimensionType);
+                ((IMixinWorldInfo) worldInfo).createWorldConfig();
+                ((WorldProperties) worldInfo).setGenerateSpawnOnLoad(((IMixinDimensionType)(Object) dimensionType).shouldGenerateSpawnOnLoad());
             }
 
             // Safety check to ensure we'll get a unique id no matter what
@@ -731,9 +736,6 @@ public final class WorldManager {
                 server.setResourcePackFromWorld(worldFolderName, saveHandler);
             }
 
-            // TODO Revise this silly configuration system
-            ((IMixinWorldInfo) worldInfo).createWorldConfig();
-
             // Step 6 - Cache the WorldProperties we've made so we don't load from disk later.
             registerWorldProperties((WorldProperties) worldInfo);
 
@@ -744,7 +746,7 @@ public final class WorldManager {
             }
 
             // Step 7 - Finally, we can create the world and tell it to load
-            final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, worldInfo, worldSettings, false);
+            final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, worldInfo, worldSettings);
 
             SpongeImpl.getLogger().info("Loading world [{}] ({})", ((org.spongepowered.api.world.World) worldServer).getName(), getDimensionType
                     (dimensionId).get().getName());
@@ -758,6 +760,7 @@ public final class WorldManager {
         worldSettings.setGeneratorOptions(generatorOptions);
 
         ((IMixinWorldSettings) (Object) worldSettings).setDimensionType(dimensionType);
+        ((IMixinWorldSettings)(Object) worldSettings).setGenerateSpawnOnLoad(((IMixinDimensionType) dimensionType).shouldGenerateSpawnOnLoad());
 
         final WorldInfo worldInfo = new WorldInfo(worldSettings, worldFolderName);
         setUuidOnProperties(dimensionId == 0 ? currentSaveRoot.getParent() : currentSaveRoot, (WorldProperties) worldInfo);
@@ -770,7 +773,7 @@ public final class WorldManager {
     }
 
     public static WorldServer createWorldFromProperties(int dimensionId, ISaveHandler saveHandler, WorldInfo worldInfo, @Nullable WorldSettings
-            worldSettings, boolean prepareSpawn) {
+            worldSettings) {
         final MinecraftServer server = SpongeImpl.getServer();
         final WorldServer worldServer;
         if (dimensionId == 0) {
@@ -802,14 +805,7 @@ public final class WorldManager {
         reorderWorldsVanillaFirst();
 
         SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) worldServer));
-
-        if (prepareSpawn) {
-            ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
-        }
-
-        // Ensure that config is initialized
-        SpongeHooks.getActiveConfig(worldServer, true);
-
+        ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
         return worldServer;
     }
 
