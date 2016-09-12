@@ -40,151 +40,151 @@ import java.util.Iterator;
 import java.util.Optional;
 
 public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, net.minecraft.item.ItemStack> {
-    
+
     @Override
-    default public Translation getName() {
+    default Translation getName() {
         return this.getRootLens().getName(this.getInventory());
     }
 
     @Override
-    default public Optional<ItemStack> poll() {
+    default Optional<ItemStack> poll() {
         return Adapter.Logic.pollSequential(this);
     }
 
     @Override
-    default public Optional<ItemStack> poll(int limit) {
+    default Optional<ItemStack> poll(int limit) {
         return Adapter.Logic.pollSequential(this, limit);
     }
 
     @Override
-    default public Optional<ItemStack> peek() {
+    default Optional<ItemStack> peek() {
         return Adapter.Logic.peekSequential(this);
     }
 
     @Override
-    default public Optional<ItemStack> peek(int limit) {
+    default Optional<ItemStack> peek(int limit) {
         return Adapter.Logic.peekSequential(this, limit);
     }
 
     @Override
-    default public InventoryTransactionResult offer(ItemStack stack) {
-//        try {
-            return Adapter.Logic.appendSequential(this, stack);
-//        } catch (Exception ex) {
-//            return false;
-//        }
+    default InventoryTransactionResult offer(ItemStack stack) {
+        //        try {
+        return Adapter.Logic.appendSequential(this, stack);
+        //        } catch (Exception ex) {
+        //            return false;
+        //        }
     }
 
     @Override
-    default public InventoryTransactionResult set(ItemStack stack) {
+    default InventoryTransactionResult set(ItemStack stack) {
         return Adapter.Logic.insertSequential(this, stack);
     }
 
     @Override
-    default public int size() {
+    default int size() {
         return Adapter.Logic.countStacks(this);
     }
 
     @Override
-    default public int totalItems() {
+    default int totalItems() {
         return Adapter.Logic.countItems(this);
     }
 
     @Override
-    default public int capacity() {
+    default int capacity() {
         return Adapter.Logic.getCapacity(this);
     }
 
     @Override
-    default public boolean isEmpty() {
+    default boolean isEmpty() {
         return this.getRootLens().getChildren().size() == 0;
     }
 
     @Override
-    default public boolean contains(ItemStack stack) {
+    default boolean contains(ItemStack stack) {
         return Adapter.Logic.contains(this, stack);
     }
 
     @Override
-    default public boolean contains(ItemType type) {
+    default boolean contains(ItemType type) {
         return Adapter.Logic.contains(this, type);
     }
 
     @Override
-    default public int getMaxStackSize() {
+    default int getMaxStackSize() {
         return this.getRootLens().getMaxStackSize(this.getInventory());
     }
 
     @Override
-    default public void setMaxStackSize(int size) {
+    default void setMaxStackSize(int size) {
         throw new UnsupportedOperationException("This inventory does not support stack limit adjustment");
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default public <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Inventory child, Class<T> property) {
+    default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Inventory child, Class<T> property) {
         return (Collection<T>) Adapter.Logic.getProperties(this, child, property);
     }
 
     @Override
-    default public <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Class<T> property) {
-        return Collections.<T>emptyList();
+    default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Class<T> property) {
+        return Collections.emptyList();
     }
 
     @Override
-    default public <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property, Object key) {
-        return Optional.<T>empty(); // TODO!
+    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property, Object key) {
+        return Optional.empty(); // TODO!
     }
 
     @Override
-    default public <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Class<T> property, Object key) {
-        return Optional.<T>empty(); // TODO!
+    default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Class<T> property, Object key) {
+        return Optional.empty(); // TODO!
     }
 
     @Override
-    default public Iterator<Inventory> iterator() {
+    default Iterator<Inventory> iterator() {
         return new Adapter.Iter(this);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default public <T extends Inventory> T query(Class<?>... types) {
+    default <T extends Inventory> T query(Class<?>... types) {
         return (T) Query.compile(this, types).execute();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default public <T extends Inventory> T query(ItemType... types) {
+    default <T extends Inventory> T query(ItemType... types) {
         return (T) Query.compile(this, types).execute();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default public <T extends Inventory> T query(ItemStack... types) {
+    default <T extends Inventory> T query(ItemStack... types) {
         return (T) Query.compile(this, types).execute();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default public <T extends Inventory> T query(InventoryProperty<?, ?>... props) {
+    default <T extends Inventory> T query(InventoryProperty<?, ?>... props) {
         return (T) Query.compile(this, props).execute();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default public <T extends Inventory> T query(Translation... names) {
+    default <T extends Inventory> T query(Translation... names) {
         return (T) Query.compile(this, names).execute();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default public <T extends Inventory> T query(String... args) {
+    default <T extends Inventory> T query(String... args) {
         return (T) Query.compile(this, args).execute();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default public <T extends Inventory> T query(Object... args) {
+    default <T extends Inventory> T query(Object... args) {
         return (T) Query.compile(this, args).execute();
     }
 

@@ -71,7 +71,7 @@ public class OrderedInventoryLensImpl extends MinecraftLens implements OrderedIn
     private void cache0(Lens<IInventory, ItemStack> lens) {
         for (Lens<IInventory, ItemStack> child : lens.getSpanningChildren()) {
             if (child instanceof SlotLens) {
-                this.slotCache.add(new LensHandle<IInventory, ItemStack>(child, lens.getProperties(child)));
+                this.slotCache.add(new LensHandle<>(child, lens.getProperties(child)));
             } else {
                 this.cache0(child);
             }

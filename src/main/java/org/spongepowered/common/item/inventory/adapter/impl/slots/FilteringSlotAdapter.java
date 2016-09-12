@@ -28,8 +28,10 @@ import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.slot.FilteringSlot;
+import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.slots.FilteringSlotLens;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.function.Predicate;
 
@@ -54,4 +56,27 @@ public class FilteringSlotAdapter extends SlotAdapter implements FilteringSlot {
         return filter == null ? true : filter.test(type);
     }
 
+    @Override
+    public InventoryTransactionResult offer(ItemStack stack) {
+        final boolean canOffer = isValidItem(stack);
+        if (!canOffer) {
+            final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE);
+            result.reject(ItemStackUtil.cloneDefensive(stack));
+            return result.build();
+        }
+
+        return super.offer(stack);
+    }
+
+    @Override
+    public InventoryTransactionResult set(ItemStack stack) {
+        final boolean canSet = isValidItem(stack);
+        if (!canSet) {
+            final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE);
+            result.reject(ItemStackUtil.cloneDefensive(stack));
+            return result.build();
+        }
+
+        return super.set(stack);
+    }
 }

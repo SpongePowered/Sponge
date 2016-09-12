@@ -47,7 +47,6 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 
@@ -56,7 +55,7 @@ import java.util.List;
 
 @NonnullByDefault
 @Mixin(Container.class)
-@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
+@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "fabric$")})
 public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer {
 
     @Shadow public List<Slot> inventorySlots;
@@ -75,16 +74,16 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     private boolean captureInventory = false;
     private List<SlotTransaction> capturedSlotTransactions = new ArrayList<>();
-    private Fabric<IInventory>  inventory;
+    private Fabric<IInventory> fabric;
     private SlotCollection slots;
     private Lens<IInventory, ItemStack> lens;
     private boolean initialized;
 
     private void init() {
         this.initialized = true;
-        this.inventory = MinecraftFabric.of(this$);
+        this.fabric = MinecraftFabric.of(this$);
         this.slots = ContainerUtil.countSlots(this$);
-        this.lens = MinecraftLens.of(this$, this.slots);
+        this.lens = ContainerUtil.getLens(this$, this.slots);
     }
 
     /**
@@ -112,7 +111,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     /**
      * @author bloodmc
-     * @reason All player inventory changes that need to be synced to
+     * @reason All player fabric changes that need to be synced to
      * client flow through this method. Overwrite is used as no mod
      * should be touching this method.
      *
@@ -180,19 +179,20 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         if (!this.initialized) {
             this.init();
         }
-        return slots;
+        return this.slots;
     }
 
     public Lens<IInventory, ItemStack> inventory$getRootLens() {
         if (!this.initialized) {
             this.init();
         }
-        return lens;
+        return this.lens;
     }
 
     public Fabric<IInventory> inventory$getInventory() {
         if (!this.initialized) {
             this.init();
         }
-        return inventory;
-    }}
+        return this.fabric;
+    }
+}
