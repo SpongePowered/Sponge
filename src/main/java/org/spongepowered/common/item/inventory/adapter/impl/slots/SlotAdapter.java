@@ -59,12 +59,12 @@ public class SlotAdapter extends Adapter implements Slot {
     public int slotNumber = -1;
 
     public SlotAdapter(net.minecraft.inventory.Slot slot) {
-        this(MinecraftFabric.of(slot), new SlotLensImpl(((IMixinSlot)slot).getSlotIndex()));
+        this(MinecraftFabric.of(slot), new SlotLensImpl(((IMixinSlot)slot).getSlotIndex()), (Inventory)slot.inventory);
         this.slotNumber = slot.slotNumber;
     }
 
-    public SlotAdapter(Fabric<IInventory> inventory, SlotLens<IInventory, net.minecraft.item.ItemStack> lens) {
-        super(inventory, lens);
+    public SlotAdapter(Fabric<IInventory> inventory, SlotLens<IInventory, net.minecraft.item.ItemStack> lens, Inventory parent) {
+        super(inventory, lens, parent);
         this.slot = lens;
         this.ordinal = lens.getOrdinal(inventory);
     }
@@ -155,7 +155,7 @@ public class SlotAdapter extends Adapter implements Slot {
 //        this.inventory.markDirty();
 //        return InventoryTransactionResult.successNoTransactions();
 
-        Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
+        InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
         int maxStackSize = this.slot.getMaxStackSize(this.inventory);
@@ -183,7 +183,7 @@ public class SlotAdapter extends Adapter implements Slot {
 
     @Override
     public InventoryTransactionResult set(ItemStack stack) {
-        Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
+        InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
         net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);

@@ -48,7 +48,7 @@ public class CraftingOutputSlotLensImpl extends OutputSlotLensImpl implements Cr
     
     @Override
     public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new CraftingOutputAdapter(inv, this);
+        return new CraftingOutputAdapter(inv, this, parent);
     }
 
 }

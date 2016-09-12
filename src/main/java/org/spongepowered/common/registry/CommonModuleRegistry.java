@@ -73,6 +73,8 @@ import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -140,7 +142,9 @@ import org.spongepowered.common.event.spawn.SpongeWeatherSpawnCauseBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
+import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
+import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetypeBuilder;
 import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
@@ -299,6 +303,8 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
             .registerBuilderSupplier(TileEntityArchetype.Builder.class, SpongeTileEntityArchetypeBuilder::new)
             .registerBuilderSupplier(Schematic.Builder.class, SpongeSchematicBuilder::new)
+            .registerBuilderSupplier(InventoryArchetype.Builder.class, SpongeInventoryArchetypeBuilder::new)
+            .registerBuilderSupplier(Inventory.Builder.class, SpongeInventoryBuilder::new)
         ;
     }
 
@@ -404,6 +410,7 @@ public final class CommonModuleRegistry {
             .registerModule(PickupRule.class, new PickupRuleRegistryModule())
             .registerModule(BlockPaletteType.class, new PaletteTypeRegistryModule())
             .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
+            .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
             ;
     }
 
