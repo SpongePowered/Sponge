@@ -302,6 +302,7 @@
         "event.cause.entity.damage.MixinMinecraftBlockDamageSource",
         "event.cause.entity.damage.MixinMinecraftFallingBlockDamageSource",
         "event.cause.entity.damage.MixinIndirectEntityDamageSource",
+        "inventory.MixinInventoryEnderChest",
         "inventory.MixinInventoryHelper",
         "inventory.MixinInventoryLargeChest",
         "item.MixinEnchantment",
