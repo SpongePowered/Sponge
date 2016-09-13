@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.slots;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -46,9 +48,18 @@ public class FilteringSlotLensImpl extends SlotLensImpl implements FilteringSlot
 
     public FilteringSlotLensImpl(int index, Class<? extends Inventory> adapterType, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
         super(index, adapterType);
-        
+
         this.stackFilter = stackFilter;
-        this.typeFilter = typeFilter; 
+        this.typeFilter = typeFilter;
+    }
+
+    @Override
+    public boolean setStack(Fabric<IInventory> inv, net.minecraft.item.ItemStack stack) {
+        if (this.getItemStackFilter().test((ItemStack) stack)) {
+            checkNotNull(inv, "Target inventory").setStack(this.base, stack);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -60,10 +71,10 @@ public class FilteringSlotLensImpl extends SlotLensImpl implements FilteringSlot
     public Predicate<ItemType> getItemTypeFilter() {
         return this.typeFilter;
     }
-    
+
     @Override
     public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
         return new FilteringSlotAdapter(inv, this);
     }
-    
+
 }

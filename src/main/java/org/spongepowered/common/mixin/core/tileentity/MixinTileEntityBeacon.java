@@ -54,6 +54,7 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
+import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
 import java.util.List;
 import java.util.Optional;
@@ -67,7 +68,7 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     @Shadow private Potion primaryEffect;
     @Shadow private Potion secondaryEffect;
     @Shadow private int levels;
-    @Shadow public abstract boolean isItemValidForSlot(int index, ItemStack stack);
+    @Override @Shadow public abstract boolean isItemValidForSlot(int index, ItemStack stack);
 
     private Fabric<IInventory> fabric;
     private SlotCollection slots;
@@ -76,13 +77,13 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
+        InputSlotLensImpl lens = new InputSlotLensImpl(0, itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
+                itemType -> isItemValidForSlot(0, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)));
+
         this.slots = new SlotCollection.Builder()
-                .add(1)
-                .add(InputSlotAdapter.class, slotIndex -> new InputSlotLensImpl(0, itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
-                        itemType -> isItemValidForSlot(0, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))))
+                .add(InputSlotAdapter.class, i -> lens)
                 .build();
-        // TODO Make a Single Slot Inventory lens
-        this.lens = new OrderedInventoryLensImpl(0, 1, 1, slots);
+        this.lens = lens;
     }
 
     @Override
