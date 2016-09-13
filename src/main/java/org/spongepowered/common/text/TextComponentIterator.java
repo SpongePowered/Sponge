@@ -47,6 +47,9 @@ public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> 
 
     public TextComponentIterator(Iterator<ITextComponent> children) {
         this.children = checkNotNull(children, "children");
+        if (this.children.hasNext()) {
+            this.setCurrentChildIterator();
+        }
     }
 
     @Override
@@ -71,7 +74,7 @@ public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> 
         ITextComponent result = this.currentChildIterator.next();
 
         if (!this.currentChildIterator.hasNext() && this.children.hasNext()) {
-            this.currentChildIterator = ((IMixinChatComponent) this.children.next()).withChildren().iterator();
+            this.setCurrentChildIterator();
         }
 
         return result;
@@ -87,10 +90,14 @@ public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> 
         // at the end of this method will lead to a NoSuchElementException. To fix this, we
         // initialize currentChildIterator so that the following call to 'hasNext()' will properly return 'false' if necessary
         if (this.children.hasNext()) {
-            this.currentChildIterator = ((IMixinChatComponent) this.children.next()).withChildren().iterator();
+            this.setCurrentChildIterator();
         }
 
         return result;
+    }
+
+    private void setCurrentChildIterator() {
+        this.currentChildIterator = ((IMixinChatComponent) this.children.next()).withChildren().iterator();
     }
 
 }
