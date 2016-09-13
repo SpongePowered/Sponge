@@ -31,6 +31,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.network.play.server.SPacketSetSlot;
+import net.minecraft.util.EnumHand;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
@@ -58,7 +59,9 @@ public class BookFaker {
         receiver.sendPacket(new SPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
 
         // Next we tell the client to open the Book GUI
-        receiver.sendPacket(new SPacketCustomPayload("MC|BOpen", new PacketBuffer(Unpooled.buffer())));
+        PacketBuffer packetbuffer = new PacketBuffer(Unpooled.buffer());
+        packetbuffer.writeEnumValue(EnumHand.MAIN_HAND);
+        receiver.sendPacket(new SPacketCustomPayload("MC|BOpen", packetbuffer));
 
         // Now we can remove the fake Book since it's contents will have already
         // been transferred to the GUI
