@@ -63,7 +63,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,12 +72,8 @@ import javax.annotation.Nullable;
 /**
  * A resolver that acts like Vanilla Minecraft in many regards.
  */
-// TODO decide if we want selector resolvers as part of the API, ask @kenzierocks for details
 public class SelectorResolver {
 
-    private static final Function<CommandSource, String> GET_NAME = CommandSource::getName;
-    private static final Vector3d ORIGIN = new Vector3d(0, 0, 0);
-    private static final Function<Number, Double> TO_DOUBLE = Number::doubleValue;
     private static final Collection<SelectorType> INFINITE_TYPES = ImmutableSet.of(SelectorTypes.ALL_ENTITIES, SelectorTypes.ALL_PLAYERS);
 
     private static Extent extentFromSource(CommandSource origin) {
@@ -101,26 +96,24 @@ public class SelectorResolver {
 
     private final Collection<Extent> extents;
     private final Vector3d position;
-    private final Optional<CommandSource> original;
     private final Selector selector;
     private final Predicate<Entity> selectorFilter;
 
     public SelectorResolver(Collection<? extends Extent> extents, Selector selector) {
-        this(extents, null, null, selector);
+        this(extents, null, selector);
     }
 
     public SelectorResolver(Location<World> location, Selector selector) {
-        this(ImmutableSet.of(location.getExtent()), location.getPosition(), null, selector);
+        this(ImmutableSet.of(location.getExtent()), location.getPosition(), selector);
     }
 
     public SelectorResolver(CommandSource origin, Selector selector) {
-        this(asSet(Optional.ofNullable(extentFromSource(origin))), positionFromSource(origin), origin, selector);
+        this(asSet(Optional.ofNullable(extentFromSource(origin))), positionFromSource(origin), selector);
     }
 
-    private SelectorResolver(Collection<? extends Extent> extents, @Nullable Vector3d position, @Nullable CommandSource original, Selector selector) {
+    private SelectorResolver(Collection<? extends Extent> extents, @Nullable Vector3d position, Selector selector) {
         this.extents = ImmutableSet.copyOf(extents);
-        this.position = position == null ? ORIGIN : position;
-        this.original = Optional.ofNullable(original);
+        this.position = position == null ? Vector3d.ZERO : position;
         this.selector = checkNotNull(selector);
         this.selectorFilter = makeFilter();
     }
@@ -129,6 +122,10 @@ public class SelectorResolver {
         final Selector sel = this.selector;
         Vector3d position = getPositionOrDefault(this.position, ArgumentTypes.POSITION);
         ArrayList<Predicate<Entity>> filters = new ArrayList<>(sel.getArguments().size());
+
+        if (isPlayerOnlySelector()) {
+            filters.add(requireTypePredicate(Entity.class, Player.class));
+        }
 
         addTypeFilters(filters);
         addDimensionFilters(position, filters);
@@ -140,22 +137,20 @@ public class SelectorResolver {
         addTeamFilters(filters);
         addScoreFilters(filters);
 
-        if (isPlayerOnlySelector(sel.getType())) {
-            // insert at the start so it applies first
-            filters.add(0, requireTypePredicate(Entity.class, Player.class));
-        }
         // Pack the list before returning it to improve space efficiency
         filters.trimToSize();
         return Functional.predicateAnd(filters);
     }
 
-    private boolean isPlayerOnlySelector(SelectorType selectorType) {
-        return selectorType == SelectorTypes.ALL_PLAYERS || selectorType == SelectorTypes.NEAREST_PLAYER;
+    private boolean isPlayerOnlySelector() {
+        SelectorType type = this.selector.getType();
+        boolean untypedRandom = type == SelectorTypes.RANDOM && !this.selector.get(ArgumentTypes.ENTITY_TYPE).isPresent();
+        return type == SelectorTypes.ALL_PLAYERS || type == SelectorTypes.NEAREST_PLAYER || untypedRandom;
     }
 
     private void addDimensionFilters(final Vector3d position, List<Predicate<Entity>> filters) {
         Selector sel = this.selector;
-        Vector3d boxDimensions = getPositionOrDefault(ORIGIN, ArgumentTypes.DIMENSION);
+        Vector3d boxDimensions = getPositionOrDefault(Vector3d.ZERO, ArgumentTypes.DIMENSION);
         Vector3d det1 = position;
         Vector3d det2 = position.add(boxDimensions);
         final Vector3d boxMin = det1.min(det2);
@@ -244,11 +239,6 @@ public class SelectorResolver {
 
     private void addRotationFilters(List<Predicate<Entity>> filters) {
         Selector sel = this.selector;
-        // If the Z's are uncommented, don't forget to implement them
-        // Optional<Double> rotMinZ =
-        // sel.get(ArgumentTypes.ROTATION.minimum().z());
-        // Optional<Double> rotMaxZ =
-        // sel.get(ArgumentTypes.ROTATION.maximum().z());
         Optional<Double> rotMinX = sel.get(ArgumentTypes.ROTATION.minimum().x());
         if (rotMinX.isPresent()) {
             final double rmx = rotMinX.get();
@@ -317,14 +307,10 @@ public class SelectorResolver {
     }
 
     private Vector3d getPositionOrDefault(Vector3d pos, ArgumentHolder.Vector3<?, ? extends Number> vecTypes) {
-        Optional<Double> x = this.selector.get(vecTypes.x()).map(TO_DOUBLE);
-        Optional<Double> y = this.selector.get(vecTypes.y()).map(TO_DOUBLE);
-        Optional<Double> z = this.selector.get(vecTypes.z()).map(TO_DOUBLE);
+        Optional<Double> x = this.selector.get(vecTypes.x()).map(Number::doubleValue);
+        Optional<Double> y = this.selector.get(vecTypes.y()).map(Number::doubleValue);
+        Optional<Double> z = this.selector.get(vecTypes.z()).map(Number::doubleValue);
         return new Vector3d(x.orElse(pos.getX()), y.orElse(pos.getY()), z.orElse(pos.getZ()));
-    }
-
-    public String getName() {
-        return this.original.map(GET_NAME).orElse("SelectorResolver");
     }
 
     public List<Entity> resolve() {
@@ -345,10 +331,14 @@ public class SelectorResolver {
                 List<Entity> holder = entityStream.collect(Collectors.toList());
                 Collections.shuffle(holder);
                 entityStream = holder.stream();
+            } else {
+                entityStream = entityStream.sorted(distanceSort(isReversed));
             }
             entityStream = entityStream.limit(maxToSelect);
+        } else {
+            entityStream = entityStream.sorted(distanceSort(isReversed));
         }
-        return entityStream.sorted(distanceSort(isReversed)).collect(GuavaCollectors.toImmutableList());
+        return entityStream.collect(GuavaCollectors.toImmutableList());
     }
 
     private Comparator<? super Entity> distanceSort(boolean isReversed) {
