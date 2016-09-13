@@ -33,6 +33,18 @@ apply plugin: 'net.minecrell.vanillagradle.server'
 // Create task to resolve SpongeAPI revision
 apply from: 'api-revision.gradle'
 
+configurations {
+    fastutil
+    compile {
+        extendsFrom fastutil
+    }
+}
+
+plugins.withType(MavenPlugin) {
+    // Include fastutil in POM
+    conf2ScopeMappings.addMapping(MavenPlugin.COMPILE_PRIORITY, configurations.fastutil, Conf2ScopeMappingContainer.COMPILE)
+}
+
 // Apply shared ForgeGradle configuration
 ext.common = project
 apply from: 'gradle/minecraft.gradle'
@@ -43,13 +55,6 @@ ext.apiVersion = version
 
 minecraft {
     version = '1.10.2'
-}
-
-configurations {
-    fastutil
-    compile {
-        extendsFrom fastutil
-    }
 }
 
 dependencies {
