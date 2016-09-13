@@ -990,7 +990,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return this.getDimensionId();
     }
 
-
     /**
      * @author gabizou - February 7th, 2016
      * @author gabizou - September 3rd, 2016 - Moved from MixinWorld since WorldServer overrides the method.
@@ -1014,7 +1013,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         List<Entity> entityList = new ArrayList<>();
         for (net.minecraft.entity.Entity entity : entities) {
-            entityList.add((Entity) entity);
+            if (this.canAddEntity(entity)) {
+                entityList.add((Entity) entity);
+            }
         }
         SpawnCause cause = SpawnCause.builder().type(InternalSpawnTypes.CHUNK_LOAD).build();
         List<NamedCause> causes = new ArrayList<>();
