@@ -553,11 +553,6 @@ public final class CauseTracker {
         if (!isForced && !getMixinWorld().isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
             return false;
         } else {
-            if (minecraftEntity instanceof EntityPlayer) {
-                EntityPlayer entityplayer = (EntityPlayer) minecraftEntity;
-                minecraftWorld.playerEntities.add(entityplayer);
-                minecraftWorld.updateAllPlayersSleepingFlag();
-            }
 
             // Sponge Start - throw an event
 
@@ -565,7 +560,7 @@ public final class CauseTracker {
                     event =
                     SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(entity), getWorld());
             SpongeImpl.postEvent(event);
-            if (!event.isCancelled()) {
+            if (entity instanceof EntityPlayer || !event.isCancelled()) {
                 getMixinWorld().forceSpawnEntity(entity);
             }
             // Sponge end
