@@ -29,7 +29,6 @@ import static org.spongepowered.common.event.tracking.TrackingUtil.iterateChange
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import javafx.geometry.Pos;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
