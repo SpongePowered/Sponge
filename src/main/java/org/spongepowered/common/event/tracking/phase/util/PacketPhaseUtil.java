@@ -54,7 +54,7 @@ public final class PacketPhaseUtil {
                 slot.offer((org.spongepowered.api.item.inventory.ItemStack) originalStack);
             }*/
 
-            final Slot nmsSlot = player.inventoryContainer.getSlot(slotNumber);
+            final Slot nmsSlot = player.openContainer.getSlot(slotNumber);
             if (nmsSlot != null) {
                 nmsSlot.putStack(originalStack);
             }
