@@ -35,6 +35,7 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.world.Locatable;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -92,7 +93,7 @@ public class WrapperICommandSender implements ICommandSender {
         if (this.source instanceof Locatable) {
             return (World) ((Locatable) this.source).getWorld();
         }
-        return null;
+        return SpongeImpl.getServer().getEntityWorld(); // Use overworld as default
     }
 
     @Override
@@ -115,11 +116,7 @@ public class WrapperICommandSender implements ICommandSender {
 
     @Override
     public MinecraftServer getServer() {
-        final World world = getEntityWorld();
-        if (world != null) {
-            return world.getMinecraftServer();
-        }
-        return null;
+        return getEntityWorld().getMinecraftServer();
     }
 
     public static ICommandSender of(CommandSource source) {
