@@ -64,6 +64,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -74,6 +75,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -86,6 +88,7 @@ import org.spongepowered.common.event.tracking.phase.util.PacketFunction;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -165,6 +168,7 @@ public final class PacketPhase extends TrackingPhase {
         default boolean ignoresItemPreMerges() {
             return false;
         }
+
         default boolean doesCaptureEntityDrops() {
             return false;
         }
@@ -194,6 +198,45 @@ public final class PacketPhase extends TrackingPhase {
                     causeTracker.getMixinWorld().forceSpawnEntity(entity);
                 }
             }
+        }
+
+        default boolean shouldCaptureEntity() {
+            return false;
+        }
+
+        /**
+         * Defaulted method for packet phase states to spawn an entity directly.
+         * This should be overridden by all packet phase states that are handling spawns
+         * customarily with contexts and such. Captured entities are handled in
+         * their respective {@link PacketFunction}s.
+         *
+         * @param context
+         * @param entity
+         * @param chunkX
+         * @param chunkZ
+         * @return True if the entity was spawned
+         */
+        default boolean spawnEntity(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+            final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
+            final WorldServer minecraftWorld = (WorldServer) minecraftEntity.worldObj;
+            final Player player = context.getSource(Player.class)
+                            .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a player", context));
+            final ArrayList<Entity> entities = new ArrayList<>(1);
+            entities.add(entity);
+            final EntitySpawnCause cause = EntitySpawnCause
+                    .builder()
+                    .entity(player)
+                    .type(InternalSpawnTypes.PLACEMENT)
+                    .build();
+            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Cause.source(cause).build(),
+                    entities, (World) minecraftWorld);
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
+                ((IMixinWorldServer) minecraftWorld).forceSpawnEntity(entity);
+                return true;
+            }
+            return false;
         }
     }
 
@@ -837,9 +880,9 @@ public final class PacketPhase extends TrackingPhase {
 
     @Override
     public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
-        return this.allowEntitySpawns(phaseState)
+        return ((IPacketState) phaseState).shouldCaptureEntity()
                ? context.getCapturedEntities().add(entity)
-               : super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
+               : ((IPacketState) phaseState).spawnEntity(context, entity, chunkX, chunkZ);
     }
 
     @SuppressWarnings("unchecked")
