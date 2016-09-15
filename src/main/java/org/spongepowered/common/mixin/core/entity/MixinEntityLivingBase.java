@@ -127,6 +127,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected int recentlyHit;
     @Shadow protected float lastDamage;
     @Shadow @Nullable protected EntityPlayer attackingPlayer;
+    @Shadow protected ItemStack activeItemStack;
+    // Empty body so that we can call super() in MixinEntityPlayer
+    @Shadow public void stopActiveHand() {
+
+    }
     @Shadow protected abstract void damageArmor(float p_70675_1_);
     @Shadow protected abstract void setBeenAttacked();
     @Shadow protected abstract SoundEvent getDeathSound();
@@ -659,7 +664,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 if (!world.isRemote) {
                     Transform<org.spongepowered.api.world.World> fromTransform = this.getTransform().setPosition(new Vector3d(d0, d1, d2));
                     Transform<org.spongepowered.api.world.World> toTransform = this.getTransform().setPosition(new Vector3d(this.posX, this.posY, this.posZ));
-    
+
                     MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent((Entity) (Object) this, fromTransform, toTransform, false);
                     if (event.isCancelled()) {
                         this.posX = d0;
@@ -803,7 +808,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 //            EntityUtil.toMixin(entityItem).setDestructCause(Cause.of(NamedCause.of("PickedUp", this)));
         }
     }
-
     // Data delegated methods
 
     @Override
