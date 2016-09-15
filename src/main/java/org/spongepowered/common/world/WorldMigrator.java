@@ -26,7 +26,7 @@ package org.spongepowered.common.world;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
-import org.apache.commons.io.FileUtils;
+import org.spongepowered.api.util.file.CopyFileVisitor;
 import org.spongepowered.common.SpongeImpl;
 
 import java.io.IOException;
@@ -98,7 +98,7 @@ public class WorldMigrator {
                     SpongeImpl.getLogger().info("Migrating [{}] from [{}].", oldWorldPath.getFileName(), oldWorldContainer);
                     try {
                         worldPath = renameToVanillaNetherOrEnd(worldContainer, oldWorldPath, worldPath);
-                        FileUtils.copyDirectory(oldWorldPath.toFile(), worldPath.toFile());
+                        Files.walkFileTree(oldWorldPath, new CopyFileVisitor(worldPath));
                         fixInnerNetherOrEndRegionData(worldPath);
                         removeInnerNameFolder(worldPath);
                         migrated.add(worldPath);
