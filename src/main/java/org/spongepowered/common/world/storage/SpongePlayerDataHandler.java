@@ -132,7 +132,7 @@ public final class SpongePlayerDataHandler {
         checkState(Holder.INSTANCE.hasInitialized, "PlayerDataHandler hasn't initialized yet!");
         SpongePlayerDataHandler instance = Holder.INSTANCE;
         try {
-            final Path newDatPath = instance.playerDir.resolve(id + "_new.dat");
+            final Path newDatPath = instance.playerDir.resolve(id + "dat.tmp");
             if (Files.notExists(newDatPath)) {
                 Files.createFile(newDatPath);
             }
