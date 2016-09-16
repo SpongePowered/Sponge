@@ -56,6 +56,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -231,7 +232,16 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
 
     @Override
     public ItemStack.Builder remove(Class<? extends DataManipulator<?, ?>> manipulatorClass) {
-        return null;
+        if (this.itemDataSet != null) {
+            for (final Iterator<DataManipulator<?, ?>> iterator = this.itemDataSet.iterator(); iterator.hasNext(); ) {
+                final DataManipulator<?, ?> next = iterator.next();
+                if (manipulatorClass.isInstance(next)) {
+                    iterator.remove();
+                    break;
+                }
+            }
+        }
+        return this;
     }
 
     @Override
@@ -241,7 +251,35 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
 
     @Override
     public Optional<ItemStack> build(DataView container) throws InvalidDataException {
-        return null;
+        checkNotNull(container);
+        if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT)
+            || !container.contains(DataQueries.ITEM_DAMAGE_VALUE)) {
+            return Optional.empty();
+        }
+        reset();
+
+        final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
+        quantity(count);
+
+        final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);
+        final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemTypeId).get();
+        itemType(itemType);
+
+        this.damageValue = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
+        if (container.contains(DataQueries.UNSAFE_NBT)) {
+            final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
+            if (compound.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+                compound.removeTag(NbtDataUtil.SPONGE_DATA);
+            }
+            this.compound = compound;
+        }
+        if (container.contains(DataQueries.DATA_MANIPULATORS)) {
+            final List<DataView> views = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
+            final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(views);
+            this.itemDataSet = new HashSet<>();
+            manipulators.forEach(this.itemDataSet::add);
+        }
+        return Optional.of(this.build());
     }
 
     @Override

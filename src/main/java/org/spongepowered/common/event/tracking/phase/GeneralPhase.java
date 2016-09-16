@@ -278,7 +278,7 @@ public final class GeneralPhase extends TrackingPhase {
 
         }
 
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings({"unchecked", "rawtypes"})
         private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, Cause cause, CauseTracker causeTracker, PhaseContext context) {
             if (snapshots.isEmpty()) {
                 return;
