@@ -81,6 +81,8 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.dismount.DismountType;
+import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
@@ -152,7 +154,7 @@ public abstract class MixinEntity implements IMixinEntity {
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
     private static final String RIDING_ENTITY_FIELD = "Lnet/minecraft/entity/Entity;ridingEntity:Lnet/minecraft/entity/Entity;";
     @SuppressWarnings("unused")
-	private static final String
+    private static final String
             ENTITY_ITEM_INIT =
             "Lnet/minecraft/entity/item/EntityItem;<init>(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V";
     // @formatter:off
@@ -169,11 +171,13 @@ public abstract class MixinEntity implements IMixinEntity {
     private BlockPos lastCollidedBlockPos;
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
     @SuppressWarnings("unused")
-	private SpongeProfileManager spongeProfileManager;
+    private SpongeProfileManager spongeProfileManager;
     @SuppressWarnings("unused")
-	private UserStorageService userStorageService;
+    private UserStorageService userStorageService;
     private Timing timing;
 
+    @Shadow public net.minecraft.entity.Entity ridingEntity;
+    @Shadow private List<Entity> riddenByEntities;
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World world;
     @Shadow public double posX;
@@ -220,7 +224,6 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract List<net.minecraft.entity.Entity> shadow$getPassengers();
     @Shadow public abstract net.minecraft.entity.Entity getLowestRidingEntity();
     @Shadow public abstract net.minecraft.entity.Entity getRidingEntity();
-    @Shadow public abstract void dismountRidingEntity();
     @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
     @Shadow public abstract boolean isSprinting();
@@ -237,6 +240,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void extinguish();
     @Shadow protected abstract void setFlag(int flag, boolean set);
+    @Shadow protected abstract void removePassenger(net.minecraft.entity.Entity passenger);
 
     // @formatter:on
 
@@ -288,14 +292,44 @@ public abstract class MixinEntity implements IMixinEntity {
         }
     }
 
-    @Inject(method = "dismountRidingEntity()V", at = @At(value = "FIELD", target = RIDING_ENTITY_FIELD, ordinal = 1), cancellable = true)
-    public void onDismountRidingEntity(CallbackInfo ci) {
+    /**
+     * @author rexbut - December 16th, 2016
+     *
+     * @reason - adjusted to support {@link DismountTypes}
+     */
+    @Overwrite
+    public void dismountRidingEntity() {
+        if (this.getRidingEntity().isDead) {
+            this.dismountRidingEntity(DismountTypes.DEATH);
+        } else {
+            this.dismountRidingEntity(DismountTypes.PLAYER);
+        }
+    }
+
+    @Override
+    public boolean dismountRidingEntity(DismountType type) {
         if (!this.world.isRemote && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
             if (SpongeImpl.postEvent(SpongeEventFactory.
-                    createRideEntityEventDismount(Cause.of(NamedCause.source(this)), (Entity) this.getRidingEntity()))) {
-                ci.cancel();
+                    createRideEntityEventDismount(Cause.of(NamedCause.source(this), NamedCause.of("DismountType", type)), (Entity) this.getRidingEntity(), type))) {
+                return false;
             }
         }
+
+        if (this.ridingEntity != null) {
+            MixinEntity entity = (MixinEntity) (Object) this.ridingEntity;
+            this.ridingEntity = null;
+            entity.removePassenger((net.minecraft.entity.Entity) (Object)this);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean removePassengers(DismountType type) {
+        boolean dismount = false;
+        for (int i = this.riddenByEntities.size() - 1; i >= 0; --i) {
+            dismount = ((IMixinEntity)this.riddenByEntities.get(i)).dismountRidingEntity(type) || dismount;
+        }
+        return dismount;
     }
 
     @Inject(method = "setSize", at = @At("RETURN"))
