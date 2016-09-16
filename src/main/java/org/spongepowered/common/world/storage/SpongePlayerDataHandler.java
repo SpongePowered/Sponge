@@ -65,7 +65,7 @@ public final class SpongePlayerDataHandler {
 
     public static void init() {
         final SpongePlayerDataHandler handlerInstance = Holder.INSTANCE;
-        if (!Sponge.isServerAvailable() || handlerInstance.hasInitialized) {
+        if (!Sponge.isServerAvailable()) {
             return;
         }
         handlerInstance.playerDataMap = new ConcurrentHashMap<>();
