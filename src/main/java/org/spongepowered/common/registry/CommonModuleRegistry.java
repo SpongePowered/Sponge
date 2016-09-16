@@ -35,6 +35,7 @@ import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.ServerBossBar;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.persistence.DataTranslator;
@@ -153,6 +154,7 @@ import org.spongepowered.common.registry.type.boss.BossBarOverlayRegistryModule;
 import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 import org.spongepowered.common.registry.type.data.HandTypeRegistryModule;
+import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.ParticleRegistryModule;
 import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
@@ -404,6 +406,7 @@ public final class CommonModuleRegistry {
             .registerModule(PickupRule.class, new PickupRuleRegistryModule())
             .registerModule(BlockPaletteType.class, new PaletteTypeRegistryModule())
             .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
+            .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
             ;
     }
 
