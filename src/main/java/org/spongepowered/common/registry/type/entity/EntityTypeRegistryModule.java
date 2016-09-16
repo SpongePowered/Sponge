@@ -222,7 +222,11 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
 
     @Override
     public EntityType getForClass(Class<? extends Entity> clazz) {
-        return this.entityClassToTypeMappings.get(clazz);
+        EntityType type = this.entityClassToTypeMappings.get(clazz);
+        if (type == null) {
+            type = EntityTypes.UNKNOWN;
+        }
+        return type;
     }
 
     EntityTypeRegistryModule() {

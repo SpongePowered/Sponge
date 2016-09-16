@@ -28,6 +28,8 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -55,13 +57,14 @@ public class MixinEntity_Collisions implements IModData_Collisions {
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onEntityConstruction(World world, CallbackInfo ci) {
         if (world != null && ((IMixinWorldInfo) world.getWorldInfo()).isValid()) {
-            this.spongeEntityType = (SpongeEntityType) ((Entity) this.mcEntity).getType();
-            if (spongeEntityType == null) {
+            EntityType entityType = ((Entity) this.mcEntity).getType();
+            if (entityType == EntityTypes.UNKNOWN || !(entityType instanceof SpongeEntityType)) {
                 return;
             }
+            this.spongeEntityType = (SpongeEntityType) entityType;
 
-            if (mcEntity instanceof EntityItem) {
-                EntityItem item = (EntityItem) mcEntity;
+            if (this.mcEntity instanceof EntityItem) {
+                EntityItem item = (EntityItem) this.mcEntity;
                 ItemStack itemstack = item.getEntityItem();
                 if (itemstack != null) {
                     this.entityName = itemstack.getUnlocalizedName().replace("item.", "");
@@ -114,7 +117,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
         if (collisionMod == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
             collisionMod = new CollisionModCategory(this.entityModId);
             collisionCat.getModList().put(this.entityModId, collisionMod);
-            collisionMod.getEntityList().put(this.entityName, maxCollisions);
+            collisionMod.getEntityList().put(this.entityName, this.maxCollisions);
             activeConfig.save();
             return true;
         } else if (collisionMod != null) {
@@ -135,7 +138,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
             }
             // entity overrides
             if (entityMaxCollision == null && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
-                collisionMod.getEntityList().put(this.entityName, maxCollisions);
+                collisionMod.getEntityList().put(this.entityName, this.maxCollisions);
                 requiresSave = true;
             } else if (entityMaxCollision != null) {
                 this.maxCollisions = entityMaxCollision;

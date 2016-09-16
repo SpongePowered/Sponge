@@ -244,7 +244,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruction(net.minecraft.world.World worldIn, CallbackInfo ci) {
-        if (this.entityType != null) {
+        if (this.entityType instanceof SpongeEntityType) {
             SpongeEntityType spongeEntityType = (SpongeEntityType) this.entityType;
             if (spongeEntityType.getEnumCreatureType() == null) {
                 for (EnumCreatureType type : EnumCreatureType.values()) {
