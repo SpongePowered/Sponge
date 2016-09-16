@@ -98,15 +98,6 @@ public class ImmutableSpongeExperienceHolderData extends AbstractImmutableData<I
     }
 
     @Override
-    public int compareTo(ImmutableExperienceHolderData o) {
-        return ComparisonChain.start()
-                .compare(o.level().get().intValue(), this.level)
-                .compare(o.totalExperience().get().intValue(), this.totalExp)
-                .compare(o.experienceSinceLevel().get().intValue(), this.expSinceLevel)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.EXPERIENCE_LEVEL.getQuery(), this.level)

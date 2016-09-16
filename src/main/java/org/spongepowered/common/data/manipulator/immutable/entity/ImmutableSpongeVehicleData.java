@@ -82,14 +82,6 @@ public class ImmutableSpongeVehicleData extends AbstractImmutableData<ImmutableV
                 .set(Keys.BASE_VEHICLE, this.baseVehicle);
     }
 
-    @Override
-    public int compareTo(ImmutableVehicleData o) {
-        return ComparisonChain.start()
-                .compare(o.vehicle().get().getUniqueId().orElse(null), this.vehicle.getUniqueId().orElse(null))
-                .compare(o.baseVehicle().get().getUniqueId().orElse(null), this.baseVehicle.getUniqueId().orElse(null))
-                .result();
-    }
-
     public EntitySnapshot getVehicle() {
         return this.vehicle;
     }

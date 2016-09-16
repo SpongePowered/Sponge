@@ -60,9 +60,4 @@ public class ImmutableSpongeExplosionRadiusData
         return this.value;
     }
 
-    @Override
-    public int compareTo(ImmutableExplosionRadiusData that) {
-        return SpongeExplosionRadiusData.compare(this, that);
-    }
-
 }

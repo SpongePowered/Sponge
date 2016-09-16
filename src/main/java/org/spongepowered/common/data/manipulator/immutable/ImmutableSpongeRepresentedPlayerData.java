@@ -67,11 +67,6 @@ public class ImmutableSpongeRepresentedPlayerData
     }
 
     @Override
-    public int compareTo(ImmutableRepresentedPlayerData o) {
-        return this.value.getUniqueId().compareTo(o.owner().get().getUniqueId());
-    }
-
-    @Override
     protected ImmutableValue<?> getValueGetter() {
         return this.owner();
     }

@@ -53,13 +53,6 @@ public class ImmutableSpongeCriticalHitData extends AbstractImmutableSingleData<
     }
 
     @Override
-    public int compareTo(ImmutableCriticalHitData o) {
-        return ComparisonChain.start()
-                .compare(getValue(), o.criticalHit().get())
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.CRITICAL_HIT, getValue());

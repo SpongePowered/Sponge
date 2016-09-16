@@ -48,11 +48,6 @@ public class ImmutableSpongeLockableData extends AbstractImmutableSingleData<Str
     }
 
     @Override
-    public int compareTo(ImmutableLockableData o) {
-        return this.value.compareTo(o.lockToken().get());
-    }
-
-    @Override
     protected ImmutableValue<String> getValueGetter() {
         return this.valueObj;
     }

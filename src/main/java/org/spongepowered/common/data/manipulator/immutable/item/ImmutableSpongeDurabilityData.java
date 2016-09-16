@@ -90,14 +90,6 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    public int compareTo(ImmutableDurabilityData o) {
-        return ComparisonChain.start()
-                .compare(this.durability.intValue(), o.durability().get().intValue())
-                .compare(this.unbreakable, o.unbreakable().get())
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.ITEM_DURABILITY, this.durability)

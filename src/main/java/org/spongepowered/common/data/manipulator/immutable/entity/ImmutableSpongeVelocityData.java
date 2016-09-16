@@ -68,8 +68,4 @@ public class ImmutableSpongeVelocityData extends AbstractImmutableSingleData<Vec
         return this.velocityValue;
     }
 
-    @Override
-    public int compareTo(ImmutableVelocityData o) {
-        return o.velocity().get().compareTo(this.value);
-    }
 }

@@ -88,15 +88,6 @@ public class ImmutableSpongeFoodData extends AbstractImmutableData<ImmutableFood
     }
 
     @Override
-    public int compareTo(ImmutableFoodData o) {
-        return ComparisonChain.start()
-                .compare(o.foodLevel().get().intValue(), this.foodLevel)
-                .compare(o.saturation().get().floatValue(), this.foodSaturationLevel)
-                .compare(o.exhaustion().get().floatValue(), this.foodExhaustionLevel)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.FOOD_LEVEL, this.foodLevel)

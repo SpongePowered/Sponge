@@ -68,12 +68,4 @@ public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text,
         return new SpongeAuthorData(this.getValue());
     }
 
-    @Override
-    public int compareTo(ImmutableAuthorData o) {
-        return ComparisonChain.start()
-                .compare(TextSerializers.JSON.serialize(o.get(Keys.BOOK_AUTHOR).get()),
-                        TextSerializers.JSON.serialize(this.getValue()))
-                .result();
-    }
-
 }

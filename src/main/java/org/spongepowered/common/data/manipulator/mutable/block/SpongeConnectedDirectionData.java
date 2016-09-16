@@ -93,11 +93,6 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
     }
 
     @Override
-    public int compareTo(ConnectedDirectionData o) {
-        return 0;
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.CONNECTED_DIRECTIONS.getQuery(), this.connectedDirections)

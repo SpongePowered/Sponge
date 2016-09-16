@@ -62,14 +62,6 @@ public class SpongeBreathingData extends AbstractData<BreathingData, ImmutableBr
     }
 
     @Override
-    public int compareTo(BreathingData o) {
-        return ComparisonChain.start()
-                .compare(o.maxAir().get().intValue(), this.maxAir)
-                .compare(o.remainingAir().get().intValue(), this.remainingAir)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.MAX_AIR.getQuery(), this.maxAir)

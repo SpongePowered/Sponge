@@ -86,14 +86,6 @@ public class SpongeIgniteableData extends AbstractData<IgniteableData, Immutable
     }
 
     @Override
-    public int compareTo(IgniteableData o) {
-        return ComparisonChain.start()
-                .compare(o.fireTicks().get().intValue(), this.fireTicks)
-                .compare(o.fireDelay().get().intValue(), this.fireDelay)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.FIRE_TICKS, this.fireTicks)

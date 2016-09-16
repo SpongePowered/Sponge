@@ -125,19 +125,4 @@ public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconDa
         return dataContainer;
     }
 
-    @Override
-    public int compareTo(BeaconData o) {
-        ComparisonChain compare = ComparisonChain.start()
-                .compare(this.primaryEffect().exists(), o.primaryEffect().exists())
-                .compare(this.secondaryEffect().exists(), o.secondaryEffect().exists());
-        if (this.primaryEffect().exists() && o.primaryEffect().exists()) {
-            compare = compare.compare(this.primaryEffect().get().get().getName(), o.primaryEffect().get().get().getName())
-                    .compare(this.primaryEffect().get().get().isInstant(), o.primaryEffect().get().get().isInstant());
-        }
-        if (this.secondaryEffect().exists() && o.secondaryEffect().exists()) {
-            compare = compare.compare(this.secondaryEffect().get().get().getName(), o.secondaryEffect().get().get().getName())
-                    .compare(this.secondaryEffect().get().get().isInstant(), o.secondaryEffect().get().get().isInstant());
-        }
-        return compare.result();
-    }
 }

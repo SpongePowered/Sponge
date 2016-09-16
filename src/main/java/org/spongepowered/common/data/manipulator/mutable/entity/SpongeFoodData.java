@@ -64,15 +64,6 @@ public class SpongeFoodData extends AbstractData<FoodData, ImmutableFoodData> im
     }
 
     @Override
-    public int compareTo(FoodData o) {
-        return ComparisonChain.start()
-                .compare(o.foodLevel().get().intValue(), this.foodLevel)
-                .compare(o.saturation().get().floatValue(), this.foodSaturationLevel)
-                .compare(o.exhaustion().get().floatValue(), this.foodExhaustionLevel)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.FOOD_LEVEL.getQuery(), this.foodLevel)

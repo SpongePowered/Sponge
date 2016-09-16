@@ -102,11 +102,6 @@ public class SpongeBannerData extends AbstractData<BannerData, ImmutableBannerDa
     }
 
     @Override
-    public int compareTo(BannerData o) {
-        return 0;
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.BANNER_BASE_COLOR.getQuery(), this.base.getId())

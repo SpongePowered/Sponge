@@ -65,13 +65,6 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableSingleData<
     }
 
     @Override
-    public int compareTo(ImmutableDisplayNameData o) {
-        return ComparisonChain.start()
-                .compare(TextSerializers.JSON.serialize(o.displayName().get()), TextSerializers.JSON.serialize(this.getValue()))
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.DISPLAY_NAME.getQuery(), TextSerializers.JSON.serialize(this.getValue()));

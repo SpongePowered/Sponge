@@ -65,8 +65,4 @@ public abstract class AbstractImmutableSingleSetData<E, I extends ImmutableDataM
         return ReflectionUtil.createInstance(this.mutableClass, this.value);
     }
 
-    @Override
-    public int compareTo(I o) {
-        return 0;
-    }
 }

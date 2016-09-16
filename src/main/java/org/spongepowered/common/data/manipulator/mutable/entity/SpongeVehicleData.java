@@ -119,12 +119,6 @@ public class SpongeVehicleData extends AbstractData<VehicleData, ImmutableVehicl
     }
 
     @Override
-    public int compareTo(VehicleData o) {
-        return ComparisonChain.start().compare(o.vehicle().get().getUniqueId().orElse(null), this.vehicle.getUniqueId().orElse(null))
-                .compare(o.baseVehicle().get().getUniqueId().orElse(null), this.baseVehicle.getUniqueId().orElse(null)).result();
-    }
-
-    @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.VEHICLE, SpongeVehicleData.this::getVehicle);
         registerFieldSetter(Keys.VEHICLE, SpongeVehicleData.this::setVehicle);

@@ -74,21 +74,6 @@ public class SpongeBodyPartRotationalData extends AbstractData<BodyPartRotationa
     }
 
     @Override
-    public int compareTo(BodyPartRotationalData o) {
-        int mapSizeComp = Integer.compare(this.rotations.size(), o.partRotation().size());
-
-        if (mapSizeComp != 0) {
-            return mapSizeComp;
-        }
-        ComparisonChain comparison = ComparisonChain.start();
-        Map<BodyPart, Vector3d> parts = o.partRotation().get();
-        parts.forEach((part, vec) -> {
-            comparison.compare(vec, this.rotations.get(part));
-        });
-        return comparison.result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         Vector3d headRotation = this.rotations.get(BodyParts.HEAD);
         Vector3d chestRotation = this.rotations.get(BodyParts.CHEST);

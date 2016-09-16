@@ -65,13 +65,6 @@ public class ImmutableSpongeNoteData extends AbstractImmutableSingleData<NotePit
     }
 
     @Override
-    public int compareTo(ImmutableNoteData o) {
-        return ComparisonChain.start()
-                .compare(note().get().getId(), o.note().get().getId())
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer().set(Keys.NOTE_PITCH, getValue());
     }

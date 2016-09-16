@@ -92,12 +92,5 @@ public class SpongeJoinData extends AbstractData<JoinData, ImmutableJoinData> im
         return new ImmutableSpongeJoinData(this.firstJoined, this.lastJoined);
     }
 
-    @Override
-    public int compareTo(JoinData o) {
-        return ComparisonChain.start()
-                .compare(o.firstPlayed().get(), this.firstJoined)
-                .compare(o.lastPlayed().get(), this.lastJoined)
-                .result();
-    }
 
 }

@@ -113,11 +113,6 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
                 .set(Keys.LAST_COMMAND_OUTPUT.getQuery(), this.lastOutput == null ? "" : this.lastOutput.toString());
     }
 
-    @Override
-    public int compareTo(ImmutableCommandData o) {
-        return 0;
-    }
-
     public String getStoredCommand() {
         return this.storedCommand;
     }

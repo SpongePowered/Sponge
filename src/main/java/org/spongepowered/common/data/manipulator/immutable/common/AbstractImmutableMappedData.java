@@ -76,11 +76,6 @@ public abstract class AbstractImmutableMappedData<K, V, I extends ImmutableMappe
     }
 
     @Override
-    public int compareTo(I o) {
-        return 0;
-    }
-
-    @Override
     public Optional<V> get(K key) {
         return Optional.ofNullable(super.getValue().get(checkNotNull(key, "Key cannot be null!")));
     }

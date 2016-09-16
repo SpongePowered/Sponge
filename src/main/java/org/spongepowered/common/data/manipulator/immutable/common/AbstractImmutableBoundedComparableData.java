@@ -102,8 +102,4 @@ public abstract class AbstractImmutableBoundedComparableData<T extends Comparabl
         return ReflectionUtil.createInstance(this.mutableClass, this.value, this.lowerBound, this.upperBound, this.defaultValue);
     }
 
-    @Override
-    public int compareTo(I o) {
-        return this.comparator.compare(o.get(this.usedKey).get(), this.value);
-    }
 }

@@ -101,16 +101,6 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
     }
 
     @Override
-    public int compareTo(CommandData o) {
-        return ComparisonChain.start()
-                .compare(o.doesTrackOutput().get(), this.tracks)
-                .compare(o.lastOutput().get().isPresent(), this.lastOutput != null)
-                .compare(o.storedCommand().get(), this.command)
-                .compare(o.successCount().get().intValue(), this.success)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.COMMAND.getQuery(), this.command)

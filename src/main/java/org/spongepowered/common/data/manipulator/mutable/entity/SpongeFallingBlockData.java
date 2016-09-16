@@ -204,19 +204,6 @@ public class SpongeFallingBlockData extends AbstractData<FallingBlockData, Immut
     }
 
     @Override
-    public int compareTo(FallingBlockData o) {
-        return ComparisonChain.start()
-                .compare(o.fallDamagePerBlock().get().doubleValue(), this.fallDamagePerBlock)
-                .compare(o.maxFallDamage().get().doubleValue(), this.maxFallDamage)
-                .compare(o.blockState().get().getType().getId(), this.blockState.getType().getId())
-                .compare(o.canPlaceAsBlock().get().booleanValue(), this.canPlaceAsBlock)
-                .compare(o.canDropAsItem().get().booleanValue(), this.canDropAsItem)
-                .compare(o.fallTime().get().intValue(), this.fallTime)
-                .compare(o.canHurtEntities().get().booleanValue(), this.canHurtEntities)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.FALL_DAMAGE_PER_BLOCK.getQuery(), this.fallDamagePerBlock)

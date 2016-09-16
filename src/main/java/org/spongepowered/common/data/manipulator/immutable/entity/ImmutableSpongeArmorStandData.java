@@ -116,17 +116,6 @@ public class ImmutableSpongeArmorStandData extends AbstractImmutableData<Immutab
     }
 
     @Override
-    public int compareTo(ImmutableArmorStandData o) {
-        return ComparisonChain.start()
-                .compare(o.arms().get(), this.arms)
-                .compare(o.marker().get(), this.marker)
-                .compare(o.basePlate().get(), this.basePlate)
-                .compare(o.gravity().get(), this.gravity)
-                .compare(o.small().get(), this.small)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.ARMOR_STAND_HAS_ARMS, this.arms)

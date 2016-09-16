@@ -60,11 +60,6 @@ public class ImmutableSpongeSkinData extends AbstractImmutableSingleData<UUID, I
     }
 
     @Override
-    public int compareTo(ImmutableSkinData o) {
-        return this.value.compareTo(o.skinUniqueId().get());
-    }
-
-    @Override
     public ImmutableValue<UUID> skinUniqueId() {
         return this.skinValue;
     }

@@ -55,11 +55,6 @@ public class ImmutableSpongeFluidItemData extends AbstractImmutableSingleData<Fl
     }
 
     @Override
-    public int compareTo(ImmutableFluidItemData o) {
-        return 0;
-    }
-
-    @Override
     public ImmutableValue<FluidStackSnapshot> fluid() {
         return getValueGetter();
     }

@@ -73,14 +73,6 @@ public class ImmutableSpongeBreathingData extends AbstractImmutableData<Immutabl
     }
 
     @Override
-    public int compareTo(ImmutableBreathingData o) {
-        return ComparisonChain.start()
-                .compare(o.maxAir().get().intValue(), this.maxAir)
-                .compare(o.remainingAir().get().intValue(), this.remainingAir)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.MAX_AIR.getQuery(), this.maxAir)

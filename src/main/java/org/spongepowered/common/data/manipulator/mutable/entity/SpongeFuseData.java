@@ -81,12 +81,4 @@ public class SpongeFuseData extends AbstractData<FuseData, ImmutableFuseData> im
         return new ImmutableSpongeFuseData(this.fuseDuration, this.ticksRemaining);
     }
 
-    @Override
-    public int compareTo(FuseData that) {
-        return ComparisonChain.start()
-                .compare(this.fuseDuration, (int) that.fuseDuration().get())
-                .compare(this.ticksRemaining, (int) that.ticksRemaining().get())
-                .result();
-    }
-
 }

@@ -63,8 +63,4 @@ public class ImmutableSpongeColoredData extends AbstractImmutableSingleData<Colo
         return this.immutableValue;
     }
 
-    @Override
-    public int compareTo(ImmutableColoredData o) {
-        return o.get(this.usedKey).get().getRgb() - this.getValue().getRgb();
-    }
 }

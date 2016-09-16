@@ -94,11 +94,6 @@ public class ImmutableSpongeConnectedDirectionData extends AbstractImmutableData
     }
 
     @Override
-    public int compareTo(ImmutableConnectedDirectionData o) {
-        return 0;
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.CONNECTED_DIRECTIONS.getQuery(), this.directions)

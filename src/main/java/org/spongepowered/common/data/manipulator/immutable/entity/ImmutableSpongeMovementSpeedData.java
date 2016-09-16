@@ -87,14 +87,6 @@ public class ImmutableSpongeMovementSpeedData extends AbstractImmutableData<Immu
     }
 
     @Override
-    public int compareTo(ImmutableMovementSpeedData o) {
-        return ComparisonChain.start()
-                .compare(o.walkSpeed().get().doubleValue(), this.walkSpeed)
-                .compare(o.flySpeed().get().doubleValue(), this.flySpeed)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.WALKING_SPEED.getQuery(), this.walkSpeed)

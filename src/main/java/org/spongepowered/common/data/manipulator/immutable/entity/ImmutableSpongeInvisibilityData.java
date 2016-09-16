@@ -121,13 +121,4 @@ public class ImmutableSpongeInvisibilityData extends AbstractImmutableData<Immut
         return new SpongeInvisibilityData(this.vanish, this.collision, this.untargetable, this.invisible);
     }
 
-    @Override
-    public int compareTo(ImmutableInvisibilityData o) {
-        return ComparisonChain.start()
-                .compare(o.ignoresCollisionDetection().get(), this.collision)
-                .compare(o.invisible().get(), this.invisible)
-                .compare(o.vanish().get(), this.vanish)
-                .compare(o.untargetable().get(), this.untargetable)
-                .result();
-    }
 }

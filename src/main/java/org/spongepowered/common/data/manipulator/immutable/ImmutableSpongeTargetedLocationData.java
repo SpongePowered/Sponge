@@ -58,9 +58,4 @@ public final class ImmutableSpongeTargetedLocationData extends AbstractImmutable
         return this.immutableValue;
     }
 
-    @Override
-    public int compareTo(ImmutableTargetedLocationData o) {
-        return this.getValue().compareTo(o.target().get());
-    }
-
 }

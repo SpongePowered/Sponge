@@ -160,17 +160,6 @@ public class SpongeFurnaceData extends AbstractData<FurnaceData, ImmutableFurnac
     }
 
     @Override
-    public int compareTo(FurnaceData o) {
-        return ComparisonChain
-                .start()
-                .compare(o.passedBurnTime().get().intValue(), this.passedBurnTime)
-                .compare(o.maxBurnTime().get().intValue(), this.maxBurnTime)
-                .compare(o.passedCookTime().get().intValue(), this.passedCookTime)
-                .compare(o.maxCookTime().get().intValue(), this.maxCookTime)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.PASSED_BURN_TIME, this.passedBurnTime)

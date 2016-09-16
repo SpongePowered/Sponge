@@ -102,14 +102,6 @@ public class SpongeMovementSpeedData extends AbstractData<MovementSpeedData, Imm
     }
 
     @Override
-    public int compareTo(MovementSpeedData o) {
-        return ComparisonChain.start()
-                .compare(o.walkSpeed().get().doubleValue(), this.walkSpeed)
-                .compare(o.flySpeed().get().doubleValue(), this.flySpeed)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.WALKING_SPEED, this.walkSpeed)

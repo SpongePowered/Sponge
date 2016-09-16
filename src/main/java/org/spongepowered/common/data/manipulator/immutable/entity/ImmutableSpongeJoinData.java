@@ -75,14 +75,6 @@ public class ImmutableSpongeJoinData extends AbstractImmutableData<ImmutableJoin
     }
 
     @Override
-    public int compareTo(ImmutableJoinData o) {
-        return ComparisonChain.start()
-                .compare(o.firstPlayed().get(), this.firstJoined)
-                .compare(o.lastPlayed().get(), this.lastJoined)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.FIRST_DATE_PLAYED.getQuery(), this.firstJoined.toEpochMilli())

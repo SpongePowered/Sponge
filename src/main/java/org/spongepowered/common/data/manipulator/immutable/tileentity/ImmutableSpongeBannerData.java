@@ -94,14 +94,6 @@ public class ImmutableSpongeBannerData extends AbstractImmutableData<ImmutableBa
     }
 
     @Override
-    public int compareTo(ImmutableBannerData o) {
-        return ComparisonChain.start()
-                .compare(o.baseColor().get().getId(), this.base.getId())
-                .compare(o.patterns().get().containsAll(this.layers), this.layers.containsAll(o.patterns().get()))
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.BANNER_BASE_COLOR.getQuery(), this.base.getId())

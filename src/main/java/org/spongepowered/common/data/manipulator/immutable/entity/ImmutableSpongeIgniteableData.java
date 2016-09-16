@@ -93,14 +93,6 @@ public class ImmutableSpongeIgniteableData extends AbstractImmutableData<Immutab
             .set(Keys.FIRE_DAMAGE_DELAY.getQuery(), this.fireDelay);
     }
 
-    @Override
-    public int compareTo(ImmutableIgniteableData o) {
-        return ComparisonChain.start()
-                .compare(o.fireTicks().get().intValue(), this.fireTicks)
-                .compare(o.fireDelay().get().intValue(), this.fireDelay)
-                .result();
-    }
-
     public int getFireTicks() {
         return this.fireTicks;
     }

@@ -75,17 +75,6 @@ public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<Immu
         return new SpongeMinecartBlockData(this.block, this.offset);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public int compareTo(ImmutableMinecartBlockData o) {
-        Map<?, ?> oTraits = o.block().get().getTraitMap();
-        Map<?, ?> traits = this.block.getTraitMap();
-        return ComparisonChain.start()
-                .compare(oTraits.entrySet().containsAll(traits.entrySet()), traits.entrySet().containsAll(oTraits.entrySet()))
-                .compare((Integer) this.offset, o.offset().get())
-                .result();
-    }
-
     @Override
     public DataContainer toContainer() {
         return super.toContainer()

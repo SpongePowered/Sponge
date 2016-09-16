@@ -178,19 +178,6 @@ public class SpongeMobSpawnerData extends AbstractData<MobSpawnerData, Immutable
     }
 
     @Override
-    public int compareTo(MobSpawnerData o) {
-        return ComparisonChain.start()
-                .compare(o.remainingDelay().get().intValue(), this.remainingDelay)
-                .compare(o.minimumSpawnDelay().get().intValue(), this.minimumDelay)
-                .compare(o.maximumSpawnDelay().get().intValue(), this.maximumDelay)
-                .compare(o.maximumNearbyEntities().get().intValue(), this.maximumEntities)
-                .compare(o.spawnCount().get().intValue(), this.count)
-                .compare(o.requiredPlayerRange().get().intValue(), this.playerRange)
-                .compare(o.spawnRange().get().intValue(), this.spawnRange)
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.SPAWNER_REMAINING_DELAY.getQuery(), this.remainingDelay)

@@ -89,16 +89,6 @@ public class SpongeWireAttachementData extends AbstractData<WireAttachmentData, 
     }
 
     @Override
-    public int compareTo(WireAttachmentData o) {
-        return ComparisonChain.start()
-            .compare(o.wireAttachmentNorth().get().getId(), this.wireAttachmentMap.get(Direction.NORTH).getId())
-            .compare(o.wireAttachmentSouth().get().getId(), this.wireAttachmentMap.get(Direction.SOUTH).getId())
-            .compare(o.wireAttachmentEast().get().getId(), this.wireAttachmentMap.get(Direction.EAST).getId())
-            .compare(o.wireAttachmentWest().get().getId(), this.wireAttachmentMap.get(Direction.WEST).getId())
-            .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.WIRE_ATTACHMENTS.getQuery(), this.wireAttachmentMap)

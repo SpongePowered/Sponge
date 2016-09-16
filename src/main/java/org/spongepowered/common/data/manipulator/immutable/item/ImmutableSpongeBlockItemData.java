@@ -67,9 +67,4 @@ public class ImmutableSpongeBlockItemData extends AbstractImmutableSingleData<Bl
             .set(Keys.ITEM_BLOCKSTATE, this.value);
     }
 
-    @Override
-    public int compareTo(ImmutableBlockItemData o) {
-        return BlockUtil.BLOCK_STATE_COMPARATOR.compare(getValue(), o.get(Keys.ITEM_BLOCKSTATE).get());
-    }
-
 }

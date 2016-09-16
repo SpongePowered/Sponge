@@ -105,18 +105,6 @@ public class ImmutableSpongeHideData extends AbstractImmutableData<ImmutableHide
     }
 
     @Override
-    public int compareTo(ImmutableHideData o) {
-        return ComparisonChain.start()
-                .compare(this.enchantments, o.hideEnchantments().get())
-                .compare(this.attributes, o.hideAttributes().get())
-                .compare(this.unbreakable, o.hideUnbreakable().get())
-                .compare(this.canDestroy, o.hideCanDestroy().get())
-                .compare(this.canPlace, o.hideCanPlace().get())
-                .compare(this.miscellaneous, o.hideMiscellaneous().get())
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.HIDE_ENCHANTMENTS, this.enchantments)

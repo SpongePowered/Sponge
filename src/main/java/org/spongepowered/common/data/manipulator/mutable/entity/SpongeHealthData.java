@@ -85,14 +85,6 @@ public class SpongeHealthData extends AbstractData<HealthData, ImmutableHealthDa
     }
 
     @Override
-    public int compareTo(HealthData o) {
-        return ComparisonChain.start()
-            .compare(o.health().get().doubleValue(), this.health)
-            .compare(o.maxHealth().get().doubleValue(), this.maxHealth)
-            .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.HEALTH, this.health)

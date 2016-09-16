@@ -105,15 +105,6 @@ public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData>
     }
 
     @Override
-    public int compareTo(HorseData other) {
-        return ComparisonChain.start()
-                .compare(this.horseColor.getId(), other.color().get().getId())
-                .compare(this.horseStyle.getId(), other.style().get().getId())
-                .compare(this.horseVariant.getId(), other.variant().get().getId())
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.HORSE_COLOR.getQuery(), this.horseColor.getId())

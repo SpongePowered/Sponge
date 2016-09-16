@@ -49,12 +49,6 @@ public class ImmutableSpongePlaceableData extends AbstractImmutableSingleSetData
     }
 
     @Override
-    public int compareTo(ImmutablePlaceableData o) {
-        return Booleans.compare(o.placeable().containsAll(getValue()),
-                getValue().containsAll(o.placeable().get()));
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.PLACEABLE_BLOCKS.getQuery(), getValue()

@@ -100,15 +100,6 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
     }
 
     @Override
-    public int compareTo(ImmutableHorseData other) {
-        return ComparisonChain.start()
-                .compare(this.horseColor.getId(), other.color().get().getId())
-                .compare(this.horseStyle.getId(), other.style().get().getId())
-                .compare(this.horseVariant.getId(), other.variant().get().getId())
-                .result();
-    }
-
-    @Override
     public HorseData asMutable() {
         return new SpongeHorseData(this.horseColor, this.horseStyle, this.horseVariant);
     }

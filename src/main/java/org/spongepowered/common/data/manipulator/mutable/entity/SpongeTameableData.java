@@ -71,13 +71,6 @@ public class SpongeTameableData extends AbstractData<TameableData, ImmutableTame
     }
 
     @Override
-    public int compareTo(TameableData o) {
-        return ComparisonChain.start()
-                .compare(this.owner, o.owner().get().orElse(null), Ordering.natural().nullsFirst())
-                .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         final String uuid = this.owner == null ? "none" : this.owner.toString();
         return super.toContainer()

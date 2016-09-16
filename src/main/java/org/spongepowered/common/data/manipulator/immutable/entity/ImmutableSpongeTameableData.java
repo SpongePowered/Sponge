@@ -71,13 +71,6 @@ public class ImmutableSpongeTameableData extends AbstractImmutableData<Immutable
     }
 
     @Override
-    public int compareTo(ImmutableTameableData o) {
-        return ComparisonChain.start()
-            .compare(this.owner, o.owner().get().orElse(null), Ordering.natural().nullsFirst())
-            .result();
-    }
-
-    @Override
     public DataContainer toContainer() {
         final String owner = this.owner == null ? "none" : this.owner.toString();
         return super.toContainer()

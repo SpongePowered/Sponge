@@ -41,8 +41,10 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
@@ -78,6 +80,11 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         checkNotNull(itemType, "Item type cannot be null");
         this.type = itemType;
         return this;
+    }
+
+    @Override
+    public ItemType getCurrentItem() {
+        return this.type == null ? ItemTypes.NONE : this.type;
     }
 
     @Override
@@ -223,8 +230,18 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     }
 
     @Override
+    public ItemStack.Builder remove(Class<? extends DataManipulator<?, ?>> manipulatorClass) {
+        return null;
+    }
+
+    @Override
     public ItemStack.Builder from(ItemStack value) {
         return fromItemStack(value);
+    }
+
+    @Override
+    public Optional<ItemStack> build(DataView container) throws InvalidDataException {
+        return null;
     }
 
     @Override

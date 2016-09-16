@@ -64,9 +64,4 @@ public class ImmutableSpongeRepresentedItemData extends AbstractImmutableSingleD
             .set(Keys.REPRESENTED_ITEM, this.value);
     }
 
-    @Override
-    public int compareTo(ImmutableRepresentedItemData o) {
-        return ItemStackComparators.ALL.compare(o.item().get().createStack(), this.getValue().createStack());
-    }
-
 }
