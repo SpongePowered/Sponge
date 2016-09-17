@@ -498,7 +498,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     // to avoid firing a DisplaceEntityEvent.Teleport
     @Override
     public void setLocationAndAngles(Location<World> location) {
-        if (this.mcEntity instanceof EntityPlayerMP) {
+        if (this.mcEntity instanceof EntityPlayerMP && ((EntityPlayerMP) this.mcEntity).playerNetServerHandler != null) {
             ((EntityPlayerMP) this.mcEntity).playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
         } else {
             this.setPosition(location.getX(), location.getY(), location.getZ());
@@ -511,7 +511,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public void setLocationAndAngles(Transform<World> transform) {
         Vector3d position = transform.getPosition();
-        if (this.mcEntity instanceof EntityPlayerMP) {
+        if (this.mcEntity instanceof EntityPlayerMP && ((EntityPlayerMP) this.mcEntity).playerNetServerHandler != null) {
             ((EntityPlayerMP) this.mcEntity).playerNetServerHandler.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
         } else {
             this.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
