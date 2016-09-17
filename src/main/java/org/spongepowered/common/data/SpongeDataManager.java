@@ -148,7 +148,7 @@ public final class SpongeDataManager implements DataManager {
             }
             this.builders.put(clazz, builder);
         } else {
-            SpongeImpl.getLogger().warn("A DataBuilder has already been registered for %s. Attempted to register %s instead.%n", clazz,
+            SpongeImpl.getLogger().warn("A DataBuilder has already been registered for {}. Attempted to register {} instead.", clazz,
                     builder.getClass());
         }
     }
@@ -528,12 +528,12 @@ public final class SpongeDataManager implements DataManager {
     }
 
     @SuppressWarnings("rawtypes")
-	public Optional<NbtDataProcessor> getRawNbtProcessor(NbtDataType dataType, Class<? extends DataManipulator> aClass) {
+    public Optional<NbtDataProcessor> getRawNbtProcessor(NbtDataType dataType, Class<? extends DataManipulator> aClass) {
         return Optional.ofNullable(this.nbtProcessorTable.get(checkNotNull(aClass, "Manipulator class cannot be null!"), dataType));
     }
 
     @SuppressWarnings("rawtypes")
-	public Optional<NbtValueProcessor> getRawNbtProcessor(NbtDataType dataType, Key<?> key) {
+    public Optional<NbtValueProcessor> getRawNbtProcessor(NbtDataType dataType, Key<?> key) {
         return Optional.ofNullable(this.nbtValueTable.get(key, dataType));
     }
 

@@ -38,13 +38,14 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.PEBKACException;
+import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import java.util.Set;
 
-@RunWith(Parameterized.class)
+@RunWith(LaunchWrapperParameterized.class)
 public class ManipulatorTest {
 
     @Parameterized.Parameters(name = "{index} Data: {0}")
@@ -55,7 +56,6 @@ public class ManipulatorTest {
     private String dataName;
     private Class<? extends DataManipulator<?, ?>> manipulatorClass;
     private DataManipulatorBuilder<?, ?> builder;
-
 
     public ManipulatorTest(String simpleName, Class<? extends DataManipulator<?, ?>> manipulatorClass, DataManipulatorBuilder<?, ?> builder) {
         this.manipulatorClass = manipulatorClass;

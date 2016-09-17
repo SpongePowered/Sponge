@@ -96,25 +96,28 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskTy
 
     @Override
     public void registerDefaults() {
-        createAITaskType(SpongeImpl.getMinecraftPlugin(), "wander", "Wander", WanderAITask.class);
-        createAITaskType(SpongeImpl.getMinecraftPlugin(), "avoid_entity", "Avoid Entity", AvoidEntityAITask.class);
-        createAITaskType(SpongeImpl.getMinecraftPlugin(), "run_around_like_crazy", "Run Around Like Crazy", RunAroundLikeCrazyAITask.class);
-        createAITaskType(SpongeImpl.getMinecraftPlugin(), "swimming", "Swimming", SwimmingAITask.class);
-        createAITaskType(SpongeImpl.getMinecraftPlugin(), "watch_closest", "Watch Closest", WatchClosestAITask.class);
-        createAITaskType(SpongeImpl.getMinecraftPlugin(), "find_nearest_attackable_target", "Find Nearest Attackable Target",
-                FindNearestAttackableTargetAITask.class);
-        createAITaskType(SpongeImpl.getMinecraftPlugin(), "attack_living", "Attack Living", AttackLivingAITask.class);
+        createAITaskType("minecraft:wander", "Wander", WanderAITask.class);
+        createAITaskType("minecraft:avoid_entity", "Avoid Entity", AvoidEntityAITask.class);
+        createAITaskType("minecraft:run_around_like_crazy", "Run Around Like Crazy", RunAroundLikeCrazyAITask.class);
+        createAITaskType("minecraft:swimming", "Swimming", SwimmingAITask.class);
+        createAITaskType("minecraft:watch_closest", "Watch Closest", WatchClosestAITask.class);
+        createAITaskType("minecraft:find_nearest_attackable_target", "Find Nearest Attackable Target", FindNearestAttackableTargetAITask.class);
+        createAITaskType("minecraft:attack_living", "Attack Living", AttackLivingAITask.class);
+    }
+
+    private AITaskType createAITaskType(String combinedId, String name, Class<? extends AITask<? extends Agent>> aiClass) {
+        final SpongeAITaskType newType = new SpongeAITaskType(combinedId, name, aiClass);
+        this.aiTaskTypes.put(combinedId, newType);
+        return newType;
     }
 
     public AITaskType createAITaskType(Object plugin, String id, String name, Class<? extends AITask<? extends Agent>> aiClass) {
         final Optional<PluginContainer> optPluginContainer = SpongeImpl.getGame().getPluginManager().fromInstance(plugin);
         Preconditions.checkArgument(optPluginContainer.isPresent());
         final PluginContainer pluginContainer = optPluginContainer.get();
-        final String combinedId = pluginContainer.getId().toLowerCase(Locale.ENGLISH) + ":" + id;
+        final String combinedId = pluginContainer.getId().toLowerCase(Locale.ENGLISH) + ':' + id;
 
-        final SpongeAITaskType newType = new SpongeAITaskType(combinedId, name, aiClass);
-        this.aiTaskTypes.put(combinedId, newType);
-        return newType;
+        return createAITaskType(combinedId, name, aiClass);
     }
 
     AITaskTypeModule() {}

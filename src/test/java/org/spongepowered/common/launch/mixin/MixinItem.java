@@ -22,30 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package org.spongepowered.common.launch.mixin;
 
-import static org.spongepowered.asm.mixin.MixinEnvironment.Side.SERVER;
+import net.minecraft.item.Item;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.asm.mixin.Mixins;
-import org.spongepowered.lwts.AbstractTestTweaker;
+@Mixin(value = Item.class, remap = false)
+public abstract class MixinItem {
 
-import java.io.File;
-
-public class TestTweaker extends AbstractTestTweaker {
-
-    @Override
-    public void injectIntoClassLoader(LaunchClassLoader loader) {
-        super.injectIntoClassLoader(loader);
-
-        registerAccessTransformer("META-INF/common_at.cfg");
-
-        SpongeLaunch.initPaths(new File("."));
-
-        SpongeLaunch.setupMixinEnvironment();
-        Mixins.addConfiguration("mixins.common.test.json");
-        MixinEnvironment.getDefaultEnvironment().setSide(SERVER);
+    // Register items
+    @Inject(method = "registerItem(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V", at = @At("RETURN"))
+    private static void registerMinecraftItem(int id, ResourceLocation name, Item item, CallbackInfo ci) {
+        ItemTypeRegistryModule.getInstance().registerAdditionalCatalog((ItemType) item);
     }
 
 }
