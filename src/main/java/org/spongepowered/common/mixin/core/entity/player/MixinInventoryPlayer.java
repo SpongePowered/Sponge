@@ -60,6 +60,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
     @Shadow public int currentItem;
     @Shadow public EntityPlayer player;
     @Shadow @Final public ItemStack[] mainInventory;
+    @Shadow @Final public ItemStack[] armorInventory;
     @Shadow @Final private ItemStack[][] allInventories;
 
     @Shadow public abstract int getInventoryStackLimit();
@@ -74,7 +75,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(EntityPlayer playerIn, CallbackInfo ci) {
         this.inventory = new DefaultInventoryFabric((IInventory) this);
-        this.slots = new SlotCollection.Builder().add(36).add(4, EquipmentSlotAdapter.class).build();
+        this.slots = new SlotCollection.Builder().add(mainInventory.length).add(armorInventory.length, EquipmentSlotAdapter.class).build();
         this.lens = new HumanInventoryLens(this, this.slots);
         this.carrier = playerIn instanceof Humanoid ? (Humanoid) playerIn : null;
     }

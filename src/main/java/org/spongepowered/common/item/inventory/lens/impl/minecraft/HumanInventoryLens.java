@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -46,14 +47,13 @@ public class HumanInventoryLens extends MinecraftLens {
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
-        this.hotbar = new HotbarLensImpl(0, 9, slots);
+        this.hotbar = new HotbarLensImpl(0, InventoryPlayer.getHotbarSize(), slots);
         this.mainInventory = new GridInventoryLensImpl(9, 9, 3, 9, slots);
         this.armourInventory = new OrderedInventoryLensImpl(36, 4, 1, slots);
 
-        this.addSpanningChild(this.armourInventory);
-        this.addSpanningChild(this.mainInventory);
         this.addSpanningChild(this.hotbar);
-
+        this.addSpanningChild(this.mainInventory);
+        this.addSpanningChild(this.armourInventory);
     }
 
     public HotbarLens<IInventory, net.minecraft.item.ItemStack> getHotbar() {
