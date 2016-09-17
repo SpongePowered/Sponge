@@ -68,7 +68,14 @@ dependencies {
     forgeGradleMcDeps('net.minecraft:launchwrapper:1.11') {
         transitive = false
     }
+
+    testCompile 'org.spongepowered:launchwrappertestsuite:1.0-SNAPSHOT'
 }
 
 // Include API dependencies in our POM
 ext.shadedDevProject = api
+
+test {
+    systemProperty 'lwts.tweaker', 'org.spongepowered.common.launch.TestTweaker'
+    workingDir = {test.temporaryDir}
+}
