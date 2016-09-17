@@ -1148,11 +1148,6 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public void appendPreBlockProtectedCheck(Cause.Builder builder, IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker) {
-        context.getSource(Player.class).ifPresent(player -> builder.named(NamedCause.notifier(player)));
-    }
-
-    @Override
     public boolean isTicking(IPhaseState state) {
         return true;
     }

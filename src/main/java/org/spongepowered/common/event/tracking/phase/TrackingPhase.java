@@ -337,9 +337,17 @@ public abstract class TrackingPhase {
         return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.UNKNOWN).build()));
     }
 
-
-    public void appendPreBlockProtectedCheck(Cause.Builder builder, IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker) {
-        context.getSource(Player.class).ifPresent(player -> builder.named(NamedCause.notifier(player)));
+    /**
+     * Adds a notifier to the builder, if necessasry
+     *
+     * @return Whether a notifier was added
+     */
+    public boolean appendPreBlockProtectedCheck(Cause.Builder builder, IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker) {
+        if (context.getSource(Player.class).isPresent()) {
+            builder.named(NamedCause.notifier(context.getSource(Player.class).get()));
+            return true;
+        }
+        return false;
     }
 
     public boolean isTicking(IPhaseState state) {
