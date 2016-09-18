@@ -32,8 +32,6 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagDouble;
-import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -57,10 +55,11 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
-import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 
 import java.lang.ref.WeakReference;
@@ -112,12 +111,17 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             this.keys = keyBuilder.build();
             this.values = valueBuilder.build();
         }
+        // TODO cleanup: sensible defaults?
         this.compound = builder.compound == null ? null : builder.compound.copy();
         this.worldUuid = builder.worldId == null ? null : builder.worldId;
         this.position = builder.position == null ? null : builder.position;
-        this.rotation = builder.rotation == null ? null : builder.rotation;
+        this.rotation = builder.rotation == null ? Vector3d.ZERO : builder.rotation;
         this.scale = builder.scale == null ? null : builder.scale;
         this.entityReference = builder.entityReference;
+        if(this.compound != null) {
+            this.compound.setTag("Pos", NbtDataUtil.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
+            // TODO should ensure other elements are within the compound as well
+        }
     }
 
     // internal use only
@@ -388,7 +392,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         builder.position = location.getPosition();
         builder.worldId = location.getExtent().getUniqueId();
         NBTTagCompound newCompound = this.compound.copy();
-        newCompound.setTag("Pos", newDoubleNBTList(new double[] {location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ()}));
         newCompound.setInteger("Dimension", ((IMixinWorldInfo)location.getExtent().getProperties()).getDimensionId());
         builder.compound = newCompound;
         return builder.build();
@@ -440,19 +443,6 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             }
         }
         return Optional.empty();
-    }
-
-    public NBTTagList newDoubleNBTList(double ... numbers) {
-        NBTTagList nbttaglist = new NBTTagList();
-        double[] adouble = numbers;
-        int i = numbers.length;
-
-        for (int j = 0; j < i; ++j) {
-            double d1 = adouble[j];
-            nbttaglist.appendTag(new NBTTagDouble(d1));
-        }
-
-        return nbttaglist;
     }
 
     @Override

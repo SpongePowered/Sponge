@@ -26,8 +26,8 @@ package org.spongepowered.common.entity;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.DataContainer;
@@ -48,6 +48,8 @@ import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataVersions;
+import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Arrays;
@@ -68,6 +70,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         return NbtTranslator.getInstance().translateFrom(this.data);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean apply(Location<World> location, Cause cause) {
         final Vector3d position = location.getPosition();
@@ -78,7 +81,26 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final World world = location.getExtent();
         final WorldServer worldServer = (WorldServer) world;
 
-        final Entity entity = EntityList.createEntityFromNBT(this.data, worldServer);
+        Entity entity = null;
+
+        try {
+            Class<? extends Entity> oclass = (Class<? extends Entity>) this.type.getEntityClass();
+            if (oclass != null) {
+                entity = oclass.getConstructor(net.minecraft.world.World.class).newInstance(world);
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+
+        if (entity == null) {
+            return false;
+        }
+
+        this.data.setTag("Pos", NbtDataUtil.newDoubleNBTList(x, y, z));
+        this.data.setInteger("Dimension", ((IMixinWorldInfo) location.getExtent().getProperties()).getDimensionId());
+        entity.readFromNBT(this.data);
+        this.data.removeTag("Pos");
+        this.data.removeTag("Dimension");
 
         final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entity);
         final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(spongeEntity), world);
@@ -101,7 +123,11 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     public EntitySnapshot toSnapshot(Location<World> location) {
         final SpongeEntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
         builder.entityType = this.type;
-        builder.compound = this.data.copy();
+        NBTTagCompound newCompound = this.data.copy();
+        newCompound.setTag("Pos", NbtDataUtil
+                .newDoubleNBTList(new double[] { location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ() }));
+        newCompound.setInteger("Dimension", ((IMixinWorldInfo) location.getExtent().getProperties()).getDimensionId());
+        builder.compound = newCompound;
         builder.worldId = location.getExtent().getUniqueId();
         builder.position = location.getPosition();
         return builder.build();

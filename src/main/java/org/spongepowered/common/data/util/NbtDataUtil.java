@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagDouble;
 import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.item.Enchantment;
@@ -387,6 +388,19 @@ public final class NbtDataUtil {
             newList.appendTag(enchantmentCompound);
         }
         compound.setTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST, newList);
+    }
+
+    public static NBTTagList newDoubleNBTList(double... numbers) {
+        NBTTagList nbttaglist = new NBTTagList();
+        double[] adouble = numbers;
+        int i = numbers.length;
+
+        for (int j = 0; j < i; ++j) {
+            double d1 = adouble[j];
+            nbttaglist.appendTag(new NBTTagDouble(d1));
+        }
+
+        return nbttaglist;
     }
 
 }

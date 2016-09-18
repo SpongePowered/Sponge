@@ -186,7 +186,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         switch (type) {
             case NbtDataUtil.TAG_BYTE:
                 if (key.contains(BOOLEAN_IDENTIFER)) {
-                    view.set(of(key.replace(BOOLEAN_IDENTIFER, "")), (((NBTTagByte) base).getByte() == 1));
+                    view.set(of(key.replace(BOOLEAN_IDENTIFER, "")), (((NBTTagByte) base).getByte() != 0));
                 } else {
                     view.set(of(key), ((NBTTagByte) base).getByte());
                 }
