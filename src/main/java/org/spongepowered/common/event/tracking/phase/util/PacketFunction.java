@@ -365,7 +365,7 @@ public interface PacketFunction {
                 .orElse(null);
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
-        if (state == PacketPhase.Inventory.DROP_ITEM) {
+        if (state == PacketPhase.Inventory.DROP_ITEM_WITH_HOTKEY) {
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks ->
                             TrackingUtil.processBlockCaptures(blocks, causeTracker, state, context)

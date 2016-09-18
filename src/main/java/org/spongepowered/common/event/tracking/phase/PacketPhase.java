@@ -74,6 +74,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -146,6 +147,12 @@ public final class PacketPhase extends TrackingPhase {
     final static int BUTTON_SECONDARY       = 0x01 << 0 << 1;
     final static int BUTTON_MIDDLE          = 0x01 << 0 << 2;
 
+    // Only use these with data from the actual packet. DO NOT
+    // use them as enum constant values (the 'stateId')
+    final static int PACKET_BUTTON_PRIMARY_ID = 0;
+    final static int PACKET_BUTTON_SECONDARY_ID = 0;
+    final static int PACKET_BUTTON_MIDDLE_ID = 0;
+
     public boolean isPacketInvalid(Packet<?> packetIn, EntityPlayerMP packetPlayer, IPacketState packetState) {
         return packetState.isPacketIgnored(packetIn, packetPlayer);
     }
@@ -202,14 +209,29 @@ public final class PacketPhase extends TrackingPhase {
         // ORDER MATTERS. TEST IF YOU RE-ARRANGE
 
         INVENTORY,
-        PRIMARY_INVENTORY_CLICK(MODE_CLICK | MODE_DROP | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_INSIDE_WINDOW) {
+        PRIMARY_INVENTORY_CLICK(MODE_CLICK | BUTTON_PRIMARY | CLICK_INSIDE_WINDOW) {
             @Override
             public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
                 return SpongeEventFactory.createClickInventoryEventPrimary(cause, transaction, openContainer, slotTransactions);
             }
         },
-        DROP_ITEM(MODE_CLICK | MODE_DROP | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_ANYWHERE) {
+        SECONDARY_INVENTORY_CLICK(MODE_CLICK | BUTTON_SECONDARY | CLICK_INSIDE_WINDOW) {
+            @Override
+            public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventSecondary(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        MIDDLE_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_MIDDLE | CLICK_INSIDE_WINDOW) {
+            @Override
+            public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventMiddle(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+
+        DROP_ITEM_OUTSIDE_WINDOW(MODE_CLICK | BUTTON_PRIMARY | BUTTON_SECONDARY | CLICK_OUTSIDE_WINDOW) {
             @Override
             public boolean doesCaptureEntityDrops() {
                 return true;
@@ -235,8 +257,10 @@ public final class PacketPhase extends TrackingPhase {
                 for (Entity currentEntity : capturedEntities) {
                     currentEntity.setCreator(playerMP.getUniqueID());
                 }
-                final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
-                return SpongeEventFactory.createClickInventoryEventDropFull(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
+                final World spongeWorld = (World) playerMP.worldObj;
+                return usedButton == PACKET_BUTTON_PRIMARY_ID ?
+                        SpongeEventFactory.createClickInventoryEventDropOutsidePrimary   (spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions) :
+                        SpongeEventFactory.createClickInventoryEventDropOutsideSecondary (spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
             }
 
             @Override
@@ -244,32 +268,41 @@ public final class PacketPhase extends TrackingPhase {
                 return true;
             }
         },
-        DROP_ITEMS() {
 
-        },
-        DROP_INVENTORY() {
-        },
-        DROP_SINGLE_ITEM_FROM_INVENTORY(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_OUTSIDE_WINDOW) {
+        // Hotkey is 'q' by default. Note that this only fires when q is pressed with a container open.
+        // Pressing 'q' with a container closed (i.e. while in game normally is a DropItemEvent
+        DROP_ITEM_WITH_HOTKEY(MODE_DROP | BUTTON_PRIMARY | BUTTON_SECONDARY | CLICK_ANYWHERE) {
             @Override
             public boolean doesCaptureEntityDrops() {
                 return true;
             }
 
             @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                super.populateContext(playerMP, packet, context);
+                context
+                        .add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
+            }
+
+            @Override
             public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
                 final Cause spawnCause = Cause.source(EntitySpawnCause.builder()
-                            .entity(EntityUtil.fromNative(playerMP))
-                            .type(InternalSpawnTypes.DROPPED_ITEM)
-                            .build())
+                        .entity(EntityUtil.fromNative(playerMP))
+                        .type(InternalSpawnTypes.DROPPED_ITEM)
+                        .build())
                         .named(NamedCause.of("Container", openContainer))
                         .build();
 
                 for (Entity currentEntity : capturedEntities) {
                     currentEntity.setCreator(playerMP.getUniqueID());
                 }
-                final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
-                return SpongeEventFactory.createClickInventoryEventDropSingle(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
+                final World spongeWorld = (World) playerMP.worldObj;
+
+                // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding 'control')
+                return usedButton == PACKET_BUTTON_PRIMARY_ID ?
+                        SpongeEventFactory.createClickInventoryEventDropSingle(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions) :
+                        SpongeEventFactory.createClickInventoryEventDropFull(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
 
             }
 
@@ -278,6 +311,13 @@ public final class PacketPhase extends TrackingPhase {
                 return true;
             }
         },
+
+        DROP_ITEMS() {
+
+        },
+        DROP_INVENTORY() {
+        },
+
         SWITCH_HOTBAR_NUMBER_PRESS(MODE_HOTBAR, MASK_MODE) {
             @Override
             public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
@@ -291,32 +331,6 @@ public final class PacketPhase extends TrackingPhase {
             public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
                 return SpongeEventFactory.createClickInventoryEventShiftPrimary(cause, transaction, openContainer, slotTransactions);
-            }
-        },
-        MIDDLE_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_MIDDLE, MASK_NORMAL) {
-            @Override
-            public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return SpongeEventFactory.createClickInventoryEventMiddle(cause, transaction, openContainer, slotTransactions);
-            }
-        },
-        SECONDARY_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_INSIDE_WINDOW) {
-            @Override
-            public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return SpongeEventFactory.createClickInventoryEventSecondary(cause, transaction, openContainer, slotTransactions);
-            }
-        },
-        SECONDARY_INVENTORY_CLICK_DROP(MODE_DROP | BUTTON_SECONDARY, MASK_NORMAL) {
-            @Override
-            public boolean doesCaptureEntityDrops() {
-                return true;
-            }
-
-            @Override
-            public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return SpongeEventFactory.createClickInventoryEventSecondary(cause, transaction, openContainer, slotTransactions);
             }
         },
         SECONDARY_INVENTORY_SHIFT_CLICK(MODE_SHIFT_CLICK | BUTTON_SECONDARY, MASK_NORMAL) {
@@ -437,7 +451,12 @@ public final class PacketPhase extends TrackingPhase {
             final int mode = 0x01 << 9 << windowPacket.getClickType().ordinal();
             final int packed = windowPacket.getUsedButton();
             final int unpacked = mode == MODE_DRAG ? (0x01 << 6 << (packed >> 2 & 3)) | (0x01 << 3 << (packed & 3)) : (0x01 << (packed & 3));
-            return Inventory.fromState(Inventory.clickType(windowPacket.getSlotId()) | mode | unpacked);
+
+            Inventory inventory = Inventory.fromState(Inventory.clickType(windowPacket.getSlotId()) | mode | unpacked);
+            if (inventory == Inventory.INVENTORY) {
+                System.err.println(String.format("Unable to find inventory handler for click window packet: %s", windowPacket));
+            }
+            return inventory;
         }
 
         public static Inventory fromState(final int state) {
@@ -983,8 +1002,8 @@ public final class PacketPhase extends TrackingPhase {
             .build();
 
     public static final ImmutableMap<CPacketPlayerDigging.Action, IPacketState> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<CPacketPlayerDigging.Action, IPacketState>builder()
-            .put(CPacketPlayerDigging.Action.DROP_ITEM, Inventory.DROP_ITEM)
-            .put(CPacketPlayerDigging.Action.DROP_ALL_ITEMS, Inventory.DROP_ITEM)
+            .put(CPacketPlayerDigging.Action.DROP_ITEM, Inventory.DROP_ITEM_WITH_HOTKEY)
+            .put(CPacketPlayerDigging.Action.DROP_ALL_ITEMS, Inventory.DROP_ITEM_WITH_HOTKEY)
             .put(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
             .put(CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
             .put(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
