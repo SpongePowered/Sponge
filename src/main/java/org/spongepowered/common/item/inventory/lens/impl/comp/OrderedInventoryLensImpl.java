@@ -43,12 +43,11 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class OrderedInventoryLensImpl extends MinecraftLens implements OrderedInventoryLens<IInventory, ItemStack> {
     
     protected final int stride;
     
-    protected final List<LensHandle<IInventory, ItemStack>> slotCache = new ArrayList<LensHandle<IInventory, ItemStack>>();
+    protected final List<LensHandle<IInventory, ItemStack>> slotCache = new ArrayList<>();
 
     public OrderedInventoryLensImpl(int base, int size, int stride, SlotProvider<IInventory, ItemStack> slots) {
         this(base, size, stride, OrderedInventoryAdapter.class, slots);

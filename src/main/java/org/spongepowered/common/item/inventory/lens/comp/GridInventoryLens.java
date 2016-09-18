@@ -25,9 +25,9 @@
 package org.spongepowered.common.item.inventory.lens.comp;
 
 public interface GridInventoryLens<TInventory, TStack> extends Inventory2DLens<TInventory, TStack> {
-    
-    public abstract InventoryRowLens<TInventory, TStack> getRow(int row);
-    
-    public abstract InventoryColumnLens<TInventory, TStack> getColumn(int column);
+
+    InventoryRowLens<TInventory, TStack> getRow(int row);
+
+    InventoryColumnLens<TInventory, TStack> getColumn(int column);
 
 }

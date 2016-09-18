@@ -43,7 +43,7 @@ public class DefaultInventoryFabric extends MinecraftFabric {
     
     @Override
     public Collection<IInventory> allInventories() {
-        return ImmutableSet.<IInventory>of(this.inventory);
+        return ImmutableSet.of(this.inventory);
     }
 
     @Override
