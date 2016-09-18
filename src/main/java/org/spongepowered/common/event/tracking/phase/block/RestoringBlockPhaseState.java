@@ -22,33 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.general;
+package org.spongepowered.common.event.tracking.phase.block;
 
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 
-final class PostState extends GeneralState {
+final class RestoringBlockPhaseState extends BlockPhaseState {
 
+    RestoringBlockPhaseState() {
+    }
+
+    @SuppressWarnings("unchecked")
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
-        return state.getPhase() == TrackingPhases.GENERATION || state == BlockPhase.State.RESTORING_BLOCKS;
+    void unwind(CauseTracker causeTracker, PhaseContext phaseContext) {
+
     }
 
     @Override
-    public boolean tracksBlockRestores() {
-        return false; // TODO - check that this really is needed.
-    }
-    @Override
-    void unwind(CauseTracker causeTracker, PhaseContext context) {
-        final IPhaseState unwindingState = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no phase found!", context));
-        final PhaseContext unwindingContext = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no context found!", context));
-        this.getPhase().postDispatch(causeTracker, unwindingState, unwindingContext, context);
+    public boolean allowsSpawns() {
+        return false;
     }
 }

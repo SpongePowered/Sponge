@@ -33,7 +33,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
-class PopulatorGenerationPhaseState extends GeneralGenerationPhaseState {
+final class PopulatorGenerationPhaseState extends GeneralGenerationPhaseState {
 
     PopulatorGenerationPhaseState(String id) {
         super(id);

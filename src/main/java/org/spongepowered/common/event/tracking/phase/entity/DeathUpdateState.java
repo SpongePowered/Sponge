@@ -50,7 +50,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-class DeathUpdateState extends EntityPhaseState {
+final class DeathUpdateState extends EntityPhaseState {
 
     DeathUpdateState() {
     }

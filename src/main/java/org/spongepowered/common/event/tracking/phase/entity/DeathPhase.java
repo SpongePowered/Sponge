@@ -51,7 +51,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-class DeathPhase extends EntityPhaseState {
+final class DeathPhase extends EntityPhaseState {
 
     DeathPhase() {
 

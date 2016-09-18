@@ -33,7 +33,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import javax.annotation.Nullable;
 
-class ChangingToDimensionState extends EntityPhaseState {
+final class ChangingToDimensionState extends EntityPhaseState {
 
     ChangingToDimensionState() {
     }

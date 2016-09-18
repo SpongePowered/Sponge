@@ -22,44 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.tick;
+package org.spongepowered.common.event.tracking.phase.plugin;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.SpongeEventFactory;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhaseState;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
-
-import java.util.ArrayList;
+import org.spongepowered.common.interfaces.event.forge.IMixinWorldTickEvent;
 
 import javax.annotation.Nullable;
 
-abstract class TickPhaseState implements IPhaseState {
-
-    TickPhaseState() {
-    }
-
-    @Override
-    public final TrackingPhase getPhase() {
-        return TrackingPhases.TICK;
-    }
+/**
+ * A specialized phase for forge event listeners during pre tick, may need to do the same
+ * if SpongeAPI adds pre tick events.
+ */
+abstract class ListenerPhaseState extends PluginPhaseState {
 
     @Override
     public boolean canSwitchTo(IPhaseState state) {
@@ -71,7 +61,6 @@ abstract class TickPhaseState implements IPhaseState {
         return true;
     }
 
-    public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) { }
 
     public abstract void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker);
 
@@ -84,23 +73,39 @@ abstract class TickPhaseState implements IPhaseState {
 
     }
 
-    public Cause generateTeleportCause(PhaseContext context) {
-        return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.UNKNOWN).build()));
-    }
-
-    public void processPostSpawns(CauseTracker causeTracker, PhaseContext phaseContext, ArrayList<Entity> entities) {
-        final SpawnEntityEvent
-                event =
-                SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, entities, causeTracker.getWorld());
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
-            for (Entity entity : event.getEntities()) {
-                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-            }
-        }
-    }
-
-    public void appendExplosionContext(PhaseContext explosionContext, PhaseContext context) {
+    public void capturePlayerUsingStackToBreakBlocks(PhaseContext context, EntityPlayerMP playerMP, @Nullable ItemStack stack) {
 
     }
+
+    static void logWarningOfDifferentWorldchanges(CauseTracker causeTracker, IMixinWorldTickEvent worldTickEvent, Object listener) {
+        final PrettyPrinter printer = new PrettyPrinter(50).add("Changing a different World than expected!!").centre().hr();
+        printer.add("Sponge is going to process the block changes as normal, however, a mod seems to be changing");
+        printer.add("a world without checking for the world equality of the event! If you do not wish to see this");
+        printer.add("message, you may disable this check in the <gamedir>/config/sponge/global.conf under");
+        printer.add("cause-tracker.report-different-world-changes = false");
+        printer.hr();
+        printer.add("Providing information of the event:");
+        printer.add("%s : %s", "Event world", worldTickEvent.getWorld());
+        printer.addWrapped("%s : %s", "Changed world", causeTracker.getMinecraftWorld());
+        printer.addWrapped("%s : %s", "Listener", listener);
+        printer.add("Stacktrace:");
+        printer.add(new Exception());
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+    }
+    static void logWarningOfDifferentWorldchanges(CauseTracker causeTracker, Object listener) {
+        final PrettyPrinter printer = new PrettyPrinter(50).add("Changing a different World than expected!!").centre().hr();
+        printer.add("Sponge is going to process the block changes as normal, however, a mod seems to be changing");
+        printer.add("a world during a general server tick event! If you do not wish to see this");
+        printer.add("message, you may disable this check in the <gamedir>/config/sponge/global.conf under");
+        printer.add("cause-tracker.report-different-world-changes = false");
+        printer.hr();
+        printer.add("Providing information of the event:");
+        printer.addWrapped("%s : %s", "Changed world", causeTracker.getMinecraftWorld());
+        printer.addWrapped("%s : %s", "Listener", listener);
+        printer.add("Stacktrace:");
+        printer.add(new Exception());
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+    }
+
+
 }

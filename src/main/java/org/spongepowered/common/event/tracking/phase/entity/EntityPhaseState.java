@@ -33,7 +33,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 import javax.annotation.Nullable;
 
-abstract class EntityPhaseState implements IPhaseState {
+public abstract class EntityPhaseState implements IPhaseState {
 
     @Override
     public final TrackingPhase getPhase() {

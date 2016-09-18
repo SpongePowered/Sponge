@@ -22,11 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.entity;
-
-final class LeavingDimensionState extends EntityPhaseState {
-
-    LeavingDimensionState() {
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.event.tracking.phase.block;

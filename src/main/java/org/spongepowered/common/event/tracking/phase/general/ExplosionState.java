@@ -63,7 +63,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
-class ExplosionState extends GeneralState {
+final class ExplosionState extends GeneralState {
     @Override
     public boolean canSwitchTo(IPhaseState state) {
         return true;

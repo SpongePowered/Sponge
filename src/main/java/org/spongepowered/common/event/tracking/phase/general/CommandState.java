@@ -41,7 +41,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
@@ -52,11 +52,11 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-class CommandState extends GeneralState {
+final class CommandState extends GeneralState {
 
     @Override
     public boolean canSwitchTo(IPhaseState state) {
-        return state instanceof BlockPhase.State;
+        return state instanceof BlockPhaseState;
     }
 
     @Override

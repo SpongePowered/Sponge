@@ -28,7 +28,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
-class PlayerWakeUpState extends EntityPhaseState {
+final class PlayerWakeUpState extends EntityPhaseState {
 
     PlayerWakeUpState() {
     }

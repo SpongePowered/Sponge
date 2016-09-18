@@ -29,8 +29,6 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.event.InternalNamedCauses;
 
 import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 final class UnwindingPhaseContext extends PhaseContext {
 
