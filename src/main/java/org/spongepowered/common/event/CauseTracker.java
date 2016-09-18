@@ -880,7 +880,7 @@ public final class CauseTracker {
                         if (captureType == CaptureType.BREAK && !(transaction.getOriginal().getState().getType() instanceof BlockLiquid) && cause.first(User.class).isPresent()) {
                             BlockPos pos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
                             for (EntityHanging hanging : SpongeHooks.findHangingEntities(this.getMinecraftWorld(), pos)) {
-                                if (hanging != null) {
+                                if (hanging != null && !hanging.isDead) {
                                     if (hanging instanceof EntityItemFrame) {
                                         EntityItemFrame itemFrame = (EntityItemFrame) hanging;
                                         net.minecraft.entity.Entity dropCause = null;
@@ -1080,7 +1080,7 @@ public final class CauseTracker {
 
             if (!SpongeImpl.postEvent(event) && event.getEntities().size() > 0) {
                 for (Entity spongeEntity : event.getEntities()) {
-                    net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) spongeEntity; 
+                    net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) spongeEntity;
                     if (nmsEntity instanceof EntityWeatherEffect) {
                         return addWeatherEffect(nmsEntity, cause);
                     }
