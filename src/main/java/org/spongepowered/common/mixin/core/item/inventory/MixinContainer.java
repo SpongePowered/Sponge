@@ -85,8 +85,12 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         this.fabric = MinecraftFabric.of(this.this$);
         this.slots = ContainerUtil.countSlots(this.this$);
         this.lens = ContainerUtil.getLens(this.this$, this.slots);
-        for (org.spongepowered.api.item.inventory.Slot slot: this.slots.getIterator(this, (MinecraftInventoryAdapter) this)) {
-            this.adapters.add(slot);
+
+        // TODO: If lens == null then getIterator will cause a NPE (remove this check when it is no longer necessary)
+        if (this.lens != null) {
+            for (org.spongepowered.api.item.inventory.Slot slot : this.slots.getIterator(this, (MinecraftInventoryAdapter) this)) {
+                this.adapters.add(slot);
+            }
         }
     }
 
