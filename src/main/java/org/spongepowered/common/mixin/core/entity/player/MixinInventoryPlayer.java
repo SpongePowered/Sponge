@@ -30,10 +30,13 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
-import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
-import org.spongepowered.api.item.inventory.entity.HumanInventory;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
+import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -42,42 +45,53 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
+import org.spongepowered.common.item.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.comp.GridInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.HotbarAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.HumanInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 
 import java.util.Optional;
 
 @Mixin(InventoryPlayer.class)
-public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, HumanInventory {
+public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, PlayerInventory {
 
     @Shadow public int currentItem;
     @Shadow public EntityPlayer player;
     @Shadow @Final public ItemStack[] mainInventory;
     @Shadow @Final public ItemStack[] armorInventory;
+    @Shadow @Final public ItemStack[] offHandInventory;
     @Shadow @Final private ItemStack[][] allInventories;
 
     @Shadow public abstract int getInventoryStackLimit();
 
     protected SlotCollection slots;
     protected Fabric<IInventory> inventory;
-    protected HumanInventoryLens lens;
+    protected PlayerInventoryLens lens;
 
-    private Humanoid carrier;
+    private Player carrier;
     private HotbarAdapter hotbar;
+    private GridInventoryAdapter main;
+    private EquipmentInventoryAdapter equipment;
+    private SlotAdapter offhand;
 
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(EntityPlayer playerIn, CallbackInfo ci) {
-        this.inventory = new DefaultInventoryFabric((IInventory) this);
-        this.slots = new SlotCollection.Builder().add(mainInventory.length).add(armorInventory.length, EquipmentSlotAdapter.class).build();
-        this.lens = new HumanInventoryLens(this, this.slots);
-        this.carrier = playerIn instanceof Humanoid ? (Humanoid) playerIn : null;
+        if (playerIn instanceof EntityPlayerMP) {
+            // We only care about Server inventories
+            this.inventory = new DefaultInventoryFabric((IInventory) this);
+            this.slots = new SlotCollection.Builder().add(mainInventory.length).add(offHandInventory.length).add(armorInventory.length,
+                    EquipmentSlotAdapter.class).build();
+            this.carrier = (Player) playerIn;
+            this.lens = new PlayerInventoryLens(this, this.slots);
+        }
     }
 
     @Override
@@ -96,16 +110,40 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
     }
 
     @Override
-    public Optional<Humanoid> getCarrier() {
+    public Optional<Player> getCarrier() {
         return Optional.ofNullable(this.carrier);
     }
 
     @Override
     public Hotbar getHotbar() {
         if (this.hotbar == null) {
-            this.hotbar = (HotbarAdapter) this.lens.getHotbar().getAdapter(this.inventory, this);
+            this.hotbar = (HotbarAdapter) this.lens.getHotbarLens().getAdapter(this.inventory, this);
         }
         return this.hotbar;
+    }
+
+    @Override
+    public GridInventory getMain() {
+        if (this.main == null) {
+            this.main = (GridInventoryAdapter) this.lens.getMainLens().getAdapter(this.inventory, this);
+        }
+        return this.main;
+    }
+
+    @Override
+    public EquipmentInventory getEquipment() {
+        if (this.equipment == null) {
+            this.equipment = (EquipmentInventoryAdapter) this.lens.getEquipmentLens().getAdapter(this.inventory, this);
+        }
+        return this.equipment;
+    }
+
+    @Override
+    public Slot getOffhand() {
+        if (this.offhand == null) {
+            this.offhand = (SlotAdapter) this.lens.getOffhandLens().getAdapter(this.inventory, this);
+        }
+        return this.offhand;
     }
 
     @Override
@@ -129,7 +167,6 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
 
     /**
      * @author blood - October 7th, 2015
-     * @author Minecrell - August 22nd, 2016 - Updated to 1.10
      * @reason Prevents inventory from being cleared until after events.
      */
     @Overwrite

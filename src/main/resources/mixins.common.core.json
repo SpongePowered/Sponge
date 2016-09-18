@@ -440,8 +440,6 @@
         "world.gen.MixinChunkProviderOverworld",
         "world.gen.MixinChunkProviderHell",
         "world.gen.MixinMapGenBase",
-        "world.gen.MixinMapGenStructure",
-        "world.gen.MixinMapGenVillage",
         "world.gen.MixinChunkProviderServer",
         "world.gen.populators.MixinWorldGenAbstractTree",
         "world.gen.populators.MixinWorldGenBigMushroom",
@@ -479,6 +477,7 @@
         "world.gen.populators.MixinWorldGenVines",
         "world.gen.populators.MixinWorldGenWaterLily",
         "world.gen.structure.MixinMapGenStructure",
+        "world.gen.structure.MixinMapGenVillage",
         "world.storage.MixinWorldInfo",
         "world.storage.MixinSaveHandler"
     ],

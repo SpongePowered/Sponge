@@ -47,7 +47,7 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
     @Nullable final ItemType baseType;
     final List<BiConsumer<ItemStack.Builder, Random>> biConsumers;
 
-    SpongeItemStackGenerator(Builder builder) {
+    private SpongeItemStackGenerator(Builder builder) {
         this.biConsumers = ImmutableList.copyOf(builder.consumers);
         this.baseType = builder.baseItem;
     }

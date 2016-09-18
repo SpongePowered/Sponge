@@ -22,19 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.comp;
+package org.spongepowered.common.item.inventory.lens.impl.slots;
 
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.common.interfaces.inventory.IMixinSlot;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
 
-public interface CraftingInventoryLens<TInventory, TStack> extends GridInventoryLens<TInventory, TStack> {
+public class FakeSlotLensImpl extends SlotLensImpl {
 
-    GridInventoryLens<TInventory, TStack> getCraftingGrid();
+    private Slot slot;
 
-    CraftingOutputSlotLens<TInventory, TStack> getOutputSlot();
+    public FakeSlotLensImpl(Slot slot) {
+        super(Integer.MAX_VALUE);
+        this.slot = slot;
+    }
 
-    TStack getOutputStack(Fabric<TInventory> inv);
+    @Override
+    public ItemStack getStack(Fabric<IInventory> inv) {
+        return this.slot.getStack();
+    }
 
-    boolean setOutputStack(Fabric<TInventory> inv, TStack stack);
-
+    @Override
+    public boolean setStack(Fabric<IInventory> inv, ItemStack stack) {
+        throw new IllegalStateException(String.format("Cannot set stack for invalid slot %s with id %s!", this.slot, ((IMixinSlot) this.slot).getSlotIndex()));
+    }
 }

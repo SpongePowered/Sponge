@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import org.spongepowered.api.data.Property.Operator;
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
+
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.Property.Operator;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.property.SlotPos;
@@ -85,12 +86,12 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
     }
 
     /**
-     * Basic initialiser for two dimensional inventories. Adds child slots
+     * Basic initializer for two dimensional inventories. Adds child slots
      * directly to this lens starting at {@link #base} and creating a
      * rectangular array of slots {@link #width} by {@link #height} assuming
      * that the target inventory is {@link #stride} slots wide.
      *
-     * @param slots
+     * @param slots the ptrovider of the slos
      * @param spanning Set to true to create spanning slots, false to create
      *      normal child slots
      */

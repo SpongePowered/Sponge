@@ -543,11 +543,15 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         // since the client will send the server a CPacketTryUseItem right after this packet is done processing.
         if (actionResult != EnumActionResult.SUCCESS) {
             SpongeCommonEventFactory.ignoreRightClickAirEvent = true;
-            final CauseTracker causeTracker = ((IMixinWorldServer) player.worldObj).getCauseTracker();
-            final PhaseData peek = causeTracker.getCurrentPhaseData();
-            final ItemStack itemStack = peek.context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
-            PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
+            // If a plugin or mod has changed the item, avoid restoring
+            if (!SpongeCommonEventFactory.playerInteractItemChanged) {
+                final CauseTracker causeTracker = ((IMixinWorldServer) player.worldObj).getCauseTracker();
+                final PhaseData peek = causeTracker.getCurrentPhaseData();
+                final ItemStack itemStack = peek.context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
+                PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
+            }
         }
+        SpongeCommonEventFactory.playerInteractItemChanged = false;
         return actionResult;
     }
 

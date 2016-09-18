@@ -71,8 +71,8 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
-        this.rows = new ArrayList<LensHandle<IInventory, ItemStack>>();
-        this.cols = new ArrayList<LensHandle<IInventory, ItemStack>>();
+        this.rows = new ArrayList<>();
+        this.cols = new ArrayList<>();
 
         for (int y = 0, base = this.base; y < this.height; y++, base += this.stride) {
             InventoryRowLensImpl row = new InventoryRowLensImpl(base, this.width, this.xBase, this.yBase + y, slots);
@@ -90,12 +90,12 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
 
     protected void addRow(InventoryRowLens<IInventory, ItemStack> row) {
         super.addSpanningChild(row);
-        this.rows.add(new LensHandle<IInventory, ItemStack>(row));
+        this.rows.add(new LensHandle<>(row));
     }
 
     protected void addColumn(InventoryColumnLens<IInventory, ItemStack> column) {
         super.addChild(column);
-        this.cols.add(new LensHandle<IInventory, ItemStack>(column));
+        this.cols.add(new LensHandle<>(column));
     }
 
     @Override

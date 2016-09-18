@@ -364,7 +364,7 @@ public interface PacketFunction {
                 .orElse(null);
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
-        if (state == InventoryPacketState.DROP_ITEM) {
+        if (state == InventoryPacketState.DROP_ITEM_WITH_HOTKEY) {
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks ->
                             TrackingUtil.processBlockCaptures(blocks, causeTracker, state, context)
@@ -650,11 +650,11 @@ public interface PacketFunction {
 
                 if (inventoryEvent instanceof ChangeInventoryEvent) {
                     // Restore target slots
-                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions());
+                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions(), true);
                 }
             } else {
                 if (inventoryEvent instanceof ChangeInventoryEvent) {
-                    PacketPhaseUtil.handleCustomSlot(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions());
+                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions(), false);
                 }
 
                 // Custom cursor
@@ -754,7 +754,7 @@ public interface PacketFunction {
         if (changeInventoryEventHeld.isCancelled()) {
             player.connection.sendPacket(new SPacketHeldItemChange(previousSlot));
         } else {
-            PacketPhaseUtil.handleCustomSlot(player, changeInventoryEventHeld.getTransactions());
+            PacketPhaseUtil.handleSlotRestore(player, changeInventoryEventHeld.getTransactions(), false);
             inventory.currentItem = itemChange.getSlotId();
             player.markPlayerActive();
         }

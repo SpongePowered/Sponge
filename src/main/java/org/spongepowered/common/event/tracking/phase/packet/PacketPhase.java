@@ -129,6 +129,12 @@ public final class PacketPhase extends TrackingPhase {
     final static int BUTTON_MIDDLE          = 0x01 << 0 << 2;
 
 
+    // Only use these with data from the actual packet. DO NOT
+    // use them as enum constant values (the 'stateId')
+    final static int PACKET_BUTTON_PRIMARY_ID = 0;
+    final static int PACKET_BUTTON_SECONDARY_ID = 0;
+    final static int PACKET_BUTTON_MIDDLE_ID = 0;
+
     private final Map<Class<? extends Packet<?>>, Function<Packet<?>, IPacketState>> packetTranslationMap = new IdentityHashMap<>();
     private final Map<Class<? extends Packet<?>>, PacketFunction> packetUnwindMap = new IdentityHashMap<>();
 
@@ -362,8 +368,8 @@ public final class PacketPhase extends TrackingPhase {
             .put(CPacketEntityAction.Action.START_FALL_FLYING, GeneralPacketState.START_FALL_FLYING)
             .build();
     public static final ImmutableMap<CPacketPlayerDigging.Action, IPacketState> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<CPacketPlayerDigging.Action, IPacketState>builder()
-            .put(CPacketPlayerDigging.Action.DROP_ITEM, InventoryPacketState.DROP_ITEM)
-            .put(CPacketPlayerDigging.Action.DROP_ALL_ITEMS, InventoryPacketState.DROP_ITEM)
+            .put(CPacketPlayerDigging.Action.DROP_ITEM, InventoryPacketState.DROP_ITEM_WITH_HOTKEY)
+            .put(CPacketPlayerDigging.Action.DROP_ALL_ITEMS, InventoryPacketState.DROP_ITEM_WITH_HOTKEY)
             .put(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, GeneralPacketState.INTERACTION)
             .put(CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, GeneralPacketState.INTERACTION)
             .put(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, GeneralPacketState.INTERACTION)

@@ -41,11 +41,17 @@ import java.util.List;
 
 public final class PacketPhaseUtil {
 
-    public static void handleSlotRestore(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
+    public static void handleSlotRestore(EntityPlayerMP player, List<SlotTransaction> slotTransactions, boolean eventCancelled) {
         for (SlotTransaction slotTransaction : slotTransactions) {
+
+            if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
+                continue;
+            }
+
             final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
             final int slotNumber = slot.slotNumber;
-            final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(slotTransaction.getOriginal());
+            ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
+            final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(snapshot);
 
             // TODO: fix below
             /*if (originalStack == null) {
@@ -67,30 +73,6 @@ public final class PacketPhaseUtil {
         ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
         player.inventory.setItemStack(cursor);
         player.connection.sendPacket(new SPacketSetSlot(-1, -1, cursor));
-    }
-
-    public static void handleCustomSlot(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
-        for (SlotTransaction slotTransaction : slotTransactions) {
-            if (slotTransaction.isValid() && slotTransaction.getCustom().isPresent()) {
-                final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
-                final int slotNumber = slot.slotNumber;
-                final ItemStack customStack = ItemStackUtil.fromSnapshotToNative(slotTransaction.getFinal());
-
-                // TODO: fix below
-                /*if (customStack == null) {
-                    slot.clear();
-                } else {
-                    slot.offer((org.spongepowered.api.item.inventory.ItemStack) customStack);
-                }*/
-
-                final Slot nmsSlot = player.inventoryContainer.getSlot(slotNumber);
-                if (nmsSlot != null) {
-                    nmsSlot.putStack(customStack);
-                }
-
-                player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotNumber, customStack));
-            }
-        }
     }
 
     public static void validateCapturedTransactions(int slotId, Container openContainer, List<SlotTransaction> capturedTransactions) {

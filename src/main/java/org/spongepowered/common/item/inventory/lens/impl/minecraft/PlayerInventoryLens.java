@@ -24,40 +24,63 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
+import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.comp.EquipmentInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
-public class HumanInventoryLens extends MinecraftLens {
+public class PlayerInventoryLens extends MinecraftLens {
 
-    private GridInventoryLensImpl mainInventory;
+    private final EntityPlayerMP player;
+
     private HotbarLensImpl hotbar;
-    private OrderedInventoryLensImpl armourInventory;
+    private GridInventoryLensImpl main;
+    private EquipmentInventoryLensImpl equipment;
+    private SlotLensImpl offhand;
 
-    public HumanInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+    public PlayerInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
         super(0, adapter.getInventory().getSize(), adapter, slots);
+        this.player = (EntityPlayerMP) ((InventoryPlayer) adapter).player;
     }
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
         this.hotbar = new HotbarLensImpl(0, InventoryPlayer.getHotbarSize(), slots);
-        this.mainInventory = new GridInventoryLensImpl(9, 9, 3, 9, slots);
-        this.armourInventory = new OrderedInventoryLensImpl(36, 4, 1, slots);
+        this.main = new GridInventoryLensImpl(9, 9, 3, 9, slots);
+        this.equipment = new EquipmentInventoryLensImpl((ArmorEquipable) player, 36, 4, 1, slots);
+        this.offhand = new SlotLensImpl(37);
 
         this.addSpanningChild(this.hotbar);
-        this.addSpanningChild(this.mainInventory);
-        this.addSpanningChild(this.armourInventory);
+        this.addSpanningChild(this.main);
+        this.addSpanningChild(this.equipment);
+        this.addSpanningChild(this.offhand);
     }
 
-    public HotbarLens<IInventory, net.minecraft.item.ItemStack> getHotbar() {
+    public HotbarLens<IInventory, net.minecraft.item.ItemStack> getHotbarLens() {
         return this.hotbar;
     }
 
+    public GridInventoryLens<IInventory, ItemStack> getMainLens() {
+        return this.main;
+    }
+
+    public EquipmentInventoryLens<IInventory, ItemStack> getEquipmentLens() {
+        return this.equipment;
+    }
+
+    public SlotLens<IInventory, ItemStack> getOffhandLens() {
+        return this.offhand;
+    }
 }

@@ -66,6 +66,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.util.SpongeHooks;
 
 import java.util.Optional;
 
@@ -133,11 +134,15 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         // Sponge Start - Create an interact block event before something happens.
         @Nullable final ItemStack oldStack = ItemStack.copyItemStack(stack);
 
+        ItemStack currentPlayerItem = this.thisPlayerMP.getHeldItemMainhand();
         final BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)),
                 Optional.of(new Vector3d(offsetX, offsetY, offsetZ)), currentSnapshot,
                 DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
-
+        ItemStack newPlayerItem = this.thisPlayerMP.getHeldItemMainhand();
+        if (!SpongeHooks.areItemStacksEquals(currentPlayerItem, newPlayerItem)) {
+            SpongeCommonEventFactory.playerInteractItemChanged = true;
+        }
         final EntityPlayerMP playerMP = (EntityPlayerMP) player;
         if (event.isCancelled()) {
             final IBlockState state = (IBlockState) currentSnapshot.getState();

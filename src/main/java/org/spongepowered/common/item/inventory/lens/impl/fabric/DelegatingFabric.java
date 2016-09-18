@@ -44,7 +44,7 @@ public class DelegatingFabric extends MinecraftFabric {
     
     @Override
     public Collection<IInventory> allInventories() {
-        return Collections.<IInventory>emptyList();
+        return Collections.emptyList();
     }
 
     @Override

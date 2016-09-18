@@ -37,6 +37,8 @@ import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -54,15 +56,29 @@ enum InventoryPacketState implements IPacketState, IPhaseState {
     // ORDER MATTERS. TEST IF YOU RE-ARRANGE
 
     INVENTORY,
-    PRIMARY_INVENTORY_CLICK(
-            PacketPhase.MODE_CLICK | PacketPhase.MODE_DROP | PacketPhase.MODE_PICKBLOCK | PacketPhase.BUTTON_PRIMARY | PacketPhase.CLICK_INSIDE_WINDOW) {
+    PRIMARY_INVENTORY_CLICK(PacketPhase.MODE_CLICK | PacketPhase.BUTTON_PRIMARY | PacketPhase.CLICK_INSIDE_WINDOW) {
         @Override
         public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                 List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
             return SpongeEventFactory.createClickInventoryEventPrimary(cause, transaction, openContainer, slotTransactions);
         }
     },
-    DROP_ITEM(PacketPhase.MODE_CLICK | PacketPhase.MODE_DROP | PacketPhase.MODE_PICKBLOCK | PacketPhase.BUTTON_PRIMARY | PacketPhase.CLICK_ANYWHERE) {
+    SECONDARY_INVENTORY_CLICK(PacketPhase.MODE_CLICK | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_INSIDE_WINDOW) {
+        @Override
+        public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+            return SpongeEventFactory.createClickInventoryEventSecondary(cause, transaction, openContainer, slotTransactions);
+        }
+    },
+    MIDDLE_INVENTORY_CLICK(PacketPhase.MODE_CLICK | PacketPhase.MODE_PICKBLOCK | PacketPhase.BUTTON_MIDDLE | PacketPhase.CLICK_INSIDE_WINDOW) {
+        @Override
+        public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+            return SpongeEventFactory.createClickInventoryEventMiddle(cause, transaction, openContainer, slotTransactions);
+        }
+    },
+
+    DROP_ITEM_OUTSIDE_WINDOW(PacketPhase.MODE_CLICK | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_OUTSIDE_WINDOW) {
         @Override
         public boolean doesCaptureEntityDrops() {
             return true;
@@ -88,8 +104,10 @@ enum InventoryPacketState implements IPacketState, IPhaseState {
             for (Entity currentEntity : capturedEntities) {
                 currentEntity.setCreator(playerMP.getUniqueID());
             }
-            final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
-            return SpongeEventFactory.createClickInventoryEventDropFull(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
+            final World spongeWorld = (World) playerMP.worldObj;
+            return usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID ?
+                   SpongeEventFactory.createClickInventoryEventDropOutsidePrimary   (spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions) :
+                   SpongeEventFactory.createClickInventoryEventDropOutsideSecondary (spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
         }
 
         @Override
@@ -97,33 +115,41 @@ enum InventoryPacketState implements IPacketState, IPhaseState {
             return true;
         }
     },
-    DROP_ITEMS() {
 
-    },
-    DROP_INVENTORY() {
-    },
-    DROP_SINGLE_ITEM_FROM_INVENTORY(
-            PacketPhase.MODE_CLICK | PacketPhase.MODE_PICKBLOCK | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_OUTSIDE_WINDOW) {
+    // Hotkey is 'q' by default. Note that this only fires when q is pressed with a container open.
+    // Pressing 'q' with a container closed (i.e. while in game normally is a DropItemEvent
+    DROP_ITEM_WITH_HOTKEY(PacketPhase.MODE_DROP | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_ANYWHERE) {
         @Override
         public boolean doesCaptureEntityDrops() {
             return true;
         }
 
         @Override
+        public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+            super.populateContext(playerMP, packet, context);
+            context
+                    .add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
+        }
+
+        @Override
         public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                 List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
             final Cause spawnCause = Cause.source(EntitySpawnCause.builder()
-                        .entity(EntityUtil.fromNative(playerMP))
-                        .type(InternalSpawnTypes.DROPPED_ITEM)
-                        .build())
+                    .entity(EntityUtil.fromNative(playerMP))
+                    .type(InternalSpawnTypes.DROPPED_ITEM)
+                    .build())
                     .named(NamedCause.of("Container", openContainer))
                     .build();
 
             for (Entity currentEntity : capturedEntities) {
                 currentEntity.setCreator(playerMP.getUniqueID());
             }
-            final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
-            return SpongeEventFactory.createClickInventoryEventDropSingle(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
+            final World spongeWorld = (World) playerMP.worldObj;
+
+            // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding 'control')
+            return usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID ?
+                   SpongeEventFactory.createClickInventoryEventDropSingle(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions) :
+                   SpongeEventFactory.createClickInventoryEventDropFull(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
 
         }
 
@@ -132,6 +158,13 @@ enum InventoryPacketState implements IPacketState, IPhaseState {
             return true;
         }
     },
+
+    DROP_ITEMS() {
+
+    },
+    DROP_INVENTORY() {
+    },
+
     SWITCH_HOTBAR_NUMBER_PRESS(PacketPhase.MODE_HOTBAR, PacketPhase.MASK_MODE) {
         @Override
         public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
@@ -145,32 +178,6 @@ enum InventoryPacketState implements IPacketState, IPhaseState {
         public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                 List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
             return SpongeEventFactory.createClickInventoryEventShiftPrimary(cause, transaction, openContainer, slotTransactions);
-        }
-    },
-    MIDDLE_INVENTORY_CLICK(PacketPhase.MODE_CLICK | PacketPhase.MODE_PICKBLOCK | PacketPhase.BUTTON_MIDDLE, PacketPhase.MASK_NORMAL) {
-        @Override
-        public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-            return SpongeEventFactory.createClickInventoryEventMiddle(cause, transaction, openContainer, slotTransactions);
-        }
-    },
-    SECONDARY_INVENTORY_CLICK(PacketPhase.MODE_CLICK | PacketPhase.MODE_PICKBLOCK | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_INSIDE_WINDOW) {
-        @Override
-        public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-            return SpongeEventFactory.createClickInventoryEventSecondary(cause, transaction, openContainer, slotTransactions);
-        }
-    },
-    SECONDARY_INVENTORY_CLICK_DROP(PacketPhase.MODE_DROP | PacketPhase.BUTTON_SECONDARY, PacketPhase.MASK_NORMAL) {
-        @Override
-        public boolean doesCaptureEntityDrops() {
-            return true;
-        }
-
-        @Override
-        public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-            return SpongeEventFactory.createClickInventoryEventSecondary(cause, transaction, openContainer, slotTransactions);
         }
     },
     SECONDARY_INVENTORY_SHIFT_CLICK(PacketPhase.MODE_SHIFT_CLICK | PacketPhase.BUTTON_SECONDARY, PacketPhase.MASK_NORMAL) {
@@ -188,14 +195,11 @@ enum InventoryPacketState implements IPacketState, IPhaseState {
             return SpongeEventFactory.createClickInventoryEventDouble(cause, transaction, openContainer, slotTransactions);
         }
     },
-    PRIMARY_DRAG_INVENTORY_START(
-            PacketPhase.MODE_DRAG | PacketPhase.DRAG_MODE_SPLIT_ITEMS | PacketPhase.DRAG_STATUS_STARTED | PacketPhase.CLICK_OUTSIDE_WINDOW, PacketPhase.MASK_DRAG),
+    PRIMARY_DRAG_INVENTORY_START(PacketPhase.MODE_DRAG | PacketPhase.DRAG_MODE_SPLIT_ITEMS | PacketPhase.DRAG_STATUS_STARTED | PacketPhase.CLICK_OUTSIDE_WINDOW, PacketPhase.MASK_DRAG),
     SECONDARY_DRAG_INVENTORY_START(PacketPhase.MODE_DRAG | PacketPhase.DRAG_MODE_ONE_ITEM | PacketPhase.DRAG_STATUS_STARTED | PacketPhase.CLICK_OUTSIDE_WINDOW, PacketPhase.MASK_DRAG),
-    PRIMARY_DRAG_INVENTORY_ADDSLOT(
-            PacketPhase.MODE_DRAG | PacketPhase.DRAG_MODE_SPLIT_ITEMS | PacketPhase.DRAG_STATUS_ADD_SLOT | PacketPhase.CLICK_INSIDE_WINDOW, PacketPhase.MASK_DRAG),
+    PRIMARY_DRAG_INVENTORY_ADDSLOT(PacketPhase.MODE_DRAG | PacketPhase.DRAG_MODE_SPLIT_ITEMS | PacketPhase.DRAG_STATUS_ADD_SLOT | PacketPhase.CLICK_INSIDE_WINDOW, PacketPhase.MASK_DRAG),
     SECONDARY_DRAG_INVENTORY_ADDSLOT(PacketPhase.MODE_DRAG | PacketPhase.DRAG_MODE_ONE_ITEM | PacketPhase.DRAG_STATUS_ADD_SLOT | PacketPhase.CLICK_INSIDE_WINDOW, PacketPhase.MASK_DRAG),
-    PRIMARY_DRAG_INVENTORY_STOP(
-            PacketPhase.MODE_DRAG | PacketPhase.DRAG_MODE_SPLIT_ITEMS | PacketPhase.DRAG_STATUS_STOPPED | PacketPhase.CLICK_OUTSIDE_WINDOW, PacketPhase.MASK_DRAG) {
+    PRIMARY_DRAG_INVENTORY_STOP(PacketPhase.MODE_DRAG | PacketPhase.DRAG_MODE_SPLIT_ITEMS | PacketPhase.DRAG_STATUS_STOPPED | PacketPhase.CLICK_OUTSIDE_WINDOW, PacketPhase.MASK_DRAG) {
         @Override
         public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                 List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
@@ -224,7 +228,8 @@ enum InventoryPacketState implements IPacketState, IPhaseState {
         }
     },
     OPEN_INVENTORY,
-    ENCHANT_ITEM;
+    ENCHANT_ITEM,
+    ;
 
     /**
      * Flags we care about
@@ -294,7 +299,12 @@ enum InventoryPacketState implements IPacketState, IPhaseState {
         final int mode = 0x01 << 9 << windowPacket.getClickType().ordinal();
         final int packed = windowPacket.getUsedButton();
         final int unpacked = mode == PacketPhase.MODE_DRAG ? (0x01 << 6 << (packed >> 2 & 3)) | (0x01 << 3 << (packed & 3)) : (0x01 << (packed & 3));
-        return InventoryPacketState.fromState(InventoryPacketState.clickType(windowPacket.getSlotId()) | mode | unpacked);
+
+        InventoryPacketState inventory = InventoryPacketState.fromState(InventoryPacketState.clickType(windowPacket.getSlotId()) | mode | unpacked);
+        if (inventory == InventoryPacketState.INVENTORY) {
+            SpongeImpl.getLogger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
+        }
+        return inventory;
     }
 
     public static InventoryPacketState fromState(final int state) {

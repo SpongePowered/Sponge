@@ -24,17 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.comp;
 
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
-
-public interface CraftingInventoryLens<TInventory, TStack> extends GridInventoryLens<TInventory, TStack> {
-
-    GridInventoryLens<TInventory, TStack> getCraftingGrid();
-
-    CraftingOutputSlotLens<TInventory, TStack> getOutputSlot();
-
-    TStack getOutputStack(Fabric<TInventory> inv);
-
-    boolean setOutputStack(Fabric<TInventory> inv, TStack stack);
+public interface EquipmentInventoryLens<TInventory, TStack> extends OrderedInventoryLens<TInventory, TStack> {
 
 }

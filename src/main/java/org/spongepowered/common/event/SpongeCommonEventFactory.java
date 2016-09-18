@@ -112,6 +112,8 @@ public class SpongeCommonEventFactory {
     // Set before firing an internal Forge BlockBreak event to handle extended blockstate
     public static boolean convertingMapFormat = false;
     public static boolean ignoreRightClickAirEvent = false;
+    // Set if the player's held item changes during InteractBlockEvent.Secondary
+    public static boolean playerInteractItemChanged = false;
 
     // For animation packet
     public static int lastAnimationPacketTick = 0;
