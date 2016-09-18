@@ -467,8 +467,15 @@ public final class EntityPhase extends TrackingPhase {
     }
 
 
-    EntityPhase(TrackingPhase parent) {
-        super(parent);
+    public static EntityPhase getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private EntityPhase() {
+    }
+
+    private static final class Holder {
+        static final EntityPhase INSTANCE = new EntityPhase();
     }
 
 }

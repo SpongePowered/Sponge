@@ -64,8 +64,15 @@ public class PlayerPhase extends TrackingPhase {
         }
     }
 
-    PlayerPhase(@Nullable TrackingPhase parent) {
-        super(parent);
+    public static PlayerPhase getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private PlayerPhase() {
+    }
+
+    private static final class Holder {
+        static final PlayerPhase INSTANCE = new PlayerPhase();
     }
 
     @SuppressWarnings("unchecked")

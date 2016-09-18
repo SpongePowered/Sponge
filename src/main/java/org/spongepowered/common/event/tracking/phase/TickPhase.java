@@ -114,7 +114,7 @@ public final class TickPhase extends TrackingPhase {
 
         @Override
         public final TrackingPhase getPhase() {
-            return TrackingPhases.WORLD;
+            return TrackingPhases.TICK;
         }
 
         @Override
@@ -1092,14 +1092,15 @@ public final class TickPhase extends TrackingPhase {
         ((TickPhaseState) state).processPostTick(causeTracker, context);
     }
 
-    TickPhase(TrackingPhase parent) {
-        super(parent);
+    public static TickPhase getInstance() {
+        return Holder.INSTANCE;
     }
 
-    @Override
-    public TickPhase addChild(TrackingPhase child) {
-        super.addChild(child);
-        return this;
+    private TickPhase() {
+    }
+
+    private static final class Holder {
+        static final TickPhase INSTANCE = new TickPhase();
     }
 
     @Override

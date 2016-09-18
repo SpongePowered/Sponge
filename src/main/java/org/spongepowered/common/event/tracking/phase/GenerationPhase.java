@@ -224,14 +224,15 @@ public final class GenerationPhase extends TrackingPhase {
 
     }
 
-    GenerationPhase(TrackingPhase parent) {
-        super(parent);
+    public static GenerationPhase getInstance() {
+        return Holder.INSTANCE;
     }
 
-    @Override
-    public GenerationPhase addChild(TrackingPhase child) {
-        super.addChild(child);
-        return this;
+    private GenerationPhase() {
+    }
+
+    private static final class Holder {
+        static final GenerationPhase INSTANCE = new GenerationPhase();
     }
 
     @Override

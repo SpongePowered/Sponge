@@ -90,8 +90,15 @@ public final class BlockPhase extends TrackingPhase {
 
     }
 
-    BlockPhase(TrackingPhase parent) {
-        super(parent);
+    public static BlockPhase getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private BlockPhase() {
+    }
+
+    private static final class Holder {
+        static final BlockPhase INSTANCE = new BlockPhase();
     }
 
     @Override

@@ -25,7 +25,7 @@
 package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static org.spongepowered.common.event.tracking.phase.util.PacketPhaseUtil.handleCustomCursor;
+import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
@@ -37,7 +37,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;

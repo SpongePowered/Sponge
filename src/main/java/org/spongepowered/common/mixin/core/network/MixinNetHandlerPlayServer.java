@@ -106,7 +106,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TickPhase;
-import org.spongepowered.common.event.tracking.phase.util.PacketPhaseUtil;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;

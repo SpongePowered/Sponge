@@ -49,6 +49,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -62,27 +63,7 @@ import javax.annotation.Nullable;
 
 public abstract class TrackingPhase {
 
-    @Nullable private final TrackingPhase parent;
-
     private final List<TrackingPhase> children = new ArrayList<>();
-
-    TrackingPhase(@Nullable TrackingPhase parent) {
-        this.parent = parent;
-    }
-
-    @Nullable
-    public TrackingPhase getParent() {
-        return this.parent;
-    }
-
-    public List<TrackingPhase> getChildren() {
-        return this.children;
-    }
-
-    public TrackingPhase addChild(TrackingPhase child) {
-        this.children.add(child);
-        return this;
-    }
 
     /**
      * The exit point of any phase. Every phase should have an unwinding

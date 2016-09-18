@@ -70,7 +70,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.mixin.core.world.MixinExplosion;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -444,14 +443,15 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
 
-    GeneralPhase(@Nullable TrackingPhase parent) {
-        super(parent);
+    public static GeneralPhase getInstance() {
+        return Holder.INSTANCE;
     }
 
-    @Override
-    public GeneralPhase addChild(TrackingPhase child) {
-        super.addChild(child);
-        return this;
+    private GeneralPhase() {
+    }
+
+    private static final class Holder {
+        static final GeneralPhase INSTANCE = new GeneralPhase();
     }
 
     @Override

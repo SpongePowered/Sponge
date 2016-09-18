@@ -46,7 +46,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.packet.GeneralPacketState;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.net.InetSocketAddress;
@@ -98,8 +98,8 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
         final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = peek.state;
-        if (phaseState == null || (phaseState != PacketPhase.General.PLACE_BLOCK && phaseState != PacketPhase.General.USE_ITEM &&
-                phaseState != PacketPhase.General.INTERACTION)) {
+        if (phaseState == null || (phaseState != GeneralPacketState.PLACE_BLOCK && phaseState != GeneralPacketState.USE_ITEM &&
+                                   phaseState != GeneralPacketState.INTERACTION)) {
             final Cause.Builder builder = Cause.source(playerIn);
             peek.context.getOwner().ifPresent(builder::owner);
 

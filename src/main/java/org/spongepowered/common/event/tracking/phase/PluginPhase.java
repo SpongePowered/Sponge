@@ -291,14 +291,15 @@ public final class PluginPhase extends TrackingPhase {
         }
     }
 
-    PluginPhase(@Nullable TrackingPhase parent) {
-        super(parent);
+    public static PluginPhase getInstance() {
+        return Holder.INSTANCE;
     }
 
-    @Override
-    public PluginPhase addChild(TrackingPhase child) {
-        super.addChild(child);
-        return this;
+    private PluginPhase() {
+    }
+
+    private static final class Holder {
+        static final PluginPhase INSTANCE = new PluginPhase();
     }
 
     @Override
