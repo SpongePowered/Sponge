@@ -78,12 +78,16 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private SlotCollection slots;
     private Lens<IInventory, ItemStack> lens;
     private boolean initialized;
+    private List<org.spongepowered.api.item.inventory.Slot> adapters = new ArrayList<>();
 
     private void init() {
         this.initialized = true;
         this.fabric = MinecraftFabric.of(this.this$);
         this.slots = ContainerUtil.countSlots(this.this$);
         this.lens = ContainerUtil.getLens(this.this$, this.slots);
+        for (org.spongepowered.api.item.inventory.Slot slot: this.slots.getIterator(this, (MinecraftInventoryAdapter) this)) {
+            this.adapters.add(slot);
+        }
     }
 
     /**
@@ -118,6 +122,10 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
      */
     @Overwrite
     public void detectAndSendChanges() {
+        if (!this.initialized) {
+            this.init();
+        }
+
         for (int i = 0; i < this.inventorySlots.size(); ++i) {
             ItemStack itemstack = this.inventorySlots.get(i).getStack();
             ItemStack itemstack1 = this.inventoryItemStacks.get(i);
@@ -130,7 +138,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                     ItemStackSnapshot newItem = itemstack == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
                     SlotTransaction slotTransaction =
-                            new SlotTransaction(new SlotAdapter(this.inventorySlots.get(i)), originalItem, newItem);
+                            new SlotTransaction(this.adapters.get(i), originalItem, newItem);
                     this.capturedSlotTransactions.add(slotTransaction);
                 }
                 // Sponge end
@@ -148,13 +156,17 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Inject(method = "putStackInSlot", at = @At(value = "HEAD") )
     public void onPutStackInSlot(int slotId, ItemStack itemstack, CallbackInfo ci) {
         if (this.captureInventory) {
+            if (!this.initialized) {
+                this.init();
+            }
+
             Slot slot = getSlot(slotId);
             if (slot != null) {
                 ItemStackSnapshot originalItem = slot.getStack() == null ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
                 ItemStackSnapshot newItem =
                         itemstack == null ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
-                SlotTransaction slotTransaction = new SlotTransaction(new SlotAdapter(slot), originalItem, newItem);
+                SlotTransaction slotTransaction = new SlotTransaction(this.adapters.get(slotId), originalItem, newItem);
                 this.capturedSlotTransactions.add(slotTransaction);
             }
         }
