@@ -51,7 +51,9 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @NonnullByDefault
 @Mixin(Container.class)
@@ -78,7 +80,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private SlotCollection slots;
     private Lens<IInventory, ItemStack> lens;
     private boolean initialized;
-    private List<org.spongepowered.api.item.inventory.Slot> adapters = new ArrayList<>();
+    private Map<Integer, SlotAdapter> adapters = new HashMap<>();
 
     private void init() {
         this.initialized = true;
@@ -86,10 +88,10 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         this.slots = ContainerUtil.countSlots(this.this$);
         this.lens = ContainerUtil.getLens(this.this$, this.slots);
 
-        // TODO: If lens == null then getIterator will cause a NPE (remove this check when it is no longer necessary)
+        // If we know the lens, we can cache the adapters now
         if (this.lens != null) {
             for (org.spongepowered.api.item.inventory.Slot slot : this.slots.getIterator(this, (MinecraftInventoryAdapter) this)) {
-                this.adapters.add(slot);
+                this.adapters.put(((SlotAdapter) slot).slotNumber, (SlotAdapter) slot);
             }
         }
     }
@@ -131,27 +133,37 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         }
 
         for (int i = 0; i < this.inventorySlots.size(); ++i) {
-            ItemStack itemstack = this.inventorySlots.get(i).getStack();
+            final Slot slot = this.inventorySlots.get(i);
+            final ItemStack itemstack = slot.getStack();
             ItemStack itemstack1 = this.inventoryItemStacks.get(i);
 
             if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
+
                 // Sponge start
                 if (this.captureInventory) {
-                    ItemStackSnapshot originalItem = itemstack1 == null ? ItemStackSnapshot.NONE
+                    final ItemStackSnapshot originalItem = itemstack1 == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) itemstack1).createSnapshot();
-                    ItemStackSnapshot newItem = itemstack == null ? ItemStackSnapshot.NONE
+                    final ItemStackSnapshot newItem = itemstack == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
-                    SlotTransaction slotTransaction =
-                            new SlotTransaction(this.adapters.get(i), originalItem, newItem);
-                    this.capturedSlotTransactions.add(slotTransaction);
+
+                    SlotAdapter adapter = this.adapters.get(i);
+
+                    // TODO If slotid is not in adapters map, either no lens is known and we didn't cache or this is a newly added slot. The
+                    // TODO following is fallback code until a fallback container lens is added which would be sensitive to these changes.
+                    if (adapter == null) {
+                        adapter = new SlotAdapter(slot);
+                        this.adapters.put(i, adapter);
+                    }
+
+                    this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
                 }
                 // Sponge end
 
                 itemstack1 = itemstack == null ? null : itemstack.copy();
                 this.inventoryItemStacks.set(i, itemstack1);
 
-                for (int j = 0; j < this.listeners.size(); ++j) {
-                    this.listeners.get(j).sendSlotContents((Container) (Object) this, i, itemstack1);
+                for (IContainerListener listener : this.listeners) {
+                    listener.sendSlotContents((Container) (Object) this, i, itemstack1);
                 }
             }
         }
@@ -164,14 +176,23 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 this.init();
             }
 
-            Slot slot = getSlot(slotId);
+            final Slot slot = getSlot(slotId);
             if (slot != null) {
                 ItemStackSnapshot originalItem = slot.getStack() == null ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
                 ItemStackSnapshot newItem =
                         itemstack == null ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
-                SlotTransaction slotTransaction = new SlotTransaction(this.adapters.get(slotId), originalItem, newItem);
-                this.capturedSlotTransactions.add(slotTransaction);
+
+                SlotAdapter adapter = this.adapters.get(slotId);
+
+                // TODO If slotid is not in adapters map, either no lens is known and we didn't cache or this is a newly added slot. The
+                // TODO following is fallback code until a fallback container lens is added which would be sensitive to these changes.
+                if (adapter == null) {
+                    adapter = new SlotAdapter(slot);
+                    this.adapters.put(slotId, adapter);
+                }
+
+                this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
             }
         }
     }
