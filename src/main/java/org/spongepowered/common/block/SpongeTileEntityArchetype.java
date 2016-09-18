@@ -118,7 +118,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
         return new MemoryDataContainer()
                 .set(DataQueries.TileEntityArchetype.TILE_TYPE, this.type)
                 .set(DataQueries.TileEntityArchetype.BLOCK_STATE, this.blockState)
-                .set(DataQueries.TileEntityArchetype.TILE_DATA, this.data)
+                .set(DataQueries.TileEntityArchetype.TILE_DATA, getTileData())
                 ;
     }
 

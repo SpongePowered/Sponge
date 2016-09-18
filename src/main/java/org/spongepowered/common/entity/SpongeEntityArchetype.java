@@ -116,7 +116,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     public DataContainer toContainer() {
         return new MemoryDataContainer()
                 .set(DataQueries.EntityArchetype.ENTITY_TYPE, this.type)
-                .set(DataQueries.EntityArchetype.ENTITY_DATA, this.data)
+                .set(DataQueries.EntityArchetype.ENTITY_DATA, getEntityData())
                 ;
     }
 
