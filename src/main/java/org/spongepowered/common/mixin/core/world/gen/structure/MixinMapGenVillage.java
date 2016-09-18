@@ -22,35 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.gen;
+package org.spongepowered.common.mixin.core.world.gen.structure;
 
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.MapGenStructure;
+import net.minecraft.world.gen.structure.MapGenVillage;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.world.gen.InternalPopulatorTypes;
+import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
+import org.spongepowered.common.world.gen.WorldGenConstants;
 
+import java.util.List;
 import java.util.Random;
 
 /**
- * This mixin is making MapGenStructure be a populator as well as a
- * generationpopulator as the structures are called both from the generation
- * phase and the population phase of chunk creation.
+ * The placement of villages within a chunk has impact can have impact on other
+ * populators. Possibly this should be added as a concept in the API in order to
+ * allow better access and control over the function of these populators while
+ * preserving vanilla functionality.
  */
-@Mixin(MapGenStructure.class)
-public abstract class MixinMapGenStructure implements Populator {
+@Mixin(MapGenVillage.class)
+public abstract class MixinMapGenVillage extends MapGenStructure implements IFlaggedPopulator {
 
-    @Shadow
-    public abstract boolean generateStructure(World worldIn, Random p_175794_2_, ChunkPos p_175794_3_);
-    
     @Override
-    public PopulatorType getType() {
-        return InternalPopulatorTypes.STRUCTURE;
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random, List<String> flags) {
+        Vector3i min = extent.getBlockMin();
+        World world = (World) worldIn;
+        boolean flag = generateStructure(world, random, new ChunkPos((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
+        if (flag) {
+            flags.add(WorldGenConstants.VILLAGE_FLAG);
+        }
     }
 
     @Override

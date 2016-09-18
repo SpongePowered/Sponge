@@ -24,35 +24,52 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.structure;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.structure.MapGenStructure;
-import net.minecraft.world.gen.structure.StructureStart;
+import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
 import java.util.Random;
 
+/**
+ * This mixin is making MapGenStructure be a populator as well as a
+ * generationpopulator as the structures are called both from the generation
+ * phase and the population phase of chunk creation.
+ */
 @Mixin(MapGenStructure.class)
-public abstract class MixinMapGenStructure {
+public abstract class MixinMapGenStructure implements Populator {
 
-    @Shadow protected Long2ObjectMap<StructureStart> structureMap;
+    @Shadow
+    public abstract boolean generateStructure(World worldIn, Random p_175794_2_, ChunkPos p_175794_3_);
+    
+    @Override
+    public PopulatorType getType() {
+        return InternalPopulatorTypes.STRUCTURE;
+    }
 
-    @Shadow protected abstract void initializeStructureData(World worldIn);
-    @Shadow public abstract void setStructureStart(int chunkX, int chunkZ, StructureStart start);
+    @Override
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        World world = (World) worldIn;
+        generateStructure(world, random, new ChunkPos((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
+    }
 
     @Inject(method = "generateStructure", at = @At("HEAD"), cancellable = true)
     public void onGenerateStructure(World worldIn, Random randomIn, ChunkPos chunkCoord, CallbackInfoReturnable<Boolean> cir) {
-        int x = (chunkCoord.chunkXPos << 4) + 8;
-        int z = (chunkCoord.chunkZPos << 4) + 8;
-        Chunk chunk = worldIn.getChunkProvider().getLoadedChunk(x, z);
+        Chunk chunk = worldIn.getChunkProvider().getLoadedChunk(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
         if (chunk == null) {
             cir.setReturnValue(false);
         }
     }
+
 }
