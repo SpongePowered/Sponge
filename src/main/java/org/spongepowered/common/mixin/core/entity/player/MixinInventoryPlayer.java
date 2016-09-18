@@ -84,12 +84,14 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(EntityPlayer playerIn, CallbackInfo ci) {
-        // We only care about Server inventories
+        if (playerIn instanceof EntityPlayerMP) {
+            // We only care about Server inventories
             this.inventory = new DefaultInventoryFabric((IInventory) this);
             this.slots = new SlotCollection.Builder().add(mainInventory.length).add(offHandInventory.length).add(armorInventory.length,
                     EquipmentSlotAdapter.class).build();
-            this.carrier = playerIn instanceof Player ? (Player) playerIn : null;
+            this.carrier = (Player) playerIn;
             this.lens = new PlayerInventoryLens(this, this.slots);
+        }
     }
 
     @Override
