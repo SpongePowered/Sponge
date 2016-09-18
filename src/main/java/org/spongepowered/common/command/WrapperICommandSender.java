@@ -67,7 +67,7 @@ public class WrapperICommandSender implements ICommandSender {
 
     @Override
     public boolean canCommandSenderUseCommand(int permLevel, String commandName) {
-        return this.source.hasPermission(commandName);
+        return CommandPermissions.testPermission(this.source, commandName);
     }
 
     @Override

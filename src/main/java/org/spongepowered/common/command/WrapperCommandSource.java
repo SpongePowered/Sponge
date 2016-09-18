@@ -53,16 +53,13 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
     final ICommandSender sender;
     private final MemorySubjectData data;
 
-    WrapperCommandSource(ICommandSender sender) {
+    private WrapperCommandSource(ICommandSender sender) {
         this.sender = sender;
         this.data = new MemorySubjectData(SpongeImpl.getGame().getServiceManager().provide(PermissionService.class).get());
 
         // ICommandSenders have a *very* basic understanding of permissions, so
         // get what we can.
-        this.data.setPermission(SubjectData.GLOBAL_CONTEXT, "minecraft.selector",
-                Tristate.fromBoolean(this.sender.canCommandSenderUseCommand(1, "@")));
-        this.data.setPermission(SubjectData.GLOBAL_CONTEXT, "minecraft.commandblock",
-                Tristate.fromBoolean(this.sender.canCommandSenderUseCommand(2, "")));
+        CommandPermissions.populateNonCommandPermissions(this.data, this.sender::canCommandSenderUseCommand);
         for (CommandMapping command : SpongeImpl.getGame().getCommandManager().getCommands()) {
             if (command.getCallable() instanceof MinecraftCommandWrapper) {
                 MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
