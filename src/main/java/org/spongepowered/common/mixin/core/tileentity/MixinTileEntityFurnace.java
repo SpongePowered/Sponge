@@ -74,7 +74,11 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(1)
-                .add(FuelSlotAdapter.class, (i) -> new FuelSlotLensImpl(i, (s) -> TileEntityFurnace.isItemFuel((ItemStack) s) || isBucket((ItemStack) s), t -> true))
+                .add(FuelSlotAdapter.class, (i) -> new FuelSlotLensImpl(i, (s) -> TileEntityFurnace.isItemFuel((ItemStack) s) || isBucket(
+                        (ItemStack) s), t -> {
+                            final ItemStack nmsStack = (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1);
+                    return TileEntityFurnace.isItemFuel(nmsStack) || isBucket(nmsStack);
+                }))
                 .add(OutputSlotAdapter.class, (i) -> new OutputSlotLensImpl(i, (s) -> false, (t) -> false))
                 .build();
         this.lens = new OrderedInventoryLensImpl(0, 3, 1, slots);

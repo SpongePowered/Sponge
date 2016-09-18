@@ -68,19 +68,19 @@ public class PlayerInventoryLens extends MinecraftLens {
         this.addSpanningChild(this.offhand);
     }
 
-    public HotbarLens<IInventory, net.minecraft.item.ItemStack> getHotbar() {
+    public HotbarLens<IInventory, net.minecraft.item.ItemStack> getHotbarLens() {
         return this.hotbar;
     }
 
-    public GridInventoryLens<IInventory, ItemStack> getMain() {
+    public GridInventoryLens<IInventory, ItemStack> getMainLens() {
         return this.main;
     }
 
-    public EquipmentInventoryLens<IInventory, ItemStack> getEquipment() {
+    public EquipmentInventoryLens<IInventory, ItemStack> getEquipmentLens() {
         return this.equipment;
     }
 
-    public SlotLens<IInventory, ItemStack> getOffhand() {
+    public SlotLens<IInventory, ItemStack> getOffhandLens() {
         return this.offhand;
     }
 }

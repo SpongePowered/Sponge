@@ -115,7 +115,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     @Override
     public Hotbar getHotbar() {
         if (this.hotbar == null) {
-            this.hotbar = (HotbarAdapter) this.lens.getHotbar().getAdapter(this.inventory, this);
+            this.hotbar = (HotbarAdapter) this.lens.getHotbarLens().getAdapter(this.inventory, this);
         }
         return this.hotbar;
     }
@@ -123,7 +123,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     @Override
     public GridInventory getMain() {
         if (this.main == null) {
-            this.main = (GridInventoryAdapter) this.lens.getMain().getAdapter(this.inventory, this);
+            this.main = (GridInventoryAdapter) this.lens.getMainLens().getAdapter(this.inventory, this);
         }
         return this.main;
     }
@@ -131,7 +131,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     @Override
     public EquipmentInventory getEquipment() {
         if (this.equipment == null) {
-            this.equipment = (EquipmentInventoryAdapter) this.lens.getEquipment().getAdapter(this.inventory, this);
+            this.equipment = (EquipmentInventoryAdapter) this.lens.getEquipmentLens().getAdapter(this.inventory, this);
         }
         return this.equipment;
     }
@@ -139,7 +139,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     @Override
     public Slot getOffhand() {
         if (this.offhand == null) {
-            this.offhand = (SlotAdapter) this.lens.getOffhand().getAdapter(this.inventory, this);
+            this.offhand = (SlotAdapter) this.lens.getOffhandLens().getAdapter(this.inventory, this);
         }
         return this.offhand;
     }
