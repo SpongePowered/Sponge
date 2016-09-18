@@ -37,7 +37,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
-import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
@@ -113,6 +112,8 @@ public class SpongeCommonEventFactory {
     // Set before firing an internal Forge BlockBreak event to handle extended blockstate
     public static boolean convertingMapFormat = false;
     public static boolean ignoreRightClickAirEvent = false;
+    // Set if the player's held item changes during InteractBlockEvent.Secondary
+    public static boolean playerInteractItemChanged = false;
 
     // For animation packet
     public static int lastAnimationPacketTick = 0;

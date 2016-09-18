@@ -32,6 +32,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
@@ -541,4 +542,37 @@ public class SpongeHooks {
         return causedBy;
     }
 
+    public static boolean areItemStacksEquals(ItemStack stackA, ItemStack stackB) {
+        if (stackA == null && stackB == null) {
+            return true;
+        }
+        if (stackA != stackB) {
+            return false;
+        }
+        if (stackA == null && stackB != null) {
+            return false;
+        }
+        if (stackA != null && stackB == null) {
+            return false;
+        }
+        if (stackA.stackSize != stackB.stackSize) {
+            return false;
+        }
+        if (stackA.getTagCompound() == null && stackB.getTagCompound() != null) {
+            return false;
+        }
+        if (stackA.getTagCompound() != null && stackB.getTagCompound() == null) {
+            return false;
+        }
+        if (stackA.getTagCompound() != null && !stackA.getTagCompound().equals(stackB.getTagCompound())) {
+            return false;
+        }
+        if (stackA.getItem() != stackB.getItem()) {
+            return false;
+        }
+        if (stackA.getItemDamage() != stackB.getItemDamage()) {
+            return false;
+        }
+        return true;
+    }
 }

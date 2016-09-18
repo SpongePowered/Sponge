@@ -47,6 +47,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.At.Shift;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -187,6 +188,20 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     public void onCanSave(CallbackInfoReturnable<Boolean> cir) {
         if (((WorldProperties)this.worldObj.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             cir.setReturnValue(false);
+        }
+    }
+
+    @Inject(method = "saveChunkData", at = @At("HEAD"), cancellable = true)
+    public void onSaveChunkData(Chunk chunkIn, CallbackInfo ci) {
+        if (((WorldProperties)this.worldObj.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
+            ci.cancel();
+        }
+    }
+
+    @Inject(method = "saveExtraData", at = @At("HEAD"), cancellable = true)
+    public void onSaveExtraData(CallbackInfo ci) {
+        if (((WorldProperties)this.worldObj.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
+            ci.cancel();
         }
     }
 }
