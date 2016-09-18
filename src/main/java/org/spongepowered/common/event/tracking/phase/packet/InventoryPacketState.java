@@ -49,7 +49,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-public enum InventoryPacketState implements IPacketState, IPhaseState {
+enum InventoryPacketState implements IPacketState, IPhaseState {
 
     // ORDER MATTERS. TEST IF YOU RE-ARRANGE
 

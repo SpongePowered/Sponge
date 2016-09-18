@@ -52,7 +52,7 @@ import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
 
-public enum GeneralPacketState implements IPacketState, IPhaseState {
+enum GeneralPacketState implements IPacketState, IPhaseState {
     UNKNOWN() {
         @Override
         public boolean ignoresItemPreMerges() {
@@ -82,6 +82,12 @@ public enum GeneralPacketState implements IPacketState, IPhaseState {
 
     },
     INTERACTION() {
+
+        @Override
+        public boolean isInteraction() {
+            return true;
+        }
+
         @Override
         public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
             final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
@@ -258,6 +264,11 @@ public enum GeneralPacketState implements IPacketState, IPhaseState {
     },
     PLACE_BLOCK() {
         @Override
+        public boolean isInteraction() {
+            return true;
+        }
+
+        @Override
         public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
             // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
             final CPacketPlayerTryUseItemOnBlock placeBlock = (CPacketPlayerTryUseItemOnBlock) packet;
@@ -292,6 +303,11 @@ public enum GeneralPacketState implements IPacketState, IPhaseState {
     OPEN_INVENTORY,
     REQUEST_RESPAWN,
     USE_ITEM {
+        @Override
+        public boolean isInteraction() {
+            return true;
+        }
+
         @Override
         public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
             // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement

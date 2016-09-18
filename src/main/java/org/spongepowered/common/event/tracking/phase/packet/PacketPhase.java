@@ -370,4 +370,10 @@ public final class PacketPhase extends TrackingPhase {
             .put(CPacketPlayerDigging.Action.RELEASE_USE_ITEM, GeneralPacketState.INTERACTION)
             .put(CPacketPlayerDigging.Action.SWAP_HELD_ITEMS, GeneralPacketState.SWAP_HAND_ITEMS)
             .build();
+
+    public static final class General {
+
+        public static final IPhaseState INVALID = GeneralPacketState.INVALID;
+
+    }
 }

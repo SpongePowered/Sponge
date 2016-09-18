@@ -41,9 +41,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.packet.GeneralPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -117,7 +117,7 @@ public class PacketUtil {
                     context.complete();
                     causeTracker.switchToPhase(packetState, context);
                 } else {
-                    causeTracker.switchToPhase(GeneralPacketState.INVALID, EMPTY_INVALID);
+                    causeTracker.switchToPhase(PacketPhase.General.INVALID, EMPTY_INVALID);
                 }
                 packetIn.processPacket(netHandler);
                 causeTracker.completePhase();

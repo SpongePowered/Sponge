@@ -40,6 +40,8 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.entity.EntityPhaseState;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.event.forge.IMixinWorldTickEvent;
@@ -266,7 +268,7 @@ public final class PluginPhase extends TrackingPhase {
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
-            return state instanceof BlockPhase.State || state instanceof EntityPhase.State || state == GenerationPhase.State.TERRAIN_GENERATION;
+            return state instanceof BlockPhase.State || state instanceof EntityPhaseState || state == GenerationPhase.State.TERRAIN_GENERATION;
         }
 
         @Override
