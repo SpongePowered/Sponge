@@ -50,6 +50,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -116,7 +117,7 @@ public abstract class TrackingPhase {
     public void postDispatch(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwindingContext, PhaseContext postContext) {
     }
 
-    protected void processPostItemSpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> items) {
+    public void processPostItemSpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> items) {
         final SpawnEntityEvent
                 event =
                 SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, items, causeTracker.getWorld());
@@ -128,7 +129,7 @@ public abstract class TrackingPhase {
         }
     }
 
-    protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
+    public void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
             ArrayList<Entity> entities) {
         final SpawnEntityEvent
                 event =

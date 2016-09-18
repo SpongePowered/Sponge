@@ -22,24 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase;
-
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
-
-public final class TrackingPhases {
-
-    public static final TickPhase TICK = TickPhase.getInstance();
-    public static final EntityPhase ENTITY = EntityPhase.getInstance();
-    public static final BlockPhase BLOCK    = BlockPhase.getInstance();
-    public static final GeneralPhase GENERAL  = GeneralPhase.getInstance();
-    public static final PacketPhase PACKET = PacketPhase.getInstance();
-    public static final PluginPhase PLUGIN = PluginPhase.getInstance();
-    public static final GenerationPhase GENERATION = GenerationPhase.getInstance();
-    public static final PlayerPhase PLAYER = PlayerPhase.getInstance();
-
-    private TrackingPhases() {
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.event.tracking.phase.general;

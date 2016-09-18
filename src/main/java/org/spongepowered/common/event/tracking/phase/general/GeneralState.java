@@ -22,24 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase;
+package org.spongepowered.common.event.tracking.phase.general;
 
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
-public final class TrackingPhases {
+abstract class GeneralState implements IPhaseState {
 
-    public static final TickPhase TICK = TickPhase.getInstance();
-    public static final EntityPhase ENTITY = EntityPhase.getInstance();
-    public static final BlockPhase BLOCK    = BlockPhase.getInstance();
-    public static final GeneralPhase GENERAL  = GeneralPhase.getInstance();
-    public static final PacketPhase PACKET = PacketPhase.getInstance();
-    public static final PluginPhase PLUGIN = PluginPhase.getInstance();
-    public static final GenerationPhase GENERATION = GenerationPhase.getInstance();
-    public static final PlayerPhase PLAYER = PlayerPhase.getInstance();
+    abstract void unwind(CauseTracker causeTracker, PhaseContext context);
 
-    private TrackingPhases() {
+    @Override
+    public final TrackingPhase getPhase() {
+        return TrackingPhases.GENERAL;
     }
-
 }

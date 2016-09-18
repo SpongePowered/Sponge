@@ -229,7 +229,7 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
-    protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
+    public void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
             ArrayList<Entity> entities) {
         ((IPacketState) unwindingState).postSpawnEntities(causeTracker, phaseContext, entities);
     }

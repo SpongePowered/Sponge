@@ -60,7 +60,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.GeneralPhase;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.io.PrintWriter;
@@ -77,7 +77,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-import javax.activation.CommandMap;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 

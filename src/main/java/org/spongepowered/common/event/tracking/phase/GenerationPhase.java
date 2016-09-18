@@ -39,6 +39,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
@@ -266,7 +267,7 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
+    public void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
             ArrayList<Entity> entities) {
         super.processPostEntitySpawns(causeTracker, unwindingState, phaseContext, entities);
     }
