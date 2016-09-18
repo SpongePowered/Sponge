@@ -454,7 +454,7 @@ public final class PacketPhase extends TrackingPhase {
 
             Inventory inventory = Inventory.fromState(Inventory.clickType(windowPacket.getSlotId()) | mode | unpacked);
             if (inventory == Inventory.INVENTORY) {
-                System.err.println(String.format("Unable to find inventory handler for click window packet: %s", windowPacket));
+                SpongeImpl.getLogger().warn(String.format("Unable to find inventory handler for click window packet: %s", windowPacket));
             }
             return inventory;
         }
