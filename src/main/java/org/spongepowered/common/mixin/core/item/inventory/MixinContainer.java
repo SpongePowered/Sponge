@@ -81,9 +81,9 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     private void init() {
         this.initialized = true;
-        this.fabric = MinecraftFabric.of(this$);
-        this.slots = ContainerUtil.countSlots(this$);
-        this.lens = ContainerUtil.getLens(this$, this.slots);
+        this.fabric = MinecraftFabric.of(this.this$);
+        this.slots = ContainerUtil.countSlots(this.this$);
+        this.lens = ContainerUtil.getLens(this.this$, this.slots);
     }
 
     /**

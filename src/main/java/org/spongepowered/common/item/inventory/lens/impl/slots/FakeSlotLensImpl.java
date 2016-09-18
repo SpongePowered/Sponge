@@ -22,22 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.item.inventory.lens.impl.slots;
 
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.common.interfaces.inventory.IMixinSlot;
+import org.spongepowered.common.item.inventory.lens.Fabric;
 
-@Mixin(Slot.class)
-public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot {
+public class FakeSlotLensImpl extends SlotLensImpl {
 
-    @Shadow @Final private int slotIndex;
+    private Slot slot;
 
-    @Override
-    public int getSlotIndex() {
-        return this.slotIndex;
+    public FakeSlotLensImpl(Slot slot) {
+        super(Integer.MAX_VALUE);
+        this.slot = slot;
     }
 
+    @Override
+    public ItemStack getStack(Fabric<IInventory> inv) {
+        return this.slot.getStack();
+    }
+
+    @Override
+    public boolean setStack(Fabric<IInventory> inv, ItemStack stack) {
+        throw new IllegalStateException(String.format("Cannot set stack for invalid slot %s with id %s!", this.slot, ((IMixinSlot) this.slot).getSlotIndex()));
+    }
 }
