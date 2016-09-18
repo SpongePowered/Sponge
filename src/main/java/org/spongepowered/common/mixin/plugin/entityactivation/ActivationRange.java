@@ -264,8 +264,8 @@ public class ActivationRange {
             for (Object o : chunk.getEntityLists()[i]) {
                 Entity entity = (Entity) o;
                 SpongeConfig<?> config = ((IMixinWorld) entity.worldObj).getActiveConfig();
-                SpongeEntityType type = (SpongeEntityType) ((org.spongepowered.api.entity.Entity) entity).getType();
-                if (config == null || type == null) {
+                EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
+                if (type == EntityTypes.UNKNOWN || !(type instanceof SpongeEntityType) || config == null) {
                     continue;
                 }
 
