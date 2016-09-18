@@ -56,9 +56,10 @@ public abstract class MixinEntityMinecartHopper extends MixinEntityMinecartConta
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(5).build();
-        this.lens = new OrderedInventoryLensImpl(0, 5, 1, slots);
+        this.lens = new OrderedInventoryLensImpl(0, 5, 1, this.slots);
     }
 
+    @SuppressWarnings("unchecked")
     public CarriedInventory<HopperMinecart> minecart$getInventory() {
         return (CarriedInventory<HopperMinecart>) (Object) this;
     }

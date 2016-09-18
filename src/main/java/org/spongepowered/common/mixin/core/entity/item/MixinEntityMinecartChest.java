@@ -56,9 +56,10 @@ public abstract class MixinEntityMinecartChest extends MixinEntityMinecartContai
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(27).build();
-        this.lens = new GridInventoryLensImpl(0, 9, 3, 9, slots);
+        this.lens = new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
     }
 
+    @SuppressWarnings("unchecked")
     public CarriedInventory<ChestMinecart> minecart$getInventory() {
         return (CarriedInventory<ChestMinecart>) (Object) this;
     }

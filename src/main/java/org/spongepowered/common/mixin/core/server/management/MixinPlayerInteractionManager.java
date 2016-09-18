@@ -232,7 +232,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     public EnumActionResult handleOpenEvent(Container lastOpenContainer, EntityPlayerMP player, EnumActionResult result) {
 
         if (lastOpenContainer != player.openContainer) {
-            if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(Cause.of(NamedCause.source(player)), (EntityPlayerMP) player)) {
+            if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(Cause.of(NamedCause.source(player)), player)) {
                 result = EnumActionResult.FAIL;
             }
         }

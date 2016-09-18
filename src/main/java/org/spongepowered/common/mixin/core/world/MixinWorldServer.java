@@ -1424,7 +1424,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         for (EntityPlayer entityplayer : this.playerEntities) {
             if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
                 ((EntityPlayerMP) entityplayer).connection.sendPacket(new SPacketExplosion(x, y, z, strength, explosion.getAffectedBlockPositions(),
-                        (Vec3d) explosion.getPlayerKnockbackMap().get(entityplayer)));
+                        explosion.getPlayerKnockbackMap().get(entityplayer)));
             }
         }
 

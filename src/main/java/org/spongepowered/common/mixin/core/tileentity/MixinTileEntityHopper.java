@@ -41,6 +41,7 @@ import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -121,13 +122,15 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
         ((TileEntityHopper) (Object) this).setCustomName(customName);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public TileEntityInventory<TileEntityCarrier> getInventory() {
         return (TileEntityInventory<TileEntityCarrier>) this;
     }
 
+    @Intrinsic
     public void tilentityinventory$markDirty() {
-        ((IInventory) (Object) this).markDirty();
+        this.markDirty();
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {

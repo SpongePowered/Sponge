@@ -258,7 +258,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         Vec3d vec3d = new Vec3d(this.explosionX, this.explosionY, this.explosionZ);
 
         for (int k2 = 0; k2 < list.size(); ++k2) {
-            Entity entity = (Entity) list.get(k2);
+            Entity entity = list.get(k2);
 
             if (!entity.isImmuneToExplosions()) {
                 double d12 = entity.getDistance(this.explosionX, this.explosionY, this.explosionZ) / (double) f3;

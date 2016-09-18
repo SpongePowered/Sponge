@@ -47,6 +47,7 @@ import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -88,7 +89,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(27).build();
-        this.lens = new GridInventoryLensImpl(0, 9, 3, 9, slots);
+        this.lens = new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
     }
 
     /**
@@ -193,13 +194,15 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
         ((TileEntityChest) (Object) this).setCustomName(customName);
     }
 
+    @SuppressWarnings({"RedundantCast", "unchecked"})
     @Override
     public TileEntityInventory<TileEntityCarrier> getInventory() {
         return (TileEntityInventory<TileEntityCarrier>) (Object) this;
     }
 
+    @Intrinsic
     public void tilentityinventory$markDirty() {
-        ((IInventory) (Object) this).markDirty();
+        this.markDirty();
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {

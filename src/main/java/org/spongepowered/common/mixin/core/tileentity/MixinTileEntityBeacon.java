@@ -124,6 +124,7 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
         manipulators.add(getBeaconData());
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public TileEntityInventory<TileEntityCarrier> getInventory() {
         return (TileEntityInventory<TileEntityCarrier>) this;
