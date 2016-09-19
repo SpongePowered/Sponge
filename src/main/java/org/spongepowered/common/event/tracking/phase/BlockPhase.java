@@ -324,6 +324,63 @@ public final class BlockPhase extends TrackingPhase {
                         .map(wrapper -> ((MutableWrapper<CallbackInfoReturnable<Boolean>>) wrapper).getObj())
                         .ifPresent(callback -> callback.setReturnValue(false));
             }
+
+            final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
+                    .orElseThrow(TrackingUtil.throwWithContext("Could not find a piston!", phaseContext));
+            phaseContext.getCapturedItemsSupplier()
+                    .ifPresentAndNotEmpty(items -> {
+                        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
+                                .block(blockSnapshot)
+                                .type(InternalSpawnTypes.PLACEMENT)
+                                .build());
+                        phaseContext.getNotifier()
+                                .ifPresent(builder::notifier);
+                        phaseContext.getOwner()
+                                .ifPresent(builder::owner);
+
+                        final Cause cause = builder
+                                .build();
+                        final ArrayList<Entity> entities = new ArrayList<>();
+                        for (EntityItem item : items) {
+                            entities.add(EntityUtil.fromNative(item));
+                        }
+                        final DropItemEvent.Destruct
+                                event =
+                                SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            for (Entity entity : event.getEntities()) {
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        }
+                    });
+            phaseContext.getCapturedEntitySupplier()
+                    .ifPresentAndNotEmpty(entities -> {
+                        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
+                                .block(blockSnapshot)
+                                .type(InternalSpawnTypes.PLACEMENT)
+                                .build());
+                        phaseContext.getNotifier()
+                                .ifPresent(builder::notifier);
+                        phaseContext.getOwner()
+                                .ifPresent(builder::owner);
+
+                        final Cause cause = builder
+                                .build();
+                        final SpawnEntityEvent
+                                event =
+                                SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(event);
+                        final User user = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
+                        if (!event.isCancelled()) {
+                            for (Entity entity : event.getEntities()) {
+                                if (user != null) {
+                                    EntityUtil.toMixin(entity).setCreator(user.getUniqueId());
+                                }
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        }
+                    });
         }
 
     }
