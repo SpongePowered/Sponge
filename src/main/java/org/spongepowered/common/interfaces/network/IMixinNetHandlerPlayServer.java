@@ -25,6 +25,8 @@
 package org.spongepowered.common.interfaces.network;
 
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
 import java.util.Map;
 
@@ -35,4 +37,6 @@ public interface IMixinNetHandlerPlayServer {
     void setAllowClientLocationUpdate(boolean flag);
 
     void captureCurrentPlayerPosition();
+
+    void setLastMoveLocation(Location<World> location);
 }

@@ -709,4 +709,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             SpongeCommonEventFactory.lastAnimationPlayer = this.playerEntity;
         }
     }
+
+    @Override
+    public void setLastMoveLocation(Location<World> location) {
+        this.lastMoveLocation = location;
+    }
 }

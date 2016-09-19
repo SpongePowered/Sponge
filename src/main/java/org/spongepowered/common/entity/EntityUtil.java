@@ -728,6 +728,9 @@ public final class EntityUtil {
                 }
             }
 
+            // Prevent 'lastMoveLocation' from being set to the previous world.
+            ((IMixinNetHandlerPlayServer) entityPlayerMP.connection).setLastMoveLocation(null);
+
             entityPlayerMP.connection.sendPacket(
                     new SPacketRespawn(toDimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
                             entityPlayerMP.interactionManager.getGameType()));
