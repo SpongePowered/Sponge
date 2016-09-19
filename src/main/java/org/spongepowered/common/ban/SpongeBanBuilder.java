@@ -43,7 +43,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.Date;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -52,7 +51,7 @@ public class SpongeBanBuilder implements Ban.Builder {
     private org.spongepowered.api.profile.GameProfile profile;
     private InetAddress address;
     private BanType banType;
-    private Optional<Text> reason;
+    @Nullable private Text reason;
     private Instant start = Instant.now();
     @Nullable private Instant end;
     @Nullable private Text source;
@@ -87,7 +86,7 @@ public class SpongeBanBuilder implements Ban.Builder {
 
     @Override
     public Ban.Builder reason(@Nullable Text reason) {
-        this.reason = Optional.ofNullable(reason);
+        this.reason = reason;
         return this;
     }
 
@@ -119,21 +118,20 @@ public class SpongeBanBuilder implements Ban.Builder {
     @Override
     public Ban build() {
         checkState(this.banType != null, "BanType cannot be null!");
-        checkState(this.reason != null, "Reason cannot be null!");
 
         String sourceName = this.source != null ? SpongeTexts.toLegacy(this.source) : null;
 
         if (this.banType == BanTypes.PROFILE) {
             checkState(this.profile != null, "User cannot be null!");
             return (Ban) new UserListBansEntry((GameProfile) this.profile, Date.from(this.start), sourceName, this.toDate(this.end),
-                    this.reason.isPresent() ? SpongeTexts.toLegacy(this.reason.get()) : null);
+                    this.reason != null ? SpongeTexts.toLegacy(this.reason) : null);
         } else {
             checkState(this.address != null, "Address cannot be null!");
 
             // This *should* be a static method, but apparently not...
             UserListIPBans ipBans = SpongeImpl.getServer().getPlayerList().getBannedIPs();
             return (Ban) new UserListIPBansEntry(ipBans.addressToString(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName,
-                    this.toDate(this.end), this.reason.isPresent() ? SpongeTexts.toLegacy(this.reason.get()) : null);
+                    this.toDate(this.end), this.reason != null ? SpongeTexts.toLegacy(this.reason) : null);
         }
     }
 
@@ -152,7 +150,7 @@ public class SpongeBanBuilder implements Ban.Builder {
             this.address = ((Ban.Ip) ban).getAddress();
         }
 
-        this.reason = ban.getReason();
+        this.reason = ban.getReason().orElse(null);
         this.start = ban.getCreationDate();
         this.end = ban.getExpirationDate().orElse(null);
         this.source = ban.getBanSource().orElse(null);
