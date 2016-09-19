@@ -552,6 +552,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             entityPlayerMP.connection.sendPacket(new SPacketEntityEffect(entityPlayerMP.getEntityId(), potioneffect));
         }
 
+        entityPlayerMP.sendPlayerAbilities();
+
         return entityPlayerMP;
     }
 

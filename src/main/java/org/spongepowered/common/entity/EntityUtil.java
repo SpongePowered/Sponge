@@ -218,7 +218,7 @@ public final class EntityUtil {
         } // else { // Sponge - Remove unecessary
 
         final WorldServer toWorldServer = SpongeImpl.getServer().worldServerForDimension(suggestedDimensionId);
-        // If we attempted to travel a new dimension but were denied due to some reason such as world 
+        // If we attempted to travel a new dimension but were denied due to some reason such as world
         // not being loaded then short-circuit to prevent unnecessary logic from running
         if (!sameDimension && fromWorldServer == toWorldServer) {
             return entityPlayerMP;
@@ -306,7 +306,7 @@ public final class EntityUtil {
             targetDimensionId = 0;
         }
         WorldServer toWorld = mcServer.worldServerForDimension(targetDimensionId);
-        // If we attempted to travel a new dimension but were denied due to some reason such as world 
+        // If we attempted to travel a new dimension but were denied due to some reason such as world
         // not being loaded then short-circuit to prevent unnecessary logic from running
         if (!sameDimension && fromWorld == toWorld) {
             return null;
@@ -745,6 +745,7 @@ public final class EntityUtil {
             for (Object effect : entityPlayerMP.getActivePotionEffects()) {
                 entityPlayerMP.connection.sendPacket(new SPacketEntityEffect(entityPlayerMP.getEntityId(), (PotionEffect) effect));
             }
+            entityPlayerMP.sendPlayerAbilities();
         } else {
             entity.setWorld(toWorld);
             toWorld.spawnEntityInWorld(entity);
