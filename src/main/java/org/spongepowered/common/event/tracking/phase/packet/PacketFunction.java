@@ -118,7 +118,7 @@ public interface PacketFunction {
         final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
         EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
 
-        if (state == GeneralPacketState.ATTACK_ENTITY) {
+        if (state == PacketPhase.General.ATTACK_ENTITY) {
             context.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
                         // For destruction, this should be empty, however, some times, it may not be?
@@ -197,7 +197,7 @@ public interface PacketFunction {
             });
 
 
-        } else if (state == GeneralPacketState.INTERACT_ENTITY) {
+        } else if (state == PacketPhase.General.INTERACT_ENTITY) {
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks -> {
                         final PrettyPrinter printer = new PrettyPrinter(80);
@@ -249,7 +249,7 @@ public interface PacketFunction {
                         printer.trace(System.err);
                     });
 
-        } else if (state == GeneralPacketState.INTERACT_AT_ENTITY) {
+        } else if (state == PacketPhase.General.INTERACT_AT_ENTITY) {
             context.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
                 final Cause cause = Cause.source(EntitySpawnCause.builder()
                         .entity((Player) player)
@@ -364,7 +364,7 @@ public interface PacketFunction {
                 .orElse(null);
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
-        if (state == InventoryPacketState.DROP_ITEM_WITH_HOTKEY) {
+        if (state == PacketPhase.Inventory.DROP_ITEM_WITH_HOTKEY) {
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks ->
                             TrackingUtil.processBlockCaptures(blocks, causeTracker, state, context)
@@ -394,7 +394,7 @@ public interface PacketFunction {
 
 
                     });
-        } else if (state == InventoryPacketState.DROP_INVENTORY) {
+        } else if (state == PacketPhase.Inventory.DROP_INVENTORY) {
 
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, causeTracker, state, context));
@@ -420,7 +420,7 @@ public interface PacketFunction {
                         }
                     });
 
-        } else if (state == GeneralPacketState.INTERACTION) {
+        } else if (state == PacketPhase.General.INTERACTION) {
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks ->
                             TrackingUtil.processBlockCaptures(blocks, causeTracker, state, context)
@@ -623,9 +623,9 @@ public interface PacketFunction {
         }
         final Cause cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", openContainer));
         final InteractInventoryEvent inventoryEvent;
-        if (state instanceof InventoryPacketState) {
+        if (state instanceof BasicInventoryPacketState) {
             inventoryEvent =
-                    ((InventoryPacketState) state)
+                    ((BasicInventoryPacketState) state)
                             .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction, slotTransactions, capturedItems,
                                     cause, usedButton);
         } else {
@@ -697,7 +697,7 @@ public interface PacketFunction {
 
     });
     PacketFunction PLACE_BLOCK = (packet, state, player, context) -> {
-        if (state == GeneralPacketState.INVALID) { // This basically is an out of world place, and nothing should occur here.
+        if (state == PacketPhase.General.INVALID) { // This basically is an out of world place, and nothing should occur here.
             return;
         }
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.worldObj;
@@ -860,7 +860,7 @@ public interface PacketFunction {
         SpongeImpl.postEvent(event);
     });
     PacketFunction CLIENT_STATUS = ((packet, state, player, context) -> {
-        if (state == InventoryPacketState.OPEN_INVENTORY) {
+        if (state == PacketPhase.Inventory.OPEN_INVENTORY) {
             final ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class)
                     .orElseThrow(TrackingUtil.throwWithContext("Expected a cursor item stack, but had nothing!", context));
             final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
