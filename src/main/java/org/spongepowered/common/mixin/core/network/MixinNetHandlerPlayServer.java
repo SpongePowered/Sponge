@@ -79,6 +79,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.living.humanoid.player.KickPlayerEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
@@ -713,5 +714,15 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Override
     public void setLastMoveLocation(Location<World> location) {
         this.lastMoveLocation = location;
+    }
+
+    @Inject(method = "kickPlayerFromServer", at = @At("HEAD"))
+    public void onKickPlayer(String reason, CallbackInfo info) {
+        final MessageChannel originalChannel = ((Player) this.playerEntity).getMessageChannel();
+        final KickPlayerEvent event = SpongeEventFactory.createKickPlayerEvent(
+                Cause.of(NamedCause.source(this.playerEntity)), SpongeTexts.fromLegacy(reason), (Player) this.playerEntity
+        );
+
+        reason = SpongeTexts.toLegacy(event.getReason());
     }
 }
