@@ -31,8 +31,6 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -46,6 +44,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
@@ -85,9 +84,10 @@ import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.FunctionalUtil;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.persistence.JsonTranslator;
 import org.spongepowered.common.world.WorldManager;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -658,8 +658,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         // Minecraft uses a String, we want to return a fancy DataContainer
         // Parse the world generator settings as JSON
         try {
-            return JsonTranslator.translateFrom(new JsonParser().parse(this.generatorOptions).getAsJsonObject());
-        } catch (JsonParseException | IllegalStateException ignored) {
+            return DataFormats.JSON.readFrom(new ByteArrayInputStream(this.generatorOptions.getBytes()));
+        } catch (IOException ignored) {
         }
         return new MemoryDataContainer().set(DataQueries.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
     }
