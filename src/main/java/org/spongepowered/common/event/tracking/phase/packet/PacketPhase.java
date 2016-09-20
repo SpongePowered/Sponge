@@ -368,6 +368,7 @@ public final class PacketPhase extends TrackingPhase {
         static final PacketPhase INSTANCE = new PacketPhase();
     }
 
+    // TODO - move these into the packet state classes for unwinding instead of using packet functions.
     public void setupPacketToUnwindMapping() {
         this.packetUnwindMap.put(CPacketKeepAlive.class, PacketFunction.IGNORED);
         this.packetUnwindMap.put(CPacketChatMessage.class, PacketFunction.HANDLED_EXTERNALLY);

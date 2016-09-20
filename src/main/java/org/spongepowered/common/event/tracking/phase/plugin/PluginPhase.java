@@ -44,6 +44,7 @@ public final class PluginPhase extends TrackingPhase {
     public static final class State {
         public static final IPhaseState BLOCK_WORKER = new BlockWorkerPhaseState();
         public static final IPhaseState CUSTOM_SPAWN = new PluginPhaseState();
+        public static final IPhaseState CUSTOM_EXPLOSION = new CustomExplosionState();
 
         private State() {
         }

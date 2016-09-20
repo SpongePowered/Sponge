@@ -610,7 +610,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public void triggerExplosion(Explosion explosion) {
+    public void triggerExplosion(Explosion explosion, Cause cause) {
         checkNotNull(explosion, "explosion");
         Location<World> origin = explosion.getLocation();
         checkNotNull(origin, "location");

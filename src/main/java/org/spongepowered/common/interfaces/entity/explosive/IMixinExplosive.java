@@ -48,7 +48,7 @@ public interface IMixinExplosive {
         if (!Sponge.getEventManager().post(event)) {
             Explosion explosion = event.getExplosionBuilder().build();
             if (explosion.getRadius() > 0) {
-                ((Explosive) this).getWorld().triggerExplosion(explosion);
+                ((Explosive) this).getWorld().triggerExplosion(explosion, );
             }
             return Optional.of((net.minecraft.world.Explosion) explosion);
         }
