@@ -28,9 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.common.event.tracking.phase.GeneralPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

@@ -22,31 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase;
+package org.spongepowered.common.event.tracking.phase.generation;
 
-import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableSet;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.gen.PopulatorType;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
-import org.spongepowered.common.world.gen.InternalPopulatorTypes;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A specific {@link TrackingPhase} to handle any point in which world or chunk
@@ -95,143 +84,15 @@ public final class GenerationPhase extends TrackingPhase {
         }
     }
 
-    /**
-     * A generalized
-     */
-    static class GeneralGenerationPhaseState implements IPhaseState {
-
-        private Set<IPhaseState> compatibleStates = new HashSet<>();
-        private boolean isBaked = false;
-        private final String id;
-
-        GeneralGenerationPhaseState(String id) {
-            this.id = id;
-        }
-
-        final GeneralGenerationPhaseState addCompatibleState(IPhaseState state) {
-            if (this.isBaked) {
-                throw new IllegalStateException("This state is already baked! " + this.id);
-            }
-            this.compatibleStates.add(state);
-            return this;
-        }
-
-        final GeneralGenerationPhaseState addCompatibleStates(IPhaseState... states) {
-            if (this.isBaked) {
-                throw new IllegalStateException("This state is already baked! " + this.id);
-            }
-            Collections.addAll(this.compatibleStates, states);
-            return this;
-        }
-
-        final GeneralGenerationPhaseState bake() {
-            if (this.isBaked) {
-                throw new IllegalStateException("This state is already baked! " + this.id);
-            }
-            this.compatibleStates = ImmutableSet.copyOf(this.compatibleStates);
-            this.isBaked = true;
-            return this;
-        }
-
-        @Override
-        public final TrackingPhase getPhase() {
-            return TrackingPhases.GENERATION;
-        }
-
-        @Override
-        public final boolean canSwitchTo(IPhaseState state) {
-            return this.compatibleStates.contains(state);
-        }
-
-        @Override
-        public final boolean isExpectedForReEntrance() {
-            return true;
-        }
-
-
-        Cause provideSpawnCause(CauseTracker causeTracker, PhaseContext context) {
-            return Cause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE).named("World", causeTracker.getWorld()).build();
-        }
-
-        @SuppressWarnings("unchecked")
-        public final void unwind(CauseTracker causeTracker, PhaseContext context) {
-            final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
-            if (spawnedEntities.isEmpty()) {
-                return;
-            }
-            final Cause cause = provideSpawnCause(causeTracker, context);
-
-            final SpawnEntityEvent.Spawner
-                    event =
-                    SpongeEventFactory.createSpawnEntityEventSpawner(cause, spawnedEntities, causeTracker.getWorld());
-            SpongeImpl.postEvent(event);
-            if (!event.isCancelled()) {
-                for (Entity entity : event.getEntities()) {
-                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                }
-            }
-
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            GeneralGenerationPhaseState that = (GeneralGenerationPhaseState) o;
-            return Objects.equal(this.id, that.id);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(this.id);
-        }
-
-        @Override
-        public String toString() {
-            return Objects.toStringHelper(this)
-                    .add("id", this.id)
-                    .toString();
-        }
+    public static GenerationPhase getInstance() {
+        return Holder.INSTANCE;
     }
 
-    private static class PopulatorGenerationPhaseState extends GeneralGenerationPhaseState {
-
-        PopulatorGenerationPhaseState(String id) {
-            super(id);
-        }
-
-        @Override
-        Cause provideSpawnCause(CauseTracker causeTracker, PhaseContext context) {
-            final PopulatorType runningGenerator = context.firstNamed(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, PopulatorType.class)
-                    .orElse(null);
-            final Cause.Builder causeBuilder = Cause.builder();
-            Cause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE).named("World",  causeTracker.getWorld());
-            if (InternalPopulatorTypes.ANIMAL.equals(runningGenerator)) {
-                causeBuilder.named(NamedCause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE))
-                        .named(NamedCause.of(InternalNamedCauses.General.ANIMAL_SPAWNER, runningGenerator));
-            } else if (runningGenerator != null) {
-                causeBuilder.named(NamedCause.source(InternalSpawnTypes.SpawnCauses.STRUCTURE_SPAWNING))
-                        .named(NamedCause.of(InternalNamedCauses.WorldGeneration.STRUCTURE, runningGenerator));
-            } else {
-                causeBuilder.named(NamedCause.source(InternalSpawnTypes.SpawnCauses.STRUCTURE_SPAWNING));
-            }
-            return causeBuilder.build();
-        }
-
+    private GenerationPhase() {
     }
 
-    GenerationPhase(TrackingPhase parent) {
-        super(parent);
-    }
-
-    @Override
-    public GenerationPhase addChild(TrackingPhase child) {
-        super.addChild(child);
-        return this;
+    private static final class Holder {
+        static final GenerationPhase INSTANCE = new GenerationPhase();
     }
 
     @Override
@@ -265,7 +126,7 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
+    public void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
             ArrayList<Entity> entities) {
         super.processPostEntitySpawns(causeTracker, unwindingState, phaseContext, entities);
     }

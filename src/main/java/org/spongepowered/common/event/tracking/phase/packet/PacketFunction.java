@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.util;
+package org.spongepowered.common.event.tracking.phase.packet;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
@@ -81,7 +81,6 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -624,9 +623,9 @@ public interface PacketFunction {
         }
         final Cause cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", openContainer));
         final InteractInventoryEvent inventoryEvent;
-        if (state instanceof PacketPhase.Inventory) {
+        if (state instanceof BasicInventoryPacketState) {
             inventoryEvent =
-                    ((PacketPhase.Inventory) state)
+                    ((BasicInventoryPacketState) state)
                             .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction, slotTransactions, capturedItems,
                                     cause, usedButton);
         } else {
@@ -1028,6 +1027,6 @@ public interface PacketFunction {
 
     PacketFunction HANDLED_EXTERNALLY = UNKONWN_PACKET;
 
-    void unwind(Packet<?> packet, PacketPhase.IPacketState state, EntityPlayerMP player, PhaseContext context);
+    void unwind(Packet<?> packet, IPacketState state, EntityPlayerMP player, PhaseContext context);
 
 }

@@ -44,8 +44,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
 public class PlayerPhase extends TrackingPhase {
 
     public static final class State {
@@ -64,8 +62,15 @@ public class PlayerPhase extends TrackingPhase {
         }
     }
 
-    PlayerPhase(@Nullable TrackingPhase parent) {
-        super(parent);
+    public static PlayerPhase getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private PlayerPhase() {
+    }
+
+    private static final class Holder {
+        static final PlayerPhase INSTANCE = new PlayerPhase();
     }
 
     @SuppressWarnings("unchecked")

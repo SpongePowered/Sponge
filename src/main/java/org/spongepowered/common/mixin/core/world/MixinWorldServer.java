@@ -55,7 +55,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.Explosion;
@@ -107,6 +106,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.PortalAgentTypes;
@@ -129,6 +129,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -146,11 +147,11 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.EntityPhase;
-import org.spongepowered.common.event.tracking.phase.GeneralPhase;
-import org.spongepowered.common.event.tracking.phase.GenerationPhase;
-import org.spongepowered.common.event.tracking.phase.PluginPhase;
-import org.spongepowered.common.event.tracking.phase.TickPhase;
+import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -1038,6 +1039,75 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             }
         }
         callbackInfo.cancel();
+    }
+
+    @Override
+    public void triggerExplosion(org.spongepowered.api.world.explosion.Explosion explosion, Cause cause) {
+        checkNotNull(explosion, "explosion");
+        Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
+        checkNotNull(origin, "location");
+        checkNotNull(cause, "Cause cannot be null!");
+        checkArgument(cause.contains(PluginContainer.class), "Cause must contain a PluginContainer!");
+        if (CauseTracker.ENABLED) {
+            final PhaseContext phaseContext = PhaseContext.start()
+                    .add(NamedCause.source(cause))
+                    .explosion()
+                    .addEntityCaptures()
+                    .addEntityDropCaptures()
+                    .addBlockCaptures();
+            phaseContext.getCaptureExplosion().addExplosion(explosion);
+            phaseContext.complete();
+            this.causeTracker.switchToPhase(PluginPhase.State.CUSTOM_EXPLOSION, phaseContext);
+        }
+        final Explosion mcExplosion;
+        try {
+            // Since we already have the API created implementation Explosion, let's use it.
+            mcExplosion = (Explosion) explosion;
+        } catch (Exception e) {
+            new PrettyPrinter(60).add("Explosion not compatible with this implementation").centre().hr()
+                    .add("An explosion that was expected to be used for this implementation does not")
+                    .add("originate from this implementation.")
+                    .add(e)
+                    .trace();
+            return;
+        }
+        final double x = mcExplosion.explosionX;
+        final double y = mcExplosion.explosionY;
+        final double z = mcExplosion.explosionZ;
+        final boolean isSmoking = mcExplosion.isSmoking;
+        final float strength = explosion.getRadius();
+
+        // Set up the pre event
+        final ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(cause, explosion, this);
+        if (SpongeImpl.postEvent(event)) {
+            this.processingExplosion = false;
+            if (CauseTracker.ENABLED) {
+                this.causeTracker.completePhase();
+            }
+            return;
+        }
+        // Sponge End
+
+        mcExplosion.doExplosionA();
+        mcExplosion.doExplosionB(false);
+
+        if (!isSmoking) {
+            mcExplosion.clearAffectedBlockPositions();
+        }
+
+        for (EntityPlayer entityplayer : this.playerEntities) {
+            if (entityplayer.getDistanceSq(x, y, z) < 4096.0D) {
+                ((EntityPlayerMP) entityplayer).connection.sendPacket(new SPacketExplosion(x, y, z, strength, mcExplosion.getAffectedBlockPositions(),
+                        mcExplosion.getPlayerKnockbackMap().get(entityplayer)));
+            }
+        }
+
+        // Sponge Start - end processing
+        this.processingExplosion = false;
+        if (CauseTracker.ENABLED) {
+            this.causeTracker.completePhase();
+        }
+        // Sponge End
     }
 
     // ------------------------- Start Cause Tracking overrides of Minecraft World methods ----------

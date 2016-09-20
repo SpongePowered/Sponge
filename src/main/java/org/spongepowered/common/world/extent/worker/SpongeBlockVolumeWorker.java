@@ -42,7 +42,7 @@ import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.PluginPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.function.BiFunction;

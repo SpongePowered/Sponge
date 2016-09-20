@@ -24,16 +24,24 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
+
 public final class TrackingPhases {
 
-    public static final TickPhase WORLD = new TickPhase(TrackingPhases.GENERAL).addChild(TrackingPhases.ENTITY).addChild(TrackingPhases.BLOCK);
-    public static final EntityPhase ENTITY = new EntityPhase(TrackingPhases.GENERAL);
-    public static final BlockPhase BLOCK    = new BlockPhase(TrackingPhases.GENERAL);
-    public static final GeneralPhase GENERAL  = new GeneralPhase(null).addChild(TrackingPhases.ENTITY).addChild(TrackingPhases.BLOCK);
-    public static final PacketPhase PACKET = new PacketPhase(TrackingPhases.GENERAL);
-    public static final PluginPhase PLUGIN = new PluginPhase(null).addChild(TrackingPhases.ENTITY).addChild(TrackingPhases.BLOCK);
-    public static final GenerationPhase GENERATION = new GenerationPhase(null);
-    public static final PlayerPhase PLAYER = new PlayerPhase(TrackingPhases.GENERAL);
+    public static final TickPhase TICK = TickPhase.getInstance();
+    public static final EntityPhase ENTITY = EntityPhase.getInstance();
+    public static final BlockPhase BLOCK    = BlockPhase.getInstance();
+    public static final GeneralPhase GENERAL  = GeneralPhase.getInstance();
+    public static final PacketPhase PACKET = PacketPhase.getInstance();
+    public static final PluginPhase PLUGIN = PluginPhase.getInstance();
+    public static final GenerationPhase GENERATION = GenerationPhase.getInstance();
+    public static final PlayerPhase PLAYER = PlayerPhase.getInstance();
 
     private TrackingPhases() {
     }
