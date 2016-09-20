@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.ai.EntityAIMate;
 import net.minecraft.entity.passive.EntityAnimal;
@@ -50,6 +49,7 @@ public abstract class MixinEntityAIMate {
     private static final String
         METHOD_INVOKE_ASSIGN =
         "net/minecraft/entity/passive/EntityAnimal.createChild(Lnet/minecraft/entity/EntityAgeable;)Lnet/minecraft/entity/EntityAgeable;";
+
     @Shadow @Final private EntityAnimal theAnimal;
     @Shadow private EntityAnimal targetMate;
 

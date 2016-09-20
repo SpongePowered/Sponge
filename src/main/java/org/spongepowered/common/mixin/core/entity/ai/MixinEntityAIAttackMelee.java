@@ -31,6 +31,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(EntityAIAttackMelee.class)
 public abstract class MixinEntityAIAttackMelee implements AttackLivingAITask {
+
     @Shadow double speedTowardsTarget;
     @Shadow boolean longMemory;
 

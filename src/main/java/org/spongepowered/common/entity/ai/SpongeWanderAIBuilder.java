@@ -31,8 +31,13 @@ import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
 import org.spongepowered.api.entity.living.Creature;
 
 public final class SpongeWanderAIBuilder implements WanderAITask.Builder {
+
     private double speed;
     private int executionChance;
+
+    public SpongeWanderAIBuilder() {
+        this.reset();
+    }
 
     @Override
     public WanderAITask.Builder speed(double speed) {
@@ -55,7 +60,7 @@ public final class SpongeWanderAIBuilder implements WanderAITask.Builder {
     @Override
     public WanderAITask.Builder reset() {
         this.speed = 1;
-        this.executionChance = 1;
+        this.executionChance = 120;
         return this;
     }
 

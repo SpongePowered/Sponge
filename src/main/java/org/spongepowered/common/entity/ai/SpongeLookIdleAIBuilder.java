@@ -24,50 +24,29 @@
  */
 package org.spongepowered.common.entity.ai;
 
-import com.google.common.base.Preconditions;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIAttackMelee;
-import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
-import org.spongepowered.api.entity.living.Creature;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public final class SpongeAttackLivingAIBuilder implements AttackLivingAITask.Builder {
+import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import org.spongepowered.api.entity.ai.task.builtin.LookIdleAITask;
+import org.spongepowered.api.entity.living.Agent;
 
-    private double speed;
-    private boolean longMemory;
-
-    public SpongeAttackLivingAIBuilder() {
-        this.reset();
-    }
+public final class SpongeLookIdleAIBuilder implements LookIdleAITask.Builder {
 
     @Override
-    public AttackLivingAITask.Builder speed(double speed) {
-        this.speed = speed;
+    public LookIdleAITask.Builder from(LookIdleAITask value) {
         return this;
     }
 
     @Override
-    public AttackLivingAITask.Builder longMemory() {
-        this.longMemory = true;
+    public LookIdleAITask.Builder reset() {
         return this;
     }
 
     @Override
-    public AttackLivingAITask.Builder from(AttackLivingAITask value) {
-        return speed(value.getSpeed())
-            .longMemory();
-    }
+    public LookIdleAITask build(Agent owner) {
+        checkNotNull(owner);
 
-    @Override
-    public AttackLivingAITask.Builder reset() {
-        this.speed = 0;
-        this.longMemory = false;
-        return this;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public AttackLivingAITask build(Creature owner) {
-        Preconditions.checkNotNull(owner);
-        return (AttackLivingAITask) new EntityAIAttackMelee((EntityCreature) owner, this.speed, this.longMemory);
+        return (LookIdleAITask) new EntityAILookIdle((EntityLiving) owner);
     }
 }

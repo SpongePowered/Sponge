@@ -33,7 +33,11 @@ import org.spongepowered.api.entity.living.Agent;
 public final class SpongeSwimmingAIBuilder implements SwimmingAITask.Builder {
 
     float chance = 0.8f;
-    
+
+    public SpongeSwimmingAIBuilder() {
+        this.reset();
+    }
+
     @Override
     public SwimmingAITask.Builder swimChance(float chance) {
         this.chance = chance;

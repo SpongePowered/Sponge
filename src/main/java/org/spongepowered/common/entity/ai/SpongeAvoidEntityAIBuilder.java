@@ -35,9 +35,14 @@ import org.spongepowered.common.util.GuavaJavaUtils;
 import java.util.function.Predicate;
 
 public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Builder {
+
     Predicate<Entity> targetSelector;
     float searchDistance;
     double closeRangeSpeed, farRangeSpeed;
+
+    public SpongeAvoidEntityAIBuilder() {
+        this.reset();
+    }
 
     @Override
     public AvoidEntityAITask.Builder targetSelector(Predicate<Entity> predicate) {

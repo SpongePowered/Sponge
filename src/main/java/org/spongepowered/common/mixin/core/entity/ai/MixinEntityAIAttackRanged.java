@@ -22,52 +22,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai;
+package org.spongepowered.common.mixin.core.entity.ai;
 
-import com.google.common.base.Preconditions;
-import net.minecraft.entity.EntityCreature;
-import net.minecraft.entity.ai.EntityAIAttackMelee;
-import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
-import org.spongepowered.api.entity.living.Creature;
+import net.minecraft.entity.ai.EntityAIAttackRanged;
+import org.spongepowered.api.entity.ai.task.builtin.creature.RangeAgentAITask;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
 
-public final class SpongeAttackLivingAIBuilder implements AttackLivingAITask.Builder {
+@Mixin(EntityAIAttackRanged.class)
+public abstract class MixinEntityAIAttackRanged implements RangeAgentAITask {
 
-    private double speed;
-    private boolean longMemory;
+    @Shadow @Final @Mutable private double entityMoveSpeed;
+    @Shadow @Final @Mutable private int maxRangedAttackTime;
+    @Shadow @Final @Mutable private float attackRadius;
+    @Shadow @Final @Mutable private float maxAttackDistance;
 
-    public SpongeAttackLivingAIBuilder() {
-        this.reset();
+    @Override
+    public double getMoveSpeed() {
+        return this.entityMoveSpeed;
     }
 
     @Override
-    public AttackLivingAITask.Builder speed(double speed) {
-        this.speed = speed;
+    public RangeAgentAITask setMoveSpeed(double speed) {
+        this.entityMoveSpeed = speed;
         return this;
     }
 
     @Override
-    public AttackLivingAITask.Builder longMemory() {
-        this.longMemory = true;
+    public int getDelayBetweenAttacks() {
+        return this.maxRangedAttackTime;
+    }
+
+    @Override
+    public RangeAgentAITask setDelayBetweenAttacks(int delay) {
+        this.maxRangedAttackTime = delay;
         return this;
     }
 
     @Override
-    public AttackLivingAITask.Builder from(AttackLivingAITask value) {
-        return speed(value.getSpeed())
-            .longMemory();
+    public float getAttackRadius() {
+        return this.attackRadius;
     }
 
     @Override
-    public AttackLivingAITask.Builder reset() {
-        this.speed = 0;
-        this.longMemory = false;
+    public RangeAgentAITask setAttackRadius(float radius) {
+        this.attackRadius = radius;
+        this.maxAttackDistance = this.attackRadius * this.attackRadius;
         return this;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public AttackLivingAITask build(Creature owner) {
-        Preconditions.checkNotNull(owner);
-        return (AttackLivingAITask) new EntityAIAttackMelee((EntityCreature) owner, this.speed, this.longMemory);
     }
 }

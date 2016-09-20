@@ -34,10 +34,15 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityTippedArrow;
+import net.minecraft.init.Enchantments;
+import net.minecraft.init.Items;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
@@ -75,7 +80,7 @@ import javax.annotation.Nullable;
  *
  * Hostile mobs don't attack the human, should this be default behaviour?
  */
-public class EntityHuman extends EntityCreature implements TeamMember {
+public class EntityHuman extends EntityCreature implements TeamMember, IRangedAttackMob {
 
     // According to http://wiki.vg/Mojang_API#UUID_-.3E_Profile_.2B_Skin.2FCape
     // you can access this data once per minute, lets cache for 2 minutes
@@ -473,5 +478,37 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     public Packet<?>[] popQueuedPackets(@Nullable EntityPlayerMP player) {
         List<Packet<?>[]> queue = this.playerPacketMap.get(player == null ? null : player.getUniqueID());
         return queue == null || queue.isEmpty() ? null : queue.remove(0);
+    }
+
+    @Override
+    public void attackEntityWithRangedAttack(EntityLivingBase target, float p_82196_2_) {
+        // Borrowed from Skeleton
+        // TODO Figure out how to API this out
+        final EntityTippedArrow entitytippedarrow = new EntityTippedArrow(this.worldObj, this);
+        double d0 = target.posX - this.posX;
+        double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - entitytippedarrow.posY;
+        double d2 = target.posZ - this.posZ;
+        double d3 = (double)MathHelper.sqrt_double(d0 * d0 + d2 * d2);
+        entitytippedarrow.setThrowableHeading(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, (float)(14 - this.worldObj.getDifficulty().getDifficultyId() * 4));
+        int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.POWER, this);
+        int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
+        entitytippedarrow.setDamage((double)(p_82196_2_ * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.worldObj.getDifficulty().getDifficultyId() * 0.11F));
+
+        if (i > 0) {
+            entitytippedarrow.setDamage(entitytippedarrow.getDamage() + (double)i * 0.5D + 0.5D);
+        }
+
+        if (j > 0) {
+            entitytippedarrow.setKnockbackStrength(j);
+        }
+
+        final ItemStack itemstack = this.getHeldItem(EnumHand.OFF_HAND);
+
+        if (itemstack != null && itemstack.getItem() == Items.TIPPED_ARROW) {
+            entitytippedarrow.setPotionEffect(itemstack);
+        }
+
+        this.playSound(SoundEvents.ENTITY_ARROW_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
+        this.worldObj.spawnEntityInWorld(entitytippedarrow);
     }
 }

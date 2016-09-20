@@ -24,39 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAISwimming;
-import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.entity.ai.EntityAILookIdle;
+import org.spongepowered.api.entity.ai.task.builtin.LookIdleAITask;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntityAISwimming.class)
-public abstract class MixinEntityAISwimming implements SwimmingAITask {
+@Mixin(EntityAILookIdle.class)
+public abstract class MixinEntityAILookIdle implements LookIdleAITask {
 
-    @Shadow @Final private EntityLiving theEntity;
-
-    float swimChance = 0.8f;
-
-    /**
-     * @author Zidane
-     * @reason By default, Vanilla's swim chance is always 0.8f. I expose this.
-     */
-    @Overwrite
-    public void updateTask() {
-        if (this.theEntity.getRNG().nextFloat() < this.swimChance) {
-            this.theEntity.getJumpHelper().setJumping();
-        }
-    }
-
-    @Override
-    public float getSwimChance() {
-        return this.swimChance;
-    }
-
-    @Override
-    public void setSwimChance(float chance) {
-        this.swimChance = chance;
-    }
 }

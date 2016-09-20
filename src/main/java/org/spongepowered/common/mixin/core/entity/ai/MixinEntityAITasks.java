@@ -59,6 +59,7 @@ import java.util.Set;
 @Mixin(EntityAITasks.class)
 @Implements(value = @Interface(iface = Goal.class, prefix = "goal$"))
 public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
+
     @Shadow @Final private Set<EntityAITasks.EntityAITaskEntry> taskEntries;
     @Shadow @Final private Set<EntityAITasks.EntityAITaskEntry> executingTaskEntries;
 

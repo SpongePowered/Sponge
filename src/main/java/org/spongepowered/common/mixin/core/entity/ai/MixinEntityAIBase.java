@@ -46,7 +46,9 @@ import javax.annotation.Nullable;
 @Mixin(EntityAIBase.class)
 @Implements(value = @Interface(iface = AITask.class, prefix = "task$"))
 public abstract class MixinEntityAIBase implements IMixinEntityAIBase {
+
     @Shadow private int mutexBits;
+
     private AITaskType type;
     private Optional<Goal<?>> owner = Optional.empty();
 

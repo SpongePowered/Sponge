@@ -31,8 +31,13 @@ import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLike
 import org.spongepowered.api.entity.living.animal.Horse;
 
 public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCrazyAITask.Builder {
+
     double speed;
-    
+
+    public SpongeRunAroundLikeCrazyAIBuilder() {
+        this.reset();
+    }
+
     @Override
     public RunAroundLikeCrazyAITask.Builder speed(double speed) {
         this.speed = speed;

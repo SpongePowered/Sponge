@@ -28,10 +28,10 @@ import com.google.common.base.Preconditions;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.ai.task.builtin.creature.WatchClosestAITask;
+import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
 import org.spongepowered.api.entity.living.Agent;
 
-public class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Builder {
+public final class SpongeWatchClosestAIBuilder implements WatchClosestAITask.Builder {
 
     private Class<? extends Entity> watchedClass;
     private float maxDistance;

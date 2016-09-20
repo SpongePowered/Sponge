@@ -44,6 +44,10 @@ public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTarg
     private int chance;
     private Predicate<? extends Living> predicate;
 
+    public SpongeFindNearestAttackableTargetAIBuilder() {
+        this.reset();
+    }
+
     @Override
     public FindNearestAttackableTargetAITask.Builder target(Class<? extends Living> targetClass) {
         this.targetClass = targetClass;
@@ -59,7 +63,7 @@ public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTarg
     @Override
     public FindNearestAttackableTargetAITask.Builder filter(Predicate<? extends Living> predicate) {
         this.predicate = predicate;
-        return null;
+        return this;
     }
 
     @Override

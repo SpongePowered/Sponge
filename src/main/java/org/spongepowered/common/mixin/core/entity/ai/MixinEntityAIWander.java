@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(EntityAIWander.class)
 public abstract class MixinEntityAIWander extends MixinEntityAIBase implements WanderAITask {
+
     @Shadow @Final @Mutable private double speed;
     @Shadow private int executionChance;
 

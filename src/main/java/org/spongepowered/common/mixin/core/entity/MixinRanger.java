@@ -22,41 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.ai;
+package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.ai.EntityAISwimming;
-import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.entity.boss.EntityWither;
+import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntitySnowman;
+import net.minecraft.entity.monster.EntityWitch;
+import org.spongepowered.api.entity.living.Ranger;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.entity.living.human.EntityHuman;
 
-@Mixin(EntityAISwimming.class)
-public abstract class MixinEntityAISwimming implements SwimmingAITask {
+@Mixin({
+        EntityHuman.class,
+        EntitySkeleton.class,
+        EntitySnowman.class,
+        EntityWitch.class,
+        EntityWither.class
+})
+// TODO Remove when we can mix into implementors of an interface
+public abstract class MixinRanger implements Ranger {
 
-    @Shadow @Final private EntityLiving theEntity;
-
-    float swimChance = 0.8f;
-
-    /**
-     * @author Zidane
-     * @reason By default, Vanilla's swim chance is always 0.8f. I expose this.
-     */
-    @Overwrite
-    public void updateTask() {
-        if (this.theEntity.getRNG().nextFloat() < this.swimChance) {
-            this.theEntity.getJumpHelper().setJumping();
-        }
-    }
-
-    @Override
-    public float getSwimChance() {
-        return this.swimChance;
-    }
-
-    @Override
-    public void setSwimChance(float chance) {
-        this.swimChance = chance;
-    }
 }
