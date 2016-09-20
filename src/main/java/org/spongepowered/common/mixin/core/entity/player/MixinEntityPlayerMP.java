@@ -773,4 +773,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public Inventory getEnderChestInventory() {
         return (Inventory) this.theInventoryEnderChest;
     }
+
+    @Override
+    public boolean respawnPlayer() {
+        if (this.getHealth() > 0.0F) {
+            return false;
+        }
+        this.mcServer.getPlayerList().recreatePlayerEntity(this$, this$.dimension, false);
+        return true;
+    }
 }
