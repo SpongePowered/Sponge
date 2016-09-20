@@ -30,6 +30,8 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.explosive.DetonateExplosiveEvent;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Optional;
 
@@ -48,7 +50,7 @@ public interface IMixinExplosive {
         if (!Sponge.getEventManager().post(event)) {
             Explosion explosion = event.getExplosionBuilder().build();
             if (explosion.getRadius() > 0) {
-                ((Explosive) this).getWorld().triggerExplosion(explosion, );
+                ((IMixinWorldServer) ((Explosive) this).getWorld()).triggerInternalExplosion(explosion);
             }
             return Optional.of((net.minecraft.world.Explosion) explosion);
         }

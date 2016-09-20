@@ -31,6 +31,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
@@ -88,5 +89,7 @@ public interface IMixinWorldServer extends IMixinWorld {
     int getChunkGCTickInterval();
 
     long getChunkUnloadDelay();
+
+    void triggerInternalExplosion(Explosion explosion);
 
 }

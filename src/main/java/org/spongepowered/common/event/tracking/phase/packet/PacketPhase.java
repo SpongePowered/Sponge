@@ -113,7 +113,7 @@ public final class PacketPhase extends TrackingPhase {
         public static final IPacketState UPDATE_SIGN = new UpdateSignState();
         public static final IPacketState RESOURCE_PACK = new UpdateSignState();
         public static final IPacketState STOP_RIDING_JUMP = new BasicPacketState();
-        public static final IPacketState HANDLED_EXTERNALLY = new BasicPacketState();
+        public static final IPacketState HANDLED_EXTERNALLY = new UnknownPacketState();
         public static final IPacketState START_FALL_FLYING = new BasicPacketState();
         public static final IPacketState SWAP_HAND_ITEMS = new BasicPacketState();
     }

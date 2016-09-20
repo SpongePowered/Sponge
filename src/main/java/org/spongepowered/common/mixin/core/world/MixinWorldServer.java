@@ -1047,7 +1047,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
         checkNotNull(cause, "Cause cannot be null!");
-        checkArgument(cause.contains(PluginContainer.class), "Cause must contain a PluginContainer!");
+        checkArgument(cause.containsType(PluginContainer.class), "Cause must contain a PluginContainer!");
         if (CauseTracker.ENABLED) {
             final PhaseContext phaseContext = PhaseContext.start()
                     .add(NamedCause.source(cause))
@@ -1108,6 +1108,17 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.causeTracker.completePhase();
         }
         // Sponge End
+    }
+
+    @Override
+    public void triggerInternalExplosion(org.spongepowered.api.world.explosion.Explosion explosion) {
+        checkNotNull(explosion, "explosion");
+        Location<org.spongepowered.api.world.World> origin = explosion.getLocation();
+        checkNotNull(origin, "location");
+        newExplosion(EntityUtil.toNullableNative(explosion.getSourceExplosive().orElse(null)), origin.getX(),
+                origin.getY(), origin.getZ(), explosion.getRadius(), explosion.canCauseFire(),
+                explosion.shouldBreakBlocks()
+        );
     }
 
     // ------------------------- Start Cause Tracking overrides of Minecraft World methods ----------
