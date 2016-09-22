@@ -29,15 +29,13 @@ import static org.spongepowered.common.util.OptionalUtils.asSet;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -47,50 +45,36 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.Argument.Invertible;
 import org.spongepowered.api.text.selector.ArgumentHolder;
-import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.text.selector.ArgumentTypes;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.text.selector.SelectorTypes;
 import org.spongepowered.api.util.Functional;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.common.SpongeImpl;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 /**
  * A resolver that acts like Vanilla Minecraft in many regards.
  */
-// TODO decide if we want selector resolvers as part of the API, ask @kenzierocks for details
 public class SelectorResolver {
 
-    private static final Function<CommandSource, String> GET_NAME = CommandSource::getName;
-    private static final Vector3d ORIGIN = new Vector3d(0, 0, 0);
-    private static final Set<ArgumentType<?>> LOCATION_BASED_ARGUMENTS;
-    private static final Function<Number, Double> TO_DOUBLE = Number::doubleValue;
     private static final Collection<SelectorType> INFINITE_TYPES = ImmutableSet.of(SelectorTypes.ALL_ENTITIES, SelectorTypes.ALL_PLAYERS);
-
-    static {
-        ImmutableSet.Builder<ArgumentType<?>> builder = ImmutableSet.builder();
-        builder.addAll(ArgumentTypes.POSITION.getTypes());
-        builder.addAll(ArgumentTypes.DIMENSION.getTypes());
-        builder.addAll(ArgumentTypes.RADIUS.getTypes());
-        // Left commented because Vanilla doesn't include it (see field_179666_d)
-        // builder.addAll(ArgumentTypes.ROTATION.getTypes());
-        LOCATION_BASED_ARGUMENTS = builder.build();
-    }
 
     private static Extent extentFromSource(CommandSource origin) {
         if (origin instanceof Locatable) {
@@ -106,44 +90,43 @@ public class SelectorResolver {
         return null;
     }
 
-    private static <I, R> Predicate<I> requireTypePredicate(Class<I> inputType, final Class<R> requiredType) {
+    private static <I, R extends I> Predicate<I> requireTypePredicate(Class<I> inputType, final Class<R> requiredType) {
         return requiredType::isInstance;
     }
 
     private final Collection<Extent> extents;
     private final Vector3d position;
-    private final Optional<CommandSource> original;
     private final Selector selector;
     private final Predicate<Entity> selectorFilter;
-    private final boolean alwaysUsePosition;
 
-    public SelectorResolver(Collection<? extends Extent> extents, Selector selector, boolean force) {
-        this(extents, null, null, selector, force);
+    public SelectorResolver(Collection<? extends Extent> extents, Selector selector) {
+        this(extents, null, selector);
     }
 
-    public SelectorResolver(Location<World> location, Selector selector, boolean force) {
-        this(ImmutableSet.of(location.getExtent()), location.getPosition(), null, selector, force);
+    public SelectorResolver(Location<World> location, Selector selector) {
+        this(ImmutableSet.of(location.getExtent()), location.getPosition(), selector);
     }
 
-    public SelectorResolver(CommandSource origin, Selector selector, boolean force) {
-        this(asSet(Optional.ofNullable(extentFromSource(origin))), positionFromSource(origin), origin, selector, force);
+    public SelectorResolver(CommandSource origin, Selector selector) {
+        this(asSet(Optional.ofNullable(extentFromSource(origin))), positionFromSource(origin), selector);
     }
 
-    private SelectorResolver(Collection<? extends Extent> extents, Vector3d position,
-        CommandSource original, Selector selector, boolean force) {
+    private SelectorResolver(Collection<? extends Extent> extents, @Nullable Vector3d position, Selector selector) {
         this.extents = ImmutableSet.copyOf(extents);
-        this.position = position == null ? ORIGIN : position;
-        this.original = Optional.ofNullable(original);
+        this.position = position == null ? Vector3d.ZERO : position;
         this.selector = checkNotNull(selector);
         this.selectorFilter = makeFilter();
-        this.alwaysUsePosition = force;
     }
 
     private Predicate<Entity> makeFilter() {
-        // for easier reading
         final Selector sel = this.selector;
         Vector3d position = getPositionOrDefault(this.position, ArgumentTypes.POSITION);
-        List<Predicate<Entity>> filters = Lists.newArrayList();
+        ArrayList<Predicate<Entity>> filters = new ArrayList<>(sel.getArguments().size());
+
+        if (isPlayerOnlySelector()) {
+            filters.add(requireTypePredicate(Entity.class, Player.class));
+        }
+
         addTypeFilters(filters);
         addDimensionFilters(position, filters);
         addRadiusFilters(position, filters);
@@ -153,23 +136,21 @@ public class SelectorResolver {
         addRotationFilters(filters);
         addTeamFilters(filters);
         addScoreFilters(filters);
-        SelectorType selectorType = sel.getType();
-        Optional<Invertible<EntityType>> type = sel.getArgument(ArgumentTypes.ENTITY_TYPE);
-        // isn't an ALL_ENTITIES selector or it is a RANDOM selector for only players
-        boolean isPlayerOnlySelector =
-            selectorType == SelectorTypes.ALL_PLAYERS || selectorType == SelectorTypes.NEAREST_PLAYER
-                || (selectorType == SelectorTypes.RANDOM && type.isPresent() && !type.get().isInverted()
-                && type.get().getValue() != EntityTypes.PLAYER);
-        if (isPlayerOnlySelector) {
-            // insert at the start so it applies first
-            filters.add(0, requireTypePredicate(Entity.class, Player.class));
-        }
+
+        // Pack the list before returning it to improve space efficiency
+        filters.trimToSize();
         return Functional.predicateAnd(filters);
+    }
+
+    private boolean isPlayerOnlySelector() {
+        SelectorType type = this.selector.getType();
+        boolean untypedRandom = type == SelectorTypes.RANDOM && !this.selector.get(ArgumentTypes.ENTITY_TYPE).isPresent();
+        return type == SelectorTypes.ALL_PLAYERS || type == SelectorTypes.NEAREST_PLAYER || untypedRandom;
     }
 
     private void addDimensionFilters(final Vector3d position, List<Predicate<Entity>> filters) {
         Selector sel = this.selector;
-        Vector3d boxDimensions = getPositionOrDefault(ORIGIN, ArgumentTypes.DIMENSION);
+        Vector3d boxDimensions = getPositionOrDefault(Vector3d.ZERO, ArgumentTypes.DIMENSION);
         Vector3d det1 = position;
         Vector3d det2 = position.add(boxDimensions);
         final Vector3d boxMin = det1.min(det2);
@@ -258,9 +239,6 @@ public class SelectorResolver {
 
     private void addRotationFilters(List<Predicate<Entity>> filters) {
         Selector sel = this.selector;
-        // If the Z's are uncommented, don't forget to implement them
-        // Optional<Double> rotMinZ = sel.get(ArgumentTypes.ROTATION.minimum().z());
-        // Optional<Double> rotMaxZ = sel.get(ArgumentTypes.ROTATION.maximum().z());
         Optional<Double> rotMinX = sel.get(ArgumentTypes.ROTATION.minimum().x());
         if (rotMinX.isPresent()) {
             final double rmx = rotMinX.get();
@@ -294,13 +272,13 @@ public class SelectorResolver {
         if (teamOpt.isPresent()) {
             Invertible<String> teamArg = teamOpt.get();
             final boolean inverted = teamArg.isInverted();
-            final Collection<Team> teams = Sponge.getGame().getServer().getServerScoreboard().get().getTeams();
             filters.add(new Predicate<Entity>() {
 
                 @Override
                 public boolean test(Entity input) {
+                    Collection<Team> teams = Sponge.getGame().getServer().getServerScoreboard().get().getTeams();
                     if (input instanceof TeamMember) {
-                        return inverted ^ collectMembers(teams).contains(((TeamMember) input).getTeamRepresentation());
+                        return inverted != collectMembers(teams).contains(((TeamMember) input).getTeamRepresentation());
                     }
                     return false;
                 }
@@ -324,64 +302,57 @@ public class SelectorResolver {
             Argument.Invertible<EntityType> typeArg = typeOpt.get();
             final boolean inverted = typeArg.isInverted();
             final EntityType type = typeArg.getValue();
-            filters.add(input -> inverted ^ input.getType() == type);
+            filters.add(input -> inverted != (input.getType() == type));
         }
     }
 
     private Vector3d getPositionOrDefault(Vector3d pos, ArgumentHolder.Vector3<?, ? extends Number> vecTypes) {
-        Optional<Double> x = this.selector.get(vecTypes.x()).map(TO_DOUBLE);
-        Optional<Double> y = this.selector.get(vecTypes.y()).map(TO_DOUBLE);
-        Optional<Double> z = this.selector.get(vecTypes.z()).map(TO_DOUBLE);
-        return new Vector3d(x.orElse(Double.valueOf(pos.getX())), y.orElse(Double.valueOf(pos.getY())), z.orElse(Double.valueOf(pos.getZ())));
+        Optional<Double> x = this.selector.get(vecTypes.x()).map(Number::doubleValue);
+        Optional<Double> y = this.selector.get(vecTypes.y()).map(Number::doubleValue);
+        Optional<Double> z = this.selector.get(vecTypes.z()).map(Number::doubleValue);
+        return new Vector3d(x.orElse(pos.getX()), y.orElse(pos.getY()), z.orElse(pos.getZ()));
     }
 
-    public String getName() {
-        return this.original.map(GET_NAME).orElse("SelectorResolver");
-    }
-
-    public Set<Entity> resolve() {
+    public List<Entity> resolve() {
         SelectorType selectorType = this.selector.getType();
         int defaultCount = 1;
         if (INFINITE_TYPES.contains(selectorType)) {
             defaultCount = 0;
         }
         int maxToSelect = this.selector.get(ArgumentTypes.COUNT).orElse(defaultCount);
+        boolean isReversed = maxToSelect < 0;
+        maxToSelect = Math.abs(maxToSelect);
         Set<? extends Extent> extents = getExtentSet();
-        int count = 0;
-        ImmutableSet.Builder<Entity> entities = ImmutableSet.builder();
-        for (Extent extent : extents) {
-            Collection<Entity> allEntities = extent.getEntities();
+        Stream<Entity> entityStream = extents.stream()
+                .flatMap(ext -> ext.getEntities().stream())
+                .filter(this.selectorFilter);
+        if (maxToSelect != 0) {
             if (selectorType == SelectorTypes.RANDOM) {
-                List<Entity> entityList = new ArrayList<>(allEntities);
-                Collections.shuffle(entityList);
-                allEntities = entityList;
+                List<Entity> holder = entityStream.collect(Collectors.toList());
+                Collections.shuffle(holder);
+                entityStream = holder.stream();
+            } else {
+                entityStream = entityStream.sorted(distanceSort(isReversed));
             }
-
-            for (Entity e : allEntities) {
-                if (!this.selectorFilter.test(e)) {
-                    continue;
-                }
-                entities.add(e);
-                count++;
-                if (maxToSelect != 0 && count > maxToSelect) {
-                    break;
-                }
-            }
+            entityStream = entityStream.limit(maxToSelect);
+        } else {
+            entityStream = entityStream.sorted(distanceSort(isReversed));
         }
-        return entities.build();
+        return entityStream.collect(GuavaCollectors.toImmutableList());
+    }
+
+    private Comparator<? super Entity> distanceSort(boolean isReversed) {
+        Vector3d position = getPositionOrDefault(this.position, ArgumentTypes.POSITION);
+        int multiplier = isReversed ? -1 : 1;
+        return (a, b) -> {
+            double distToPosA = a.getLocation().getPosition().distanceSquared(position);
+            double distToPosB = b.getLocation().getPosition().distanceSquared(position);
+            return Double.compare(distToPosA, distToPosB) * multiplier;
+        };
     }
 
     private Set<? extends Extent> getExtentSet() {
-        if (!this.alwaysUsePosition && Collections.disjoint(getArgumentTypes(this.selector.getArguments()), LOCATION_BASED_ARGUMENTS)) {
-            return ImmutableSet.copyOf(SpongeImpl.getGame().getServer().getWorlds());
-        }
         return ImmutableSet.copyOf(this.extents);
-    }
-
-    private Collection<ArgumentType<?>> getArgumentTypes(Collection<Argument<?>> arguments) {
-        Collection<ArgumentType<?>> types = Sets.newHashSet();
-        types.addAll(arguments.stream().map(Argument::getType).collect(Collectors.toList()));
-        return types;
     }
 
 }
