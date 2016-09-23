@@ -54,10 +54,12 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
@@ -157,8 +159,10 @@ import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
+import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -227,6 +231,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow @Final private WorldServer.ServerBlockEventList[] blockEventQueue;
     @Shadow private int blockEventCacheIndex;
     @Shadow private int updateEntityTick;
+    @Shadow protected List<IWorldEventListener> eventListeners;
 
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
     @Shadow protected abstract void createBonusChest();
@@ -1744,7 +1749,38 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public void playSound(SoundType sound,  SoundCategory category, Vector3d position, double volume, double pitch, double minVolume) {
-        this.playSound(null, position.getX(), position.getY(), position.getZ(), SoundEvents.getRegisteredSoundEvent(sound.getId()), (net.minecraft.util.SoundCategory) (Object) category, (float) Math.max(minVolume, volume), (float) pitch);
+        SoundEvent event;
+        try {
+            // Check if the event is registered (ie has an integer ID)
+            event = SoundEvents.getRegisteredSoundEvent(sound.getId());
+        } catch (IllegalStateException e) {
+            // Otherwise send it as a custom sound
+            this.playCustomSound(null, position.getX(), position.getY(), position.getZ(), sound.getId(),
+                    (net.minecraft.util.SoundCategory) (Object) category, (float) Math.max(minVolume, volume), (float) pitch);
+            return;
+        }
+
+        this.playSound(null, position.getX(), position.getY(), position.getZ(), event, (net.minecraft.util.SoundCategory) (Object) category,
+                (float) Math.max(minVolume, volume), (float) pitch);
+    }
+
+    @Override
+    public void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, String soundIn, net.minecraft.util.SoundCategory category,
+            float volume, float pitch) {
+
+        if (player instanceof IMixinEntity) {
+            if (((IMixinEntity) player).isVanished()) {
+                return;
+            }
+        }
+
+        this.eventListeners.stream()
+                .filter(listener -> listener instanceof IMixinServerWorldEventHandler)
+                .map(listener -> (IMixinServerWorldEventHandler) listener)
+                .forEach(listener -> {
+                    // There's no method for playing a custom sound to all, so I made one -_-
+                    listener.playCustomSoundToAllNearExcept(null, soundIn, category, x, y, z, volume, pitch);
+                });
     }
 
     @Override

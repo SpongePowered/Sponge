@@ -127,6 +127,7 @@ import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.data.builder.data.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
+import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.ai.*;
@@ -311,6 +312,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Schematic.Builder.class, SpongeSchematicBuilder::new)
             .registerBuilderSupplier(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
             .registerBuilderSupplier(BiomeGenerationSettings.Builder.class, SpongeBiomeGenerationSettingsBuilder::new)
+            .registerBuilderSupplier(SoundType.Builder.class, SpongeSoundBuilder::new)
         ;
     }
 
