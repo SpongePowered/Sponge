@@ -67,7 +67,6 @@ public final class SpongeImpl {
     public static final String GAME_ID = "minecraft";
     public static final String GAME_NAME = "Minecraft";
 
-    public static final String API_ID = "spongeapi";
     public static final String API_NAME = firstNonNull(getPackage().getSpecificationTitle(), "SpongeAPI");
     public static final Optional<String> API_VERSION = Optional.ofNullable(getPackage().getSpecificationVersion());
 
