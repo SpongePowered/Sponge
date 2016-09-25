@@ -25,7 +25,7 @@
 package org.spongepowered.common.world.schematic;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.event.cause.Cause;
@@ -54,7 +54,7 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
     public SpongeArchetypeVolume(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles) {
         super(backing.getBlockMin(), backing.getBlockSize());
         this.backing = backing;
-        this.tiles = ImmutableMap.copyOf(tiles);
+        this.tiles = Maps.newHashMap(tiles);
     }
 
     @Override

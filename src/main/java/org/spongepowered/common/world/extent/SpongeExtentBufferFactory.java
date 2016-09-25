@@ -26,11 +26,15 @@ package org.spongepowered.common.world.extent;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import org.spongepowered.api.world.extent.ArchetypeVolume;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
+import org.spongepowered.common.world.schematic.SpongeArchetypeVolume;
 
 public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
 
@@ -57,6 +61,13 @@ public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
     @Override
     public MutableBlockVolume createThreadSafeBlockBuffer(Vector3i size) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public ArchetypeVolume createArchetypeVolume(Vector3i size, Vector3i origin) {
+        MutableBlockVolume backing = new CharArrayMutableBlockBuffer(origin.mul(-1), size);
+        SpongeArchetypeVolume vol = new SpongeArchetypeVolume(backing, ImmutableMap.of());
+        return vol;
     }
 
 }
