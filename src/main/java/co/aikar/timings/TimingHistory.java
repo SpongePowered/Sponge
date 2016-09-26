@@ -39,6 +39,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.SpongeEntityType;
@@ -120,6 +121,9 @@ public class TimingHistory {
                         chunk.getPosition().getX(),
                         chunk.getPosition().getZ(),
                         JSONUtil.mapArrayToObject(entityCounts.entrySet(), (entry) -> {
+                            if (entry.getKey() == EntityTypes.UNKNOWN) {
+                                return null;
+                            }
                             this.entityTypeSet.add(entry.getKey());
                             return JSONUtil.singleObjectPair(((SpongeEntityType) entry.getKey()).entityTypeId, entry.getValue().count());
                         }),

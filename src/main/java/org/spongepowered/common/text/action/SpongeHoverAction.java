@@ -31,6 +31,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.common.entity.SpongeEntityType;
@@ -71,7 +72,7 @@ public class SpongeHoverAction {
                 NBTTagCompound nbt = new NBTTagCompound();
                 nbt.setString("id", entity.getUniqueId().toString());
 
-                if (entity.getType().isPresent()) {
+                if (entity.getType().isPresent() && !(entity.getType().get() == EntityTypes.UNKNOWN)) {
                     nbt.setString("type", EntityList.getStringFromID(((SpongeEntityType) entity.getType().get()).entityTypeId));
                 }
 

@@ -42,6 +42,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
@@ -159,6 +160,9 @@ class TimingsExport extends Thread {
                     return JSONUtil.singleObjectPair(Block.getIdFromBlock((Block) blockType), blockType.getId());
                 }))
                 .add("entity", JSONUtil.mapArrayToObject(entityTypeSet, (entityType) -> {
+                    if (entityType == EntityTypes.UNKNOWN) {
+                        return null;
+                    }
                     return JSONUtil.singleObjectPair(((SpongeEntityType) entityType).entityTypeId, entityType.getId());
                 })));
 
