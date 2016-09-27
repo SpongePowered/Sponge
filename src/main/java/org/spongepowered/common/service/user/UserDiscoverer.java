@@ -130,7 +130,7 @@ class UserDiscoverer {
 
             // If the filename contains a period, we can fail fast. Vanilla code fixes the Strings that have ".dat" to strip that out
             // before passing that back in getAvailablePlayerDat. It doesn't remove non ".dat" filenames from the list.
-            if (playerUuid.contains("\\.")) {
+            if (playerUuid.contains(".")) {
                 continue;
             }
 
