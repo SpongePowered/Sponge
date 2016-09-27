@@ -73,7 +73,7 @@ class UserDiscoverer {
      * Searches for user data from a variety of places, in order of preference.
      * A user that has data in sponge may not necessarily have been online
      * before. A user added to the ban/whitelist that has not been on the server
-     * before should be discover-able.
+     * before should be discoverable.
      *
      * @param profile The user's profile
      * @return The user data, or null if not found
@@ -128,28 +128,37 @@ class UserDiscoverer {
         String[] uuids = saveHandler.getAvailablePlayerDat();
         for (String playerUuid : uuids) {
 
-            // Some mods store other files in the 'playerdata' folder, so
-            // we need to ensure that the filename is a valid UUID
-            if (playerUuid.split("-").length != 5) {
+            // If the filename contains a period, we can fail fast. Vanilla code fixes the Strings that have ".dat" to strip that out
+            // before passing that back in getAvailablePlayerDat. It doesn't remove non ".dat" filenames from the list.
+            if (playerUuid.contains("\\.")) {
                 continue;
             }
 
-            GameProfile profile = SpongeImpl.getServer().getPlayerProfileCache().getProfileByUUID(UUID.fromString(playerUuid));
+            // At this point, we have a filename who has no extension. This doesn't mean it is actually a UUID. We trap the exception and ignore
+            // any filenames that fail the UUID check.
+            UUID uuid;
+            try {
+                uuid = UUID.fromString(playerUuid);
+            } catch (Exception ex) {
+                continue;
+            }
+
+            final GameProfile profile = SpongeImpl.getServer().getPlayerProfileCache().getProfileByUUID(uuid);
             if (profile != null) {
                 profiles.add((org.spongepowered.api.profile.GameProfile) profile);
             }
         }
 
         // Add all whitelisted users
-        UserListWhitelist whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
-        for (UserListWhitelistEntry entry : whiteList.getValues().values()) {
-            profiles.add((org.spongepowered.api.profile.GameProfile) entry.value);
-        }
+        final UserListWhitelist whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
+        profiles.addAll(whiteList.getValues().values().stream().map(entry -> (org.spongepowered.api.profile.GameProfile) entry.value)
+                .collect(Collectors.toList()));
 
         // Add all banned users
-        UserListBans banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
+        final UserListBans banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
         profiles.addAll(banList.getValues().values().stream().filter(entry -> entry != null).map(entry -> (org.spongepowered.api.profile.GameProfile)
                 entry.value).collect(Collectors.toList()));
+
         return profiles;
     }
 
@@ -165,34 +174,37 @@ class UserDiscoverer {
     }
 
     private static User getOnlinePlayer(UUID uniqueId) {
-        PlayerList confMgr = SpongeImpl.getServer().getPlayerList();
-        if (confMgr == null) { // Server not started yet
-            return null;
-        }
+        Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
+        final PlayerList playerList = SpongeImpl.getServer().getPlayerList();
+
         // Although the player itself could be returned here (as Player extends
         // User), a plugin is more likely to cache the User object and we don't
         // want the player entity to be cached.
-        IMixinEntityPlayerMP player = (IMixinEntityPlayerMP) confMgr.getPlayerByUUID(uniqueId);
+        final IMixinEntityPlayerMP player = (IMixinEntityPlayerMP) playerList.getPlayerByUUID(uniqueId);
         if (player != null) {
-            User user = player.getUserObject();
+            final User user = player.getUserObject();
             userCache.put(uniqueId, user);
             return user;
         }
+
         return null;
     }
 
     private static User getFromStoredData(org.spongepowered.api.profile.GameProfile profile) {
         // Note: Uses the overworld's player data
-        File dataFile = getPlayerDataFile(profile.getUniqueId());
+        final File dataFile = getPlayerDataFile(profile.getUniqueId());
         if (dataFile == null) {
             return null;
         }
-        User user = create((GameProfile) profile);
+
+        final User user = create((GameProfile) profile);
+
         try {
             ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(new FileInputStream(dataFile)));
         } catch (IOException e) {
             SpongeImpl.getLogger().warn("Corrupt user file {}", dataFile, e);
         }
+
         return user;
     }
 
