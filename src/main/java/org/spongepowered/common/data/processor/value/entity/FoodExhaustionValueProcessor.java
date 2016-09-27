@@ -47,7 +47,7 @@ public class FoodExhaustionValueProcessor extends AbstractSpongeValueProcessor<E
         return SpongeValueFactory.boundedBuilder(Keys.EXHAUSTION)
             .defaultValue(DataConstants.DEFAULT_EXHAUSTION)
             .minimum(0D)
-            .maximum(Double.MAX_VALUE)
+            .maximum(4.0)
             .actualValue(defaultValue)
             .build();
     }

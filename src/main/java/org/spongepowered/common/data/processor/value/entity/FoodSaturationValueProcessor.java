@@ -47,7 +47,7 @@ public class FoodSaturationValueProcessor extends AbstractSpongeValueProcessor<E
         return SpongeValueFactory.boundedBuilder(Keys.SATURATION)
             .defaultValue(DataConstants.DEFAULT_SATURATION)
             .minimum(0D)
-            .maximum(Double.MAX_VALUE)
+            .maximum(5.0)
             .actualValue(defaultValue)
             .build();
     }

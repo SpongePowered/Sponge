@@ -47,7 +47,7 @@ public class FoodLevelValueProcessor extends AbstractSpongeValueProcessor<Entity
         return SpongeValueFactory.boundedBuilder(Keys.FOOD_LEVEL)
             .defaultValue(DataConstants.DEFAULT_FOOD_LEVEL)
             .minimum(0)
-            .maximum(Integer.MAX_VALUE)
+            .maximum(20)
             .actualValue(defaultValue)
             .build();
     }
