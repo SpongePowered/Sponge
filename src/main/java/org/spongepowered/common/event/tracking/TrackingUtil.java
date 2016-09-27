@@ -584,9 +584,10 @@ public final class TrackingUtil {
             final BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
             final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
-            // Containers get placed automatically
-            if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks
-                    .blockHasTileEntity(newState.getBlock(), newState)) {
+            // We call onBlockAdded here for both TE blocks (BlockContainer's) and other blocks.
+            // MixinChunk#setBlockState will only call onBlockAdded for BlockContainers when it's passed a null newBlockSnapshot,
+            // which only happens when capturing is not being done.
+            if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock()) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
                 final PhaseData peek = causeTracker.getCurrentPhaseData();
                 if (peek.state == GeneralPhase.Post.UNWINDING) {
