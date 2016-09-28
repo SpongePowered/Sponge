@@ -70,7 +70,7 @@ import java.util.Optional;
 public abstract class MixinBlockLeaves extends MixinBlock {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
-    public void onConstruction(CallbackInfo ci) {
+    public void onLeavesConstruction(CallbackInfo ci) {
         this.setTickRandomly(SpongeImpl.getGlobalConfig().getConfig().getWorld().getLeafDecay());
     }
 
