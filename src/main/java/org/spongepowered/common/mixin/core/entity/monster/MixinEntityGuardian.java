@@ -47,7 +47,7 @@ public abstract class MixinEntityGuardian extends MixinEntityMob implements Guar
 
     @Shadow @Final private static DataParameter<Integer> TARGET_ENTITY;
     @Shadow public abstract boolean isElder();
-    @Shadow public abstract void setTargetedEntity(int entityId);
+    @Shadow private void setTargetedEntity(int entityId) { }
 
     @Override
     public ElderData getElderData() {

@@ -71,7 +71,7 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = org.spongepowered.api.scoreboard.Scoreboard.class, prefix = "scoreboard$"))
 public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinServerScoreboard {
 
-    @Shadow public abstract void markSaveDataDirty();
+    @Shadow protected abstract void markSaveDataDirty();
 
     // Get Objective
 

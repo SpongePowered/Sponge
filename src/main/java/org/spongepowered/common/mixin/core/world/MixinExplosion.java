@@ -90,7 +90,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     @Shadow public Entity exploder;
     @Shadow public float explosionSize;
 
-    @Shadow @Nullable abstract EntityLivingBase getExplosivePlacedBy();
+    @Shadow @Nullable public abstract EntityLivingBase getExplosivePlacedBy();
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstructed(net.minecraft.world.World world, Entity entity, double originX, double originY,

@@ -142,7 +142,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow protected abstract void outputPercentRemaining(String message, int percent);
     @Shadow protected abstract void clearCurrentTask();
     @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
-    @Shadow protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
+    @Shadow public abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
     @Shadow public abstract boolean getAllowNether();
     @Shadow public abstract DataFixer getDataFixer();
     @Shadow public abstract int getMaxPlayerIdleMinutes();

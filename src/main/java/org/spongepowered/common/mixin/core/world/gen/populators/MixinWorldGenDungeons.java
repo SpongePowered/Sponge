@@ -54,9 +54,6 @@ public abstract class MixinWorldGenDungeons extends WorldGenerator implements Du
     private MobSpawnerData data;
     private LootTable<ItemStackSnapshot> items;
 
-    @Shadow
-    public abstract String pickMobSpawner(Random p_76543_1_);
-
     @Inject(method = "<init>()V", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
         this.attempts = VariableAmount.fixed(8);

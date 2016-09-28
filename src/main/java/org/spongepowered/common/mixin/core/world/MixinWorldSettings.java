@@ -73,14 +73,12 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
 
     @Shadow private boolean commandsAllowed;
 
-    @Shadow abstract long shadow$getSeed();
-    @Shadow abstract boolean isBonusChestEnabled();
-    @Shadow abstract GameType getGameType();
-    @Shadow abstract boolean getHardcoreEnabled();
-    @Shadow abstract boolean isMapFeaturesEnabled();
-    @Shadow abstract WorldType getTerrainType();
-    @Shadow abstract boolean shadow$areCommandsAllowed();
-    @Shadow abstract String getGeneratorOptions();
+    @Shadow public abstract long shadow$getSeed();
+    @Shadow public abstract GameType getGameType();
+    @Shadow public abstract boolean getHardcoreEnabled();
+    @Shadow public abstract boolean isMapFeaturesEnabled();
+    @Shadow public abstract WorldType getTerrainType();
+    @Shadow public abstract boolean shadow$areCommandsAllowed();
 
     private String id, name;
     private DimensionType dimensionType = DimensionTypes.OVERWORLD;

@@ -132,7 +132,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public void stopActiveHand() {
 
     }
-    @Shadow protected abstract void damageArmor(float p_70675_1_);
+
     @Shadow protected abstract void setBeenAttacked();
     @Shadow protected abstract SoundEvent getDeathSound();
     @Shadow protected abstract float getSoundVolume();
@@ -155,7 +155,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow @Nullable public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow protected abstract void applyEntityAttributes();
     @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
-    @Shadow protected abstract boolean canBlockDamageSource(DamageSource p_184583_1_);
     @Shadow protected abstract void damageShield(float p_184590_1_);
     @Shadow public abstract void setActiveHand(EnumHand hand);
     @Shadow @Nullable public abstract ItemStack getHeldItem(EnumHand hand);
@@ -174,6 +173,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source);
     @Shadow protected abstract boolean canDropLoot();
     @Shadow public abstract Random getRNG();
+    @Shadow private boolean canBlockDamageSource(DamageSource p_184583_1_) {
+        return false; // Shadowed
+    }
 
     @Override
     public Vector3d getHeadRotation() {

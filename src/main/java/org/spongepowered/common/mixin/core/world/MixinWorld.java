@@ -208,9 +208,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Shadow public abstract boolean checkLight(BlockPos pos);
-    @Shadow public abstract boolean isValid(BlockPos pos);
+    @Shadow protected abstract boolean isValid(BlockPos pos);
     @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
-    @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
+    @Shadow protected abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
     @Shadow protected abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);

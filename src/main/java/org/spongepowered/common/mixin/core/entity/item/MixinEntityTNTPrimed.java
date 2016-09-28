@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import static org.spongepowered.api.data.DataQuery.of;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -66,7 +65,7 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
 
     @Shadow private int fuse;
     @Shadow @Nullable private EntityLivingBase tntPlacedBy;
-    @Shadow public abstract void explode();
+    @Shadow private void explode() { }
 
     @Nullable private EntityLivingBase detonator;
     private Cause detonationCause;

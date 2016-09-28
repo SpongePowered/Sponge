@@ -45,8 +45,9 @@ public abstract class MixinWorldGenBigTree extends WorldGenAbstractTree implemen
     @Shadow private BlockPos basePos;
     @Shadow int heightLimit;
 
-    @Shadow
-    public abstract boolean validTreeLocation();
+    @Shadow private boolean validTreeLocation() {
+        return true; // Shadowed
+    }
 
     @Override
     public String getId() {

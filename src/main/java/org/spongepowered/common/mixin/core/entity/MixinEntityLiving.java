@@ -84,27 +84,23 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
             "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;";
     @Shadow @Final private EntityAITasks tasks;
     @Shadow @Final private EntityAITasks targetTasks;
-    @Shadow private boolean canPickUpLoot;
     @Shadow @Nullable private EntityLivingBase attackTarget;
 
     @Shadow public abstract boolean isAIDisabled();
-    @Shadow protected abstract void setNoAI(boolean p_94061_1_);
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getLeashedToEntity();
-    @Shadow public abstract void setLeashedToEntity(net.minecraft.entity.Entity entityIn, boolean sendAttachNotification);
     @Shadow protected abstract void initEntityAI();
-    @Shadow protected abstract boolean canDespawn();
 
     boolean initAI = false;
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
     public void onInitAi(EntityLiving this$0) {
-        if (!initAI) {
+        if (!this.initAI) {
             ((IMixinEntityAITasks) this.tasks).setOwner((EntityLiving) (Object) this);
             ((IMixinEntityAITasks) this.tasks).setType(GoalTypes.NORMAL);
             ((IMixinEntityAITasks) this.targetTasks).setOwner((EntityLiving) (Object) this);
             ((IMixinEntityAITasks) this.targetTasks).setType(GoalTypes.TARGET);
             this.initEntityAI();
-            initAI = true;
+            this.initAI = true;
         }
     }
 

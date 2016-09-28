@@ -180,8 +180,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     // Inventory
     @Shadow public abstract void addChatMessage(ITextComponent component);
     @Shadow public abstract void closeScreen();
-    @Shadow public abstract void getNextWindowId();
     @Shadow public int currentWindowId;
+    @Shadow private void getNextWindowId() { }
 
     private EntityPlayerMP this$ = (EntityPlayerMP) (Object) this;
 

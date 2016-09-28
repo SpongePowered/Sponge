@@ -229,7 +229,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow private int updateEntityTick;
 
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
-    @Shadow public abstract void createBonusChest();
+    @Shadow protected abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
     @Shadow @Override public abstract ChunkProviderServer getChunkProvider();

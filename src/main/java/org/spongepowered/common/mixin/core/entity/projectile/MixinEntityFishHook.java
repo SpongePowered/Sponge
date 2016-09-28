@@ -65,7 +65,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     @Shadow private EntityPlayer angler;
     @Shadow public net.minecraft.entity.Entity caughtEntity;
     @Shadow private int ticksCatchable;
-    @Shadow public abstract void bringInHookedEntity();
+    @Shadow protected abstract void bringInHookedEntity();
 
     @Nullable
     public ProjectileSource projectileSource;

@@ -142,7 +142,6 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Shadow @Final public List<EntityPlayerMP> playerEntityList;
     @Shadow private IPlayerFileData playerNBTManagerObj;
     @Shadow public abstract NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn);
-    @Shadow public abstract void setPlayerGameTypeBasedOnOther(EntityPlayerMP playerIn, @Nullable EntityPlayerMP other, net.minecraft.world.World worldIn);
     @Shadow public abstract MinecraftServer getServerInstance();
     @Shadow public abstract int getMaxPlayers();
     @Shadow public abstract void sendChatMsg(ITextComponent component);
@@ -153,6 +152,9 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Shadow public abstract void updatePermissionLevel(EntityPlayerMP p_187243_1_);
     @Shadow public abstract void syncPlayerInventory(EntityPlayerMP playerIn);
     @Nullable @Shadow public abstract String allowUserToConnect(SocketAddress address, GameProfile profile);
+    @Shadow private void setPlayerGameTypeBasedOnOther(EntityPlayerMP playerIn, @Nullable EntityPlayerMP other, net.minecraft.world.World worldIn) {
+        // Shadowed
+    }
 
     /**
      * Bridge methods to proxy modified method in Vanilla, nothing in Forge

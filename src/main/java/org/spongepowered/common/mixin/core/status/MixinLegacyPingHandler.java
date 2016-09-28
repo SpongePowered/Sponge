@@ -48,8 +48,10 @@ public abstract class MixinLegacyPingHandler extends ChannelInboundHandlerAdapte
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final private NetworkSystem networkSystem;
 
-    @Shadow abstract void writeAndFlush(ChannelHandlerContext ctx, ByteBuf data);
-    @Shadow abstract ByteBuf getStringBuffer(String string);
+    @Shadow private void writeAndFlush(ChannelHandlerContext ctx, ByteBuf data) { }
+    @Shadow private ByteBuf getStringBuffer(String string) {
+        return null; // Shadowed
+    }
 
     private ByteBuf buf;
 

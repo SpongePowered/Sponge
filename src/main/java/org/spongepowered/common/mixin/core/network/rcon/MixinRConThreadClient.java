@@ -50,14 +50,8 @@ import java.net.Socket;
 @Mixin(RConThreadClient.class)
 public abstract class MixinRConThreadClient extends RConThreadBase implements RemoteConnection {
 
-    @Shadow
-    private boolean loggedIn;
-
-    @Shadow
-    private Socket clientSocket;
-
-    @Shadow
-    protected abstract void sendResponse(int id, int packetId, String payload) throws IOException;
+    @Shadow private boolean loggedIn;
+    @Shadow private Socket clientSocket;
 
     private RConConsoleSource source;
 

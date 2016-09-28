@@ -73,9 +73,9 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
     @Shadow @Final private Map<String, IMixinPlayerProfileCacheEntry> usernameToProfileEntryMap;
     @Shadow @Final private Map<UUID, IMixinPlayerProfileCacheEntry> uuidToProfileEntryMap;
     @Shadow @Final private Deque<com.mojang.authlib.GameProfile> gameProfiles;
-    @Shadow abstract void addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry);
     @Nullable @Shadow public abstract com.mojang.authlib.GameProfile getProfileByUUID(UUID uniqueId);
     @Shadow public abstract void save();
+    @Shadow private void addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry) { }
     // Thread-safe queue
     private Queue<com.mojang.authlib.GameProfile> profiles = new ConcurrentLinkedQueue<>();
     private boolean canSave = false;

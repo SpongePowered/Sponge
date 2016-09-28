@@ -169,9 +169,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     // @formatter:off
     @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
     @Shadow public abstract void generateSkylightMap();
-    @Shadow protected abstract void relightBlock(int x, int y, int z);
     @Shadow public abstract int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos);
-    @Shadow protected abstract void propagateSkylightOcclusion(int x, int z);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(final int p_186032_1_, final int p_186032_2_, final int p_186032_3_);
     @Shadow public abstract Biome getBiome(BlockPos pos, BiomeProvider chunkManager);
@@ -180,7 +178,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Shadow public abstract int getTopFilledSegment();
     @Shadow public abstract void checkLight();
     @Shadow public abstract <T extends Entity> void getEntitiesOfTypeWithinAAAB(Class <? extends T > entityClass, AxisAlignedBB aabb,
-        List<T> listToFill, Predicate <? super T > p_177430_4_);
+    List<T> listToFill, Predicate <? super T > p_177430_4_);
+    @Shadow private void propagateSkylightOcclusion(int x, int z) { };
+    @Shadow private void relightBlock(int x, int y, int z) { };
     // @formatter:on
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)

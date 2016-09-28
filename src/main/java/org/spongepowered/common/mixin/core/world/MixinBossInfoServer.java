@@ -47,11 +47,12 @@ import java.util.Collection;
 public abstract class MixinBossInfoServer extends MixinBossInfo {
 
     @Shadow private boolean visible;
-    @Shadow abstract void sendUpdate(SPacketUpdateBossInfo.Operation operation);
     @Shadow public abstract void addPlayer(EntityPlayerMP player);
     @Shadow public abstract void removePlayer(EntityPlayerMP player);
     @Shadow public abstract void setVisible(boolean visibleIn);
     @Shadow public abstract Collection<EntityPlayerMP> getPlayers();
+    @Shadow private void sendUpdate(SPacketUpdateBossInfo.Operation operation) {
+    };
 
     public ServerBossBar sbar$setName(Text name) {
         if (this.name != name) {

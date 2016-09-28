@@ -202,23 +202,15 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();
-    @Shadow public abstract void setFlag(int flag, boolean data);
-    @Shadow public abstract boolean getFlag(int flag);
     @Shadow public abstract int getAir();
     @Shadow public abstract void setAir(int air);
     @Shadow public abstract float getEyeHeight();
-    @Shadow public abstract String getCustomNameTag();
     @Shadow public abstract void setCustomNameTag(String name);
     @Shadow public abstract UUID getUniqueID();
     @Shadow @Nullable public abstract AxisAlignedBB getEntityBoundingBox();
-    @Shadow protected abstract boolean getAlwaysRenderNameTag();
-    @Shadow protected abstract void setAlwaysRenderNameTag(boolean visible);
     @Shadow public abstract void setFire(int seconds);
     @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
-    @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
-    @Shadow public abstract void setSize(float width, float height);
-    @Shadow public abstract boolean isSilent();
     @Shadow public abstract int getEntityId();
     @Shadow public abstract boolean isBeingRidden();
     @Shadow public abstract SoundCategory getSoundCategory();
@@ -231,15 +223,15 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract boolean isSprinting();
     @Shadow public abstract boolean isInWater();
     @Shadow public abstract boolean isRiding();
-    @Shadow public abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isOnSameTeam(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract double getDistanceSqToEntity(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract void addToPlayerScore(net.minecraft.entity.Entity entityIn, int amount);
     @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
     @Shadow public abstract boolean hasNoGravity();
     @Shadow public abstract void setNoGravity(boolean noGravity);
     @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
-
+    @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow protected abstract void setSize(float width, float height);
+    @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
 
     // @formatter:on
 

@@ -71,9 +71,9 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     @Shadow private int explosionRadius;
 
     @Shadow public abstract void ignite();
-    @Shadow public abstract void explode();
     @Shadow public abstract int getCreeperState();
     @Shadow public abstract void setCreeperState(int state);
+    @Shadow private void explode() { }
 
     private Cause primeCause;
     private Cause detonationCause;

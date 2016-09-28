@@ -45,7 +45,7 @@ import java.util.Optional;
 public abstract class MixinBlockCrops extends MixinBlock {
 
     @Shadow protected abstract PropertyInteger getAgeProperty();
-    @Shadow protected abstract int getMaxAge();
+    @Shadow public abstract int getMaxAge();
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {

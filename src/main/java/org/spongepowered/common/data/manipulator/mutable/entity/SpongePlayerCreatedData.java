@@ -28,6 +28,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePlayerCreatedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PlayerCreatedData;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePlayerCreatedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
@@ -35,7 +36,7 @@ import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 public class SpongePlayerCreatedData extends AbstractBooleanData<PlayerCreatedData, ImmutablePlayerCreatedData> implements PlayerCreatedData {
 
     protected SpongePlayerCreatedData(Boolean value) {
-        super(PlayerCreatedData.class, value, Keys.PLAYER_CREATED, ImmutablePlayerCreatedData.class, false);
+        super(PlayerCreatedData.class, value, Keys.PLAYER_CREATED, ImmutableSpongePlayerCreatedData.class, false);
     }
 
     public SpongePlayerCreatedData() {
