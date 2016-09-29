@@ -59,7 +59,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderHell;
@@ -856,6 +855,16 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             return 4;
         }
         return permLevel;
+    }
+
+    @Redirect(method = "updatePermissionLevel", at = @At(value = "INVOKE",
+            target = "net/minecraft/world/WorldServer.getWorldInfo()Lnet/minecraft/world/storage/WorldInfo;"))
+    private WorldInfo onGetWorldInfo(WorldServer overworld, EntityPlayerMP player) {
+        // TODO: This applies only to singleplayer, on the server canSendCommands is called with the game profile
+        // We can't get the world from the game profile
+
+        // Check the world info of the current world instead of overworld world info
+        return player.worldObj.getWorldInfo();
     }
 
 }
