@@ -55,7 +55,7 @@ public class SpongeTextStyle extends TextStyle.Base {
 
     public static SpongeTextStyle of(TextFormatting handle) {
         if (handle == TextFormatting.RESET) {
-            return new SpongeTextStyle(handle, false, false, false, false, false);
+            return new SpongeTextStyle(TextFormatting.RESET, false, false, false, false, false);
         }
 
         return new SpongeTextStyle(handle,

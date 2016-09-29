@@ -31,7 +31,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.text.TextComponentIterable;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -66,8 +66,8 @@ public abstract class MixinTextComponentTranslation extends MixinTextComponentBa
     private static Object[] wrapFormatArgs(Object... formatArgs) {
         Object[] ret = new Object[formatArgs.length];
         for (int i = 0; i < formatArgs.length; ++i) {
-            if (formatArgs[i] instanceof IMixinChatComponent) {
-                ret[i] = ((IMixinChatComponent) formatArgs[i]).toText();
+            if (formatArgs[i] instanceof IMixinTextComponent) {
+                ret[i] = ((IMixinTextComponent) formatArgs[i]).toText();
             } else {
                 ret[i] = formatArgs[i];
             }

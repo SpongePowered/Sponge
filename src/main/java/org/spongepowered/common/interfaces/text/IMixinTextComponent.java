@@ -29,7 +29,7 @@ import org.spongepowered.api.text.Text;
 
 import java.util.Iterator;
 
-public interface IMixinChatComponent extends ITextComponent {
+public interface IMixinTextComponent extends ITextComponent {
 
     Iterator<ITextComponent> childrenIterator();
 
@@ -40,6 +40,8 @@ public interface IMixinChatComponent extends ITextComponent {
     String getLegacyFormatting();
 
     String toLegacy(char code);
+
+    String toLegacySingle(char code);
 
     Text toText();
 

@@ -60,7 +60,7 @@ public abstract class MixinTitle implements IMixinTitle {
 
     private List<SPacketTitle> getPackets() {
         if (this.packets == null) {
-            this.packets = new ArrayList<SPacketTitle>();
+            this.packets = new ArrayList<>();
             if (this.clear) {
                 this.packets.add(new SPacketTitle(SPacketTitle.Type.CLEAR, null));
             }
@@ -77,6 +77,7 @@ public abstract class MixinTitle implements IMixinTitle {
                 this.packets.add(new SPacketTitle(SPacketTitle.Type.TITLE, ((IMixinText) this.title.get()).toComponent()));
             }
         }
+
         return this.packets;
     }
 }

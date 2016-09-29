@@ -32,7 +32,6 @@ import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -43,7 +42,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
 
 import java.util.UUID;
@@ -64,7 +63,7 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
                 // This is inefficient, but at least we only need to do it once
                 switch (this.action) {
                     case SHOW_TEXT:
-                        setHandle(TextActions.showText(((IMixinChatComponent) this.value).toText()));
+                        setHandle(TextActions.showText(((IMixinTextComponent) this.value).toText()));
                         break;
                     case SHOW_ACHIEVEMENT:
                         String stat = this.value.getUnformattedText();

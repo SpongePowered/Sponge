@@ -34,10 +34,10 @@ import org.spongepowered.common.text.chat.SpongeChatType;
 public final class ChatTypeRegistryModule implements RegistryModule {
 
     @RegisterCatalog(ChatTypes.class)
-    public static final ImmutableMap<String, ChatType> chatTypeMappings = new ImmutableMap.Builder<String, ChatType>()
-        .put("chat", new SpongeChatType((byte) 0))
-        .put("system", new SpongeChatType((byte) 1))
-        .put("action_bar", new SpongeChatType((byte) 2))
-        .build();
+    public static final ImmutableMap<String, ChatType> chatTypeMappings = ImmutableMap.of(
+            "chat", new SpongeChatType("minecraft:chat", "Chat", (byte) 0),
+            "system", new SpongeChatType("minecraft:system", "System", (byte) 1),
+            "action_bar", new SpongeChatType("minecraft:action_bar", "Action Bar", (byte) 2)
+    );
 
 }

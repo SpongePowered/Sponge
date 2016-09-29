@@ -34,10 +34,12 @@ public interface IMixinText {
 
     String toPlain();
 
+    String toPlainSingle();
+
     String toJson();
 
-    String getLegacyFormatting();
-
     String toLegacy(char code);
+
+    String toLegacySingle(char code);
 
 }

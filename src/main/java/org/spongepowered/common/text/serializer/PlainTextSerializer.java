@@ -37,6 +37,11 @@ public final class PlainTextSerializer implements SafeTextSerializer {
     }
 
     @Override
+    public String serializeSingle(Text text) {
+        return text.toPlainSingle();
+    }
+
+    @Override
     public Text deserialize(String input) {
         return Text.of(input);
     }

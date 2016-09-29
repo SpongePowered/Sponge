@@ -37,7 +37,7 @@ import org.spongepowered.api.text.format.TextFormat;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.action.SpongeClickAction;
 import org.spongepowered.common.text.action.SpongeHoverAction;
@@ -95,6 +95,7 @@ public abstract class MixinText implements IMixinText {
                 this.component.appendSibling(((IMixinText) child).toComponent());
             }
         }
+
         return this.component;
     }
 
@@ -109,7 +110,12 @@ public abstract class MixinText implements IMixinText {
 
     @Override
     public String toPlain() {
-        return ((IMixinChatComponent) getHandle()).toPlain();
+        return ((IMixinTextComponent) getHandle()).toPlain();
+    }
+
+    @Override
+    public String toPlainSingle() {
+        return getHandle().getUnformattedComponentText();
     }
 
     @Override
@@ -122,13 +128,12 @@ public abstract class MixinText implements IMixinText {
     }
 
     @Override
-    public String getLegacyFormatting() {
-        return ((IMixinChatComponent) getHandle()).getLegacyFormatting();
+    public String toLegacy(char code) {
+        return ((IMixinTextComponent) getHandle()).toLegacy(code);
     }
 
     @Override
-    public String toLegacy(char code) {
-        return ((IMixinChatComponent) getHandle()).toLegacy(code);
+    public String toLegacySingle(char code) {
+        return ((IMixinTextComponent) getHandle()).toLegacySingle(code);
     }
-
 }

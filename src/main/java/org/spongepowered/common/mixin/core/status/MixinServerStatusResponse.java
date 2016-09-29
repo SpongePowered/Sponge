@@ -73,7 +73,7 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
     @Override
     public void setDescription(Text description) {
         this.descriptionText = checkNotNull(description, "description");
-        this.description = SpongeTexts.toComponent(description); // TODO: Hope we get sent the locale
+        this.description = SpongeTexts.toComponent(description);
     }
 
     /**

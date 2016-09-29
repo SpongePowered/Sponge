@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.UnmodifiableIterator;
 import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -37,11 +37,11 @@ import javax.annotation.Nullable;
 
 public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> {
 
-    private IMixinChatComponent component;
+    private IMixinTextComponent component;
     private Iterator<ITextComponent> children;
     @Nullable private Iterator<ITextComponent> currentChildIterator;
 
-    public TextComponentIterator(IMixinChatComponent component) {
+    public TextComponentIterator(IMixinTextComponent component) {
         this.component = checkNotNull(component, "component");
     }
 
@@ -97,7 +97,7 @@ public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> 
     }
 
     private void setCurrentChildIterator() {
-        this.currentChildIterator = ((IMixinChatComponent) this.children.next()).withChildren().iterator();
+        this.currentChildIterator = ((IMixinTextComponent) this.children.next()).withChildren().iterator();
     }
 
 }

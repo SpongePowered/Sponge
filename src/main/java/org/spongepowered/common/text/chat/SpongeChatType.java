@@ -28,23 +28,28 @@ import org.spongepowered.api.text.chat.ChatType;
 
 public class SpongeChatType implements ChatType {
 
-    private final byte id;
+    private final String id;
+    private final String name;
+    private final byte byteId;
 
-    public SpongeChatType(byte id) {
+    public SpongeChatType(String id, String name, byte byteId) {
         this.id = id;
+        this.name = name;
+        this.byteId = byteId;
     }
 
     @Override
     public String getId() {
-        return "minecraft:" + this.id;
+        return this.id;
     }
 
     @Override
     public String getName() {
-        return getId(); // todo actually pick up a name
+        return this.name;
     }
 
     public byte getByteId() {
-        return this.id;
+        return this.byteId;
     }
+
 }

@@ -84,10 +84,6 @@ public final class LegacyTexts {
         return pos != -1 ? formatting[pos] : null;
     }
 
-    public static String serialize(Text text, char code) {
-        return ((IMixinText) text).toLegacy(code);
-    }
-
     public static Text parse(String input, char code) {
         int next = input.lastIndexOf(code, input.length() - 2);
         if (next == -1) {

@@ -26,8 +26,7 @@ package org.spongepowered.common.text.serializer;
 
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.FormattingCodeTextSerializer;
-
-import java.util.Locale;
+import org.spongepowered.common.interfaces.text.IMixinText;
 
 public final class SpongeFormattingCodeTextSerializer implements FormattingCodeTextSerializer {
 
@@ -44,7 +43,12 @@ public final class SpongeFormattingCodeTextSerializer implements FormattingCodeT
 
     @Override
     public String serialize(Text text) {
-        return LegacyTexts.serialize(text, this.formattingChar);
+        return ((IMixinText) text).toLegacy(this.formattingChar);
+    }
+
+    @Override
+    public String serializeSingle(Text text) {
+        return ((IMixinText) text).toLegacy(this.formattingChar);
     }
 
     @Override
