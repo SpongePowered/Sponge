@@ -29,12 +29,17 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.SPacketEffect;
 import net.minecraft.network.play.server.SPacketParticles;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionType;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.effect.particle.ParticleOptions;
+import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Color;
@@ -49,6 +54,27 @@ import java.util.Random;
 
 public final class SpongeParticleHelper {
 
+    private static int getBlockState(SpongeParticleEffect effect, Optional<BlockState> defaultBlockState) {
+        Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
+        if (blockState.isPresent()) {
+            return Block.getStateId((IBlockState) blockState.get());
+        } else {
+            Optional<ItemStackSnapshot> optSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
+            if (optSnapshot.isPresent()) {
+                ItemStackSnapshot snapshot = optSnapshot.get();
+                Optional<BlockType> blockType = snapshot.getType().getBlock();
+                if (blockType.isPresent()) {
+                    return Block.getStateId(((Block) blockType.get()).getStateFromMeta(
+                            ((SpongeItemStackSnapshot) snapshot).getDamageValue()));
+                } else {
+                    return 0;
+                }
+            } else {
+                return Block.getStateId((IBlockState) defaultBlockState.get());
+            }
+        }
+    }
+
     /**
      * Gets the list of packets that are needed to spawn the particle effect at
      * the position. This method tries to minimize the amount of packets for
@@ -60,11 +86,43 @@ public final class SpongeParticleHelper {
      */
     public static List<Packet<?>> toPackets(SpongeParticleEffect effect, Vector3d position) {
         SpongeParticleType type = effect.getType();
+
         EnumParticleTypes internal = type.getInternalType();
+        // Special cases
+        if (internal == null) {
+            BlockPos pos = new BlockPos(Math.round(position.getX()), Math.round(position.getY()), Math.round(position.getZ()));
+            if (type == ParticleTypes.FERTILIZER) {
+                int quantity = effect.getOptionOrDefault(ParticleOptions.QUANTITY).get();
+                return Collections.singletonList(new SPacketEffect(2005, pos, quantity, false));
+            } else if (type == ParticleTypes.SPLASH_POTION) {
+                Potion potion = (Potion) effect.getOptionOrDefault(ParticleOptions.POTION_EFFECT_TYPE).get();
+                for (PotionType potionType : PotionType.REGISTRY) {
+                    for (net.minecraft.potion.PotionEffect potionEffect : potionType.getEffects()) {
+                        if (potionEffect.getPotion() == potion) {
+                            return Collections.singletonList(new SPacketEffect(2002, pos, PotionType.getID(potionType), false));
+                        }
+                    }
+                }
+                return Collections.emptyList();
+            } else if (type == ParticleTypes.BREAK_BLOCK) {
+                int state = getBlockState(effect, type.getDefaultOption(ParticleOptions.BLOCK_STATE));
+                if (state == 0) {
+                    return Collections.emptyList();
+                }
+                return Collections.singletonList(new SPacketEffect(2001, pos, state, false));
+            } else if (type == ParticleTypes.MOBSPAWNER_FLAMES) {
+                return Collections.singletonList(new SPacketEffect(2004, pos, 0, false));
+            } else if (type == ParticleTypes.ENDER_TELEPORT) {
+                return Collections.singletonList(new SPacketEffect(2003, pos, 0, false));
+            } else if (type == ParticleTypes.DRAGON_BREATH_ATTACK) {
+                return Collections.singletonList(new SPacketEffect(2006, pos, 0, false));
+            }
+            return Collections.emptyList();
+        }
 
         Vector3d offset = effect.getOption(ParticleOptions.OFFSET).orElse(Vector3d.ZERO);
 
-        int count = effect.getOption(ParticleOptions.COUNT).orElse(1);
+        int quantity = effect.getOption(ParticleOptions.QUANTITY).orElse(1);
         int[] extra = null;
 
         float px = (float) position.getX();
@@ -85,24 +143,11 @@ public final class SpongeParticleHelper {
 
         Optional<BlockState> defaultBlockState;
         if (internal != EnumParticleTypes.ITEM_CRACK && (defaultBlockState = type.getDefaultOption(ParticleOptions.BLOCK_STATE)).isPresent()) {
-            Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
-            if (blockState.isPresent()) {
-                extra = new int[] { Block.getStateId((IBlockState) blockState.get()) };
-            } else {
-                Optional<ItemStackSnapshot> optSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
-                if (optSnapshot.isPresent()) {
-                    ItemStackSnapshot snapshot = optSnapshot.get();
-                    Optional<BlockType> blockType = snapshot.getType().getBlock();
-                    if (blockType.isPresent()) {
-                        extra = new int[] { Block.getStateId(((Block) blockType.get()).getStateFromMeta(
-                                ((SpongeItemStackSnapshot) snapshot).getDamageValue())) };
-                    } else {
-                        return Collections.emptyList();
-                    }
-                } else {
-                    extra = new int[] { Block.getStateId((IBlockState) defaultBlockState.get()) };
-                }
+            int state = getBlockState(effect, defaultBlockState);
+            if (state == 0) {
+                return Collections.emptyList();
             }
+            extra = new int[] { state };
         }
 
         Optional<ItemStackSnapshot> defaultSnapshot;
@@ -115,7 +160,7 @@ public final class SpongeParticleHelper {
                 Optional<BlockState> optBlockState = effect.getOption(ParticleOptions.BLOCK_STATE);
                 if (optBlockState.isPresent()) {
                     BlockState blockState = optBlockState.get();
-                    Optional<ItemType> optItemType =  blockState.getType().getItem();
+                    Optional<ItemType> optItemType = blockState.getType().getItem();
                     if (optItemType.isPresent()) {
                         extra = new int[] { Item.getIdFromItem((Item) optItemType.get()),
                                 ((Block) blockState.getType()).getMetaFromState((IBlockState) blockState) };
@@ -150,21 +195,33 @@ public final class SpongeParticleHelper {
 
             if (scale == 0f) {
                 return Collections.singletonList(
-                        new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count, extra));
+                        new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, quantity, extra));
             }
 
             f0 = scale;
         } else if ((defaultColor = type.getDefaultOption(ParticleOptions.COLOR)).isPresent()) {
             Color color = effect.getOption(ParticleOptions.COLOR).orElse(null);
 
-            if (color == null || color.equals(defaultColor.get())) {
+            boolean isSpell = internal == EnumParticleTypes.SPELL_MOB || internal == EnumParticleTypes.SPELL_MOB_AMBIENT;
+
+            if (!isSpell && (color == null || color.equals(defaultColor.get()))) {
                 return Collections.singletonList(
-                        new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count, extra));
+                        new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, quantity, extra));
+            } else if (isSpell && color == null) {
+                color = defaultColor.get();
             }
 
             f0 = color.getRed() / 255f;
             f1 = color.getGreen() / 255f;
             f2 = color.getBlue() / 255f;
+
+            // Make sure that the x and z component are never 0 for these effects,
+            // they would trigger the slow horizontal velocity (unsupported on the server),
+            // but we already chose for the color, can't have both
+            if (isSpell) {
+                f0 = Math.max(f0, 0.001f);
+                f2 = Math.max(f0, 0.001f);
+            }
 
             // If the f0 value 0 is, the redstone will set it automatically to red 255
             if (f0 == 0f && internal == EnumParticleTypes.REDSTONE) {
@@ -176,7 +233,7 @@ public final class SpongeParticleHelper {
 
             if (note == 0f) {
                 return Collections.singletonList(
-                        new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count, extra));
+                        new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, quantity, extra));
             }
 
             f0 = note / 24f;
@@ -187,32 +244,38 @@ public final class SpongeParticleHelper {
             f1 = velocity.getY();
             f2 = velocity.getZ();
 
-            // The y value won't work for this effect, if the value isn't 0 the motion won't work
+            Optional<Boolean> slowHorizontalVelocity = type.getDefaultOption(ParticleOptions.SLOW_HORIZONTAL_VELOCITY);
+            if (slowHorizontalVelocity.isPresent() && slowHorizontalVelocity.get()) {
+                f0 = 0f;
+                f2 = 0f;
+            }
+
+            // The y value won't work for this effect, if the value isn't 0 the velocity won't work
             if (internal == EnumParticleTypes.WATER_SPLASH) {
                 f1 = 0f;
             }
 
             if (f0 == 0f && f1 == 0f && f2 == 0f) {
                 return Collections.singletonList(
-                        new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count, extra));
+                        new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, quantity, extra));
             }
         }
 
         // Is this check necessary?
         if (f0 == 0f && f1 == 0f && f2 == 0f) {
-            return Collections.singletonList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count, extra));
+            return Collections.singletonList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, quantity, extra));
         }
 
-        List<Packet<?>> packets = new ArrayList<>(count);
+        List<Packet<?>> packets = new ArrayList<>(quantity);
 
         if (ox == 0f && oy == 0f && oz == 0f) {
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < quantity; i++) {
                 packets.add(new SPacketParticles(internal, true, px, py, pz, (float) f0, (float) f1, (float) f2, 1f, 0, extra));
             }
         } else {
             Random random = new Random();
 
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < quantity; i++) {
                 double px0 = (px + (random.nextFloat() * 2f - 1f) * ox);
                 double py0 = (py + (random.nextFloat() * 2f - 1f) * oy);
                 double pz0 = (pz + (random.nextFloat() * 2f - 1f) * oz);

@@ -37,6 +37,7 @@ import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
+import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -54,8 +55,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @RegistrationDependency({ ParticleOptionRegistryModule.class, NotePitchRegistryModule.class, BlockTypeRegistryModule.class,
-        ItemTypeRegistryModule.class})
+        ItemTypeRegistryModule.class, PotionEffectTypeRegistryModule.class })
 public final class ParticleRegistryModule implements CatalogRegistryModule<ParticleType> {
 
     @RegisterCatalog(ParticleTypes.class)
@@ -84,18 +87,25 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         this.addParticleType("block_dust", EnumParticleTypes.BLOCK_DUST, true, ImmutableMap.of(
                 ParticleOptions.BLOCK_STATE, Blocks.STONE.getDefaultState(),
                 ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.STONE))));
+        this.addEffectType("break_block", null, ImmutableMap.of(
+                ParticleOptions.BLOCK_STATE, Blocks.STONE.getDefaultState(),
+                ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.STONE))));
         this.addParticleType("cloud", EnumParticleTypes.CLOUD, true);
         this.addParticleType("critical_hit", EnumParticleTypes.CRIT, true);
         this.addParticleType("damage_indicator", EnumParticleTypes.DAMAGE_INDICATOR, true);
         this.addParticleType("dragon_breath", EnumParticleTypes.DRAGON_BREATH, true);
+        this.addEffectType("dragon_breath_attack", null, ImmutableMap.of());
         this.addParticleType("drip_lava", EnumParticleTypes.DRIP_LAVA, false);
         this.addParticleType("drip_water", EnumParticleTypes.DRIP_WATER, false);
         this.addParticleType("enchanting_glyphs", EnumParticleTypes.ENCHANTMENT_TABLE, true);
         this.addParticleType("end_rod", EnumParticleTypes.END_ROD, true);
+        this.addEffectType("ender_teleport", null, ImmutableMap.of());
         this.addParticleType("explosion", EnumParticleTypes.EXPLOSION_NORMAL, true);
         this.addParticleType("falling_dust", EnumParticleTypes.FALLING_DUST, false, ImmutableMap.of(
                 ParticleOptions.BLOCK_STATE, Blocks.STONE.getDefaultState(),
                 ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.STONE))));
+        this.addEffectType("fertilizer", null, ImmutableMap.of(
+                ParticleOptions.QUANTITY, 15));
         this.addParticleType("fireworks_spark", EnumParticleTypes.FIREWORKS_SPARK, true);
         this.addParticleType("flame", EnumParticleTypes.FLAME, true);
         this.addParticleType("footstep", EnumParticleTypes.FOOTSTEP, false);
@@ -103,7 +113,8 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         this.addParticleType("happy_villager", EnumParticleTypes.VILLAGER_HAPPY, true);
         this.addParticleType("heart", EnumParticleTypes.HEART, false);
         this.addParticleType("huge_explosion", EnumParticleTypes.EXPLOSION_HUGE, false);
-        this.addParticleType("instant_spell", EnumParticleTypes.SPELL_INSTANT, false);
+        this.addParticleType("instant_spell", EnumParticleTypes.SPELL_INSTANT, true, ImmutableMap.of(
+                ParticleOptions.SLOW_HORIZONTAL_VELOCITY, false));
         this.addParticleType("item_crack", EnumParticleTypes.ITEM_CRACK, true, ImmutableMap.of(
                 ParticleOptions.ITEM_STACK_SNAPSHOT, new SpongeItemStackSnapshot((ItemStack) new net.minecraft.item.ItemStack(Blocks.STONE))));
         this.addParticleType("large_explosion", EnumParticleTypes.EXPLOSION_LARGE, false, ImmutableMap.of(
@@ -111,6 +122,7 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         this.addParticleType("large_smoke", EnumParticleTypes.SMOKE_LARGE, true);
         this.addParticleType("lava", EnumParticleTypes.LAVA, false);
         this.addParticleType("magic_critical_hit", EnumParticleTypes.CRIT_MAGIC, true);
+        this.addEffectType("mobspawner_flames", null, ImmutableMap.of());
         this.addParticleType("mob_spell", EnumParticleTypes.END_ROD, false, ImmutableMap.of(
                 ParticleOptions.COLOR, Color.BLACK));
         this.addParticleType("note", EnumParticleTypes.NOTE, false, ImmutableMap.of(
@@ -122,8 +134,10 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         this.addParticleType("smoke", EnumParticleTypes.SMOKE_NORMAL, true);
         this.addParticleType("snowball", EnumParticleTypes.SNOWBALL, false);
         this.addParticleType("snow_shovel", EnumParticleTypes.SNOW_SHOVEL, true);
-        // TODO: Has vertical velocity and x and z velocity are * 0.1 on the client when x and y are 0 on the server
-        this.addParticleType("spell", EnumParticleTypes.SPELL, false);
+        this.addParticleType("spell", EnumParticleTypes.SPELL, true, ImmutableMap.of(
+                ParticleOptions.SLOW_HORIZONTAL_VELOCITY, false));
+        this.addEffectType("splash_potion", null, ImmutableMap.of(
+                ParticleOptions.POTION_EFFECT_TYPE, PotionEffectTypes.ABSORPTION));
         this.addParticleType("suspended", EnumParticleTypes.SUSPENDED, false);
         this.addParticleType("suspended_depth", EnumParticleTypes.SUSPENDED_DEPTH, false);
         this.addParticleType("sweep_attack", EnumParticleTypes.SWEEP_ATTACK, false, ImmutableMap.of(
@@ -133,7 +147,8 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         this.addParticleType("water_drop", EnumParticleTypes.WATER_DROP, false);
         this.addParticleType("water_splash", EnumParticleTypes.WATER_SPLASH, true);
         this.addParticleType("water_wake", EnumParticleTypes.WATER_WAKE, true);
-        this.addParticleType("witch_spell", EnumParticleTypes.SPELL_WITCH, false);
+        this.addParticleType("witch_spell", EnumParticleTypes.SPELL_WITCH, true, ImmutableMap.of(
+                ParticleOptions.SLOW_HORIZONTAL_VELOCITY, false));
         // Is not exposed in the api, since it doesn't do anything
         this.addParticleType("item_take", EnumParticleTypes.ITEM_TAKE, false);
     }
@@ -146,12 +161,16 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
             Map<ParticleOption<?>, Object> extraOptions) {
         ImmutableMap.Builder<ParticleOption<?>, Object> options = ImmutableMap.builder();
         options.put(ParticleOptions.OFFSET, Vector3d.ZERO);
-        options.put(ParticleOptions.COUNT, 1);
+        options.put(ParticleOptions.QUANTITY, 1);
         if (velocity) {
             options.put(ParticleOptions.VELOCITY, Vector3d.ZERO);
         }
         options.putAll(extraOptions);
-        SpongeParticleType particleType = new SpongeParticleType("minecraft:" + id, id, internalType, options.build());
+        this.addEffectType(id, internalType, options.build());
+    }
+
+    private void addEffectType(String id, @Nullable EnumParticleTypes internalType, Map<ParticleOption<?>, Object> options) {
+        SpongeParticleType particleType = new SpongeParticleType("minecraft:" + id, id, internalType, options);
         this.particleMappings.put(id, particleType);
         this.particleByName.put(particleType.getId().toLowerCase(Locale.ENGLISH), particleType);
     }

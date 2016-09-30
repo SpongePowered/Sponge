@@ -32,6 +32,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.api.effect.particle.ParticleOptions;
+import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -67,12 +68,15 @@ public class ParticleOptionRegistryModule implements CatalogRegistryModule<Parti
     public void registerDefaults() {
         this.registerOption("block_state", BlockState.class);
         this.registerOption("color", Color.class);
-        this.registerOption("count", Integer.class, value -> value < 1 ? new IllegalStateException("Count must be at least 1") : null);
+        this.registerOption("quantity", Integer.class,
+                value -> value < 1 ? new IllegalStateException("Quantity must be at least 1") : null);
         this.registerOption("item_stack_snapshot", ItemStackSnapshot.class);
         this.registerOption("note", NotePitch.class);
         this.registerOption("offset", Vector3d.class);
+        this.registerOption("potion_effect_type", PotionEffectType.class);
         this.registerOption("scale", Double.class);
         this.registerOption("velocity", Vector3d.class);
+        this.registerOption("slow_horizontal_velocity", Boolean.class);
     }
 
     private <V> void registerOption(String id, Class<V> valueType) {

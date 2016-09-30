@@ -34,13 +34,15 @@ import org.spongepowered.common.SpongeCatalogType;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public class SpongeParticleType extends SpongeCatalogType implements ParticleType {
 
     private final String name;
-    private final EnumParticleTypes internalType;
+    @Nullable private final EnumParticleTypes internalType;
     private final Map<ParticleOption<?>, Object> options;
 
-    public SpongeParticleType(String id, String name, EnumParticleTypes internalType,
+    public SpongeParticleType(String id, String name, @Nullable EnumParticleTypes internalType,
             Map<ParticleOption<?>, Object> options) {
         super(id);
         this.options = ImmutableMap.copyOf(options);
@@ -53,6 +55,7 @@ public class SpongeParticleType extends SpongeCatalogType implements ParticleTyp
         return this.name;
     }
 
+    @Nullable
     public EnumParticleTypes getInternalType() {
         return this.internalType;
     }
