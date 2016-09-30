@@ -24,57 +24,46 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import com.google.common.base.Objects.ToStringHelper;
-import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.effect.particle.ParticleOption;
-import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.common.SpongeCatalogType;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class SpongeParticleType extends SpongeCatalogType implements ParticleType {
+public class SpongeParticleOption<V> extends SpongeCatalogType implements ParticleOption<V> {
 
     private final String name;
-    @Nullable private final EnumParticleTypes internalType;
-    private final Map<ParticleOption<?>, Object> options;
+    private final Class<V> valueType;
+    @Nullable private final Function<V, IllegalStateException> valueValidator;
 
-    public SpongeParticleType(String id, String name, @Nullable EnumParticleTypes internalType,
-            Map<ParticleOption<?>, Object> options) {
+    public SpongeParticleOption(String id, String name, Class<V> valueType,
+            @Nullable Function<V, IllegalStateException> valueValidator) {
         super(id);
-        this.options = ImmutableMap.copyOf(options);
-        this.internalType = internalType;
+        this.valueValidator = valueValidator;
+        this.valueType = valueType;
         this.name = name;
+    }
+
+    public SpongeParticleOption(String id, String name, Class<V> valueType) {
+        this(id, name, valueType, null);
+    }
+
+    @Nullable
+    public IllegalStateException validateValue(V value) {
+        if (this.valueValidator != null) {
+            return this.valueValidator.apply(value);
+        }
+        return null;
+    }
+
+    @Override
+    public Class<V> getValueType() {
+        return this.valueType;
     }
 
     @Override
     public String getName() {
         return this.name;
     }
-
-    @Nullable
-    public EnumParticleTypes getInternalType() {
-        return this.internalType;
-    }
-
-    @Override
-    protected ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-                .add("type", this.internalType);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <V> Optional<V> getDefaultOption(ParticleOption<V> option) {
-        return (Optional) Optional.ofNullable(this.options.get(option));
-    }
-
-    @Override
-    public Map<ParticleOption<?>, Object> getDefaultOptions() {
-        return this.options;
-    }
-
 }
