@@ -68,6 +68,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -101,6 +102,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGravityData;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -364,6 +366,7 @@ public abstract class MixinEntity implements IMixinEntity {
         if (this.fire > 0) {
             manipulators.add(get(IgniteableData.class).get());
         }
+        manipulators.add(new SpongeGravityData(!this.hasNoGravity()));
     }
 
     @Override
@@ -1254,4 +1257,8 @@ public abstract class MixinEntity implements IMixinEntity {
         return new SpongeEntityArchetypeBuilder().from(this).build();
     }
 
+    @Override
+    public Value<Boolean> gravity() {
+        return this.getValue(Keys.HAS_GRAVITY).get();
+    }
 }
