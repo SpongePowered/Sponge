@@ -54,7 +54,7 @@ public class JavaVersionCheckUtils {
     }
 
     private static String getCurrentVersion() {
-        return System.getProperty("java.version");
+        return System.getProperty("sponge.override.java.version", System.getProperty("java.version"));
     }
 
     /**
