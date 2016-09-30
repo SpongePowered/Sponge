@@ -393,6 +393,9 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(PickupRuleData.class, SpongePickupRuleData.class, ImmutablePickupRuleData.class,
                 ImmutableSpongePickupRuleData.class, new PickupRuleDataProcessor());
+        
+        dataManager.registerDualProcessor(TagsData.class, SpongeTagsData.class, ImmutableTagsData.class, 
+        		ImmutableSpongeTagsData.class, new TagsDataProcessor());
 
         // Item Processors
 
