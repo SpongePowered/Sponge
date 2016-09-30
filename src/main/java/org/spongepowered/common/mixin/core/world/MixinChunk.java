@@ -39,6 +39,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.server.management.PlayerManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -88,6 +89,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerInstance;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -301,6 +303,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         int j = z & 15;
         biomeArray[j << 4 | i] = (byte) (((BiomeGenBase) biome).biomeID & 255);
         setBiomeArray(biomeArray);
+
+        if (this.worldObj instanceof WorldServer) {
+            PlayerManager.PlayerInstance trackedChunk = ((WorldServer) this.worldObj).getPlayerManager()
+                    .getPlayerInstance(this.xPosition, this.zPosition, false);
+            if (trackedChunk != null) {
+                ((IMixinPlayerInstance) trackedChunk).markBiomesForUpdate();
+            }
+        }
     }
 
     @Override
