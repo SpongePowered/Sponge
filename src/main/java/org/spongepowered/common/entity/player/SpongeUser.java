@@ -174,79 +174,83 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
                 .set(DataQueries.USER_SPAWNS, this.spawnLocations);
     }
 
+    private Player getUserIfOnlineForInventory() {
+        return this.self.getPlayer().orElseThrow(() -> new UnsupportedOperationException("User is offline, offline inventory API yet to be implemented"));
+    }
+
     @Override
     public boolean canEquip(EquipmentType type) {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        return getUserIfOnlineForInventory().canEquip(type); // TODO Inventory API
     }
 
     @Override
     public boolean canEquip(EquipmentType type, ItemStack equipment) {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        return getUserIfOnlineForInventory().canEquip(type, equipment); // TODO Inventory API
     }
 
     @Override
     public Optional<ItemStack> getEquipped(EquipmentType type) {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        return getUserIfOnlineForInventory().getEquipped(type); // TODO Inventory API
     }
 
     @Override
     public boolean equip(EquipmentType type, ItemStack equipment) {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        return getUserIfOnlineForInventory().equip(type, equipment); // TODO Inventory API
     }
 
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        return getUserIfOnlineForInventory().getInventory(); // TODO Inventory API
     }
 
     @Override
     public Optional<ItemStack> getHelmet() {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        return getUserIfOnlineForInventory().getHelmet(); // TODO Inventory API
     }
 
     @Override
     public void setHelmet(ItemStack helmet) {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        getUserIfOnlineForInventory().setHelmet(helmet); // TODO Inventory API
     }
 
     @Override
     public Optional<ItemStack> getChestplate() {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        return getUserIfOnlineForInventory().getChestplate(); // TODO Inventory API
     }
 
     @Override
     public void setChestplate(ItemStack chestplate) {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        getUserIfOnlineForInventory().setChestplate(chestplate); // TODO Inventory API
     }
 
     @Override
     public Optional<ItemStack> getLeggings() {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        return getUserIfOnlineForInventory().getLeggings(); // TODO Inventory API
     }
 
     @Override
     public void setLeggings(ItemStack leggings) {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        getUserIfOnlineForInventory().setLeggings(leggings); // TODO Inventory API
     }
 
     @Override
     public Optional<ItemStack> getBoots() {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        return getUserIfOnlineForInventory().getBoots(); // TODO Inventory API
     }
 
     @Override
     public void setBoots(ItemStack boots) {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        getUserIfOnlineForInventory().setBoots(boots); // TODO Inventory API
     }
 
     @Override
     public Optional<ItemStack> getItemInHand(HandType handType) {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        return getUserIfOnlineForInventory().getItemInHand(handType); // TODO Inventory API
     }
 
     @Override
     public void setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
-        throw new UnsupportedOperationException(); // TODO Inventory API
+        getUserIfOnlineForInventory().setItemInHand(handType, itemInHand); // TODO Inventory API
     }
 
     @Override

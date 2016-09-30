@@ -54,13 +54,11 @@ public class ArmorStandDataProcessor extends AbstractEntityDataProcessor<EntityA
     protected boolean set(EntityArmorStand dataHolder, Map<Key<?>, Object> keyValues) {
         final boolean hasArms = (boolean) keyValues.get(Keys.ARMOR_STAND_HAS_ARMS);
         final boolean hasBasePlate = (boolean) keyValues.get(Keys.ARMOR_STAND_HAS_BASE_PLATE);
-        final boolean hasGravity = (boolean) keyValues.get(Keys.ARMOR_STAND_HAS_GRAVITY);
         final boolean isSmall = (boolean) keyValues.get(Keys.ARMOR_STAND_IS_SMALL);
         final boolean isMarker = (boolean) keyValues.get(Keys.ARMOR_STAND_MARKER);
         dataHolder.setSmall(isSmall);
         dataHolder.setMarker(isMarker);
         dataHolder.setNoBasePlate(!hasBasePlate);
-        dataHolder.setNoGravity(!hasGravity);
         dataHolder.setShowArms(hasArms);
         return true;
     }
@@ -70,7 +68,6 @@ public class ArmorStandDataProcessor extends AbstractEntityDataProcessor<EntityA
         return ImmutableMap.<Key<?>, Object>builder()
                 .put(Keys.ARMOR_STAND_HAS_ARMS, dataHolder.getShowArms())
                 .put(Keys.ARMOR_STAND_HAS_BASE_PLATE, !dataHolder.hasNoBasePlate())
-                .put(Keys.ARMOR_STAND_HAS_GRAVITY, !dataHolder.hasNoGravity())
                 .put(Keys.ARMOR_STAND_MARKER, dataHolder.hasMarker())
                 .put(Keys.ARMOR_STAND_IS_SMALL, dataHolder.isSmall())
                 .build();
@@ -88,9 +85,6 @@ public class ArmorStandDataProcessor extends AbstractEntityDataProcessor<EntityA
         }
         if (container.contains(Keys.ARMOR_STAND_MARKER)) {
             armorStandData.set(Keys.ARMOR_STAND_MARKER, container.getBoolean(Keys.ARMOR_STAND_MARKER.getQuery()).get());
-        }
-        if (container.contains(Keys.ARMOR_STAND_HAS_GRAVITY)) {
-            armorStandData.set(Keys.ARMOR_STAND_HAS_GRAVITY, container.getBoolean(Keys.ARMOR_STAND_HAS_GRAVITY.getQuery()).get());
         }
         if (container.contains(Keys.ARMOR_STAND_HAS_BASE_PLATE)) {
             armorStandData.set(Keys.ARMOR_STAND_HAS_BASE_PLATE, container.getBoolean(Keys.ARMOR_STAND_HAS_BASE_PLATE.getQuery()).get());

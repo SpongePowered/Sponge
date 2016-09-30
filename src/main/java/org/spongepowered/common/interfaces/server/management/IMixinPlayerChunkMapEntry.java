@@ -22,22 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.command;
+package org.spongepowered.common.interfaces.server.management;
 
-import net.minecraft.command.ICommandSender;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.rcon.RConConsoleSource;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.CommandBlockBaseLogic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.command.CommandPermissions;
-import org.spongepowered.common.interfaces.IMixinCommandSender;
+public interface IMixinPlayerChunkMapEntry {
 
-@Mixin(value = {EntityPlayerMP.class, MinecraftServer.class, RConConsoleSource.class, CommandBlockBaseLogic.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
-public abstract class MixinICommandSender implements ICommandSender, IMixinCommandSender {
-
-    @Override
-    public boolean canCommandSenderUseCommand(int permissionLevel, String commandName) {
-        return CommandPermissions.testPermission(this.asCommandSource(), commandName);
-    }
+    void markBiomesForUpdate();
 }

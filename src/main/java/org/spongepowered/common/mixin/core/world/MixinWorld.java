@@ -485,7 +485,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Iterable<Chunk> getLoadedChunks() {
-        return (Iterable) ((ChunkProviderServer) this.getChunkProvider()).getLoadedChunks();
+        return (List<Chunk>) (List<?>) Lists.newArrayList(((ChunkProviderServer) this.getChunkProvider()).getLoadedChunks());
     }
 
     @Override

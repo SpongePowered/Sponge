@@ -102,7 +102,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract IBlockState shadow$getDefaultState();
     @Shadow public abstract void dropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune);
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
         // Determine which blocks can avoid executing un-needed event logic
         // This will allow us to avoid running event logic for blocks that do nothing such as grass collisions
@@ -112,6 +112,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         this.hasCollideWithStateLogic = true;
         this.requiresLocationCheckForLight = true;
         this.requiresLocationCheckForOpacity = true;
+
         // onEntityCollidedWithBlock
         try {
             String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollidedWithBlock" : "func_176199_a";

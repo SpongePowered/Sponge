@@ -38,6 +38,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -97,6 +98,7 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinCachable;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
@@ -315,6 +317,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         int j = z & 15;
         biomeArray[j << 4 | i] = (byte) (Biome.getIdForBiome((Biome) biome) & 255);
         setBiomeArray(biomeArray);
+
+        if (this.worldObj instanceof WorldServer) {
+            final PlayerChunkMapEntry entry = ((WorldServer) this.worldObj).getPlayerChunkMap().getEntry(this.xPosition, this.zPosition);
+            if (entry != null) {
+                ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
+            }
+        }
     }
 
     @Override

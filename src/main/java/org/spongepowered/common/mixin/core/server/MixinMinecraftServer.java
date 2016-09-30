@@ -615,8 +615,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     if (autoSaveInterval <= 0 || ((WorldProperties) worldserver.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
                         if (logAutoSave) {
                             LOG.warn("Auto-saving has been disabled for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                                        + worldserver.provider.getDimensionType().getName() + ". "
-                                        + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than zero in the corresponding world config.");
+                                    + worldserver.provider.getDimensionType().getName() + ". "
+                                    + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than zero in the corresponding world config.");
                         }
                         continue;
                     }
@@ -625,11 +625,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     }
                     if (logAutoSave) {
                         LOG.info("Auto-saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                                    + worldserver.provider.getDimensionType().getName());
+                                + worldserver.provider.getDimensionType().getName());
                     }
                 } else if (!dontLog) {
                     LOG.info("Saving chunks for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
-                                + worldserver.provider.getDimensionType().getName());
+                            + worldserver.provider.getDimensionType().getName());
                 }
                 // Sponge end
                 try {

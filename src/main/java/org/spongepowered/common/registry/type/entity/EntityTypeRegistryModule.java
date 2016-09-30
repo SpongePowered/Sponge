@@ -41,7 +41,6 @@ import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.api.data.type.RabbitTypes;
-import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;

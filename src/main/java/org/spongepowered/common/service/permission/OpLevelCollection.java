@@ -32,6 +32,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.common.command.CommandPermissions;
 import org.spongepowered.common.service.permission.base.GlobalMemorySubjectData;
 import org.spongepowered.common.service.permission.base.SpongeSubject;
 import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
@@ -99,6 +100,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
                     }
                 }
             };
+            CommandPermissions.populateNonCommandPermissions(this.data, (permLevel, name) -> level == permLevel);
         }
 
         public int getOpLevel() {
