@@ -29,29 +29,15 @@ import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
-import org.spongepowered.api.command.CommandCallable;
-import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.command.MinecraftCommandWrapper;
+import org.spongepowered.common.command.CommandPermissions;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
-
-import java.util.Optional;
 
 @Mixin(value = {EntityPlayerMP.class, MinecraftServer.class, RConConsoleSource.class, CommandBlockLogic.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
 public abstract class MixinICommandSender implements ICommandSender, IMixinCommandSender {
 
     @Override
     public boolean canCommandSenderUseCommand(int permissionLevel, String commandName) {
-        Optional<? extends CommandMapping> mapping = SpongeImpl.getGame().getCommandManager().get(commandName);
-        if (mapping.isPresent()) {
-            CommandCallable callable = mapping.get().getCallable();
-            if (callable instanceof MinecraftCommandWrapper) {
-                return asCommandSource().hasPermission(((MinecraftCommandWrapper) callable).getCommandPermission());
-            } else {
-                return callable.testPermission(asCommandSource());
-            }
-        }
-        return asCommandSource().hasPermission(commandName);
+        return CommandPermissions.testPermission(this.asCommandSource(), commandName);
     }
 }
