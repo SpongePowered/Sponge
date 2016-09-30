@@ -38,39 +38,38 @@ import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 
 public class SpongeTagsData extends AbstractData<TagsData, ImmutableTagsData> implements TagsData {
 
-	private Set<String> tags;
-	
-	public SpongeTagsData(Set<String> tags)
-	{
-		super(TagsData.class);
-		this.tags = tags;
-		registerGettersAndSetters();
-	}
-	
-	public SpongeTagsData() {
+    private Set<String> tags;
+
+    public SpongeTagsData(Set<String> tags) {
+        super(TagsData.class);
+        this.tags = tags;
+        registerGettersAndSetters();
+    }
+
+    public SpongeTagsData() {
         this(Collections.<String>emptySet());
     }
 
-	@Override
-	public TagsData copy() {
-		return new SpongeTagsData(this.tags);
-	}
+    @Override
+    public TagsData copy() {
+        return new SpongeTagsData(this.tags);
+    }
 
-	@Override
-	public ImmutableTagsData asImmutable() {
-		return new ImmutableSpongeTagsData(new HashSet<>(this.tags));
-	}
+    @Override
+    public ImmutableTagsData asImmutable() {
+        return new ImmutableSpongeTagsData(new HashSet<>(this.tags));
+    }
 
-	@Override
-	public SetValue<String> tags() {
-		return new SpongeSetValue<>(Keys.TAGS, this.tags);
-	}
+    @Override
+    public SetValue<String> tags() {
+        return new SpongeSetValue<>(Keys.TAGS, this.tags);
+    }
 
-	@Override
-	protected void registerGettersAndSetters() {
-		registerFieldGetter(Keys.TAGS, () -> this.tags);
-		registerFieldSetter(Keys.TAGS, tags -> this.tags = tags);
-		registerKeyValue(Keys.TAGS, this::tags);
-	}
-	
+    @Override
+    protected void registerGettersAndSetters() {
+        registerFieldGetter(Keys.TAGS, () -> this.tags);
+        registerFieldSetter(Keys.TAGS, tags -> this.tags = tags);
+        registerKeyValue(Keys.TAGS, this::tags);
+    }
+
 }
