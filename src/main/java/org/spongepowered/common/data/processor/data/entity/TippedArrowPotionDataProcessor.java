@@ -22,15 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.data.item;
+package org.spongepowered.common.data.processor.data.entity;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.init.Items;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.potion.PotionUtils;
+import net.minecraft.entity.projectile.EntityTippedArrow;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionEffectData;
@@ -40,45 +35,44 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.manipulator.mutable.SpongePotionEffectData;
-import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
-import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.util.PotionUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
-public class ItemPotionDataProcessor extends AbstractItemSingleDataProcessor<List<PotionEffect>, ListValue<PotionEffect>, PotionEffectData, ImmutablePotionEffectData> {
+public class TippedArrowPotionDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityTippedArrow, List<PotionEffect>,
+        ListValue<PotionEffect>, PotionEffectData, ImmutablePotionEffectData> {
 
-    public ItemPotionDataProcessor() {
-        super(itemStack -> itemStack.getItem() == Items.POTIONITEM || itemStack.getItem() == Items.SPLASH_POTION ||
-                itemStack.getItem() == Items.LINGERING_POTION || itemStack.getItem() == Items.TIPPED_ARROW, Keys.POTION_EFFECTS);
+    public TippedArrowPotionDataProcessor() {
+        super(Keys.POTION_EFFECTS, EntityTippedArrow.class);
     }
 
     @Override
-    protected boolean set(ItemStack dataHolder, List<PotionEffect> value) {
-        if (!dataHolder.hasTagCompound()) {
-            dataHolder.setTagCompound(new NBTTagCompound());
-        }
-        final NBTTagCompound mainCompound = dataHolder.getTagCompound();
-        final NBTTagList potionList = new NBTTagList();
+    protected boolean set(EntityTippedArrow dataHolder, List<PotionEffect> value) {
+        dataHolder.customPotionEffects.clear();
         for (PotionEffect effect : value) {
-            final NBTTagCompound potionCompound = new NBTTagCompound();
-            ((net.minecraft.potion.PotionEffect) effect).writeCustomPotionEffectToNBT(potionCompound);
-            potionList.appendTag(potionCompound);
+            net.minecraft.potion.PotionEffect mcEffect = PotionUtil.copyToNative(effect);
+            dataHolder.addEffect(mcEffect);
         }
-        mainCompound.setTag(NbtDataUtil.CUSTOM_POTION_EFFECTS, potionList);
-        return true;
+        return false;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    protected Optional<List<PotionEffect>> getVal(ItemStack dataHolder) {
-        final List<net.minecraft.potion.PotionEffect> effects = PotionUtils.getEffectsFromStack(dataHolder);
+    protected Optional<List<PotionEffect>> getVal(EntityTippedArrow dataHolder) {
+        Set<net.minecraft.potion.PotionEffect> effects = dataHolder.customPotionEffects;
         if (effects.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of((List<PotionEffect>) (List<?>) effects);
+        List<PotionEffect> apiEffects = new ArrayList<>();
+        for (net.minecraft.potion.PotionEffect potionEffect : effects) {
+            apiEffects.add(PotionUtil.copyToApi(potionEffect));
+        }
+        return Optional.of(apiEffects);
     }
 
     @Override
@@ -98,26 +92,15 @@ public class ItemPotionDataProcessor extends AbstractItemSingleDataProcessor<Lis
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (!(container instanceof ItemStack)) {
+        if (!(container instanceof EntityTippedArrow)) {
             return DataTransactionResult.failNoData();
         }
-        ItemStack itemStack = (ItemStack) container;
-        Item item = itemStack.getItem();
-        if (item != Items.POTIONITEM) {
-            return DataTransactionResult.failNoData();
+        Optional<List<PotionEffect>> effects = getVal((EntityTippedArrow) container);
+        if (effects.isPresent()) {
+            ((EntityTippedArrow) container).customPotionEffects.clear();
+            return DataTransactionResult.successRemove(constructImmutableValue(effects.get()));
         }
-
-        Optional<List<PotionEffect>> currentEffects = getVal(itemStack);
-        if (!itemStack.hasTagCompound()) {
-            itemStack.setTagCompound(new NBTTagCompound());
-        }
-
-        final NBTTagCompound tagCompound = itemStack.getTagCompound();
-        tagCompound.setTag(NbtDataUtil.CUSTOM_POTION_EFFECTS, new NBTTagList());
-        if (currentEffects.isPresent()) {
-            return DataTransactionResult.successRemove(constructImmutableValue(currentEffects.get()));
-        } else {
-            return DataTransactionResult.successNoData();
-        }
+        return DataTransactionResult.successNoData();
     }
+
 }
