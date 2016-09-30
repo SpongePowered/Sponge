@@ -944,8 +944,6 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("armor_stand_has_base_plate", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("HasBasePlate"), "sponge:has_base_plate", "Has Base Plate"));
 
-        this.fieldMap.put("armor_stand_has_gravity", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("HasGravity"), "sponge:has_gravity", "Has Gravity"));
-
         this.fieldMap.put("armor_stand_marker", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("IsMarker"), "sponge:is_marker", "Is Marker"));
 
         this.fieldMap.put("armor_stand_is_small", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("IsSmall"), "sponge:is_small", "Is Small"));
@@ -957,6 +955,8 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("pickup_rule", makeSingleKey(PICKUP_TOKEN, PICKUP_VALUE_TOKEN, of("PickupRule"), "sponge:pickupRule", "Pickup Rule"));
 
         this.fieldMap.put("invulnerability_ticks", makeSingleKey(INTEGER_TOKEN, BOUNDED_INTEGER_VALUE_TOKEN, of("HurtTime"), "sponge:invulnerability_ticks", "Invulnerability Ticks"));
+
+        this.fieldMap.put("has_gravity", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("HasGravity"), "sponge:has_gravity", "Has Gravity"));
 
         for (Key<?> key : this.fieldMap.values()) {
             this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
