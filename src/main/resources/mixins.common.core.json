@@ -109,6 +109,7 @@
         "block.MixinBlockWallSign",
         "block.MixinBlockWoodSlab",
         "block.MixinDyeableBlock",
+        "block.MixinSoundType",
         "block.properties.MixinIProperty",
         "block.properties.MixinPropertyBoolean",
         "block.properties.MixinPropertyEnum",

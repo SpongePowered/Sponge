@@ -30,6 +30,7 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -39,6 +40,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.IBlockAccess;
+
+import org.spongepowered.api.block.BlockSounds;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
@@ -96,6 +99,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private Timing timing;
 
     @Shadow private boolean needsRandomTick;
+    @Shadow protected SoundType blockSoundType;
 
     @Shadow public abstract String getUnlocalizedName();
     @Shadow public abstract Material getMaterial(IBlockState state);
@@ -320,5 +324,10 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public boolean requiresLocationCheckForOpacity() {
         return this.requiresLocationCheckForOpacity;
+    }
+
+    @Override
+    public BlockSounds getSounds() {
+        return (BlockSounds) this.blockSoundType;
     }
 }
