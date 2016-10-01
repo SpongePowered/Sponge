@@ -2,16 +2,20 @@
 
 ext.api = common.project('SpongeAPI')
 
+// Finish configuring SpongeAPI first
+evaluationDependsOn api.path
+
 // Apply shared Gradle configuration in SpongeAPI
 apply from: api.file('gradle/sponge.gradle')
 
-// Finish configuring SpongeAPI first
-evaluationDependsOn api.path
+// Apply ForgeGradle plugin
+apply plugin: forgeGradlePlugin
 
 // Apply MixinGradle plugin to project
 apply plugin: 'org.spongepowered.mixin'
 
 minecraft {
+    version = minecraftVersion
     mappings = 'snapshot_20160822'
 
     runDir = 'run'

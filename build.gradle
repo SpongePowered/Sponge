@@ -6,12 +6,12 @@ buildscript {
             url = 'https://plugins.gradle.org/m2'
         }
         maven {
-            name = 'forge'
-            url = 'http://files.minecraftforge.net/maven'
+            name = 'sponge'
+            url = 'https://repo.spongepowered.org/maven'
         }
         maven {
-            name = 'sponge'
-            url = 'http://repo.spongepowered.org/maven'
+            name = 'forge'
+            url = 'http://files.minecraftforge.net/maven'
         }
     }
 
@@ -19,16 +19,11 @@ buildscript {
         // VanillaGradle contains a custom ForgeGradle extension for SpongeCommon (see below)
         classpath 'gradle.plugin.net.minecrell:vanillagradle:2.2-3'
         classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
-        classpath 'gradle.plugin.net.minecrell:licenser:0.2.1'
+        classpath 'gradle.plugin.net.minecrell:licenser:0.3'
         classpath 'gradle.plugin.org.spongepowered:spongegradle:0.7'
         classpath 'org.spongepowered:mixingradle:0.4-SNAPSHOT'
     }
 }
-
-// Apply our custom ForgeGradle extension for SpongeCommon
-// Compared to the regular tweaker-server plugin, SpongeCommon has all run tasks disabled
-// and the Minecraft workspace defined as "provided" so they won't conflict with the implementation
-apply plugin: 'net.minecrell.vanillagradle.server'
 
 // Create task to resolve SpongeAPI revision
 apply from: 'api-revision.gradle'
@@ -53,10 +48,6 @@ apply from: 'gradle/minecraft.gradle'
 version = api.version
 ext.apiVersion = version
 
-minecraft {
-    version = '1.10.2'
-}
-
 dependencies {
     compile api
     compile('org.spongepowered:mixin:0.5.13-SNAPSHOT') {
@@ -69,10 +60,10 @@ dependencies {
     runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta9'
 
     // Database connectors
-    compile 'com.zaxxer:HikariCP:2.4.7'
-    runtime 'org.mariadb.jdbc:mariadb-java-client:1.4.6'
+    compile 'com.zaxxer:HikariCP:2.5.1'
+    runtime 'org.mariadb.jdbc:mariadb-java-client:1.5.2'
     compile 'com.h2database:h2:1.4.192'
-    runtime 'org.xerial:sqlite-jdbc:3.8.11.2'
+    runtime 'org.xerial:sqlite-jdbc:3.14.2.1'
 
     forgeGradleMcDeps('net.minecraft:launchwrapper:1.11') {
         transitive = false
