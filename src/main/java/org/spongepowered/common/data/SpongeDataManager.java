@@ -62,6 +62,7 @@ import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.RawDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.value.NbtValueProcessor;
+import org.spongepowered.common.data.persistence.DataTranslatorTypeSerializer;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataFunction;
@@ -346,6 +347,9 @@ public final class SpongeDataManager implements DataManager {
             DataTranslatorRegistryModule.getInstance().registerAdditionalCatalog(translator);
         } else {
             throw new IllegalStateException("Already registered the DataTranslator for " + objectClass.getCanonicalName());
+        }
+        if (TypeSerializers.getDefaultSerializers().get(translator.getToken()) == null) {
+            TypeSerializers.getDefaultSerializers().registerType(translator.getToken(), DataTranslatorTypeSerializer.from(translator));
         }
     }
 
