@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -43,7 +42,7 @@ public class SpongeTagsData extends AbstractData<TagsData, ImmutableTagsData> im
     private Set<String> tags;
 
     public SpongeTagsData() {
-        this(Collections.emptySet());
+        this(new HashSet<>());
     }
     
     public SpongeTagsData(Set<String> tags) {
