@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -37,6 +33,10 @@ import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTagsData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ImmutableSpongeTagsData extends AbstractImmutableData<ImmutableTagsData, TagsData> implements ImmutableTagsData {
 
