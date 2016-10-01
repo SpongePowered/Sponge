@@ -52,7 +52,7 @@ public class ImmutableSpongeTagsData extends AbstractImmutableData<ImmutableTags
     }
 
     public ImmutableSpongeTagsData() {
-        this(Collections.<String>emptySet());
+        this(Collections.emptySet());
     }
 
     @Override

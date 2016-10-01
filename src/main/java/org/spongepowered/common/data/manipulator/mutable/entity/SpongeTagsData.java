@@ -49,7 +49,7 @@ public class SpongeTagsData extends AbstractData<TagsData, ImmutableTagsData> im
     }
 
     public SpongeTagsData() {
-        this(Collections.<String>emptySet());
+        this(Collections.emptySet());
     }
 
     @Override

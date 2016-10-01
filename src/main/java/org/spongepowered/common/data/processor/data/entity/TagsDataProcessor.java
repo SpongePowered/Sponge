@@ -75,12 +75,12 @@ public class TagsDataProcessor extends AbstractEntitySingleDataProcessor<Entity,
 
     @Override
     protected ImmutableValue<Set<String>> constructImmutableValue(Set<String> value) {
-        return ImmutableSpongeSetValue.cachedOf(Keys.TAGS, Collections.<String>emptySet(), value);
+        return ImmutableSpongeSetValue.cachedOf(Keys.TAGS, Collections.emptySet(), value);
     }
 
     @Override
     protected SetValue<String> constructValue(Set<String> actualValue) {
-        return new SpongeSetValue<>(Keys.TAGS, Collections.<String>emptySet(), actualValue);
+        return new SpongeSetValue<>(Keys.TAGS, Collections.emptySet(), actualValue);
     }
 
     @Override
