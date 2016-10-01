@@ -125,8 +125,8 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
     }
 
     @Override
-    public boolean isEmpty() {
-        return true;
+    public boolean hasChildren() {
+        return false;
     }
 
     @Override

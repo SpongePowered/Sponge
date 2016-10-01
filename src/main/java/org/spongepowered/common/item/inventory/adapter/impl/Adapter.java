@@ -57,6 +57,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Adapter implements MinecraftInventoryAdapter {
     
@@ -70,7 +71,7 @@ public class Adapter implements MinecraftInventoryAdapter {
         
         public static Optional<ItemStack> pollSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens) {
             if (lens == null) {
-                return Optional.<ItemStack>empty();
+                return Optional.empty();
             }
             return Logic.findStack(inv, lens, true);
         }
@@ -81,7 +82,7 @@ public class Adapter implements MinecraftInventoryAdapter {
         
         public static Optional<ItemStack> pollSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, int limit) {
             if (lens == null) {
-                return Optional.<ItemStack>empty();
+                return Optional.empty();
             }
             return Logic.findStacks(inv, lens, limit, true);
         }
@@ -92,7 +93,7 @@ public class Adapter implements MinecraftInventoryAdapter {
         
         public static Optional<ItemStack> peekSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens) {
             if (lens == null) {
-                return Optional.<ItemStack>empty();
+                return Optional.empty();
             }
             return Logic.findStack(inv, lens, false);
         }
@@ -103,7 +104,7 @@ public class Adapter implements MinecraftInventoryAdapter {
         
         public static Optional<ItemStack> peekSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, int limit) {
             if (lens == null) {
-                return Optional.<ItemStack>empty();
+                return Optional.empty();
             }
             return Logic.findStacks(inv, lens, limit, false);
         }
@@ -111,13 +112,16 @@ public class Adapter implements MinecraftInventoryAdapter {
         private static Optional<ItemStack> findStack(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, boolean remove) {
             for (int ord = 0; ord < lens.slotCount(); ord++) {
                 net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
+                if (stack != null) {
+                    System.err.println("Found stack!");
+                }
                 if (stack == null || (remove && !lens.setStack(inv, ord, null))) {
                     continue;
                 }
                 return ItemStackUtil.cloneDefensiveOptional(stack);
             }
             
-            return Optional.<ItemStack>empty();
+            return Optional.empty();
         }
 
         private static Optional<ItemStack> findStacks(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, int limit, boolean remove) {
@@ -148,7 +152,7 @@ public class Adapter implements MinecraftInventoryAdapter {
                 }
             }
             
-            return Optional.<ItemStack>ofNullable(result);
+            return Optional.ofNullable(result);
         }
 
         public static InventoryTransactionResult insertSequential(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter, ItemStack stack) {
@@ -271,17 +275,12 @@ public class Adapter implements MinecraftInventoryAdapter {
                 checkNotNull(property, "property");
                 int index = lens.getChildren().indexOf(((InventoryAdapter<?, ?>) child).getRootLens());
                 if (index > -1) {
-                    Collection<InventoryProperty<?, ?>> properties = new ArrayList<InventoryProperty<?, ?>>();
-                    for(InventoryProperty<?, ?> prop : lens.getProperties(index)) {
-                        if (property.equals(prop.getClass())) {
-                            properties.add(prop);
-                        }
-                    }
-                    return properties;
+                    return lens.getProperties(index).stream().filter(prop -> property.equals(prop.getClass()))
+                            .collect(Collectors.toCollection(ArrayList::new));
                 }
             }
 
-            return Collections.<InventoryProperty<?, ?>>emptyList();
+            return Collections.emptyList();
         }
 
         public static boolean contains(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter, ItemStack stack) {

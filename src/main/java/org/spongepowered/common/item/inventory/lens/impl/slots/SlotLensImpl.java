@@ -49,8 +49,6 @@ import java.util.List;
 public class SlotLensImpl extends MinecraftLens implements SlotLens<IInventory, ItemStack> {
     
     public static final Translation SLOT_NAME = new SpongeTranslation("slot.name");
-    
-    protected int maxStackSize = -1;
 
     public SlotLensImpl(int index) {
         this(index, SlotAdapter.class);
@@ -78,12 +76,12 @@ public class SlotLensImpl extends MinecraftLens implements SlotLens<IInventory, 
     
     @Override
     public List<Lens<IInventory, ItemStack>> getChildren() {
-        return Collections.<Lens<IInventory, ItemStack>>emptyList();
+        return Collections.emptyList();
     }
     
     @Override
     public List<Lens<IInventory, ItemStack>> getSpanningChildren() {
-        return Collections.<Lens<IInventory, ItemStack>>emptyList();
+        return Collections.emptyList();
     }
     
     @Override
@@ -130,7 +128,7 @@ public class SlotLensImpl extends MinecraftLens implements SlotLens<IInventory, 
 
     @Override
     public Collection<InventoryProperty<?, ?>> getProperties(int index) {
-        return Collections.<InventoryProperty<?, ?>>emptyList();
+        return Collections.emptyList();
     }
 
     @Override

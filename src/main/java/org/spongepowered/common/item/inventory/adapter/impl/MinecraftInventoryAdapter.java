@@ -96,8 +96,8 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     }
 
     @Override
-    default boolean isEmpty() {
-        return this.getRootLens().getChildren().size() == 0;
+    default boolean hasChildren() {
+        return this.getRootLens().getChildren().size() != 0;
     }
 
     @Override

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.slots;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -55,11 +53,7 @@ public class FilteringSlotLensImpl extends SlotLensImpl implements FilteringSlot
 
     @Override
     public boolean setStack(Fabric<IInventory> inv, net.minecraft.item.ItemStack stack) {
-        if (this.getItemStackFilter().test((ItemStack) stack)) {
-            checkNotNull(inv, "Target inventory").setStack(this.base, stack);
-            return true;
-        }
-        return false;
+        return this.getItemStackFilter().test((ItemStack) stack) && super.setStack(inv, stack);
     }
 
     @Override

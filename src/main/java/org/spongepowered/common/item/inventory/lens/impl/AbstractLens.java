@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
@@ -43,7 +44,6 @@ import org.spongepowered.common.item.inventory.lens.MutableLensCollection;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.MutableLensCollectionImpl;
 import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs.Type;
 import org.spongepowered.common.util.observer.Observer;
@@ -100,8 +100,8 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
     }
 
     protected void prepare() {
-        this.children = new MutableLensCollectionImpl<TInventory, TStack>(0, false);
-        this.spanningChildren = new ArrayList<LensHandle<TInventory, TStack>>();
+        this.children = new MutableLensCollectionImpl<>(0, false);
+        this.spanningChildren = new ArrayList<>();
     }
 
     @SuppressWarnings("unchecked")
@@ -112,11 +112,8 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
             } else if (adapter instanceof SlotProvider) {
                 this.init((SlotProvider<TInventory, TStack>) adapter);
             } else {
-                this.init(new SlotProvider<TInventory, TStack>() {
-                    @Override
-                    public SlotLens<TInventory, TStack> getSlot(int index) {
-                        throw new NoSuchElementException("Attempted to fetch slot at index " + index + " but no provider was available instancing " + AbstractLens.this);
-                    }
+                this.init(index -> {
+                    throw new NoSuchElementException("Attempted to fetch slot at index " + index + " but no provider was available instancing " + AbstractLens.this);
                 });
             }
         } catch (NoSuchElementException ex) {
@@ -224,10 +221,7 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
     @Override
     public boolean setStack(Fabric<TInventory> inv, int ordinal, TStack stack) {
         LensHandle<TInventory, TStack> lens = this.getLensForOrdinal(ordinal);
-        if (lens == null) {
-            return false;
-        }
-        return lens.lens.setStack(inv, ordinal - lens.ordinal, stack);
+        return lens != null && lens.lens.setStack(inv, ordinal - lens.ordinal, stack);
     }
     
     protected LensHandle<TInventory, TStack> getLensForOrdinal(int ordinal) {
@@ -246,7 +240,7 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
     
     @Override
     public List<Lens<TInventory, TStack>> getChildren() {
-        return Collections.<Lens<TInventory, TStack>>unmodifiableList(this.children);
+        return Collections.unmodifiableList(this.children);
     }
 
     @Override

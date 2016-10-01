@@ -52,21 +52,21 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
     /**
      * Returns the <em>primary</em> parent lens of this lens. Can be null. 
      */
-    public abstract Lens<TInventory, TStack> getParent();
+    Lens<TInventory, TStack> getParent();
     
     /**
      * Get the corresponding adapter type for this lens
      * 
      * @return class of the adapter which corresponds to this specific lens type
      */
-    public abstract Class<? extends Inventory> getAdapterType();
+    Class<? extends Inventory> getAdapterType();
     
     /**
      * Get an instance of the corresponding adapter type for this lens
      * 
      * @return adapter for this lens
      */
-    public abstract InventoryAdapter<TInventory, TStack> getAdapter(Fabric<TInventory> inv, Inventory parent);
+    InventoryAdapter<TInventory, TStack> getAdapter(Fabric<TInventory> inv, Inventory parent);
     
     /**
      * Returns the display name of this lens 
@@ -76,10 +76,9 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
     /**
      * Get the number of slots referenced by this lens
      * 
-     * @param inv Inventory
      * @return
      */
-    public abstract int slotCount(); //TInventory inv);
+    int slotCount();
     
     /**
      * Used by parent lenses when marshalling their spanning tree, queries
@@ -90,10 +89,10 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * @return true if this lens has a path to the specified slot index
      */
 //    @Deprecated // TODO deprecate
-    public abstract boolean hasSlot(int index); //TInventory inv, int index);
+    boolean hasSlot(int index); //TInventory inv, int index);
     
 //    @Deprecated // TODO deprecate
-    public abstract IntSet getSlots(); //TInventory inv);
+    IntSet getSlots(); //TInventory inv);
     
     /**
      * Returns the "real" underlying slot index in the target inventory for the
@@ -105,7 +104,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * @param ordinal 
      * @return the "real" slot index (ordinal), or -1 for invalid indices
      */
-    public abstract int getRealIndex(Fabric<TInventory> inv, int ordinal);
+    int getRealIndex(Fabric<TInventory> inv, int ordinal);
     
     /**
      * Gets the itemstack for the specified slot ordinal. Returns null if the
@@ -116,7 +115,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * @param ordinal slot ordinal
      * @return the item stack in the specified slot
      */
-    public abstract TStack getStack(Fabric<TInventory> inv, int ordinal);
+    TStack getStack(Fabric<TInventory> inv, int ordinal);
     
     /**
      * Get the maximum stack size from the target inventory
@@ -124,21 +123,21 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * @param inv
      * @return
      */
-    public abstract int getMaxStackSize(Fabric<TInventory> inv);
+    int getMaxStackSize(Fabric<TInventory> inv);
 
     /**
      * Get child lenses of this lens
      * 
      * @return
      */
-    public abstract List<Lens<TInventory, TStack>> getChildren();
+    List<Lens<TInventory, TStack>> getChildren();
     
     /**
      * Get child lenses of this lens
      * 
      * @return
      */
-    public abstract List<Lens<TInventory, TStack>> getSpanningChildren();
+    List<Lens<TInventory, TStack>> getSpanningChildren();
     
     /**
      * Set the stack at the specified offset 
@@ -148,13 +147,13 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * @param stack
      * @return
      */
-    public abstract boolean setStack(Fabric<TInventory> inv, int ordinal, TStack stack);
+    boolean setStack(Fabric<TInventory> inv, int ordinal, TStack stack);
     
     /**
      * Invalidate this lens for the supplied inventory, notify all observers
      * 
      * @param inv inventory
      */
-    public abstract void invalidate(Fabric<TInventory> inv);
+    void invalidate(Fabric<TInventory> inv);
 
 }
