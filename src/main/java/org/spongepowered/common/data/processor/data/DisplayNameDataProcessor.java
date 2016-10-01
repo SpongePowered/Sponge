@@ -101,7 +101,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             }
 
             final NBTTagCompound compound = ((ItemStack) holder).getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
-            if (compound != null && compound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, 8)) {
+            if (compound != null && compound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, NbtDataUtil.TAG_STRING)) {
                 return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(NbtDataUtil.ITEM_DISPLAY_NAME))));
             } else {
                 return Optional.empty();
@@ -142,6 +142,23 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
             } catch (Exception e) {
                 SpongeImpl.getLogger().debug("An exception occurred when setting data: ", e);
                 return DataTransactionResult.errorResult(immutableValue);
+            }
+        }
+        if (holder instanceof ItemStack) {
+            final Optional<DisplayNameData> prevValue = from(holder);
+            final DisplayNameData merged = checkNotNull(function).merge(prevValue.orElse(null), manipulator);
+            final Text newValue = merged.displayName().get();
+            final ImmutableValue<Text> immutableValue = merged.displayName().asImmutable();
+            ItemStack stack = (ItemStack) holder;
+            if (stack.getItem() == Items.WRITTEN_BOOK) {
+                NbtDataUtil.getOrCreateCompound(stack).setString(NbtDataUtil.ITEM_BOOK_TITLE, SpongeTexts.toLegacy(newValue));
+            } else {
+                stack.setStackDisplayName(SpongeTexts.toLegacy(newValue));
+            }
+            if (prevValue.isPresent()) {
+                return DataTransactionResult.successReplaceResult(prevValue.get().displayName().asImmutable(), immutableValue);
+            } else {
+                return DataTransactionResult.successResult(immutableValue);
             }
         }
         return DataTransactionResult.failResult(manipulator.getValues());
