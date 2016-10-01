@@ -44,17 +44,17 @@ public class ImmutableSpongeTagsData extends AbstractImmutableData<ImmutableTags
 
     private ImmutableSetValue<String> tagsValue;
 
+    public ImmutableSpongeTagsData() {
+        this(Collections.emptySet());
+    }
+    
     public ImmutableSpongeTagsData(Set<String> tags) {
         super(ImmutableTagsData.class);
         this.tags = tags;
         this.tagsValue = new ImmutableSpongeSetValue<>(Keys.TAGS, tags);
         registerGetters();
     }
-
-    public ImmutableSpongeTagsData() {
-        this(Collections.emptySet());
-    }
-
+    
     @Override
     public TagsData asMutable() {
         return new SpongeTagsData(new HashSet<>(this.tags));

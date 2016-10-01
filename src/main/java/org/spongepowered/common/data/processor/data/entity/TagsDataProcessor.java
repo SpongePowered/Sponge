@@ -60,10 +60,16 @@ public class TagsDataProcessor extends AbstractEntitySingleDataProcessor<Entity,
             dataHolder.removeTag(oldTag);
         }
 
+        Set<String> added = new HashSet<String>();
         for (String newTag : value) {
             if (!dataHolder.addTag(newTag)) {
+                for(String tag : added)
+                {
+                    dataHolder.removeTag(tag);
+                }
                 return false;
             }
+            added.add(newTag);
         }
         return true;
     }

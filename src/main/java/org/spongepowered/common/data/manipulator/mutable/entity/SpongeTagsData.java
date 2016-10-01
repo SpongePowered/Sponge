@@ -42,14 +42,14 @@ public class SpongeTagsData extends AbstractData<TagsData, ImmutableTagsData> im
 
     private Set<String> tags;
 
+    public SpongeTagsData() {
+        this(Collections.emptySet());
+    }
+    
     public SpongeTagsData(Set<String> tags) {
         super(TagsData.class);
         this.tags = tags;
         registerGettersAndSetters();
-    }
-
-    public SpongeTagsData() {
-        this(Collections.emptySet());
     }
 
     @Override
