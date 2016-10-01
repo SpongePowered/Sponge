@@ -45,50 +45,47 @@ import net.minecraft.entity.Entity;
 
 public class TagsDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Set<String>, SetValue<String>, TagsData, ImmutableTagsData> {
 
-	public TagsDataProcessor() {
-		super(Entity.class, Keys.TAGS);
-	}
+    public TagsDataProcessor() {
+        super(Entity.class, Keys.TAGS);
+    }
 
-	@Override
-	public DataTransactionResult removeFrom(ValueContainer<?> container) {
-		return DataTransactionResult.failNoData();
-	}
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionResult.failNoData();
+    }
 
-	@Override
-	protected boolean set(Entity dataHolder, Set<String> value) {
-		for(String oldTag : dataHolder.getTags())
-		{
-			dataHolder.removeTag(oldTag);
-		}
-		
-		for(String newTag : value)
-		{
-			if(!dataHolder.addTag(newTag))
-			{
-				return false;
-			}
-		}
-		return true;
-	}
+    @Override
+    protected boolean set(Entity dataHolder, Set<String> value) {
+        for (String oldTag : dataHolder.getTags()) {
+            dataHolder.removeTag(oldTag);
+        }
 
-	@Override
-	protected Optional<Set<String>> getVal(Entity dataHolder) {
-		return Optional.of(new HashSet<String>(dataHolder.getTags()));
-	}
+        for (String newTag : value) {
+            if (!dataHolder.addTag(newTag)) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-	@Override
-	protected ImmutableValue<Set<String>> constructImmutableValue(Set<String> value) {
-		return ImmutableSpongeSetValue.cachedOf(Keys.TAGS, Collections.<String>emptySet(), value);
-	}
+    @Override
+    protected Optional<Set<String>> getVal(Entity dataHolder) {
+        return Optional.of(new HashSet<String>(dataHolder.getTags()));
+    }
 
-	@Override
-	protected SetValue<String> constructValue(Set<String> actualValue) {
-		return new SpongeSetValue<>(Keys.TAGS, Collections.<String>emptySet(), actualValue);
-	}
+    @Override
+    protected ImmutableValue<Set<String>> constructImmutableValue(Set<String> value) {
+        return ImmutableSpongeSetValue.cachedOf(Keys.TAGS, Collections.<String>emptySet(), value);
+    }
 
-	@Override
-	protected TagsData createManipulator() {
-		return new SpongeTagsData();
-	}
+    @Override
+    protected SetValue<String> constructValue(Set<String> actualValue) {
+        return new SpongeSetValue<>(Keys.TAGS, Collections.<String>emptySet(), actualValue);
+    }
+
+    @Override
+    protected TagsData createManipulator() {
+        return new SpongeTagsData();
+    }
 
 }

@@ -28,6 +28,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTagsData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TagsData;
@@ -70,6 +72,12 @@ public class SpongeTagsData extends AbstractData<TagsData, ImmutableTagsData> im
         registerFieldGetter(Keys.TAGS, () -> this.tags);
         registerFieldSetter(Keys.TAGS, tags -> this.tags = tags);
         registerKeyValue(Keys.TAGS, this::tags);
+    }
+    
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer()
+              .set(Keys.TAGS, new HashSet<>(this.tags));
     }
 
 }
