@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -39,6 +40,7 @@ import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -59,7 +61,7 @@ public class TagsDataProcessor extends AbstractEntitySingleDataProcessor<Entity,
             dataHolder.removeTag(oldTag);
         }
 
-        Set<String> added = new HashSet<String>();
+        List<String> added = Lists.newArrayList();
         for (String newTag : value) {
             if (!dataHolder.addTag(newTag)) {
                 for (String tag : added) {
