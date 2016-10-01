@@ -27,10 +27,17 @@ package org.spongepowered.common.effect.particle;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.item.EntityFireworkRocket;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.network.Packet;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketEffect;
+import net.minecraft.network.play.server.SPacketEntityMetadata;
+import net.minecraft.network.play.server.SPacketEntityStatus;
 import net.minecraft.network.play.server.SPacketParticles;
+import net.minecraft.network.play.server.SPacketSpawnObject;
 import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionType;
 import net.minecraft.util.EnumParticleTypes;
@@ -40,9 +47,12 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleTypes;
+import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.data.type.SpongeNotePitch;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 
@@ -75,6 +85,40 @@ public final class SpongeParticleHelper {
         }
     }
 
+    private static int getDirectionData(Direction direction) {
+        if (direction.isSecondaryOrdinal()) {
+            direction = Direction.getClosest(direction.asOffset(), Direction.Division.CARDINAL);
+        }
+        switch (direction) {
+            case SOUTHEAST:
+                return 0;
+            case SOUTH:
+                return 1;
+            case SOUTHWEST:
+                return 2;
+            case EAST:
+                return 3;
+            case WEST:
+                return 5;
+            case NORTHEAST:
+                return 6;
+            case NORTH:
+                return 7;
+            case NORTHWEST:
+                return 8;
+            default:
+                return 4;
+        }
+    }
+
+    private static final EntityFireworkRocket FIREWORK_ROCKET_DUMMY = new EntityFireworkRocket(null);
+    private static final Packet<?> DESTROY_FIREWORK_ROCKET_DUMMY = new SPacketDestroyEntities(FIREWORK_ROCKET_DUMMY.getEntityId());
+    private static final Packet<?> FIREWORK_ROCKET_DUMMY_EFFECT = new SPacketEntityStatus(FIREWORK_ROCKET_DUMMY, (byte) 17);
+
+    static {
+        FIREWORK_ROCKET_DUMMY.getDataManager().getDirty();
+    }
+
     /**
      * Gets the list of packets that are needed to spawn the particle effect at
      * the position. This method tries to minimize the amount of packets for
@@ -90,6 +134,26 @@ public final class SpongeParticleHelper {
         EnumParticleTypes internal = type.getInternalType();
         // Special cases
         if (internal == null) {
+            if (type == ParticleTypes.FIREWORKS) {
+                final List<FireworkEffect> effects = type.getDefaultOption(ParticleOptions.FIREWORK_EFFECTS).get();
+                if (effects.isEmpty()) {
+                    return Collections.emptyList();
+                }
+                FIREWORK_ROCKET_DUMMY.setPosition(position.getX(), position.getY(), position.getZ());
+                final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.FIREWORKS);
+                FireworkUtils.setFireworkEffects(itemStack, effects);
+                final SPacketEntityMetadata packetEntityMetadata = new SPacketEntityMetadata();
+                packetEntityMetadata.entityId = FIREWORK_ROCKET_DUMMY.getEntityId();
+                packetEntityMetadata.dataManagerEntries = new ArrayList<>();
+                packetEntityMetadata.dataManagerEntries.add(new EntityDataManager.DataEntry<>(
+                        EntityFireworkRocket.FIREWORK_ITEM, com.google.common.base.Optional.of(itemStack)));
+                final List<Packet<?>> packets = new ArrayList<>();
+                packets.add(new SPacketSpawnObject(FIREWORK_ROCKET_DUMMY, 76));
+                packets.add(packetEntityMetadata);
+                packets.add(FIREWORK_ROCKET_DUMMY_EFFECT);
+                packets.add(DESTROY_FIREWORK_ROCKET_DUMMY);
+                return packets;
+            }
             BlockPos pos = new BlockPos(Math.round(position.getX()), Math.round(position.getY()), Math.round(position.getZ()));
             if (type == ParticleTypes.FERTILIZER) {
                 int quantity = effect.getOptionOrDefault(ParticleOptions.QUANTITY).get();
@@ -116,6 +180,9 @@ public final class SpongeParticleHelper {
                 return Collections.singletonList(new SPacketEffect(2003, pos, 0, false));
             } else if (type == ParticleTypes.DRAGON_BREATH_ATTACK) {
                 return Collections.singletonList(new SPacketEffect(2006, pos, 0, false));
+            } else if (type == ParticleTypes.FIRE_SMOKE) {
+                final Direction direction = effect.getOptionOrDefault(ParticleOptions.DIRECTION).get();
+                return Collections.singletonList(new SPacketEffect(2000, pos, getDirectionData(direction), false));
             }
             return Collections.emptyList();
         }

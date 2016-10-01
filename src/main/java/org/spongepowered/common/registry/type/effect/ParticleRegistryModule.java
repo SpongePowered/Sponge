@@ -38,16 +38,20 @@ import org.spongepowered.api.effect.particle.ParticleOptions;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
+import org.spongepowered.api.item.FireworkEffect;
+import org.spongepowered.api.item.FireworkShapes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.NotePitchRegistryModule;
+import org.spongepowered.common.registry.type.item.FireworkShapeRegistryModule;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -58,7 +62,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 @RegistrationDependency({ ParticleOptionRegistryModule.class, NotePitchRegistryModule.class, BlockTypeRegistryModule.class,
-        ItemTypeRegistryModule.class, PotionEffectTypeRegistryModule.class })
+        ItemTypeRegistryModule.class, PotionEffectTypeRegistryModule.class, FireworkShapeRegistryModule.class })
 public final class ParticleRegistryModule implements CatalogRegistryModule<ParticleType> {
 
     @RegisterCatalog(ParticleTypes.class)
@@ -107,6 +111,11 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         this.addEffectType("fertilizer", null, ImmutableMap.of(
                 ParticleOptions.QUANTITY, 15));
         this.addParticleType("fireworks_spark", EnumParticleTypes.FIREWORKS_SPARK, true);
+        this.addEffectType("fireworks", null, ImmutableMap.of(
+                ParticleOptions.FIREWORK_EFFECTS, ImmutableList.of(
+                        FireworkEffect.builder().color(Color.BLACK).shape(FireworkShapes.BALL).build())));
+        this.addEffectType("fire_smoke", null, ImmutableMap.of(
+                ParticleOptions.DIRECTION, Direction.UP));
         this.addParticleType("flame", EnumParticleTypes.FLAME, true);
         this.addParticleType("footstep", EnumParticleTypes.FOOTSTEP, false);
         this.addParticleType("guardian_appearance", EnumParticleTypes.MOB_APPEARANCE, false);

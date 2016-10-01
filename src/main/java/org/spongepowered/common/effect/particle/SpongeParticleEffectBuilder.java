@@ -27,6 +27,7 @@ package org.spongepowered.common.effect.particle;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -37,6 +38,7 @@ import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -99,6 +101,9 @@ public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEff
         IllegalStateException exception = ((SpongeParticleOption<V>) option).validateValue(value);
         if (exception != null) {
             throw exception;
+        }
+        if (value instanceof List) {
+            value = (V) ImmutableList.copyOf((List) value);
         }
         this.options.put(option, value);
         return this;

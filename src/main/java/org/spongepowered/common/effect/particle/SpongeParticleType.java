@@ -63,7 +63,8 @@ public class SpongeParticleType extends SpongeCatalogType implements ParticleTyp
     @Override
     protected ToStringHelper toStringHelper() {
         return super.toStringHelper()
-                .add("type", this.internalType);
+                .omitNullValues()
+                .add("internalType", this.internalType);
     }
 
     @SuppressWarnings("unchecked")
