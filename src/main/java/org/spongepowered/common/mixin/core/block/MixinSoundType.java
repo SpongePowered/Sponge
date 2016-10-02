@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.asm.mixin.Implements;
@@ -32,11 +33,10 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import net.minecraft.util.SoundEvent;
-
 @Mixin(net.minecraft.block.SoundType.class)
 @Implements(@Interface(iface = BlockSoundGroup.class, prefix = "group$"))
 public abstract class MixinSoundType {
+
     @Shadow private SoundEvent breakSound;
     @Shadow private SoundEvent hitSound;
     @Shadow public abstract float getVolume();
