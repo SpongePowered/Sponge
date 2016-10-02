@@ -26,43 +26,60 @@ package org.spongepowered.common.mixin.core.block;
 
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import net.minecraft.util.SoundEvent;
 
 @Mixin(net.minecraft.block.SoundType.class)
-public abstract class MixinSoundType implements BlockSoundGroup {
+@Implements(@Interface(iface = BlockSoundGroup.class, prefix = "group$"))
+public abstract class MixinSoundType {
     @Shadow private SoundEvent breakSound;
-    @Shadow private SoundEvent stepSound;
-    @Shadow private SoundEvent placeSound;
     @Shadow private SoundEvent hitSound;
-    @Shadow private SoundEvent fallSound;
     @Shadow public abstract float getVolume();
     @Shadow public abstract float getPitch();
+    @Shadow public abstract SoundEvent getStepSound();
+    @Shadow public abstract SoundEvent getPlaceSound();
+    @Shadow public abstract SoundEvent getFallSound();
 
-    @Override
-    public SoundType getBreakSound() {
-        return (SoundType) this.breakSound;
+    @Intrinsic
+    public SoundEvent getBreakSound() {
+        return this.breakSound;
     }
 
-    @Override
-    public SoundType getStepSound() {
-        return (SoundType) this.stepSound;
+    @Intrinsic
+    public SoundEvent getHitSound() {
+        return this.hitSound;
     }
 
-    @Override
-    public SoundType getPlaceSound() {
-        return (SoundType) this.placeSound;
+    public double group$getVolume() {
+        return this.getVolume();
     }
 
-    @Override
-    public SoundType getHitSound() {
-        return (SoundType) this.hitSound;
+    public double group$getPitch() {
+        return this.getPitch();
     }
 
-    @Override
-    public SoundType getFallSound() {
-        return (SoundType) this.fallSound;
+    public SoundType group$getBreakSound() {
+        return (SoundType) this.getBreakSound();
+    }
+
+    public SoundType group$getHitSound() {
+        return (SoundType) this.getHitSound();
+    }
+
+    public SoundType group$getStepSound() {
+        return (SoundType) this.getStepSound();
+    }
+
+    public SoundType group$getPlaceSound() {
+        return (SoundType) this.getPlaceSound();
+    }
+
+    public SoundType group$getFallSound() {
+        return (SoundType) this.getFallSound();
     }
 }
