@@ -128,6 +128,9 @@ public final class SpongeParticleHelper {
 
         FIREWORK_ROCKET_DUMMY_EFFECT = new SPacketEntityStatus();
         FIREWORK_ROCKET_DUMMY_EFFECT.entityId = FIREWORK_ROCKET_ID;
+        // The status index that is used to trigger the fireworks effect,
+        // can be found at: EntityFireworkRocket#handleStatusUpdate
+        // or: EntityFireworkRocket#onUpdate -> setEntityState
         FIREWORK_ROCKET_DUMMY_EFFECT.logicOpcode = 17;
     }
 
@@ -157,6 +160,9 @@ public final class SpongeParticleHelper {
                 packetSpawnObject.x = position.getX();
                 packetSpawnObject.y = position.getY();
                 packetSpawnObject.z = position.getZ();
+                // The internal id that that is used to spawn a "EntityFireworkRocket" on the client,
+                // can be found at: EntityTrackerEntry#createSpawnPacket
+                // or: NetHandlerPlayClient#handleSpawnObject
                 packetSpawnObject.type = 76;
                 final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.FIREWORKS);
                 FireworkUtils.setFireworkEffects(itemStack, effects);
