@@ -61,6 +61,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 
 public final class SpongeParticleHelper {
 
@@ -111,12 +112,23 @@ public final class SpongeParticleHelper {
         }
     }
 
-    private static final EntityFireworkRocket FIREWORK_ROCKET_DUMMY = new EntityFireworkRocket(null);
-    private static final Packet<?> DESTROY_FIREWORK_ROCKET_DUMMY = new SPacketDestroyEntities(FIREWORK_ROCKET_DUMMY.getEntityId());
-    private static final Packet<?> FIREWORK_ROCKET_DUMMY_EFFECT = new SPacketEntityStatus(FIREWORK_ROCKET_DUMMY, (byte) 17);
+    // Get the next free entity id
+    private static final int FIREWORK_ROCKET_ID;
+    private static final UUID FIREWORK_ROCKET_UNIQUE_ID;
+
+    private static final SPacketDestroyEntities DESTROY_FIREWORK_ROCKET_DUMMY;
+    private static final SPacketEntityStatus FIREWORK_ROCKET_DUMMY_EFFECT;
 
     static {
-        FIREWORK_ROCKET_DUMMY.getDataManager().getDirty();
+        final EntityFireworkRocket entityFireworkRocket = new EntityFireworkRocket(null);
+        FIREWORK_ROCKET_ID = entityFireworkRocket.getEntityId();
+        FIREWORK_ROCKET_UNIQUE_ID = entityFireworkRocket.getUniqueID();
+
+        DESTROY_FIREWORK_ROCKET_DUMMY = new SPacketDestroyEntities(FIREWORK_ROCKET_ID);
+
+        FIREWORK_ROCKET_DUMMY_EFFECT = new SPacketEntityStatus();
+        FIREWORK_ROCKET_DUMMY_EFFECT.entityId = FIREWORK_ROCKET_ID;
+        FIREWORK_ROCKET_DUMMY_EFFECT.logicOpcode = 17;
     }
 
     /**
@@ -139,16 +151,22 @@ public final class SpongeParticleHelper {
                 if (effects.isEmpty()) {
                     return Collections.emptyList();
                 }
-                FIREWORK_ROCKET_DUMMY.setPosition(position.getX(), position.getY(), position.getZ());
+                final SPacketSpawnObject packetSpawnObject = new SPacketSpawnObject();
+                packetSpawnObject.entityId = FIREWORK_ROCKET_ID;
+                packetSpawnObject.uniqueId = FIREWORK_ROCKET_UNIQUE_ID;
+                packetSpawnObject.x = position.getX();
+                packetSpawnObject.y = position.getY();
+                packetSpawnObject.z = position.getZ();
+                packetSpawnObject.type = 76;
                 final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.FIREWORKS);
                 FireworkUtils.setFireworkEffects(itemStack, effects);
                 final SPacketEntityMetadata packetEntityMetadata = new SPacketEntityMetadata();
-                packetEntityMetadata.entityId = FIREWORK_ROCKET_DUMMY.getEntityId();
+                packetEntityMetadata.entityId = FIREWORK_ROCKET_ID;
                 packetEntityMetadata.dataManagerEntries = new ArrayList<>();
                 packetEntityMetadata.dataManagerEntries.add(new EntityDataManager.DataEntry<>(
                         EntityFireworkRocket.FIREWORK_ITEM, com.google.common.base.Optional.of(itemStack)));
                 final List<Packet<?>> packets = new ArrayList<>();
-                packets.add(new SPacketSpawnObject(FIREWORK_ROCKET_DUMMY, 76));
+                packets.add(packetSpawnObject);
                 packets.add(packetEntityMetadata);
                 packets.add(FIREWORK_ROCKET_DUMMY_EFFECT);
                 packets.add(DESTROY_FIREWORK_ROCKET_DUMMY);
