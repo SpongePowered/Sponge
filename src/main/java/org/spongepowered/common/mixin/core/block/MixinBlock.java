@@ -40,7 +40,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.IBlockAccess;
-import org.spongepowered.api.block.BlockSounds;
+import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
@@ -326,7 +326,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public BlockSounds getSounds() {
-        return (BlockSounds) this.blockSoundType;
+    public BlockSoundGroup getSounds() {
+        return (BlockSoundGroup) this.blockSoundType;
     }
 }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import org.spongepowered.api.block.BlockSounds;
+import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import net.minecraft.util.SoundEvent;
 
 @Mixin(net.minecraft.block.SoundType.class)
-public abstract class MixinSoundType implements BlockSounds {
+public abstract class MixinSoundType implements BlockSoundGroup {
     @Shadow private SoundEvent breakSound;
     @Shadow private SoundEvent stepSound;
     @Shadow private SoundEvent placeSound;
