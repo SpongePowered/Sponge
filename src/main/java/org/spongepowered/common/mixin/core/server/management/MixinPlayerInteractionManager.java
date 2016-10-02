@@ -168,6 +168,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 }
             }
 
+            SpongeCommonEventFactory.interactBlockEventCancelled = true;
             return EnumActionResult.FAIL;
         }
         // Sponge End
@@ -239,6 +240,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         if (lastOpenContainer != player.openContainer) {
             if (!SpongeCommonEventFactory.callInteractInventoryOpenEvent(Cause.of(NamedCause.source(player)), player)) {
                 result = EnumActionResult.FAIL;
+                SpongeCommonEventFactory.interactBlockEventCancelled = true;
             }
         }
         return result;
