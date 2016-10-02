@@ -28,6 +28,8 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.Entity;
@@ -37,6 +39,7 @@ import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.monster.ZombieType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -67,6 +70,8 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.api.data.type.Professions;
+import org.spongepowered.api.data.type.ZombieTypes;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -133,6 +138,15 @@ public final class EntityUtil {
     public static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
     public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
     public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
+
+    private static final BiMap<Profession, ZombieType> ZOMBIE_TYPE_MAP =
+            ImmutableBiMap.<Profession, ZombieType>builder()
+                    .put(Professions.BLACKSMITH, ZombieType.VILLAGER_SMITH)
+                    .put(Professions.BUTCHER, ZombieType.VILLAGER_BUTCHER)
+                    .put(Professions.FARMER, ZombieType.VILLAGER_FARMER)
+                    .put(Professions.LIBRARIAN, ZombieType.VILLAGER_LIBRARIAN)
+                    .put(Professions.PRIEST, ZombieType.VILLAGER_PRIEST)
+                    .build();
 
     private EntityUtil() {
     }
@@ -248,6 +262,37 @@ public final class EntityUtil {
         */
         // Sponge End
         return entityPlayerMP;
+    }
+
+    // Note: does NOT take into account any forge professions
+    public static ZombieType toNative(org.spongepowered.api.data.type.ZombieType type, @Nullable Profession profession) {
+        if (type == ZombieTypes.NORMAL) {
+            return ZombieType.NORMAL;
+        } else if (type == ZombieTypes.HUSK) {
+            return ZombieType.HUSK;
+        } else {
+            return ZOMBIE_TYPE_MAP.getOrDefault(profession, ZombieType.NORMAL);
+        }
+    }
+
+    public static org.spongepowered.api.data.type.ZombieType typeFromNative(ZombieType type) {
+        if (type == ZombieType.NORMAL) {
+            return ZombieTypes.NORMAL;
+        }
+        if (type == ZombieType.HUSK) {
+            return ZombieTypes.HUSK;
+        }
+
+        return ZombieTypes.VILLAGER;
+    }
+
+    public static boolean isNative(org.spongepowered.api.data.type.ZombieType type, @Nullable Profession profession) {
+        // No profession means native, husk means native, otherwise check the map (forge uses NORMAL + Profession for its types)
+        return profession == null || type == ZombieTypes.HUSK || ZOMBIE_TYPE_MAP.containsKey(profession);
+    }
+
+    public static Optional<Profession> profFromNative(ZombieType type) {
+        return Optional.ofNullable(ZOMBIE_TYPE_MAP.inverse().get(type));
     }
 
     public static boolean isEntityDead(org.spongepowered.api.entity.Entity entity) {
