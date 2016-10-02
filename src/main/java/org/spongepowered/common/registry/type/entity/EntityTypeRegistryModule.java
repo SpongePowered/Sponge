@@ -226,7 +226,14 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
 
     @Override
     public EntityType getForClass(Class<? extends Entity> clazz) {
-        return this.entityClassToTypeMappings.get(clazz);
+        EntityType type = this.entityClassToTypeMappings.get(clazz);
+        if (type == null) {
+            SpongeImpl.getLogger().error(String.format("No entity type is registered for class %s", clazz.getName()));
+
+            type = EntityTypes.UNKNOWN;
+            this.entityClassToTypeMappings.put(clazz, type);
+        }
+        return type;
     }
 
     EntityTypeRegistryModule() {
