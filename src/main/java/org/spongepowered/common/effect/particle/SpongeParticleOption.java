@@ -36,10 +36,10 @@ public class SpongeParticleOption<V> extends SpongeCatalogType implements Partic
 
     private final String name;
     private final Class<V> valueType;
-    @Nullable private final Function<V, IllegalStateException> valueValidator;
+    @Nullable private final Function<V, IllegalArgumentException> valueValidator;
 
     public SpongeParticleOption(String id, String name, Class<V> valueType,
-            @Nullable Function<V, IllegalStateException> valueValidator) {
+            @Nullable Function<V, IllegalArgumentException> valueValidator) {
         super(id);
         this.valueValidator = valueValidator;
         this.valueType = valueType;
@@ -51,7 +51,7 @@ public class SpongeParticleOption<V> extends SpongeCatalogType implements Partic
     }
 
     @Nullable
-    public IllegalStateException validateValue(V value) {
+    public IllegalArgumentException validateValue(V value) {
         if (this.valueValidator != null) {
             return this.valueValidator.apply(value);
         }

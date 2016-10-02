@@ -98,7 +98,7 @@ public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEff
     public <V> ParticleEffect.Builder option(ParticleOption<V> option, V value) throws IllegalArgumentException {
         checkNotNull(option, "option");
         checkNotNull(value, "value");
-        IllegalStateException exception = ((SpongeParticleOption<V>) option).validateValue(value);
+        IllegalArgumentException exception = ((SpongeParticleOption<V>) option).validateValue(value);
         if (exception != null) {
             throw exception;
         }

@@ -87,7 +87,7 @@ public final class SpongeParticleHelper {
 
     private static int getDirectionData(Direction direction) {
         if (direction.isSecondaryOrdinal()) {
-            direction = Direction.getClosest(direction.asOffset(), Direction.Division.CARDINAL);
+            direction = Direction.getClosest(direction.asOffset(), Direction.Division.ORDINAL);
         }
         switch (direction) {
             case SOUTHEAST:

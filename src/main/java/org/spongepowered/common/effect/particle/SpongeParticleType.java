@@ -70,7 +70,7 @@ public class SpongeParticleType extends SpongeCatalogType implements ParticleTyp
     @SuppressWarnings("unchecked")
     @Override
     public <V> Optional<V> getDefaultOption(ParticleOption<V> option) {
-        return (Optional) Optional.ofNullable(this.options.get(option));
+        return Optional.ofNullable((V) this.options.get(option));
     }
 
     @Override

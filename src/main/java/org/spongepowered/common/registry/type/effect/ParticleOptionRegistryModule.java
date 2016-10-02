@@ -37,10 +37,12 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.effect.particle.SpongeParticleOption;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -68,13 +70,17 @@ public class ParticleOptionRegistryModule implements CatalogRegistryModule<Parti
     public void registerDefaults() {
         this.registerOption("block_state", BlockState.class);
         this.registerOption("color", Color.class);
+        this.registerOption("direction", Direction.class);
+        this.registerOption("firework_effects", List.class,
+                value -> value.isEmpty() ? new IllegalArgumentException("The firework effects list may not be empty") : null);
         this.registerOption("quantity", Integer.class,
-                value -> value < 1 ? new IllegalStateException("Quantity must be at least 1") : null);
+                value -> value < 1 ? new IllegalArgumentException("Quantity must be at least 1") : null);
         this.registerOption("item_stack_snapshot", ItemStackSnapshot.class);
         this.registerOption("note", NotePitch.class);
         this.registerOption("offset", Vector3d.class);
         this.registerOption("potion_effect_type", PotionEffectType.class);
-        this.registerOption("scale", Double.class);
+        this.registerOption("scale", Double.class,
+                value -> value < 0 ? new IllegalArgumentException("Scale may not be negative") : null);
         this.registerOption("velocity", Vector3d.class);
         this.registerOption("slow_horizontal_velocity", Boolean.class);
     }
@@ -83,7 +89,7 @@ public class ParticleOptionRegistryModule implements CatalogRegistryModule<Parti
         this.registerOption(id, valueType, null);
     }
 
-    private <V> void registerOption(String id, Class<V> valueType, @Nullable Function<V, IllegalStateException> valueValidator) {
+    private <V> void registerOption(String id, Class<V> valueType, @Nullable Function<V, IllegalArgumentException> valueValidator) {
         SpongeParticleOption<?> option = new SpongeParticleOption<>("minecraft:" + id, id, valueType, valueValidator);
         this.particleOptionsMappings.put(id, option);
         this.particleOptions.put(id, option);
