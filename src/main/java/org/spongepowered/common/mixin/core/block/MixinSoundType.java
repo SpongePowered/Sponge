@@ -39,6 +39,7 @@ public abstract class MixinSoundType {
 
     @Shadow private SoundEvent breakSound;
     @Shadow private SoundEvent hitSound;
+
     @Shadow public abstract float getVolume();
     @Shadow public abstract float getPitch();
     @Shadow public abstract SoundEvent getStepSound();
