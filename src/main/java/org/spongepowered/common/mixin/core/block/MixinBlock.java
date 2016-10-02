@@ -326,7 +326,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public BlockSoundGroup getSounds() {
+    public BlockSoundGroup getSoundGroup() {
         return (BlockSoundGroup) this.blockSoundType;
     }
 }
