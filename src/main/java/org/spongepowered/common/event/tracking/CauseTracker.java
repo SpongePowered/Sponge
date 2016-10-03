@@ -32,6 +32,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -47,6 +48,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -493,6 +495,7 @@ public final class CauseTracker {
                 EntityPlayer entityplayer = (EntityPlayer) minecraftEntity;
                 minecraftWorld.playerEntities.add(entityplayer);
                 minecraftWorld.updateAllPlayersSleepingFlag();
+                SpongeImplHooks.firePlayerJoinSpawnEvent((EntityPlayerMP) entityplayer);
             }
             // Sponge Start
             // First, check if the owning world is a remote world. Then check if the spawn is forced.

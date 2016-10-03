@@ -171,6 +171,10 @@ public final class SpongeImplHooks {
 
     }
 
+    public static void firePlayerJoinSpawnEvent(EntityPlayerMP playerMP) {
+        // Overwritten in Forge
+    }
+
     public static boolean canDoLightning(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
         return true;
     }
