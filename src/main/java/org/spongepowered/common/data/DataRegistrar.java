@@ -400,6 +400,12 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(PickupRuleData.class, SpongePickupRuleData.class, ImmutablePickupRuleData.class,
                 ImmutableSpongePickupRuleData.class, new PickupRuleDataProcessor());
 
+        dataManager.registerDataProcessorAndImpl(PickupDelayData.class, SpongePickupDelayData.class, ImmutablePickupDelayData.class,
+                ImmutableSpongePickupDelayData.class, new PickupDelayDataProcessor());
+
+        dataManager.registerDataProcessorAndImpl(DespawnDelayData.class, SpongeDespawnDelayData.class, ImmutableDespawnDelayData.class,
+                ImmutableSpongeDespawnDelayData.class, new DespawnDelayDataProcessor());
+
         // Item Processors
 
         dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
@@ -736,6 +742,10 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.ARMOR_STAND_HAS_ARMS, new ArmorStandArmsValueProcessor());
         dataManager.registerValueProcessor(Keys.ZOMBIE_TYPE, new ZombieTypeValueProcessor());
         dataManager.registerValueProcessor(Keys.VILLAGER_ZOMBIE_PROFESSION, new VillagerZombieProfessionValueProcessor());
+        dataManager.registerValueProcessor(Keys.PICKUP_DELAY, new PickupDelayValueProcessor());
+        dataManager.registerValueProcessor(Keys.INFINITE_PICKUP_DELAY, new InfinitePickupDelayValueProcessor());
+        dataManager.registerValueProcessor(Keys.DESPAWN_DELAY, new DespawnDelayValueProcessor());
+        dataManager.registerValueProcessor(Keys.INFINITE_DESPAWN_DELAY, new InfiniteDespawnDelayValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

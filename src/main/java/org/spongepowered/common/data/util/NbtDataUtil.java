@@ -168,6 +168,12 @@ public final class NbtDataUtil {
     public static final String MINECART_TYPE = "Type";
     public static final String ENTITY_POSITION = "Pos";
 
+    // These are used by pickup/despawn delay for ItemEntity
+    public static final String INFINITE_PICKUP_DELAY = "InfinitePickupDelay";
+    public static final String INFINITE_DESPAWN_DELAY = "InfiniteDespawnDelay";
+    public static final String PREVIOUS_PICKUP_DELAY = "PreviousPickupDelay";
+    public static final String PREVIOUS_DESPAWN_DELAY = "PreviousDespawnDelay";
+
     public static final class Deprecated {
 
         public static final class Entity {

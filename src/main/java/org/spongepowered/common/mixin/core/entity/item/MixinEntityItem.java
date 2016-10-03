@@ -53,7 +53,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
+import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -63,19 +66,12 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import java.util.List;
 
 @Mixin(EntityItem.class)
-public abstract class MixinEntityItem extends MixinEntity implements Item {
+public abstract class MixinEntityItem extends MixinEntity implements Item, IMixinEntityItem {
 
-    private static final short MAGIC_INFINITE_PICKUP_DELAY = 32767;
-    private static final short MAGIC_INFINITE_DESPAWN_TIME = -32768;
-    private static final int MAGIC_INFINITE = -1;
-
+    private static final int MAGIC_PREVIOUS = -1;
     @Shadow private int delayBeforeCanPickup;
     @Shadow private int age;
-
     @Shadow public abstract ItemStack getEntityItem();
-
-    public int lifespan;
-    public float dropChance = 1.0f;
     /**
      * A simple cached value of the merge radius for this item.
      * Since the value is configurable, the first time searching for
@@ -83,33 +79,16 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
      */
     private double cachedRadius = -1;
 
-    //
-    // In the case where a Forge mod sets the delay to MAGIC_INFINITE_PICKUP_DELAY, but a plugin has
-    // never called setPickupDelay or setInfinitePickupDelay, delayBeforeCanPickup would be decremented,
-    // as infiniteDelay is set to false. However, this is not the intended behavior, as the Forge
-    // mod meant an infinite delay to be set.
-
-    // To resolve the ambiguity, this flag is used to determine whether infiniteDelay is false because it was never changed
-    // from the default, or if it was explicitly set by a plugin
-    private boolean pluginPickupSet;
+    private int previousPickupDelay = MAGIC_PREVIOUS;
     private boolean infinitePickupDelay;
-    private boolean pluginDespawnSet;
+    private int previousDespawnDelay = MAGIC_PREVIOUS;
     private boolean infiniteDespawnDelay;
 
-    @Inject(method = "onUpdate()V", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityItem;delayBeforeCanPickup:I",
-            opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
-    private void onOnUpdate(CallbackInfo ci) {
-        if (this.delayBeforeCanPickup == MAGIC_INFINITE_PICKUP_DELAY && !this.infinitePickupDelay && this.pluginPickupSet) {
-            this.delayBeforeCanPickup--;
-        }
-    }
+    public float dropChance = 1.0f;
 
-    @Inject(method = "onUpdate()V", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityItem;age:I", opcode = Opcodes.PUTFIELD,
-            shift = At.Shift.AFTER))
-    private void onOnUpdateAge(CallbackInfo ci) {
-        if (this.delayBeforeCanPickup == MAGIC_INFINITE_DESPAWN_TIME && !this.infiniteDespawnDelay && this.pluginDespawnSet) {
-            this.delayBeforeCanPickup--;
-        }
+    @Override
+    public boolean infinitePickupDelay() {
+        return this.infinitePickupDelay;
     }
 
     @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"))
@@ -129,89 +108,95 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
         return this.cachedRadius;
     }
 
+    @Override
     public int getPickupDelay() {
-        if (this.delayBeforeCanPickup == MAGIC_INFINITE_PICKUP_DELAY) {
-            // There are two cases when -1 should be returned:
-
-            // The plugin has called set an infinite pickup delay
-            // The plugin has not set a pickup delay (neither setPickupDelay nor setInfinitePickupDelay
-            // has been called) - a Forge mod or something else has set the pickup delay, and they presumably
-            // know about the magic value.
-            if ((this.pluginPickupSet && this.infinitePickupDelay) || !this.pluginPickupSet) {
-                return MAGIC_INFINITE;
-            }
-        }
-        return this.delayBeforeCanPickup;
+        return this.infinitePickupDelay ? this.previousPickupDelay : this.delayBeforeCanPickup;
     }
 
-    public void setPickupDelay(int delay) {
+    @Override
+    public void setPickupDelay(int delay, boolean infinite) {
         this.delayBeforeCanPickup = delay;
-        this.pluginPickupSet = true;
-        this.infinitePickupDelay = false;
-    }
-
-    public void setInfinitePickupDelay() {
-        this.delayBeforeCanPickup = MAGIC_INFINITE_PICKUP_DELAY;
-        this.pluginPickupSet = true;
-        this.infinitePickupDelay = true;
-    }
-
-    public int getDespawnTime() {
-        if (this.age == MAGIC_INFINITE_DESPAWN_TIME) {
-            if ((this.pluginDespawnSet && this.infiniteDespawnDelay) || !this.pluginDespawnSet) {
-                return MAGIC_INFINITE;
-            }
+        boolean previous = this.infinitePickupDelay;
+        this.infinitePickupDelay = infinite;
+        if (infinite && !previous) {
+            this.previousPickupDelay = this.delayBeforeCanPickup;
+            this.delayBeforeCanPickup = DataConstants.Entity.Item.MAGIC_NO_PICKUP;
+        } else if (!infinite) {
+            this.previousPickupDelay = MAGIC_PREVIOUS;
         }
-        return this.lifespan - this.age;
     }
 
-    public void setDespawnTime(int time) {
-        this.lifespan = this.age + time;
-        this.pluginDespawnSet = true;
-        this.infiniteDespawnDelay = false;
+    @Override
+    public boolean infiniteDespawnDelay() {
+        return this.infiniteDespawnDelay;
     }
 
-    public void setInfiniteDespawnTime() {
-        this.age = MAGIC_INFINITE_DESPAWN_TIME;
-        this.pluginDespawnSet = true;
-        this.infiniteDespawnDelay = true;
+    @Override
+    public int getDespawnDelay() {
+        return this.infiniteDespawnDelay ? this.previousDespawnDelay : this.age;
+    }
+
+    @Override
+    public void setDespawnDelay(int delay, boolean infinite) {
+        this.age = delay;
+        boolean previous = this.infiniteDespawnDelay;
+        this.infiniteDespawnDelay = infinite;
+        if (infinite && !previous) {
+            this.previousDespawnDelay = this.age;
+            this.age = DataConstants.Entity.Item.MAGIC_NO_DESPAWN;
+        } else if (!infinite) {
+            this.previousDespawnDelay = MAGIC_PREVIOUS;
+        }
     }
 
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        // If the key exists, the value has been set by a plugin
-        if (compound.hasKey("infinitePickupDelay")) {
-            this.pluginPickupSet = true;
-            if (compound.getBoolean("infinitePickupDelay")) {
-                this.setInfinitePickupDelay();
-            } else {
-                this.infinitePickupDelay = false;
-            }
+
+        this.infinitePickupDelay = compound.getBoolean(NbtDataUtil.INFINITE_PICKUP_DELAY);
+        if (compound.hasKey(NbtDataUtil.PREVIOUS_PICKUP_DELAY, NbtDataUtil.TAG_ANY_NUMERIC)) {
+            this.previousPickupDelay = compound.getInteger(NbtDataUtil.PREVIOUS_PICKUP_DELAY);
+        } else {
+            this.previousPickupDelay = MAGIC_PREVIOUS;
         }
-        if (compound.hasKey("infiniteDespawnDelay")) {
-            this.pluginDespawnSet = true;
-            if (compound.getBoolean("infiniteDespawnDelay")) {
-                this.setInfiniteDespawnTime();
-            } else {
-                this.infiniteDespawnDelay = false;
+        this.infiniteDespawnDelay = compound.getBoolean(NbtDataUtil.INFINITE_DESPAWN_DELAY);
+        if (compound.hasKey(NbtDataUtil.PREVIOUS_DESPAWN_DELAY, NbtDataUtil.TAG_ANY_NUMERIC)) {
+            this.previousDespawnDelay = compound.getInteger(NbtDataUtil.PREVIOUS_DESPAWN_DELAY);
+        } else {
+            this.previousDespawnDelay = MAGIC_PREVIOUS;
+        }
+
+        if (this.infinitePickupDelay) {
+            if (this.previousPickupDelay != this.delayBeforeCanPickup) {
+                this.previousPickupDelay = this.delayBeforeCanPickup;
             }
+
+            this.delayBeforeCanPickup = DataConstants.Entity.Item.MAGIC_NO_PICKUP;
+        } else if (this.delayBeforeCanPickup == DataConstants.Entity.Item.MAGIC_NO_PICKUP && this.previousPickupDelay != MAGIC_PREVIOUS) {
+            this.delayBeforeCanPickup = this.previousPickupDelay;
+            this.previousPickupDelay = MAGIC_PREVIOUS;
+        }
+
+        if (this.infiniteDespawnDelay) {
+            if (this.previousDespawnDelay != this.age) {
+                this.previousDespawnDelay = this.age;
+            }
+
+            this.age = DataConstants.Entity.Item.MAGIC_NO_DESPAWN;
+        } else if (this.age == DataConstants.Entity.Item.MAGIC_NO_DESPAWN && this.previousDespawnDelay != MAGIC_PREVIOUS) {
+            this.age = this.previousDespawnDelay;
+            this.previousDespawnDelay = MAGIC_PREVIOUS;
         }
     }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        if (this.pluginPickupSet) {
-            compound.setBoolean("infinitePickupDelay", this.infinitePickupDelay);
-        } else {
-            compound.removeTag("infinitePickupDelay");
-        }
-        if (this.pluginDespawnSet) {
-            compound.setBoolean("infiniteDespawnDelay", this.infiniteDespawnDelay);
-        } else {
-            compound.removeTag("infiniteDespawnDelay");
-        }
+
+        compound.setBoolean(NbtDataUtil.INFINITE_PICKUP_DELAY, this.infinitePickupDelay);
+        compound.setShort(NbtDataUtil.PREVIOUS_PICKUP_DELAY, (short) this.previousPickupDelay);
+        compound.setBoolean(NbtDataUtil.INFINITE_DESPAWN_DELAY, this.infiniteDespawnDelay);
+        compound.setShort(NbtDataUtil.PREVIOUS_DESPAWN_DELAY, (short) this.previousDespawnDelay);
     }
 
     @Override
