@@ -355,7 +355,10 @@ public final class WorldManager {
         dimensionBits.clear();
         weakWorldByWorld.clear();
         unregisterableDimensions.clear();
+
         isVanillaRegistered = false;
+        // This is needed to ensure that DimensionType is usable by GuiListWorldSelection, which is only ever used when the server isn't running
+        registerVanillaTypesAndDimensions();
     }
 
     public static Optional<WorldProperties> getWorldProperties(String folderName) {
