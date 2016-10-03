@@ -702,6 +702,8 @@ public interface PacketFunction {
         }
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.worldObj;
         final World spongeWorld = (World) mixinWorld;
+        final CauseTracker causeTracker = mixinWorld.getCauseTracker();
+
         // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
         final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected the used item stack to place a block, but got nothing!", context));
@@ -731,6 +733,33 @@ public interface PacketFunction {
                                 PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
                             }
                         });
+        context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(drops -> {
+            final List<EntityItem>
+                    items =
+                    drops.stream().map(drop -> drop.create(causeTracker.getMinecraftWorld())).collect(Collectors.toList());
+            final Cause cause = Cause.source(
+                    EntitySpawnCause.builder()
+                            .entity((Entity) player)
+                            .type(InternalSpawnTypes.PLACEMENT)
+                            .build()
+            ).named(NamedCause.notifier(player))
+                    .build();
+            final List<Entity> entities = items
+                    .stream()
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
+            if (!entities.isEmpty()) {
+                DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities, causeTracker.getWorld());
+                SpongeImpl.postEvent(event);
+                if (!event.isCancelled()) {
+                    for (Entity droppedItem : event.getEntities()) {
+                        droppedItem.setCreator(player.getUniqueID());
+                        mixinWorld.forceSpawnEntity(droppedItem);
+                    }
+                }
+            }
+
+        });
     };
     PacketFunction HELD_ITEM_CHANGE = ((packet, state, player, context) -> {
         final CPacketHeldItemChange itemChange = (CPacketHeldItemChange) packet;
