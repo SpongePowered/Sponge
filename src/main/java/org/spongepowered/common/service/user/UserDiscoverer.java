@@ -52,8 +52,13 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 class UserDiscoverer {
+
+    private static final Pattern UUID_PATTERN =
+            Pattern.compile("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", Pattern.CASE_INSENSITIVE);
 
     private static final Cache<UUID, User> userCache = CacheBuilder.newBuilder()
             .expireAfterAccess(1, TimeUnit.DAYS)
@@ -123,11 +128,17 @@ class UserDiscoverer {
         // Add all known profiles from the data files
         SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldFromDimId(0).getSaveHandler();
         String[] uuids = saveHandler.getAvailablePlayerDat();
+        Matcher uuidMatcher = UUID_PATTERN.matcher("");
         for (String playerUuid : uuids) {
 
             // Some mods store other files in the 'playerdata' folder, so
             // we need to ensure that the filename is a valid UUID
-            if (playerUuid.split("-").length != 5) {
+            //
+            // It's also important to note that the SaveHandler's
+            // getAvailablePlayerDat method will only remove the
+            // extension from ".dat" files, any other file will retain
+            // their extension.
+            if (!uuidMatcher.reset(playerUuid).matches()) {
                 continue;
             }
 
