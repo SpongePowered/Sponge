@@ -67,6 +67,7 @@ public class IntArrayMutableBlockBuffer extends AbstractBlockBuffer implements M
         this.palette = palette;
     }
 
+    @Override
     public BlockPalette getPalette() {
         return this.palette;
     }

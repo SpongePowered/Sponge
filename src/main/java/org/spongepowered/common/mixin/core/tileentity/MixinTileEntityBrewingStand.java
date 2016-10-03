@@ -62,7 +62,6 @@ import java.util.Optional;
 public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockable implements BrewingStand, IMixinCustomNameable {
 
     @Shadow private String customName;
-    @Shadow public abstract boolean isItemValidForSlot(int index, ItemStack stack);
 
     private Fabric<IInventory> fabric;
     private SlotCollection slots;
@@ -83,7 +82,7 @@ public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockabl
                 .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s), t
                         -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
                 .build();
-        this.lens = new OrderedInventoryLensImpl(0, 5, 1, slots);
+        this.lens = new OrderedInventoryLensImpl(0, 5, 1, this.slots);
     }
 
     @Override
