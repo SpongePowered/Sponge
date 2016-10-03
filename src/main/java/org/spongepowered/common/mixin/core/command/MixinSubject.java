@@ -44,7 +44,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeInternalListeners;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.service.permission.SubjectSettingCallback;
 
@@ -62,7 +61,7 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 @Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class,
         SpongeUser.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
-public abstract class MixinSubject implements Subject, IMixinCommandSource, IMixinSubject {
+public abstract class MixinSubject implements Subject, IMixinSubject {
 
     @Nullable
     private Subject thisSubject;
