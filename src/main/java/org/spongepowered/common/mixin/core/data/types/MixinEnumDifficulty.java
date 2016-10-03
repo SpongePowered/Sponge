@@ -31,6 +31,9 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @NonnullByDefault
@@ -39,17 +42,24 @@ public class MixinEnumDifficulty implements Difficulty {
 
     @Shadow @Final private int difficultyId;
     @Shadow @Final private String difficultyResourceKey;
+    
+    private String id;
 
     private Translation translation;
 
+    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    public void onConstruction(CallbackInfo callbackInfo) {
+        this.id = this.difficultyResourceKey.replace("options.difficulty.", "");
+    }
+    
     @Override
     public String getId() {
-        return this.difficultyResourceKey;
+        return this.id;
     }
 
     @Override
     public String getName() {
-        return this.difficultyResourceKey.replace("options.difficulty.", "");
+        return this.id;
     }
 
     @Override
