@@ -41,6 +41,10 @@ public final class SpongePickupDelayData extends AbstractIntData<PickupDelayData
         this(DataConstants.Entity.Item.DEFAULT_PICKUP_DELAY);
     }
 
+    public SpongePickupDelayData(int value, int minimum, int maximum, int defaultValue) {
+        this(value);
+    }
+
     public SpongePickupDelayData(int value) {
         super(PickupDelayData.class, value, Keys.PICKUP_DELAY);
     }

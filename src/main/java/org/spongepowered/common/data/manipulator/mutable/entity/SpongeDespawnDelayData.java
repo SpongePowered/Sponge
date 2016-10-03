@@ -45,6 +45,11 @@ public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayDa
         super(DespawnDelayData.class, value, Keys.DESPAWN_DELAY);
     }
 
+    public SpongeDespawnDelayData(int value, int minimum, int maximum, int defaultValue) {
+        this(value);
+    }
+
+
     @Override
     public MutableBoundedValue<Integer> delay() {
         return SpongeValueFactory.boundedBuilder(Keys.DESPAWN_DELAY) // this.usedKey does not work here
