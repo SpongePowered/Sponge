@@ -33,6 +33,7 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
+import ninja.leaping.configurate.loader.HeaderMode;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
@@ -62,7 +63,8 @@ public class PaginationCalculator {
     static {
         ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder()
                 .setURL(PaginationCalculator.class.getResource("font-sizes.json"))
-                .setPreservesHeader(false).build();
+                .setHeaderMode(HeaderMode.NONE)
+                .build();
         try {
             ConfigurationNode node = loader.load();
             NON_UNICODE_CHARS = node.getNode("non-unicode").getString();
