@@ -53,7 +53,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -488,11 +487,6 @@ public class ExtentViewDownsize implements DefaultedExtent {
         checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
         checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new ExtentViewDownsize(this.extent, newMin, newMax);
-    }
-
-    @Override
-    public Extent getExtentView(DiscreteTransform3 transform) {
-        return new ExtentViewTransform(this, transform);
     }
 
     @Override

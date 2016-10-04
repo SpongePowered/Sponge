@@ -53,7 +53,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -533,24 +532,23 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
                 newMax.add(this.hardBlockMax.sub(this.blockMax)));
     }
 
-    @Override
-    public Extent getExtentView(DiscreteTransform3 transform) {
-        return new ExtentViewTransform(this, transform);
-    }
-
     @Override public Optional<UUID> getCreator(int x, int y, int z) {
+        checkRange(x, y, z);
         return this.extent.getCreator(x, y, z);
     }
 
     @Override public Optional<UUID> getNotifier(int x, int y, int z) {
+        checkRange(x, y, z);
         return this.extent.getNotifier(x, y, z);
     }
 
     @Override public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
+        checkRange(x, y, z);
         this.extent.setCreator(x, y, z, uuid);
     }
 
     @Override public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
+        checkRange(x, y, z);
         this.extent.setNotifier(x, y, z, uuid);
     }
 

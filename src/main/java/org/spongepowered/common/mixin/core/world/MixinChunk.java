@@ -70,7 +70,6 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -104,7 +103,6 @@ import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
-import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -422,11 +420,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         checkBlockBounds(newMin.getX(), newMin.getY(), newMin.getZ());
         checkBlockBounds(newMax.getX(), newMax.getY(), newMax.getZ());
         return new ExtentViewDownsize(this, newMin, newMax);
-    }
-
-    @Override
-    public Extent getExtentView(DiscreteTransform3 transform) {
-        return new ExtentViewTransform(this, transform);
     }
 
     @Override
