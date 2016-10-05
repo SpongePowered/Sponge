@@ -31,9 +31,12 @@ import net.minecraft.stats.StatBase;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.HoverEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
 public class SpongeHoverAction {
@@ -78,7 +81,7 @@ public class SpongeHoverAction {
                 break;
             }
             case SHOW_ITEM: {
-                ItemStack item = (ItemStack) action.getResult();
+                ItemStack item = (ItemStack) ((ItemStackSnapshot) action.getResult()).createStack();
                 NBTTagCompound nbt = new NBTTagCompound();
                 item.writeToNBT(nbt);
                 component = new TextComponentString(nbt.toString());
@@ -91,7 +94,9 @@ public class SpongeHoverAction {
                 throw new AssertionError();
         }
 
-        return new HoverEvent(type, component);
+        HoverEvent event = new HoverEvent(type, component);
+        ((IMixinHoverEvent) event).setHandle(action);
+        return event;
     }
 
 }

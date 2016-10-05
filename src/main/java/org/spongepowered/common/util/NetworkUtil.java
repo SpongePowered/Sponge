@@ -69,7 +69,7 @@ public final class NetworkUtil {
         // FML appends a marker to the host to recognize FML clients (\0FML\0)
         host = substringBefore(host, '\0');
 
-        // When clients connect with a SRV record, there host contains a trailing '.'
+        // When clients connect with a SRV record, their host contains a trailing '.'
         if (host.endsWith(".")) {
             host = host.substring(0, host.length() - 1);
         }
