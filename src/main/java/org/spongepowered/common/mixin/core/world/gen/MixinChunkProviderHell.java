@@ -31,7 +31,7 @@ import net.minecraft.world.gen.ChunkProviderHell;
 import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
@@ -66,7 +66,7 @@ public abstract class MixinChunkProviderHell implements IChunkProvider, Generati
     }
 
     @Override
-    public void populate(World world, MutableBlockVolume buffer, ImmutableBiomeArea biomes) {
+    public void populate(World world, MutableBlockVolume buffer, ImmutableBiomeVolume biomes) {
         int x = GenericMath.floor(buffer.getBlockMin().getX() / 16f);
         int z = GenericMath.floor(buffer.getBlockMin().getZ() / 16f);
         ChunkPrimer chunkprimer = new ChunkBufferPrimer(buffer);

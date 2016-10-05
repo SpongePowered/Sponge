@@ -24,50 +24,51 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector2i;
-import org.spongepowered.api.util.DiscreteTransform2;
+import com.flowpowered.math.vector.Vector3i;
+import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
-import org.spongepowered.api.world.extent.MutableBiomeArea;
-import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
-import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
+import org.spongepowered.api.world.extent.MutableBiomeVolume;
+import org.spongepowered.api.world.extent.UnmodifiableBiomeVolume;
+import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
-import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 
-public class MutableBiomeViewTransform extends AbstractBiomeViewTransform<MutableBiomeArea> implements MutableBiomeArea {
+public class MutableBiomeViewTransform extends AbstractBiomeViewTransform<MutableBiomeVolume> implements MutableBiomeVolume {
 
-    public MutableBiomeViewTransform(MutableBiomeArea area, DiscreteTransform2 transform) {
-        super(area, transform);
+    public MutableBiomeViewTransform(MutableBiomeVolume volume, DiscreteTransform3 transform) {
+        super(volume, transform);
     }
 
     @Override
-    public void setBiome(int x, int z, BiomeType biome) {
-        this.area.setBiome(this.inverseTransform.transformX(x, z), this.inverseTransform.transformY(x, z), biome);
+    public void setBiome(int x, int y, int z, BiomeType biome) {
+        this.volume.setBiome(this.inverseTransform.transformX(x, y, z),this.inverseTransform.transformY(x, y, z),
+                this.inverseTransform.transformZ(x, y, z), biome);
     }
 
     @Override
-    public MutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
-        return new MutableBiomeViewDownsize(this.area, this.inverseTransform.transform(newMin), this.inverseTransform.transform(newMax))
+    public MutableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
+        return new MutableBiomeViewDownsize(this.volume, this.inverseTransform.transform(newMin), this.inverseTransform.transform(newMax))
             .getBiomeView(this.transform);
     }
 
     @Override
-    public MutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
-        return new MutableBiomeViewTransform(this.area, this.transform.withTransformation(transform));
+    public MutableBiomeVolume getBiomeView(DiscreteTransform3 transform) {
+        return new MutableBiomeViewTransform(this.volume, this.transform.withTransformation(transform));
     }
 
     @Override
-    public MutableBiomeAreaWorker<? extends MutableBiomeArea> getBiomeWorker() {
-        return new SpongeMutableBiomeAreaWorker<>(this);
+    public MutableBiomeVolumeWorker<? extends MutableBiomeVolume> getBiomeWorker() {
+        return new SpongeMutableBiomeVolumeWorker<>(this);
     }
 
     @Override
-    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
-        return new UnmodifiableBiomeAreaWrapper(this);
+    public UnmodifiableBiomeVolume getUnmodifiableBiomeView() {
+        return new UnmodifiableBiomeVolumeWrapper(this);
     }
 
     @Override
-    public ImmutableBiomeArea getImmutableBiomeCopy() {
+    public ImmutableBiomeVolume getImmutableBiomeCopy() {
         return ByteArrayImmutableBiomeBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min,
             this.size);
     }

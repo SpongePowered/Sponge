@@ -25,29 +25,33 @@
 package org.spongepowered.common.world.extent.worker;
 
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.MutableBiomeArea;
-import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
-import org.spongepowered.api.world.extent.worker.procedure.BiomeAreaFiller;
+import org.spongepowered.api.world.extent.MutableBiomeVolume;
+import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
+import org.spongepowered.api.world.extent.worker.procedure.BiomeVolumeFiller;
 
 /**
  *
  */
-public class SpongeMutableBiomeAreaWorker<A extends MutableBiomeArea> extends SpongeBiomeAreaWorker<A> implements MutableBiomeAreaWorker<A> {
+public class SpongeMutableBiomeVolumeWorker<V extends MutableBiomeVolume> extends SpongeBiomeVolumeWorker<V> implements MutableBiomeVolumeWorker<V> {
 
-    public SpongeMutableBiomeAreaWorker(A area) {
-        super(area);
+    public SpongeMutableBiomeVolumeWorker(V volume) {
+        super(volume);
     }
 
     @Override
-    public void fill(BiomeAreaFiller filler) {
-        final int xMin = this.area.getBiomeMin().getX();
-        final int zMin = this.area.getBiomeMin().getY();
-        final int xMax = this.area.getBiomeMax().getX();
-        final int zMax = this.area.getBiomeMax().getY();
+    public void fill(BiomeVolumeFiller filler) {
+        final int xMin = this.volume.getBiomeMin().getX();
+        final int yMin = this.volume.getBiomeMin().getY();
+        final int zMin = this.volume.getBiomeMin().getZ();
+        final int xMax = this.volume.getBiomeMax().getX();
+        final int yMax = this.volume.getBiomeMax().getY();
+        final int zMax = this.volume.getBiomeMax().getZ();
         for (int z = zMin; z <= zMax; z++) {
-            for (int x = xMin; x <= xMax; x++) {
-                final BiomeType biome = filler.produce(x, z);
-                this.area.setBiome(x, z, biome);
+            for (int y = yMin; y <= yMax; y++) {
+                for (int x = xMin; x <= xMax; x++) {
+                    final BiomeType biome = filler.produce(x, y, z);
+                    this.volume.setBiome(x, y, z, biome);
+                }
             }
         }
     }

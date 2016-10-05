@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector2d;
-import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
@@ -109,7 +108,7 @@ import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
+import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
@@ -135,7 +134,7 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeChunkPreGenerate;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
-import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
@@ -162,11 +161,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private static final String PROFILER_ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
 
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
-    private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1);
-    private static final Vector3i BLOCK_SIZE = BLOCK_MAX.sub(BLOCK_MIN).add(1, 1, 1);
-    private static final Vector2i BIOME_MIN = BLOCK_MIN.toVector2(true);
-    private static final Vector2i BIOME_MAX = BLOCK_MAX.toVector2(true);
-    private static final Vector2i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(1, 1);
+    private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
+    private static final Vector3i BLOCK_SIZE = BLOCK_MAX.sub(BLOCK_MIN).add(Vector3i.ONE);
+    private static final Vector3i BIOME_MIN = new Vector3i(BLOCK_MIN.getX(), 0, BLOCK_MIN.getZ());
+    private static final Vector3i BIOME_MAX = new Vector3i(BLOCK_MAX.getX(), 0, BLOCK_MAX.getZ());
+    private static final Vector3i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(Vector3i.ONE);
     private static final String
             CHECK_NO_ENTITY_COLLISION =
             "checkNoEntityCollision(Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Z";
@@ -343,15 +342,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
 
     @Override
-    public BiomeType getBiome(int x, int z) {
-        checkBiomeBounds(x, z);
-        return (BiomeType) this.getBiome(new BlockPos(x, 0, z));
+    public BiomeType getBiome(int x, int y, int z) {
+        checkBiomeBounds(x, y, z);
+        return (BiomeType) this.getBiome(new BlockPos(x, y, z));
     }
 
     @Override
-    public void setBiome(int x, int z, BiomeType biome) {
-        checkBiomeBounds(x, z);
-        ((Chunk) getChunkFromChunkCoords(x >> 4, z >> 4)).setBiome(x, z, biome);
+    public void setBiome(int x, int y, int z, BiomeType biome) {
+        checkBiomeBounds(x, y, z);
+        ((Chunk) getChunkFromChunkCoords(x >> 4, z >> 4)).setBiome(x, y, z, biome);
     }
 
     @SuppressWarnings("unchecked")
@@ -515,17 +514,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public Vector2i getBiomeMin() {
+    public Vector3i getBiomeMin() {
         return BIOME_MIN;
     }
 
     @Override
-    public Vector2i getBiomeMax() {
+    public Vector3i getBiomeMax() {
         return BIOME_MAX;
     }
 
     @Override
-    public Vector2i getBiomeSize() {
+    public Vector3i getBiomeSize() {
         return BIOME_SIZE;
     }
 
@@ -545,8 +544,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean containsBiome(int x, int z) {
-        return VecHelper.inBounds(x, z, BIOME_MIN, BIOME_MAX);
+    public boolean containsBiome(int x, int y, int z) {
+        return VecHelper.inBounds(x, y, z, BIOME_MIN, BIOME_MAX);
     }
 
     @Override
@@ -554,9 +553,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return VecHelper.inBounds(x, y, z, BLOCK_MIN, BLOCK_MAX);
     }
 
-    private void checkBiomeBounds(int x, int z) {
-        if (!containsBiome(x, z)) {
-            throw new PositionOutOfBoundsException(new Vector2i(x, z), BIOME_MIN, BIOME_MAX);
+    private void checkBiomeBounds(int x, int y, int z) {
+        if (!containsBiome(x, y, z)) {
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), BIOME_MIN, BIOME_MAX);
         }
     }
 
@@ -628,8 +627,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public MutableBiomeAreaWorker<World> getBiomeWorker() {
-        return new SpongeMutableBiomeAreaWorker<>(this);
+    public MutableBiomeVolumeWorker<World> getBiomeWorker() {
+        return new SpongeMutableBiomeVolumeWorker<>(this);
     }
 
     @Override

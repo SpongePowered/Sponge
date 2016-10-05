@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world.biome;
 
-import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,19 +40,23 @@ public abstract class MixinBiomeProvider implements BiomeGenerator {
     public abstract Biome[] getBiomes(Biome[] listToReuse, int x, int z, int width, int length, boolean cacheFlag);
 
     @Override
-    public void generateBiomes(MutableBiomeArea buffer) {
-        Vector2i min = buffer.getBiomeMin();
-        Vector2i size = buffer.getBiomeSize();
+    public void generateBiomes(MutableBiomeVolume buffer) {
+        Vector3i min = buffer.getBiomeMin();
+        Vector3i size = buffer.getBiomeSize();
         int xStart = min.getX();
-        int zStart = min.getY();
+        int yStart = min.getY();
+        int zStart = min.getZ();
         int xSize = size.getX();
-        int zSize = size.getY();
+        int ySize = size.getY();
+        int zSize = size.getZ();
 
         Biome[] biomes = getBiomes(null, xStart, zStart, xSize, zSize, true);
 
-        for (int i = 0; i < xSize; i++) {
-            for (int j = 0; j < zSize; j++) {
-                buffer.setBiome(xStart + i, zStart + j, (BiomeType) biomes[i + j * xSize]);
+        for (int k = 0; k < zSize; k++) {
+            for (int j = 0; j < ySize; j++) {
+                for (int i = 0; i < xSize; i++) {
+                    buffer.setBiome(xStart + i, yStart + j, zStart + k, (BiomeType) biomes[i + k * xSize]);
+                }
             }
         }
     }

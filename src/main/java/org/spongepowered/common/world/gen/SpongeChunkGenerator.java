@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
-import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -61,7 +60,7 @@ import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.GroundCoverLayer;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GenerationPopulator;
@@ -97,7 +96,7 @@ import javax.annotation.Nullable;
  */
 public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
-    private static final Vector2i CHUNK_AREA = new Vector2i(16, 16);
+    private static final Vector3i CHUNK_AREA = new Vector3i(16, 1, 16);
 
     protected BiomeGenerator biomeGenerator;
     protected GenerationPopulator baseGenerator;
@@ -120,7 +119,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         this.biomeGenerator = checkNotNull(biomegen, "biomeGenerator");
 
         // Make initially empty biome cache
-        this.cachedBiomes = new VirtualMutableBiomeBuffer(Vector2i.ZERO, CHUNK_AREA);
+        this.cachedBiomes = new VirtualMutableBiomeBuffer(Vector3i.ZERO, CHUNK_AREA);
 
         this.genpop = Lists.newArrayList();
         this.pop = Lists.newArrayList();
@@ -224,9 +223,9 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Override
     public Chunk provideChunk(int chunkX, int chunkZ) {
         this.rand.setSeed(chunkX * 341873128712L + chunkZ * 132897987541L);
-        this.cachedBiomes.reuse(new Vector2i(chunkX * 16, chunkZ * 16));
+        this.cachedBiomes.reuse(new Vector3i(chunkX * 16, 0, chunkZ * 16));
         this.biomeGenerator.generateBiomes(this.cachedBiomes);
-        ImmutableBiomeArea biomeBuffer = this.cachedBiomes.getImmutableBiomeCopy();
+        ImmutableBiomeVolume biomeBuffer = this.cachedBiomes.getImmutableBiomeCopy();
 
         // Generate base terrain
         ChunkPrimer chunkprimer = new ChunkPrimer();
@@ -247,7 +246,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         BiomeType biome;
         for (int x = 0; x < 16; x++) {
             for (int z = 0; z < 16; z++) {
-                biome = this.cachedBiomes.getBiome(chunkX * 16 + x, chunkZ * 16 + z);
+                biome = this.cachedBiomes.getBiome(chunkX * 16 + x, 0, chunkZ * 16 + z);
                 if (!uniqueBiomes.contains(biome)) {
                     uniqueBiomes.add(biome);
                 }
@@ -286,9 +285,9 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
         // Have to regeneate the biomes so that any virtual biomes can be passed
         // to the populator.
-        this.cachedBiomes.reuse(new Vector2i(chunkX * 16, chunkZ * 16));
+        this.cachedBiomes.reuse(new Vector3i(chunkX * 16, 0, chunkZ * 16));
         this.biomeGenerator.generateBiomes(this.cachedBiomes);
-        ImmutableBiomeArea biomeBuffer = this.cachedBiomes.getImmutableBiomeCopy();
+        ImmutableBiomeVolume biomeBuffer = this.cachedBiomes.getImmutableBiomeCopy();
 
         BlockPos blockpos = new BlockPos(chunkX * 16, 0, chunkZ * 16);
         BiomeType biome = (BiomeType) this.world.getBiome(blockpos.add(16, 0, 16));
@@ -444,13 +443,13 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         }
     }
 
-    public void replaceBiomeBlocks(World world, Random rand, int x, int z, ChunkPrimer chunk, ImmutableBiomeArea biomes) {
+    public void replaceBiomeBlocks(World world, Random rand, int x, int z, ChunkPrimer chunk, ImmutableBiomeVolume biomes) {
         double d0 = 0.03125D;
         this.stoneNoise = this.noise4.getRegion(this.stoneNoise, x * 16, z * 16, 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
-        Vector2i min = biomes.getBiomeMin();
+        Vector3i min = biomes.getBiomeMin();
         for (int k = 0; k < 16; ++k) {
             for (int l = 0; l < 16; ++l) {
-                BiomeType biomegenbase = biomes.getBiome(min.getX() + l, min.getY() + k);
+                BiomeType biomegenbase = biomes.getBiome(min.getX() + l, 0, min.getZ() + k);
                 generateBiomeTerrain(world, rand, chunk, x * 16 + k, z * 16 + l, this.stoneNoise[l + k * 16],
                         getBiomeSettings(biomegenbase).getGroundCoverLayers());
             }

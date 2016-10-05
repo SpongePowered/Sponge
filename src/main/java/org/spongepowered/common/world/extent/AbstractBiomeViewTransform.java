@@ -24,63 +24,65 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector2i;
-import org.spongepowered.api.util.DiscreteTransform2;
+import com.flowpowered.math.vector.Vector3i;
+import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.BiomeArea;
-import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.BiomeVolume;
+import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 
-public abstract class AbstractBiomeViewTransform<A extends BiomeArea> implements BiomeArea {
+public abstract class AbstractBiomeViewTransform<V extends BiomeVolume> implements BiomeVolume {
 
-    protected final A area;
-    protected final DiscreteTransform2 transform;
-    protected final DiscreteTransform2 inverseTransform;
-    protected final Vector2i min;
-    protected final Vector2i max;
-    protected final Vector2i size;
+    protected final V volume;
+    protected final DiscreteTransform3 transform;
+    protected final DiscreteTransform3 inverseTransform;
+    protected final Vector3i min;
+    protected final Vector3i max;
+    protected final Vector3i size;
 
-    public AbstractBiomeViewTransform(A area, DiscreteTransform2 transform) {
-        this.area = area;
+    public AbstractBiomeViewTransform(V volume, DiscreteTransform3 transform) {
+        this.volume = volume;
         this.transform = transform;
         this.inverseTransform = transform.invert();
 
-        final Vector2i a = transform.transform(area.getBiomeMin());
-        final Vector2i b = transform.transform(area.getBiomeMax());
+        final Vector3i a = transform.transform(volume.getBiomeMin());
+        final Vector3i b = transform.transform(volume.getBiomeMax());
         this.min = a.min(b);
         this.max = a.max(b);
 
-        this.size = this.max.sub(this.min).add(Vector2i.ONE);
+        this.size = this.max.sub(this.min).add(Vector3i.ONE);
     }
 
     @Override
-    public Vector2i getBiomeMin() {
+    public Vector3i getBiomeMin() {
         return this.min;
     }
 
     @Override
-    public Vector2i getBiomeMax() {
+    public Vector3i getBiomeMax() {
         return this.max;
     }
 
     @Override
-    public Vector2i getBiomeSize() {
+    public Vector3i getBiomeSize() {
         return this.size;
     }
 
     @Override
-    public boolean containsBiome(int x, int z) {
-        return this.area.containsBiome(this.inverseTransform.transformX(x, z), this.inverseTransform.transformY(x, z));
+    public boolean containsBiome(int x, int y, int z) {
+        return this.volume.containsBiome(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+                this.inverseTransform.transformZ(x, y, z));
     }
 
     @Override
-    public BiomeType getBiome(int x, int z) {
-        return this.area.getBiome(this.inverseTransform.transformX(x, z), this.inverseTransform.transformY(x, z));
+    public BiomeType getBiome(int x, int y, int z) {
+        return this.volume.getBiome(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+                this.inverseTransform.transformZ(x, y, z));
     }
 
     @Override
-    public MutableBiomeArea getBiomeCopy(StorageType type) {
+    public MutableBiomeVolume getBiomeCopy(StorageType type) {
         switch (type) {
             case STANDARD:
                 return new ByteArrayMutableBiomeBuffer(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min, this.size);

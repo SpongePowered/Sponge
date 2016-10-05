@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector2d;
-import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
@@ -77,7 +76,7 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
+import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -103,7 +102,7 @@ import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
-import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
@@ -145,12 +144,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     private static final short Y_SHORT_MASK = 0xFF;
     private static final int Y_INT_MASK = 0xFFFFFF;
 
-    private static final Vector2i BIOME_SIZE = SpongeChunkLayout.CHUNK_SIZE.toVector2(true);
+    private static final Vector3i BIOME_SIZE = new Vector3i(SpongeChunkLayout.CHUNK_SIZE.getX(), 1, SpongeChunkLayout.CHUNK_SIZE.getZ());
     private Vector3i chunkPos;
     private Vector3i blockMin;
     private Vector3i blockMax;
-    private Vector2i biomeMin;
-    private Vector2i biomeMax;
+    private Vector3i biomeMin;
+    private Vector3i biomeMax;
 
     @Shadow @Final private World worldObj;
     @Shadow @Final public int xPosition;
@@ -188,8 +187,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         this.chunkPos = new Vector3i(x, 0, z);
         this.blockMin = SpongeChunkLayout.instance.toWorld(this.chunkPos).get();
         this.blockMax = this.blockMin.add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
-        this.biomeMin = this.blockMin.toVector2(true);
-        this.biomeMax = this.blockMax.toVector2(true);
+        this.biomeMin = new Vector3i(blockMin.getX(), 0, blockMin.getZ());
+        this.biomeMax = new Vector3i(blockMax.getX(), 0, blockMax.getZ());
         this.world = (org.spongepowered.api.world.World) world;
         if (this.world.getUniqueId() != null) { // Client worlds have no UUID
             this.uuid = new UUID(this.world.getUniqueId().getMostSignificantBits() ^ (x * 2 + 1),
@@ -301,14 +300,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public BiomeType getBiome(int x, int z) {
-        checkBiomeBounds(x, z);
-        return (BiomeType) getBiome(new BlockPos(x, 0, z), this.worldObj.getBiomeProvider());
+    public BiomeType getBiome(int x, int y, int z) {
+        checkBiomeBounds(x, y, z);
+        return (BiomeType) getBiome(new BlockPos(x, y, z), this.worldObj.getBiomeProvider());
     }
 
     @Override
-    public void setBiome(int x, int z, BiomeType biome) {
-        checkBiomeBounds(x, z);
+    public void setBiome(int x, int y, int z, BiomeType biome) {
+        checkBiomeBounds(x, y, z);
         // Taken from Chunk#getBiome
         byte[] biomeArray = getBiomeArray();
         int i = x & 15;
@@ -364,17 +363,17 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public Vector2i getBiomeMin() {
+    public Vector3i getBiomeMin() {
         return this.biomeMin;
     }
 
     @Override
-    public Vector2i getBiomeMax() {
+    public Vector3i getBiomeMax() {
         return this.biomeMax;
     }
 
     @Override
-    public Vector2i getBiomeSize() {
+    public Vector3i getBiomeSize() {
         return BIOME_SIZE;
     }
 
@@ -394,8 +393,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public boolean containsBiome(int x, int z) {
-        return VecHelper.inBounds(x, z, this.biomeMin, this.biomeMax);
+    public boolean containsBiome(int x, int y, int z) {
+        return VecHelper.inBounds(x, y, z, this.biomeMin, this.biomeMax);
     }
 
     @Override
@@ -403,9 +402,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         return VecHelper.inBounds(x, y, z, this.blockMin, this.blockMax);
     }
 
-    private void checkBiomeBounds(int x, int z) {
-        if (!containsBiome(x, z)) {
-            throw new PositionOutOfBoundsException(new Vector2i(x, z), this.biomeMin, this.biomeMax);
+    private void checkBiomeBounds(int x, int y, int z) {
+        if (!containsBiome(x, y, z)) {
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.biomeMin, this.biomeMax);
         }
     }
 
@@ -423,8 +422,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public MutableBiomeAreaWorker<Chunk> getBiomeWorker() {
-        return new SpongeMutableBiomeAreaWorker<>(this);
+    public MutableBiomeVolumeWorker<Chunk> getBiomeWorker() {
+        return new SpongeMutableBiomeVolumeWorker<>(this);
     }
 
     @Override

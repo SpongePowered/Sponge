@@ -24,63 +24,67 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector2i;
+import static com.google.common.base.Preconditions.checkArgument;
+
+import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.BiomeArea;
-import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.BiomeVolume;
+import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 
-public abstract class AbstractBiomeViewDownsize<A extends BiomeArea> implements BiomeArea {
+public abstract class AbstractBiomeViewDownsize<V extends BiomeVolume> implements BiomeVolume {
 
-    protected final A area;
-    protected final Vector2i min;
-    protected final Vector2i max;
-    protected final Vector2i size;
+    protected final V volume;
+    protected final Vector3i min;
+    protected final Vector3i max;
+    protected final Vector3i size;
 
-    public AbstractBiomeViewDownsize(A area, Vector2i min, Vector2i max) {
-        this.area = area;
+    public AbstractBiomeViewDownsize(V volume, Vector3i min, Vector3i max) {
+        checkArgument(min.getY() == 0, "Min y coordinate should be 0");
+        checkArgument(max.getY() == 0, "Max y coordinate should be 0");
+        this.volume = volume;
         this.min = min;
         this.max = max;
-        this.size = max.sub(min).add(Vector2i.ONE);
+        this.size = max.sub(min).add(Vector3i.ONE);
     }
 
     @Override
-    public Vector2i getBiomeMin() {
+    public Vector3i getBiomeMin() {
         return this.min;
     }
 
     @Override
-    public Vector2i getBiomeMax() {
+    public Vector3i getBiomeMax() {
         return this.max;
     }
 
     @Override
-    public Vector2i getBiomeSize() {
+    public Vector3i getBiomeSize() {
         return this.size;
     }
 
     @Override
-    public boolean containsBiome(int x, int z) {
-        return VecHelper.inBounds(x, z, this.min, this.max);
+    public boolean containsBiome(int x, int y, int z) {
+        return VecHelper.inBounds(x, y, z, this.min, this.max);
     }
 
-    protected final void checkRange(int x, int z) {
-        if (!VecHelper.inBounds(x, z, this.min, this.max)) {
-            throw new PositionOutOfBoundsException(new Vector2i(x, z), this.min, this.max);
+    protected final void checkRange(int x, int y, int z) {
+        if (!VecHelper.inBounds(x, y, z, this.min, this.max)) {
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.min, this.max);
         }
     }
 
     @Override
-    public BiomeType getBiome(int x, int z) {
-        checkRange(x, z);
-        return this.area.getBiome(x, z);
+    public BiomeType getBiome(int x, int y, int z) {
+        checkRange(x, y, z);
+        return this.volume.getBiome(x, y, z);
     }
 
     @Override
-    public MutableBiomeArea getBiomeCopy(StorageType type) {
+    public MutableBiomeVolume getBiomeCopy(StorageType type) {
         switch (type) {
             case STANDARD:
                 return new ByteArrayMutableBiomeBuffer(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min, this.size);

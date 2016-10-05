@@ -27,30 +27,30 @@ package org.spongepowered.common.util.gen;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.util.DiscreteTransform2;
+import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
-import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
+import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
-import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
+import org.spongepowered.api.world.extent.UnmodifiableBiomeVolume;
+import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.MutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.MutableBiomeViewTransform;
-import org.spongepowered.common.world.extent.UnmodifiableBiomeAreaWrapper;
-import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
+import org.spongepowered.common.world.extent.UnmodifiableBiomeVolumeWrapper;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 
 import java.util.Arrays;
 
 /**
- * Mutable biome area backed by a byte array. Reusable.
+ * Mutable biome volume backed by a byte array. Reusable.
  *
  * <p>Using {@link #detach()} the underlying byte array can be accessed.
- * The byte array can then be reused by calling {@link #reuse(Vector2i)}.</p>
+ * The byte array can then be reused by calling {@link #reuse(Vector3i)}.</p>
  */
-public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeArea {
+public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeVolume {
 
     private boolean detached;
     private final byte[] biomes;
@@ -59,27 +59,27 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         checkState(!this.detached, "trying to use buffer after it's closed");
     }
 
-    public ByteArrayMutableBiomeBuffer(Vector2i start, Vector2i size) {
-        this(new byte[size.getX() * size.getY()], start, size);
+    public ByteArrayMutableBiomeBuffer(Vector3i start, Vector3i size) {
+        this(new byte[size.getX() * size.getZ()], start, size);
     }
 
-    public ByteArrayMutableBiomeBuffer(byte[] biomes, Vector2i start, Vector2i size) {
+    public ByteArrayMutableBiomeBuffer(byte[] biomes, Vector3i start, Vector3i size) {
         super(start, size);
         this.biomes = biomes;
     }
 
     @Override
-    public void setBiome(int x, int z, BiomeType biome) {
+    public void setBiome(int x, int y, int z, BiomeType biome) {
         checkOpen();
-        checkRange(x, z);
+        checkRange(x, y, z);
 
         this.biomes[getIndex(x, z)] = (byte) Biome.getIdForBiome((Biome) biome);
     }
 
     @Override
-    public BiomeType getBiome(int x, int z) {
+    public BiomeType getBiome(int x, int y, int z) {
         checkOpen();
-        checkRange(x, z);
+        checkRange(x, y, z);
 
         byte biomeId = this.biomes[getIndex(x, z)];
         BiomeType biomeType = (BiomeType) Biome.getBiomeForId(biomeId & 255);
@@ -88,7 +88,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
 
     /**
      * Gets the internal byte array, and prevents further of it through this
-     * object uses until {@link #reuse(Vector2i)} is called.
+     * object uses until {@link #reuse(Vector3i)} is called.
      *
      * @return The internal byte array.
      */
@@ -100,55 +100,55 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     }
 
     /**
-     * Gets whether this biome area is currently detached. When detached, this
-     * object is available for reuse using {@link #reuse(Vector2i)}.
+     * Gets whether this biome volume is currently detached. When detached, this
+     * object is available for reuse using {@link #reuse(Vector3i)}.
      *
-     * @return Whether this biome area is detached
+     * @return Whether this biome volume is detached
      */
     public boolean isDetached() {
         return this.detached;
     }
 
     /**
-     * Changes the bounds of this biome area, so that it can be reused for
+     * Changes the bounds of this biome volume, so that it can be reused for
      * another chunk.
      *
      * @param start New start position.
      */
-    public void reuse(Vector2i start) {
+    public void reuse(Vector3i start) {
         checkState(this.detached, "Cannot reuse while still in use");
 
         this.start = checkNotNull(start, "start");
-        this.end = this.start.add(this.size).sub(Vector2i.ONE);
+        this.end = this.start.add(this.size).sub(Vector3i.ONE);
         Arrays.fill(this.biomes, (byte) 0);
 
         this.detached = false;
     }
 
     @Override
-    public MutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
-        checkRange(newMin.getX(), newMin.getY());
-        checkRange(newMax.getX(), newMax.getY());
+    public MutableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
+        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new MutableBiomeViewDownsize(this, newMin, newMax);
     }
 
     @Override
-    public MutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
+    public MutableBiomeVolume getBiomeView(DiscreteTransform3 transform) {
         return new MutableBiomeViewTransform(this, transform);
     }
 
     @Override
-    public MutableBiomeAreaWorker<? extends MutableBiomeArea> getBiomeWorker() {
-        return new SpongeMutableBiomeAreaWorker<>(this);
+    public MutableBiomeVolumeWorker<? extends MutableBiomeVolume> getBiomeWorker() {
+        return new SpongeMutableBiomeVolumeWorker<>(this);
     }
 
     @Override
-    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
-        return new UnmodifiableBiomeAreaWrapper(this);
+    public UnmodifiableBiomeVolume getUnmodifiableBiomeView() {
+        return new UnmodifiableBiomeVolumeWrapper(this);
     }
 
     @Override
-    public MutableBiomeArea getBiomeCopy(StorageType type) {
+    public MutableBiomeVolume getBiomeCopy(StorageType type) {
         checkOpen();
         switch (type) {
             case STANDARD:
@@ -160,7 +160,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     }
 
     @Override
-    public ImmutableBiomeArea getImmutableBiomeCopy() {
+    public ImmutableBiomeVolume getImmutableBiomeCopy() {
         checkOpen();
         return new ByteArrayImmutableBiomeBuffer(this.biomes, this.start, this.size);
     }
