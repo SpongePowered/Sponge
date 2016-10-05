@@ -22,41 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.network.status;
-
-import org.spongepowered.api.MinecraftVersion;
-import org.spongepowered.api.network.status.StatusClient;
-
-import java.net.InetSocketAddress;
-import java.util.Optional;
-
-import javax.annotation.Nullable;
-
-public class SpongeLegacyStatusClient implements StatusClient {
-
-    private final InetSocketAddress address;
-    private final MinecraftVersion version;
-    private final Optional<InetSocketAddress> virtualHost;
-
-    public SpongeLegacyStatusClient(InetSocketAddress address, MinecraftVersion version, @Nullable InetSocketAddress virtualHost) {
-        this.address = address;
-        this.version = version;
-        this.virtualHost = Optional.ofNullable(virtualHost);
-    }
-
-    @Override
-    public InetSocketAddress getAddress() {
-        return this.address;
-    }
-
-    @Override
-    public MinecraftVersion getVersion() {
-        return this.version;
-    }
-
-    @Override
-    public Optional<InetSocketAddress> getVirtualHost() {
-        return this.virtualHost;
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.network.status;

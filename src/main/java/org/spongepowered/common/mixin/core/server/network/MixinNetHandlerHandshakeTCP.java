@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server;
+package org.spongepowered.common.mixin.core.server.network;
 
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.handshake.client.C00Handshake;
@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
+import org.spongepowered.common.util.NetworkUtil;
 
 @Mixin(NetHandlerHandshakeTCP.class)
 public abstract class MixinNetHandlerHandshakeTCP {
@@ -44,7 +45,7 @@ public abstract class MixinNetHandlerHandshakeTCP {
     public void onProcessHandshake(C00Handshake packetIn, CallbackInfo ci) {
         IMixinNetworkManager info = (IMixinNetworkManager) this.networkManager;
         info.setVersion(packetIn.getProtocolVersion());
-        info.setVirtualHost(packetIn.ip, packetIn.port);
+        info.setVirtualHost(NetworkUtil.cleanVirtualHost(packetIn.ip), packetIn.port);
     }
 
 }

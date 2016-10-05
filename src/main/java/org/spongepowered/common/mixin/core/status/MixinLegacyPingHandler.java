@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.network.status.SpongeLegacyMinecraftVersion;
 import org.spongepowered.common.network.status.SpongeStatusResponse;
+import org.spongepowered.common.util.NetworkUtil;
 
 import java.net.InetSocketAddress;
 
@@ -179,7 +180,7 @@ public abstract class MixinLegacyPingHandler extends ChannelInboundHandlerAdapte
                 response =
                         SpongeStatusResponse.postLegacy(server, client,
                                 new SpongeLegacyMinecraftVersion(SpongeLegacyMinecraftVersion.V1_6, protocol),
-                                InetSocketAddress.createUnresolved(host, port));
+                                InetSocketAddress.createUnresolved(NetworkUtil.cleanVirtualHost(host), port));
                 if (response != null) {
                     this.writeResponse(ctx, String.format("§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
                             response.getVersion().getProtocol(),

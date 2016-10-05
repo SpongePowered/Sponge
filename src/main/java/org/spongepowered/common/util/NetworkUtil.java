@@ -59,4 +59,27 @@ public final class NetworkUtil {
         return address.toString();
     }
 
+    /**
+     * Returns the cleaned hostname for the input sent by the client.
+     *
+     * @param host The host sent by the client
+     * @return The cleaned hostname
+     */
+    public static String cleanVirtualHost(String host) {
+        // FML appends a marker to the host to recognize FML clients (\0FML\0)
+        host = substringBefore(host, '\0');
+
+        // When clients connect with a SRV record, there host contains a trailing '.'
+        if (host.endsWith(".")) {
+            host = host.substring(0, host.length() - 1);
+        }
+
+        return host;
+    }
+
+    public static String substringBefore(String s, char c) {
+        int pos = s.indexOf(c);
+        return pos >= 0 ? s.substring(0, pos) : s;
+    }
+
 }

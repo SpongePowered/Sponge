@@ -36,25 +36,29 @@ import org.spongepowered.api.event.server.ClientPingServerEvent;
 import org.spongepowered.api.network.status.StatusClient;
 import org.spongepowered.api.network.status.StatusResponse;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.serializer.LegacyTexts;
+import org.spongepowered.common.util.NetworkUtil;
 
 import java.net.InetSocketAddress;
+
+import javax.annotation.Nullable;
 
 public final class SpongeStatusResponse {
 
     private SpongeStatusResponse() {
     }
 
+    @Nullable
     public static ServerStatusResponse post(MinecraftServer server, StatusClient client) {
         return call(create(server), client);
     }
 
+    @Nullable
     public static ServerStatusResponse postLegacy(MinecraftServer server, InetSocketAddress address, MinecraftVersion version,
             InetSocketAddress virtualHost) {
         ServerStatusResponse response = create(server);
-        response.setVersion(
-                new ServerStatusResponse.Version(response.getVersion().getName(), Byte.MAX_VALUE));
+        response.setVersion(new ServerStatusResponse.Version(response.getVersion().getName(), Byte.MAX_VALUE));
         response = call(response, new SpongeLegacyStatusClient(address, version, virtualHost));
         if (response != null && response.getPlayers() == null) {
             response.setPlayers(new ServerStatusResponse.Players(-1, 0));
@@ -62,13 +66,10 @@ public final class SpongeStatusResponse {
         return response;
     }
 
+    @Nullable
     private static ServerStatusResponse call(ServerStatusResponse response, StatusClient client) {
-        if (!SpongeImpl.postEvent(SpongeEventFactory.createClientPingServerEvent(Cause.of(NamedCause.source(client)), client,
-                                                                                 (ClientPingServerEvent.Response) response))) {
-            return response;
-        } else {
-            return null;
-        }
+        return !SpongeImpl.postEvent(SpongeEventFactory.createClientPingServerEvent(Cause.of(NamedCause.source(client)), client,
+                (ClientPingServerEvent.Response) response)) ? response : null;
     }
 
     public static ServerStatusResponse create(MinecraftServer server) {
@@ -87,7 +88,8 @@ public final class SpongeStatusResponse {
         return clone;
     }
 
-    private static ServerStatusResponse.Players clone(ServerStatusResponse.Players original) {
+    @Nullable
+    private static ServerStatusResponse.Players clone(@Nullable ServerStatusResponse.Players original) {
         if (original != null) {
             ServerStatusResponse.Players clone = new ServerStatusResponse.Players(original.getMaxPlayers(),
                     original.getOnlinePlayerCount());
@@ -98,17 +100,9 @@ public final class SpongeStatusResponse {
         }
     }
 
-    private static ServerStatusResponse.Version clone(ServerStatusResponse.Version original) {
-        if (original != null) {
-            return new ServerStatusResponse.Version(original.getName(), original.getProtocol());
-        } else {
-            return null;
-        }
-    }
-
-    private static String getFirstLine(String s) {
-        int i = s.indexOf('\n');
-        return i == -1 ? s : s.substring(0, i);
+    @Nullable
+    private static ServerStatusResponse.Version clone(@Nullable ServerStatusResponse.Version original) {
+        return original != null ? new ServerStatusResponse.Version(original.getName(), original.getProtocol()) : null;
     }
 
     public static String getMotd(ServerStatusResponse response) {
@@ -117,6 +111,10 @@ public final class SpongeStatusResponse {
 
     public static String getUnformattedMotd(ServerStatusResponse response) {
         return getFirstLine(LegacyTexts.stripAll(response.getServerDescription().getUnformattedText(), COLOR_CHAR));
+    }
+
+    private static String getFirstLine(String s) {
+        return NetworkUtil.substringBefore(s, '\n');
     }
 
 }

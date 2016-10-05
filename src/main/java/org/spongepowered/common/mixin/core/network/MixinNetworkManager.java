@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.server;
+package org.spongepowered.common.mixin.core.network;
 
 import io.netty.channel.Channel;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -77,8 +77,8 @@ public abstract class MixinNetworkManager extends SimpleChannelInboundHandler im
     @Override
     public void setVirtualHost(String host, int port) {
         try {
-            this.virtualHost = new InetSocketAddress(InetAddress.getByAddress(host, ((InetSocketAddress) this.channel.localAddress()).getAddress()
-                    .getAddress()), port);
+            this.virtualHost = new InetSocketAddress(InetAddress.getByAddress(host,
+                    ((InetSocketAddress) this.channel.localAddress()).getAddress().getAddress()), port);
         } catch (UnknownHostException e) {
             this.virtualHost = InetSocketAddress.createUnresolved(host, port);
         }

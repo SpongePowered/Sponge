@@ -116,7 +116,9 @@ public final class TimingsManager {
                     timings.reset(true);
                 }
             }
-            SpongeImpl.getLogger().info("Timings Reset");
+            if (timingStart != 0) {
+                SpongeImpl.getLogger().info("Timings reset");
+            }
             HISTORY.clear();
             needsFullReset = false;
             needsRecheckEnabled = false;

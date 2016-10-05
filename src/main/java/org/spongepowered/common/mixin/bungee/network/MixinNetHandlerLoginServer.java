@@ -45,7 +45,7 @@ import java.util.UUID;
 public abstract class MixinNetHandlerLoginServer {
 
     @Shadow @Final private MinecraftServer server;
-    @Shadow public NetworkManager networkManager;
+    @Shadow @Final public NetworkManager networkManager;
     @Shadow private GameProfile loginGameProfile;
 
     @Inject(method = "processLoginStart", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/NetHandlerLoginServer;"
