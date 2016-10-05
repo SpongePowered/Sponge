@@ -127,13 +127,6 @@ import javax.annotation.Nullable;
 
 public final class EntityUtil {
 
-    /**
-     * This is a dummy entity that can be used for various mixins where a null
-     * check on an entity is required. Note that this entity SHOULD NEVER BE
-     * USED FOR OTHER PURPOSES AT ALL.
-     */
-    public static final Entity USELESS_ENTITY_FOR_MIXINS = new EntityDummy(null);
-
     public static final BlockPos HANGING_OFFSET_EAST = new BlockPos(1, 1, 0);
     public static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
     public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
