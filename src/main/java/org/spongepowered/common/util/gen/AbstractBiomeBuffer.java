@@ -24,59 +24,63 @@
  */
 package org.spongepowered.common.util.gen;
 
-import com.flowpowered.math.vector.Vector2i;
+import static com.google.common.base.Preconditions.checkArgument;
+
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
-import org.spongepowered.api.world.extent.BiomeArea;
+import org.spongepowered.api.world.extent.BiomeVolume;
 import org.spongepowered.common.util.VecHelper;
 
 /**
  * Base class for biome areas. This class provides methods for retrieving the
  * size and for range checking.
  */
-public abstract class AbstractBiomeBuffer implements BiomeArea {
+public abstract class AbstractBiomeBuffer implements BiomeVolume {
 
-    protected Vector2i start;
-    protected Vector2i size;
-    protected Vector2i end;
+    protected Vector3i start;
+    protected Vector3i size;
+    protected Vector3i end;
     private final int xLine;
 
-    protected AbstractBiomeBuffer(Vector2i start, Vector2i size) {
+    protected AbstractBiomeBuffer(Vector3i start, Vector3i size) {
+        checkArgument(size.getY() == 1, "Size y coordinate should be 1");
+
         this.start = start;
         this.size = size;
-        this.end = this.start.add(this.size).sub(Vector2i.ONE);
+        this.end = this.start.add(this.size).sub(Vector3i.ONE);
 
         this.xLine = size.getX();
     }
 
-    protected final void checkRange(int x, int z) {
-        if (!VecHelper.inBounds(x, z, this.start, this.end)) {
-            throw new PositionOutOfBoundsException(new Vector2i(x, z), this.start, this.end);
+    protected final void checkRange(int x, int y, int z) {
+        if (!VecHelper.inBounds(x, y, z, this.start, this.end)) {
+            throw new PositionOutOfBoundsException(new Vector3i(x, y, z), this.start, this.end);
         }
     }
 
-    protected int getIndex(int x, int y) {
-        return (y - this.start.getY()) * this.xLine + (x - this.start.getX());
+    protected int getIndex(int x, int z) {
+        return (z - this.start.getZ()) * this.xLine + (x - this.start.getX());
     }
 
     @Override
-    public Vector2i getBiomeMin() {
+    public Vector3i getBiomeMin() {
         return this.start;
     }
 
     @Override
-    public Vector2i getBiomeMax() {
+    public Vector3i getBiomeMax() {
         return this.end;
     }
 
     @Override
-    public Vector2i getBiomeSize() {
+    public Vector3i getBiomeSize() {
         return this.size;
     }
 
     @Override
-    public boolean containsBiome(int x, int z) {
-        return VecHelper.inBounds(x, z, this.start, this.end);
+    public boolean containsBiome(int x, int y, int z) {
+        return VecHelper.inBounds(x, y, z, this.start, this.end);
     }
 
     @Override

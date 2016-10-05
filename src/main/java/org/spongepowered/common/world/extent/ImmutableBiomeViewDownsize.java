@@ -24,33 +24,33 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector2i;
-import org.spongepowered.api.util.DiscreteTransform2;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
-import org.spongepowered.api.world.extent.worker.BiomeAreaWorker;
-import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
+import com.flowpowered.math.vector.Vector3i;
+import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
+import org.spongepowered.api.world.extent.worker.BiomeVolumeWorker;
+import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
 
-public class ImmutableBiomeViewDownsize extends AbstractBiomeViewDownsize<ImmutableBiomeArea> implements ImmutableBiomeArea {
+public class ImmutableBiomeViewDownsize extends AbstractBiomeViewDownsize<ImmutableBiomeVolume> implements ImmutableBiomeVolume {
 
-    public ImmutableBiomeViewDownsize(ImmutableBiomeArea area, Vector2i min, Vector2i max) {
-        super(area, min, max);
+    public ImmutableBiomeViewDownsize(ImmutableBiomeVolume volume, Vector3i min, Vector3i max) {
+        super(volume, min, max);
     }
 
     @Override
-    public ImmutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
-        checkRange(newMin.getX(), newMin.getY());
-        checkRange(newMax.getX(), newMax.getY());
-        return new ImmutableBiomeViewDownsize(this.area, newMin, newMax);
+    public ImmutableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
+        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
+        return new ImmutableBiomeViewDownsize(this.volume, newMin, newMax);
     }
 
     @Override
-    public ImmutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
+    public ImmutableBiomeVolume getBiomeView(DiscreteTransform3 transform) {
         return new ImmutableBiomeViewTransform(this, transform);
     }
 
     @Override
-    public BiomeAreaWorker<? extends ImmutableBiomeArea> getBiomeWorker() {
-        return new SpongeBiomeAreaWorker<>(this);
+    public BiomeVolumeWorker<? extends ImmutableBiomeVolume> getBiomeWorker() {
+        return new SpongeBiomeVolumeWorker<>(this);
     }
 
 }

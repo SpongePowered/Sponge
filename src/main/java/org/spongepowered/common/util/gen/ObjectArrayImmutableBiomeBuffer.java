@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.util.gen;
 
-import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.util.DiscreteTransform2;
+import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
-import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
+import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.api.world.extent.worker.BiomeAreaWorker;
+import org.spongepowered.api.world.extent.worker.BiomeVolumeWorker;
 import org.spongepowered.common.world.extent.ImmutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBiomeViewTransform;
-import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
+import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
 
 /**
  * Mutable view of a {@link Biome} array.
@@ -44,7 +44,7 @@ import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
-public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeArea {
+public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeVolume {
 
     private final Biome[] biomes;
 
@@ -56,36 +56,36 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
      * @param start The start position
      * @param size The size
      */
-    public ObjectArrayImmutableBiomeBuffer(Biome[] biomes, Vector2i start, Vector2i size) {
+    public ObjectArrayImmutableBiomeBuffer(Biome[] biomes, Vector3i start, Vector3i size) {
         super(start, size);
         this.biomes = biomes.clone();
     }
 
     @Override
-    public BiomeType getBiome(int x, int z) {
-        checkRange(x, z);
+    public BiomeType getBiome(int x, int y, int z) {
+        checkRange(x, y, z);
         return (BiomeType) this.biomes[getIndex(x, z)];
     }
 
     @Override
-    public ImmutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
-        checkRange(newMin.getX(), newMin.getY());
-        checkRange(newMax.getX(), newMax.getY());
+    public ImmutableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
+        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new ImmutableBiomeViewDownsize(this, newMin, newMax);
     }
 
     @Override
-    public ImmutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
+    public ImmutableBiomeVolume getBiomeView(DiscreteTransform3 transform) {
         return new ImmutableBiomeViewTransform(this, transform);
     }
 
     @Override
-    public BiomeAreaWorker<? extends ImmutableBiomeArea> getBiomeWorker() {
-        return new SpongeBiomeAreaWorker<>(this);
+    public BiomeVolumeWorker<? extends ImmutableBiomeVolume> getBiomeWorker() {
+        return new SpongeBiomeVolumeWorker<>(this);
     }
 
     @Override
-    public MutableBiomeArea getBiomeCopy(StorageType type) {
+    public MutableBiomeVolume getBiomeCopy(StorageType type) {
         switch (type) {
             case STANDARD:
                 return new ObjectArrayMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
@@ -96,7 +96,7 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     }
 
     @Override
-    public ImmutableBiomeArea getImmutableBiomeCopy() {
+    public ImmutableBiomeVolume getImmutableBiomeCopy() {
         return this;
     }
 

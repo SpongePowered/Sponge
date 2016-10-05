@@ -24,31 +24,32 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector2i;
-import org.spongepowered.api.util.DiscreteTransform2;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
-import org.spongepowered.api.world.extent.worker.BiomeAreaWorker;
-import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
+import com.flowpowered.math.vector.Vector3i;
+import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
+import org.spongepowered.api.world.extent.worker.BiomeVolumeWorker;
+import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
 
-public class ImmutableBiomeViewTransform extends AbstractBiomeViewTransform<ImmutableBiomeArea> implements ImmutableBiomeArea {
+public class ImmutableBiomeViewTransform extends AbstractBiomeViewTransform<ImmutableBiomeVolume> implements ImmutableBiomeVolume {
 
-    public ImmutableBiomeViewTransform(ImmutableBiomeArea area, DiscreteTransform2 transform) {
-        super(area, transform);
+    public ImmutableBiomeViewTransform(ImmutableBiomeVolume volume, DiscreteTransform3 transform) {
+        super(volume, transform);
     }
 
     @Override
-    public ImmutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
-        return new ImmutableBiomeViewDownsize(this.area, this.inverseTransform.transform(newMin), this.inverseTransform.transform(newMax)).getBiomeView(this.transform);
+    public ImmutableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
+        return new ImmutableBiomeViewDownsize(this.volume, this.inverseTransform.transform(newMin),
+                this.inverseTransform.transform(newMax)).getBiomeView(this.transform);
     }
 
     @Override
-    public ImmutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
-        return new ImmutableBiomeViewTransform(this.area, this.transform.withTransformation(transform));
+    public ImmutableBiomeVolume getBiomeView(DiscreteTransform3 transform) {
+        return new ImmutableBiomeViewTransform(this.volume, this.transform.withTransformation(transform));
     }
 
     @Override
-    public BiomeAreaWorker<? extends ImmutableBiomeArea> getBiomeWorker() {
-        return new SpongeBiomeAreaWorker<>(this);
+    public BiomeVolumeWorker<? extends ImmutableBiomeVolume> getBiomeWorker() {
+        return new SpongeBiomeVolumeWorker<>(this);
     }
 
 }

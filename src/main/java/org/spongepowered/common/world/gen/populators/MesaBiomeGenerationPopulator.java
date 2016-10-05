@@ -36,7 +36,7 @@ import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
 
@@ -62,7 +62,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
     }
 
     @Override
-    public void populate(World world, MutableBlockVolume buffer, ImmutableBiomeArea biomes) {
+    public void populate(World world, MutableBlockVolume buffer, ImmutableBiomeVolume biomes) {
         long seed = world.getProperties().getSeed();
         if (this.possibleBlocks == null || this.lastSeed != seed) {
             this.func_150619_a(seed);

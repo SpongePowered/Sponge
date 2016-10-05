@@ -24,63 +24,63 @@
  */
 package org.spongepowered.common.util.gen;
 
-import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.util.DiscreteTransform2;
+import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
-import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
+import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.api.world.extent.worker.BiomeAreaWorker;
+import org.spongepowered.api.world.extent.worker.BiomeVolumeWorker;
 import org.spongepowered.common.world.extent.ImmutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBiomeViewTransform;
-import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
+import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
 
 /**
- * Immutable biome area, backed by a byte array. The array passed to the
+ * Immutable biome volume, backed by a byte array. The array passed to the
  * constructor is copied to ensure that the instance is immutable.
  */
-public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeArea {
+public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeVolume {
 
     private final byte[] biomes;
 
-    public ByteArrayImmutableBiomeBuffer(byte[] biomes, Vector2i start, Vector2i size) {
+    public ByteArrayImmutableBiomeBuffer(byte[] biomes, Vector3i start, Vector3i size) {
         super(start, size);
         this.biomes = biomes.clone();
     }
 
-    private ByteArrayImmutableBiomeBuffer(Vector2i start, Vector2i size, byte[] biomes) {
+    private ByteArrayImmutableBiomeBuffer(Vector3i start, Vector3i size, byte[] biomes) {
         super(start, size);
         this.biomes = biomes;
     }
 
     @Override
-    public BiomeType getBiome(int x, int z) {
-        checkRange(x, z);
+    public BiomeType getBiome(int x, int y, int z) {
+        checkRange(x, y, z);
         BiomeType biomeType = (BiomeType) Biome.getBiomeForId(this.biomes[getIndex(x, z)] & 255);
         return biomeType == null ? BiomeTypes.OCEAN : biomeType;
     }
 
     @Override
-    public ImmutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
-        checkRange(newMin.getX(), newMin.getY());
-        checkRange(newMax.getX(), newMax.getY());
+    public ImmutableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
+        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new ImmutableBiomeViewDownsize(this, newMin, newMax);
     }
 
     @Override
-    public ImmutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
+    public ImmutableBiomeVolume getBiomeView(DiscreteTransform3 transform) {
         return new ImmutableBiomeViewTransform(this, transform);
     }
 
     @Override
-    public BiomeAreaWorker<? extends ImmutableBiomeArea> getBiomeWorker() {
-        return new SpongeBiomeAreaWorker<>(this);
+    public BiomeVolumeWorker<? extends ImmutableBiomeVolume> getBiomeWorker() {
+        return new SpongeBiomeVolumeWorker<>(this);
     }
 
     @Override
-    public MutableBiomeArea getBiomeCopy(StorageType type) {
+    public MutableBiomeVolume getBiomeCopy(StorageType type) {
         switch (type) {
             case STANDARD:
                 return new ByteArrayMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
@@ -95,11 +95,11 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
      * Make sure your code doesn't leak the reference if you're using it.
      *
      * @param biomes The biomes to store
-     * @param start The start of the area
-     * @param size The size of the area
+     * @param start The start of the volume
+     * @param size The size of the volume
      * @return A new buffer using the same array reference
      */
-    public static ImmutableBiomeArea newWithoutArrayClone(byte[] biomes, Vector2i start, Vector2i size) {
+    public static ImmutableBiomeVolume newWithoutArrayClone(byte[] biomes, Vector3i start, Vector3i size) {
         return new ByteArrayImmutableBiomeBuffer(start, size, biomes);
     }
 

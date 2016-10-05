@@ -33,8 +33,8 @@ import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
 
 public class ImmutableBlockViewTransform extends AbstractBlockViewTransform<ImmutableBlockVolume> implements ImmutableBlockVolume {
 
-    public ImmutableBlockViewTransform(ImmutableBlockVolume area, DiscreteTransform3 transform) {
-        super(area, transform);
+    public ImmutableBlockViewTransform(ImmutableBlockVolume volume, DiscreteTransform3 transform) {
+        super(volume, transform);
     }
 
     @Override

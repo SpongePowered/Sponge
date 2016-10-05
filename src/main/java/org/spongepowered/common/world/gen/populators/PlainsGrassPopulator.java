@@ -33,7 +33,7 @@ import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
@@ -103,7 +103,7 @@ public class PlainsGrassPopulator implements Populator {
     }
 
     @Override
-    public void populate(org.spongepowered.api.world.World world, Extent extent, Random random, ImmutableBiomeArea virtualBiomes) {
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random random, ImmutableBiomeVolume virtualBiomes) {
         Vector3i min = extent.getBlockMin();
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         double d0 = this.noise.getValue((chunkPos.getX() + 8) / 200.0D, (chunkPos.getZ() + 8) / 200.0D);
