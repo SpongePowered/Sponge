@@ -30,6 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Singleton;
+import net.minecraft.block.Block;
+import net.minecraft.entity.EntityList;
+import net.minecraft.stats.StatList;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
@@ -57,10 +60,12 @@ import org.spongepowered.api.statistic.EntityStatistic;
 import org.spongepowered.api.statistic.ItemStatistic;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticGroup;
+import org.spongepowered.api.statistic.StatisticGroups;
 import org.spongepowered.api.statistic.TeamStatistic;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.serializer.TextSerializerFactory;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
@@ -354,17 +359,47 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Optional<EntityStatistic> getEntityStatistic(StatisticGroup statisticGroup, EntityType entityType) {
-        throw new UnsupportedOperationException(); // TODO
+        checkNotNull(statisticGroup, "statisticGroup");
+        checkNotNull(entityType, "entityType");
+        String entityName = EntityList.CLASS_TO_NAME.get(entityType.getEntityClass());
+        EntityList.EntityEggInfo eggInfo = EntityList.ENTITY_EGGS.get(entityName);
+        if (StatisticGroups.HAS_KILLED_ENTITY.equals(statisticGroup)) {
+            return Optional.of((EntityStatistic) eggInfo.killEntityStat);
+        } else if (StatisticGroups.KILLED_BY_ENTITY.equals(statisticGroup)) {
+            return Optional.of((EntityStatistic) eggInfo.entityKilledByStat);
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
     public Optional<ItemStatistic> getItemStatistic(StatisticGroup statisticGroup, ItemType itemType) {
-        throw new UnsupportedOperationException(); // TODO
+        checkNotNull(itemType, "itemType");
+        return getStatistics(statisticGroup).stream()
+            .filter(s -> s instanceof ItemStatistic)
+            .map(s -> (ItemStatistic) s)
+            .filter(s -> itemType.equals(s.getItemType()))
+            .findAny();
     }
 
     @Override
     public Optional<BlockStatistic> getBlockStatistic(StatisticGroup statisticGroup, BlockType blockType) {
-        throw new UnsupportedOperationException(); // TODO
+        checkNotNull(statisticGroup, "statisticGroup");
+        checkNotNull(blockType, "blockType");
+        int blockId = Block.getIdFromBlock((Block) blockType);
+        if (statisticGroup == StatisticGroups.MINE_BLOCK) {
+            return Optional.ofNullable((BlockStatistic) StatList.BLOCKS_STATS[blockId]);
+        } else if (statisticGroup == StatisticGroups.USE_BLOCK) {
+            return Optional.ofNullable((BlockStatistic) StatList.OBJECT_USE_STATS[blockId]);
+        } else if (statisticGroup == StatisticGroups.CRAFT_BLOCK) {
+            return Optional.ofNullable((BlockStatistic) StatList.CRAFTS_STATS[blockId]);
+        } else if (statisticGroup == StatisticGroups.PICK_UP_BLOCK) {
+            return Optional.ofNullable((BlockStatistic) StatList.OBJECTS_PICKED_UP_STATS[blockId]);
+        } else if (statisticGroup == StatisticGroups.DROP_BLOCK) {
+            return Optional.ofNullable((BlockStatistic) StatList.OBJECTS_DROPPED_STATS[blockId]);
+        } else {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -374,7 +409,10 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Collection<Statistic> getStatistics(StatisticGroup statisticGroup) {
-        throw new UnsupportedOperationException(); // TODO
+        checkNotNull(statisticGroup, "statisticGroup");
+        return getAllOf(Statistic.class).stream()
+            .filter(s -> statisticGroup.equals(s.getGroup()))
+            .collect(GuavaCollectors.toImmutableSet());
     }
 
     @Override
