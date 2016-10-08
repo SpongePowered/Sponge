@@ -68,6 +68,7 @@ import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
@@ -83,6 +84,7 @@ import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -95,6 +97,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
@@ -112,6 +115,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketWorldBorder;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
@@ -831,6 +835,16 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Inject(method = "writePlayerData", at = @At(target = WRITE_PLAYER_DATA, value = "INVOKE"))
     private void onWritePlayerFile(EntityPlayerMP playerMP, CallbackInfo callbackInfo) {
         SpongePlayerDataHandler.savePlayer(playerMP.getUniqueID());
+    }
+
+    @ModifyVariable(method = "sendPlayerPermissionLevel", at = @At("HEAD"), argsOnly = true)
+    public int fixPermLevel(int permLevel) {
+        // If a non-default permission service is being used, then the op level will always be 0.
+        // We force it to be 4 to ensure that the client is able to open command blocks (
+        if (!(Sponge.getServiceManager().provideUnchecked(PermissionService.class) instanceof SpongePermissionService)) {
+            return 4;
+        }
+        return permLevel;
     }
 
 }
