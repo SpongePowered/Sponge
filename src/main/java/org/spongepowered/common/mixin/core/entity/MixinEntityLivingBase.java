@@ -376,7 +376,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         } else {
             this.entityAge = 0;
 
-            if (this.getHealth() <= 0.0F) {
+            // Sponge - if the damage source is ignored, then do not return false here, as the health
+            // has already been set to zero if Keys#HEALTH or SpongeHealthData is set to zero.
+            if (this.getHealth() <= 0.0F && source != DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) {
                 return false;
             } else if (source.isFireDamage() && this.isPotionActive(MobEffects.FIRE_RESISTANCE)) {
                 return false;

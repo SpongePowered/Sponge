@@ -87,6 +87,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.interfaces.ITargetedLocation;
@@ -94,6 +95,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
+import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -146,6 +148,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract void takeStat(StatBase stat);
     @Shadow public abstract boolean canOpen(LockCode code);
     @Shadow protected abstract void destroyVanishingCursedItems(); // Filter vanishing curse enchanted items
+    @Shadow public abstract boolean isPlayerSleeping();
+    @Shadow public abstract void wakeUpPlayer(boolean immediately, boolean updateWorldFlag, boolean setSpawn);
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
@@ -406,6 +410,27 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Override
     public UUID getCollidingEntityUuid() {
         return this.collidingEntityUuid;
+    }
+
+    /**
+     * @author dualspiral - October 7th, 2016
+     *
+     * @reason When setting {@link SpongeHealthData#setHealth(double)} to 0, {@link #onDeath(DamageSource)} was
+     * not being called. This check bypasses some of the checks that prevent the superclass method being called
+     * when the {@link DamageSourceRegistryModule#IGNORED_DAMAGE_SOURCE} is being used.
+     */
+    @Inject(method = "attackEntityFrom", cancellable = true, at = @At(value = "HEAD"))
+    public void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        if (source == DamageSourceRegistryModule.IGNORED_DAMAGE_SOURCE) {
+            // Taken from the original method, wake the player up if they are about to die.
+            if (this.isPlayerSleeping() && !this.world.isRemote) {
+                this.wakeUpPlayer(true, true, false);
+            }
+
+            // We just throw it to the superclass method so that we can potentially get the
+            // onDeath method.
+            cir.setReturnValue(super.attackEntityFrom(source, amount));
+        }
     }
 
     /**
