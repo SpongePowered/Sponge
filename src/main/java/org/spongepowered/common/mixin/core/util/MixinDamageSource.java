@@ -25,8 +25,11 @@
 package org.spongepowered.common.mixin.core.util;
 
 import com.google.common.base.Objects;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.Explosion;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
@@ -62,6 +65,16 @@ public abstract class MixinDamageSource implements DamageSource {
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(String damageTypeIn, CallbackInfo ci) {
         this.apiDamageType = DamageSourceToTypeProvider.getInstance().getOrCustom(damageTypeIn);
+    }
+
+    @Inject(method = "getDeathMessage(Lnet/minecraft/entity/EntityLivingBase;)Lnet/minecraft/util/text/ITextComponent;", cancellable = true,
+            at = @At(value = "RETURN"))
+    @SuppressWarnings("deprecation")
+    public void beforeGetDeathMessageReturn(EntityLivingBase entityLivingBaseIn, CallbackInfoReturnable<ITextComponent> cir) {
+        // This prevents untranslated keys from appearing in death messages, switching out those that are untranslated with the generic message.
+        if (cir.getReturnValue().getUnformattedText().equals("death.attack." + this.damageType)) {
+            cir.setReturnValue(new TextComponentTranslation("death.attack.generic", entityLivingBaseIn.getDisplayName()));
+        }
     }
 
     @Inject(method = "causeExplosionDamage(Lnet/minecraft/world/Explosion;)Lnet/minecraft/util/DamageSource;", at = @At("HEAD"), cancellable = true)
