@@ -28,6 +28,7 @@ import com.google.common.base.Objects;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -39,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinEnchantment;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @NonnullByDefault
 @Mixin(net.minecraft.enchantment.Enchantment.class)
@@ -112,6 +114,11 @@ public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment
     @Intrinsic
     public String enchantment$getName() {
         return shadow$getName();
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return new SpongeTranslation(shadow$getName());
     }
 
     @Override
