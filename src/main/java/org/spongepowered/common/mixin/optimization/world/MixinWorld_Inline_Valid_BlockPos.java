@@ -98,6 +98,12 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
         } else {
             TileEntity tileentity = null;
 
+            // Sponge start - don't allow loading chunks here
+            if (!this.isBlockLoaded(pos)) {
+                return null;
+            }
+            // Sponge end
+
             if (this.processingLoadedTiles) {
                 tileentity = this.getPendingTileEntityAt(pos);
             }
