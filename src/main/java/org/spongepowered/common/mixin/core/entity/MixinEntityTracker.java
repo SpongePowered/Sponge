@@ -57,7 +57,7 @@ public abstract class MixinEntityTracker {
     }
 
 
-    @Redirect(method = "addEntityToTracker", at = @At(value = "NEW", target = "java/lang/IllegalStateException"))
+    @Redirect(method = "addEntityToTracker", at = @At(value = "NEW", args = "class=java/lang/IllegalStateException"))
     private IllegalStateException reportEntityAlreadyTrackedWithWorld(String string, Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates) {
         return new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, ((World) this.theWorld).getName()));
     }
