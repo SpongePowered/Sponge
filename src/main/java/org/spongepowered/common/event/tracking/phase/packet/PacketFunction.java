@@ -601,7 +601,29 @@ public interface PacketFunction {
     }
 
     PacketFunction CREATIVE = (packet, state, player, context) -> {
-        //final CPacketCreativeInventoryAction creativeInventoryAction = (CPacketCreativeInventoryAction) packet;
+        final CauseTracker causeTracker = ((IMixinWorldServer) player.worldObj).getCauseTracker();
+        context.getCapturedItemsSupplier()
+                .ifPresentAndNotEmpty(items -> {
+                    if (items.isEmpty()) {
+                        return;
+                    }
+                    final Cause cause = Cause.source(EntitySpawnCause.builder()
+                            .entity((Entity) player)
+                            .type(InternalSpawnTypes.DROPPED_ITEM)
+                            .build())
+                            .build();
+                    final ArrayList<Entity> entities = new ArrayList<>();
+                    for (EntityItem item : items) {
+                        entities.add(EntityUtil.fromNative(item));
+                    }
+                    final DropItemEvent.Dispense
+                            dispense =
+                            SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld());
+                    SpongeImpl.postEvent(dispense);
+                    if (!dispense.isCancelled()) {
+                        processSpawnedEntities(player, causeTracker, dispense);
+                    }
+                });
     };
 
     PacketFunction INVENTORY = (packet, state, player, context) -> {
