@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.living.human.EntityHuman;
@@ -56,9 +57,9 @@ public abstract class MixinEntityTracker {
     }
 
 
-    @ModifyConstant(method = "addEntityToTracker", constant = @Constant(stringValue = "Entity is already tracked!"))
-    private String reportEntityAlreadyTrackedWithWorld(String string) {
-        return "Entity is already tracked for world: " + ((World) this.theWorld).getName();
+    @Redirect(method = "addEntityToTracker", at = @At(value = "NEW", target = "java/lang/IllegalStateException"))
+    private IllegalStateException reportEntityAlreadyTrackedWithWorld(String string, Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates) {
+        return new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, ((World) this.theWorld).getName()));
     }
 
     @Inject(method = "addEntityToTracker", at = @At("HEAD"), cancellable = true)
