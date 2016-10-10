@@ -78,90 +78,97 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         final Optional<User> owner = phaseContext.getOwner();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
         final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tickingTile;
-        phaseContext.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blockSnapshots -> {
-                    TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
-                });
 
-        phaseContext.getCapturedEntitySupplier()
-                .ifPresentAndNotEmpty(entities -> {
-                    // Separate experience from other entities
-                    final List<Entity> experience = new ArrayList<>(entities.size());
-                    final List<Entity> nonExpEntities = new ArrayList<>(entities.size());
-                    for (Entity entity : entities) {
-                        if (entity instanceof EntityXPOrb) {
-                            experience.add(entity);
-                            continue;
+        try {
+
+            phaseContext.getCapturedBlockSupplier()
+                    .ifPresentAndNotEmpty(blockSnapshots -> {
+                        TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
+                    });
+
+            phaseContext.getCapturedEntitySupplier()
+                    .ifPresentAndNotEmpty(entities -> {
+                        // Separate experience from other entities
+                        final List<Entity> experience = new ArrayList<>(entities.size());
+                        final List<Entity> nonExpEntities = new ArrayList<>(entities.size());
+                        for (Entity entity : entities) {
+                            if (entity instanceof EntityXPOrb) {
+                                experience.add(entity);
+                                continue;
+                            }
+                            nonExpEntities.add(entity);
                         }
-                        nonExpEntities.add(entity);
-                    }
-                    if (!experience.isEmpty()) { // Experience needs to have the proper spawn type
-                        final Cause.Builder builder = Cause.builder();
-                        builder.named(NamedCause.source(
-                                BlockSpawnCause.builder()
-                                        .block(capturedSnapshot.getSnapshot())
-                                        .type(InternalSpawnTypes.EXPERIENCE)
-                                        .build()
-                                )
-                        );
+                        if (!experience.isEmpty()) { // Experience needs to have the proper spawn type
+                            final Cause.Builder builder = Cause.builder();
+                            builder.named(NamedCause.source(
+                                    BlockSpawnCause.builder()
+                                            .block(capturedSnapshot.getSnapshot())
+                                            .type(InternalSpawnTypes.EXPERIENCE)
+                                            .build()
+                                    )
+                            );
+                            notifier.ifPresent(builder::notifier);
+                            owner.ifPresent(builder::owner);
+                            final SpawnEntityEvent event =
+                                    SpongeEventFactory.createSpawnEntityEvent(builder.build(), experience, causeTracker.getWorld());
+                            SpongeImpl.postEvent(event);
+                            if (!event.isCancelled()) {
+                                for (Entity entity : event.getEntities()) {
+                                    if (entityCreator != null) {
+                                        EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                                    }
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                }
+                            }
+
+                        } // Otherwise, just go ahead
+                        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
+                                .block(capturedSnapshot.getSnapshot())
+                                .type(mixinTileEntity.getTickedSpawnType())
+                                .build());
                         notifier.ifPresent(builder::notifier);
                         owner.ifPresent(builder::owner);
-                        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), experience, causeTracker.getWorld());
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
-                            for (Entity entity : event.getEntities()) {
+                        final Cause cause = builder.build();
+                        final SpawnEntityEvent
+                                spawnEntityEvent =
+                                SpongeEventFactory.createSpawnEntityEvent(cause, nonExpEntities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(spawnEntityEvent);
+                        if (!spawnEntityEvent.isCancelled()) {
+                            for (Entity entity : spawnEntityEvent.getEntities()) {
                                 if (entityCreator != null) {
                                     EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
                                 }
                                 causeTracker.getMixinWorld().forceSpawnEntity(entity);
                             }
                         }
-
-                    } // Otherwise, just go ahead
-                    final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
-                            .block(capturedSnapshot.getSnapshot())
-                            .type(mixinTileEntity.getTickedSpawnType())
-                            .build());
-                    notifier.ifPresent(builder::notifier);
-                    owner.ifPresent(builder::owner);
-                    final Cause cause = builder.build();
-                    final SpawnEntityEvent
-                            spawnEntityEvent =
-                            SpongeEventFactory.createSpawnEntityEvent(cause, nonExpEntities, causeTracker.getWorld());
-                    SpongeImpl.postEvent(spawnEntityEvent);
-                    if (!spawnEntityEvent.isCancelled()) {
-                        for (Entity entity : spawnEntityEvent.getEntities()) {
-                            if (entityCreator != null) {
-                                EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                            }
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                    });
+            phaseContext.getCapturedItemsSupplier()
+                    .ifPresentAndNotEmpty(entities -> {
+                        final Cause cause = Cause.source(BlockSpawnCause.builder()
+                                .block(capturedSnapshot.getSnapshot())
+                                .type(InternalSpawnTypes.BLOCK_SPAWNING)
+                                .build())
+                                .build();
+                        final ArrayList<Entity> capturedEntities = new ArrayList<>();
+                        for (EntityItem entity : entities) {
+                            capturedEntities.add(EntityUtil.fromNative(entity));
                         }
-                    }
-                });
-        phaseContext.getCapturedItemsSupplier()
-                .ifPresentAndNotEmpty(entities -> {
-                    final Cause cause = Cause.source(BlockSpawnCause.builder()
-                            .block(capturedSnapshot.getSnapshot())
-                            .type(InternalSpawnTypes.BLOCK_SPAWNING)
-                            .build())
-                            .build();
-                    final ArrayList<Entity> capturedEntities = new ArrayList<>();
-                    for (EntityItem entity : entities) {
-                        capturedEntities.add(EntityUtil.fromNative(entity));
-                    }
-                    final SpawnEntityEvent
-                            spawnEntityEvent =
-                            SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld());
-                    SpongeImpl.postEvent(spawnEntityEvent);
-                    if (!spawnEntityEvent.isCancelled()) {
-                        for (Entity entity : spawnEntityEvent.getEntities()) {
-                            if (entityCreator != null) {
-                                EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                        final SpawnEntityEvent
+                                spawnEntityEvent =
+                                SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld());
+                        SpongeImpl.postEvent(spawnEntityEvent);
+                        if (!spawnEntityEvent.isCancelled()) {
+                            for (Entity entity : spawnEntityEvent.getEntities()) {
+                                if (entityCreator != null) {
+                                    EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
+                                }
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
                             }
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
                         }
-                    }
-                });
+                    });
+        } catch (Exception e) {
+            throw new RuntimeException(String.format("Exception occured while processing tile entity %s at %s", tickingTile, tickingTile.getLocation()), e);
+        }
     }
 
     @Override
