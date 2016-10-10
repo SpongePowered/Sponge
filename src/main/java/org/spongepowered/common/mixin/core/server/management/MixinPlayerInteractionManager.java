@@ -66,7 +66,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerInteractionManager;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.util.SpongeHooks;
 
 import java.util.Optional;
 
@@ -140,7 +139,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 Optional.of(new Vector3d(offsetX, offsetY, offsetZ)), currentSnapshot,
                 DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
         ItemStack newPlayerItem = this.thisPlayerMP.getHeldItemMainhand();
-        if (!SpongeHooks.areItemStacksEquals(currentPlayerItem, newPlayerItem)) {
+        if (!ItemStack.areItemsEqual(currentPlayerItem, newPlayerItem)) {
             SpongeCommonEventFactory.playerInteractItemChanged = true;
         }
         final EntityPlayerMP playerMP = (EntityPlayerMP) player;
