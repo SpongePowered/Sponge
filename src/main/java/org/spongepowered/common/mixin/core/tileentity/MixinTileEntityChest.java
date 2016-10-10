@@ -152,7 +152,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
             if (this.numPlayersUsing > 0) {
                 this.lidAngle += f;
             } else {
-                this.lidAngle -= f;
+                this.lidAngle = 0.0f;
             }
 
             double posX = (double)this.pos.getX() + 0.5D;
