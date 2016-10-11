@@ -276,7 +276,7 @@ public abstract class TrackingPhase {
         final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE,
                 entities, (World) minecraftWorld);
         SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
+        if (!event.isCancelled() && event.getEntities().size() > 0) {
             ((IMixinWorldServer) minecraftWorld).forceSpawnEntity(entity);
             return true;
         }
