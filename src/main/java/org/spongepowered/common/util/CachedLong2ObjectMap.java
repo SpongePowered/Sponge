@@ -50,4 +50,8 @@ public class CachedLong2ObjectMap<V extends IMixinCachable> extends Long2ObjectO
         return super.remove(key);
     }
 
+    @Override
+    public boolean containsKey(long key) {
+        return this.get(key) != null;
+    }
 }
