@@ -92,6 +92,10 @@ import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
+import org.spongepowered.api.statistic.Statistic;
+import org.spongepowered.api.statistic.StatisticFormat;
+import org.spongepowered.api.statistic.StatisticGroup;
+import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextStyle;
@@ -187,6 +191,8 @@ import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
+import org.spongepowered.common.statistic.builder.SpongeAchievementBuilder;
+import org.spongepowered.common.statistic.builder.SpongeStatisticBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettingsBuilder;
@@ -311,12 +317,15 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Schematic.Builder.class, SpongeSchematicBuilder::new)
             .registerBuilderSupplier(VirtualBiomeType.Builder.class, SpongeVirtualBiomeTypeBuilder::new)
             .registerBuilderSupplier(BiomeGenerationSettings.Builder.class, SpongeBiomeGenerationSettingsBuilder::new)
+            .registerBuilderSupplier(Statistic.Builder.class, SpongeStatisticBuilder::new)
+            .registerBuilderSupplier(Achievement.Builder.class, SpongeAchievementBuilder::new)
         ;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected void registerCommonModules(SpongeGameRegistry registry) {
-        registry.registerModule(new ArgumentRegistryModule())
+        registry.registerModule(Achievement.class, new AchievementRegistryModule())
+            .registerModule(new ArgumentRegistryModule())
             .registerModule(AITaskType.class, AITaskTypeModule.getInstance())
             .registerModule(ArmorType.class, new ArmorTypeRegistryModule())
             .registerModule(Art.class, new ArtRegistryModule())
@@ -393,6 +402,9 @@ public final class CommonModuleRegistry {
             .registerModule(SpawnType.class, new SpawnTypeRegistryModule())
             .registerModule(SoundCategory.class, new SoundCategoryRegistryModule())
             .registerModule(StairShape.class, new StairShapeRegistryModule())
+            .registerModule(Statistic.class, new StatisticRegistryModule())
+            .registerModule(StatisticFormat.class, new StatisticFormatRegistryModule())
+            .registerModule(StatisticGroup.class, new StatisticGroupRegistryModule())
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
             .registerModule(TeleportType.class, TeleportTypeRegistryModule.getInstance())
             .registerModule(TextColor.class, new TextColorRegistryModule())

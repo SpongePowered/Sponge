@@ -26,11 +26,15 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.DataView;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.stats.StatisticsManagerServer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.statistic.Statistic;
+import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.asm.mixin.Final;
@@ -39,11 +43,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.interfaces.statistic.IMixinStatisticHolder;
 
+import java.io.File;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 @Mixin(value = SpongeUser.class, remap = false)
-public abstract class MixinSpongeUser implements User, IMixinSubject {
+public abstract class MixinSpongeUser implements User, IMixinSubject, IMixinStatisticHolder {
 
     @Shadow @Final private com.mojang.authlib.GameProfile profile;
 
@@ -93,6 +101,71 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
         return this.profile.getId().toString();
     }
 
+    private StatisticsManagerServer getStatisticFile() {
+        MinecraftServer server = SpongeImpl.getServer();
+        File statsDir = new File(server.worldServerForDimension(0).getSaveHandler().getWorldDirectory(), "stats");
+        File statsFile = new File(statsDir, getUniqueId().toString() + ".json");
+
+        if (!statsFile.exists()) {
+            File legacyFile = new File(statsDir, getName() + ".json");
+            if (legacyFile.exists() && legacyFile.isFile()) {
+                legacyFile.renameTo(statsFile);
+            }
+        }
+        return new StatisticsManagerServer(server, statsFile);
+    }
+
+    @Override
+    public Map<Statistic, Long> getStatistics() {
+        Optional<Player> player = getPlayer();
+        if (player.isPresent()) {
+            return ((IMixinStatisticHolder) player.get()).getStatistics();
+        }
+
+        StatisticsManagerServer statisticsFile = getStatisticFile();
+        statisticsFile.readStatFile();
+        return ((IMixinStatisticHolder) statisticsFile).getStatistics();
+    }
+
+    @Override
+    public void setStatistics(Map<Statistic, Long> statistics) {
+        Optional<Player> player = getPlayer();
+        if (player.isPresent()) {
+            ((IMixinStatisticHolder) player.get()).setStatistics(statistics);
+            return;
+        }
+
+        StatisticsManagerServer statisticsFile = getStatisticFile();
+        ((IMixinStatisticHolder) statisticsFile).setStatistics(statistics);
+        statisticsFile.saveStatFile();
+    }
+
+    @Override
+    public Set<Achievement> getAchievements() {
+        Optional<Player> player = getPlayer();
+        if (player.isPresent()) {
+            return ((IMixinStatisticHolder) player.get()).getAchievements();
+        }
+
+        StatisticsManagerServer statisticsFile = getStatisticFile();
+        statisticsFile.readStatFile();
+        return ((IMixinStatisticHolder) statisticsFile).getAchievements();
+    }
+
+    @Override
+    public void setAchievements(Set<Achievement> achievements) {
+        Optional<Player> player = getPlayer();
+        if (player.isPresent()) {
+            ((IMixinStatisticHolder) player.get()).setAchievements(achievements);
+            return;
+        }
+
+        StatisticsManagerServer statisticsFile = getStatisticFile();
+        statisticsFile.readStatFile();
+        ((IMixinStatisticHolder) statisticsFile).setAchievements(achievements);
+        statisticsFile.saveStatFile();
+    }
+
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
@@ -100,4 +173,5 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
                 .add("profile", this.getProfile())
                 .toString();
     }
+
 }

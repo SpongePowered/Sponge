@@ -87,6 +87,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
+import org.spongepowered.api.event.statistic.ChangeStatisticEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -95,6 +96,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -103,11 +105,13 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -137,6 +141,7 @@ import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.statistic.IMixinStatisticHolder;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -151,6 +156,7 @@ import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 import java.time.Instant;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -158,7 +164,7 @@ import javax.annotation.Nullable;
 
 @Mixin(EntityPlayerMP.class)
 public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, IMixinSubject, IMixinEntityPlayerMP, IMixinCommandSender,
-        IMixinCommandSource {
+        IMixinCommandSource, IMixinStatisticHolder {
 
     @Shadow @Final public MinecraftServer mcServer;
     @Shadow @Final public PlayerInteractionManager interactionManager;
@@ -173,6 +179,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
+    @Shadow @Final private StatisticsManagerServer statsFile;
     @Shadow @Override public abstract void takeStat(StatBase stat);
     @Shadow public abstract StatisticsManagerServer getStatFile();
     @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
@@ -312,6 +319,18 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Overwrite
     public Entity changeDimension(int dimensionId) {
         return EntityUtil.teleportPlayerToDimension(this, dimensionId);
+    }
+
+    // @see EntityPlayerMP#addStat(StatBase, int)
+    @Inject(method = "addStat", at = @At(value = "INVOKE", opcode = Opcodes.IFNONNULL, shift = Shift.AFTER, ordinal = 0) , cancellable = true)
+    public void callStatisticEvent(StatBase statistic, int amount, CallbackInfo ci) {
+        int oldValue = this.statsFile.readStat(statistic);
+        final ChangeStatisticEvent.TargetPlayer event = SpongeEventFactory.createChangeStatisticEventTargetPlayer(Cause.of(NamedCause.source(this)),
+                oldValue, oldValue + amount, (Statistic) statistic, this);
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            ci.cancel();
+        }
     }
 
     @Override
@@ -611,6 +630,28 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void setImplVelocity(Vector3d velocity) {
         super.setImplVelocity(velocity);
         this.velocityOverride = null;
+    }
+
+    @Override
+    public Map<Statistic, Long> getStatistics() {
+        return ((IMixinStatisticHolder) statsFile).getStatistics();
+    }
+
+    @Override
+    public void setStatistics(Map<Statistic, Long> statistics) {
+        ((IMixinStatisticHolder) statsFile).setStatistics(statistics);
+        // statsFile.saveStatFile();
+    }
+
+    @Override
+    public Set<org.spongepowered.api.statistic.achievement.Achievement> getAchievements() {
+        return ((IMixinStatisticHolder) statsFile).getAchievements();
+    }
+
+    @Override
+    public void setAchievements(Set<org.spongepowered.api.statistic.achievement.Achievement> achievements) {
+        ((IMixinStatisticHolder) statsFile).setAchievements(achievements);
+        // statsFile.saveStatFile();
     }
 
     @Override

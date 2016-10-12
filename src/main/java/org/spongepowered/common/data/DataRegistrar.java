@@ -655,6 +655,12 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(BeaconData.class, SpongeBeaconData.class,
                 ImmutableBeaconData.class, ImmutableSpongeBeaconData.class, new BeaconDataProcessor());
 
+        dataManager.registerDualProcessor(AchievementData.class, SpongeAchievementData.class, ImmutableAchievementData.class,
+                ImmutableSpongeAchievementData.class, new AchievementDataProcessor());
+
+        dataManager.registerDualProcessor(StatisticData.class, SpongeStatisticData.class, ImmutableStatisticData.class,
+                ImmutableSpongeStatisticData.class, new StatisticDataProcessor());
+
         // Values
 
         dataManager.registerValueProcessor(Keys.FUSE_DURATION, new FuseDurationValueProcessor());
