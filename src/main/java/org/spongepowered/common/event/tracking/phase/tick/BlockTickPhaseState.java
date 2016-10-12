@@ -25,6 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.Lists;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.util.math.BlockPos;
@@ -41,7 +43,9 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -170,6 +174,16 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState {
         final BlockSnapshot blockSnapshot = context.getSource(BlockSnapshot.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking a block", context));
         explosionContext.add(NamedCause.source(blockSnapshot));
+    }
+
+    @Override
+    public void postTrackBlock(BlockSnapshot snapshot, CauseTracker tracker, PhaseContext context) {
+        boolean processImmediately = context.firstNamed(InternalNamedCauses.Tracker.PROCESS_IMMEDIATELY, Boolean.class).get();
+        if (processImmediately) {
+            TrackingUtil.processBlockCaptures(Lists.newArrayList(snapshot), tracker, this, context);
+            context.getCapturedBlocks().remove(snapshot);
+        }
+
     }
 
     @Override

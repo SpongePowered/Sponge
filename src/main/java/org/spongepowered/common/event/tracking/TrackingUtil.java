@@ -34,6 +34,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
+import net.minecraft.block.BlockRedstoneLight;
 import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.state.IBlockState;
@@ -62,7 +63,6 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
@@ -76,6 +76,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.mixin.plugin.blockcapturing.IModData_BlockCapturing;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -206,10 +207,23 @@ public final class TrackingUtil {
         if(event.isCancelled()) {
             return;
         }
+
         final PhaseContext phaseContext = PhaseContext.start()
                 .add(NamedCause.source(snapshot))
                 .addBlockCaptures()
                 .addEntityCaptures();
+
+        if (block instanceof IModData_BlockCapturing) {
+            IModData_BlockCapturing capturingBlock = (IModData_BlockCapturing) block;
+            if (capturingBlock.requiresBlockCapturingRefresh()) {
+                capturingBlock.initializeBlockCapturingState(minecraftWorld);
+                capturingBlock.requiresBlockCapturingRefresh(false);
+            }
+            phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.PROCESS_IMMEDIATELY, ((IModData_BlockCapturing) block).processTickChangesImmediately()));
+        } else {
+            phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.PROCESS_IMMEDIATELY, false));
+        }
+
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseData current = causeTracker.getCurrentPhaseData();
         final IPhaseState currentState = current.state;
@@ -325,6 +339,7 @@ public final class TrackingUtil {
                 capturedSnapshots.remove(originalBlockSnapshot);
                 return false;
             }
+            phaseState.postTrackBlock(originalBlockSnapshot, causeTracker, phaseContext);
         } else {
             originalBlockSnapshot = (SpongeBlockSnapshot) BlockSnapshot.NONE;
             final IMixinChunk mixinChunk = (IMixinChunk) chunk;
@@ -368,6 +383,9 @@ public final class TrackingUtil {
             return true;
         }
         if (originalBlock instanceof BlockRedstoneTorch && newBlock instanceof BlockRedstoneTorch) {
+            return true;
+        }
+        if (originalBlock instanceof BlockRedstoneLight && newBlock instanceof BlockRedstoneLight) {
             return true;
         }
 

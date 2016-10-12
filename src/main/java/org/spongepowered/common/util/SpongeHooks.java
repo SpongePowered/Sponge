@@ -57,6 +57,7 @@ import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
+import org.spongepowered.common.mixin.plugin.blockcapturing.IModData_BlockCapturing;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;
@@ -508,6 +509,9 @@ public class SpongeHooks {
         for (BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
             if (blockType instanceof IModData_Collisions) {
                 ((IModData_Collisions) blockType).requiresCollisionsCacheRefresh(true);
+            }
+            if (blockType instanceof IModData_BlockCapturing) {
+                ((IModData_BlockCapturing) blockType).requiresBlockCapturingRefresh(true);
             }
         }
     }

@@ -39,6 +39,9 @@ public class ModuleCategory extends ConfigCategory {
     @Setting(value = "entity-collisions")
     private boolean pluginEntityCollisions = true;
 
+    @Setting(value = "block-capturing-control")
+    private boolean blockCapturing = true;
+
     @Setting("timings")
     private boolean pluginTimings = true;
 
@@ -67,6 +70,10 @@ public class ModuleCategory extends ConfigCategory {
 
     public boolean usePluginEntityActivation() {
         return this.pluginEntityActivation;
+    }
+
+    public boolean usesBlockCapturing() {
+        return this.blockCapturing;
     }
 
     public void setPluginEntityActivation(boolean state) {

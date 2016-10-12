@@ -67,6 +67,7 @@ public class SpongeLaunch {
         // Register common mixin configurations
         Mixins.addConfiguration("mixins.common.api.json");
         Mixins.addConfiguration("mixins.common.core.json");
+        Mixins.addConfiguration("mixins.common.blockcapturing.json");
         Mixins.addConfiguration("mixins.common.bungeecord.json");
         Mixins.addConfiguration("mixins.common.concurrentchecks.json");
         Mixins.addConfiguration("mixins.common.entityactivation.json");

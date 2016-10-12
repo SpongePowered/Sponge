@@ -25,7 +25,9 @@
 package org.spongepowered.common.config.type;
 
 import ninja.leaping.configurate.objectmapping.Setting;
+import org.spongepowered.common.config.category.BlockCapturingCategory;
 import org.spongepowered.common.config.category.BlockTrackingCategory;
+import org.spongepowered.common.config.category.CollisionModCategory;
 import org.spongepowered.common.config.category.DebugCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.config.category.EntityCategory;
@@ -39,6 +41,8 @@ public abstract class ConfigBase {
 
     @Setting(value = "block-tracking")
     private BlockTrackingCategory blockTracking = new BlockTrackingCategory();
+    @Setting(value = "block-capturing")
+    private BlockCapturingCategory blockCapturing = new BlockCapturingCategory();
     @Setting
     private DebugCategory debug = new DebugCategory();
     @Setting(value = "entity")
@@ -65,6 +69,10 @@ public abstract class ConfigBase {
 
     public BlockTrackingCategory getBlockTracking() {
         return this.blockTracking;
+    }
+
+    public BlockCapturingCategory getBlockCapturing() {
+        return this.blockCapturing;
     }
 
     public DebugCategory getDebug() {
