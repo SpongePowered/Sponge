@@ -213,16 +213,7 @@ public final class TrackingUtil {
                 .addBlockCaptures()
                 .addEntityCaptures();
 
-        if (block instanceof IModData_BlockCapturing) {
-            IModData_BlockCapturing capturingBlock = (IModData_BlockCapturing) block;
-            if (capturingBlock.requiresBlockCapturingRefresh()) {
-                capturingBlock.initializeBlockCapturingState(minecraftWorld);
-                capturingBlock.requiresBlockCapturingRefresh(false);
-            }
-            phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.PROCESS_IMMEDIATELY, ((IModData_BlockCapturing) block).processTickChangesImmediately()));
-        } else {
-            phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.PROCESS_IMMEDIATELY, false));
-        }
+        checkAndAssignBlockTickConfig(block, minecraftWorld, phaseContext);
 
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseData current = causeTracker.getCurrentPhaseData();
@@ -247,6 +238,9 @@ public final class TrackingUtil {
                 .add(NamedCause.source(currentTickBlock))
                 .addEntityCaptures()
                 .addBlockCaptures();
+
+        checkAndAssignBlockTickConfig(block, minecraftWorld, phaseContext);
+
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseData current = causeTracker.getCurrentPhaseData();
         final IPhaseState currentState = current.state;
@@ -255,6 +249,19 @@ public final class TrackingUtil {
         causeTracker.switchToPhase(TickPhase.Tick.RANDOM_BLOCK, phaseContext.complete());
         block.randomTick(minecraftWorld, pos, state, random);
         causeTracker.completePhase();
+    }
+
+    private static void checkAndAssignBlockTickConfig(Block block, WorldServer minecraftWorld, PhaseContext phaseContext) {
+        if (block instanceof IModData_BlockCapturing) {
+            IModData_BlockCapturing capturingBlock = (IModData_BlockCapturing) block;
+            if (capturingBlock.requiresBlockCapturingRefresh()) {
+                capturingBlock.initializeBlockCapturingState(minecraftWorld);
+                capturingBlock.requiresBlockCapturingRefresh(false);
+            }
+            phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.PROCESS_IMMEDIATELY, ((IModData_BlockCapturing) block).processTickChangesImmediately()));
+        } else {
+            phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.PROCESS_IMMEDIATELY, false));
+        }
     }
 
     public static void tickWorldProvider(IMixinWorldServer worldServer) {
