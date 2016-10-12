@@ -100,7 +100,8 @@ public final class CauseTracker {
 
     @Nullable private PhaseData currentProcessingState = null;
 
-    private final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().isVerbose();
+    public final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().isVerbose();
+    public final boolean verboseErrors = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().verboseErrors();
 
     @SuppressWarnings("ConstantConditions")
     public CauseTracker(WorldServer targetWorld) {
@@ -232,7 +233,11 @@ public final class CauseTracker {
         printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
     }
 
-    private void printMessageWithCaughtException(String header, String subHeader, IPhaseState state, PhaseContext context, Exception e) {
+    public void printMessageWithCaughtException(String header, String subHeader, Exception e) {
+        this.printMessageWithCaughtException(header, subHeader, this.getCurrentState(), this.getCurrentContext(), e);
+    }
+
+    public void printMessageWithCaughtException(String header, String subHeader, IPhaseState state, PhaseContext context, Exception e) {
         final PrettyPrinter printer = new PrettyPrinter(40);
         printer.add(header).centre().hr()
                 .add("%s %s", subHeader, state)

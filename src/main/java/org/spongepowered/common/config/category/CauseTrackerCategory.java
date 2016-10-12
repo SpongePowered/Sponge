@@ -37,6 +37,11 @@ public class CauseTrackerCategory extends ConfigCategory {
                                           + "reported, you may disable this.")
     boolean isVerbose = false;
 
+    @Setting(value = "verbose-errors", comment = "If true, the cause tracker will dump extra information about the current phases"
+                                                + "when certain non-CauseTracker related exceptions occur. This is usually not necessary, as the information "
+                                                + "in the exception itself can normally be used to determine the cause of the issue")
+    boolean verboseErrors = false;
+
     @Setting(value = "report-different-world-changes", comment = "If true, when a mod changes a world that is different\n"
                                                                  + "from an expected world during a WorldTick event, the\n"
                                                                  + "cause tracker will identify both the expected changed\n"
@@ -52,6 +57,10 @@ public class CauseTrackerCategory extends ConfigCategory {
 
     public void setVerbose(boolean verbose) {
         this.isVerbose = verbose;
+    }
+
+    public boolean verboseErrors() {
+        return this.verboseErrors;
     }
 
     public boolean reportWorldTickDifferences() {
