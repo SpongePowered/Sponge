@@ -26,7 +26,7 @@ package org.spongepowered.common.interfaces.world.gen;
 
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.gen.Populator;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public interface IFlaggedPopulator extends Populator {
 
     void populate(World world, Extent extent, Random rand, List<String> flags);
 
-    default void populate(World world, Extent extent, Random rand, ImmutableBiomeArea virtualBiomes, List<String> flags) {
+    default void populate(World world, Extent extent, Random rand, ImmutableBiomeVolume virtualBiomes, List<String> flags) {
         populate(world, extent, rand, flags);
     }
 

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.world.gen;
 
 import com.flowpowered.math.GenericMath;
-import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
@@ -48,8 +47,8 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
-import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
+import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GenerationPopulator;
@@ -190,7 +189,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
     }
 
     @Override
-    public void populate(World world, MutableBlockVolume buffer, ImmutableBiomeArea biomes) {
+    public void populate(World world, MutableBlockVolume buffer, ImmutableBiomeVolume biomes) {
         int x = GenericMath.floor(buffer.getBlockMin().getX() / 16f);
         int z = GenericMath.floor(buffer.getBlockMin().getZ() / 16f);
         this.rand.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
@@ -225,7 +224,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
         // of the biomes that the terrain generator expects. While not an exact
         // reverse of the algorithm this should be accurate 99.997% of the time
         // (based on testing).
-        MutableBiomeArea buffer = new VirtualMutableBiomeBuffer(new Vector2i(x * 16 - 6, z * 16 - 6), new Vector2i(37, 37));
+        MutableBiomeVolume buffer = new VirtualMutableBiomeBuffer(new Vector3i(x * 16 - 6, 0, z * 16 - 6), new Vector3i(37, 1, 37));
         this.biomegen.generateBiomes(buffer);
         if (this.biomesForGeneration == null || this.biomesForGeneration.length < 100) {
             this.biomesForGeneration = new Biome[100];
@@ -234,7 +233,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
             int absX = bx + x * 16 - 6;
             for (int bz = 0; bz < 40; bz += 4) {
                 int absZ = bz + z * 16 - 6;
-                BiomeType type = buffer.getBiome(absX, absZ);
+                BiomeType type = buffer.getBiome(absX, 0, absZ);
                 if (type instanceof VirtualBiomeType) {
                     type = ((VirtualBiomeType) type).getPersistedType();
                 }
@@ -247,7 +246,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
     /**
      * @author gabizou - February 1st, 2016
      *
-     * Redirects this method call to just simply return the current bimoes, as
+     * Redirects this method call to just simply return the current biomes, as
      * necessitated by @Deamon's changes. This avoids an overwrite entirely.
      */
     @Redirect(method = "setBlocksInChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/biome/BiomeProvider;getBiomesForGeneration([Lnet/minecraft/world/biome/Biome;IIII)[Lnet/minecraft/world/biome/Biome;"))

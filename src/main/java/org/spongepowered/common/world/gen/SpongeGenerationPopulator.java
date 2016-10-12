@@ -36,7 +36,7 @@ import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.common.SpongeImplHooks;
@@ -78,7 +78,7 @@ public class SpongeGenerationPopulator implements GenerationPopulator, IGenerati
     }
 
     @Override
-    public void populate(org.spongepowered.api.world.World world, MutableBlockVolume buffer, ImmutableBiomeArea biomes) {
+    public void populate(org.spongepowered.api.world.World world, MutableBlockVolume buffer, ImmutableBiomeVolume biomes) {
         this.getTimingsHandler().startTimingIfSync();
         Vector3i min = buffer.getBlockMin();
         Vector3i max = buffer.getBlockMax();

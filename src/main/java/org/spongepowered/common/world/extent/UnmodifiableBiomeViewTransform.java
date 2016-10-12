@@ -24,40 +24,40 @@
  */
 package org.spongepowered.common.world.extent;
 
-import com.flowpowered.math.vector.Vector2i;
-import org.spongepowered.api.util.DiscreteTransform2;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
-import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
-import org.spongepowered.api.world.extent.worker.BiomeAreaWorker;
+import com.flowpowered.math.vector.Vector3i;
+import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
+import org.spongepowered.api.world.extent.UnmodifiableBiomeVolume;
+import org.spongepowered.api.world.extent.worker.BiomeVolumeWorker;
 import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
-import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
+import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
 
-public class UnmodifiableBiomeViewTransform extends AbstractBiomeViewTransform<UnmodifiableBiomeArea> implements UnmodifiableBiomeArea {
+public class UnmodifiableBiomeViewTransform extends AbstractBiomeViewTransform<UnmodifiableBiomeVolume> implements UnmodifiableBiomeVolume {
 
-    public UnmodifiableBiomeViewTransform(UnmodifiableBiomeArea area, DiscreteTransform2 transform) {
-        super(area, transform);
+    public UnmodifiableBiomeViewTransform(UnmodifiableBiomeVolume volume, DiscreteTransform3 transform) {
+        super(volume, transform);
     }
 
     @Override
-    public UnmodifiableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
-        return new UnmodifiableBiomeViewDownsize(this.area, this.inverseTransform.transform(newMin), this.inverseTransform.transform(newMax))
-            .getBiomeView(this.transform);
+    public UnmodifiableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
+        return new UnmodifiableBiomeViewDownsize(this.volume, this.inverseTransform.transform(newMin),
+                this.inverseTransform.transform(newMax)).getBiomeView(this.transform);
     }
 
     @Override
-    public UnmodifiableBiomeArea getBiomeView(DiscreteTransform2 transform) {
-        return new UnmodifiableBiomeViewTransform(this.area, this.transform.withTransformation(transform));
+    public UnmodifiableBiomeVolume getBiomeView(DiscreteTransform3 transform) {
+        return new UnmodifiableBiomeViewTransform(this.volume, this.transform.withTransformation(transform));
     }
 
     @Override
-    public ImmutableBiomeArea getImmutableBiomeCopy() {
+    public ImmutableBiomeVolume getImmutableBiomeCopy() {
         return ByteArrayImmutableBiomeBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min,
             this.size);
     }
 
     @Override
-    public BiomeAreaWorker<? extends UnmodifiableBiomeArea> getBiomeWorker() {
-        return new SpongeBiomeAreaWorker<>(this);
+    public BiomeVolumeWorker<? extends UnmodifiableBiomeVolume> getBiomeWorker() {
+        return new SpongeBiomeVolumeWorker<>(this);
     }
 
 }

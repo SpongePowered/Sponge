@@ -27,7 +27,7 @@ package org.spongepowered.common.world.gen.populators;
 import com.google.common.collect.Lists;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
@@ -69,7 +69,7 @@ public class FilteredPopulator implements IFlaggedPopulator {
     }
 
     @Override
-    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand, ImmutableBiomeArea virtualBiomes) {
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand, ImmutableBiomeVolume virtualBiomes) {
         this.wrapped.populate(world, extent, rand, virtualBiomes);
     }
 
@@ -85,7 +85,7 @@ public class FilteredPopulator implements IFlaggedPopulator {
     }
 
     @Override
-    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand, ImmutableBiomeArea virtualBiomes, List<String> flags) {
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand, ImmutableBiomeVolume virtualBiomes, List<String> flags) {
         if (!this.check.test(extent)) {
             return;
         }

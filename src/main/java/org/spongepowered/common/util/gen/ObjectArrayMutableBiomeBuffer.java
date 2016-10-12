@@ -26,19 +26,19 @@ package org.spongepowered.common.util.gen;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
-import org.spongepowered.api.util.DiscreteTransform2;
+import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
-import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
+import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
-import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
+import org.spongepowered.api.world.extent.UnmodifiableBiomeVolume;
+import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.MutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.MutableBiomeViewTransform;
-import org.spongepowered.common.world.extent.UnmodifiableBiomeAreaWrapper;
-import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
+import org.spongepowered.common.world.extent.UnmodifiableBiomeVolumeWrapper;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 
 /**
  * Mutable view of a {@link Biome} array.
@@ -48,7 +48,7 @@ import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
-public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeArea {
+public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeVolume {
 
     private final Biome[] biomes;
 
@@ -60,48 +60,48 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
      * @param start The start position
      * @param size The size
      */
-    public ObjectArrayMutableBiomeBuffer(Biome[] biomes, Vector2i start, Vector2i size) {
+    public ObjectArrayMutableBiomeBuffer(Biome[] biomes, Vector3i start, Vector3i size) {
         super(start, size);
         this.biomes = biomes;
     }
 
     @Override
-    public BiomeType getBiome(int x, int z) {
-        checkRange(x, z);
+    public BiomeType getBiome(int x, int y, int z) {
+        checkRange(x, y, z);
         return (BiomeType) this.biomes[getIndex(x, z)];
     }
 
     @Override
-    public void setBiome(int x, int z, BiomeType biome) {
+    public void setBiome(int x, int y, int z, BiomeType biome) {
         checkNotNull(biome, "biome");
-        checkRange(x, z);
+        checkRange(x, y, z);
         this.biomes[getIndex(x, z)] = (Biome) biome;
     }
 
     @Override
-    public MutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
-        checkRange(newMin.getX(), newMin.getY());
-        checkRange(newMax.getX(), newMax.getY());
+    public MutableBiomeVolume getBiomeView(Vector3i newMin, Vector3i newMax) {
+        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
+        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
         return new MutableBiomeViewDownsize(this, newMin, newMax);
     }
 
     @Override
-    public MutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
+    public MutableBiomeVolume getBiomeView(DiscreteTransform3 transform) {
         return new MutableBiomeViewTransform(this, transform);
     }
 
     @Override
-    public MutableBiomeAreaWorker<? extends MutableBiomeArea> getBiomeWorker() {
-        return new SpongeMutableBiomeAreaWorker<>(this);
+    public MutableBiomeVolumeWorker<? extends MutableBiomeVolume> getBiomeWorker() {
+        return new SpongeMutableBiomeVolumeWorker<>(this);
     }
 
     @Override
-    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
-        return new UnmodifiableBiomeAreaWrapper(this);
+    public UnmodifiableBiomeVolume getUnmodifiableBiomeView() {
+        return new UnmodifiableBiomeVolumeWrapper(this);
     }
 
     @Override
-    public MutableBiomeArea getBiomeCopy(StorageType type) {
+    public MutableBiomeVolume getBiomeCopy(StorageType type) {
         switch (type) {
             case STANDARD:
                 return new ObjectArrayMutableBiomeBuffer(this.biomes.clone(), this.start, this.size);
@@ -112,7 +112,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     }
 
     @Override
-    public ImmutableBiomeArea getImmutableBiomeCopy() {
+    public ImmutableBiomeVolume getImmutableBiomeCopy() {
         return new ObjectArrayImmutableBiomeBuffer(this.biomes, this.start, this.size);
     }
 
