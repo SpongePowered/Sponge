@@ -56,14 +56,15 @@ public final class EntityPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
+            int chunkZ) {
         if (phaseState == State.CHANGING_TO_DIMENSION) {
             final WorldServer worldServer = context.firstNamed(InternalNamedCauses.Teleporting.TARGET_WORLD, WorldServer.class)
                     .orElseThrow(TrackingUtil.throwWithContext("Expected to capture the target World for a teleport!", context));
             ((IMixinWorldServer) worldServer).forceSpawnEntity(entity);
             return true;
         }
-        return super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
+        return super.spawnEntityOrCapture(causeTracker, phaseState, context, entity, chunkX, chunkZ);
     }
 
     @Override
