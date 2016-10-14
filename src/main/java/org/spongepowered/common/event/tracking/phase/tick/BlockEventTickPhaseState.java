@@ -54,6 +54,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -76,6 +77,32 @@ class BlockEventTickPhaseState extends TickPhaseState {
                         mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
                     });
         });
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        final Optional<User> notifier = context.getNotifier();
+        final Optional<User> owner = context.getOwner();
+        final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
+        final Cause cause = Cause.source(InternalSpawnTypes.SpawnCauses.CUSTOM_SPAWN)
+                .build();
+
+        final List<Entity> entities = new ArrayList<>(1);
+        entities.add(entity);
+        final SpawnEntityEvent
+                spawnEntityEvent =
+                SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+        SpongeImpl.postEvent(spawnEntityEvent);
+        if (!spawnEntityEvent.isCancelled()) {
+            for (Entity anEntity : spawnEntityEvent.getEntities()) {
+                if (entityCreator != null) {
+                    EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
+                }
+                causeTracker.getMixinWorld().forceSpawnEntity(anEntity);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -111,21 +138,6 @@ class BlockEventTickPhaseState extends TickPhaseState {
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
         phaseContext.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
-        phaseContext.getCapturedEntitySupplier()
-                .ifPresentAndNotEmpty(entities -> {
-                    final Cause cause = Cause.source(InternalSpawnTypes.SpawnCauses.CUSTOM_SPAWN)
-                            .build();
-                    final SpawnEntityEvent
-                            spawnEntityEvent =
-                            SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
-                    SpongeImpl.postEvent(spawnEntityEvent);
-                    for (Entity entity : spawnEntityEvent.getEntities()) {
-                        if (entityCreator != null) {
-                            EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                        }
-                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                    }
-                });
         phaseContext.getCapturedItemsSupplier()
                 .ifPresentAndNotEmpty(items -> {
                     final Cause cause = Cause.source(InternalSpawnTypes.SpawnCauses.CUSTOM_SPAWN)

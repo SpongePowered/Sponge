@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -58,23 +56,6 @@ class WeatherTickPhaseState extends TickPhaseState {
                 causeTracker.getMixinWorld().forceSpawnEntity(entity);
             }
         });
-        phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
-            final Cause.Builder builder = Cause.source(SpawnCause.builder()
-                    .type(InternalSpawnTypes.WEATHER)
-                    .build());
-            final ArrayList<Entity> capturedEntities = new ArrayList<>();
-            for (EntityItem entity : entities) {
-                capturedEntities.add(EntityUtil.fromNative(entity));
-            }
-
-            final SpawnEntityEvent
-                    spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(builder.build(), capturedEntities, causeTracker.getWorld());
-            SpongeImpl.postEvent(spawnEntityEvent);
-            for (Entity entity : spawnEntityEvent.getEntities()) {
-                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-            }
-        });
         phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
             TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
         });
@@ -82,6 +63,26 @@ class WeatherTickPhaseState extends TickPhaseState {
     @Override
     public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
 
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        final Cause.Builder builder = Cause.source(SpawnCause.builder()
+                .type(InternalSpawnTypes.WEATHER)
+                .build());
+        final ArrayList<Entity> capturedEntities = new ArrayList<>();
+        capturedEntities.add(entity);
+        final SpawnEntityEvent
+                spawnEntityEvent =
+                SpongeEventFactory.createSpawnEntityEvent(builder.build(), capturedEntities, causeTracker.getWorld());
+        SpongeImpl.postEvent(spawnEntityEvent);
+        if (!spawnEntityEvent.isCancelled()) {
+            for (Entity anEntity : spawnEntityEvent.getEntities()) {
+                causeTracker.getMixinWorld().forceSpawnEntity(anEntity);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

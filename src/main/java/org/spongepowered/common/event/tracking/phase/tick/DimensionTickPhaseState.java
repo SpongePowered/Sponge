@@ -91,6 +91,12 @@ class DimensionTickPhaseState extends TickPhaseState {
     public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
 
     }
+
+    @Override
+    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        return context.getCapturedEntities().add(entity);
+    }
+
     @Override
     public String toString() {
         return "DimensionTickPhase";
