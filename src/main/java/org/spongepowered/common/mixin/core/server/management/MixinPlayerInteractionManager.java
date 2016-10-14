@@ -54,7 +54,6 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -83,16 +82,9 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
     @Inject(method = "processRightClick", at = @At("HEAD"), cancellable = true)
     private void onProcessRightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand,
             CallbackInfoReturnable<EnumActionResult> cir) {
-        // If a CPacketTryUseItemOnBlock was just processed and didn't succeed,
-        // ignore firing the right-click AIR event
-        if (SpongeCommonEventFactory.ignoreRightClickAirEvent) {
-            SpongeCommonEventFactory.ignoreRightClickAirEvent = false;
-            return;
-        }
 
-        // We fire an event here when a player right-click's the AIR
-        if (SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)), Optional.empty(),
-                BlockSnapshot.NONE, Direction.NONE, hand).isCancelled()) {
+        // We fire an event here when a player right-click's the AIR with an item
+        if (SpongeCommonEventFactory.callInteractItemEventSecondary(player, stack, hand).isCancelled()) {
             cir.setReturnValue(EnumActionResult.FAIL);
         }
     }
@@ -137,32 +129,31 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)),
                 Optional.of(new Vector3d(offsetX, offsetY, offsetZ)), currentSnapshot,
                 DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
-        ItemStack newPlayerItem = this.thisPlayerMP.getHeldItemMainhand();
-        if (!ItemStack.areItemsEqual(oldStack, newPlayerItem)) {
+        if (!ItemStack.areItemStacksEqual(oldStack, this.thisPlayerMP.getHeldItem(hand))) {
             SpongeCommonEventFactory.playerInteractItemChanged = true;
         }
-        final EntityPlayerMP playerMP = (EntityPlayerMP) player;
+
         if (event.isCancelled()) {
             final IBlockState state = (IBlockState) currentSnapshot.getState();
 
             if (state.getBlock() == Blocks.COMMAND_BLOCK) {
                 // CommandBlock GUI opens solely on the client, we need to force it close on cancellation
-                playerMP.connection.sendPacket(new SPacketCloseWindow(0));
+                this.thisPlayerMP.connection.sendPacket(new SPacketCloseWindow(0));
 
             } else if (state.getProperties().containsKey(BlockDoor.HALF)) {
                 // Stopping a door from opening while `g the top part will allow the door to open, we need to update the
                 // client to resolve this
                 if (state.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER) {
-                    playerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up()));
+                    this.thisPlayerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up()));
                 } else {
-                    playerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.down()));
+                    this.thisPlayerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.down()));
                 }
 
             } else if (oldStack != null) {
                 // Stopping the placement of a door or double plant causes artifacts (ghosts) on the top-side of the block. We need to remove it
                 final Item item = oldStack.getItem();
                 if (item instanceof ItemDoor || (item instanceof ItemBlock && ((ItemBlock) item).getBlock().equals(Blocks.DOUBLE_PLANT))) {
-                    playerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up(2)));
+                    this.thisPlayerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up(2)));
                 }
             }
 
@@ -181,8 +172,12 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, stack, facing, offsetX, offsetY, offsetZ)
                          ? EnumActionResult.SUCCESS
                          : EnumActionResult.PASS;
+                // if itemstack changed, avoid restore
+                if (!ItemStack.areItemStacksEqual(oldStack, this.thisPlayerMP.getHeldItem(hand))) {
+                    SpongeCommonEventFactory.playerInteractItemChanged = true;
+                }
 
-                result = this.handleOpenEvent(lastOpenContainer, playerMP, result);
+                result = this.handleOpenEvent(lastOpenContainer, this.thisPlayerMP, result);
 
                 if (result != EnumActionResult.PASS) {
 
@@ -191,7 +186,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             } else {
                 // Need to send a block change to the client, because otherwise, they are not
                 // going to be told about the block change.
-                playerMP.connection.sendPacket(new SPacketBlockChange(this.theWorld, pos));
+                this.thisPlayerMP.connection.sendPacket(new SPacketBlockChange(this.theWorld, pos));
                 // Since the event was explicitly set to fail, we need to respect it and treat it as if
                 // it wasn't cancelled, but perform no further processing.
                 return EnumActionResult.FAIL;

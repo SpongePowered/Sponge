@@ -32,13 +32,25 @@ import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.client.CPacketClientStatus;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
-import net.minecraft.network.play.client.CPacketUpdateSign;
-import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.data.type.HandTypes;
+import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.living.humanoid.AnimateHandEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
@@ -57,6 +69,10 @@ public class PacketUtil {
         if (netHandler instanceof NetHandlerPlayServer) {
             EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
 
+            // Fire packet events and return if cancelled
+            if (firePreEvents(packetIn, packetPlayer)) {
+                return;
+            }
             boolean ignoreCreative = false;
 
             // This is another horrible hack required since the client sends a C10 packet for every slot
@@ -77,21 +93,6 @@ public class PacketUtil {
                 }
             }
 
-            // Fix invisibility respawn exploit
-            // Disabled until it can be tested further
-            /*if (packetIn instanceof C16PacketClientStatus) {
-                C16PacketClientStatus statusPacket = (C16PacketClientStatus) packetIn;
-                if (statusPacket.getStatus() == C16PacketClientStatus.EnumState.PERFORM_RESPAWN) {
-                    if (!SpongeCommonEventFactory.packetPlayer.isDead) {
-                        SpongeHooks.logExploitRespawnInvisibility(SpongeCommonEventFactory.packetPlayer);
-                        SpongeCommonEventFactory.packetPlayer.connection.kickPlayerFromServer("You have been kicked for attempting to perform an invisibility respawn exploit.");
-                        resetStaticData();
-                        return;
-                    }
-                }
-
-            }*/
-
             if (!CauseTracker.ENABLED && (packetIn instanceof CPacketAnimation || packetIn instanceof CPacketClientSettings)) {
                 packetIn.processPacket(netHandler);
             } else {
@@ -106,7 +107,6 @@ public class PacketUtil {
                     PhaseContext context = PhaseContext.start()
                             .add(NamedCause.source(packetPlayer))
                             .add(NamedCause.of(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer))
-                            //.addCaptures()
                             .add(NamedCause.of(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn))
                             .add(NamedCause.of(InternalNamedCauses.Packet.CURSOR, cursor))
                             .add(NamedCause.of(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative));
@@ -127,36 +127,69 @@ public class PacketUtil {
         }
     }
 
-    private static boolean creativeCheck(Packet<?> packet, EntityPlayerMP playerMP) {
-        return packet instanceof CPacketCreativeInventoryAction;
+    private static boolean creativeCheck(Packet<?> packetIn, EntityPlayerMP playerMP) {
+        return packetIn instanceof CPacketCreativeInventoryAction;
     }
 
+    private static boolean firePreEvents(Packet<?> packetIn, EntityPlayerMP playerMP) {
+        if (packetIn instanceof CPacketAnimation) {
+            CPacketAnimation packet = (CPacketAnimation) packetIn;
+            SpongeCommonEventFactory.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
+            SpongeCommonEventFactory.lastAnimationPlayer = playerMP;
+            HandType handType = packet.getHand() == EnumHand.MAIN_HAND ? HandTypes.MAIN_HAND : HandTypes.OFF_HAND;
+            AnimateHandEvent event = SpongeEventFactory.createAnimateHandEvent(Cause.of(NamedCause.source(playerMP)), handType, (Humanoid) playerMP);
+            if (SpongeImpl.postEvent(event)) {
+                return true;
+            }
+        } else if (packetIn instanceof CPacketPlayerDigging) {
+            SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
+            CPacketPlayerDigging packet = (CPacketPlayerDigging) packetIn;
+            if(SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, playerMP.getHeldItemMainhand(), EnumHand.MAIN_HAND).isCancelled()) {
+                BlockUtil.sendClientBlockChange(playerMP, packet.getPosition());
+                return true;
+            }
 
-    public static boolean processSignPacket(CPacketUpdateSign packetIn, CallbackInfo ci, TileEntitySign tileentitysign, EntityPlayerMP playerEntity) {
-        // TODO: Check if this is still actually necessary
+            switch (packet.getAction()) {
+                case START_DESTROY_BLOCK:
+                case ABORT_DESTROY_BLOCK:
+                case STOP_DESTROY_BLOCK:
+                    BlockPos pos = packet.getPosition();
+                    double d0 = playerMP.posX - ((double)pos.getX() + 0.5D);
+                    double d1 = playerMP.posY - ((double)pos.getY() + 0.5D) + 1.5D;
+                    double d2 = playerMP.posZ - ((double)pos.getZ() + 0.5D);
+                    double d3 = d0 * d0 + d1 * d1 + d2 * d2;
+        
+                    double dist = SpongeImplHooks.getBlockReachDistance(playerMP)+ 1;
+                    dist *= dist;
+        
+                    if (d3 > dist) {
+                        return true;
+                    } else if (pos.getY() >= SpongeImpl.getServer().getBuildLimit()) {
+                        return true;
+                    }
+                    if (packet.getAction() == CPacketPlayerDigging.Action.START_DESTROY_BLOCK) {
+                        if (SpongeCommonEventFactory.callInteractBlockEventPrimary(playerMP, pos, EnumHand.MAIN_HAND, packet.getFacing()).isCancelled()) {
+                            BlockUtil.sendClientBlockChange(playerMP, pos);
+                            return true;
+                        }
+                    }
+                default:
+                    break;
+            }
+        } else if (packetIn instanceof CPacketPlayerTryUseItem) {
+            CPacketPlayerTryUseItem packet = (CPacketPlayerTryUseItem) packetIn;
+            SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
+            if(SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand()).isCancelled()) {
+                return true;
+            }
+        } else if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
+            CPacketPlayerTryUseItemOnBlock packet = (CPacketPlayerTryUseItemOnBlock) packetIn;
+            SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
+            if(SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand()).isCancelled()) {
+                return true;
+            }
+        }
 
-//        if (!SpongeImpl.getGlobalConfig().getConfig().getExploits().isPreventSignExploit()) {
-//            return true;
-//        }
-//        // Sign command exploit fix
-//        for (int i = 0; i < packetIn.getLines().length; ++i) {
-//            TextStyle chatstyle = packetIn.getLines()[i] == null ? null : packetIn.getLines()[i].getChatStyle();
-//
-//            if (chatstyle != null && chatstyle.getChatClickEvent() != null) {
-//                ClickEvent clickevent = chatstyle.getChatClickEvent();
-//
-//                if (clickevent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-//                    if (!MinecraftServer.getServer().getConfigurationManager().canSendCommands(playerEntity.getGameProfile())) {
-//                        SpongeHooks.logExploitSignCommandUpdates(playerEntity, tileentitysign, clickevent.getValue());
-//                        playerEntity.connection.kickPlayerFromServer("You have been kicked for attempting to perform a sign command exploit.");
-//                        ci.cancel();
-//                        return false;
-//                    }
-//                }
-//            }
-//            packetIn.getLines()[i] = new ChatComponentText(SpongeHooks.getTextWithoutFormattingCodes(packetIn.getLines()[i].getUnformattedText()));
-//        }
-        return true;
-
+        return false;
     }
 }

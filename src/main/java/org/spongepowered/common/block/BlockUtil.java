@@ -30,6 +30,8 @@ import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -102,6 +104,11 @@ public final class BlockUtil {
             throw new IllegalArgumentException("World : " + world.getName() + " is not appropriate for this implementation!");
         }
         return ((World) world).getBlockState(VecHelper.toBlockPos(blockPos));
+    }
+
+    public static void sendClientBlockChange(EntityPlayerMP player, BlockPos pos) {
+        player.connection.sendPacket(new SPacketBlockChange(player.worldObj, pos));
+        player.worldObj.notifyBlockUpdate(pos, player.worldObj.getBlockState(pos), player.worldObj.getBlockState(pos), 3);
     }
 
     private BlockUtil() {

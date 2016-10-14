@@ -220,4 +220,8 @@ public final class SpongeImplHooks {
 
         return ret;
     }
+
+    public static double getBlockReachDistance(EntityPlayerMP player) {
+        return 5.0d;
+    }
 }
