@@ -103,4 +103,6 @@ abstract class TickPhaseState implements IPhaseState {
     public void appendExplosionContext(PhaseContext explosionContext, PhaseContext context) {
 
     }
+
+    public abstract boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ);
 }
