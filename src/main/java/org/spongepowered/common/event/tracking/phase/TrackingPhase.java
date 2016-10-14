@@ -257,6 +257,8 @@ public abstract class TrackingPhase {
      * <p>NOTE: This method should only be called and handled if and only if {@link #allowEntitySpawns(IPhaseState)}
      * returns {@code true}. Violation of this will have unforseen consequences.</p>
      *
+     *
+     * @param causeTracker
      * @param phaseState The current phase state
      * @param context The current context
      * @param entity The entity being captured
@@ -264,7 +266,8 @@ public abstract class TrackingPhase {
      * @param chunkZ The chunk z position
      * @return True if the entity was successfully captured
      */
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
+            int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final WorldServer minecraftWorld = (WorldServer) minecraftEntity.worldObj;
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
