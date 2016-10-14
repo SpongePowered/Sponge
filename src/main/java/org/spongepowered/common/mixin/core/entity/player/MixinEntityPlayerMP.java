@@ -71,6 +71,7 @@ import net.minecraft.util.FoodStats;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IInteractionObject;
@@ -96,6 +97,8 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
+import org.spongepowered.api.event.message.MessageChannelEvent;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -873,6 +876,25 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void setSpectatorTarget(@Nullable org.spongepowered.api.entity.Entity entity) {
         this.setSpectatingEntity((Entity) entity);
+    }
+
+    @Override
+    public MessageChannelEvent.Chat simulateChat(Text message, Cause cause) {
+        checkNotNull(message, "message");
+
+        TextComponentTranslation component = new TextComponentTranslation("chat.type.text", SpongeTexts.toComponent(this.getDisplayNameText()),
+                SpongeTexts.toComponent(message));
+        final Text[] messages = SpongeTexts.splitChatMessage(component);
+
+        final MessageChannel originalChannel = this.getMessageChannel();
+        final MessageChannelEvent.Chat event = SpongeEventFactory.createMessageChannelEventChat(
+                cause, originalChannel, Optional.of(originalChannel),
+                new MessageEvent.MessageFormatter(messages[0], messages[1]), message, false
+        );
+        if (!SpongeImpl.postEvent(event) && !event.isMessageCancelled()) {
+            event.getChannel().ifPresent(channel -> channel.send(this, event.getMessage(), ChatTypes.CHAT));
+        }
+        return event;
     }
 
 }
