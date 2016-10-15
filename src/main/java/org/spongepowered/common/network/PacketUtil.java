@@ -25,6 +25,7 @@
 package org.spongepowered.common.network;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -144,7 +145,8 @@ public class PacketUtil {
         } else if (packetIn instanceof CPacketPlayerDigging) {
             SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
             CPacketPlayerDigging packet = (CPacketPlayerDigging) packetIn;
-            if(SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, playerMP.getHeldItemMainhand(), EnumHand.MAIN_HAND).isCancelled()) {
+            ItemStack stack = playerMP.getHeldItemMainhand();
+            if(stack != null && SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, stack, EnumHand.MAIN_HAND).isCancelled()) {
                 BlockUtil.sendClientBlockChange(playerMP, packet.getPosition());
                 return true;
             }

@@ -604,6 +604,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 EnumHand hand = packetIn.getHand();
                 ItemStack itemstack = hand != null ? this.playerEntity.getHeldItem(hand) : null;
                 if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT_AT) {
+                    SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
                     // Is interaction allowed with item in hand
                     if(SpongeCommonEventFactory.callInteractItemEventSecondary(this.playerEntity, itemstack, hand).isCancelled()) {
                         return;
@@ -615,7 +616,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         }
                     }
                 } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
-                    if(SpongeCommonEventFactory.callInteractItemEventPrimary(this.playerEntity, itemstack, hand).isCancelled()) {
+                    SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
+                    if(itemstack != null && SpongeCommonEventFactory.callInteractItemEventPrimary(this.playerEntity, itemstack, hand).isCancelled()) {
                         return;
                     }
 
