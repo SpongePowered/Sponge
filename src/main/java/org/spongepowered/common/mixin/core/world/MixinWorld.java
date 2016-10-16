@@ -66,6 +66,7 @@ import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
+import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -189,6 +190,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tickableTileEntities;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tileEntitiesToBeRemoved;
     @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
+    @Shadow protected List<IWorldEventListener> eventListeners;
 
     @Shadow private boolean processingLoadedTiles;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
