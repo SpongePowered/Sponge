@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.block;
 import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -37,42 +38,40 @@ import org.spongepowered.asm.mixin.Shadow;
 @Implements(@Interface(iface = BlockSoundGroup.class, prefix = "group$"))
 public abstract class MixinSoundType {
 
-    @Shadow private SoundEvent breakSound;
-    @Shadow private SoundEvent hitSound;
+    @Shadow @Final public float volume;
+    @Shadow @Final public float pitch;
 
-    @Shadow public abstract float getVolume();
-    @Shadow public abstract float getPitch();
-    @Shadow public abstract SoundEvent getStepSound();
-    @Shadow public abstract SoundEvent getPlaceSound();
-    @Shadow public abstract SoundEvent getFallSound();
-    @Shadow public abstract SoundEvent getBreakSound();
-    @Shadow public abstract SoundEvent getHitSound();
+    @Shadow @Final public SoundEvent stepSound;
+    @Shadow @Final public SoundEvent placeSound;
+    @Shadow @Final public SoundEvent fallSound;
+    @Shadow @Final public SoundEvent breakSound;
+    @Shadow @Final public SoundEvent hitSound;
 
     public double group$getVolume() {
-        return this.getVolume();
+        return this.volume;
     }
 
     public double group$getPitch() {
-        return this.getPitch();
+        return this.pitch;
     }
 
     public SoundType group$getBreakSound() {
-        return (SoundType) this.getBreakSound();
+        return (SoundType) this.breakSound;
     }
 
     public SoundType group$getHitSound() {
-        return (SoundType) this.getHitSound();
+        return (SoundType) this.hitSound;
     }
 
     public SoundType group$getStepSound() {
-        return (SoundType) this.getStepSound();
+        return (SoundType) this.stepSound;
     }
 
     public SoundType group$getPlaceSound() {
-        return (SoundType) this.getPlaceSound();
+        return (SoundType) this.placeSound;
     }
 
     public SoundType group$getFallSound() {
-        return (SoundType) this.getFallSound();
+        return (SoundType) this.fallSound;
     }
 }
