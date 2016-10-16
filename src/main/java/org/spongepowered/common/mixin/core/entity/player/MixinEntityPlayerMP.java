@@ -48,6 +48,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
+import net.minecraft.network.play.server.SPacketCustomSound;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
@@ -63,6 +64,7 @@ import net.minecraft.stats.StatList;
 import net.minecraft.stats.StatisticsManagerServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameRules;
@@ -591,8 +593,19 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void playSound(SoundType sound, SoundCategory category, Vector3d position, double volume, double pitch, double minVolume) {
-        this.connection.sendPacket(new SPacketSoundEffect(SoundEvents.getRegisteredSoundEvent(sound.getId()), (net.minecraft.util.SoundCategory) (Object) category, position.getX(), position.getY(), position.getZ(),
-                (float) Math.max(minVolume, volume), (float) pitch));
+        SoundEvent event;
+        try {
+            // Check if the event is registered (ie has an integer ID)
+            event = SoundEvents.getRegisteredSoundEvent(sound.getId());
+        } catch (IllegalStateException e) {
+            // Otherwise send it as a custom sound
+            this.connection.sendPacket(new SPacketCustomSound(sound.getId(), (net.minecraft.util.SoundCategory) (Object) category,
+                    position.getX(), position.getY(), position.getZ(), (float) Math.max(minVolume, volume), (float) pitch));
+            return;
+        }
+
+        this.connection.sendPacket(new SPacketSoundEffect(event, (net.minecraft.util.SoundCategory) (Object) category, position.getX(),
+                position.getY(), position.getZ(), (float) Math.max(minVolume, volume), (float) pitch));
     }
 
     @Override

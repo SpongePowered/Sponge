@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.network.play.server.SPacketCustomSound;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.ServerWorldEventHandler;
 import net.minecraft.world.WorldServer;
@@ -32,12 +36,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.world.IMixinServerWorldEventHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
+import javax.annotation.Nullable;
+
 @Mixin(ServerWorldEventHandler.class)
-public abstract class MixinServerWorldEventHandler {
+public abstract class MixinServerWorldEventHandler implements IMixinServerWorldEventHandler {
 
     @Shadow @Final private WorldServer theWorldServer;
+    @Shadow @Final private MinecraftServer mcServer;
 
     @Redirect(method = "playSoundToAllNearExcept", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     private int getDimensionForPlayingSound(DimensionType dimensionType) {
@@ -49,4 +57,10 @@ public abstract class MixinServerWorldEventHandler {
         return ((IMixinWorldServer) this.theWorldServer).getDimensionId();
     }
 
+    @Override
+    public void playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, String soundIn, SoundCategory category, double x, double y, double z,
+            float volume, float pitch) {
+        this.mcServer.getPlayerList().sendToAllNearExcept(player, x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D,
+                ((IMixinWorldServer) this.theWorldServer).getDimensionId(), new SPacketCustomSound(soundIn, category, x, y, z, volume, pitch));
+    }
 }

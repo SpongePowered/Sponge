@@ -28,6 +28,8 @@ import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -39,6 +41,8 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+
+import javax.annotation.Nullable;
 
 public interface IMixinWorldServer extends IMixinWorld {
 
@@ -91,5 +95,7 @@ public interface IMixinWorldServer extends IMixinWorld {
     long getChunkUnloadDelay();
 
     void triggerInternalExplosion(Explosion explosion);
+
+    void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, String soundIn, SoundCategory category, float volume, float pitch);
 
 }

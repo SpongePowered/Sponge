@@ -24,21 +24,26 @@
  */
 package org.spongepowered.common.effect.sound;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundEvent;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeSound extends SpongeCatalogType implements SoundType {
+public class SpongeSoundBuilder implements SoundType.Builder {
 
-    private final String name;
-
-    public SpongeSound(String name, String id) {
-        super(id);
-        this.name = name;
+    @Override
+    public SoundType.Builder from(SoundType value) {
+        return this;
     }
 
     @Override
-    public String getName() {
-        return this.name;
+    public SoundType.Builder reset() {
+        return this;
     }
 
+    @Override
+    public SoundType build(String id) throws IllegalStateException {
+        return (SoundType) new SoundEvent(new ResourceLocation(checkNotNull(id)));
+   }
 }
