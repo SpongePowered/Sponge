@@ -24,32 +24,24 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.type.NotePitch;
-import org.spongepowered.api.effect.particle.BlockParticle;
-import org.spongepowered.api.effect.particle.ColoredParticle;
-import org.spongepowered.api.effect.particle.ItemParticle;
-import org.spongepowered.api.effect.particle.NoteParticle;
+import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.particle.ResizableParticle;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.util.Color;
+import org.spongepowered.api.effect.particle.ParticleOption;
+import org.spongepowered.common.data.util.DataQueries;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class SpongeParticleEffect implements ParticleEffect {
 
-    private SpongeParticleType type;
+    private final SpongeParticleType type;
+    private final Map<ParticleOption<?>, Object> options;
 
-    private Vector3d motion;
-    private Vector3d offset;
-
-    private int count;
-
-    public SpongeParticleEffect(SpongeParticleType type, Vector3d motion, Vector3d offset, int count) {
-        this.motion = motion;
-        this.offset = offset;
-        this.count = count;
+    public SpongeParticleEffect(SpongeParticleType type, Map<ParticleOption<?>, Object> options) {
+        this.options = ImmutableMap.copyOf(options);
         this.type = type;
     }
 
@@ -58,98 +50,30 @@ public class SpongeParticleEffect implements ParticleEffect {
         return this.type;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Vector3d getMotion() {
-        return this.motion;
-    }
-
-    @Override
-    public Vector3d getOffset() {
-        return this.offset;
+    public <V> Optional<V> getOption(ParticleOption<V> option) {
+        return Optional.ofNullable((V) this.options.get(option));
     }
 
     @Override
-    public int getCount() {
-        return this.count;
+    public Map<ParticleOption<?>, Object> getOptions() {
+        return this.options;
     }
 
-    public static class Colored extends SpongeParticleEffect implements ColoredParticle {
-
-        private Color color;
-
-        public Colored(SpongeParticleType type, Vector3d motion, Vector3d offset, Color color, int count) {
-            super(type, motion, offset, count);
-            this.color = color;
-        }
-
-        @Override
-        public Color getColor() {
-            return this.color;
-        }
-
+    @Override
+    public int getContentVersion() {
+        return 1;
     }
 
-    public static class Resized extends SpongeParticleEffect implements ResizableParticle {
-
-        private float size;
-
-        public Resized(SpongeParticleType type, Vector3d motion, Vector3d offset, float size, int count) {
-            super(type, motion, offset, count);
-            this.size = size;
-        }
-
-        @Override
-        public float getSize() {
-            return this.size;
-        }
-
+    @Override
+    public DataContainer toContainer() {
+        DataContainer dataContainer = new MemoryDataContainer();
+        dataContainer.set(DataQueries.PARTICLE_TYPE, this.type);
+        dataContainer.set(DataQueries.PARTICLE_OPTIONS, this.options.entrySet().stream().map(entry -> new MemoryDataContainer()
+                .set(DataQueries.PARTICLE_OPTION_KEY, entry.getKey())
+                .set(DataQueries.PARTICLE_OPTION_VALUE, entry.getValue()))
+                .collect(Collectors.toList()));
+        return dataContainer;
     }
-
-    public static class Note extends SpongeParticleEffect implements NoteParticle {
-
-        private NotePitch note;
-
-        public Note(SpongeParticleType type, Vector3d motion, Vector3d offset, NotePitch note, int count) {
-            super(type, motion, offset, count);
-            this.note = note;
-        }
-
-        @Override
-        public NotePitch getNote() {
-            return this.note;
-        }
-
-    }
-
-    public static class Materialized extends SpongeParticleEffect implements ItemParticle {
-
-        private ItemStackSnapshot item;
-
-        public Materialized(SpongeParticleType type, Vector3d motion, Vector3d offset, ItemStackSnapshot item, int count) {
-            super(type, motion, offset, count);
-            this.item = item;
-        }
-
-        @Override
-        public ItemStackSnapshot getItem() {
-            return this.item;
-        }
-
-    }
-
-    public static class Block extends SpongeParticleEffect implements BlockParticle {
-
-        private BlockState blockState;
-
-        public Block(SpongeParticleType type, Vector3d motion, Vector3d offset, int count, BlockState blockState) {
-            super(type, motion, offset, count);
-            this.blockState = blockState;
-        }
-
-        @Override
-        public BlockState getBlockState() {
-            return this.blockState;
-        }
-    }
-
 }

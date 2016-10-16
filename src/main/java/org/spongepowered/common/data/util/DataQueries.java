@@ -150,6 +150,12 @@ public final class DataQueries {
     public static final DataQuery FIREWORK_TRAILS = of("Trails");
     public static final DataQuery FIREWORK_FLICKERS = of("Flickers");
 
+    // Particle Effects
+    public static final DataQuery PARTICLE_TYPE = of("Type");
+    public static final DataQuery PARTICLE_OPTIONS = of("Options");
+    public static final DataQuery PARTICLE_OPTION_KEY = of("Option");
+    public static final DataQuery PARTICLE_OPTION_VALUE = of("Value");
+
     // Fluids
     public static final DataQuery FLUID_TYPE = of("FluidType");
     public static final DataQuery FLUID_VOLUME = of("FluidVolume");

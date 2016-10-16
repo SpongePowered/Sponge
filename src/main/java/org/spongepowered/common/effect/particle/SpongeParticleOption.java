@@ -24,30 +24,43 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import com.google.common.base.Objects.ToStringHelper;
-import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.EnumParticleTypes;
+import com.google.common.base.Objects;
 import org.spongepowered.api.effect.particle.ParticleOption;
-import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.common.SpongeCatalogType;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class SpongeParticleType extends SpongeCatalogType implements ParticleType {
+public class SpongeParticleOption<V> extends SpongeCatalogType implements ParticleOption<V> {
 
     private final String name;
-    @Nullable private final EnumParticleTypes internalType;
-    private final Map<ParticleOption<?>, Object> options;
+    private final Class<V> valueType;
+    @Nullable private final Function<V, IllegalArgumentException> valueValidator;
 
-    public SpongeParticleType(String id, String name, @Nullable EnumParticleTypes internalType,
-            Map<ParticleOption<?>, Object> options) {
+    public SpongeParticleOption(String id, String name, Class<V> valueType,
+            @Nullable Function<V, IllegalArgumentException> valueValidator) {
         super(id);
-        this.options = ImmutableMap.copyOf(options);
-        this.internalType = internalType;
+        this.valueValidator = valueValidator;
+        this.valueType = valueType;
         this.name = name;
+    }
+
+    public SpongeParticleOption(String id, String name, Class<V> valueType) {
+        this(id, name, valueType, null);
+    }
+
+    @Nullable
+    public IllegalArgumentException validateValue(V value) {
+        if (this.valueValidator != null) {
+            return this.valueValidator.apply(value);
+        }
+        return null;
+    }
+
+    @Override
+    public Class<V> getValueType() {
+        return this.valueType;
     }
 
     @Override
@@ -55,27 +68,11 @@ public class SpongeParticleType extends SpongeCatalogType implements ParticleTyp
         return this.name;
     }
 
-    @Nullable
-    public EnumParticleTypes getInternalType() {
-        return this.internalType;
-    }
-
     @Override
-    protected ToStringHelper toStringHelper() {
+    protected Objects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
                 .omitNullValues()
-                .add("internalType", this.internalType);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <V> Optional<V> getDefaultOption(ParticleOption<V> option) {
-        return Optional.ofNullable((V) this.options.get(option));
-    }
-
-    @Override
-    public Map<ParticleOption<?>, Object> getDefaultOptions() {
-        return this.options;
+                .add("valueType", this.valueType);
     }
 
 }

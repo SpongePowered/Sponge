@@ -165,6 +165,7 @@ import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 import org.spongepowered.common.registry.type.data.HandTypeRegistryModule;
 import org.spongepowered.common.registry.type.data.KeyRegistryModule;
 import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryModule;
+import org.spongepowered.common.registry.type.effect.ParticleOptionRegistryModule;
 import org.spongepowered.common.registry.type.effect.ParticleRegistryModule;
 import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.SoundCategoryRegistryModule;
@@ -252,9 +253,6 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::new)
             .registerBuilderSupplier(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
             .registerBuilderSupplier(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
-            .registerBuilderSupplier(ColoredParticle.Builder.class, SpongeParticleEffectBuilder.BuilderColorable::new)
-            .registerBuilderSupplier(NoteParticle.Builder.class, SpongeParticleEffectBuilder.BuilderNote::new)
-            .registerBuilderSupplier(ItemParticle.Builder.class, SpongeParticleEffectBuilder.BuilderMaterial::new)
             .registerBuilderSupplier(WanderAITask.Builder.class, SpongeWanderAIBuilder::new)
             .registerBuilderSupplier(AvoidEntityAITask.Builder.class, SpongeAvoidEntityAIBuilder::new)
             .registerBuilderSupplier(RunAroundLikeCrazyAITask.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
@@ -265,8 +263,6 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(RangeAgentAITask.Builder.class, SpongeRangeAgentAIBuilder::new)
             .registerBuilderSupplier(LookIdleAITask.Builder.class, SpongeLookIdleAIBuilder::new)
             .registerBuilderSupplier(PatternLayer.Builder.class, SpongePatternLayerBuilder::new)
-            .registerBuilderSupplier(ResizableParticle.Builder.class, SpongeParticleEffectBuilder.BuilderResizable::new)
-            .registerBuilderSupplier(BlockParticle.Builder.class, SpongeParticleEffectBuilder.BuilderBlock::new)
             .registerBuilderSupplier(Task.Builder.class, SpongeTaskBuilder::new)
             .registerBuilderSupplier(BigMushroom.Builder.class, BigMushroomBuilder::new)
             .registerBuilderSupplier(BlockBlob.Builder.class, BlockBlobBuilder::new)
@@ -377,6 +373,7 @@ public final class CommonModuleRegistry {
             .registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule())
             .registerModule(OcelotType.class, new OcelotTypeRegistryModule())
             .registerModule(ParticleType.class, new ParticleRegistryModule())
+            .registerModule(ParticleOption.class, new ParticleOptionRegistryModule())
             .registerModule(PistonType.class, new PistonTypeRegistryModule())
             .registerModule(PlantType.class, new PlantTypeModuleRegistry())
             .registerModule(PopulatorObject.class, new PopulatorObjectRegistryModule())

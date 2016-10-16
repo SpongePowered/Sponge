@@ -25,23 +25,114 @@
 package org.spongepowered.common.effect.particle;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.item.EntityFireworkRocket;
+import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.network.Packet;
+import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.network.play.server.SPacketDestroyEntities;
+import net.minecraft.network.play.server.SPacketEffect;
+import net.minecraft.network.play.server.SPacketEntityMetadata;
+import net.minecraft.network.play.server.SPacketEntityStatus;
 import net.minecraft.network.play.server.SPacketParticles;
+import net.minecraft.network.play.server.SPacketSpawnObject;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionType;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.type.NotePitch;
+import org.spongepowered.api.effect.particle.ParticleOptions;
+import org.spongepowered.api.effect.particle.ParticleTypes;
+import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.data.type.SpongeNotePitch;
+import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 
 public final class SpongeParticleHelper {
+
+    private static int getBlockState(SpongeParticleEffect effect, Optional<BlockState> defaultBlockState) {
+        Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
+        if (blockState.isPresent()) {
+            return Block.getStateId((IBlockState) blockState.get());
+        } else {
+            Optional<ItemStackSnapshot> optSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
+            if (optSnapshot.isPresent()) {
+                ItemStackSnapshot snapshot = optSnapshot.get();
+                Optional<BlockType> blockType = snapshot.getType().getBlock();
+                if (blockType.isPresent()) {
+                    return Block.getStateId(((Block) blockType.get()).getStateFromMeta(
+                            ((SpongeItemStackSnapshot) snapshot).getDamageValue()));
+                } else {
+                    return 0;
+                }
+            } else {
+                return Block.getStateId((IBlockState) defaultBlockState.get());
+            }
+        }
+    }
+
+    private static int getDirectionData(Direction direction) {
+        if (direction.isSecondaryOrdinal()) {
+            direction = Direction.getClosest(direction.asOffset(), Direction.Division.ORDINAL);
+        }
+        switch (direction) {
+            case SOUTHEAST:
+                return 0;
+            case SOUTH:
+                return 1;
+            case SOUTHWEST:
+                return 2;
+            case EAST:
+                return 3;
+            case WEST:
+                return 5;
+            case NORTHEAST:
+                return 6;
+            case NORTH:
+                return 7;
+            case NORTHWEST:
+                return 8;
+            default:
+                return 4;
+        }
+    }
+
+    // Get the next free entity id
+    private static final int FIREWORK_ROCKET_ID;
+    private static final UUID FIREWORK_ROCKET_UNIQUE_ID;
+
+    private static final SPacketDestroyEntities DESTROY_FIREWORK_ROCKET_DUMMY;
+    private static final SPacketEntityStatus FIREWORK_ROCKET_DUMMY_EFFECT;
+
+    static {
+        final EntityFireworkRocket entityFireworkRocket = new EntityFireworkRocket(null);
+        FIREWORK_ROCKET_ID = entityFireworkRocket.getEntityId();
+        FIREWORK_ROCKET_UNIQUE_ID = entityFireworkRocket.getUniqueID();
+
+        DESTROY_FIREWORK_ROCKET_DUMMY = new SPacketDestroyEntities(FIREWORK_ROCKET_ID);
+
+        FIREWORK_ROCKET_DUMMY_EFFECT = new SPacketEntityStatus();
+        FIREWORK_ROCKET_DUMMY_EFFECT.entityId = FIREWORK_ROCKET_ID;
+        // The status index that is used to trigger the fireworks effect,
+        // can be found at: EntityFireworkRocket#handleStatusUpdate
+        // or: EntityFireworkRocket#onUpdate -> setEntityState
+        FIREWORK_ROCKET_DUMMY_EFFECT.logicOpcode = 17;
+    }
 
     /**
      * Gets the list of packets that are needed to spawn the particle effect at
@@ -54,12 +145,76 @@ public final class SpongeParticleHelper {
      */
     public static List<Packet<?>> toPackets(SpongeParticleEffect effect, Vector3d position) {
         SpongeParticleType type = effect.getType();
+
         EnumParticleTypes internal = type.getInternalType();
+        // Special cases
+        if (internal == null) {
+            if (type == ParticleTypes.FIREWORKS) {
+                final List<FireworkEffect> effects = type.getDefaultOption(ParticleOptions.FIREWORK_EFFECTS).get();
+                if (effects.isEmpty()) {
+                    return Collections.emptyList();
+                }
+                final SPacketSpawnObject packetSpawnObject = new SPacketSpawnObject();
+                packetSpawnObject.entityId = FIREWORK_ROCKET_ID;
+                packetSpawnObject.uniqueId = FIREWORK_ROCKET_UNIQUE_ID;
+                packetSpawnObject.x = position.getX();
+                packetSpawnObject.y = position.getY();
+                packetSpawnObject.z = position.getZ();
+                // The internal id that that is used to spawn a "EntityFireworkRocket" on the client,
+                // can be found at: EntityTrackerEntry#createSpawnPacket
+                // or: NetHandlerPlayClient#handleSpawnObject
+                packetSpawnObject.type = 76;
+                final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.FIREWORKS);
+                FireworkUtils.setFireworkEffects(itemStack, effects);
+                final SPacketEntityMetadata packetEntityMetadata = new SPacketEntityMetadata();
+                packetEntityMetadata.entityId = FIREWORK_ROCKET_ID;
+                packetEntityMetadata.dataManagerEntries = new ArrayList<>();
+                packetEntityMetadata.dataManagerEntries.add(new EntityDataManager.DataEntry<>(
+                        EntityFireworkRocket.FIREWORK_ITEM, com.google.common.base.Optional.of(itemStack)));
+                final List<Packet<?>> packets = new ArrayList<>();
+                packets.add(packetSpawnObject);
+                packets.add(packetEntityMetadata);
+                packets.add(FIREWORK_ROCKET_DUMMY_EFFECT);
+                packets.add(DESTROY_FIREWORK_ROCKET_DUMMY);
+                return packets;
+            }
+            BlockPos pos = new BlockPos(Math.round(position.getX()), Math.round(position.getY()), Math.round(position.getZ()));
+            if (type == ParticleTypes.FERTILIZER) {
+                int quantity = effect.getOptionOrDefault(ParticleOptions.QUANTITY).get();
+                return Collections.singletonList(new SPacketEffect(2005, pos, quantity, false));
+            } else if (type == ParticleTypes.SPLASH_POTION) {
+                Potion potion = (Potion) effect.getOptionOrDefault(ParticleOptions.POTION_EFFECT_TYPE).get();
+                for (PotionType potionType : PotionType.REGISTRY) {
+                    for (net.minecraft.potion.PotionEffect potionEffect : potionType.getEffects()) {
+                        if (potionEffect.getPotion() == potion) {
+                            return Collections.singletonList(new SPacketEffect(2002, pos, PotionType.getID(potionType), false));
+                        }
+                    }
+                }
+                return Collections.emptyList();
+            } else if (type == ParticleTypes.BREAK_BLOCK) {
+                int state = getBlockState(effect, type.getDefaultOption(ParticleOptions.BLOCK_STATE));
+                if (state == 0) {
+                    return Collections.emptyList();
+                }
+                return Collections.singletonList(new SPacketEffect(2001, pos, state, false));
+            } else if (type == ParticleTypes.MOBSPAWNER_FLAMES) {
+                return Collections.singletonList(new SPacketEffect(2004, pos, 0, false));
+            } else if (type == ParticleTypes.ENDER_TELEPORT) {
+                return Collections.singletonList(new SPacketEffect(2003, pos, 0, false));
+            } else if (type == ParticleTypes.DRAGON_BREATH_ATTACK) {
+                return Collections.singletonList(new SPacketEffect(2006, pos, 0, false));
+            } else if (type == ParticleTypes.FIRE_SMOKE) {
+                final Direction direction = effect.getOptionOrDefault(ParticleOptions.DIRECTION).get();
+                return Collections.singletonList(new SPacketEffect(2000, pos, getDirectionData(direction), false));
+            }
+            return Collections.emptyList();
+        }
 
-        Vector3d offset = effect.getOffset();
+        Vector3d offset = effect.getOption(ParticleOptions.OFFSET).orElse(Vector3d.ZERO);
 
-        int count = effect.getCount();
-        int[] extra = new int[0];
+        int quantity = effect.getOption(ParticleOptions.QUANTITY).orElse(1);
+        int[] extra = null;
 
         float px = (float) position.getX();
         float py = (float) position.getY();
@@ -77,117 +232,142 @@ public final class SpongeParticleHelper {
         // Depends on behavior
         // Note: If the count > 0 -> speed = 0f else if count = 0 -> speed = 1f
 
-        if (effect instanceof SpongeParticleEffect.Materialized) {
-            ItemStack item = ((SpongeParticleEffect.Materialized) effect).getItem().createStack();
-            ItemType itemType = item.getItem();
-
-            int id = 0;
-            int data = 0;
-
-            if (internal == EnumParticleTypes.ITEM_CRACK) {
-                id = Item.REGISTRY.getIDForObject((Item) itemType);
-                data = ((net.minecraft.item.ItemStack) item).getItemDamage();
-            }
-
-            if (id == 0) {
+        Optional<BlockState> defaultBlockState;
+        if (internal != EnumParticleTypes.ITEM_CRACK && (defaultBlockState = type.getDefaultOption(ParticleOptions.BLOCK_STATE)).isPresent()) {
+            int state = getBlockState(effect, defaultBlockState);
+            if (state == 0) {
                 return Collections.emptyList();
             }
-
-            extra = new int[] {id, data};
+            extra = new int[] { state };
         }
 
-        if (effect instanceof SpongeParticleEffect.Block) {
-            IBlockState blockState = (IBlockState) ((SpongeParticleEffect.Block) effect).getBlockState();
-            Block block = blockState.getBlock();
-            if (internal == EnumParticleTypes.BLOCK_CRACK || internal == EnumParticleTypes.BLOCK_DUST) {
-                // Only block types are allowed
-                int id = Block.REGISTRY.getIDForObject(block);
-                int data = block.damageDropped(blockState);
-                extra = new int[] {id, data};
+        Optional<ItemStackSnapshot> defaultSnapshot;
+        if (extra == null && (defaultSnapshot = type.getDefaultOption(ParticleOptions.ITEM_STACK_SNAPSHOT)).isPresent()) {
+            Optional<ItemStackSnapshot> optSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
+            if (optSnapshot.isPresent()) {
+                ItemStackSnapshot snapshot = optSnapshot.get();
+                extra = new int[] { Item.getIdFromItem((Item) snapshot.getType()), ((SpongeItemStackSnapshot) snapshot).getDamageValue() };
+            } else {
+                Optional<BlockState> optBlockState = effect.getOption(ParticleOptions.BLOCK_STATE);
+                if (optBlockState.isPresent()) {
+                    BlockState blockState = optBlockState.get();
+                    Optional<ItemType> optItemType = blockState.getType().getItem();
+                    if (optItemType.isPresent()) {
+                        extra = new int[] { Item.getIdFromItem((Item) optItemType.get()),
+                                ((Block) blockState.getType()).getMetaFromState((IBlockState) blockState) };
+                    } else {
+                        return Collections.emptyList();
+                    }
+                } else {
+                    ItemStackSnapshot snapshot = defaultSnapshot.get();
+                    extra = new int[] { Item.getIdFromItem((Item) snapshot.getType()), ((SpongeItemStackSnapshot) snapshot).getDamageValue() };
+                }
             }
         }
 
-        if (effect instanceof SpongeParticleEffect.Resized) {
-            float size = ((SpongeParticleEffect.Resized) effect).getSize();
+        if (extra == null) {
+            extra = new int[0];
+        }
+
+        Optional<Double> defaultScale = type.getDefaultOption(ParticleOptions.SCALE);
+        Optional<Color> defaultColor;
+        Optional<NotePitch> defaultNote;
+        Optional<Vector3d> defaultVelocity;
+        if (defaultScale.isPresent()) {
+            double scale = effect.getOption(ParticleOptions.SCALE).orElse(defaultScale.get());
 
             // The formula of the large explosion acts strange
             // Client formula: sizeClient = 1 - sizeServer * 0.5
             // The particle effect returns the client value so
             // Server formula: sizeServer = (-sizeClient * 2) + 2
-            if (internal == EnumParticleTypes.EXPLOSION_LARGE) {
-                size = (-size * 2f) + 2f;
+            if (internal == EnumParticleTypes.EXPLOSION_LARGE || internal == EnumParticleTypes.SWEEP_ATTACK) {
+                scale = (-scale * 2f) + 2f;
             }
 
-            if (size == 0f) {
-                return Lists.newArrayList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count,
-                        extra));
+            if (scale == 0f) {
+                return Collections.singletonList(
+                        new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, quantity, extra));
             }
 
-            f0 = size;
-        } else if (effect instanceof SpongeParticleEffect.Colored) {
-            Color color0 = ((SpongeParticleEffect.Colored) effect).getColor();
-            Color color1 = ((SpongeParticleType.Colorable) type).getDefaultColor();
+            f0 = scale;
+        } else if ((defaultColor = type.getDefaultOption(ParticleOptions.COLOR)).isPresent()) {
+            Color color = effect.getOption(ParticleOptions.COLOR).orElse(null);
 
-            if (color0.equals(color1)) {
-                return Lists.newArrayList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count,
-                        extra));
+            boolean isSpell = internal == EnumParticleTypes.SPELL_MOB || internal == EnumParticleTypes.SPELL_MOB_AMBIENT;
+
+            if (!isSpell && (color == null || color.equals(defaultColor.get()))) {
+                return Collections.singletonList(
+                        new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, quantity, extra));
+            } else if (isSpell && color == null) {
+                color = defaultColor.get();
             }
 
-            f0 = color0.getRed() / 255f;
-            f1 = color0.getGreen() / 255f;
-            f2 = color0.getBlue() / 255f;
+            f0 = color.getRed() / 255f;
+            f1 = color.getGreen() / 255f;
+            f2 = color.getBlue() / 255f;
+
+            // Make sure that the x and z component are never 0 for these effects,
+            // they would trigger the slow horizontal velocity (unsupported on the server),
+            // but we already chose for the color, can't have both
+            if (isSpell) {
+                f0 = Math.max(f0, 0.001f);
+                f2 = Math.max(f0, 0.001f);
+            }
 
             // If the f0 value 0 is, the redstone will set it automatically to red 255
             if (f0 == 0f && internal == EnumParticleTypes.REDSTONE) {
                 f0 = 0.00001f;
             }
-        } else if (effect instanceof SpongeParticleEffect.Note) {
-            float note = ((SpongeNotePitch) ((SpongeParticleEffect.Note) effect).getNote()).getByteId();
+        } else if ((defaultNote = type.getDefaultOption(ParticleOptions.NOTE)).isPresent()) {
+            NotePitch notePitch = effect.getOption(ParticleOptions.NOTE).orElse(defaultNote.get());
+            float note = ((SpongeNotePitch) notePitch).getByteId();
 
             if (note == 0f) {
-                return Lists.newArrayList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f,
-                        count, extra));
+                return Collections.singletonList(
+                        new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, quantity, extra));
             }
 
             f0 = note / 24f;
-        } else if (type.hasMotion()) {
-            Vector3d motion = effect.getMotion();
+        } else if ((defaultVelocity = type.getDefaultOption(ParticleOptions.VELOCITY)).isPresent()) {
+            Vector3d velocity = effect.getOption(ParticleOptions.VELOCITY).orElse(defaultVelocity.get());
 
-            double mx = motion.getX();
-            double my = motion.getY();
-            double mz = motion.getZ();
+            f0 = velocity.getX();
+            f1 = velocity.getY();
+            f2 = velocity.getZ();
 
-            // The y value won't work for this effect, if the value isn't 0 the motion won't work
-            if (internal == EnumParticleTypes.WATER_SPLASH) {
-                my = 0f;
+            Optional<Boolean> slowHorizontalVelocity = type.getDefaultOption(ParticleOptions.SLOW_HORIZONTAL_VELOCITY);
+            if (slowHorizontalVelocity.isPresent() &&
+                    effect.getOption(ParticleOptions.SLOW_HORIZONTAL_VELOCITY).orElse(slowHorizontalVelocity.get())) {
+                f0 = 0f;
+                f2 = 0f;
             }
 
-            if (mx == 0f && my == 0f && mz == 0f) {
-                return Lists.newArrayList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count,
-                        extra));
-            } else {
-                f0 = mx;
-                f1 = my;
-                f2 = mz;
+            // The y value won't work for this effect, if the value isn't 0 the velocity won't work
+            if (internal == EnumParticleTypes.WATER_SPLASH) {
+                f1 = 0f;
+            }
+
+            if (f0 == 0f && f1 == 0f && f2 == 0f) {
+                return Collections.singletonList(
+                        new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, quantity, extra));
             }
         }
 
         // Is this check necessary?
         if (f0 == 0f && f1 == 0f && f2 == 0f) {
-            return Lists.newArrayList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count,
-                    extra));
+            return Collections.singletonList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, quantity, extra));
         }
 
-        List<Packet<?>> packets = Lists.newArrayList();
+        List<Packet<?>> packets = new ArrayList<>(quantity);
 
         if (ox == 0f && oy == 0f && oz == 0f) {
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < quantity; i++) {
                 packets.add(new SPacketParticles(internal, true, px, py, pz, (float) f0, (float) f1, (float) f2, 1f, 0, extra));
             }
         } else {
             Random random = new Random();
 
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < quantity; i++) {
                 double px0 = (px + (random.nextFloat() * 2f - 1f) * ox);
                 double py0 = (py + (random.nextFloat() * 2f - 1f) * oy);
                 double pz0 = (pz + (random.nextFloat() * 2f - 1f) * oz);
