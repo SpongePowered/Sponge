@@ -45,16 +45,8 @@ public abstract class MixinSoundType {
     @Shadow public abstract SoundEvent getStepSound();
     @Shadow public abstract SoundEvent getPlaceSound();
     @Shadow public abstract SoundEvent getFallSound();
-
-    @Intrinsic
-    public SoundEvent getBreakSound() {
-        return this.breakSound;
-    }
-
-    @Intrinsic
-    public SoundEvent getHitSound() {
-        return this.hitSound;
-    }
+    @Shadow public abstract SoundEvent getBreakSound();
+    @Shadow public abstract SoundEvent getHitSound();
 
     public double group$getVolume() {
         return this.getVolume();
