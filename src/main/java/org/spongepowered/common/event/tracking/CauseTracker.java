@@ -59,7 +59,9 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
@@ -510,7 +512,7 @@ public final class CauseTracker {
             // capture all entities until the phase is marked for completion.
             if (!isForced) {
                 try {
-                    return phase.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
+                    return phase.spawnEntityOrCapture(this, phaseState, context, entity, chunkX, chunkZ);
                 } catch (Exception e) {
                     // Just in case something really happened, we should print a nice exception for people to
                     // paste us
@@ -551,8 +553,6 @@ public final class CauseTracker {
         }
 
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
-        final WorldServer minecraftWorld = this.getMinecraftWorld();
-        final PhaseData phaseData = this.stack.peek();
         // Sponge End - continue with vanilla mechanics
 
         final int chunkX = MathHelper.floor_double(minecraftEntity.posX / 16.0D);
@@ -564,10 +564,12 @@ public final class CauseTracker {
         } else {
 
             // Sponge Start - throw an event
+            final List<Entity> entities = new ArrayList<>(1); // We need to use an arraylist so that filtering will work.
+            entities.add(entity);
 
             final SpawnEntityEvent.Custom
                     event =
-                    SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(entity), getWorld());
+                    SpongeEventFactory.createSpawnEntityEventCustom(cause, entities, getWorld());
             SpongeImpl.postEvent(event);
             if (entity instanceof EntityPlayer || !event.isCancelled()) {
                 getMixinWorld().forceSpawnEntity(entity);

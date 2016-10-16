@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Lists;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.util.math.BlockPos;
@@ -45,7 +44,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -82,46 +80,6 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState {
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
         phaseContext.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
-        phaseContext.getCapturedEntitySupplier()
-                .ifPresentAndNotEmpty(entities -> {
-                    // Separate experience from other entities
-                    final List<Entity> experience = new ArrayList<>(entities.size());
-                    final List<Entity> nonExpEntities = new ArrayList<>(entities.size());
-                    for (Entity entity : entities) {
-                        if (entity instanceof EntityXPOrb) {
-                            experience.add(entity);
-                            continue;
-                        }
-                        nonExpEntities.add(entity);
-                    }
-                    if (!experience.isEmpty()) {
-                        final Cause.Builder builder = Cause.builder();
-                        builder.named(NamedCause.source(BlockSpawnCause.builder()
-                                .block(tickingBlock)
-                                .type(InternalSpawnTypes.EXPERIENCE)
-                                .build()));
-                        notifier.ifPresent(builder::notifier);
-                        owner.ifPresent(builder::owner);
-                        SpongeEventFactory.createSpawnEntityEvent(builder.build(), experience, causeTracker.getWorld());
-                    }
-                    final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
-                            .block(tickingBlock)
-                            .type(InternalSpawnTypes.BLOCK_SPAWNING)
-                            .build());
-                    notifier.ifPresent(builder::notifier);
-                    owner.ifPresent(builder::owner);
-                    final Cause cause = builder.build();
-                    final SpawnEntityEvent
-                            spawnEntityEvent =
-                            SpongeEventFactory.createSpawnEntityEvent(cause, nonExpEntities, causeTracker.getWorld());
-                    SpongeImpl.postEvent(spawnEntityEvent);
-                    for (Entity entity : spawnEntityEvent.getEntities()) {
-                        if (entityCreator != null) {
-                            EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                        }
-                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                    }
-                });
         phaseContext.getCapturedItemsSupplier()
                 .ifPresentAndNotEmpty(items -> {
                     final Cause cause = Cause.source(BlockSpawnCause.builder()
@@ -174,6 +132,62 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState {
         final BlockSnapshot blockSnapshot = context.getSource(BlockSnapshot.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking a block", context));
         explosionContext.add(NamedCause.source(blockSnapshot));
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        final BlockSnapshot tickingBlock = context.getSource(BlockSnapshot.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Block!", context));
+        final Optional<User> owner = context.getOwner();
+        final Optional<User> notifier = context.getNotifier();
+        final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
+        if (entity instanceof EntityXPOrb) {
+            final ArrayList<Entity> entities = new ArrayList<>(1);
+            entities.add(entity);
+            final Cause.Builder builder = Cause.builder();
+            builder.named(NamedCause.source(BlockSpawnCause.builder()
+                    .block(tickingBlock)
+                    .type(InternalSpawnTypes.EXPERIENCE)
+                    .build()));
+            notifier.ifPresent(builder::notifier);
+            owner.ifPresent(builder::owner);
+            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, causeTracker.getWorld());
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                for (Entity anEntity : event.getEntities()) {
+                    if (entityCreator != null) {
+                        EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
+                    }
+                    causeTracker.getMixinWorld().forceSpawnEntity(anEntity);
+                }
+                return true;
+            }
+            return false;
+        }
+        final List<Entity> nonExpEntities = new ArrayList<>(1);
+        nonExpEntities.add(entity);
+        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
+                .block(tickingBlock)
+                .type(InternalSpawnTypes.BLOCK_SPAWNING)
+                .build());
+        notifier.ifPresent(builder::notifier);
+        owner.ifPresent(builder::owner);
+        final Cause cause = builder.build();
+        final SpawnEntityEvent
+                spawnEntityEvent =
+                SpongeEventFactory.createSpawnEntityEvent(cause, nonExpEntities, causeTracker.getWorld());
+        SpongeImpl.postEvent(spawnEntityEvent);
+
+        if (!spawnEntityEvent.isCancelled()) {
+            for (Entity anEntity : spawnEntityEvent.getEntities()) {
+                if (entityCreator != null) {
+                    EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
+                }
+                causeTracker.getMixinWorld().forceSpawnEntity(anEntity);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

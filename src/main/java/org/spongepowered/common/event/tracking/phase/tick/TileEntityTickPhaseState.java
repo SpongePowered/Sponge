@@ -77,70 +77,12 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         final Optional<User> notifier = phaseContext.getNotifier();
         final Optional<User> owner = phaseContext.getOwner();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
-        final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tickingTile;
 
         try {
 
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> {
                         TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
-                    });
-
-            phaseContext.getCapturedEntitySupplier()
-                    .ifPresentAndNotEmpty(entities -> {
-                        // Separate experience from other entities
-                        final List<Entity> experience = new ArrayList<>(entities.size());
-                        final List<Entity> nonExpEntities = new ArrayList<>(entities.size());
-                        for (Entity entity : entities) {
-                            if (entity instanceof EntityXPOrb) {
-                                experience.add(entity);
-                                continue;
-                            }
-                            nonExpEntities.add(entity);
-                        }
-                        if (!experience.isEmpty()) { // Experience needs to have the proper spawn type
-                            final Cause.Builder builder = Cause.builder();
-                            builder.named(NamedCause.source(
-                                    BlockSpawnCause.builder()
-                                            .block(capturedSnapshot.getSnapshot())
-                                            .type(InternalSpawnTypes.EXPERIENCE)
-                                            .build()
-                                    )
-                            );
-                            notifier.ifPresent(builder::notifier);
-                            owner.ifPresent(builder::owner);
-                            final SpawnEntityEvent event =
-                                    SpongeEventFactory.createSpawnEntityEvent(builder.build(), experience, causeTracker.getWorld());
-                            SpongeImpl.postEvent(event);
-                            if (!event.isCancelled()) {
-                                for (Entity entity : event.getEntities()) {
-                                    if (entityCreator != null) {
-                                        EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                                    }
-                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                }
-                            }
-
-                        } // Otherwise, just go ahead
-                        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
-                                .block(capturedSnapshot.getSnapshot())
-                                .type(mixinTileEntity.getTickedSpawnType())
-                                .build());
-                        notifier.ifPresent(builder::notifier);
-                        owner.ifPresent(builder::owner);
-                        final Cause cause = builder.build();
-                        final SpawnEntityEvent
-                                spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(cause, nonExpEntities, causeTracker.getWorld());
-                        SpongeImpl.postEvent(spawnEntityEvent);
-                        if (!spawnEntityEvent.isCancelled()) {
-                            for (Entity entity : spawnEntityEvent.getEntities()) {
-                                if (entityCreator != null) {
-                                    EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
-                                }
-                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                            }
-                        }
                     });
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(entities -> {
@@ -199,6 +141,71 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         final TileEntity tickingTile = context.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
         explosionContext.add(NamedCause.source(tickingTile));
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        final TileEntity tickingTile = context.getSource(TileEntity.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
+        final PhaseContext.CaptureBlockSnapshotForTile capturedSnapshot = context
+                .firstNamed(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, PhaseContext.CaptureBlockSnapshotForTile.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a snapshot for a ticking tile entity!", context));
+        final Optional<User> notifier = context.getNotifier();
+        final Optional<User> owner = context.getOwner();
+        final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
+        final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tickingTile;
+        // Separate experience from other entities
+        if (entity instanceof EntityXPOrb) {
+            final Cause.Builder builder = Cause.builder();
+            builder.named(NamedCause.source(
+                    BlockSpawnCause.builder()
+                            .block(capturedSnapshot.getSnapshot())
+                            .type(InternalSpawnTypes.EXPERIENCE)
+                            .build()
+                    )
+            );
+            notifier.ifPresent(builder::notifier);
+            owner.ifPresent(builder::owner);
+            final ArrayList<Entity> exp = new ArrayList<>();
+            exp.add(entity);
+            final SpawnEntityEvent event =
+                    SpongeEventFactory.createSpawnEntityEvent(builder.build(), exp, causeTracker.getWorld());
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                for (Entity anEntity : event.getEntities()) {
+                    if (entityCreator != null) {
+                        EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
+                    }
+                    causeTracker.getMixinWorld().forceSpawnEntity(anEntity);
+                }
+                return true;
+            }
+            return false;
+        }
+        final List<Entity> nonExpEntities = new ArrayList<>(1);
+        nonExpEntities.add(entity);
+
+        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
+                .block(capturedSnapshot.getSnapshot())
+                .type(mixinTileEntity.getTickedSpawnType())
+                .build());
+        notifier.ifPresent(builder::notifier);
+        owner.ifPresent(builder::owner);
+        final Cause cause = builder.build();
+        final SpawnEntityEvent
+                spawnEntityEvent =
+                SpongeEventFactory.createSpawnEntityEvent(cause, nonExpEntities, causeTracker.getWorld());
+        SpongeImpl.postEvent(spawnEntityEvent);
+        if (!spawnEntityEvent.isCancelled()) {
+            for (Entity anEntity : spawnEntityEvent.getEntities()) {
+                if (entityCreator != null) {
+                    EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
+                }
+                causeTracker.getMixinWorld().forceSpawnEntity(anEntity);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
