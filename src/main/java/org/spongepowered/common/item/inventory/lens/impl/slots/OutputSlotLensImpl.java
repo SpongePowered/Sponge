@@ -48,6 +48,6 @@ public class OutputSlotLensImpl extends FilteringSlotLensImpl implements OutputS
 
     @Override
     public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new OutputSlotAdapter(inv, this);
+        return new OutputSlotAdapter(inv, this, parent);
     }
 }

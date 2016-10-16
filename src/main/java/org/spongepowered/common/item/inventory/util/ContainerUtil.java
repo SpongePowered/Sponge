@@ -26,14 +26,32 @@ package org.spongepowered.common.item.inventory.util;
 
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.ContainerBeacon;
+import net.minecraft.inventory.ContainerBrewingStand;
 import net.minecraft.inventory.ContainerChest;
+import net.minecraft.inventory.ContainerDispenser;
+import net.minecraft.inventory.ContainerEnchantment;
+import net.minecraft.inventory.ContainerFurnace;
+import net.minecraft.inventory.ContainerHopper;
+import net.minecraft.inventory.ContainerHorseInventory;
+import net.minecraft.inventory.ContainerMerchant;
 import net.minecraft.inventory.ContainerPlayer;
+import net.minecraft.inventory.ContainerRepair;
+import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.InventoryArchetype;
+import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -196,11 +214,105 @@ public final class ContainerUtil {
         return null;
     }
 
-    // TODO Inventory - Figure this out per container
+    /**
+     * Calculates the slot count for the passed {@link Container}
+     *
+     * @return The {@link SlotCollection} with the amount of slots for this container.
+     */
     public static SlotCollection countSlots(net.minecraft.inventory.Container container) {
         if (container instanceof ContainerPlayer) {
             return new SlotCollection.Builder().add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false)).add(4).add(4, EquipmentSlotAdapter.class).add(36).add(1).build();
         }
         return new SlotCollection.Builder().add(((MinecraftInventoryAdapter) container).getInventory().getSize()).build();
+    }
+
+    public static InventoryArchetype getArchetype(net.minecraft.inventory.Container container) {
+        if (container instanceof ContainerChest) {
+            IInventory inventory = ((ContainerChest) container).getLowerChestInventory();
+            if (inventory instanceof TileEntityChest) {
+                return InventoryArchetypes.CHEST;
+            } else if (inventory instanceof InventoryLargeChest) {
+                return InventoryArchetypes.DOUBLE_CHEST;
+            } else {
+                return InventoryArchetypes.UNKNOWN;
+            }
+        } else if (container instanceof ContainerHopper) {
+            return InventoryArchetypes.HOPPER;
+        } else if (container instanceof ContainerDispenser) {
+            return InventoryArchetypes.DISPENSER;
+        } else if (container instanceof ContainerWorkbench) {
+            return InventoryArchetypes.WORKBENCH;
+        } else if (container instanceof ContainerFurnace) {
+            return InventoryArchetypes.FURNACE;
+        } else if (container instanceof ContainerEnchantment) {
+            return InventoryArchetypes.ENCHANTING_TABLE;
+        } else if (container instanceof ContainerRepair) {
+            return InventoryArchetypes.ANVIL;
+        } else if (container instanceof ContainerBrewingStand) {
+            return InventoryArchetypes.BREWING_STAND;
+        } else if (container instanceof ContainerBeacon) {
+            return InventoryArchetypes.BEACON;
+        } else if (container instanceof ContainerHorseInventory) {
+            EntityHorse horse = ((ContainerHorseInventory) container).theHorse;
+            if (horse.isChested()) {
+                return InventoryArchetypes.HORSE_WITH_CHEST;
+            }
+            return InventoryArchetypes.HORSE;
+        } else if (container instanceof ContainerMerchant) {
+            return InventoryArchetypes.VILLAGER;
+        } else if (container instanceof ContainerPlayer) {
+            return InventoryArchetypes.PLAYER;
+        }
+        return InventoryArchetypes.UNKNOWN;
+    }
+
+    public static Carrier getCarrier(Container container) {
+        if (container instanceof ContainerChest) {
+            IInventory inventory = ((ContainerChest) container).getLowerChestInventory();
+            if (inventory instanceof TileEntityChest) {
+                return (Carrier) inventory;
+            } else if (inventory instanceof InventoryLargeChest) {
+                return null;
+                // TODO: Decide what the carrire should be
+            } else {
+                return null;
+            }
+        } else if (container instanceof ContainerHopper) {
+            return carrierOrNull(((ContainerHopper) container).hopperInventory);
+        } else if (container instanceof ContainerDispenser) {
+            return carrierOrNull(((ContainerDispenser) container).dispenserInventory);
+        } else if (container instanceof ContainerWorkbench) {
+            return null; // TODO: Return a block-based carrier
+        } else if (container instanceof ContainerFurnace) {
+            return carrierOrNull(((ContainerFurnace) container).tileFurnace);
+        } else if (container instanceof ContainerEnchantment) {
+            /*ContainerEnchantment enchantment = ((ContainerEnchantment) container);
+            net.minecraft.tileentity.TileEntity tileEntity = enchantment.worldPointer.getTileEntity(enchantment.position);
+            return tileEntity != null && tileEntity instanceof TileEntityEnchantmentTable ? (Carrier) tileEntity : null;*/
+            return null; // TODO: Decide whether or not this should be a Carrier in the api
+        } else if (container instanceof ContainerRepair) {
+            return null; // TODO: Return a block-base
+        } else if (container instanceof ContainerBrewingStand) {
+            return carrierOrNull(((ContainerBrewingStand) container).tileBrewingStand);
+        } else if (container instanceof ContainerBeacon) {
+            return carrierOrNull(((ContainerBeacon) container).getTileEntity());
+        } else if (container instanceof ContainerHorseInventory) {
+            return (Carrier) ((ContainerHorseInventory) container).theHorse;
+        } else if (container instanceof ContainerMerchant) {
+            return (Carrier) ((ContainerMerchant) container).theMerchant;
+        } else if (container instanceof ContainerPlayer) {
+            EntityPlayer player = ((ContainerPlayer) container).thePlayer;
+            if (player instanceof EntityPlayerMP) {
+                return (Carrier) player;
+            }
+        }
+        return null;
+    }
+
+    private static Carrier carrierOrNull(IInventory inventory) {
+        if (inventory instanceof Carrier) {
+            return (Carrier) inventory;
+        }
+        return null;
     }
 }

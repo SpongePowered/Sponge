@@ -29,6 +29,9 @@ import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.InventoryArchetype;
+import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -54,6 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(Container.class)
@@ -81,12 +85,16 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private Lens<IInventory, ItemStack> lens;
     private boolean initialized;
     private Map<Integer, SlotAdapter> adapters = new HashMap<>();
+    private InventoryArchetype archetype;
+    protected Optional<Carrier> carrier;
 
     private void init() {
         this.initialized = true;
         this.fabric = MinecraftFabric.of(this.this$);
         this.slots = ContainerUtil.countSlots(this.this$);
         this.lens = ContainerUtil.getLens(this.this$, this.slots);
+        this.archetype = ContainerUtil.getArchetype(this$);
+        this.carrier = Optional.ofNullable(ContainerUtil.getCarrier(this));
 
         // If we know the lens, we can cache the adapters now
         if (this.lens != null) {
@@ -94,6 +102,14 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 this.adapters.put(((SlotAdapter) slot).slotNumber, (SlotAdapter) slot);
             }
         }
+    }
+
+    @Override
+    public InventoryArchetype getArchetype() {
+        if (!this.initialized) {
+            this.init();
+        }
+        return this.archetype;
     }
 
     /**
@@ -233,3 +249,4 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         return this.fabric;
     }
 }
+

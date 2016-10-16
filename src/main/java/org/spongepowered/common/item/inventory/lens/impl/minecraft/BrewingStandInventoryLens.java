@@ -22,33 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl.slots;
+package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
 import net.minecraft.inventory.IInventory;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 
-import java.util.function.Predicate;
+public class BrewingStandInventoryLens extends OrderedInventoryLensImpl {
 
+    private OrderedInventoryLensImpl potions;
+    private InputSlotLensImpl ingredient;
 
-public class InputSlotLensImpl extends FilteringSlotLensImpl implements InputSlotLens<IInventory, net.minecraft.item.ItemStack> {
-
-    public InputSlotLensImpl(int index, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
-        this(index, InputSlotAdapter.class, stackFilter, typeFilter);
+    public BrewingStandInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+        super(0, adapter.getInventory().getSize(), 1, adapter.getClass(), slots);
     }
 
-    public InputSlotLensImpl(int index, Class<? extends Inventory> adapterType, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
-        super(index, adapterType, stackFilter, typeFilter);
-    }
-    
     @Override
-    public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new InputSlotAdapter(inv, this, parent);
-    }
+    protected void init(SlotProvider<IInventory, ItemStack> slots) {
 
+        this.potions = new OrderedInventoryLensImpl(0, 3, 1, slots); // TODO ContainerBrewingStand.Potion Adapter / Filter Potion/Bottle
+        this.ingredient = new InputSlotLensImpl(3, (i) -> true, (i) -> true); // TODO filter PotionIngredients
+        // TODO 1.9 Fuel slot
+
+        this.addSpanningChild(potions);
+        this.addSpanningChild(ingredient);
+    }
 }

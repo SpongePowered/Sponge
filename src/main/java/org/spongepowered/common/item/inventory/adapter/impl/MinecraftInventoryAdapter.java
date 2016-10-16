@@ -27,6 +27,8 @@ package org.spongepowered.common.item.inventory.adapter.impl;
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryArchetype;
+import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
@@ -186,6 +188,11 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     @Override
     default <T extends Inventory> T query(Object... args) {
         return (T) Query.compile(this, args).execute();
+    }
+
+    @Override
+    default InventoryArchetype getArchetype() {
+        return InventoryArchetypes.UNKNOWN;
     }
 
 }

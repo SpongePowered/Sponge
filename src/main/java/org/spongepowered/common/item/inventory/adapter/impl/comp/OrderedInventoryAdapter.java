@@ -34,6 +34,7 @@ import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.comp.OrderedInventoryLens;
@@ -42,7 +43,7 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import java.util.Optional;
 
 public class OrderedInventoryAdapter extends Adapter implements OrderedInventory {
-    
+
     protected final OrderedInventoryLens<IInventory, net.minecraft.item.ItemStack> orderedLens;
 
     public OrderedInventoryAdapter(Fabric<IInventory> inventory, OrderedInventoryLens<IInventory, net.minecraft.item.ItemStack> root) {
@@ -58,18 +59,29 @@ public class OrderedInventoryAdapter extends Adapter implements OrderedInventory
         if (index < 0) {
             return null;
         }
-        for (Lens<IInventory, net.minecraft.item.ItemStack> lens : orderedLens) {
-            if (lens.getSlots().contains(index)) {
-                return (SlotLens<IInventory, net.minecraft.item.ItemStack>) lens;
-            }
+        if (this.orderedLens.hasSlotRealIndex(index)) {
+            return this.orderedLens.getSlot(index);
         }
         return null;
+        /*for (Lens<IInventory, net.minecraft.item.ItemStack> lens : orderedLens) {
+            if (lens.getSlots().contains(index)) {*/
+                /*
+                if (lens instanceof OrderedInventoryLens) {
+                    ((OrderedInventoryLens) lens).getSlot(orderedLens.)
+                }*/
+                // TODO getting OrderedInventoryLensImpl here instead of SlotLens
+                //return (SlotLens<IInventory, net.minecraft.item.ItemStack>) lens;
+                /*SlotAdapter adapter = lens.getAdapter(this.inventory, this).query(SlotAdapter.class).first();
+                return (SlotLens<IInventory, net.minecraft.item.ItemStack>) adapter.getRootLens();
+            }
+        }
+        return null;*/
     }
 
     protected SlotLens<IInventory, net.minecraft.item.ItemStack> getSlotLens(SlotIndex index) {
         return this.getSlotLens(index.getValue().intValue());
     }
-    
+
     @Override
     public Optional<Slot> getSlot(SlotIndex index) {
         return Adapter.forSlot(this.inventory, this.getSlotLens(index), this);

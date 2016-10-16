@@ -37,9 +37,11 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -65,6 +67,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
+import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
@@ -89,6 +92,9 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -139,6 +145,8 @@ import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
@@ -176,6 +184,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow @Override public abstract void takeStat(StatBase stat);
     @Shadow public abstract StatisticsManagerServer getStatFile();
     @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
+    @Shadow public abstract void displayGUIChest(IInventory chestInventory);
+    @Shadow public abstract void displayGui(IInteractionObject guiOwner);
+    @Shadow public abstract void openGuiHorseInventory(EntityHorse horse, IInventory horseInventory);
 
     // Inventory
     @Shadow public abstract void addChatMessage(ITextComponent component);
@@ -491,8 +502,20 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public boolean isViewingInventory() {
-        return this.openContainer != null;
+    public Optional<Container> getOpenInventory() {
+        return Optional.ofNullable((Container) this.openContainer);
+    }
+
+    @Override
+    public Optional<Container> openInventory(Inventory inventory, Cause cause) throws IllegalArgumentException {
+        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer(cause, this$,
+                inventory));
+    }
+
+    @Override
+    public boolean closeInventory(Cause cause) throws IllegalArgumentException {
+        ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
+        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, this.openContainer, this$, cursor, cursor).isCancelled();
     }
 
     @Override

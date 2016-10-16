@@ -34,12 +34,16 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
+import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumFacing;
@@ -47,6 +51,7 @@ import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -78,6 +83,7 @@ import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
@@ -98,6 +104,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -522,5 +529,87 @@ public class SpongeCommonEventFactory {
             }
             return true;
         }
+    }
+
+    public static InteractInventoryEvent.Close callInteractInventoryCloseEvent(Cause cause, Container container, EntityPlayerMP player, ItemStackSnapshot lastCursor, ItemStackSnapshot newCursor) {
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
+        final InteractInventoryEvent.Close
+                event =
+                SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction, ContainerUtil.fromNative(container));
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            if (container.getSlot(0) != null) {
+                player.openContainer = container;
+                final Slot slot = container.getSlot(0);
+                final String guiId;
+                final IInventory slotInventory = slot.inventory;
+                if (slotInventory instanceof IInteractionObject) {
+                    guiId = ((IInteractionObject) slotInventory).getGuiID();
+                } else {
+                    guiId = "unknown";
+                }
+                slotInventory.openInventory(player);
+                player.connection.sendPacket(new SPacketOpenWindow(container.windowId, guiId, slotInventory
+                        .getDisplayName(), slotInventory.getSizeInventory()));
+                // resync data to client
+                player.sendContainerToPlayer(container);
+            }
+        } else {
+            // Custom cursor
+            if (event.getCursorTransaction().getCustom().isPresent()) {
+                handleCustomCursor(player, event.getCursorTransaction().getFinal());
+            }
+        }
+        return event;
+    }
+
+    @Nullable
+    public static Container displayContainer(Cause cause, EntityPlayerMP player, Inventory inventory) {
+        net.minecraft.inventory.Container previousContainer = player.openContainer;
+        net.minecraft.inventory.Container container = null;
+
+        if (inventory instanceof IInteractionObject) {
+            final String guiId = ((IInteractionObject) inventory).getGuiID();
+
+            switch (guiId) {
+                case "EntityHorse":
+                    // If Carrier is Horse open Inventory
+                    if (inventory instanceof CarriedInventory) {
+                        if (((CarriedInventory) inventory).getCarrier().isPresent()
+                                && ((CarriedInventory) inventory).getCarrier().get() instanceof EntityHorse) {
+                            player.openGuiHorseInventory(((EntityHorse) ((CarriedInventory) inventory).getCarrier().get()), (IInventory) inventory);
+                            container = player.openContainer;
+                        }
+                    }
+                    break;
+                case "minecraft:chest":
+                    player.displayGUIChest((IInventory) inventory);
+                    container = player.openContainer;
+                    break;
+                case "minecraft:crafting_table":
+                case "minecraft:anvil":
+                case "minecraft:enchanting_table":
+                    player.displayGui((IInteractionObject) inventory);
+                    container = player.openContainer;
+                    break;
+                default:
+                    player.displayGUIChest((IInventory) inventory);
+                    container = player.openContainer;
+                    break;
+            }
+        } else {
+            player.displayGUIChest(((IInventory) inventory));
+            container = player.openContainer;
+        }
+
+        if (previousContainer == container) {
+            return null;
+        }
+
+        if (!callInteractInventoryOpenEvent(cause, player)) {
+            return null;
+        }
+
+        return container;
     }
 }

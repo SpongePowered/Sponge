@@ -22,31 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl.slots;
+package org.spongepowered.common.item.inventory.archetype;
 
-import net.minecraft.inventory.IInventory;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.FuelSlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.api.item.inventory.InventoryProperty;
 
-import java.util.function.Predicate;
+import java.util.Collections;
+import java.util.Map;
 
-public class FuelSlotLensImpl extends InputSlotLensImpl {
+/**
+ * Base Archetype
+ */
+public class SlotArchetype extends CompositeInventoryArchetype {
 
-    public FuelSlotLensImpl(int index, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
-        this(index, FuelSlotAdapter.class, stackFilter, typeFilter);
+    public SlotArchetype(Map<String, InventoryProperty<String, ?>> properties) {
+        super("minecraft:slot", "Slot", Collections.emptyList(), properties);
     }
-
-    public FuelSlotLensImpl(int index, Class<? extends Inventory> adapterType, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
-        super(index, adapterType, stackFilter, typeFilter);
-    }
-    
-    @Override
-    public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new FuelSlotAdapter(inv, this, parent);
-    }
-
 }

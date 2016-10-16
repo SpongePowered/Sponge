@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.slots;
 
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
@@ -34,8 +35,8 @@ import org.spongepowered.api.item.inventory.slot.InputSlot;
 
 public class InputSlotAdapter extends FilteringSlotAdapter implements InputSlot {
 
-    public InputSlotAdapter(Fabric<IInventory> inventory, InputSlotLens<IInventory, ItemStack> lens) {
-        super(inventory, lens);
+    public InputSlotAdapter(Fabric<IInventory> inventory, InputSlotLens<IInventory, ItemStack> lens, Inventory parent) {
+        super(inventory, lens, parent);
     }
 
 }

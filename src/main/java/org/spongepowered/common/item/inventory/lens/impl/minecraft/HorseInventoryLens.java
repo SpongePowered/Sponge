@@ -22,33 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl.slots;
+package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
 import net.minecraft.inventory.IInventory;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStack;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 
-import java.util.function.Predicate;
+public class HorseInventoryLens extends MinecraftLens {
 
+    private OrderedInventoryLensImpl horseEquipment;
+    private GridInventoryLensImpl chest;
 
-public class InputSlotLensImpl extends FilteringSlotLensImpl implements InputSlotLens<IInventory, net.minecraft.item.ItemStack> {
-
-    public InputSlotLensImpl(int index, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
-        this(index, InputSlotAdapter.class, stackFilter, typeFilter);
+    public HorseInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+        super(0, 2
+                //+ 5*3  // TODO chested horse
+                ,adapter, slots);
     }
 
-    public InputSlotLensImpl(int index, Class<? extends Inventory> adapterType, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
-        super(index, adapterType, stackFilter, typeFilter);
-    }
-    
     @Override
-    public InventoryAdapter<IInventory, net.minecraft.item.ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new InputSlotAdapter(inv, this, parent);
-    }
+    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+        this.horseEquipment = new OrderedInventoryLensImpl(0, 2, 1, slots); // 0-1
+        // TODO only for "chested" horses. Will this cause problems?
+        //this.chest = new GridInventoryLensImpl(2, 5, 3, 5, slots);             // 2-16
 
+        this.addSpanningChild(this.horseEquipment);
+        //this.addSpanningChild(this.chest);
+    }
 }

@@ -84,6 +84,8 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
             this.addColumn(column);
         }
 
+        this.cache();
+
         // Add direct child slots
 //        super.init(slots, false);
     }

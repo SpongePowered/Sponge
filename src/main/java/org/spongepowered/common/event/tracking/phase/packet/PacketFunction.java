@@ -77,6 +77,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -818,32 +819,8 @@ public interface PacketFunction {
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         final Cause cause = Cause.source(player).build();
-        final InteractInventoryEvent.Close
-                event =
-                SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction, ContainerUtil.fromNative(container));
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            if (container.getSlot(0) != null) {
-                player.openContainer = container;
-                final Slot slot = container.getSlot(0);
-                final String guiId;
-                final IInventory slotInventory = slot.inventory;
-                if (slotInventory instanceof IInteractionObject) {
-                    guiId = ((IInteractionObject) slotInventory).getGuiID();
-                } else {
-                    guiId = "unknown";
-                }
-                slotInventory.openInventory(player);
-                player.connection.sendPacket(new SPacketOpenWindow(container.windowId, guiId, slotInventory
-                        .getDisplayName(), slotInventory.getSizeInventory()));
-                // resync data to client
-                player.sendContainerToPlayer(container);
-            }
-        } else {
-            // Custom cursor
-            if (event.getCursorTransaction().getCustom().isPresent()) {
-                PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
-            }
+        InteractInventoryEvent.Close event = SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, container, player, lastCursor, newCursor);
+        if (!event.isCancelled()) {
             // Non-merged items
             context.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
                 final Cause spawnCause = Cause.source(

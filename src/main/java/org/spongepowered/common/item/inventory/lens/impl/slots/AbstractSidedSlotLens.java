@@ -45,7 +45,7 @@ public abstract class AbstractSidedSlotLens extends SlotLensImpl implements Side
     
     @Override
     public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
-        return new SidedSlotAdapter(inv, this);
+        return new SidedSlotAdapter(inv, this, parent);
     }
 
 }

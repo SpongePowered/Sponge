@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.slots;
 
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
 
 import net.minecraft.inventory.IInventory;
@@ -34,8 +35,8 @@ import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens
 
 public class CraftingOutputAdapter extends OutputSlotAdapter implements CraftingOutput {
 
-    public CraftingOutputAdapter(Fabric<IInventory> inventory, CraftingOutputSlotLens<IInventory, ItemStack> lens) {
-        super(inventory, lens);
+    public CraftingOutputAdapter(Fabric<IInventory> inventory, CraftingOutputSlotLens<IInventory, ItemStack> lens, Inventory parent) {
+        super(inventory, lens, parent);
     }
 
 }

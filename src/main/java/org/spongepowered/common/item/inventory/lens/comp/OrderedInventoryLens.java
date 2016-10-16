@@ -36,4 +36,6 @@ public interface OrderedInventoryLens<TInventory, TStack> extends Lens<TInventor
 
     SlotLens<IInventory, ItemStack> getSlot(int ordinal);
 
+    boolean hasSlotRealIndex(int index);
+
 }

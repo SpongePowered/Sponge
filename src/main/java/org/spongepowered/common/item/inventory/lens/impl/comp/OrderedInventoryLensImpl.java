@@ -37,6 +37,7 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.OrderedInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
@@ -44,7 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OrderedInventoryLensImpl extends MinecraftLens implements OrderedInventoryLens<IInventory, ItemStack> {
-    
+
     protected final int stride;
     
     protected final List<LensHandle<IInventory, ItemStack>> slotCache = new ArrayList<>();
@@ -58,16 +59,19 @@ public class OrderedInventoryLensImpl extends MinecraftLens implements OrderedIn
         checkArgument(stride > 0, "Invalid stride: %s", stride);
         this.stride = stride;
         this.init(slots);
-        this.cache();
     }
 
-    private void cache() {
+    protected void cache() {
         for (LensHandle<IInventory, ItemStack> child : this.spanningChildren) {
             this.cache0(child.lens);
         }
     }
 
     private void cache0(Lens<IInventory, ItemStack> lens) {
+        if (lens instanceof SlotLens) {
+            this.slotCache.add(new LensHandle<>(lens, lens.getProperties(0)));
+            return;
+        }
         for (Lens<IInventory, ItemStack> child : lens.getSpanningChildren()) {
             if (child instanceof SlotLens) {
                 this.slotCache.add(new LensHandle<>(child, lens.getProperties(child)));
@@ -81,17 +85,18 @@ public class OrderedInventoryLensImpl extends MinecraftLens implements OrderedIn
     public int getStride() {
         return this.stride;
     }
-    
+
     @Override
     public SlotLens<IInventory, ItemStack> getSlot(int ordinal) {
         return (SlotLens<IInventory, ItemStack>) this.slotCache.get(ordinal).lens;
     }
-    
+
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot += this.stride) {
             this.addSpanningChild(slots.getSlot(slot), new SlotIndex(ord));
         }
+        this.cache();
     }
 
     @Override
@@ -99,10 +104,15 @@ public class OrderedInventoryLensImpl extends MinecraftLens implements OrderedIn
         if (!this.checkOrdinal(ordinal)) {
             return -1;
         }
-        
+
         return this.base + (ordinal * this.stride);
     }
-    
+
+    @Override
+    public boolean hasSlotRealIndex(int index) {
+        return this.availableSlots.contains(this.base + index);
+    }
+
     @Override
     public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
         return new OrderedInventoryAdapter(inv, this, parent);

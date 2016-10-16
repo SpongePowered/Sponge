@@ -27,10 +27,13 @@ package org.spongepowered.common.item.inventory;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryArchetype;
+import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -46,9 +49,9 @@ import java.util.Optional;
  * Bottom type / empty results set for inventory queries.
  */
 public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEventArgs> {
-    
+
     public static final Translation EMPTY_NAME = new SpongeTranslation("inventory.empty.title");
-    
+
     static final class EmptyIterator implements Iterator<Inventory> {
 
         @Override
@@ -65,7 +68,7 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
         public void remove() {
             throw new NoSuchElementException("Attempted to remove an element from an empty collection");
         }
-        
+
     }
 
     private final Inventory parent;
@@ -245,4 +248,13 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
     public void notify(Object source, InventoryEventArgs eventArgs) {
     }
 
+    @Override
+    public PluginContainer getPlugin() {
+        return null; // TODO?
+    }
+
+    @Override
+    public InventoryArchetype getArchetype() {
+        return InventoryArchetypes.UNKNOWN;
+    }
 }
