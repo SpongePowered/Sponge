@@ -355,4 +355,12 @@ public final class GeneralPhase extends TrackingPhase {
                : super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
     }
 
+    @Override
+    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
+        if (currentPhaseData.state == Post.UNWINDING) {
+            ((PostState) currentPhaseData.state).appendContextPreExplosion(phaseContext, currentPhaseData);
+            return;
+        }
+        super.appendContextPreExplosion(phaseContext, currentPhaseData);
+    }
 }

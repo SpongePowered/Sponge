@@ -71,6 +71,7 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -322,6 +323,11 @@ public final class PacketPhase extends TrackingPhase {
     public void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
             ArrayList<Entity> entities) {
         ((IPacketState) unwindingState).postSpawnEntities(causeTracker, phaseContext, entities);
+    }
+
+    @Override
+    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
+        ((IPacketState) currentPhaseData.state).appendContextPreExplosion(phaseContext, currentPhaseData);
     }
 
     // Inventory packet specific methods

@@ -28,6 +28,7 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -50,5 +51,15 @@ final class PostState extends GeneralState {
         final PhaseContext unwindingContext = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no context found!", context));
         this.getPhase().postDispatch(causeTracker, unwindingState, unwindingContext, context);
+    }
+
+    public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
+        final PhaseContext unwinding = currentPhaseData.context.first(PhaseContext.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding with a PhaseContext, but couldn't!", currentPhaseData.context));
+        final IPhaseState phaseState = currentPhaseData.context.first(IPhaseState.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding with an IPhaseState, but couldn't!", currentPhaseData.context));
+        final PhaseData phaseData = new PhaseData(unwinding, phaseState);
+        phaseState.getPhase().appendContextPreExplosion(phaseContext, phaseData);
+
     }
 }
