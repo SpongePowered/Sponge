@@ -33,7 +33,7 @@ public final class PhaseData {
     public final PhaseContext context;
     public final IPhaseState state;
 
-    PhaseData(PhaseContext context, IPhaseState state) {
+    public PhaseData(PhaseContext context, IPhaseState state) {
         this.context = checkNotNull(context, "Context cannot be null!");
         this.state = checkNotNull(state, "State cannot be null!");
     }
