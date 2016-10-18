@@ -51,7 +51,6 @@ import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -64,6 +63,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.category.EntityActivationModCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.entity.SpongeEntityType;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.projectile.IMixinEntityArrow;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -412,7 +412,7 @@ public class ActivationRange {
         int x = MathHelper.floor_double(entity.posX);
         int z = MathHelper.floor_double(entity.posZ);
         Chunk chunk = isActive ? ((IMixinChunkProviderServer) entity.worldObj.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
-        if (isActive && chunk != null && !entity.worldObj.isAreaLoaded(new BlockPos(x, 0, z), 16)) {
+        if (isActive && !(chunk != null && ((IMixinChunk) chunk).areNeighborsLoaded())) {
             isActive = false;
         }
 
