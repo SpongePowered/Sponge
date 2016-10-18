@@ -224,4 +224,8 @@ public final class SpongeImplHooks {
     public static double getBlockReachDistance(EntityPlayerMP player) {
         return 5.0d;
     }
+
+    public static void onTileChunkUnload(TileEntity te) {
+        // This is a forge only hook.
+    }
 }

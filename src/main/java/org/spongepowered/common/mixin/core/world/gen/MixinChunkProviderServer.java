@@ -39,13 +39,11 @@ import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -61,8 +59,6 @@ import org.spongepowered.common.world.storage.WorldStorageUtil;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-
-import javax.annotation.Nullable;
 
 @Mixin(ChunkProviderServer.class)
 public abstract class MixinChunkProviderServer implements WorldStorage, IMixinChunkProviderServer {
@@ -154,33 +150,12 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         this.maxChunkUnloads = maxUnloads;
     }
 
-    @Redirect(method = "unloadQueuedChunks", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/longs/Long2ObjectMap;get(Ljava/lang/Object;)Ljava/lang/Object;", remap = false))
-    public Object onUnloadQueuedChunksGetChunk(Long2ObjectMap<Chunk> chunkMap, Object key) {
-        Chunk chunk = chunkMap.get(key);
-        if (chunk != null) {
-            chunk.unloaded = true; // ignore unloaded flag
-        }
-        return chunk;
-    }
-
-    /**
-     * @author blood - September 5th, 2016
-     *
-     * @reason Ignores the chunk unload flag to avoid chunks not unloading properly.
-     */
-    @Nullable
-    @Overwrite
-    public Chunk getLoadedChunk(int x, int z){
+    // Copy of getLoadedChunk without marking chunk active.
+    // This allows the chunk to unload if currently queued.
+    @Override
+    public Chunk getLoadedChunkWithoutMarkingActive(int x, int z){
         long i = ChunkPos.chunkXZ2Int(x, z);
         Chunk chunk = this.id2ChunkMap.get(i);
-
-        // Sponge start - Ignore the chunk unloaded flag as it causes
-        // many issues with how we already handle unloads.
-        /*if (chunk != null){
-            chunk.unloaded = false;
-        }*/
-        // Sponge end
-
         return chunk;
     }
 

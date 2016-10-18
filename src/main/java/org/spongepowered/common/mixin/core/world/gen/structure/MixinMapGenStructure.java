@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
 import java.util.Random;
@@ -66,7 +67,7 @@ public abstract class MixinMapGenStructure implements Populator {
 
     @Inject(method = "generateStructure", at = @At("HEAD"), cancellable = true)
     public void onGenerateStructure(World worldIn, Random randomIn, ChunkPos chunkCoord, CallbackInfoReturnable<Boolean> cir) {
-        Chunk chunk = worldIn.getChunkProvider().getLoadedChunk(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
+        Chunk chunk = ((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
         if (chunk == null) {
             cir.setReturnValue(false);
         }
