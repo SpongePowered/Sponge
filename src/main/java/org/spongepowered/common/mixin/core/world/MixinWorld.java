@@ -1298,7 +1298,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 this.loadedTileEntityList.remove(tileentity);
 
                 if (this.isBlockLoaded(tileentity.getPos())) {
-                    this.getChunkFromBlockCoords(tileentity.getPos()).removeTileEntity(tileentity.getPos());
+                    // Sponge start - use forge hook
+                    //this.getChunkFromBlockCoords(tileentity.getPos()).removeTileEntity(tileentity.getPos());
+                    //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desynced
+                    net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(tileentity.getPos());
+                    if (chunk.getTileEntity(tileentity.getPos(), net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK) == tileentity)
+                        chunk.removeTileEntity(tileentity.getPos());
+                    // Sponge end
                 }
             }
 
@@ -1309,6 +1315,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.startPendingTileEntityTimings(); // Sponge
 
         if (!this.tileEntitiesToBeRemoved.isEmpty()) {
+            // Sponge start - use forge hook
+            for (Object tile : tileEntitiesToBeRemoved) {
+               SpongeImplHooks.onTileChunkUnload(((net.minecraft.tileentity.TileEntity)tile));
+            }
+            // Sponge end
+
             this.tickableTileEntities.removeAll(this.tileEntitiesToBeRemoved);
             this.loadedTileEntityList.removeAll(this.tileEntitiesToBeRemoved);
             this.tileEntitiesToBeRemoved.clear();

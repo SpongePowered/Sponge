@@ -29,6 +29,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 @Mixin(value = WorldServer.class, priority = 1200)
 public abstract class MixinWorldServer_Lighting_Inline_Valid_BlockPos extends MixinWorld_Lighting {
@@ -82,7 +83,7 @@ public abstract class MixinWorldServer_Lighting_Inline_Valid_BlockPos extends Mi
                 // Sponge - Gets only loaded chunks, unloaded chunks will not get loaded to check lighting
                 // Chunk chunk = this.getChunkFromBlockCoords(pos);
                 // return chunk.getLightSubtracted(pos, this.skylightSubtracted);
-                final Chunk chunk = this.chunkProvider.getLoadedChunk(pos.getX() >> 4, pos.getZ() >> 4);
+                final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
                 return chunk == null ? 0 : chunk.getLightSubtracted(pos, this.getSkylightSubtracted());
                 // Sponge End
             }

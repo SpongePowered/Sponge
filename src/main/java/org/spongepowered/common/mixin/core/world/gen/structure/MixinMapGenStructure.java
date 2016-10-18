@@ -72,7 +72,7 @@ public abstract class MixinMapGenStructure implements Populator {
     /**
      * @author blood - October 22nd, 2016
      * @reason Prevents CME's by avoiding recursive calls while generating structures
-     *
+     * 
      * @param worldIn The world
      * @param randomIn The rand
      * @Param chunkCoord The chunk position

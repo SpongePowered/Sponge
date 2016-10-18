@@ -677,7 +677,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             posX = fromPos.getX();
             posZ = fromPos.getZ();
         }
-        final net.minecraft.world.chunk.Chunk chunk = this.getChunkProvider().getLoadedChunk(posX >> 4, posZ >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(posX >> 4, posZ >> 4);
         if (chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded()) {
             return false;
         }
