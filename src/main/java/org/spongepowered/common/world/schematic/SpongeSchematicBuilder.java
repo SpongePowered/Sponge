@@ -42,9 +42,8 @@ import org.spongepowered.api.world.schematic.BlockPaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.schematic.Schematic.Builder;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.util.gen.ByteArrayMutableBlockBuffer;
-import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
-import org.spongepowered.common.util.gen.IntArrayMutableBlockBuffer;
+import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
+import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.BackingDataType;
 
 import java.util.Map;
 import java.util.Optional;
@@ -140,14 +139,15 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             this.metadata.set(DataQuery.of(".", entry.getKey()), entry.getValue());
         }
         if (this.volume == null) {
-            final MutableBlockVolume volume;
+            BackingDataType dataType;
             if (this.palette.getHighestId() <= 0xFF) {
-                volume = new ByteArrayMutableBlockBuffer(this.palette, min, size);
+                dataType = BackingDataType.BYTE;
             } else if (this.palette.getHighestId() <= 0xFFFF) {
-                volume = new CharArrayMutableBlockBuffer(this.palette, min, size);
+                dataType = BackingDataType.CHAR;
             } else {
-                volume = new IntArrayMutableBlockBuffer(this.palette, min, size);
+                dataType = BackingDataType.INT;
             }
+            final MutableBlockVolume volume = new ArrayMutableBlockBuffer(this.palette, min, size, dataType);
             Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
             this.view.getBlockWorker(SpongeImpl.getImplementationCause()).iterate((v, x, y, z) -> {
                 volume.setBlock(x, y, z, v.getBlock(x, y, z), SpongeImpl.getImplementationCause());

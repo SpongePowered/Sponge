@@ -30,8 +30,10 @@ import org.spongepowered.api.world.extent.ArchetypeVolume;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
+import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
+import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.BackingDataType;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
-import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
+import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.SpongeArchetypeVolume;
 
 public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
@@ -53,7 +55,7 @@ public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
 
     @Override
     public MutableBlockVolume createBlockBuffer(Vector3i size) {
-        return new CharArrayMutableBlockBuffer(Vector3i.ZERO, size);
+        return new ArrayMutableBlockBuffer(GlobalPalette.instance, Vector3i.ZERO, size, BackingDataType.CHAR);
     }
 
     @Override
@@ -63,7 +65,7 @@ public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
 
     @Override
     public ArchetypeVolume createArchetypeVolume(Vector3i size, Vector3i origin) {
-        MutableBlockVolume backing = new CharArrayMutableBlockBuffer(origin.mul(-1), size);
+        MutableBlockVolume backing = new ArrayMutableBlockBuffer(GlobalPalette.instance, origin.mul(-1), size, BackingDataType.CHAR);
         return new SpongeArchetypeVolume(backing, ImmutableMap.of());
     }
 

@@ -30,6 +30,8 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.BiomeTypes;
+import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.StorageType;
@@ -39,6 +41,8 @@ import org.spongepowered.common.world.extent.MutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.MutableBiomeViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBiomeVolumeWrapper;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
+
+import java.util.Arrays;
 
 /**
  * Mutable view of a {@link Biome} array.
@@ -50,7 +54,13 @@ import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWork
  */
 public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeVolume {
 
-    private final Biome[] biomes;
+    private final BiomeType[] biomes;
+
+    public ObjectArrayMutableBiomeBuffer(Vector3i start, Vector3i size) {
+        super(start, size);
+        this.biomes = new BiomeType[size.getX() * size.getZ()];
+        Arrays.fill(this.biomes, BiomeTypes.OCEAN);
+    }
 
     /**
      * Creates a new instance.
@@ -60,7 +70,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
      * @param start The start position
      * @param size The size
      */
-    public ObjectArrayMutableBiomeBuffer(Biome[] biomes, Vector3i start, Vector3i size) {
+    public ObjectArrayMutableBiomeBuffer(BiomeType[] biomes, Vector3i start, Vector3i size) {
         super(start, size);
         this.biomes = biomes;
     }
@@ -68,14 +78,68 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     @Override
     public BiomeType getBiome(int x, int y, int z) {
         checkRange(x, y, z);
-        return (BiomeType) this.biomes[getIndex(x, z)];
+        return this.biomes[getIndex(x, z)];
+    }
+
+    /**
+     * Gets the native biome for the position, resolving virtual biomes to
+     * persisted types if needed.
+     * 
+     * @param x The X position
+     * @param y The Y position
+     * @param z The X position
+     * @return The native biome
+     */
+    public Biome getNativeBiome(int x, int y, int z) {
+        checkRange(x, y, z);
+        BiomeType type = this.biomes[getIndex(x, z)];
+        if (type instanceof VirtualBiomeType) {
+            type = ((VirtualBiomeType) type).getPersistedType();
+        }
+        return (Biome) type;
     }
 
     @Override
     public void setBiome(int x, int y, int z, BiomeType biome) {
         checkNotNull(biome, "biome");
         checkRange(x, y, z);
-        this.biomes[getIndex(x, z)] = (Biome) biome;
+        this.biomes[getIndex(x, z)] = biome;
+    }
+
+    /**
+     * Changes the bounds of this biome volume, so that it can be reused for
+     * another chunk.
+     *
+     * @param start New start position.
+     */
+    public void reuse(Vector3i start) {
+        this.start = checkNotNull(start, "start");
+        this.end = this.start.add(this.size).sub(Vector3i.ONE);
+        Arrays.fill(this.biomes, BiomeTypes.OCEAN);
+    }
+
+    public void fill(byte[] biomes) {
+        for (int x = 0; x < this.size.getX(); x++) {
+            for (int z = 0; z < this.size.getZ(); z++) {
+                BiomeType type = this.biomes[x + z * this.size.getX()];
+                if (type instanceof VirtualBiomeType) {
+                    type = ((VirtualBiomeType) type).getPersistedType();
+                }
+                biomes[x + z * this.size.getX()] = (byte) Biome.getIdForBiome((Biome) type);
+            }
+        }
+    }
+
+    public void fill(Biome[] biomes) {
+        for (int x = 0; x < this.size.getX(); x++) {
+            for (int z = 0; z < this.size.getZ(); z++) {
+                BiomeType type = this.biomes[x + z * this.size.getX()];
+                if (type instanceof VirtualBiomeType) {
+                    type = ((VirtualBiomeType) type).getPersistedType();
+                }
+                biomes[x + z * this.size.getX()] = (Biome) type;
+            }
+        }
     }
 
     @Override

@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.StorageType;
@@ -37,7 +38,7 @@ import org.spongepowered.common.world.extent.ImmutableBiomeViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
 
 /**
- * Mutable view of a {@link Biome} array.
+ * Mutable view of a {@link BiomeType} array.
  *
  * <p>Normally, the {@link ByteArrayMutableBiomeBuffer} class uses memory more
  * efficiently, but when the {@link Biome} array is already created (for
@@ -46,7 +47,7 @@ import org.spongepowered.common.world.extent.worker.SpongeBiomeVolumeWorker;
  */
 public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeVolume {
 
-    private final Biome[] biomes;
+    private final BiomeType[] biomes;
 
     /**
      * Creates a new instance.
@@ -56,7 +57,7 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
      * @param start The start position
      * @param size The size
      */
-    public ObjectArrayImmutableBiomeBuffer(Biome[] biomes, Vector3i start, Vector3i size) {
+    public ObjectArrayImmutableBiomeBuffer(BiomeType[] biomes, Vector3i start, Vector3i size) {
         super(start, size);
         this.biomes = biomes.clone();
     }
@@ -64,7 +65,25 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     @Override
     public BiomeType getBiome(int x, int y, int z) {
         checkRange(x, y, z);
-        return (BiomeType) this.biomes[getIndex(x, z)];
+        return this.biomes[getIndex(x, z)];
+    }
+
+    /**
+     * Gets the native biome for the position, resolving virtual biomes to
+     * persisted types if needed.
+     * 
+     * @param x The X position
+     * @param y The Y position
+     * @param z The X position
+     * @return The native biome
+     */
+    public Biome getNativeBiome(int x, int y, int z) {
+        checkRange(x, y, z);
+        BiomeType type = this.biomes[getIndex(x, z)];
+        if (type instanceof VirtualBiomeType) {
+            type = ((VirtualBiomeType) type).getPersistedType();
+        }
+        return (Biome) type;
     }
 
     @Override

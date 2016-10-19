@@ -28,6 +28,8 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.biome.Biome;
+import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.extent.BiomeVolume;
 import org.spongepowered.api.world.extent.BlockVolume;
 
@@ -44,7 +46,11 @@ public class ExtentBufferUtil {
         int i = 0;
         for (int z = min.getZ(); z <= max.getZ(); z++) {
             for (int x = min.getX(); x <= max.getX(); x++) {
-                copy[i++] = (byte) Biome.getIdForBiome((Biome) volume.getBiome(x, 0, z));
+                BiomeType type = volume.getBiome(x, 0, z);
+                if(type instanceof VirtualBiomeType) {
+                    type = ((VirtualBiomeType) type).getPersistedType();
+                }
+                copy[i++] = (byte) Biome.getIdForBiome((Biome) type);
             }
         }
         return copy;

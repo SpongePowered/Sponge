@@ -26,7 +26,6 @@ package org.spongepowered.common.world.gen;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.BlockPos;
@@ -35,9 +34,8 @@ import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.gen.layer.IntCache;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
-import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
-import org.spongepowered.common.util.gen.VirtualMutableBiomeBuffer;
+import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -54,7 +52,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
 
     private static final Vector3i CACHED_AREA_SIZE = new Vector3i(40, 1, 40);
 
-    private final VirtualMutableBiomeBuffer areaForGeneration = new VirtualMutableBiomeBuffer(Vector3i.ZERO, CACHED_AREA_SIZE);
+    private final ObjectArrayMutableBiomeBuffer areaForGeneration = new ObjectArrayMutableBiomeBuffer(Vector3i.ZERO, CACHED_AREA_SIZE);
     private final BiomeGenerator biomeGenerator;
 
     /**
@@ -110,29 +108,26 @@ public final class CustomBiomeProvider extends BiomeProvider {
         int zSizeBlock = zSize * 4;
 
         // Get biomes
-        VirtualMutableBiomeBuffer buffer = getBiomeBuffer(xStartBlock, zStartBlock, xSizeBlock, zSizeBlock);
+        ObjectArrayMutableBiomeBuffer buffer = getBiomeBuffer(xStartBlock, zStartBlock, xSizeBlock, zSizeBlock);
         this.biomeGenerator.generateBiomes(buffer);
 
         // Downscale
         for (int i = 0; i < biomeArrayZoomedOut.length; i++) {
             int x = i % xSize;
             int z = i / xSize;
-            BiomeType type = buffer.getBiome(x * 4, 0, z * 4);
-            if (type instanceof VirtualBiomeType) {
-                type = ((VirtualBiomeType) type).getPersistedType();
-            }
-            biomeArrayZoomedOut[i] = (Biome) type;
+            Biome type = buffer.getNativeBiome(x * 4, 0, z * 4);
+            biomeArrayZoomedOut[i] = type;
         }
 
         return biomeArrayZoomedOut;
     }
 
-    private VirtualMutableBiomeBuffer getBiomeBuffer(int xStart, int zStart, int xSize, int zSize) {
+    private ObjectArrayMutableBiomeBuffer getBiomeBuffer(int xStart, int zStart, int xSize, int zSize) {
         if (xSize == CACHED_AREA_SIZE.getX() && zSize == CACHED_AREA_SIZE.getY()) {
             this.areaForGeneration.reuse(new Vector3i(xStart, 0, zStart));
             return this.areaForGeneration;
         }
-        return new VirtualMutableBiomeBuffer(new Vector3i(xStart, 0, zStart), new Vector3i(xSize, 1, zSize));
+        return new ObjectArrayMutableBiomeBuffer(new Vector3i(xStart, 0, zStart), new Vector3i(xSize, 1, zSize));
     }
 
     @Override
@@ -145,15 +140,12 @@ public final class CustomBiomeProvider extends BiomeProvider {
         int xSizeSegments = xMaxSegment - xStartSegment + 1;
         int zSizeSegments = zMaxSegment - zStartSegment + 1;
 
-        VirtualMutableBiomeBuffer buffer = getBiomeBuffer(xStartSegment, zStartSegment, xSizeSegments, zSizeSegments);
+        ObjectArrayMutableBiomeBuffer buffer = getBiomeBuffer(xStartSegment, zStartSegment, xSizeSegments, zSizeSegments);
         this.biomeGenerator.generateBiomes(buffer);
 
         for (int x = xStartSegment; x < xMaxSegment; x++) {
             for (int z = zStartSegment; z < zMaxSegment; z++) {
-                BiomeType type = buffer.getBiome(x, 0, z);
-                if (type instanceof VirtualBiomeType) {
-                    type = ((VirtualBiomeType) type).getPersistedType();
-                }
+                Biome type = buffer.getNativeBiome(x, 0, z);
                 if (!searchingForBiomes.contains(type)) {
                     return false;
                 }
@@ -173,7 +165,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
         int xSizeSegments = xMaxSegment - xStartSegment + 1;
         int zSizeSegments = zMaxSegment - zStartSegment + 1;
 
-        VirtualMutableBiomeBuffer buffer = getBiomeBuffer(xStartSegment, zStartSegment, xSizeSegments, zSizeSegments);
+        ObjectArrayMutableBiomeBuffer buffer = getBiomeBuffer(xStartSegment, zStartSegment, xSizeSegments, zSizeSegments);
         this.biomeGenerator.generateBiomes(buffer);
 
         BlockPos blockpos = null;
@@ -181,11 +173,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
 
         for (int x = xStartSegment; x < xMaxSegment; x++) {
             for (int z = zStartSegment; z < zMaxSegment; z++) {
-                BiomeType type = buffer.getBiome(x, 0, z);
-                if (type instanceof VirtualBiomeType) {
-                    type = ((VirtualBiomeType) type).getPersistedType();
-                }
-
+                Biome type = buffer.getNativeBiome(x, 0, z);
                 if (biomes.contains(type) && (blockpos == null || random.nextInt(attempts + 1) == 0)) {
                     blockpos = new BlockPos(x, 0, z);
                     ++attempts;
@@ -208,20 +196,9 @@ public final class CustomBiomeProvider extends BiomeProvider {
             Arrays.fill(biomeArray, Biomes.OCEAN);
         }
 
-        MutableBiomeVolume biomeArea = new VirtualMutableBiomeBuffer(new Vector3i(startX, 0, startZ), new Vector3i(sizeX, 1, sizeZ));
+        ObjectArrayMutableBiomeBuffer biomeArea = new ObjectArrayMutableBiomeBuffer(new Vector3i(startX, 0, startZ), new Vector3i(sizeX, 1, sizeZ));
         this.biomeGenerator.generateBiomes(biomeArea);
-        for (int x = 0; x < sizeX; x++) {
-            int x0 = startX + x;
-            for (int z = 0; z < sizeZ; z++) {
-                int z0 = startZ + z;
-                BiomeType type = biomeArea.getBiome(x0, 0, z0);
-                if (type instanceof VirtualBiomeType) {
-                    type = ((VirtualBiomeType) type).getPersistedType();
-                }
-                biomeArray[x + z * sizeX] = (Biome) type;
-            }
-        }
-
+        biomeArea.fill(biomeArray);
         return biomeArray;
     }
 

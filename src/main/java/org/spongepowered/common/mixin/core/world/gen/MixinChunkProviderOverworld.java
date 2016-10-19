@@ -45,10 +45,7 @@ import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
-import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GenerationPopulator;
@@ -68,7 +65,7 @@ import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.util.gen.ChunkBufferPrimer;
-import org.spongepowered.common.util.gen.VirtualMutableBiomeBuffer;
+import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.AnimalPopulator;
 import org.spongepowered.common.world.gen.populators.FilteredPopulator;
@@ -224,7 +221,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
         // of the biomes that the terrain generator expects. While not an exact
         // reverse of the algorithm this should be accurate 99.997% of the time
         // (based on testing).
-        MutableBiomeVolume buffer = new VirtualMutableBiomeBuffer(new Vector3i(x * 16 - 6, 0, z * 16 - 6), new Vector3i(37, 1, 37));
+        ObjectArrayMutableBiomeBuffer buffer = new ObjectArrayMutableBiomeBuffer(new Vector3i(x * 16 - 6, 0, z * 16 - 6), new Vector3i(37, 1, 37));
         this.biomegen.generateBiomes(buffer);
         if (this.biomesForGeneration == null || this.biomesForGeneration.length < 100) {
             this.biomesForGeneration = new Biome[100];
@@ -233,11 +230,8 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
             int absX = bx + x * 16 - 6;
             for (int bz = 0; bz < 40; bz += 4) {
                 int absZ = bz + z * 16 - 6;
-                BiomeType type = buffer.getBiome(absX, 0, absZ);
-                if (type instanceof VirtualBiomeType) {
-                    type = ((VirtualBiomeType) type).getPersistedType();
-                }
-                this.biomesForGeneration[(bx / 4) + (bz / 4) * 10] = (Biome) type;
+                Biome type = buffer.getNativeBiome(absX, 0, absZ);
+                this.biomesForGeneration[(bx / 4) + (bz / 4) * 10] = type;
             }
         }
         return this.biomesForGeneration;

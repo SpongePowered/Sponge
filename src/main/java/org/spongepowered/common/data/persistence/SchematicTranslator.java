@@ -47,9 +47,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
-import org.spongepowered.common.util.gen.ByteArrayMutableBlockBuffer;
-import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
-import org.spongepowered.common.util.gen.IntArrayMutableBlockBuffer;
+import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
+import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.BackingDataType;
 import org.spongepowered.common.world.schematic.BimapPalette;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.SpongeSchematic;
@@ -132,14 +131,16 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             palette = GlobalPalette.instance;
         }
 
-        MutableBlockVolume buffer;
+        BackingDataType dataType;
         if (palette_max <= 0xFF) {
-            buffer = new ByteArrayMutableBlockBuffer(palette, new Vector3i(-offset[0], -offset[1], -offset[2]), new Vector3i(width, height, length));
+            dataType = BackingDataType.BYTE;
         } else if (palette_max <= 0xFF) {
-            buffer = new CharArrayMutableBlockBuffer(palette, new Vector3i(-offset[0], -offset[1], -offset[2]), new Vector3i(width, height, length));
+            dataType = BackingDataType.CHAR;
         } else {
-            buffer = new IntArrayMutableBlockBuffer(palette, new Vector3i(-offset[0], -offset[1], -offset[2]), new Vector3i(width, height, length));
+            dataType = BackingDataType.INT;
         }
+        MutableBlockVolume buffer =
+                new ArrayMutableBlockBuffer(palette, new Vector3i(-offset[0], -offset[1], -offset[2]), new Vector3i(width, height, length), dataType);
 
         byte[] blockdata = (byte[]) view.get(DataQueries.Schematic.BLOCK_DATA).get();
         int index = 0;

@@ -77,7 +77,7 @@ import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
-import org.spongepowered.common.util.gen.VirtualMutableBiomeBuffer;
+import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.extent.SoftBufferExtentViewDownsize;
 import org.spongepowered.common.world.gen.populators.SnowPopulator;
 
@@ -104,7 +104,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     protected List<Populator> pop;
     protected Map<BiomeType, BiomeGenerationSettings> biomeSettings;
     protected final World world;
-    protected final VirtualMutableBiomeBuffer cachedBiomes;
+    protected final ObjectArrayMutableBiomeBuffer cachedBiomes;
 
     protected Random rand;
     private NoiseGeneratorPerlin noise4;
@@ -119,7 +119,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         this.biomeGenerator = checkNotNull(biomegen, "biomeGenerator");
 
         // Make initially empty biome cache
-        this.cachedBiomes = new VirtualMutableBiomeBuffer(Vector3i.ZERO, CHUNK_AREA);
+        this.cachedBiomes = new ObjectArrayMutableBiomeBuffer(Vector3i.ZERO, CHUNK_AREA);
 
         this.genpop = Lists.newArrayList();
         this.pop = Lists.newArrayList();

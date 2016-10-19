@@ -109,7 +109,7 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new CharArrayMutableBlockBuffer(this.chunkPrimer.data.clone(), this.start, this.size);
+                return new ArrayMutableBlockBuffer(GlobalPalette.instance, this.start, this.size, this.chunkPrimer.data.clone());
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -118,7 +118,7 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
 
     @Override
     public ImmutableBlockVolume getImmutableBlockCopy() {
-        return new CharArrayImmutableBlockBuffer(this.chunkPrimer.data, this.start, this.size);
+        return new ArrayImmutableBlockBuffer(GlobalPalette.instance, this.start, this.size, this.chunkPrimer.data);
     }
 
 }

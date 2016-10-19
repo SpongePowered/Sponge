@@ -46,15 +46,15 @@ import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.util.gen.ArrayImmutableBlockBuffer;
+import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
+import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.BackingDataType;
 import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
-import org.spongepowered.common.util.gen.ByteArrayMutableBlockBuffer;
-import org.spongepowered.common.util.gen.CharArrayImmutableBlockBuffer;
-import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
-import org.spongepowered.common.util.gen.IntArrayMutableBlockBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.BimapPalette;
+import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.SpongeArchetypeVolume;
 
 import java.util.Map;
@@ -130,8 +130,8 @@ public interface DefaultedExtent extends Extent {
     default MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new CharArrayMutableBlockBuffer(ExtentBufferUtil.copyToArray((BlockVolume) this, getBlockMin(), getBlockMax(), getBlockSize()),
-                        getBlockMin(), getBlockSize());
+                return new ArrayMutableBlockBuffer(GlobalPalette.instance, getBlockMin(), getBlockSize(),
+                        ExtentBufferUtil.copyToArray((BlockVolume) this, getBlockMin(), getBlockMax(), getBlockSize()));
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -140,8 +140,8 @@ public interface DefaultedExtent extends Extent {
 
     @Override
     default ImmutableBlockVolume getImmutableBlockCopy() {
-        return CharArrayImmutableBlockBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray((BlockVolume) this, getBlockMin(), getBlockMax(),
-                getBlockSize()), getBlockMin(), getBlockSize());
+        char[] data = ExtentBufferUtil.copyToArray((BlockVolume) this, getBlockMin(), getBlockMax(), getBlockSize());
+        return ArrayImmutableBlockBuffer.newWithoutArrayClone(GlobalPalette.instance, getBlockMin(), getBlockSize(), data);
     }
 
     @Override
@@ -168,14 +168,15 @@ public interface DefaultedExtent extends Extent {
         int ox = origin.getX();
         int oy = origin.getY();
         int oz = origin.getZ();
-        final MutableBlockVolume backing;
+        BackingDataType dataType;
         if (palette.getHighestId() <= 0xFF) {
-            backing = new ByteArrayMutableBlockBuffer(palette, min.sub(origin), max.sub(min).add(1, 1, 1));
+            dataType = BackingDataType.BYTE;
         } else if (palette.getHighestId() <= 0xFFFF) {
-            backing = new CharArrayMutableBlockBuffer(palette, min.sub(origin), max.sub(min).add(1, 1, 1));
+            dataType = BackingDataType.CHAR;
         } else {
-            backing = new IntArrayMutableBlockBuffer(palette, min.sub(origin), max.sub(min).add(1, 1, 1));
+            dataType = BackingDataType.INT;
         }
+        final MutableBlockVolume backing = new ArrayMutableBlockBuffer(palette, min.sub(origin), max.sub(min).add(1, 1, 1), dataType);
         Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
         volume.getBlockWorker(SpongeImpl.getImplementationCause()).iterate((extent, x, y, z) -> {
             BlockState state = extent.getBlock(x, y, z);

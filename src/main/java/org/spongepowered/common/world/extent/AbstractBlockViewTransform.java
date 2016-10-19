@@ -31,7 +31,8 @@ import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.extent.BlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
+import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
+import org.spongepowered.common.world.schematic.GlobalPalette;
 
 public abstract class AbstractBlockViewTransform<V extends BlockVolume> implements BlockVolume {
 
@@ -91,7 +92,8 @@ public abstract class AbstractBlockViewTransform<V extends BlockVolume> implemen
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new CharArrayMutableBlockBuffer(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min, this.size);
+                char[] data = ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size);
+                return new ArrayMutableBlockBuffer(GlobalPalette.instance, this.min, this.size, data);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());

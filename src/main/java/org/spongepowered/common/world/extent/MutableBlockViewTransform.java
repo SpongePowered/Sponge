@@ -32,8 +32,9 @@ import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.common.util.gen.CharArrayImmutableBlockBuffer;
+import org.spongepowered.common.util.gen.ArrayImmutableBlockBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
+import org.spongepowered.common.world.schematic.GlobalPalette;
 
 public class MutableBlockViewTransform extends AbstractBlockViewTransform<MutableBlockVolume> implements MutableBlockVolume {
 
@@ -70,8 +71,8 @@ public class MutableBlockViewTransform extends AbstractBlockViewTransform<Mutabl
 
     @Override
     public ImmutableBlockVolume getImmutableBlockCopy() {
-        return CharArrayImmutableBlockBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min,
-            this.size);
+        char[] data = ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size);
+        return ArrayImmutableBlockBuffer.newWithoutArrayClone(GlobalPalette.instance, this.min, this.size, data);
     }
 
 }

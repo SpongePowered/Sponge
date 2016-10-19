@@ -30,8 +30,9 @@ import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
-import org.spongepowered.common.util.gen.CharArrayImmutableBlockBuffer;
+import org.spongepowered.common.util.gen.ArrayImmutableBlockBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
+import org.spongepowered.common.world.schematic.GlobalPalette;
 
 public class UnmodifiableBlockViewTransform extends AbstractBlockViewTransform<UnmodifiableBlockVolume> implements UnmodifiableBlockVolume {
 
@@ -52,8 +53,8 @@ public class UnmodifiableBlockViewTransform extends AbstractBlockViewTransform<U
 
     @Override
     public ImmutableBlockVolume getImmutableBlockCopy() {
-        return CharArrayImmutableBlockBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min,
-            this.size);
+        char[] data = ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size);
+        return ArrayImmutableBlockBuffer.newWithoutArrayClone(GlobalPalette.instance, this.min, this.size, data);
     }
 
     @Override
