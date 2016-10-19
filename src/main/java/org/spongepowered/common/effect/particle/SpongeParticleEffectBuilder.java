@@ -76,7 +76,7 @@ public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEff
     @Override
     public ParticleEffect.Builder from(ParticleEffect particleEffect) {
         this.type = (SpongeParticleType) particleEffect.getType();
-        this.options = particleEffect.getOptions();
+        this.options = new HashMap<>(particleEffect.getOptions());
         return this;
     }
 

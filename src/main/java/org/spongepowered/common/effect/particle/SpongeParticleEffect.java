@@ -35,7 +35,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 public class SpongeParticleEffect implements ParticleEffect {
+
+    @Nullable ICachedParticleEffect cachedParticle;
 
     private final SpongeParticleType type;
     private final Map<ParticleOption<?>, Object> options;
