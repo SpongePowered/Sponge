@@ -26,8 +26,6 @@ package org.spongepowered.common.effect.particle;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3f;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -70,9 +68,6 @@ import java.util.UUID;
 
 public final class SpongeParticleHelper {
 
-    private static final LoadingCache<SpongeParticleEffect, ICachedPacket> cache =
-            Caffeine.newBuilder().weakKeys().build(SpongeParticleHelper::toCachedPacket);
-
     /**
      * Gets the list of packets that are needed to spawn the particle effect at
      * the position. This method tries to minimize the amount of packets for
@@ -83,7 +78,10 @@ public final class SpongeParticleHelper {
      * @return The packets
      */
     public static List<Packet<?>> toPackets(SpongeParticleEffect effect, Vector3d position) {
-        final ICachedPacket cachedPacket = cache.get(effect);
+        ICachedParticleEffect cachedPacket = effect.cachedParticle;
+        if (cachedPacket == null) {
+            cachedPacket = effect.cachedParticle = toCachedPacket(effect);
+        }
         if (cachedPacket == EmptyCachedPacket.INSTANCE) {
             return Collections.emptyList();
         }
@@ -139,7 +137,7 @@ public final class SpongeParticleHelper {
         }
     }
 
-    private static ICachedPacket toCachedPacket(SpongeParticleEffect effect) {
+    private static ICachedParticleEffect toCachedPacket(SpongeParticleEffect effect) {
         SpongeParticleType type = effect.getType();
 
         EnumParticleTypes internal = type.getInternalType();
@@ -328,7 +326,7 @@ public final class SpongeParticleHelper {
         return new CachedOffsetParticlePacket(internal, new Vector3f(f0, f1, f2), offset, quantity, extra);
     }
 
-    private static final class EmptyCachedPacket implements ICachedPacket {
+    private static final class EmptyCachedPacket implements ICachedParticleEffect {
 
         public static final EmptyCachedPacket INSTANCE = new EmptyCachedPacket();
 
@@ -337,7 +335,7 @@ public final class SpongeParticleHelper {
         }
     }
 
-    private static final class CachedFireworkPacket implements ICachedPacket {
+    private static final class CachedFireworkPacket implements ICachedParticleEffect {
 
         // Get the next free entity id
         private static final int FIREWORK_ROCKET_ID;
@@ -385,7 +383,7 @@ public final class SpongeParticleHelper {
         }
     }
 
-    private static final class CachedParticlePacket implements ICachedPacket {
+    private static final class CachedParticlePacket implements ICachedParticleEffect {
 
         private final EnumParticleTypes particleType;
         private final Vector3f offset;
@@ -415,7 +413,7 @@ public final class SpongeParticleHelper {
         }
     }
 
-    private static final class CachedOffsetParticlePacket implements ICachedPacket {
+    private static final class CachedOffsetParticlePacket implements ICachedParticleEffect {
 
         private final EnumParticleTypes particleType;
         private final Vector3f offsetData;
@@ -467,7 +465,7 @@ public final class SpongeParticleHelper {
         }
     }
 
-    private static final class CachedEffectPacket implements ICachedPacket {
+    private static final class CachedEffectPacket implements ICachedParticleEffect {
 
         private final int type;
         private final int data;
@@ -484,11 +482,6 @@ public final class SpongeParticleHelper {
             final BlockPos blockPos = new BlockPos(position.getFloorX(), position.getFloorY(), position.getFloorZ());
             output.add(new SPacketEffect(this.type, blockPos, this.data, this.broadcast));
         }
-    }
-
-    private interface ICachedPacket {
-
-        void process(Vector3d position, List<Packet<?>> output);
     }
 
     private SpongeParticleHelper() {
