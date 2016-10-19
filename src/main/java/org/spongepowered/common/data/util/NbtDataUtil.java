@@ -58,6 +58,8 @@ public final class NbtDataUtil {
     public static final String ENTITY_ROTATION = "Rotation";
     public static final String CUSTOM_DATA_CLASS = "DataClass";
     public static final String CUSTOM_DATA = "ManipulatorData";
+    public static final String BANNER_BASE = "Base";
+    public static final String BANNER_PATTERNS = "Patterns";
 
     private NbtDataUtil() {
     }
