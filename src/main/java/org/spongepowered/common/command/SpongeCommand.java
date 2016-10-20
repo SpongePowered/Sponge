@@ -24,11 +24,14 @@
  */
 package org.spongepowered.common.command;
 
+import static org.spongepowered.api.command.args.GenericArguments.catalogedElement;
 import static org.spongepowered.api.command.args.GenericArguments.choices;
 import static org.spongepowered.api.command.args.GenericArguments.dimension;
 import static org.spongepowered.api.command.args.GenericArguments.firstParsing;
 import static org.spongepowered.api.command.args.GenericArguments.flags;
 import static org.spongepowered.api.command.args.GenericArguments.literal;
+import static org.spongepowered.api.command.args.GenericArguments.longNum;
+import static org.spongepowered.api.command.args.GenericArguments.onlyOne;
 import static org.spongepowered.api.command.args.GenericArguments.optional;
 import static org.spongepowered.api.command.args.GenericArguments.optionalWeak;
 import static org.spongepowered.api.command.args.GenericArguments.plugin;
@@ -38,12 +41,14 @@ import static org.spongepowered.api.command.args.GenericArguments.world;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
+import com.google.common.collect.Iterables;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.api.CatalogTypes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandCallable;
@@ -58,6 +63,8 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -68,8 +75,11 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.BlockUtil;
@@ -88,12 +98,15 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
 @NonnullByDefault
@@ -108,6 +121,7 @@ public class SpongeCommand {
     static final Text UNKNOWN = Text.of("UNKNOWN");
 
     private static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
+
     /**
      * Create a new instance of the Sponge command structure.
      *
@@ -129,6 +143,7 @@ public class SpongeCommand {
         flagChildren.register(getReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
         flagChildren.register(getSaveCommand(), "save");
         flagChildren.register(getTpsCommand(), "tps");
+        flagChildren.register(getWorldCommand(), "world");
         return CommandSpec.builder()
                 .description(Text.of("General Sponge command"))
                 .extendedDescription(Text.of("commands:\n", // TODO: Automatically generate from child executors (wait for help system on this)
@@ -647,6 +662,169 @@ public class SpongeCommand {
                                     format(serverMeanTickTime), "ms"));
                     return CommandResult.success();
                 })
+                .build();
+    }
+
+    private static CommandSpec getWorldCommand() {
+        return CommandSpec.builder()
+                .permission("sponge.command.world")
+                .description(Text.of("Manages worlds"))
+                .child(CommandSpec.builder()
+                        .arguments(
+                                onlyOne(string(Text.of("name"))),
+                                optional(longNum(Text.of("seed"))),
+                                optional(catalogedElement(Text.of("dimensionType"), CatalogTypes.DIMENSION_TYPE)),
+                                optional(catalogedElement(Text.of("gamemode"), CatalogTypes.GAME_MODE))
+                        )
+                        .executor((src, args) -> {
+                            final String name = args.<String>getOne(Text.of("name")).get();
+                            final long seed = args.<Long>getOne(Text.of("seed")).orElse(System.currentTimeMillis());
+                            final DimensionType dimensionType = args.<DimensionType>getOne(Text.of("dimensionType")).orElse(DimensionTypes.OVERWORLD);
+                            final GameMode gameMode = args.<GameMode>getOne(Text.of("gamemode")).orElse(GameModes.SURVIVAL);
+
+                            final WorldArchetype worldArchetype = WorldArchetype.builder()
+                                    .seed(seed)
+                                    .dimension(dimensionType)
+                                    .gameMode(gameMode)
+                                    .build(name, name);
+
+                            try {
+                                final WorldProperties worldProperties = Sponge.getServer().createWorldProperties(name, worldArchetype);
+                                final Optional<World> world = Sponge.getServer().loadWorld(worldProperties);
+
+                                if (world.isPresent()) {
+                                    src.sendMessage(Text.of(TextColors.GREEN, "Successfully created world!"));
+                                    SpongeImpl.getLogger().info("Successfully created world: " + name);
+                                } else {
+                                    src.sendMessage(Text.of(TextColors.RED, "Failed to create world!"));
+                                    SpongeImpl.getLogger().error("Failed to create world: " + name);
+                                    return CommandResult.empty();
+                                }
+                            } catch (IOException e) {
+                                src.sendMessage(Text.of(TextColors.RED, "Failed to create world! " + e.getMessage()));
+                                SpongeImpl.getLogger().error("Failed to create world: " + name, e);
+                                return CommandResult.empty();
+                            }
+
+                            return CommandResult.success();
+                        })
+                        .build(), "create")
+                .child(CommandSpec.builder()
+                        .arguments(
+                                onlyOne(string(Text.of("name")))
+                        )
+                        .executor((src, args) -> {
+                            final WorldProperties world = args.<WorldProperties>getOne(Text.of("name")).get();
+                            final Optional<World> worldOptional = Sponge.getServer().getWorld(world.getUniqueId());
+
+                            if (worldOptional.isPresent()) {
+                                Sponge.getServer().unloadWorld(worldOptional.get());
+                            }
+
+                            CompletableFuture<Boolean> success = Sponge.getServer().deleteWorld(world);
+                            try {
+                                if (success.get()) {
+                                    src.sendMessage(Text.of(TextColors.GREEN, "Successfully deleted world!"));
+                                    SpongeImpl.getLogger().info("Successfully deleted world: " + world.getWorldName());
+                                } else {
+                                    src.sendMessage(Text.of(TextColors.RED, "Failed to delete world!"));
+                                    SpongeImpl.getLogger().error("Failed to delete world: " + world.getWorldName());
+                                    return CommandResult.empty();
+                                }
+                            } catch (InterruptedException | ExecutionException e) {
+                                src.sendMessage(Text.of(TextColors.RED, "Failed to delete world! " + e.getMessage()));
+                                SpongeImpl.getLogger().error("Failed to delete world: " + world.getWorldName(), e);
+                                return CommandResult.empty();
+                            }
+
+                            return CommandResult.success();
+                        })
+                        .build(), "remove")
+                .child(CommandSpec.builder()
+                        .executor((src, args) -> {
+                            src.sendMessage(Text.of(TextColors.YELLOW, "*** Available Worlds ***"));
+                            src.sendMessage(Text.of(TextColors.GREEN, "(LOADED) ", TextColors.RED, "(NOT LOADED)"));
+
+                            final Text.Builder text = Text.builder();
+                            for (WorldProperties world : Sponge.getServer().getAllWorldProperties()) {
+                                if (Sponge.getServer().getWorld(world.getUniqueId()).isPresent()) {
+                                    text.append(Text.of(TextColors.GREEN, world.getWorldName()));
+                                } else {
+                                    text.append(Text.of(TextColors.RED, world.getWorldName()));
+                                }
+                                text.append(Text.of(", "));
+                            }
+
+                            src.sendMessage(text.build());
+                            return CommandResult.success();
+                        })
+                        .build(), "list")
+                .child(CommandSpec.builder()
+                        .arguments(
+                                onlyOne(string(Text.of("world")))
+                        )
+                        .executor((src, args) -> {
+                            final WorldProperties worldProperties = args.<WorldProperties>getOne(Text.of("world")).get();
+                            final Optional<World> world = Sponge.getServer().getWorld(worldProperties.getUniqueId());
+
+                            if (world.isPresent()) {
+                                final boolean raining = world.get().getWeather() == Weathers.RAIN;
+                                final boolean thundering = world.get().getWeather() == Weathers.THUNDER_STORM;
+                                src.sendMessage(Text.of("Chunks loaded: " + Iterables.size(world.get().getLoadedChunks())));
+                                src.sendMessage(Text.of("Spawn: " + world.get().getSpawnLocation().toString()));
+                                src.sendMessage(Text.of("Raining: " + (raining ? "true" : "false")));
+                                src.sendMessage(Text.of("Thundering: " + (thundering ? "true" : "false")));
+                            } else {
+                                src.sendMessage(Text.of(TextColors.DARK_PURPLE, "World not loaded!"));
+                            }
+
+                            return CommandResult.success();
+                        })
+                        .build(), "info")
+                .child(CommandSpec.builder()
+                        .arguments(
+                                onlyOne(string(Text.of("world")))
+                        )
+                        .executor((src, args) -> {
+                            final WorldProperties worldProperties = args.<WorldProperties>getOne(Text.of("world")).get();
+                            final Optional<World> world = Sponge.getServer().getWorld(worldProperties.getUniqueId());
+
+                            if (world.isPresent()) {
+                                src.sendMessage(Text.of(TextColors.GREEN, "World is already loaded!"));
+                            } else {
+                                final Optional<World> loadedWorld = Sponge.getServer().loadWorld(worldProperties);
+
+                                if (loadedWorld.isPresent()) {
+                                    src.sendMessage(Text.of(TextColors.GREEN, "Successfully loaded world!"));
+                                } else {
+                                    src.sendMessage(Text.of(TextColors.RED, "Failed to load world!"));
+                                }
+                            }
+
+                            return CommandResult.success();
+                        })
+                        .build(), "load")
+                .child(CommandSpec.builder()
+                        .arguments(
+                                onlyOne(string(Text.of("world")))
+                        )
+                        .executor((src, args) -> {
+                            final WorldProperties worldProperties = args.<WorldProperties>getOne(Text.of("world")).get();
+                            final Optional<World> world = Sponge.getServer().getWorld(worldProperties.getUniqueId());
+
+                            if (world.isPresent()) {
+                                if (Sponge.getServer().unloadWorld(world.get())) {
+                                    src.sendMessage(Text.of(TextColors.GREEN, "Successfully unloaded world!"));
+                                } else {
+                                    src.sendMessage(Text.of(TextColors.RED, "Failed to unload world!"));
+                                }
+                            } else {
+                                src.sendMessage(Text.of(TextColors.GREEN, "World is already unloaded!"));
+                            }
+
+                            return CommandResult.success();
+                        })
+                        .build(), "unload")
                 .build();
     }
 
