@@ -61,7 +61,6 @@ public abstract class MixinEntityZombie extends MixinEntityMob implements Zombie
 
     @Override
     public ZombieData getZombieData() {
-        System.out.println("Common zombie");
         net.minecraft.entity.monster.ZombieType nativeType = getZombieType();
         ZombieType type = EntityUtil.typeFromNative(nativeType);
         if (type != ZombieTypes.VILLAGER) {

@@ -112,9 +112,6 @@ public class Adapter implements MinecraftInventoryAdapter {
         private static Optional<ItemStack> findStack(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, boolean remove) {
             for (int ord = 0; ord < lens.slotCount(); ord++) {
                 net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
-                if (stack != null) {
-                    System.err.println("Found stack!");
-                }
                 if (stack == null || (remove && !lens.setStack(inv, ord, null))) {
                     continue;
                 }
