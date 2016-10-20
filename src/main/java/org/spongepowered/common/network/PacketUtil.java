@@ -30,7 +30,6 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketAnimation;
-import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.client.CPacketClientStatus;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
@@ -65,18 +64,10 @@ public class PacketUtil {
 
     private static final PhaseContext EMPTY_INVALID = PhaseContext.start().complete();
     private static long lastInventoryOpenPacketTimeStamp = 0;
-    private static long lastReceivedPacket = 0;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
-            long currentPacketTick = SpongeImpl.getServer().getTickCounter();
-            // Ignore duplicate inventory packets received same tick.
-            // Avoids players bypassing our inventory events and duping items.
-            if (lastReceivedPacket == currentPacketTick && packetIn instanceof CPacketClickWindow) {
-                return;
-            }
-            lastReceivedPacket = currentPacketTick;
             EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
 
             // Fire packet events and return if cancelled
