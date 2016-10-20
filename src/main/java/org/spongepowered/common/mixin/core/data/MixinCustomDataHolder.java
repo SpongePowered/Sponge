@@ -32,11 +32,15 @@ import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.SimpleCustomData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.manipulator.simple.SpongeSimpleCustomData;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.registry.type.data.SimpleDataRegistryModule;
 
 import java.util.Iterator;
 import java.util.List;
@@ -137,6 +141,12 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value) {
+        if(SimpleDataRegistryModule.getInstance().isRegistered(key)) {
+            // Ensure that we always have somewhere to put the value
+            if(!getCustom(SpongeSimpleCustomData.Mutable.class).isPresent()) {
+                offerCustom(new SpongeSimpleCustomData.Mutable());
+            }
+        }
         for (DataManipulator<?, ?> manipulator : this.manipulators) {
             if (manipulator.supports(key)) {
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
@@ -146,7 +156,7 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
-        return DataTransactionResult.failNoData();
+        return DataTransactionResult.failResult(new ImmutableSpongeValue<E>(key, value));
     }
 
     @Override
