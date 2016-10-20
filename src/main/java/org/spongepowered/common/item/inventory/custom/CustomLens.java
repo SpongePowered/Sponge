@@ -53,7 +53,11 @@ public class CustomLens extends MinecraftLens {
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
 
-        InventoryDimension dimension = (InventoryDimension) archetype.getProperty(CustomInventory.INVENTORY_DIMENSION).orElse(null);
+        InventoryDimension dimension = (InventoryDimension) this.properties.get(CustomInventory.INVENTORY_DIMENSION);
+        if (dimension == null) {
+            dimension = (InventoryDimension) archetype.getProperty(CustomInventory.INVENTORY_DIMENSION).orElse(null);
+        }
+
         if (dimension != null) {
             Lens<IInventory, ItemStack> lens = new GridInventoryLensImpl(0, dimension.getColumns(), dimension.getRows(), dimension.getColumns(), slots);
             this.addSpanningChild(lens);
