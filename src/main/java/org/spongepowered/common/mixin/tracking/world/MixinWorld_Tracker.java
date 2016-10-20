@@ -25,12 +25,15 @@
 package org.spongepowered.common.mixin.tracking.world;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -41,34 +44,50 @@ import javax.annotation.Nullable;
 public abstract class MixinWorld_Tracker implements World, IMixinWorld{
 
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
+    @Shadow protected IChunkProvider chunkProvider;
 
     @Override
     public Optional<UUID> getCreator(int x, int y, int z) {
+        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        if (chunk == null) {
+            return Optional.empty();
+        }
+
         BlockPos pos = new BlockPos(x, y, z);
-        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-        return spongeChunk.getBlockOwner(pos).map(Identifiable::getUniqueId);
+        return ((IMixinChunk) chunk).getBlockOwner(pos).map(Identifiable::getUniqueId);
     }
 
     @Override
     public Optional<UUID> getNotifier(int x, int y, int z) {
+        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        if (chunk == null) {
+            return Optional.empty();
+        }
+
         BlockPos pos = new BlockPos(x, y, z);
-        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-        return spongeChunk.getBlockNotifier(pos).map(Identifiable::getUniqueId);
+        return ((IMixinChunk) chunk).getBlockNotifier(pos).map(Identifiable::getUniqueId);
     }
 
     @Override
     public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
+        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        if (chunk == null) {
+            return;
+        }
+
         BlockPos pos = new BlockPos(x, y, z);
-        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-        spongeChunk.setBlockCreator(pos, uuid);
+        ((IMixinChunk) chunk).setBlockCreator(pos, uuid);
     }
 
     @Override
     public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
-        BlockPos pos = new BlockPos(x, y, z);
-        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-        spongeChunk.setBlockNotifier(pos, uuid);
-    }
+        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        if (chunk == null) {
+            return;
+        }
 
+        BlockPos pos = new BlockPos(x, y, z);
+        ((IMixinChunk) chunk).setBlockNotifier(pos, uuid);
+    }
 
 }
