@@ -100,6 +100,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
@@ -558,6 +559,20 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
 
         return item;
+    }
+
+    @Redirect(method = "processClickWindow", at = @At(value = "INVOKE", args="log=true", target = "Lnet/minecraft/item/ItemStack;areItemStacksEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
+    public boolean onProcessClickWindowItemValidate(ItemStack stackA, ItemStack stackB) {
+        boolean result = ItemStack.areItemsEqual(stackA, stackB);
+        // If the client sends an invalid inventory packet, detect changes only then restore and notify client.
+        if (!result) {
+            IMixinContainer mixinContainer =(IMixinContainer) this.playerEntity.openContainer;
+            mixinContainer.detectAndSendChanges(true);
+            PacketPhaseUtil.handleSlotRestore(this.playerEntity, mixinContainer.getCapturedTransactions(), true);
+            mixinContainer.getCapturedTransactions().clear();
+            mixinContainer.setCaptureInventory(false);
+        }
+        return result;
     }
 
     /**

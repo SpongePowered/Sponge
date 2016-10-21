@@ -31,7 +31,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -42,10 +41,8 @@ import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
-import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IInteractionObject;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -628,7 +625,20 @@ public interface PacketFunction {
     };
 
     PacketFunction INVENTORY = (packet, state, player, context) -> {
-        ((IMixinContainer) player.openContainer).setCaptureInventory(false);
+        // The server will disable the player's crafting after receiving a client packet
+        // that did not pass validation (server click item != packet click item)
+        // The server then sends a SPacketConfirmTransaction and waits for a
+        // CPacketConfirmTransaction to re-enable crafting confirming that the client
+        // acknowledged the denied transaction.
+        // If the player cannot craft or nothing was captured, we return to avoid firing invalid events.
+        // See MixinNetHandlerPlayServer processClickWindow redirect for rest of fix.
+        // --bloodmc
+        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+        if (mixinContainer.getCapturedTransactions().size() == 0 || !player.openContainer.getCanCraft(player)) {
+            return;
+        }
+
+        mixinContainer.setCaptureInventory(false);
         final CPacketClickWindow packetIn = context.firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, CPacketClickWindow.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing the packet used, but no packet was captured!", context));
         final ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class)
@@ -637,7 +647,7 @@ public interface PacketFunction {
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(lastCursor, newCursor);
 
         final Container openContainer = player.openContainer;
-        final List<SlotTransaction> slotTransactions = ContainerUtil.toMixin(openContainer).getCapturedTransactions();
+        final List<SlotTransaction> slotTransactions = mixinContainer.getCapturedTransactions();
         PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, slotTransactions);
         final int usedButton = packetIn.getUsedButton();
         final List<Entity> capturedItems = new ArrayList<>();
@@ -817,7 +827,6 @@ public interface PacketFunction {
         ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected a cursor item stack, but had nothing!", context));
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         final Cause cause = Cause.source(player).build();
         InteractInventoryEvent.Close event = SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, container, player, lastCursor, newCursor);
         if (!event.isCancelled()) {

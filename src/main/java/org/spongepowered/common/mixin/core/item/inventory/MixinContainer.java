@@ -31,7 +31,6 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
-import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -144,6 +143,11 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
      */
     @Overwrite
     public void detectAndSendChanges() {
+        this.detectAndSendChanges(false);
+    }
+
+    @Override
+    public void detectAndSendChanges(boolean captureOnly) {
         if (!this.initialized) {
             this.init();
         }
@@ -172,6 +176,11 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                     }
 
                     this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
+                    // This flag is set only when the client sends an invalid CPacketWindowClickItem packet.
+                    // We simply capture in order to send the proper changes back to client.
+                    if (captureOnly) {
+                        continue;
+                    }
                 }
                 // Sponge end
 
