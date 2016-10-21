@@ -35,4 +35,6 @@ public interface IMixinContainer {
     boolean capturingInventory();
 
     void setCaptureInventory(boolean flag);
+
+    void detectAndSendChanges(boolean captureOnly);
 }
