@@ -64,9 +64,8 @@ public final class PacketPhaseUtil {
             if (nmsSlot != null) {
                 nmsSlot.putStack(originalStack);
             }
-
-            player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotNumber, originalStack));
         }
+        player.openContainer.detectAndSendChanges();
     }
 
     public static void handleCustomCursor(EntityPlayerMP player, ItemStackSnapshot customCursor) {
