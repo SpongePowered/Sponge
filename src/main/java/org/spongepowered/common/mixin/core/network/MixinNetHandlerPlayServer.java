@@ -561,7 +561,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         return item;
     }
 
-    @Redirect(method = "processClickWindow", at = @At(value = "INVOKE", args="log=true", target = "Lnet/minecraft/item/ItemStack;areItemStacksEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
+    @Redirect(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;areItemStacksEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
     public boolean onProcessClickWindowItemValidate(ItemStack stackA, ItemStack stackB) {
         boolean result = ItemStack.areItemsEqual(stackA, stackB);
         // If the client sends an invalid inventory packet, detect changes only then restore and notify client.
