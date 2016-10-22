@@ -52,6 +52,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -109,6 +110,14 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 //
 //        return false;
 //    }
+
+    @Inject(method = "unload", at = @At("HEAD"), cancellable = true)
+    public void onUnloadChunk(Chunk chunkIn, CallbackInfo ci) {
+        // If persisted chunk, don't queue for unload
+        if (((IMixinChunk) chunkIn).isPersistedChunk()) {
+            ci.cancel();
+        }
+    }
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/ChunkPos;chunkXZ2Int(II)J"))
     public void onProvideChunkStart(int x, int z, CallbackInfoReturnable<Chunk> cir) {
