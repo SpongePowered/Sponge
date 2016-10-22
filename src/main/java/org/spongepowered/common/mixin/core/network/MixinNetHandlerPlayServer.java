@@ -76,6 +76,7 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
@@ -569,6 +570,17 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             IMixinContainer mixinContainer =(IMixinContainer) this.playerEntity.openContainer;
             mixinContainer.detectAndSendChanges(true);
             PacketPhaseUtil.handleSlotRestore(this.playerEntity, mixinContainer.getCapturedTransactions(), true);
+            // restore cursor
+            final CauseTracker causeTracker = ((IMixinWorldServer) this.playerEntity.worldObj).getCauseTracker();
+            Optional<ItemStackSnapshot> cursorOpt = causeTracker.getCurrentContext().firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class);
+            if (cursorOpt.isPresent()) {
+                ItemStackSnapshot cursor = cursorOpt.get();
+                if (cursor == ItemStackSnapshot.NONE) {
+                    this.playerEntity.inventory.setItemStack(null);
+                } else {
+                    this.playerEntity.inventory.setItemStack((ItemStack) cursor.createStack()); 
+                }
+            }
             mixinContainer.getCapturedTransactions().clear();
             mixinContainer.setCaptureInventory(false);
         }
