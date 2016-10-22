@@ -25,18 +25,20 @@
 package org.spongepowered.common.mixin.core.world.gen.structure;
 
 import com.flowpowered.math.vector.Vector3i;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.structure.MapGenStructure;
+import net.minecraft.world.gen.structure.StructureBoundingBox;
+import net.minecraft.world.gen.structure.StructureStart;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
 import java.util.Random;
@@ -49,9 +51,12 @@ import java.util.Random;
 @Mixin(MapGenStructure.class)
 public abstract class MixinMapGenStructure implements Populator {
 
-    @Shadow
-    public abstract boolean generateStructure(World worldIn, Random p_175794_2_, ChunkPos p_175794_3_);
-    
+    private static boolean generatingStructures = false;
+
+    @Shadow protected Long2ObjectMap<StructureStart> structureMap;
+    @Shadow protected abstract void initializeStructureData(World worldIn);
+    @Shadow public abstract void setStructureStart(int chunkX, int chunkZ, StructureStart start);
+
     @Override
     public PopulatorType getType() {
         return InternalPopulatorTypes.STRUCTURE;
@@ -64,12 +69,44 @@ public abstract class MixinMapGenStructure implements Populator {
         generateStructure(world, random, new ChunkPos((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
     }
 
-    @Inject(method = "generateStructure", at = @At("HEAD"), cancellable = true)
-    public void onGenerateStructure(World worldIn, Random randomIn, ChunkPos chunkCoord, CallbackInfoReturnable<Boolean> cir) {
-        Chunk chunk = worldIn.getChunkProvider().getLoadedChunk(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
-        if (chunk == null) {
-            cir.setReturnValue(false);
+    /**
+     * @author blood - October 22nd, 2016
+     * @reason Prevents CME's by avoiding recursive calls while generating structures
+     *
+     * @param worldIn The world
+     * @param randomIn The rand
+     * @Param chunkCoord The chunk position
+     * @return true if generation was successful
+     */
+    @Overwrite
+    public synchronized boolean generateStructure(World worldIn, Random randomIn, ChunkPos chunkCoord)
+    {
+        if (generatingStructures) {
+            return false;
         }
-    }
+        Chunk chunk = ((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
+        if (chunk == null) {
+            return false;
+        }
 
+        this.initializeStructureData(worldIn);
+        int i = (chunkCoord.chunkXPos << 4) + 8;
+        int j = (chunkCoord.chunkZPos << 4) + 8;
+        boolean flag = false;
+
+        generatingStructures = true;
+        for (StructureStart structurestart : this.structureMap.values())
+        {
+            if (structurestart.isSizeableStructure() && structurestart.isValidForPostProcess(chunkCoord) && structurestart.getBoundingBox().intersectsWith(i, j, i + 15, j + 15))
+            {
+                structurestart.generateStructure(worldIn, randomIn, new StructureBoundingBox(i, j, i + 15, j + 15));
+                structurestart.notifyPostProcessAt(chunkCoord);
+                flag = true;
+                this.setStructureStart(structurestart.getChunkPosX(), structurestart.getChunkPosZ(), structurestart);
+            }
+        }
+        generatingStructures = false;
+
+        return flag;
+    }
 }
