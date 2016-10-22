@@ -72,6 +72,11 @@ public interface IMixinChunk {
 
     void setNeighbor(Direction direction, Chunk neighbor);
 
+    void setNeighborChunk(int index, @Nullable net.minecraft.world.chunk.Chunk chunk);
+
+    @Nullable
+    net.minecraft.world.chunk.Chunk getNeighborChunk(int index);
+
     boolean areNeighborsLoaded();
 
     Long getScheduledForUnload();
@@ -81,4 +86,7 @@ public interface IMixinChunk {
     void getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityUniverse.EntityHit> filter,
             double entryY, double exitY, Set<EntityUniverse.EntityHit> intersections);
 
+    boolean isPersistedChunk();
+
+    void setPersistedChunk(boolean flag);
 }

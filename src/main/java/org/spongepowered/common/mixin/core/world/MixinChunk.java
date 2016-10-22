@@ -54,7 +54,6 @@ import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -66,8 +65,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -87,7 +84,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -101,7 +97,6 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
-import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -131,21 +126,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     private org.spongepowered.api.world.World world;
     private UUID uuid;
     private Long scheduledForUnload; // delay chunk unloads
-    private SpongeProfileManager spongeProfileManager;
-    private UserStorageService userStorageService;
-    private Chunk[] neighbors = new Chunk[4];
+    private boolean persistedChunk = false;
+    private net.minecraft.world.chunk.Chunk[] neighbors = new net.minecraft.world.chunk.Chunk[4];
     private long cacheKey;
     private static final Direction[] CARDINAL_DIRECTIONS = new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
-
-    private static final int NUM_XZ_BITS = 4;
-    private static final int NUM_SHORT_Y_BITS = 8;
-    private static final int NUM_INT_Y_BITS = 24;
-    private static final int Y_SHIFT = NUM_XZ_BITS;
-    private static final int Z_SHORT_SHIFT = Y_SHIFT + NUM_SHORT_Y_BITS;
-    private static final int Z_INT_SHIFT = Y_SHIFT + NUM_INT_Y_BITS;
-    private static final short XZ_MASK = 0xF;
-    private static final short Y_SHORT_MASK = 0xFF;
-    private static final int Y_INT_MASK = 0xFFFFFF;
 
     private static final Vector3i BIOME_SIZE = new Vector3i(SpongeChunkLayout.CHUNK_SIZE.getX(), 1, SpongeChunkLayout.CHUNK_SIZE.getZ());
     private Vector3i chunkPos;
@@ -196,8 +180,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         if (this.world.getUniqueId() != null) { // Client worlds have no UUID
             this.uuid = new UUID(this.world.getUniqueId().getMostSignificantBits() ^ (x * 2 + 1),
                     this.world.getUniqueId().getLeastSignificantBits() ^ (z * 2 + 1));
-            this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
-            this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
         }
         this.cacheKey = ChunkPos.chunkXZ2Int(this.xPosition, this.zPosition);
     }
@@ -207,21 +189,32 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         return this.cacheKey;
     }
 
+    @Override
+    public boolean isPersistedChunk() {
+        return this.persistedChunk;
+    }
+
+    @Override
+    public void setPersistedChunk(boolean flag) {
+        this.persistedChunk = flag;
+    }
+
     @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
     public void onChunkLoadInject(CallbackInfo ci) {
         if (!this.worldObj.isRemote) {
             SpongeHooks.logChunkLoad(this.worldObj, this.chunkPos);
         }
 
-        Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
-        for (Direction direction : directions) {
+        for (Direction direction : CARDINAL_DIRECTIONS) {
             Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
             IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) this.worldObj.getChunkProvider();
             net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.getLoadedChunkWithoutMarkingActive
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
-                this.setNeighbor(direction, (Chunk) neighbor);
-                ((IMixinChunk) neighbor).setNeighbor(direction.getOpposite(), this);
+                int neighborIndex = directionToIndex(direction);
+                int oppositeNeighborIndex = directionToIndex(direction.getOpposite());
+                this.setNeighborChunk(neighborIndex, neighbor);
+                ((IMixinChunk) neighbor).setNeighborChunk(oppositeNeighborIndex, (net.minecraft.world.chunk.Chunk)(Object) this);
             }
         }
     }
@@ -232,15 +225,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             SpongeHooks.logChunkUnload(this.worldObj, this.chunkPos);
         }
 
-        Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
-        for (Direction direction : directions) {
+        for (Direction direction : CARDINAL_DIRECTIONS) {
             Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
             IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) this.worldObj.getChunkProvider();
             net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.getLoadedChunkWithoutMarkingActive
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
-                this.setNeighbor(direction, null);
-                ((IMixinChunk) neighbor).setNeighbor(direction.getOpposite(), null);
+                int neighborIndex = directionToIndex(direction);
+                int oppositeNeighborIndex = directionToIndex(direction.getOpposite());
+                this.setNeighborChunk(neighborIndex, null);
+                ((IMixinChunk) neighbor).setNeighborChunk(oppositeNeighborIndex, null);
             }
         }
     }
@@ -1096,13 +1090,32 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
     }
 
-    private User userForUUID(UUID uuid) {
-        return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().getOrCreate(GameProfile.of(uuid, null));
+    // Fast neighbor methods for internal use
+    @Override
+    public void setNeighborChunk(int index, @Nullable net.minecraft.world.chunk.Chunk chunk) {
+        this.neighbors[index] = chunk;
+    }
+
+    @Nullable
+    @Override
+    public net.minecraft.world.chunk.Chunk getNeighborChunk(int index) {
+        return this.neighbors[index];
+    }
+
+    @Override
+    public boolean areNeighborsLoaded() {
+        for (int i = 0; i < 4; i++) {
+            if (this.neighbors[i] == null) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     @Override
     public void setNeighbor(Direction direction, @Nullable Chunk neighbor) {
-        this.neighbors[directionToIndex(direction)] = neighbor;
+        this.neighbors[directionToIndex(direction)] = (net.minecraft.world.chunk.Chunk) neighbor;
     }
 
     @Override
@@ -1117,7 +1130,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         int index = directionToIndex(direction);
         Direction secondary = getSecondaryDirection(direction);
         Chunk neighbor = null;
-        neighbor = this.neighbors[index];
+        neighbor = (Chunk) this.neighbors[index];
 
         if (neighbor == null && shouldLoad) {
             Vector3i neighborPosition = this.getPosition().add(getCardinalDirection(direction).asBlockOffset());
@@ -1136,17 +1149,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
 
         return Optional.empty();
-    }
-
-    @Override
-    public boolean areNeighborsLoaded() {
-        for (Direction direction : CARDINAL_DIRECTIONS) {
-            if (!this.getNeighbor(direction, false).isPresent()) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     private static int directionToIndex(Direction direction) {

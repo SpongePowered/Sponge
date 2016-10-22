@@ -59,7 +59,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.Explosion;
-import net.minecraft.world.IWorldEventListener;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
@@ -105,7 +104,6 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.Location;
@@ -792,6 +790,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         long unloadAfter = this.chunkUnloadDelay;
         for (net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.getLoadedChunks()) {
             IMixinChunk spongeChunk = (IMixinChunk) chunk;
+            if (spongeChunk.isPersistedChunk()) {
+                continue;
+            }
             if (spongeChunk.getScheduledForUnload() != null && (now - spongeChunk.getScheduledForUnload()) > unloadAfter) {
                 spongeChunk.setScheduledForUnload(null);
             }
@@ -1551,35 +1552,31 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         xEnd = xEnd >> 4;
         zEnd = zEnd >> 4;
 
-        Chunk base = (Chunk) ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(xStart, zStart);
+        net.minecraft.world.chunk.Chunk base = ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(xStart, zStart);
         if (base == null) {
             return false;
         }
 
-        Optional<Chunk> currentColumn = Optional.of(base);
+        IMixinChunk currentColumn = (IMixinChunk) base;
         for (int i = xStart; i <= xEnd; i++) {
-            if (!currentColumn.isPresent()) {
+            if (currentColumn == null) {
                 return false;
             }
 
-            Chunk column = currentColumn.get();
-
-            Optional<Chunk> currentRow = column.getNeighbor(Direction.SOUTH);
+            IMixinChunk currentRow = (IMixinChunk) currentColumn.getNeighborChunk(1);
             for (int j = zStart; j <= zEnd; j++) {
-                if (!currentRow.isPresent()) {
+                if (currentRow == null) {
                     return false;
                 }
 
-                Chunk row = currentRow.get();
-
-                if (!allowEmpty && ((net.minecraft.world.chunk.Chunk) row).isEmpty()) {
+                if (!allowEmpty && ((net.minecraft.world.chunk.Chunk) currentRow).isEmpty()) {
                     return false;
                 }
 
-                currentRow = row.getNeighbor(Direction.SOUTH);
+                currentRow = (IMixinChunk) currentRow.getNeighborChunk(1);
             }
 
-            currentColumn = column.getNeighbor(Direction.EAST);
+            currentColumn = (IMixinChunk) currentColumn.getNeighborChunk(2);
         }
 
         return true;
