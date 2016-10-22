@@ -28,12 +28,15 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.management.PlayerChunkMap;
+import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
@@ -76,9 +79,6 @@ public abstract class MixinWorldEntitySpawner {
 
     private static final String WEIGHTED_RANDOM_GET = "Lnet/minecraft/util/WeightedRandom;getRandomItem(Ljava/util/Random;Ljava/util/List;)"
         + "Lnet/minecraft/util/WeightedRandom$Item;";
-    private static final String WORLD_SERVER_SPAWN_ENTITY = "Lnet/minecraft/world/WorldServer;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
-    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
-
     @Nullable
     private static EntityType spawnerEntityType;
     @Nullable
@@ -91,6 +91,16 @@ public abstract class MixinWorldEntitySpawner {
         return Math.min(((IMixinWorldServer) worldServerIn).getActiveConfig().getConfig().getWorld().getMobSpawnRange(), SpongeImpl
                 .getServer()
                 .getPlayerList().getViewDistance());
+    }
+
+    @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerChunkMap;getEntry(II)Lnet/minecraft/server/management/PlayerChunkMapEntry;"))
+    public PlayerChunkMapEntry onFindChunksForSpawningGetMapEntry(PlayerChunkMap playerChunkMap, int chunkX, int chunkZ) {
+        final Chunk chunk = ((IMixinChunkProviderServer) playerChunkMap.theWorldServer.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
+        if (chunk == null || (chunk.unloaded && !((IMixinChunk) chunk).isPersistedChunk())) {
+            // Don't attempt to spawn in an unloaded chunk
+            return null;
+        }
+        return playerChunkMap.getEntry(chunkX, chunkZ);
     }
 
     @Inject(method = "findChunksForSpawning", at = @At(value = "HEAD"))
