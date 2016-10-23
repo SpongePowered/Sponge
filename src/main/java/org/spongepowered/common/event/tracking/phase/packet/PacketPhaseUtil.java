@@ -86,13 +86,14 @@ public final class PacketPhaseUtil {
     }
 
     public static void validateCapturedTransactions(int slotId, Container openContainer, List<SlotTransaction> capturedTransactions) {
-        /*if (capturedTransactions.size() == 0 && slotId >= 0) {
+        if (capturedTransactions.size() == 0 && slotId >= 0) {
             final Slot slot = openContainer.getSlot(slotId);
             if (slot != null) {
-                final SlotTransaction slotTransaction = new SlotTransaction(new SlotAdapter(slot), ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+                ItemStackSnapshot snapshot = slot.getHasStack() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
+                final SlotTransaction slotTransaction = new SlotTransaction(new SlotAdapter(slot), snapshot, snapshot);
                 capturedTransactions.add(slotTransaction);
             }
-        }*/
+        }
     }
 
     public static void handlePlayerSlotRestore(EntityPlayerMP player, ItemStack itemStack, EnumHand hand) {
