@@ -39,7 +39,6 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.query.Query;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -143,7 +142,7 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     @Override
     default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Class<T> property) {
         if (this.parent() == this) {
-            return Collections.emptyList(); // TODO top level inventory properties
+            return Adapter.Logic.getRootProperties(this, property);
         }
         return this.parent().getProperties(this, property);
     }
@@ -153,7 +152,7 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property, Object key) {
         for (InventoryProperty<?, ?> prop : Adapter.Logic.getProperties(this, child, property)) {
             if (key.equals(prop.getKey())) {
-                return Optional.of(((T) prop));
+                return Optional.of((T)prop);
             }
         }
         return Optional.empty();
@@ -162,7 +161,7 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     @Override
     default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Class<T> property, Object key) {
         if (this.parent() == this) {
-            return Optional.empty(); // TODO top level inventory properties
+            return Adapter.Logic.getRootProperty(this, property, key);
         }
         return this.parent().getProperty(this, property, key);
     }
