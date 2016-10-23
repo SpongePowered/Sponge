@@ -569,7 +569,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         if (!result) {
             IMixinContainer mixinContainer =(IMixinContainer) this.playerEntity.openContainer;
             mixinContainer.detectAndSendChanges(true);
-            PacketPhaseUtil.handleSlotRestore(this.playerEntity, mixinContainer.getCapturedTransactions(), true);
+            PacketPhaseUtil.handleSlotRestore(this.playerEntity, mixinContainer.getCapturedTransactions(), true, false);
             // restore cursor
             final CauseTracker causeTracker = ((IMixinWorldServer) this.playerEntity.worldObj).getCauseTracker();
             Optional<ItemStackSnapshot> cursorOpt = causeTracker.getCurrentContext().firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class);
@@ -578,7 +578,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 if (cursor == ItemStackSnapshot.NONE) {
                     this.playerEntity.inventory.setItemStack(null);
                 } else {
-                    this.playerEntity.inventory.setItemStack((ItemStack) cursor.createStack()); 
+                    this.playerEntity.inventory.setItemStack((ItemStack) cursor.createStack());
                 }
             }
             mixinContainer.getCapturedTransactions().clear();
