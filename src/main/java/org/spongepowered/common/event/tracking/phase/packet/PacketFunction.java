@@ -630,11 +630,12 @@ public interface PacketFunction {
         // The server then sends a SPacketConfirmTransaction and waits for a
         // CPacketConfirmTransaction to re-enable crafting confirming that the client
         // acknowledged the denied transaction.
-        // If the player cannot craft or nothing was captured, we return to avoid firing invalid events.
+        // To detect when this happens, we turn off capturing so we can avoid firing
+        // invalid events.
         // See MixinNetHandlerPlayServer processClickWindow redirect for rest of fix.
         // --bloodmc
         final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
-        if (mixinContainer.getCapturedTransactions().size() == 0 || !player.openContainer.getCanCraft(player)) {
+        if (!mixinContainer.capturingInventory()) {
             return;
         }
 
