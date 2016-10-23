@@ -680,11 +680,11 @@ public interface PacketFunction {
 
                 if (inventoryEvent instanceof ChangeInventoryEvent) {
                     // Restore target slots
-                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions(), true);
+                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions(), true, inventoryEvent);
                 }
             } else {
                 if (inventoryEvent instanceof ChangeInventoryEvent) {
-                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions(), false);
+                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions(), false, inventoryEvent);
                 }
 
                 // Custom cursor
@@ -813,7 +813,7 @@ public interface PacketFunction {
         if (changeInventoryEventHeld.isCancelled()) {
             player.connection.sendPacket(new SPacketHeldItemChange(previousSlot));
         } else {
-            PacketPhaseUtil.handleSlotRestore(player, changeInventoryEventHeld.getTransactions(), false);
+            PacketPhaseUtil.handleSlotRestore(player, changeInventoryEventHeld.getTransactions(), false, false);
             inventory.currentItem = itemChange.getSlotId();
             player.markPlayerActive();
         }
