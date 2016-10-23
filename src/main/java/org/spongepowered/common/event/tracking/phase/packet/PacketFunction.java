@@ -677,10 +677,6 @@ public interface PacketFunction {
                     // Restore cursor
                     PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
                 }
-                if (inventoryEvent instanceof ClickInventoryEvent.Double) {
-                    ((ClickInventoryEvent.Double) inventoryEvent).getTransactions().clear();
-                    return;
-                }
 
                 if (inventoryEvent instanceof ChangeInventoryEvent) {
                     // Restore target slots
