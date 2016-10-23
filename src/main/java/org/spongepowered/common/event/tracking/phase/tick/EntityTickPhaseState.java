@@ -484,6 +484,7 @@ class EntityTickPhaseState extends TickPhaseState {
             return false;
         }
         final List<Entity> nonExp = new ArrayList<Entity>(1);
+        nonExp.add(entity);
 
         final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                 .entity(tickingEntity)
