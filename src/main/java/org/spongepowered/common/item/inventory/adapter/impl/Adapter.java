@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory.adapter.impl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Streams;
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
@@ -35,12 +36,15 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.LensProvider;
@@ -51,6 +55,7 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.ArrayList;
@@ -281,6 +286,56 @@ public class Adapter implements MinecraftInventoryAdapter {
             }
 
             return Collections.emptyList();
+        }
+
+        static <T extends InventoryProperty<?, ?>> Collection<T> getRootProperties(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter, Class<T> property) {
+            adapter = inventoryRoot(adapter);
+            if (adapter instanceof CustomInventory) {
+                return ((CustomInventory) adapter).getProperties().values().stream().filter(p -> property.equals(p.getClass()))
+                        .map(property::cast).collect(Collectors.toList());
+            }
+            return Streams.stream(findRootProperty(adapter, property)).collect(Collectors.toList());
+        }
+
+        static <T extends InventoryProperty<?, ?>> Optional<T> getRootProperty(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter, Class<T> property, Object key) {
+            adapter = inventoryRoot(adapter);
+            if (adapter instanceof CustomInventory) {
+                InventoryProperty forKey = ((CustomInventory) adapter).getProperties().get(key);
+                if (forKey != null && property.equals(forKey.getClass())) {
+                    return Optional.of((T) forKey);
+                }
+            }
+            return findRootProperty(adapter, property);
+        }
+
+        private static <T extends InventoryProperty<?, ?>> Optional<T> findRootProperty(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter, Class<T> property) {
+            if (property == InventoryTitle.class) {
+                if (adapter instanceof Container) {
+                    IInventory inv = adapter.getInventory().allInventories().iterator().next();
+                    Text text = SpongeTexts.toText(inv.getDisplayName());
+                    return ((Optional<T>) Optional.of(InventoryTitle.of(text)));
+                }
+                if (adapter instanceof IInventory) {
+                    Text text = SpongeTexts.toText(((IInventory) adapter).getDisplayName());
+                    return ((Optional<T>) Optional.of(InventoryTitle.of(text)));
+                }
+            }
+            // TODO more properties of top level inventory
+            return Optional.empty();
+        }
+
+        private static InventoryAdapter<IInventory, net.minecraft.item.ItemStack> inventoryRoot(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter) {
+            // Get Root Inventory
+            adapter = ((InventoryAdapter) adapter.root());
+            if (adapter instanceof Container) {
+                // If Root is a Container get the viewed inventory
+                IInventory first = adapter.getInventory().allInventories().iterator().next();
+                if (first instanceof CustomInventory) {
+                    // if viewed inventory is a custom inventory get it instead
+                    adapter = ((InventoryAdapter) first);
+                }
+            }
+            return adapter;
         }
 
         public static boolean contains(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter, ItemStack stack) {

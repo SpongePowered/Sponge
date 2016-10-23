@@ -97,7 +97,7 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
     @Override
     public Inventory.Builder from(Inventory value) {
         if (value instanceof CustomInventory) {
-            this.archetype = ((CustomInventory) value).getArchetype();
+            this.archetype = value.getArchetype();
             this.properties.putAll(((CustomInventory) value).getProperties());
             return this;
         }
