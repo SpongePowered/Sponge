@@ -95,6 +95,12 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         return this;
     }
 
+    @Override public ItemStack.Builder unsafeQuantity(int quantity) {
+        checkArgument(quantity >= -1, "Quantity must be greater than or equal to -1");
+        this.quantity = quantity;
+        return this;
+    }
+
     @Override
     public <E> ItemStack.Builder keyValue(Key<? extends BaseValue<E>> key, E value) {
         if (this.keyValues == null) {
