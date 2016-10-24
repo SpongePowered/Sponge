@@ -56,7 +56,7 @@ public class BasicInventoryPacketState extends BasicPacketState {
     /**
      * Don't care about anything
      */
-    BasicInventoryPacketState() {
+    public BasicInventoryPacketState() {
         this(0, PacketPhase.MASK_NONE);
     }
 
@@ -65,7 +65,7 @@ public class BasicInventoryPacketState extends BasicPacketState {
      *
      * @param stateId state
      */
-    BasicInventoryPacketState(int stateId) {
+    public BasicInventoryPacketState(int stateId) {
         this(stateId, PacketPhase.MASK_ALL);
     }
 
@@ -75,7 +75,7 @@ public class BasicInventoryPacketState extends BasicPacketState {
      * @param stateId flags we care about
      * @param stateMask caring mask
      */
-    BasicInventoryPacketState(int stateId, int stateMask) {
+    public BasicInventoryPacketState(int stateId, int stateMask) {
         this.stateId = stateId & stateMask;
         this.stateMask = stateMask;
     }
