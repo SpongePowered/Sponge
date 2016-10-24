@@ -126,8 +126,11 @@ public interface IPacketState extends IPhaseState {
                 entities, (World) minecraftWorld);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
-            EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
-            ((IMixinWorldServer) minecraftWorld).forceSpawnEntity(entity);
+            for (Entity newEntity : event.getEntities()) {
+                EntityUtil.toMixin(newEntity).setCreator(player.getUniqueId());
+                ((IMixinWorldServer) minecraftWorld).forceSpawnEntity(newEntity);
+            }
+
             return true;
         }
         return false;
