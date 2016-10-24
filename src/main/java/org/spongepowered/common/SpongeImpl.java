@@ -77,7 +77,7 @@ public final class SpongeImpl {
     public static final Optional<String> IMPLEMENTATION_VERSION =  Optional.ofNullable(getPackage().getImplementationVersion());
 
     // TODO: Keep up to date
-    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.10.2", 210);
+    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("16w42a", 210);
 
     private static final Logger logger = LogManager.getLogger(ECOSYSTEM_NAME);
     private static final org.slf4j.Logger slf4jLogger = LoggerFactory.getLogger(ECOSYSTEM_NAME);

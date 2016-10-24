@@ -8,6 +8,8 @@ evaluationDependsOn api.path
 // Apply shared Gradle configuration in SpongeAPI
 apply from: api.file('gradle/sponge.gradle')
 
+repositories { mavenLocal() }
+
 // Apply ForgeGradle plugin
 apply plugin: forgeGradlePlugin
 
