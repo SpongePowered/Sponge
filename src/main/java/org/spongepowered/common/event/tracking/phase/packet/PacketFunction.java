@@ -649,7 +649,7 @@ public interface PacketFunction {
 
         final Container openContainer = player.openContainer;
         final List<SlotTransaction> slotTransactions = mixinContainer.getCapturedTransactions();
-        PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, slotTransactions);
+
         final int usedButton = packetIn.getUsedButton();
         final List<Entity> capturedItems = new ArrayList<>();
         for (EntityItem entityItem : context.getCapturedItems()) {
@@ -667,6 +667,12 @@ public interface PacketFunction {
         }
 
         if (inventoryEvent != null) {
+            // The client sends several packets all at once for drag events - we only care about the last one.
+            // Therefore, we never add any 'fake' transactions, as the final packet has everything we want.
+            if (!(inventoryEvent instanceof ClickInventoryEvent.Drag)) {
+                PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, slotTransactions);
+            }
+
             SpongeImpl.postEvent(inventoryEvent);
             if (inventoryEvent.isCancelled()) {
                 if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
