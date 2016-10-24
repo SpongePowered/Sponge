@@ -623,7 +623,6 @@ public class PhaseContext {
 
         @Nullable private BlockSnapshot snapshot;
         private IBlockState tileState;
-        private IBlockState actualState;
         private BlockPos tilePosition;
         private TileEntity owningEntity;
         private WorldServer worldServer;
@@ -633,12 +632,11 @@ public class PhaseContext {
             this.worldServer = worldServer;
             this.tilePosition = tileEntity.getPos();
             this.tileState = worldServer.getBlockState(tileEntity.getPos());
-            this.actualState = this.tileState.getActualState(worldServer, this.tilePosition);
         }
 
         public BlockSnapshot getSnapshot() {
             if (this.snapshot == null) {
-                this.snapshot = ((IMixinWorldServer) this.worldServer).createSpongeBlockSnapshot(this.tileState, this.actualState, this.tilePosition, 0);
+                this.snapshot = ((IMixinWorldServer) this.worldServer).createSpongeBlockSnapshot(this.tileState, this.tileState, this.tilePosition, 0);
             }
             return this.snapshot;
         }
@@ -668,7 +666,6 @@ public class PhaseContext {
         public String toString() {
             return com.google.common.base.Objects.toStringHelper(this)
                     .add("tileState", this.tileState)
-                    .add("actualState", this.actualState)
                     .add("tilePosition", this.tilePosition)
                     .add("owningEntity", this.owningEntity)
                     .add("worldServer", this.worldServer)
