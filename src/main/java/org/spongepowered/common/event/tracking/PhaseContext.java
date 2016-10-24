@@ -76,6 +76,7 @@ public class PhaseContext {
     @Nullable private CapturedItemStackSupplier capturedItemStackSupplier;
     @Nullable private EntityItemDropsSupplier entityItemDropsSupplier;
     @Nullable private EntityItemEntityDropsSupplier entityItemEntityDropsSupplier;
+    @Nullable private CaptureBlockSnapshotForTile captureBlockSnapshotForTile;
     @Nullable protected User owner;
     @Nullable protected User notifier;
 
@@ -406,6 +407,24 @@ public class PhaseContext {
                 .orElseThrow(
                         TrackingUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this))
                 .getPlayer();
+    }
+
+    public PhaseContext addTileSnapshotCapture(TileEntity tileEntity, WorldServer worldServer) {
+        this.captureBlockSnapshotForTile = new CaptureBlockSnapshotForTile(tileEntity, worldServer);
+        this.add(NamedCause.of(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, this.captureBlockSnapshotForTile));
+        return this;
+    }
+
+    public CaptureBlockSnapshotForTile getTileSnapshot() throws IllegalStateException {
+        if (this.captureBlockSnapshotForTile == null) {
+            final CaptureBlockSnapshotForTile
+                    capture =
+                    this.firstNamed(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, CaptureBlockSnapshotForTile.class)
+                            .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a TileEntity's block snapshot!", this));
+            this.captureBlockSnapshotForTile = capture;
+            return capture;
+        }
+        return this.captureBlockSnapshotForTile;
     }
 
     public void forEach(Consumer<NamedCause> consumer) {

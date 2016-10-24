@@ -71,9 +71,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
     public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
         final TileEntity tickingTile = phaseContext.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
-        final PhaseContext.CaptureBlockSnapshotForTile capturedSnapshot = phaseContext
-                .firstNamed(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, PhaseContext.CaptureBlockSnapshotForTile.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a snapshot for a ticking tile entity!", phaseContext));
+        final PhaseContext.CaptureBlockSnapshotForTile capturedSnapshot = phaseContext.getTileSnapshot();
         final Optional<User> notifier = phaseContext.getNotifier();
         final Optional<User> owner = phaseContext.getOwner();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
@@ -147,9 +145,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
     public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final TileEntity tickingTile = context.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
-        final PhaseContext.CaptureBlockSnapshotForTile capturedSnapshot = context
-                .firstNamed(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, PhaseContext.CaptureBlockSnapshotForTile.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a snapshot for a ticking tile entity!", context));
+        final PhaseContext.CaptureBlockSnapshotForTile capturedSnapshot = context.getTileSnapshot();
         final Optional<User> notifier = context.getNotifier();
         final Optional<User> owner = context.getOwner();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));

@@ -204,7 +204,7 @@ public final class TrackingUtil {
         final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tile;
         // Add the block snapshot of the tile entity for caches to avoid creating multiple snapshots during processing
         // This is a lazy evaluating snapshot to avoid the overhead of snapshot creation
-        phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, new PhaseContext.CaptureBlockSnapshotForTile(tileEntity, worldServer)));
+        phaseContext.addTileSnapshotCapture(tileEntity, worldServer);
         causeTracker.switchToPhase(TickPhase.Tick.TILE_ENTITY, phaseContext
                 .complete());
         mixinTileEntity.getTimingsHandler().startTiming();
