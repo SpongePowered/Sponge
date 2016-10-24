@@ -446,10 +446,10 @@ public class SpongeCommonEventFactory {
         final Cause.Builder builder = Cause.source(projectile).named("ProjectileSource", projectileSource == null
                                                                                          ? ProjectileSource.UNKNOWN
                                                                                          : projectileSource);
-        final Optional<User> notifier = causeTracker.getCurrentPhaseData()
+        final Optional<User> owner = causeTracker.getCurrentPhaseData()
                 .context
-                .firstNamed(NamedCause.NOTIFIER, User.class);
-        notifier.ifPresent(user -> builder.named(NamedCause.OWNER, user));
+                .firstNamed(NamedCause.OWNER, User.class);
+        owner.ifPresent(user -> builder.named(NamedCause.OWNER, user));
 
         Location<World> impactPoint = new Location<>((World) projectile.worldObj, VecHelper.toVector3d(movingObjectPosition.hitVec));
         boolean cancelled = false;
@@ -465,10 +465,10 @@ public class SpongeCommonEventFactory {
                     targetBlock.getLocation().get(), side);
             cancelled = SpongeImpl.postEvent(event);
             // Track impact block if event is not cancelled
-            if (!cancelled && notifier.isPresent()) {
+            if (!cancelled && owner.isPresent()) {
                 BlockPos targetPos = VecHelper.toBlockPos(impactPoint.getBlockPosition());
                 IMixinChunk spongeChunk = (IMixinChunk) projectile.worldObj.getChunkFromBlockCoords(targetPos);
-                spongeChunk.addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, notifier.get(), PlayerTracker.Type.NOTIFIER);
+                spongeChunk.addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, owner.get(), PlayerTracker.Type.NOTIFIER);
             }
         } else if (movingObjectPosition.entityHit != null) { // entity
             ArrayList<Entity> entityList = new ArrayList<>();
