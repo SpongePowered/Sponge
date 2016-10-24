@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import co.aikar.timings.TimingsManager;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
@@ -46,6 +47,7 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -538,6 +540,30 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public String toString() {
         return getClass().getSimpleName();
+    }
+
+    @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getWorldInfo()Lnet/minecraft/world/storage/WorldInfo;"))
+    public WorldInfo onUpdateTimeLightAndEntitiesGetWorld(WorldServer worldServer) {
+        // ChunkGC needs to be processed before a world tick in order to guarantee any chunk  queued for unload
+        // can still be marked active and avoid unload if accessed during the same tick.
+        // Note: This injection must come before Forge's pre world tick event or it will cause issues with mods.
+        IMixinWorldServer spongeWorld = (IMixinWorldServer) worldServer;
+        if (spongeWorld.getChunkGCTickInterval() > 0) {
+            spongeWorld.doChunkGC();
+        }
+        return worldServer.getWorldInfo();
+    }
+
+    @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getEntityTracker()Lnet/minecraft/entity/EntityTracker;"))
+    public EntityTracker onUpdateTimeLightAndEntitiesGetEntityTracker(WorldServer worldServer) {
+        // Chunk unloads must run after a world tick to guarantee any chunks accessed during the world tick have
+        // been marked active and will not unload.
+        // Note: This injection must come after Forge's post world tick event or it will cause issues with mods.
+        IMixinWorldServer spongeWorld = (IMixinWorldServer) worldServer;
+        if (spongeWorld.getChunkGCTickInterval() > 0) {
+            worldServer.getChunkProvider().unloadQueuedChunks();
+        }
+        return worldServer.getEntityTracker();
     }
 
     @Inject(method = "tick", at = @At(value = "HEAD"))

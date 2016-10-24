@@ -68,6 +68,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -766,14 +767,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event);
     }
 
-    @Inject(method = "tick", at = @At("RETURN"))
-    public void onTickEnd(CallbackInfo ci) {
-        // Clean up any leaked chunks
-        this.doChunkGC();
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;unloadQueuedChunks()Z"))
+    public boolean onTickUnloadQueuedChunks(IChunkProvider chunkProvider) {
+        // chunk unloads are moved at end of server tick to avoid clashing with chunk GC
+        if (this.chunkGCTickInterval > 0) {
+            return false;
+        }
+
+        return chunkProvider.unloadQueuedChunks();
     }
 
     // Chunk GC
-    private void doChunkGC() {
+    @Override
+    public void doChunkGC() {
         this.chunkGCTickCount++;
 
         ChunkProviderServer chunkProviderServer = this.getChunkProvider();
@@ -1712,7 +1718,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=cleaning"))
     private void onTickUpdatesCleanup(boolean flag, CallbackInfoReturnable<Boolean> cir) {
         this.timings.scheduledBlocksCleanup.startTiming();
-
     }
 
     @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=ticking"))

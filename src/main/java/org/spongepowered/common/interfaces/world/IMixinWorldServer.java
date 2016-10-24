@@ -98,4 +98,6 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, String soundIn, SoundCategory category, float volume, float pitch);
 
+    void doChunkGC();
+
 }
