@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.mixin.tracking.world;
 
-import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectArrayMap;
+import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -87,8 +89,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Shadow @Final private int[] heightMap;
     @Shadow private boolean isModified;
 
-    public Map<Integer, PlayerTracker> trackedIntBlockPositions = Maps.newHashMap();
-    public Map<Short, PlayerTracker> trackedShortBlockPositions = Maps.newHashMap();
+    public Map<Integer, PlayerTracker> trackedIntBlockPositions = new Int2ObjectArrayMap<>();
+    public Map<Short, PlayerTracker> trackedShortBlockPositions = new Short2ObjectArrayMap<>();
 
     @Final // need this constructor to never be overwritten by anything.
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
