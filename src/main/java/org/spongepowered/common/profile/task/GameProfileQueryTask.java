@@ -46,7 +46,7 @@ public class GameProfileQueryTask implements Runnable {
     private static final int REQUEST_LIMIT = SpongeImpl.getGlobalConfig().getConfig().getWorld().getGameProfileLookupBatchSize();
 
     public synchronized void queueUuid(UUID uuid) {
-        this.queuedUuidList.add(UUID.fromString(uuid.toString()));
+        this.queuedUuidList.add(uuid);
     }
 
     public synchronized void removeFromQueue(UUID uuid) {
