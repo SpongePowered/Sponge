@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
+import org.spongepowered.common.mixin.core.util.MixinDamageSource;
 
 @Mixin(value = MinecraftBlockDamageSource.class, priority = 991)
 public abstract class MixinMinecraftBlockDamageSource extends MixinDamageSource implements BlockDamageSource {

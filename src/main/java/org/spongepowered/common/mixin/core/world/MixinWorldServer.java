@@ -31,6 +31,7 @@ import co.aikar.timings.TimingHistory;
 import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.block.Block;
@@ -1912,5 +1913,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public long getChunkUnloadDelay() {
         return this.chunkUnloadDelay;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("LevelName", this.worldInfo.getWorldName())
+                .add("DimensionId", this.provider.getDimensionType().getId())
+                .add("DimensionType", ((org.spongepowered.api.world.DimensionType)(Object) this.provider.getDimensionType()).getId())
+                .toString();
     }
 }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.event.cause.entity.damage;
+package org.spongepowered.common.mixin.core.util;
 
 import com.google.common.base.Objects;
 import net.minecraft.entity.player.EntityPlayer;

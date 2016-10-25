@@ -32,6 +32,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.damage.MinecraftFallingBlockDamageSource;
+import org.spongepowered.common.mixin.core.util.MixinEntityDamageSource;
 
 @Mixin(value = MinecraftFallingBlockDamageSource.class, priority = 992)
 public abstract class MixinMinecraftFallingBlockDamageSource extends MixinEntityDamageSource implements FallingBlockDamageSource {

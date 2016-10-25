@@ -31,6 +31,7 @@ import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector2d;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
@@ -1201,5 +1202,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public void setScheduledForUnload(Long scheduled) {
         this.scheduledForUnload = scheduled;
+    }
+
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("World", this.worldObj)
+                .add("Position", this.xPosition + this.zPosition)
+                .toString();
     }
 }
