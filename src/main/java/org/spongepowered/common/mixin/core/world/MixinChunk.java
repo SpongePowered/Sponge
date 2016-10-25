@@ -126,7 +126,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     private org.spongepowered.api.world.World world;
     private UUID uuid;
-    private Long scheduledForUnload; // delay chunk unloads
+    private long scheduledForUnload = -1; // delay chunk unloads
     private boolean persistedChunk = false;
     private net.minecraft.world.chunk.Chunk[] neighbors = new net.minecraft.world.chunk.Chunk[4];
     private long cacheKey;
@@ -1204,12 +1204,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public Long getScheduledForUnload() {
+    public long getScheduledForUnload() {
         return this.scheduledForUnload;
     }
 
     @Override
-    public void setScheduledForUnload(Long scheduled) {
+    public void setScheduledForUnload(long scheduled) {
         this.scheduledForUnload = scheduled;
     }
 

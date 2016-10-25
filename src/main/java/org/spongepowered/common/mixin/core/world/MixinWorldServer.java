@@ -245,7 +245,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, CallbackInfo callbackInfo) {
-        this.activeConfig = SpongeHooks.getActiveConfig((WorldServer)(Object) this);
         this.prevWeather = getWeather();
         this.weatherStartTime = this.worldInfo.getWorldTotalTime();
         ((World) (Object) this).getWorldBorder().addListener(new PlayerBorderListener(this.getMinecraftServer(), dimensionId));
@@ -342,7 +341,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             final IMixinChunkProviderServer mixinChunkProvider = (IMixinChunkProviderServer) this.getChunkProvider();
             final int maxChunkUnloads = this.activeConfig.getConfig().getWorld().getMaxChunkUnloads();
             mixinChunkProvider.setMaxChunkUnloads(maxChunkUnloads < 1 ? 1 : maxChunkUnloads);
-//            ((ChunkProviderServer) this.getChunkProvider()).chunkLoadOverride = !this.activeConfig.getConfig().getWorld().getDenyChunkRequests();
+            mixinChunkProvider.setDenyChunkRequests(this.activeConfig.getConfig().getWorld().getDenyChunkRequests());
             for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
                 if (entity instanceof IModData_Activation) {
                     ((IModData_Activation) entity).requiresActivationCacheRefresh(true);
@@ -797,20 +796,32 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         long unloadAfter = this.chunkUnloadDelay;
         for (net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.getLoadedChunks()) {
             IMixinChunk spongeChunk = (IMixinChunk) chunk;
-            if (spongeChunk.isPersistedChunk()) {
-                continue;
-            }
-            if (spongeChunk.getScheduledForUnload() != null && (now - spongeChunk.getScheduledForUnload()) > unloadAfter) {
-                spongeChunk.setScheduledForUnload(null);
-            }
-            // If a player is currently using the chunk, skip it
-            if (spongeChunk.getScheduledForUnload() != null || ((IMixinPlayerChunkMap) this.getPlayerChunkMap()).isChunkInUse(chunk.xPosition, chunk.zPosition)) {
+            if (chunk.unloaded || spongeChunk.isPersistedChunk() || !chunk.getWorld().provider.canDropChunk(chunk.xPosition, chunk.zPosition)) {
                 continue;
             }
 
-            // Queue chunk for unload
-            chunkProviderServer.unload(chunk);
-            SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.worldObj, chunk);
+            // If a player is currently using the chunk, skip it
+            if (((IMixinPlayerChunkMap) this.getPlayerChunkMap()).isChunkInUse(chunk.xPosition, chunk.zPosition)) {
+                continue;
+            }
+
+            if (unloadAfter > 0) {
+                // If a chunk reached this point without a scheduled unload, we can 
+                // safely assume it leaked and manually schedule an unload
+                if (spongeChunk.getScheduledForUnload() == -1) {
+                    spongeChunk.setScheduledForUnload(now);
+                }
+    
+                if ((now - spongeChunk.getScheduledForUnload()) > unloadAfter) {
+                    spongeChunk.setScheduledForUnload(-1);
+                    // Queue chunk for unload
+                    chunkProviderServer.unload(chunk);
+                    SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.worldObj, chunk);
+                }
+            } else { // Queue chunk for unload immediately
+                chunkProviderServer.unload(chunk);
+                SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.worldObj, chunk);
+            }
         }
     }
 
