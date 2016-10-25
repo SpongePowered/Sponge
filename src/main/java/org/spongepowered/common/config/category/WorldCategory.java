@@ -44,7 +44,7 @@ public class WorldCategory extends ConfigCategory {
 
     @Setting(value = "mob-spawn-range", comment = "Specifies the radius (in chunks) of where creatures will spawn. \nThis value is capped to "
             + "the current view distance setting in server.properties")
-    protected int mobSpawnRange = 8;
+    protected int mobSpawnRange = 4;
 
     @Setting(value = "world-enabled", comment = "Enable if this world should be registered.")
     protected boolean worldEnabled = true;
@@ -69,9 +69,9 @@ public class WorldCategory extends ConfigCategory {
     @Setting(value = "deny-chunk-requests", comment = "If enabled, any request for a chunk not currently loaded will be denied (exceptions apply for things like world gen and player movement). \nNote: As this is an experimental setting for performance gain, if you encounter any issues then we recommend disabling it.")
     private boolean denyChunkRequests = true;
 
-    @Setting(value = "chunk-gc-tick-interval", comment = "The tick interval used to cleanup all inactive chunks in a world. "
-                                                         + "\nSet to 0 to disable which restores vanilla handling. (Default: 1)")
-    private int chunkGCTickInterval = 1;
+    @Setting(value = "chunk-gc-tick-interval", comment = "The tick interval used to cleanup all inactive chunks that have leaked in a world. "
+                                                         + "\nSet to 0 to disable which restores vanilla handling. (Default: 600)")
+    private int chunkGCTickInterval = 600;
 
     @Setting(value = "max-chunk-unloads-per-tick", comment = "The maximum number of queued unloaded chunks that will be unloaded in a single tick. "
                                                              + "\nNote: With the chunk gc enabled, this setting only applies to the ticks "
@@ -85,9 +85,9 @@ public class WorldCategory extends ConfigCategory {
                                                           + "\nDisabled by default.")
     private int chunkGCLoadThreshold = 0;
 
-    @Setting(value = "chunk-unload-delay", comment = "The number of seconds to delay a chunk unload once marked inactive. (Default: 30)"
+    @Setting(value = "chunk-unload-delay", comment = "The number of seconds to delay a chunk unload once marked inactive. (Default: 15)"
                                                      + "\nNote: This gets reset if the chunk becomes active again.")
-    private int chunkUnloadDelay = 30;
+    private int chunkUnloadDelay = 15;
 
     @Setting(value = "item-merge-radius", comment = "The defined merge radius for Item entities such that when two items are"
                                                     + "\nwithin the defined radius of each other, they will attempt to merge. Usually,"

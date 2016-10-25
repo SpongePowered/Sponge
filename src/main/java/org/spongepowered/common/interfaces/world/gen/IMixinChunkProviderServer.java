@@ -35,4 +35,6 @@ public interface IMixinChunkProviderServer {
     void setDenyChunkRequests(boolean flag);
 
     @Nullable Chunk getLoadedChunkWithoutMarkingActive(int x, int z);
+
+    long getChunkUnloadDelay();
 }
