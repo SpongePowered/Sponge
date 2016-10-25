@@ -53,6 +53,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -196,7 +197,9 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             final IPhaseState currentState = causeTracker.getCurrentState();
             // States that cannot deny chunks
             if (currentState == TickPhase.Tick.PLAYER
-                    || currentState == TickPhase.Tick.DIMENSION) {
+                    || currentState == TickPhase.Tick.DIMENSION
+                    || currentState == EntityPhase.State.CHANGING_TO_DIMENSION
+                    || currentState == EntityPhase.State.LEAVING_DIMENSION) {
                 return false;
             }
 
