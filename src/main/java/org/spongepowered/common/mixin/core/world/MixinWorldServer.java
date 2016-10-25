@@ -792,11 +792,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        long now = System.currentTimeMillis();
-        long unloadAfter = this.chunkUnloadDelay;
         for (net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.getLoadedChunks()) {
             IMixinChunk spongeChunk = (IMixinChunk) chunk;
-            if (chunk.unloaded || spongeChunk.isPersistedChunk() || !chunk.getWorld().provider.canDropChunk(chunk.xPosition, chunk.zPosition)) {
+            if (chunk.unloaded || spongeChunk.isPersistedChunk()) {
                 continue;
             }
 
@@ -805,23 +803,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 continue;
             }
 
-            if (unloadAfter > 0) {
-                // If a chunk reached this point without a scheduled unload, we can 
-                // safely assume it leaked and manually schedule an unload
-                if (spongeChunk.getScheduledForUnload() == -1) {
-                    spongeChunk.setScheduledForUnload(now);
-                }
-    
-                if ((now - spongeChunk.getScheduledForUnload()) > unloadAfter) {
-                    spongeChunk.setScheduledForUnload(-1);
-                    // Queue chunk for unload
-                    chunkProviderServer.unload(chunk);
-                    SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.worldObj, chunk);
-                }
-            } else { // Queue chunk for unload immediately
-                chunkProviderServer.unload(chunk);
-                SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.worldObj, chunk);
-            }
+            // If we reach this point the chunk leaked so queue for unload
+            chunkProviderServer.unload(chunk);
+            SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.worldObj, chunk);
         }
     }
 

@@ -40,11 +40,10 @@ import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -67,6 +66,7 @@ import org.spongepowered.common.world.SpongeEmptyChunk;
 import org.spongepowered.common.world.storage.SpongeChunkDataStream;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
 
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -75,6 +75,8 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     private SpongeEmptyChunk EMPTY_CHUNK;
     private boolean denyChunkRequests = true;
+    private long chunkUnloadDelay = 15000;
+    private int maxChunkUnloads = 100;
 
     @Shadow @Final public WorldServer worldObj;
     @Shadow @Final private IChunkLoader chunkLoader;
@@ -86,6 +88,8 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Shadow public abstract Chunk loadChunk(int x, int z);
     @Shadow public abstract Chunk loadChunkFromFile(int x, int z);
     @Shadow public abstract Chunk provideChunk(int x, int z);
+    @Shadow public abstract void saveChunkExtraData(Chunk chunkIn);
+    @Shadow public abstract void saveChunkData(Chunk chunkIn);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(WorldServer worldObjIn, IChunkLoader chunkLoaderIn, IChunkGenerator chunkGeneratorIn, CallbackInfo ci) {
@@ -93,6 +97,8 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         SpongeConfig<?> spongeConfig = SpongeHooks.getActiveConfig(worldObjIn);
         ((IMixinWorldServer) worldObjIn).setActiveConfig(spongeConfig);
         this.denyChunkRequests = spongeConfig.getConfig().getWorld().getDenyChunkRequests();
+        this.chunkUnloadDelay = spongeConfig.getConfig().getWorld().getChunkUnloadDelay() * 1000;
+        this.maxChunkUnloads = spongeConfig.getConfig().getWorld().getMaxChunkUnloads();
     }
 
     @Override
@@ -118,11 +124,20 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         return (WorldProperties) this.worldObj.getWorldInfo();
     }
 
-    @Inject(method = "unload", at = @At("HEAD"), cancellable = true)
-    public void onUnloadChunk(Chunk chunkIn, CallbackInfo ci) {
-        // If persisted chunk, don't queue for unload
-        if (((IMixinChunk) chunkIn).isPersistedChunk()) {
-            ci.cancel();
+    /**
+     * @author blood - October 25th, 2016
+     * @reason Removes usage of droppedChunksSet in favor of unloaded flag.
+     * 
+     * @param chunkIn The chunk to queue
+     */
+    @Overwrite
+    public void unload(Chunk chunkIn)
+    {
+        if (!((IMixinChunk) chunkIn).isPersistedChunk() && this.worldObj.provider.canDropChunk(chunkIn.xPosition, chunkIn.zPosition))
+        {
+            // Sponge - we avoid using the queue and simply check the unloaded flag during unloads
+            //this.droppedChunksSet.add(Long.valueOf(ChunkPos.chunkXZ2Int(chunkIn.xPosition, chunkIn.zPosition)));
+            chunkIn.unloaded = true;
         }
     }
 
@@ -203,28 +218,6 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         return false;
     }
 
-    @Inject(method = "unloadQueuedChunks", at = @At("HEAD"))
-    public void onUnloadQueuedChunksStart(CallbackInfoReturnable<Boolean> ci) {
-        ((IMixinWorldServer) this.worldObj).getTimingsHandler().doChunkUnload.startTiming();
-    }
-
-    @Inject(method = "unloadQueuedChunks", at = @At("RETURN"))
-    public void onUnloadQueuedChunksEnd(CallbackInfoReturnable<Boolean> ci) {
-        ((IMixinWorldServer) this.worldObj).getTimingsHandler().doChunkUnload.stopTiming();
-    }
-
-
-    private int maxChunkUnloads = -1;
-
-    @ModifyConstant(method = "unloadQueuedChunks", constant = @Constant(intValue = 100))
-    private int modifyUnloadCount(int original) {
-        if (this.maxChunkUnloads == -1) {
-            final int maxChunkUnloads = ((IMixinWorldServer) this.worldObj).getActiveConfig().getConfig().getWorld().getMaxChunkUnloads();
-            this.maxChunkUnloads = maxChunkUnloads < 1 ? 1 : maxChunkUnloads;
-        }
-        return this.maxChunkUnloads;
-    }
-
     @Override
     public void setMaxChunkUnloads(int maxUnloads) {
         this.maxChunkUnloads = maxUnloads;
@@ -233,6 +226,52 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Override
     public void setDenyChunkRequests(boolean flag) {
         this.denyChunkRequests = flag;
+    }
+
+    @Override
+    public long getChunkUnloadDelay() {
+        return this.chunkUnloadDelay;
+    }
+
+    /**
+     * @author blood - October 20th, 2016
+     * @reason Refactors entire method to not use the droppedChunksSet by
+     * simply looping through all loaded chunks and determining whether it
+     * can unload or not.
+     * 
+     * @return true if unload queue was processed
+     */
+    @Overwrite
+    public boolean unloadQueuedChunks()
+    {
+        if (!this.worldObj.disableLevelSaving)
+        {
+            ((IMixinWorldServer) this.worldObj).getTimingsHandler().doChunkUnload.startTiming();
+            Iterator<Chunk> iterator = this.id2ChunkMap.values().iterator();
+            int chunksUnloaded = 0;
+            long now = System.currentTimeMillis();
+            while (chunksUnloaded < this.maxChunkUnloads && iterator.hasNext()) {
+                Chunk chunk = iterator.next();
+                IMixinChunk spongeChunk = (IMixinChunk) chunk;
+                if (chunk != null && chunk.unloaded && !spongeChunk.isPersistedChunk()) {
+                    if (this.getChunkUnloadDelay() > 0) {
+                        if ((now - spongeChunk.getScheduledForUnload()) < this.chunkUnloadDelay) {
+                            continue;
+                        }
+                        spongeChunk.setScheduledForUnload(-1);
+                    }
+                    chunk.onChunkUnload();
+                    this.saveChunkData(chunk);
+                    this.saveChunkExtraData(chunk);
+                    iterator.remove();
+                    chunksUnloaded++;
+                }
+            }
+            ((IMixinWorldServer) this.worldObj).getTimingsHandler().doChunkUnload.stopTiming();
+        }
+
+        this.chunkLoader.chunkTick();
+        return false;
     }
 
     // Copy of getLoadedChunk without marking chunk active.
