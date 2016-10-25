@@ -29,6 +29,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.data.DataContainer;
@@ -39,7 +40,6 @@ import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
@@ -49,31 +49,51 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.CachedLong2ObjectMap;
+import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.world.SpongeEmptyChunk;
 import org.spongepowered.common.world.storage.SpongeChunkDataStream;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.Nullable;
-
 @Mixin(ChunkProviderServer.class)
 public abstract class MixinChunkProviderServer implements WorldStorage, IMixinChunkProviderServer {
 
+    private SpongeEmptyChunk EMPTY_CHUNK;
+    private boolean denyChunkRequests = true;
+
     @Shadow @Final public WorldServer worldObj;
     @Shadow @Final private IChunkLoader chunkLoader;
+    @Shadow public IChunkGenerator chunkGenerator;
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Shadow @Final @Mutable public Long2ObjectMap<Chunk> id2ChunkMap = new CachedLong2ObjectMap();
 
+    @Shadow public abstract Chunk getLoadedChunk(int x, int z);
+    @Shadow public abstract Chunk loadChunk(int x, int z);
+    @Shadow public abstract Chunk loadChunkFromFile(int x, int z);
     @Shadow public abstract Chunk provideChunk(int x, int z);
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void onConstruct(WorldServer worldObjIn, IChunkLoader chunkLoaderIn, IChunkGenerator chunkGeneratorIn, CallbackInfo ci) {
+        EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
+        SpongeConfig<?> spongeConfig = SpongeHooks.getActiveConfig(worldObjIn);
+        ((IMixinWorldServer) worldObjIn).setActiveConfig(spongeConfig);
+        this.denyChunkRequests = spongeConfig.getConfig().getWorld().getDenyChunkRequests();
+    }
 
     @Override
     public ChunkDataStream getGeneratedChunks() {
@@ -98,25 +118,44 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         return (WorldProperties) this.worldObj.getWorldInfo();
     }
 
-//    private boolean canDenyChunkRequest() {
-//        if (this.chunkLoadOverride || this.worldObj.isFindingSpawnPoint()) {
-//            return false;
-//        }
-//
-//        final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
-//        if (causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning() || causeTracker.isCapturingTerrainGen()) {
-//            return true;
-//        }
-//
-//        return false;
-//    }
-
     @Inject(method = "unload", at = @At("HEAD"), cancellable = true)
     public void onUnloadChunk(Chunk chunkIn, CallbackInfo ci) {
         // If persisted chunk, don't queue for unload
         if (((IMixinChunk) chunkIn).isPersistedChunk()) {
             ci.cancel();
         }
+    }
+
+    // split from loadChunk to avoid 2 lookups with our inject
+    private Chunk loadChunkForce(int x, int z) {
+        Chunk chunk = this.loadChunkFromFile(x, z);
+
+        if (chunk != null)
+        {
+            this.id2ChunkMap.put(ChunkPos.chunkXZ2Int(x, z), chunk);
+            chunk.onChunkLoad();
+            chunk.populateChunk((ChunkProviderServer)(Object) this, this.chunkGenerator);
+        }
+
+        return chunk;
+    }
+
+    @Redirect(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;loadChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
+    public Chunk onProvideChunkHead(ChunkProviderServer chunkProviderServer, int x, int z) {
+        if (!this.denyChunkRequests) {
+            return this.loadChunk(x, z);
+        }
+
+        Chunk chunk = this.getLoadedChunk(x, z);
+        if (chunk == null && this.canDenyChunkRequest()) {
+            return EMPTY_CHUNK;
+        }
+
+        if (chunk == null) {
+            chunk = this.loadChunkForce(x, z);
+        }
+
+        return chunk;
     }
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/ChunkPos;chunkXZ2Int(II)J"))
@@ -134,6 +173,34 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         if (CauseTracker.ENABLED) {
             ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
         }
+    }
+
+    private boolean canDenyChunkRequest() {
+        if (CauseTracker.ENABLED) {
+            final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+            final IPhaseState currentState = causeTracker.getCurrentState();
+            // States that cannot deny chunks
+            if (currentState == TickPhase.Tick.PLAYER
+                    || currentState == TickPhase.Tick.DIMENSION) {
+                return false;
+            }
+
+            // States that can deny chunks
+            if (currentState == GenerationPhase.State.WORLD_SPAWNER_SPAWNING
+                    || currentState == PluginPhase.Listener.PRE_WORLD_TICK_LISTENER) {
+                return true;
+            }
+
+            // Phases that can deny chunks
+            if (currentState.getPhase() == TrackingPhases.BLOCK
+                    || currentState.getPhase() == TrackingPhases.ENTITY
+                    || currentState.getPhase() == TrackingPhases.TICK) {
+                return true;
+            }
+        }
+
+
+        return false;
     }
 
     @Inject(method = "unloadQueuedChunks", at = @At("HEAD"))
@@ -163,33 +230,17 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         this.maxChunkUnloads = maxUnloads;
     }
 
-    @Redirect(method = "unloadQueuedChunks", at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/longs/Long2ObjectMap;get(Ljava/lang/Object;)Ljava/lang/Object;", remap = false))
-    public Object onUnloadQueuedChunksGetChunk(Long2ObjectMap<Chunk> chunkMap, Object key) {
-        Chunk chunk = chunkMap.get(key);
-        if (chunk != null) {
-            chunk.unloaded = true; // ignore unloaded flag
-        }
-        return chunk;
+    @Override
+    public void setDenyChunkRequests(boolean flag) {
+        this.denyChunkRequests = flag;
     }
 
-    /**
-     * @author blood - September 5th, 2016
-     *
-     * @reason Ignores the chunk unload flag to avoid chunks not unloading properly.
-     */
-    @Nullable
-    @Overwrite
-    public Chunk getLoadedChunk(int x, int z){
+    // Copy of getLoadedChunk without marking chunk active.
+    // This allows the chunk to unload if currently queued.
+    @Override
+    public Chunk getLoadedChunkWithoutMarkingActive(int x, int z){
         long i = ChunkPos.chunkXZ2Int(x, z);
         Chunk chunk = this.id2ChunkMap.get(i);
-
-        // Sponge start - Ignore the chunk unloaded flag as it causes
-        // many issues with how we already handle unloads.
-        /*if (chunk != null){
-            chunk.unloaded = false;
-        }*/
-        // Sponge end
-
         return chunk;
     }
 

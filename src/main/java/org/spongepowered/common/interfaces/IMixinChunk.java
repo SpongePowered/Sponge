@@ -79,9 +79,9 @@ public interface IMixinChunk {
 
     boolean areNeighborsLoaded();
 
-    Long getScheduledForUnload();
+    long getScheduledForUnload();
 
-    void setScheduledForUnload(Long scheduled);
+    void setScheduledForUnload(long scheduled);
 
     void getIntersectingEntities(Vector3d start, Vector3d direction, double distance, Predicate<EntityUniverse.EntityHit> filter,
             double entryY, double exitY, Set<EntityUniverse.EntityHit> intersections);

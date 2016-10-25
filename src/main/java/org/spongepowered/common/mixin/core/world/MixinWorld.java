@@ -130,6 +130,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeChunkPreGenerate;
@@ -1067,6 +1068,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return true;
     }
 
+    @Inject(method = "getPlayerEntityByUUID", at = @At("HEAD"), cancellable = true)
+    public void onGetPlayerEntityByUUID(UUID uuid, CallbackInfoReturnable<UUID> cir) {
+        // avoid crashing server if passed a null UUID
+        if (uuid == null) {
+            cir.setReturnValue(null);
+        }
+    }
+
     /**
      * @author gabizou - July 25th, 2016
      * @reason Optimizes several blockstate lookups for getting raw light.
@@ -1091,6 +1100,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Block block = this.getBlockState(pos).getBlock();
             // int blockLight = block.getLightValue(this, pos);
+            net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            if (chunk == null || chunk.unloaded) {
+                return 0;
+            }
+
             IBlockState blockState = this.getBlockState(pos);
             int blockLight = SpongeImplHooks.getChunkPosLight(blockState, (net.minecraft.world.World) (Object) this, pos);
             int i = lightType == EnumSkyBlock.SKY ? 0 : blockLight; // Changed by forge to use the local variable
