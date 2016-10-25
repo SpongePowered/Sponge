@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
+import com.google.common.base.Objects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -54,11 +55,10 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     public Optional<BlockType> blockType = Optional.empty();
 
-    @Shadow
-    public abstract int getItemStackLimit();
+    @Shadow private String unlocalizedName;
 
-    @Shadow
-    public abstract String getUnlocalizedName();
+    @Shadow public abstract int getItemStackLimit();
+    @Shadow public abstract String getUnlocalizedName();
 
     @Override
     public String getId() {
@@ -114,5 +114,12 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     @Override
     public ItemStack createDictionaryStack(int wildcardValue) {
         return new ItemStack((Item) (Object) this, 1, wildcardValue);
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("Name", this.unlocalizedName)
+                .toString();
     }
 }

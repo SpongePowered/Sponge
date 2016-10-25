@@ -74,7 +74,6 @@ public class SpongeLaunch {
         Mixins.addConfiguration("mixins.common.entitycollisions.json");
         Mixins.addConfiguration("mixins.common.exploit.json");
         Mixins.addConfiguration("mixins.common.tracking.json");
-        Mixins.addConfiguration("mixins.common.tostring.json");
         Mixins.addConfiguration("mixins.common.optimization.json");
         Mixins.addConfiguration("mixins.common.realtime.json");
     }
