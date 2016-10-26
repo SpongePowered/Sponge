@@ -636,10 +636,10 @@ public interface PacketFunction {
         // --bloodmc
         final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
         if (!mixinContainer.capturingInventory()) {
+            mixinContainer.getCapturedTransactions().clear();
             return;
         }
 
-        mixinContainer.setCaptureInventory(false);
         final CPacketClickWindow packetIn = context.firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, CPacketClickWindow.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing the packet used, but no packet was captured!", context));
         final ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class)
@@ -704,8 +704,8 @@ public interface PacketFunction {
                     processSpawnedEntities(player, ((IMixinWorldServer) player.getServerWorld()).getCauseTracker(), (SpawnEntityEvent) inventoryEvent);
                 }
             }
-            slotTransactions.clear();
         }
+        slotTransactions.clear();
     };
     PacketFunction USE_ITEM = ((packet, state, player, context) -> {
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.worldObj;
@@ -957,7 +957,7 @@ public interface PacketFunction {
                 .processBlockCaptures(blocks, mixinWorldServer.getCauseTracker(), state, context));
     };
 
-    PacketFunction UNKONWN_PACKET = (packet, state, player, context) -> {
+    PacketFunction UNKNOWN_PACKET = (packet, state, player, context) -> {
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.getServerWorld();
         final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
         context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, causeTracker, state, context));
@@ -1065,7 +1065,7 @@ public interface PacketFunction {
 
     };
 
-    PacketFunction HANDLED_EXTERNALLY = UNKONWN_PACKET;
+    PacketFunction HANDLED_EXTERNALLY = UNKNOWN_PACKET;
 
     void unwind(Packet<?> packet, IPacketState state, EntityPlayerMP player, PhaseContext context);
 

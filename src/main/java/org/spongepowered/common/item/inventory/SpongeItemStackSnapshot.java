@@ -71,7 +71,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     private final int count;
     private final int damageValue;
     private final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
-    private final ItemStack privateStack; // only for internal use since the processors have a huge say
+    private final transient ItemStack privateStack; // only for internal use since the processors have a huge say
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<ImmutableValue<?>> values;
     @Nullable private final NBTTagCompound compound;

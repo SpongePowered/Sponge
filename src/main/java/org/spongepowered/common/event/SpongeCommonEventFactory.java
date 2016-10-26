@@ -523,6 +523,7 @@ public class SpongeCommonEventFactory {
             player.closeScreen();
             return false;
         } else {
+            ((IMixinContainer) player.openContainer).setCaptureInventory(true);
             // Custom cursor
             if (event.getCursorTransaction().getCustom().isPresent()) {
                 handleCustomCursor(player, event.getCursorTransaction().getFinal());
@@ -555,6 +556,9 @@ public class SpongeCommonEventFactory {
                 player.sendContainerToPlayer(container);
             }
         } else {
+            IMixinContainer mixinContainer = (IMixinContainer) player.openContainer;
+            mixinContainer.getCapturedTransactions().clear();
+            mixinContainer.setCaptureInventory(false);
             // Custom cursor
             if (event.getCursorTransaction().getCustom().isPresent()) {
                 handleCustomCursor(player, event.getCursorTransaction().getFinal());
