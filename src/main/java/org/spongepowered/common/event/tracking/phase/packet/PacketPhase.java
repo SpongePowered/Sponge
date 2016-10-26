@@ -319,7 +319,7 @@ public final class PacketPhase extends TrackingPhase {
         if (unwindFunction != null) {
             unwindFunction.unwind(packetIn, (IPacketState) phaseState, player, phaseContext);
         } else {
-            PacketFunction.UNKONWN_PACKET.unwind(packetIn, (IPacketState) phaseState, player, phaseContext);
+            PacketFunction.UNKNOWN_PACKET.unwind(packetIn, (IPacketState) phaseState, player, phaseContext);
         }
     }
 
