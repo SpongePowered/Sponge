@@ -72,6 +72,10 @@ public final class EntityPhase extends TrackingPhase {
         return true;
     }
 
+    @Override
+    public boolean canPhaseDenyChunkRequest(IPhaseState currentState) {
+        return true;
+    }
 
     public static EntityPhase getInstance() {
         return Holder.INSTANCE;

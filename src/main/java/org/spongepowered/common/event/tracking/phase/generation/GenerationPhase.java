@@ -58,7 +58,7 @@ public final class GenerationPhase extends TrackingPhase {
 
         public static final IPhaseState CHUNK_LOADING = new GeneralGenerationPhaseState("CHUNK_LOADING").bake();
 
-        public static final IPhaseState WORLD_SPAWNER_SPAWNING = new GeneralGenerationPhaseState("WORLD_SPAWNER_SPAWNING").bake();
+        public static final IPhaseState WORLD_SPAWNER_SPAWNING = new WorldSpawnerSpawningPhaseState().bake();
 
         public static final IPhaseState POPULATOR_RUNNING = new PopulatorGenerationPhaseState("POPULATOR_RUNNING");
 

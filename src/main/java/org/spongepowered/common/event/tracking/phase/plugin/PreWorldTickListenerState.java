@@ -83,4 +83,8 @@ final class PreWorldTickListenerState extends ListenerPhaseState {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 
+    @Override
+    public boolean doesStateDenyChunkRequests() {
+        return true;
+    }
 }
