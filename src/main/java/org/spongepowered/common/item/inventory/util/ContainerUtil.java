@@ -298,7 +298,7 @@ public final class ContainerUtil {
             return carrierOrNull(((ContainerBeacon) container).getTileEntity());
         } else if (container instanceof ContainerHorseInventory) {
             return (Carrier) ((ContainerHorseInventory) container).theHorse;
-        } else if (container instanceof ContainerMerchant) {
+        } else if (container instanceof ContainerMerchant && ((ContainerMerchant) container).theMerchant instanceof Carrier) {
             return (Carrier) ((ContainerMerchant) container).theMerchant;
         } else if (container instanceof ContainerPlayer) {
             EntityPlayer player = ((ContainerPlayer) container).thePlayer;
