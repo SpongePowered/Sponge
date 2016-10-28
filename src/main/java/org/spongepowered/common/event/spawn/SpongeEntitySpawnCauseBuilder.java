@@ -35,7 +35,7 @@ public class SpongeEntitySpawnCauseBuilder extends AbstractEntitySpawnCauseBuild
     @Override
     public EntitySpawnCause build() {
         checkState(this.spawnType != null, "SpawnType cannot be null!");
-        checkState(this.entity != null, "EntitySnapshot cannot be null!");
+        checkState(this.entity != null, "Entity cannot be null!");
         return new SpongeEntitySpawnCause(this);
     }
 
