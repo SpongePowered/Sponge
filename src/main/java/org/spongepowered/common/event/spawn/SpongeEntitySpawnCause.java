@@ -55,7 +55,7 @@ public class SpongeEntitySpawnCause extends AbstractEntitySpawnCause implements 
     public String toString() {
         return Objects.toStringHelper("EntitySpawnCause")
                 .add("SpawnType", this.getType())
-                .add("EntitySnapshot", this.entity)
+                .add("Entity", this.entity)
                 .toString();
     }
 

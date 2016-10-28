@@ -117,12 +117,13 @@ public interface IPacketState extends IPhaseState {
                         .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a player", context));
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        final EntitySpawnCause cause = EntitySpawnCause
-                .builder()
+        final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                 .entity(player)
                 .type(InternalSpawnTypes.PLACEMENT)
-                .build();
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Cause.source(cause).build(),
+                .build());
+        builder.notifier(player);
+        builder.owner(player);
+        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(),
                 entities, (World) minecraftWorld);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
