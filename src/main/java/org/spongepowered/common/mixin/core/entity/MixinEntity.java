@@ -123,6 +123,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
@@ -426,6 +427,8 @@ public abstract class MixinEntity implements IMixinEntity {
             this.rotationYaw = (float) event.getToTransform().getYaw();
         }
 
+        IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) this.worldObj.getChunkProvider();
+        chunkProviderServer.setForceChunkRequests(true);
         // detach passengers
         final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
         final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
@@ -451,11 +454,12 @@ public abstract class MixinEntity implements IMixinEntity {
             }
         }
 
-        // re-attach passengers
-            // Re-attach passengers
-            for (net.minecraft.entity.Entity passenger : passengers) {
-                passenger.startRiding(thisEntity, true);
-            }
+        // Re-attach passengers
+        for (net.minecraft.entity.Entity passenger : passengers) {
+            passenger.startRiding(thisEntity, true);
+        }
+
+        chunkProviderServer.setForceChunkRequests(false);
         return true;
     }
 
