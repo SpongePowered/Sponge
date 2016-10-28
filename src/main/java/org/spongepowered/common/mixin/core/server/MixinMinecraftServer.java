@@ -148,6 +148,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow public abstract int getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
     @Shadow public abstract boolean isDedicatedServer();
+    @Shadow public abstract boolean isCallingFromMinecraftThread();
 
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
@@ -697,5 +698,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                         .orElseThrow(() -> new RuntimeException("Attempt made to get world before overworld is loaded!")
                         )
                 );
+    }
+
+    @Override
+    public boolean isCurrentThread() {
+        return this.isCallingFromMinecraftThread();
     }
 }
