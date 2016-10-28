@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
@@ -660,7 +661,7 @@ public interface PacketFunction {
         if (state instanceof BasicInventoryPacketState) {
             inventoryEvent =
                     ((BasicInventoryPacketState) state)
-                            .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction, slotTransactions, capturedItems,
+                            .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction, Lists.newArrayList(slotTransactions), capturedItems,
                                     cause, usedButton);
         } else {
             inventoryEvent = null;
