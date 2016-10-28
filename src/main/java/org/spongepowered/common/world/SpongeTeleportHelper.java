@@ -32,6 +32,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.BlockUtil;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -54,6 +55,8 @@ public class SpongeTeleportHelper implements TeleportHelper {
     public Optional<Location<World>> getSafeLocation(Location<World> location, int height, int width) {
         final World world = location.getExtent();
 
+        IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer)((net.minecraft.world.WorldServer) world).getChunkProvider();
+        chunkProviderServer.setForceChunkRequests(true);
         // We cache the various block lookup results so we don't check a block twice.
         final Map<Vector3i, BlockData> blockCache = new HashMap<>();
 
@@ -79,6 +82,7 @@ public class SpongeTeleportHelper implements TeleportHelper {
             return false;
         }).findFirst();
 
+        chunkProviderServer.setForceChunkRequests(false);
         if (result.isPresent()) {
             return Optional.of(new Location<>(world, result.get().toDouble().add(0.5, 0, 0.5)));
         }

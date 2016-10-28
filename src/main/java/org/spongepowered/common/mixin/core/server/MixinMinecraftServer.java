@@ -97,6 +97,7 @@ import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.text.SpongeTexts;
@@ -125,6 +126,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private int tickCounter;
     @Shadow private String motd;
     @Shadow public WorldServer[] worldServers;
+    @Shadow private Thread serverThread;
 
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void addChatMessage(ITextComponent message);
@@ -346,6 +348,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             return;
         }
 
+        IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) worldServer.getChunkProvider();
+        chunkProviderServer.setForceChunkRequests(true);
         final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
         if (CauseTracker.ENABLED) {
             causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
@@ -375,6 +379,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (CauseTracker.ENABLED) {
             causeTracker.completePhase();
         }
+        chunkProviderServer.setForceChunkRequests(false);
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -697,5 +702,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                         .orElseThrow(() -> new RuntimeException("Attempt made to get world before overworld is loaded!")
                         )
                 );
+    }
+
+    @Override
+    public boolean isMainThread() {
+        return this.serverThread == Thread.currentThread();
     }
 }

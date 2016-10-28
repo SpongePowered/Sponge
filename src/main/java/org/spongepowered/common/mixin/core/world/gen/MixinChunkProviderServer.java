@@ -76,6 +76,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     private SpongeEmptyChunk EMPTY_CHUNK;
     private boolean denyChunkRequests = true;
+    private boolean forceChunkRequests = false;
     private long chunkUnloadDelay = 15000;
     private int maxChunkUnloads = 100;
 
@@ -158,7 +159,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Redirect(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;loadChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
     public Chunk onProvideChunkHead(ChunkProviderServer chunkProviderServer, int x, int z) {
-        if (!this.denyChunkRequests) {
+        if (!this.denyChunkRequests || this.forceChunkRequests) {
             return this.loadChunk(x, z);
         }
 
@@ -224,6 +225,11 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Override
     public void setMaxChunkUnloads(int maxUnloads) {
         this.maxChunkUnloads = maxUnloads;
+    }
+
+    @Override
+    public void setForceChunkRequests(boolean flag) {
+        this.forceChunkRequests = flag;
     }
 
     @Override
