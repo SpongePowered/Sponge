@@ -350,6 +350,13 @@ public final class CauseTracker {
     public boolean setBlockState(final BlockPos pos, final IBlockState newState, final int flags) {
         final net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
         final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
+        // It is now possible for setBlockState to be called on an empty chunk due to our optimization
+        // for returning empty chunks when we don't want a chunk to load.
+        // If chunk is empty, we simply return to avoid any further logic.
+        if (chunk.isEmpty()) {
+            return false;
+        }
+
         final Block newBlock = newState.getBlock();
         // Sponge Start - Up to this point, we've copied exactly what Vanilla minecraft does.
         final IBlockState currentState = chunk.getBlockState(pos);
