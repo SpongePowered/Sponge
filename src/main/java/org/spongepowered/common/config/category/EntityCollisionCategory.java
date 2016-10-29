@@ -46,6 +46,7 @@ public class EntityCollisionCategory extends ConfigCategory {
         this.defaultMaxCollisions.put("blocks", 8);
         this.defaultMaxCollisions.put("entities", 8);
         this.modList.put("minecraft", new CollisionModCategory("minecraft"));
+        this.modList.put("botania", new CollisionModCategory("botania"));
     }
 
     public boolean autoPopulateData() {
