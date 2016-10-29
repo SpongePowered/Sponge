@@ -179,34 +179,39 @@ public class SpongeCommonEventFactory {
     @Nullable
     public static CollideEntityEvent callCollideEntityEvent(net.minecraft.world.World world, @Nullable net.minecraft.entity.Entity sourceEntity,
             List<net.minecraft.entity.Entity> entities) {
-        final Cause cause;
+
+        IMixinWorldServer spongeWorld = (IMixinWorldServer) world;
+        CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        Cause.Builder builder = null;
         if (sourceEntity != null) {
-            cause = Cause.of(NamedCause.source(sourceEntity));
+            builder = Cause.source(sourceEntity);
         } else {
-            IMixinWorldServer spongeWorld = (IMixinWorldServer) world;
-            CauseTracker causeTracker = spongeWorld.getCauseTracker();
             PhaseContext context = causeTracker.getCurrentContext();
 
             final Optional<BlockSnapshot> currentTickingBlock = context.getSource(BlockSnapshot.class);
             final Optional<TileEntity> currentTickingTileEntity = context.getSource(TileEntity.class);
             final Optional<Entity> currentTickingEntity = context.getSource(Entity.class);
             if (currentTickingBlock.isPresent()) {
-                cause = Cause.of(NamedCause.source(currentTickingBlock.get()));
+                builder = Cause.source(currentTickingBlock.get());
             } else if (currentTickingTileEntity.isPresent()) {
-                cause = Cause.of(NamedCause.source(currentTickingTileEntity.get()));
+                builder = Cause.source(currentTickingTileEntity.get());
             } else if (currentTickingEntity.isPresent()) {
-                cause = Cause.of(NamedCause.source(currentTickingEntity.get()));
-            } else {
-                cause = null;
+                builder = Cause.source(currentTickingEntity.get());
             }
 
-            if (cause == null) {
+            if (builder == null) {
                 return null;
             }
         }
+        final Optional<User> owner = causeTracker.getCurrentPhaseData()
+                .context
+                .firstNamed(NamedCause.OWNER, User.class);
+        if (owner.isPresent()) {
+            builder.named(NamedCause.OWNER, owner.get());
+        }
 
         List<Entity> spEntities = (List<Entity>) (List<?>) entities;
-        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(cause, spEntities, (World) world);
+        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(builder.build(), spEntities, (World) world);
         SpongeImpl.postEvent(event);
         return event;
     }
