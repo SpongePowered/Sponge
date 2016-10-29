@@ -480,8 +480,12 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public void setLocationAndAngles(Transform<World> transform) {
         Vector3d position = transform.getPosition();
+        EntityPlayerMP player = null;
         if (((Entity) this) instanceof EntityPlayerMP) {
-        	((EntityPlayerMP)(Object) this).connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
+            player = ((EntityPlayerMP)(Object) this);
+        }
+        if (player != null && player.connection != null) {
+            player.connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
         } else {
             this.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
         }
