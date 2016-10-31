@@ -22,17 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.command.vanilla;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.border.WorldBorder;
+import net.minecraft.command.CommandToggleDownfall;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 
-public interface IMixinWorldProvider {
+@Mixin(CommandToggleDownfall.class)
+public abstract class MixinCommandToggleDownfall {
 
-    WorldBorder createServerWorldBorder();
-
-    void setGeneratorSettings(String generatorSettings);
-
-    int getRespawnDimension(EntityPlayerMP playerMP);
+    /**
+     * @author Minecrell - September 28th, 2016
+     * @reason Toggle rainfall in all worlds
+     */
+    @Overwrite
+    protected void toggleRainfall(MinecraftServer server) {
+        boolean raining = !server.worldServers[0].getWorldInfo().isRaining();
+        for (WorldServer world : server.worldServers) {
+            world.getWorldInfo().setRaining(raining);
+        }
+    }
 
 }

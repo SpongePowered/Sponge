@@ -76,6 +76,8 @@ public class SpongeLaunch {
         Mixins.addConfiguration("mixins.common.tracking.json");
         Mixins.addConfiguration("mixins.common.optimization.json");
         Mixins.addConfiguration("mixins.common.realtime.json");
+        Mixins.addConfiguration("mixins.common.vanilla-command.json");
+        Mixins.addConfiguration("mixins.common.multi-world-command.json");
     }
 
     public static void setupSuperClassTransformer() {

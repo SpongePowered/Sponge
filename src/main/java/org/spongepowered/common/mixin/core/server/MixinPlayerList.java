@@ -40,6 +40,7 @@ import net.minecraft.network.play.server.SPacketChangeGameState;
 import net.minecraft.network.play.server.SPacketCustomPayload;
 import net.minecraft.network.play.server.SPacketDisconnect;
 import net.minecraft.network.play.server.SPacketEntityEffect;
+import net.minecraft.network.play.server.SPacketEntityStatus;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.network.play.server.SPacketJoinGame;
 import net.minecraft.network.play.server.SPacketPlayerAbilities;
@@ -91,6 +92,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -544,6 +546,10 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         this.playerEntityList.add(entityPlayerMP);
         entityPlayerMP.addSelfToInternalCraftingInventory();
 
+        // Update reducedDebugInfo game rule
+        entityPlayerMP.connection.sendPacket(new SPacketEntityStatus(entityPlayerMP,
+                worldServer.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
+
         // Reset the health.
         final MutableBoundedValue<Double> maxHealth = ((Player) entityPlayerMP).maxHealth();
         final MutableBoundedValue<Integer> food = ((Player) entityPlayerMP).foodLevel();
@@ -648,6 +654,10 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         playerIn.interactionManager.setWorld(toWorld);
         this.updateTimeAndWeatherForPlayer(playerIn, toWorld);
         this.syncPlayerInventory(playerIn);
+
+        // Update reducedDebugInfo game rule
+        playerIn.connection.sendPacket(new SPacketEntityStatus(playerIn,
+                toWorld.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
 
         for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
             playerIn.connection.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
@@ -845,6 +855,16 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             return 4;
         }
         return permLevel;
+    }
+
+    @Redirect(method = "updatePermissionLevel", at = @At(value = "INVOKE",
+            target = "net/minecraft/world/WorldServer.getWorldInfo()Lnet/minecraft/world/storage/WorldInfo;"))
+    private WorldInfo onGetWorldInfo(WorldServer overworld, EntityPlayerMP player) {
+        // TODO: This applies only to singleplayer, on the server canSendCommands is called with the game profile
+        // We can't get the world from the game profile
+
+        // Check the world info of the current world instead of overworld world info
+        return player.worldObj.getWorldInfo();
     }
 
 }

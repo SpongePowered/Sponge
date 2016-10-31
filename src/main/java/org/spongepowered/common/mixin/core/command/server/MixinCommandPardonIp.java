@@ -37,7 +37,7 @@ import java.net.UnknownHostException;
 import java.util.regex.Matcher;
 
 @Mixin(CommandPardonIp.class)
-public class MixinCommandPardonIp {
+public abstract class MixinCommandPardonIp {
 
     private InetAddress address;
 

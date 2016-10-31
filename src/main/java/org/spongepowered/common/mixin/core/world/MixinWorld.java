@@ -130,6 +130,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -264,6 +265,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
 
     // @formatter:on
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
+            + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
+    private net.minecraft.world.border.WorldBorder onCreateWorldBorder(WorldProvider provider) {
+        if (this.isRemote) {
+            return provider.createWorldBorder();
+        } else {
+            return ((IMixinWorldProvider) provider).createServerWorldBorder();
+        }
+    }
+
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
             CallbackInfo ci) {

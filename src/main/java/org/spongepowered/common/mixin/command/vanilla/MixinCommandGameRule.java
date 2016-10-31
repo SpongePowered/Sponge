@@ -22,17 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.command.vanilla;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.border.WorldBorder;
+import net.minecraft.command.CommandGameRule;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeImpl;
 
-public interface IMixinWorldProvider {
+@Mixin(CommandGameRule.class)
+public abstract class MixinCommandGameRule {
 
-    WorldBorder createServerWorldBorder();
-
-    void setGeneratorSettings(String generatorSettings);
-
-    int getRespawnDimension(EntityPlayerMP playerMP);
+    /**
+     * @author Minecrell - September 28th, 2016
+     * @reason Manually apply game rule to all because Sponge uses separate world info
+     */
+    @Redirect(method = "execute", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/GameRules;setOrCreateGameRule(Ljava/lang/String;Ljava/lang/String;)V"))
+    private void onSetOrCreateGameRule(GameRules gameRules, String key, String value) {
+        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+            world.getGameRules().setOrCreateGameRule(key, value);
+        }
+    }
 
 }
