@@ -57,7 +57,9 @@ public class ContainerFabric extends MinecraftFabric {
 
         Builder<IInventory> builder = ImmutableSet.<IInventory>builder();
         for (Slot slot : slots) {
-            builder.add(slot.inventory);
+            if (slot.inventory != null) {
+                builder.add(slot.inventory);
+            }
         }
         this.all = builder.build();
     }
