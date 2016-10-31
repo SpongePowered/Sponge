@@ -135,20 +135,24 @@ final class DeathPhase extends EntityPhaseState {
                 entities.add(EntityUtil.fromNative(item));
             }
 
+            if (isPlayer) {
+                // Forge and Vanilla always clear items on player death BEFORE drops occur
+                // This will also provide the highest compatibility with mods such as Tinkers Construct
+                entityPlayer.inventory.clear();
+            }
+
             final DropItemEvent.Destruct
                     destruct =
                     SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld());
             SpongeImpl.postEvent(destruct);
             if (!destruct.isCancelled()) {
-                if (isPlayer) {
-                    if (!entityPlayer.worldObj.getGameRules().getBoolean("keepInventory")) {
-                        entityPlayer.inventory.clear();
-                    }
-                }
                 for (Entity entity : destruct.getEntities()) {
                     causeTracker.getMixinWorld().forceSpawnEntity(entity);
                 }
             }
+
+             // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
+             // This avoids many issues with mods such as Tinkers Construct's soulbound items.
         });
         // Note that this is only used if and when item pre-merging is enabled.
         context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
@@ -166,16 +170,17 @@ final class DeathPhase extends EntityPhaseState {
                         .map(EntityUtil::fromNative)
                         .collect(Collectors.toList());
 
+                if (isPlayer) {
+                    // Forge and Vanilla always clear items on player death BEFORE drops occur
+                    // This will also provide the highest compatibility with mods such as Tinkers Construct
+                    entityPlayer.inventory.clear();
+                }
+
                 final DropItemEvent.Destruct
                         destruct =
                         SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld());
                 SpongeImpl.postEvent(destruct);
                 if (!destruct.isCancelled()) {
-                    if (isPlayer) {
-                        if (!entityPlayer.worldObj.getGameRules().getBoolean("keepInventory")) {
-                            entityPlayer.inventory.clear();
-                        }
-                    }
                     for (Entity entity : destruct.getEntities()) {
                         if (entityCreator != null) {
                             EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
@@ -184,6 +189,8 @@ final class DeathPhase extends EntityPhaseState {
                     }
                 }
 
+                // Note: If cancelled, the items do not spawn in the world and are NOT copied back to player inventory.
+                // This avoids many issues with mods such as Tinkers Construct's soulbound items.
             }
 
         });
