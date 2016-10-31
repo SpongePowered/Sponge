@@ -134,6 +134,8 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     void setLocationAndAngles(Transform<World> transform);
 
+    void createForgeCapabilities();
+
     // Timings
     Timing getTimingsHandler();
 }

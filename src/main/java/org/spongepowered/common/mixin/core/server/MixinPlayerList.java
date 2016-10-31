@@ -480,8 +480,6 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // update to safe location
         toTransform = toTransform.setLocation(location);
 
-        ((IMixinEntityPlayerMP) entityPlayerMP).resetAttributeMap();
-
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event = SpongeImplHooks.createRespawnPlayerEvent(Cause.of(NamedCause.source(entityPlayerMP)), fromTransform,
                 toTransform, (Player) entityPlayerMP, this.tempIsBedSpawn);

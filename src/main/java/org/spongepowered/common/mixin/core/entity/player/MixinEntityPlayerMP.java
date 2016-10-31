@@ -500,6 +500,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
 
         this.keepsLevel = false;
+        ((IMixinEntityPlayerMP) this).resetAttributeMap();
     }
 
     @Override
