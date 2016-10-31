@@ -22,17 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.command.multiworld;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.command.CommandWorldBorder;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.border.WorldBorder;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-public interface IMixinWorldProvider {
+@Mixin(CommandWorldBorder.class)
+public abstract class MixinCommandWorldBorder {
 
-    WorldBorder createServerWorldBorder();
-
-    void setGeneratorSettings(String generatorSettings);
-
-    int getRespawnDimension(EntityPlayerMP playerMP);
+    @Redirect(method = "execute", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/command/CommandWorldBorder;getWorldBorder"
+                    + "(Lnet/minecraft/server/MinecraftServer;)Lnet/minecraft/world/border/WorldBorder;"))
+    private WorldBorder onGetWorldBorder(CommandWorldBorder self, MinecraftServer server, MinecraftServer server2, ICommandSender sender,
+            String[] args) {
+        return sender.getEntityWorld().getWorldBorder();
+    }
 
 }

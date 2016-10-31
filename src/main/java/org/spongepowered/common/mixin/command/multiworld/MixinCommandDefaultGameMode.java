@@ -22,24 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.mixin.command.multiworld;
 
-import net.minecraft.world.WorldProviderHell;
-import net.minecraft.world.border.WorldBorder;
+import net.minecraft.command.CommandDefaultGameMode;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.GameType;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(WorldProviderHell.class)
-public abstract class MixinWorldProviderHell extends MixinWorldProvider {
+@Mixin(CommandDefaultGameMode.class)
+public abstract class MixinCommandDefaultGameMode  {
 
     /**
-     * Since each World has a WorldBorder in Sponge, let the Nether
-     * based worlds use local coordinates, not adjusted ones based on Overworld's.
-     *
-     * @return The server world border
+     * @author Minecrell - September 28, 2016
+     * @reason Change game mode only in the world the command was executed in
      */
-    @Override
-    public WorldBorder createServerWorldBorder() {
-        return new WorldBorder();
+    @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/CommandDefaultGameMode;"
+            + "setDefaultGameType(Lnet/minecraft/world/GameType;Lnet/minecraft/server/MinecraftServer;)V"))
+    private void onSetDefaultGameType(CommandDefaultGameMode self, GameType type, MinecraftServer server, MinecraftServer server2,
+            ICommandSender sender, String[] args) {
+
+        World world = sender.getEntityWorld();
+        world.getWorldInfo().setGameType(type);
+
+        if (server.getForceGamemode()) {
+            for (EntityPlayer player : world.playerEntities) {
+                player.setGameType(type);
+            }
+        }
     }
 
 }

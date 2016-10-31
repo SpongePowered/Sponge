@@ -22,40 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.command;
+package org.spongepowered.common.mixin.command.multiworld;
 
-import net.minecraft.command.CommandWorldBorder;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.server.CommandSetDefaultSpawnpoint;
+import net.minecraft.network.Packet;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.border.WorldBorder;
+import net.minecraft.server.management.PlayerList;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
-import javax.annotation.Nullable;
+@Mixin(CommandSetDefaultSpawnpoint.class)
+public abstract class MixinCommandSetDefaultSpawnpoint {
 
-@Mixin(CommandWorldBorder.class)
-public abstract class MixinCommandWorldBorder {
-
-    @Nullable private ICommandSender sender;
-
-    @Inject(method = "execute", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/command/CommandWorldBorder;getWorldBorder(Lnet/minecraft/server/MinecraftServer;)Lnet/minecraft/world/border/WorldBorder;"))
-    private void beforeGetWorldBorder(MinecraftServer server, ICommandSender sender, String[] args, CallbackInfo ci) {
-        this.sender = sender;
-    }
-
-    /**
-     * @author Minecrell
-     * @reason Returns the correct worldborder for the current world of the command sender
-     */
-    @Overwrite
-    protected WorldBorder getWorldBorder(MinecraftServer server) {
-        ICommandSender sender = this.sender;
-        this.sender = null;
-        return sender.getEntityWorld().getWorldBorder();
+    // Set new spawn point packet only to players in the affected dimensions
+    @Redirect(method = "execute", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    private void onSendSpawnPointPacket(PlayerList playerList, Packet<?> packet, MinecraftServer server, ICommandSender sender, String[] args) {
+        playerList.sendPacketToAllPlayersInDimension(packet, ((IMixinWorldServer) sender.getEntityWorld()).getDimensionId());
     }
 
 }

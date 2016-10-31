@@ -22,17 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.core.command;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.border.WorldBorder;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.CommandBlockBaseLogic;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.IMixinCommandSender;
 
-public interface IMixinWorldProvider {
+@Mixin(value = {EntityPlayer.class, CommandBlockBaseLogic.class}, targets = IMixinCommandSender.EXECUTE_COMMAND_SENDER)
+public abstract class MixinCommandSendCommandFeedback implements ICommandSender {
 
-    WorldBorder createServerWorldBorder();
-
-    void setGeneratorSettings(String generatorSettings);
-
-    int getRespawnDimension(EntityPlayerMP playerMP);
+    @Redirect(method = "sendCommandFeedback()Z", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/WorldServer;getGameRules()Lnet/minecraft/world/GameRules;"))
+    private GameRules onGetGameRules(WorldServer overworld) {
+        // Check the game rules of the current world instead of overworld game rules
+        return getEntityWorld().getGameRules();
+    }
 
 }

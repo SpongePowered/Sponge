@@ -22,17 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.core.command.server;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.border.WorldBorder;
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.command.ServerCommandManager;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-public interface IMixinWorldProvider {
+@Mixin(ServerCommandManager.class)
+public abstract class MixinCommandServerManager {
 
-    WorldBorder createServerWorldBorder();
-
-    void setGeneratorSettings(String generatorSettings);
-
-    int getRespawnDimension(EntityPlayerMP playerMP);
+    @Redirect(method = "notifyListener", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/WorldServer;getGameRules()Lnet/minecraft/world/GameRules;"))
+    private GameRules onGetGameRules(WorldServer overworld,
+            ICommandSender sender, ICommand command, int flags, String translationKey, Object... translationArgs) {
+        // Check the game rules of the current world instead of overworld game rules
+        return sender.getEntityWorld().getGameRules();
+    }
 
 }

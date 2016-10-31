@@ -36,7 +36,17 @@ public class CommandsCategory extends ConfigCategory {
     @Setting(comment = "A mapping from unqualified command alias to plugin id of the plugin that should handle a certain command")
     private Map<String, String> aliases = new HashMap<>();
 
+
+    @Setting(value = "multi-world-patches", comment = "Patches the specified commands to respect the world of the sender instead of applying the "
+            + "changes on the all worlds.")
+    private Map<String, Boolean> multiWorldCommandPatches = new HashMap<>();
+
     public Map<String, String> getAliases() {
         return this.aliases;
     }
+
+    public Map<String, Boolean> getMultiWorldCommandPatches() {
+        return this.multiWorldCommandPatches;
+    }
+
 }

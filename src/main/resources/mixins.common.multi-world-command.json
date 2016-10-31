@@ -1,0 +1,22 @@
+{
+    "minVersion": "0.5.1",
+    "package": "org.spongepowered.common.mixin.command.multiworld",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.MultiWorldCommandPlugin",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+        "MixinCommandDefaultGameMode",
+        "MixinCommandDifficulty",
+        "MixinCommandGameRule",
+        "MixinCommandShowSeed",
+        "MixinCommandSetDefaultSpawnpoint",
+        "MixinCommandTime",
+        "MixinCommandToggleDownfall",
+        "MixinCommandWeather",
+        "MixinCommandWorldBorder"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

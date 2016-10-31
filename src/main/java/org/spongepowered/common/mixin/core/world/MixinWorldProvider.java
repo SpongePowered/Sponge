@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
@@ -47,6 +48,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     @Shadow public abstract boolean canRespawnHere();
     @Shadow public abstract int getAverageGroundLevel();
     @Shadow public abstract boolean doesWaterVaporize();
+    @Shadow public abstract WorldBorder createWorldBorder();
     @Shadow public abstract boolean getHasNoSky();
     @Shadow private String generatorSettings;
 
@@ -89,4 +91,10 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     public Context getContext() {
         return ((IMixinDimensionType) (Object) getDimensionType()).getContext();
     }
+
+    @Override
+    public WorldBorder createServerWorldBorder() {
+        return createWorldBorder();
+    }
+
 }
