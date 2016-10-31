@@ -489,6 +489,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.attackingPlayer = null;
         this.entityLivingToAttack = null;
         this.lastExperience = -1;
+        this.lastHealth = -1.0F;
+        this.lastFoodLevel = -1;
         this.setHealth(this.getMaxHealth());
 
         if (this.keepsLevel || keepInventory) {
