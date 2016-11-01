@@ -24,26 +24,18 @@
  */
 package org.spongepowered.common.keyboard;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spongepowered.common.keyboard.SpongeKeyContextBuilder.getName;
+import static org.spongepowered.common.keyboard.SpongeKeyContextBuilder.getPlugin;
 
 import org.spongepowered.api.keyboard.KeyCategory;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
 public class SpongeKeyCategoryBuilder implements KeyCategory.Builder {
 
     private Text title;
-    private String id;
-
-    @Override
-    public KeyCategory.Builder id(String id) {
-        checkNotNull(id, "id");
-        checkArgument(!id.isEmpty(), "The id may not be empty");
-        checkArgument(id.indexOf(' ') == -1, "The id may not contain any spaces.");
-        this.id = id;
-        return this;
-    }
 
     @Override
     public KeyCategory.Builder title(Text title) {
@@ -52,23 +44,22 @@ public class SpongeKeyCategoryBuilder implements KeyCategory.Builder {
     }
 
     @Override
-    public KeyCategory build() {
-        checkState(this.title != null, "The title must be set");
-        checkState(this.id != null, "The id must be set");
-        return new SpongeKeyCategory(this.id, this.title);
-    }
-
-    @Override
     public KeyCategory.Builder from(KeyCategory value) {
-        this.id = value.getId();
         this.title = value.getTitle();
         return this;
     }
 
     @Override
     public KeyCategory.Builder reset() {
-        this.id = null;
         this.title = null;
         return this;
+    }
+
+    @Override
+    public KeyCategory build(Object plugin, String identifier) {
+        final PluginContainer pluginContainer = getPlugin(plugin);
+        final String name = getName(pluginContainer, identifier);
+        checkState(this.title != null, "The title must be set");
+        return new SpongeKeyCategory(pluginContainer, name, this.title, false);
     }
 }

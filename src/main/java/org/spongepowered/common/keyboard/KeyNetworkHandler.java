@@ -25,6 +25,7 @@
 package org.spongepowered.common.keyboard;
 
 import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import org.spongepowered.api.Platform;
@@ -38,18 +39,20 @@ import org.spongepowered.api.event.keyboard.InteractKeyEvent;
 import org.spongepowered.api.event.keyboard.RegisterKeyBindingsEvent;
 import org.spongepowered.api.event.network.ChannelRegistrationEvent;
 import org.spongepowered.api.keyboard.KeyBinding;
+import org.spongepowered.api.keyboard.KeyContexts;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.network.message.MessageGuiState;
 import org.spongepowered.common.network.message.MessageKeyState;
 import org.spongepowered.common.network.message.MessageKeyboardData;
 import org.spongepowered.common.network.message.SpongeMessageHandler;
 import org.spongepowered.common.registry.type.keyboard.KeyBindingRegistryModule;
 
+import java.util.BitSet;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class KeyNetworkHandler {
@@ -73,20 +76,21 @@ public class KeyNetworkHandler {
         if (!player.getKeyBindings().isEmpty()) {
             return;
         }
-        Set<KeyBinding> keyBindings = new HashSet<>(KeyBindingRegistryModule.getInstance().getAll());
+        final Set<KeyBinding> keyBindings = new HashSet<>(KeyBindingRegistryModule.get().getAll());
 
-        RegisterKeyBindingsEvent event = SpongeEventFactory.createRegisterKeyBindingsEvent(Cause.source(player).build(), keyBindings, player);
+        final RegisterKeyBindingsEvent event = SpongeEventFactory.createRegisterKeyBindingsEvent(
+                Cause.source(player).build(), keyBindings, player);
         Sponge.getEventManager().post(event);
 
         if (!keyBindings.isEmpty()) {
-            Set<SpongeKeyBinding> finalKeyBindings = new HashSet<>();
-            Set<SpongeKeyCategory> keyCategories = new HashSet<>();
+            final Set<SpongeKeyBinding> finalKeyBindings = new HashSet<>();
+            final Set<SpongeKeyCategory> keyCategories = new HashSet<>();
 
             for (KeyBinding keyBinding : keyBindings) {
                 if (((SpongeKeyBinding) keyBinding).isDefault()) {
                     continue;
                 }
-                if (!KeyBindingRegistryModule.getInstance().isRegistered(keyBinding)) {
+                if (!KeyBindingRegistryModule.get().isRegistered(keyBinding)) {
                     SpongeImpl.getLogger().warn("There was an attempt to apply a key binding that isn't registered: {}", keyBinding.getId());
                     continue;
                 }
@@ -98,16 +102,24 @@ public class KeyNetworkHandler {
 
             // Register the custom client bindings on the client
             if (!finalKeyBindings.isEmpty()) {
-                SpongeMessageHandler.getChannel().sendTo(player, new MessageKeyboardData(keyCategories, finalKeyBindings));
+                final Set<SpongeKeyContext> contexts = finalKeyBindings.stream().map(SpongeKeyBinding::getContext)
+                        .collect(Collectors.toSet());
+                contexts.add((SpongeKeyContext) KeyContexts.GUI);
+                contexts.add((SpongeKeyContext) KeyContexts.UNIVERSAL);
+                contexts.add((SpongeKeyContext) KeyContexts.IN_GAME);
+                contexts.add((SpongeKeyContext) KeyContexts.INVENTORY);
+                final Int2ObjectMap<BitSet> conflictContextsData = SpongeKeyContext.compileConflictContexts(contexts);
+                SpongeMessageHandler.getChannel().sendTo(player, new MessageKeyboardData(keyCategories, finalKeyBindings,
+                        conflictContextsData));
                 if (connectionNull) {
                     ((EntityPlayerMP) player).connection = null;
                 }
             }
 
             // All the key bindings that can be used by the player, custom and defaults
-            ImmutableList.Builder<KeyBinding> playerKeyBindings = ImmutableList.builder();
+            final ImmutableList.Builder<KeyBinding> playerKeyBindings = ImmutableList.builder();
             playerKeyBindings.addAll(finalKeyBindings);
-            playerKeyBindings.addAll(KeyBindingRegistryModule.getInstance().getAll().stream()
+            playerKeyBindings.addAll(KeyBindingRegistryModule.get().getAll().stream()
                     .filter(keyBinding -> ((SpongeKeyBinding) keyBinding).isDefault())
                     .collect(Collectors.toList()));
             ((IMixinEntityPlayerMP) player).setKeyBindings(playerKeyBindings.build());
@@ -116,7 +128,7 @@ public class KeyNetworkHandler {
 
     public static void handleKeyState(MessageKeyState message, RemoteConnection connection, Platform.Type side) {
         int internalId = message.getKeyBindingId();
-        KeyBindingRegistryModule.getInstance().getByInternalId(internalId).ifPresent(keyBinding -> {
+        KeyBindingRegistryModule.get().getByInternalId(internalId).ifPresent(keyBinding -> {
             Player player = ((PlayerConnection) connection).getPlayer();
             if (!player.getKeyBindings().contains(keyBinding)) {
                 return;
@@ -130,18 +142,9 @@ public class KeyNetworkHandler {
                 }
                 mixinPlayer.setKeyPressStartTime(internalId, System.currentTimeMillis());
                 Cause cause = Cause.source(player).build();
-                InteractKeyEvent.Press.Pre event = SpongeEventFactory.createInteractKeyEventPressPre(
+                InteractKeyEvent.Press event = SpongeEventFactory.createInteractKeyEventPress(
                         cause, keyBinding, player);
                 Sponge.getEventManager().post(event);
-                if (!event.isCancelled()) {
-                    BiConsumer<Player, KeyBinding> consumer = ((SpongeKeyBinding) keyBinding).getPressExecutor();
-                    if (consumer != null) {
-                        consumer.accept(player, keyBinding);
-                    }
-                    InteractKeyEvent.Press.Post event1 = SpongeEventFactory.createInteractKeyEventPressPost(
-                            cause, keyBinding, player);
-                    Sponge.getEventManager().post(event1);
-                }
             } else {
                 if (startTime == -1) {
                     SpongeImpl.getLogger().warn("The player {} send a release message before sending a press message.");
@@ -151,19 +154,15 @@ public class KeyNetworkHandler {
                 mixinPlayer.setKeyPressStartTime(internalId, -1);
 
                 Cause cause = Cause.source(player).build();
-                InteractKeyEvent.Release.Pre event = SpongeEventFactory.createInteractKeyEventReleasePre(
+                InteractKeyEvent.Release event = SpongeEventFactory.createInteractKeyEventRelease(
                         cause, keyBinding, player, pressedTime);
                 Sponge.getEventManager().post(event);
-                if (!event.isCancelled()) {
-                    BiConsumer<Player, KeyBinding> consumer = ((SpongeKeyBinding) keyBinding).getReleaseExecutor();
-                    if (consumer != null) {
-                        consumer.accept(player, keyBinding);
-                    }
-                    InteractKeyEvent.Release.Post event1 = SpongeEventFactory.createInteractKeyEventReleasePost(
-                            cause, keyBinding, player, pressedTime);
-                    Sponge.getEventManager().post(event1);
-                }
             }
         });
+    }
+
+    public static void handleGuiState(MessageGuiState message, RemoteConnection connection, Platform.Type side) {
+        final IMixinEntityPlayerMP player = (IMixinEntityPlayerMP) ((PlayerConnection) connection).getPlayer();
+        player.setGuiOpen(message.getState());
     }
 }

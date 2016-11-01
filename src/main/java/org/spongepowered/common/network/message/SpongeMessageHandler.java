@@ -61,6 +61,7 @@ public final class SpongeMessageHandler {
         channel.registerMessage(MessageTrackerDataResponse.class, 1);
         channel.registerMessage(MessageKeyboardData.class, 2);
         channel.registerMessage(MessageKeyState.class, 3, Platform.Type.SERVER, KeyNetworkHandler::handleKeyState);
+        channel.registerMessage(MessageGuiState.class, 4, Platform.Type.SERVER, KeyNetworkHandler::handleGuiState);
     }
 
     public static void handleRequest(MessageTrackerDataRequest message, RemoteConnection connection, Platform.Type side) {

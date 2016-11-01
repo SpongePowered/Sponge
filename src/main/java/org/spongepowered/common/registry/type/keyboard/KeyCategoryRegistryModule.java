@@ -36,6 +36,7 @@ import org.spongepowered.api.keyboard.KeyCategory;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.keyboard.SpongeKeyCategory;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
@@ -48,7 +49,7 @@ import java.util.Optional;
 public class KeyCategoryRegistryModule implements AlternateCatalogRegistryModule<KeyCategory>,
         SpongeAdditionalCatalogRegistryModule<KeyCategory> {
 
-    public static KeyCategoryRegistryModule getInstance() {
+    public static KeyCategoryRegistryModule get() {
         return Holder.INSTANCE;
     }
 
@@ -99,9 +100,10 @@ public class KeyCategoryRegistryModule implements AlternateCatalogRegistryModule
     }
 
     private void registerDefaultCategory(String name, int internalId) {
-        Text title = Sponge.getRegistry().getTranslationById("key.categories." + name).map(translation -> (Text) Text.of(translation))
+        final Text title = Sponge.getRegistry().getTranslationById("key.categories." + name)
+                .map(translation -> (Text) Text.of(translation))
                 .orElseGet(() -> Text.of(name));
-        registerAdditionalCategory(new SpongeKeyCategory("minecraft", name, title, true), internalId);
+        registerAdditionalCategory(new SpongeKeyCategory(SpongeImpl.getMinecraftPlugin(), name, title, true), internalId);
     }
 
     @Override

@@ -64,4 +64,8 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     long getKeyPressStartTime(int internalId);
 
     void setKeyPressStartTime(int internalId, long time);
+
+    boolean isGuiOpen();
+
+    void setGuiOpen(boolean state);
 }

@@ -35,11 +35,16 @@ import org.spongepowered.api.keyboard.KeyBinding;
 import org.spongepowered.api.keyboard.KeyBindings;
 import org.spongepowered.api.keyboard.KeyCategories;
 import org.spongepowered.api.keyboard.KeyCategory;
+import org.spongepowered.api.keyboard.KeyContext;
+import org.spongepowered.api.keyboard.KeyContexts;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.keyboard.SpongeKeyBinding;
+import org.spongepowered.common.keyboard.SpongeKeyBindingEventListener;
 import org.spongepowered.common.keyboard.SpongeKeyCategory;
+import org.spongepowered.common.keyboard.SpongeKeyContext;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
@@ -48,11 +53,15 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
-@RegistrationDependency(KeyCategoryRegistryModule.class)
+@RegistrationDependency({
+        KeyContextRegistryModule.class,
+        KeyCategoryRegistryModule.class
+})
 public class KeyBindingRegistryModule implements CatalogRegistryModule<KeyBinding>, SpongeAdditionalCatalogRegistryModule<KeyBinding> {
 
-    public static KeyBindingRegistryModule getInstance() {
+    public static KeyBindingRegistryModule get() {
         return Holder.INSTANCE;
     }
 
@@ -80,13 +89,22 @@ public class KeyBindingRegistryModule implements CatalogRegistryModule<KeyBindin
         checkArgument(!this.keyBindings.containsValue(keyBinding), "The key binding %s is already registered", keyBinding.getId());
         checkArgument(!this.keyBindings.containsKey(keyBinding.getId().toLowerCase(Locale.ENGLISH)),
                 "The key binding id %s is already used", keyBinding.getId());
-        checkArgument(KeyCategoryRegistryModule.getInstance().isRegistered(keyBinding.getCategory()),
+        checkArgument(KeyCategoryRegistryModule.get().isRegistered(keyBinding.getCategory()),
                 "The key category %s of the key binding %s must be registered", keyBinding.getCategory().getId(), keyBinding.getId());
+        checkArgument(KeyContextRegistryModule.get().isRegistered(keyBinding.getContext()),
+                "The key context %s of the key binding %s must be registered", keyBinding.getContext().getId(), keyBinding.getId());
 
-        SpongeKeyBinding keyBinding0 = (SpongeKeyBinding) keyBinding;
+        final SpongeKeyBinding keyBinding0 = (SpongeKeyBinding) keyBinding;
         keyBinding0.setInternalId(this.internalIdCounter++);
         keyBinding0.getCategory().addBinding(keyBinding0);
         registerAdditionalBinding(keyBinding0);
+
+        if (keyBinding0.getEventConsumers() != null) {
+            for (Map.Entry<Class<?>, Consumer<?>> entry : keyBinding0.getEventConsumers().entries()) {
+                Sponge.getEventManager().registerListener(keyBinding0.getPlugin(), (Class) entry.getClass(),
+                        new SpongeKeyBindingEventListener(entry.getValue()));
+            }
+        }
     }
 
     private void registerAdditionalBinding(SpongeKeyBinding keyBinding) {
@@ -104,51 +122,84 @@ public class KeyBindingRegistryModule implements CatalogRegistryModule<KeyBindin
         return ImmutableSet.copyOf(this.keyBindings.values());
     }
 
-    private static SpongeKeyBinding buildDefaultBinding(String id, KeyCategory keyCategory, int internalId, String translationKey) {
-        Text displayName = Sponge.getRegistry().getTranslationById("key." + translationKey).map(translation -> (Text) Text.of(translation))
+    private static SpongeKeyBinding buildDefaultBinding(String id, KeyCategory keyCategory, KeyContext keyContext,
+            int internalId, String translationKey) {
+        final Text displayName = Sponge.getRegistry().getTranslationById("key." + translationKey)
+                .map(translation -> (Text) Text.of(translation))
                 .orElseGet(() -> Text.of(id));
-        SpongeKeyBinding keyBinding = new SpongeKeyBinding("minecraft", id, (SpongeKeyCategory) keyCategory, displayName, true);
+        final SpongeKeyBinding keyBinding = new SpongeKeyBinding(SpongeImpl.getMinecraftPlugin(),
+                id, (SpongeKeyContext) keyContext, (SpongeKeyCategory) keyCategory, displayName, null, true);
         keyBinding.setInternalId(internalId);
         return keyBinding;
     }
 
     @Override
     public void registerDefaults() {
-        Map<String, SpongeKeyBinding> mappings = new HashMap<>();
-        mappings.put("attack", buildDefaultBinding("attack", KeyCategories.GAMEPLAY, 0, "attack"));
-        mappings.put("pick_block", buildDefaultBinding("pick_block", KeyCategories.GAMEPLAY, 1, "pickItem"));
-        mappings.put("use_item", buildDefaultBinding("use_item", KeyCategories.GAMEPLAY, 2, "use"));
+        final Map<String, SpongeKeyBinding> mappings = new HashMap<>();
+        mappings.put("attack", buildDefaultBinding("attack",
+                KeyCategories.GAMEPLAY, KeyContexts.IN_GAME, 0, "attack"));
+        mappings.put("pick_block", buildDefaultBinding("pick_block",
+                KeyCategories.GAMEPLAY, KeyContexts.IN_GAME, 1, "pickItem"));
+        mappings.put("use_item", buildDefaultBinding("use_item",
+                KeyCategories.GAMEPLAY, KeyContexts.IN_GAME, 2, "use"));
         registerAndClearMappings(KeyBindings.Gameplay.class, mappings);
-        mappings.put("drop_item", buildDefaultBinding("drop_item", KeyCategories.INVENTORY, 3, "drop"));
-        mappings.put("hotbar_1", buildDefaultBinding("hotbar_1", KeyCategories.INVENTORY, 4, "hotbar.1"));
-        mappings.put("hotbar_2", buildDefaultBinding("hotbar_2", KeyCategories.INVENTORY, 5, "hotbar.2"));
-        mappings.put("hotbar_3", buildDefaultBinding("hotbar_3", KeyCategories.INVENTORY, 6, "hotbar.3"));
-        mappings.put("hotbar_4", buildDefaultBinding("hotbar_4", KeyCategories.INVENTORY, 7, "hotbar.4"));
-        mappings.put("hotbar_5", buildDefaultBinding("hotbar_5", KeyCategories.INVENTORY, 8, "hotbar.5"));
-        mappings.put("hotbar_6", buildDefaultBinding("hotbar_6", KeyCategories.INVENTORY, 9, "hotbar.6"));
-        mappings.put("hotbar_7", buildDefaultBinding("hotbar_7", KeyCategories.INVENTORY, 10, "hotbar.7"));
-        mappings.put("hotbar_8", buildDefaultBinding("hotbar_8", KeyCategories.INVENTORY, 11, "hotbar.8"));
-        mappings.put("hotbar_9", buildDefaultBinding("hotbar_9", KeyCategories.INVENTORY, 12, "hotbar.9"));
-        mappings.put("inventory", buildDefaultBinding("inventory", KeyCategories.INVENTORY, 13, "inventory"));
-        mappings.put("swap_hand_items", buildDefaultBinding("swap_hand_items", KeyCategories.INVENTORY, 14, "swapHands"));
+        mappings.put("drop_item", buildDefaultBinding("drop_item",
+                KeyCategories.INVENTORY, KeyContexts.IN_GAME, 3, "drop"));
+        mappings.put("hotbar_1", buildDefaultBinding("hotbar_1",
+                KeyCategories.INVENTORY, KeyContexts.INVENTORY, 4, "hotbar.1"));
+        mappings.put("hotbar_2", buildDefaultBinding("hotbar_2",
+                KeyCategories.INVENTORY, KeyContexts.INVENTORY, 5, "hotbar.2"));
+        mappings.put("hotbar_3", buildDefaultBinding("hotbar_3",
+                KeyCategories.INVENTORY, KeyContexts.INVENTORY, 6, "hotbar.3"));
+        mappings.put("hotbar_4", buildDefaultBinding("hotbar_4",
+                KeyCategories.INVENTORY, KeyContexts.INVENTORY, 7, "hotbar.4"));
+        mappings.put("hotbar_5", buildDefaultBinding("hotbar_5",
+                KeyCategories.INVENTORY, KeyContexts.INVENTORY, 8, "hotbar.5"));
+        mappings.put("hotbar_6", buildDefaultBinding("hotbar_6",
+                KeyCategories.INVENTORY, KeyContexts.INVENTORY, 9, "hotbar.6"));
+        mappings.put("hotbar_7", buildDefaultBinding("hotbar_7",
+                KeyCategories.INVENTORY, KeyContexts.INVENTORY, 10, "hotbar.7"));
+        mappings.put("hotbar_8", buildDefaultBinding("hotbar_8",
+                KeyCategories.INVENTORY, KeyContexts.INVENTORY, 11, "hotbar.8"));
+        mappings.put("hotbar_9", buildDefaultBinding("hotbar_9",
+                KeyCategories.INVENTORY, KeyContexts.INVENTORY, 12, "hotbar.9"));
+        mappings.put("inventory", buildDefaultBinding("inventory",
+                KeyCategories.INVENTORY, KeyContexts.IN_GAME, 13, "inventory"));
+        mappings.put("swap_hand_items", buildDefaultBinding("swap_hand_items",
+                KeyCategories.INVENTORY, KeyContexts.IN_GAME, 14, "swapHands"));
         registerAndClearMappings(KeyBindings.Inventory.class, mappings);
-        mappings.put("fullscreen", buildDefaultBinding("fullscreen", KeyCategories.MISC, 15, "fullscreen"));
-        mappings.put("screenshot", buildDefaultBinding("screenshot", KeyCategories.MISC, 16, "screenshot"));
-        mappings.put("smooth_camera", buildDefaultBinding("smooth_camera", KeyCategories.MISC, 17, "smoothCamera"));
-        mappings.put("spectator_outlines", buildDefaultBinding("spectator_outlines", KeyCategories.MISC, 18, "spectatorOutlines"));
-        mappings.put("toggle_perspective", buildDefaultBinding("toggle_perspective", KeyCategories.MISC, 19, "togglePerspective"));
+        mappings.put("fullscreen", buildDefaultBinding("fullscreen",
+                KeyCategories.MISC, KeyContexts.UNIVERSAL, 15, "fullscreen"));
+        mappings.put("screenshot", buildDefaultBinding("screenshot",
+                KeyCategories.MISC, KeyContexts.UNIVERSAL, 16, "screenshot"));
+        mappings.put("smooth_camera", buildDefaultBinding("smooth_camera",
+                KeyCategories.MISC, KeyContexts.IN_GAME, 17, "smoothCamera"));
+        mappings.put("spectator_outlines", buildDefaultBinding("spectator_outlines",
+                KeyCategories.MISC, KeyContexts.UNIVERSAL, 18, "spectatorOutlines"));
+        mappings.put("toggle_perspective", buildDefaultBinding("toggle_perspective",
+                KeyCategories.MISC, KeyContexts.IN_GAME, 19, "togglePerspective"));
         registerAndClearMappings(KeyBindings.Misc.class, mappings);
-        mappings.put("backward", buildDefaultBinding("backward", KeyCategories.MOVEMENT, 20, "back"));
-        mappings.put("forward", buildDefaultBinding("forward", KeyCategories.MOVEMENT, 21, "forward"));
-        mappings.put("jump", buildDefaultBinding("jump", KeyCategories.MOVEMENT, 22, "jump"));
-        mappings.put("left", buildDefaultBinding("left", KeyCategories.MOVEMENT, 23, "left"));
-        mappings.put("right", buildDefaultBinding("right", KeyCategories.MOVEMENT, 24, "right"));
-        mappings.put("sneak", buildDefaultBinding("sneak", KeyCategories.MOVEMENT, 25, "sneak"));
-        mappings.put("sprint", buildDefaultBinding("sprint", KeyCategories.MOVEMENT, 26, "sprint"));
+        mappings.put("backward", buildDefaultBinding("backward",
+                KeyCategories.MOVEMENT, KeyContexts.IN_GAME, 20, "back"));
+        mappings.put("forward", buildDefaultBinding("forward",
+                KeyCategories.MOVEMENT, KeyContexts.IN_GAME, 21, "forward"));
+        mappings.put("jump", buildDefaultBinding("jump",
+                KeyCategories.MOVEMENT, KeyContexts.IN_GAME, 22, "jump"));
+        mappings.put("left", buildDefaultBinding("left",
+                KeyCategories.MOVEMENT, KeyContexts.IN_GAME, 23, "left"));
+        mappings.put("right", buildDefaultBinding("right",
+                KeyCategories.MOVEMENT, KeyContexts.IN_GAME, 24, "right"));
+        mappings.put("sneak", buildDefaultBinding("sneak",
+                KeyCategories.MOVEMENT, KeyContexts.IN_GAME, 25, "sneak"));
+        mappings.put("sprint", buildDefaultBinding("sprint",
+                KeyCategories.MOVEMENT, KeyContexts.IN_GAME, 26, "sprint"));
         registerAndClearMappings(KeyBindings.Movement.class, mappings);
-        mappings.put("chat", buildDefaultBinding("chat", KeyCategories.MULTIPLAYER, 27, "chat"));
-        mappings.put("command", buildDefaultBinding("command", KeyCategories.MULTIPLAYER, 28, "command"));
-        mappings.put("player_list", buildDefaultBinding("player_list", KeyCategories.MULTIPLAYER, 29, "playerList"));
+        mappings.put("chat", buildDefaultBinding("chat",
+                KeyCategories.MULTIPLAYER, KeyContexts.IN_GAME, 27, "chat"));
+        mappings.put("command", buildDefaultBinding("command",
+                KeyCategories.MULTIPLAYER, KeyContexts.IN_GAME, 28, "command"));
+        mappings.put("player_list", buildDefaultBinding("player_list",
+                KeyCategories.MULTIPLAYER, KeyContexts.IN_GAME, 29, "playerList"));
         registerAndClearMappings(KeyBindings.Multiplayer.class, mappings);
     }
 
@@ -158,7 +209,8 @@ public class KeyBindingRegistryModule implements CatalogRegistryModule<KeyBindin
         keyBindings.clear();
     }
 
-    KeyBindingRegistryModule() {}
+    private KeyBindingRegistryModule() {
+    }
 
     private static final class Holder {
 

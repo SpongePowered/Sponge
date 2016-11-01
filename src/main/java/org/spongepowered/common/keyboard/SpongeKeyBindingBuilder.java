@@ -24,41 +24,47 @@
  */
 package org.spongepowered.common.keyboard;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spongepowered.common.keyboard.SpongeKeyContextBuilder.getName;
+import static org.spongepowered.common.keyboard.SpongeKeyContextBuilder.getPlugin;
 
-import org.spongepowered.api.entity.living.player.Player;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
+import org.spongepowered.api.event.keyboard.InteractKeyEvent;
 import org.spongepowered.api.keyboard.KeyBinding;
 import org.spongepowered.api.keyboard.KeyCategories;
 import org.spongepowered.api.keyboard.KeyCategory;
+import org.spongepowered.api.keyboard.KeyContext;
+import org.spongepowered.api.keyboard.KeyContexts;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 public class SpongeKeyBindingBuilder implements KeyBinding.Builder {
 
     @Nullable private KeyCategory keyCategory;
-    @Nullable private BiConsumer<Player, KeyBinding> pressExecutor;
-    @Nullable private BiConsumer<Player, KeyBinding> releaseExecutor;
-    @Nullable private BiConsumer<Player, KeyBinding> tickExecutor;
+    @Nullable private KeyContext keyContext;
+    private final Multimap<Class<?>, Consumer<?>> eventConsumers = HashMultimap.create();
     private Text displayName;
-    private String id;
+
+    public SpongeKeyBindingBuilder() {
+        reset();
+    }
 
     @Override
-    public KeyBinding.Builder category(@Nullable KeyCategory category) {
-        this.keyCategory = category;
+    public KeyBinding.Builder category(KeyCategory category) {
+        this.keyCategory = checkNotNull(category, "category");
         return this;
     }
 
     @Override
-    public KeyBinding.Builder id(String id) {
-        checkNotNull(id, "id");
-        checkArgument(!id.isEmpty(), "The id may not be empty");
-        checkArgument(id.indexOf(' ') == -1, "The id may not contain any spaces.");
-        this.id = id;
+    public KeyBinding.Builder context(KeyContext keyContext) {
+        this.keyContext = checkNotNull(keyContext, "keyContext");
         return this;
     }
 
@@ -69,44 +75,36 @@ public class SpongeKeyBindingBuilder implements KeyBinding.Builder {
     }
 
     @Override
-    public KeyBinding.Builder pressExecutor(@Nullable BiConsumer<Player, KeyBinding> executor) {
-        this.pressExecutor = executor;
+    public <E extends InteractKeyEvent> KeyBinding.Builder listener(Class<E> type, Consumer<E> listener) {
+        checkNotNull(type, "type");
+        checkNotNull(listener, "listener");
+        this.eventConsumers.put(type, listener);
         return this;
-    }
-
-    @Override
-    public KeyBinding.Builder releaseExecutor(@Nullable BiConsumer<Player, KeyBinding> executor) {
-        this.releaseExecutor = executor;
-        return this;
-    }
-
-    @Override
-    public KeyBinding.Builder tickExecutor(@Nullable BiConsumer<Player, KeyBinding> executor) {
-        this.tickExecutor = executor;
-        return this;
-    }
-
-    @Override
-    public KeyBinding build() {
-        checkState(this.displayName != null, "The display name must be set");
-        checkState(this.id != null, "The id must be set");
-        return new SpongeKeyBinding(this.id, (SpongeKeyCategory) (this.keyCategory == null ? KeyCategories.MISC : this.keyCategory),
-                this.displayName, this.pressExecutor, this.releaseExecutor, this.tickExecutor);
     }
 
     @Override
     public KeyBinding.Builder from(KeyBinding value) {
         this.keyCategory = value.getCategory();
-        this.id = value.getId();
         this.displayName = value.getDisplayName();
         return this;
     }
 
     @Override
     public KeyBinding.Builder reset() {
+        this.eventConsumers.clear();
         this.keyCategory = null;
-        this.id = null;
         this.displayName = null;
         return this;
+    }
+
+    @Override
+    public KeyBinding build(Object plugin, String identifier) {
+        final PluginContainer pluginContainer = getPlugin(plugin);
+        final String name = getName(pluginContainer, identifier);
+        checkState(this.displayName != null, "The display name must be set");
+        final SpongeKeyCategory keyCategory = (SpongeKeyCategory) (this.keyCategory == null ? KeyCategories.MISC : this.keyCategory);
+        final SpongeKeyContext keyContext = (SpongeKeyContext) (this.keyContext == null ? KeyContexts.UNIVERSAL : this.keyContext);
+        return new SpongeKeyBinding(pluginContainer, name, keyContext, keyCategory, this.displayName,
+                ImmutableMultimap.copyOf(this.eventConsumers), false);
     }
 }

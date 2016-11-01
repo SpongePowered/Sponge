@@ -29,76 +29,49 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.keyboard.KeyBinding;
 import org.spongepowered.api.keyboard.KeyCategory;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
-public class SpongeKeyCategory implements KeyCategory {
+import javax.annotation.Nullable;
+
+public class SpongeKeyCategory extends AbstractCatalogType implements KeyCategory {
 
     private final List<KeyBinding> bindings = new ArrayList<>();
-    private final String id;
-    private final String name;
+    @Nullable private List<KeyBinding> immutableBindings = null;
     private final Text title;
     private final boolean def;
 
-    private int internalId = -1;
-
-    private SpongeKeyCategory(String id, Text title, String name, boolean def) {
-        this.id = id.toLowerCase(Locale.ENGLISH);
+    public SpongeKeyCategory(PluginContainer plugin, String name, Text title, boolean def) {
+        super(plugin, name);
         this.title = title;
-        this.name = name;
         this.def = def;
     }
 
-    public SpongeKeyCategory(String pluginId, String name, Text title, boolean def) {
-        this(pluginId + ':' + name, title, name, def);
-    }
-
-    public SpongeKeyCategory(String pluginId, String name, Text title) {
-        this(pluginId, name, title, false);
-    }
-
-    public SpongeKeyCategory(String id, Text title) {
-        this(id, title, getName(id), false);
-    }
-
-    static String getName(String id) {
-        int index = id.indexOf(':');
-        return index == -1 ? id : id.substring(index + 1);
+    public SpongeKeyCategory(String id, Text title, boolean def) {
+        super(id);
+        this.title = title;
+        this.def = def;
     }
 
     public void addBinding(KeyBinding keyBinding) {
         this.bindings.add(checkNotNull(keyBinding, "keyBinding"));
+        this.immutableBindings = null;
     }
 
     @Override
     public List<KeyBinding> getBindings() {
-        return ImmutableList.copyOf(this.bindings);
+        if (this.immutableBindings == null) {
+            this.immutableBindings = ImmutableList.copyOf(this.bindings);
+        }
+        return this.immutableBindings;
     }
 
     @Override
     public Text getTitle() {
         return this.title;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    public int getInternalId() {
-        return this.internalId;
-    }
-
-    public void setInternalId(int internalId) {
-        this.internalId = internalId;
     }
 
     public boolean isDefault() {

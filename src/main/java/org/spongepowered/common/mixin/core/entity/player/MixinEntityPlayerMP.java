@@ -152,8 +152,6 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.keyboard.SpongeKeyBinding;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.registry.type.keyboard.KeyBindingRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
@@ -171,7 +169,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
@@ -227,6 +224,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
     @Nullable private Vector3d velocityOverride = null;
+
+    private boolean guiState;
 
     @Inject(method = "removeEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
@@ -854,21 +853,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             long value = entry.getValue();
             if (value != -1) {
                 int key = entry.getKey();
-                KeyBinding keyBinding = KeyBindingRegistryModule.getInstance().getByInternalId(key).orElse(null);
+                KeyBinding keyBinding = KeyBindingRegistryModule.get().getByInternalId(key).orElse(null);
                 if (keyBinding != null) {
-                    int pressedTime = (int) ((System.currentTimeMillis() - value) / 50);
-                    InteractKeyEvent.Tick.Pre event = SpongeEventFactory.createInteractKeyEventTickPre(
+                    final int pressedTime = (int) ((System.currentTimeMillis() - value) / 50);
+                    final InteractKeyEvent.Tick event = SpongeEventFactory.createInteractKeyEventTick(
                             cause, keyBinding, this, pressedTime);
                     Sponge.getEventManager().post(event);
-                    if (!event.isCancelled()) {
-                        BiConsumer<Player, KeyBinding> consumer = ((SpongeKeyBinding) keyBinding).getTickExecutor();
-                        if (consumer != null) {
-                            consumer.accept(this, keyBinding);
-                        }
-                        InteractKeyEvent.Tick.Post event1 = SpongeEventFactory.createInteractKeyEventTickPost(
-                                cause, keyBinding, this, pressedTime);
-                        Sponge.getEventManager().post(event1);
-                    }
                 }
             }
         }
@@ -895,5 +885,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void setKeyPressStartTime(int internalId, long time) {
         this.keyPressedTimes.put(internalId, time);
+    }
+
+    @Override
+    public boolean isGuiOpen() {
+        // TODO: Better way to check custom client?
+        return !this.keyBindings.isEmpty() ? this.guiState : getOpenInventory().isPresent();
+    }
+
+    @Override
+    public void setGuiOpen(boolean state) {
+        this.guiState = state;
     }
 }
