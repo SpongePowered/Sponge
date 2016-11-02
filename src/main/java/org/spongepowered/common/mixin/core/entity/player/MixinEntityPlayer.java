@@ -47,6 +47,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
@@ -86,9 +87,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.interfaces.ITargetedLocation;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
@@ -156,6 +159,18 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     public void onGetDisplayName(CallbackInfoReturnable<ITextComponent> ci, TextComponentString component) {
         ci.setReturnValue(LegacyTexts.parseComponent(component, SpongeTexts.COLOR_CHAR));
+    }
+
+    @Inject(method = "clonePlayer", at = @At("HEAD"))
+    public void onClonePlayer(EntityPlayer oldPlayer, boolean respawnFromEnd, CallbackInfo ci) {
+        // Copy over sponge data from the old player.
+        // Allows plugins to specify data that persists after players respawn.
+        IMixinEntity oldEntity = (IMixinEntity) oldPlayer;
+        NBTTagCompound old = oldEntity.getEntityData();
+        if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
+            this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
+            this.readFromNbt(this.getSpongeData());
+        }
     }
 
     // utility method for getting the total experience at an arbitrary level

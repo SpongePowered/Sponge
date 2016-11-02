@@ -60,6 +60,8 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
+import java.lang.ref.WeakReference;
+
 public class PacketUtil {
 
     private static final PhaseContext EMPTY_INVALID = PhaseContext.start().complete();
@@ -121,6 +123,10 @@ public class PacketUtil {
                     causeTracker.switchToPhase(PacketPhase.General.INVALID, EMPTY_INVALID);
                 }
                 packetIn.processPacket(netHandler);
+                if (packetIn instanceof CPacketClientStatus) {
+                    // update the reference of player
+                    packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
+                }
                 causeTracker.completePhase();
             }
         } else { // client
@@ -136,7 +142,7 @@ public class PacketUtil {
         if (packetIn instanceof CPacketAnimation) {
             CPacketAnimation packet = (CPacketAnimation) packetIn;
             SpongeCommonEventFactory.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
-            SpongeCommonEventFactory.lastAnimationPlayer = playerMP;
+            SpongeCommonEventFactory.lastAnimationPlayer = new WeakReference<>(playerMP);
             HandType handType = packet.getHand() == EnumHand.MAIN_HAND ? HandTypes.MAIN_HAND : HandTypes.OFF_HAND;
             AnimateHandEvent event = SpongeEventFactory.createAnimateHandEvent(Cause.of(NamedCause.source(playerMP)), handType, (Humanoid) playerMP);
             if (SpongeImpl.postEvent(event)) {

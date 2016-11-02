@@ -109,6 +109,7 @@ import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -133,7 +134,7 @@ public class SpongeCommonEventFactory {
     public static int lastAnimationPacketTick = 0;
     public static int lastSecondaryPacketTick = 0;
     public static int lastPrimaryPacketTick = 0;
-    public static EntityPlayerMP lastAnimationPlayer = null;
+    public static WeakReference<EntityPlayerMP> lastAnimationPlayer;
 
     public static boolean callPlayerChangeInventoryPickupEvent(EntityPlayer player, EntityItem itemToPickup, int pickupDelay, UUID creator) {
         ItemStack itemStack = itemToPickup.getEntityItem();
