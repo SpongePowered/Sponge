@@ -55,4 +55,6 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
 
     // todo
     void restorePacketItem();
+
+    void setPlayerInventoryOpen();
 }
