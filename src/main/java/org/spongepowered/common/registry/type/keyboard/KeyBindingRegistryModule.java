@@ -118,7 +118,12 @@ public class KeyBindingRegistryModule implements CatalogRegistryModule<KeyBindin
         if (listeners != null) {
             for (Map.Entry<Class<?>, Consumer<?>> entry : listeners.entries()) {
                 if (entry.getKey().isInstance(event)) {
-                    ((Consumer) entry.getValue()).accept(event);
+                    try {
+                        ((Consumer) entry.getValue()).accept(event);
+                    } catch (Exception e) {
+                        SpongeImpl.getLogger().error("Failed to handle key interaction event for the plugin {}",
+                                ((SpongeKeyBinding) event.getKeyBinding()).getPlugin().getId(), e);
+                    }
                 }
             }
         }
