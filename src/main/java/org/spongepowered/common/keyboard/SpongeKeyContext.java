@@ -56,7 +56,7 @@ public class SpongeKeyContext extends AbstractCatalogType implements KeyContext 
     }
 
     @Override
-    public boolean conflicts(KeyContext keyContext) {
+    public boolean conflictsWith(KeyContext keyContext) {
         return this.conflictPredicate.test(checkNotNull(keyContext, "keyContext"));
     }
 
@@ -74,13 +74,9 @@ public class SpongeKeyContext extends AbstractCatalogType implements KeyContext 
         for (SpongeKeyContext context : contexts) {
             BitSet bitSet = null;
             for (SpongeKeyContext context1 : contexts1) {
-                // Don't compare to itself
-                if (context1 == context) {
-                    continue;
-                }
                 // At this point, the context internal id may not be -1
                 checkArgument(context1.getInternalId() != -1);
-                if (context.conflicts(context1)) {
+                if (context.conflictsWith(context1) || context1.conflictsWith(context)) {
                     if (bitSet == null) {
                         bitSet = new BitSet(1);
                     }

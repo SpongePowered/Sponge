@@ -24,21 +24,24 @@
  */
 package org.spongepowered.common.keyboard;
 
-import org.spongepowered.api.event.EventListener;
-import org.spongepowered.api.event.keyboard.InteractKeyEvent;
+public final class KeyBindingData {
 
-import java.util.function.Consumer;
+    private boolean pressed = false;
+    private long lastActiveTime = -1;
 
-public class SpongeKeyBindingEventListener<E extends InteractKeyEvent> implements EventListener<E> {
-
-    private final Consumer<E> consumer;
-
-    public SpongeKeyBindingEventListener(Consumer<E> consumer) {
-        this.consumer = consumer;
+    public long getLastActiveTime() {
+        return this.lastActiveTime;
     }
 
-    @Override
-    public void handle(E event) throws Exception {
-        this.consumer.accept(event);
+    public void setLastActiveTime(long lastActiveTime) {
+        this.lastActiveTime = lastActiveTime;
+    }
+
+    public boolean isPressed() {
+        return this.pressed;
+    }
+
+    public void setPressed(boolean pressed) {
+        this.pressed = pressed;
     }
 }

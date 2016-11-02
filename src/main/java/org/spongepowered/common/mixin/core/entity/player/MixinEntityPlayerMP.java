@@ -31,8 +31,8 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import it.unimi.dsi.fastutil.ints.Int2LongMap;
-import it.unimi.dsi.fastutil.ints.Int2LongOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
@@ -152,6 +152,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.keyboard.KeyBindingData;
 import org.spongepowered.common.registry.type.keyboard.KeyBindingRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
@@ -166,7 +167,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -213,7 +213,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
     private Collection<KeyBinding> keyBindings = Collections.emptySet();
-    private Int2LongMap keyPressedTimes = new Int2LongOpenHashMap();
+    private Int2ObjectMap<KeyBindingData> keyPressedTimes = new Int2ObjectOpenHashMap<>();
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -848,14 +848,35 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (this.keyBindings.isEmpty()) {
             return;
         }
-        Cause cause = Cause.source(this).build();
-        for (Map.Entry<Integer, Long> entry : this.keyPressedTimes.entrySet()) {
-            long value = entry.getValue();
-            if (value != -1) {
-                int key = entry.getKey();
-                KeyBinding keyBinding = KeyBindingRegistryModule.get().getByInternalId(key).orElse(null);
-                if (keyBinding != null) {
-                    final int pressedTime = (int) ((System.currentTimeMillis() - value) / 50);
+        final Cause cause = Cause.source(this).build();
+        for (Int2ObjectMap.Entry<KeyBindingData> entry : this.keyPressedTimes.int2ObjectEntrySet()) {
+            final KeyBindingData value = entry.getValue();
+            final int internalId = entry.getIntKey();
+
+            final KeyBinding keyBinding = KeyBindingRegistryModule.get().getByInternalId(internalId).orElse(null);
+            if (keyBinding != null) {
+                final long lastActiveTime = value.getLastActiveTime();
+                final boolean lastActive = lastActiveTime != -1;
+                final boolean active = keyBinding.getContext().isActive(this) && value.isPressed();
+                // The context state changed
+                if (active != lastActive) {
+                    // The state became active
+                    if (active) {
+                        value.setLastActiveTime(System.currentTimeMillis());
+                        final InteractKeyEvent.Press event = SpongeEventFactory.createInteractKeyEventPress(
+                                cause, keyBinding, this);
+                        Sponge.getEventManager().post(event);
+                    // The state became inactive
+                    } else {
+                        value.setLastActiveTime(-1);
+                        final int pressedTime = (int) ((System.currentTimeMillis() - lastActiveTime) / 50);
+                        final InteractKeyEvent.Release event = SpongeEventFactory.createInteractKeyEventRelease(
+                                cause, keyBinding, this, pressedTime);
+                        Sponge.getEventManager().post(event);
+                    }
+                // Just tick the key binding if the context is active
+                } else if (active) {
+                    final int pressedTime = (int) ((System.currentTimeMillis() - lastActiveTime) / 50);
                     final InteractKeyEvent.Tick event = SpongeEventFactory.createInteractKeyEventTick(
                             cause, keyBinding, this, pressedTime);
                     Sponge.getEventManager().post(event);
@@ -875,16 +896,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public long getKeyPressStartTime(int internalId) {
-        if (this.keyPressedTimes.containsKey(internalId)) {
-            return this.keyPressedTimes.get(internalId);
+    public KeyBindingData getKeyBindingData(int internalId) {
+        KeyBindingData data = this.keyPressedTimes.get(internalId);
+        if (data == null) {
+            data = new KeyBindingData();
+            this.keyPressedTimes.put(internalId, data);
         }
-        return -1;
-    }
-
-    @Override
-    public void setKeyPressStartTime(int internalId, long time) {
-        this.keyPressedTimes.put(internalId, time);
+        return data;
     }
 
     @Override

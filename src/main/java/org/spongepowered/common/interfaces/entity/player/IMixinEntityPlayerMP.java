@@ -29,6 +29,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.keyboard.KeyBinding;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.keyboard.KeyBindingData;
 
 import java.util.Collection;
 
@@ -61,9 +62,7 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
 
     void setKeyBindings(Collection<KeyBinding> keyBindings);
 
-    long getKeyPressStartTime(int internalId);
-
-    void setKeyPressStartTime(int internalId, long time);
+    KeyBindingData getKeyBindingData(int internalId);
 
     boolean isGuiOpen();
 

@@ -127,36 +127,56 @@ public class KeyNetworkHandler {
     }
 
     public static void handleKeyState(MessageKeyState message, RemoteConnection connection, Platform.Type side) {
-        int internalId = message.getKeyBindingId();
+        final int internalId = message.getKeyBindingId();
         KeyBindingRegistryModule.get().getByInternalId(internalId).ifPresent(keyBinding -> {
-            Player player = ((PlayerConnection) connection).getPlayer();
+            final Player player = ((PlayerConnection) connection).getPlayer();
             if (!player.getKeyBindings().contains(keyBinding)) {
                 return;
             }
-            IMixinEntityPlayerMP mixinPlayer = (IMixinEntityPlayerMP) player;
-            boolean state = message.getState();
-            long startTime = mixinPlayer.getKeyPressStartTime(internalId);
+            final boolean active = keyBinding.getContext().isActive(player);
+            final IMixinEntityPlayerMP mixinPlayer = (IMixinEntityPlayerMP) player;
+            final boolean state = message.getState();
+            final KeyBindingData data = mixinPlayer.getKeyBindingData(internalId);
             if (state) {
-                if (startTime != -1) {
-                    SpongeImpl.getLogger().warn("The player {} never send a release message before sending a new press message.");
+                if (active && data.isPressed()) {
+                    SpongeImpl.getLogger().warn("The player {} never send a release message before sending a new press message.",
+                            player.getName());
                 }
-                mixinPlayer.setKeyPressStartTime(internalId, System.currentTimeMillis());
-                Cause cause = Cause.source(player).build();
-                InteractKeyEvent.Press event = SpongeEventFactory.createInteractKeyEventPress(
-                        cause, keyBinding, player);
-                Sponge.getEventManager().post(event);
+                data.setPressed(true);
+                // Just throw the event right away
+                if (active) {
+                    // Make sure that the events won't be thrown twice
+                    data.setLastActiveTime(System.currentTimeMillis());
+                    final Cause cause = Cause.source(player).build();
+                    final InteractKeyEvent.Press event = SpongeEventFactory.createInteractKeyEventPress(
+                            cause, keyBinding, player);
+                    Sponge.getEventManager().post(event);
+                }
             } else {
-                if (startTime == -1) {
-                    SpongeImpl.getLogger().warn("The player {} send a release message before sending a press message.");
+                if (!data.isPressed()) {
+                    SpongeImpl.getLogger().warn("The player {} send a release message before sending a press message.",
+                            player.getName());
                     return;
                 }
-                int pressedTime = (int) ((System.currentTimeMillis() - startTime) / 50);
-                mixinPlayer.setKeyPressStartTime(internalId, -1);
-
-                Cause cause = Cause.source(player).build();
-                InteractKeyEvent.Release event = SpongeEventFactory.createInteractKeyEventRelease(
-                        cause, keyBinding, player, pressedTime);
-                Sponge.getEventManager().post(event);
+                data.setPressed(false);
+                // Just throw the event right away
+                if (active) {
+                    final int pressedTime;
+                    final long lastActiveTime = data.getLastActiveTime();
+                    if (lastActiveTime == -1) {
+                        SpongeImpl.getLogger().warn("The player {} is lightning fast at clicking and releasing buttons.",
+                                player.getName());
+                        pressedTime = 0;
+                    } else {
+                        pressedTime = (int) ((System.currentTimeMillis() - lastActiveTime) / 50);
+                    }
+                    // Make sure that the events won't be thrown twice
+                    data.setLastActiveTime(-1);
+                    final Cause cause = Cause.source(player).build();
+                    final InteractKeyEvent.Release event = SpongeEventFactory.createInteractKeyEventRelease(
+                            cause, keyBinding, player, pressedTime);
+                    Sponge.getEventManager().post(event);
+                }
             }
         });
     }

@@ -49,7 +49,7 @@ public class SpongeKeyBinding extends AbstractCatalogType implements KeyBinding 
         super(plugin, name);
         this.eventConsumers = eventConsumers;
         this.keyContext = keyContext;
-        this.keyContextId = keyContext.getInternalId();
+        this.keyContextId = -1;
         this.keyCategory = keyCategory;
         this.displayName = displayName;
         this.def = def;
@@ -91,6 +91,6 @@ public class SpongeKeyBinding extends AbstractCatalogType implements KeyBinding 
     }
 
     public int getKeyContextId() {
-        return this.keyContextId;
+        return this.keyContextId == -1 ? getContext().getInternalId() : this.keyContextId;
     }
 }

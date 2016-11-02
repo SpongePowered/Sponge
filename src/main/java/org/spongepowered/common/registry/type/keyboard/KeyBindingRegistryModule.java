@@ -28,9 +28,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multimap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.keyboard.InteractKeyEvent;
 import org.spongepowered.api.keyboard.KeyBinding;
 import org.spongepowered.api.keyboard.KeyBindings;
 import org.spongepowered.api.keyboard.KeyCategories;
@@ -42,7 +45,6 @@ import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.keyboard.SpongeKeyBinding;
-import org.spongepowered.common.keyboard.SpongeKeyBindingEventListener;
 import org.spongepowered.common.keyboard.SpongeKeyCategory;
 import org.spongepowered.common.keyboard.SpongeKeyContext;
 import org.spongepowered.common.registry.RegistryHelper;
@@ -99,10 +101,25 @@ public class KeyBindingRegistryModule implements CatalogRegistryModule<KeyBindin
         keyBinding0.getCategory().addBinding(keyBinding0);
         registerAdditionalBinding(keyBinding0);
 
+        /* TODO: This doesn't work???
         if (keyBinding0.getEventConsumers() != null) {
             for (Map.Entry<Class<?>, Consumer<?>> entry : keyBinding0.getEventConsumers().entries()) {
                 Sponge.getEventManager().registerListener(keyBinding0.getPlugin(), (Class) entry.getClass(),
                         new SpongeKeyBindingEventListener(entry.getValue()));
+            }
+        }
+        */
+    }
+
+    @SuppressWarnings("unchecked")
+    @Listener
+    public void onInteractKey(InteractKeyEvent event) {
+        final Multimap<Class<?>, Consumer<?>> listeners = ((SpongeKeyBinding) event.getKeyBinding()).getEventConsumers();
+        if (listeners != null) {
+            for (Map.Entry<Class<?>, Consumer<?>> entry : listeners.entries()) {
+                if (entry.getKey().isInstance(event)) {
+                    ((Consumer) entry.getValue()).accept(event);
+                }
             }
         }
     }
@@ -164,7 +181,7 @@ public class KeyBindingRegistryModule implements CatalogRegistryModule<KeyBindin
         mappings.put("hotbar_9", buildDefaultBinding("hotbar_9",
                 KeyCategories.INVENTORY, KeyContexts.INVENTORY, 12, "hotbar.9"));
         mappings.put("inventory", buildDefaultBinding("inventory",
-                KeyCategories.INVENTORY, KeyContexts.IN_GAME, 13, "inventory"));
+                KeyCategories.INVENTORY, KeyContexts.UNIVERSAL, 13, "inventory"));
         mappings.put("swap_hand_items", buildDefaultBinding("swap_hand_items",
                 KeyCategories.INVENTORY, KeyContexts.IN_GAME, 14, "swapHands"));
         registerAndClearMappings(KeyBindings.Inventory.class, mappings);

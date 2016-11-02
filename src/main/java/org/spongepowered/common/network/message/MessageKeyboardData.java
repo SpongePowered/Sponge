@@ -124,9 +124,11 @@ public class MessageKeyboardData implements Message {
             final int length = lengthAndId >> 10;
             final int id = lengthAndId & 0x3ff;
 
-            // Read the data bytes
-            final byte[] bytes = buf.readBytes(length);
-            conflictContextData.put(id, BitSet.valueOf(bytes));
+            if (length > 0) {
+                // Read the data bytes
+                final byte[] bytes = buf.readBytes(length);
+                conflictContextData.put(id, BitSet.valueOf(bytes));
+            }
         }
     }
 

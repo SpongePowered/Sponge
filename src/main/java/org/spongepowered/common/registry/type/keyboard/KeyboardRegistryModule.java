@@ -34,5 +34,6 @@ public class KeyboardRegistryModule implements RegistryModule {
     @Override
     public void registerDefaults() {
         Sponge.getEventManager().registerListeners(SpongeImpl.getPlugin(), new KeyNetworkHandler());
+        Sponge.getEventManager().registerListeners(SpongeImpl.getPlugin(), KeyBindingRegistryModule.get());
     }
 }

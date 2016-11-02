@@ -114,11 +114,16 @@ public class KeyContextRegistryModule implements AlternateCatalogRegistryModule<
         registerAdditionalBinding(new SpongeKeyContext(SpongeImpl.getMinecraftPlugin(), "universal",
                 player -> true, context -> true).setInternalId(0));
         registerAdditionalBinding(new SpongeKeyContext(SpongeImpl.getMinecraftPlugin(), "in_game",
-                player -> !((IMixinEntityPlayerMP) player).isGuiOpen(), context -> true).setInternalId(1));
+                player -> !((IMixinEntityPlayerMP) player).isGuiOpen(),
+                context -> context == KeyContexts.IN_GAME).setInternalId(1));
         registerAdditionalBinding(new SpongeKeyContext(SpongeImpl.getMinecraftPlugin(), "gui",
-                player -> ((IMixinEntityPlayerMP) player).isGuiOpen(), context -> true).setInternalId(2));
+                player -> ((IMixinEntityPlayerMP) player).isGuiOpen(),
+                context -> context == KeyContexts.GUI || context == KeyContexts.INVENTORY).setInternalId(2));
         registerAdditionalBinding(new SpongeKeyContext(SpongeImpl.getMinecraftPlugin(), "inventory",
-                player -> player.getOpenInventory().isPresent(), context -> true).setInternalId(3));
+                // TODO: The `getOpenInventory` method will currently always return a container
+                // TODO: Remove the gui check once this is fixed
+                player -> player.getOpenInventory().isPresent() && ((IMixinEntityPlayerMP) player).isGuiOpen(),
+                context -> context == KeyContexts.GUI || context == KeyContexts.INVENTORY).setInternalId(3));
     }
 
     private KeyContextRegistryModule() {
