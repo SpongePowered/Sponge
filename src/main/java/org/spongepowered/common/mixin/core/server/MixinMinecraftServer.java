@@ -581,16 +581,18 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         int lastAnimTick = SpongeCommonEventFactory.lastAnimationPacketTick;
         int lastPrimaryTick = SpongeCommonEventFactory.lastPrimaryPacketTick;
         int lastSecondaryTick = SpongeCommonEventFactory.lastSecondaryPacketTick;
-        EntityPlayerMP player = SpongeCommonEventFactory.lastAnimationPlayer;
-        if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
-            if (player.getHeldItemMainhand() != null) {
-                if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND).isCancelled()) {
-                    SpongeCommonEventFactory.lastAnimationPacketTick = 0;
-                    return;
+        if (SpongeCommonEventFactory.lastAnimationPlayer != null) {
+            EntityPlayerMP player = SpongeCommonEventFactory.lastAnimationPlayer.get();
+            if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
+                if (player.getHeldItemMainhand() != null) {
+                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND).isCancelled()) {
+                        SpongeCommonEventFactory.lastAnimationPacketTick = 0;
+                        return;
+                    }
                 }
+    
+                SpongeCommonEventFactory.callInteractBlockEventPrimary(player, EnumHand.MAIN_HAND);
             }
-
-            SpongeCommonEventFactory.callInteractBlockEventPrimary(player, EnumHand.MAIN_HAND);
         }
         SpongeCommonEventFactory.lastAnimationPacketTick = 0;
         TimingsManager.FULL_SERVER_TICK.stopTiming();

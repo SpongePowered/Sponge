@@ -50,6 +50,7 @@ import net.minecraft.network.play.server.SPacketSetExperience;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.util.math.BlockPos;
@@ -63,6 +64,7 @@ import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import net.minecraft.world.demo.DemoWorldManager;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
@@ -417,42 +419,43 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
      * @reason - Direct respawning players to use Sponge events
      * and process appropriately.
      *
-     * @param entityPlayerMP The player being respawned/created
+     * @param playerIn The player being respawned/created
      * @param targetDimension The target dimension
      * @param conqueredEnd Whether the end was conquered
      * @return The new player
      */
     @Overwrite
-    public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP entityPlayerMP, int targetDimension, boolean conqueredEnd) {
+    public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP playerIn, int targetDimension, boolean conqueredEnd) {
         // ### PHASE 1 ### Get the location to spawn
 
         // Vanilla will always use overworld, set to the world the player was in
         // UNLESS comming back from the end.
         if (!conqueredEnd && targetDimension == 0) {
-            targetDimension = entityPlayerMP.dimension;
+            targetDimension = playerIn.dimension;
         }
 
-        if (entityPlayerMP.isBeingRidden()) {
-            entityPlayerMP.removePassengers();
+        if (playerIn.isBeingRidden()) {
+            playerIn.removePassengers();
         }
 
-        if (entityPlayerMP.isRiding()) {
-            entityPlayerMP.dismountRidingEntity();
+        if (playerIn.isRiding()) {
+            playerIn.dismountRidingEntity();
         }
 
-        final Player player = (Player) entityPlayerMP;
+        final Player player = (Player) playerIn;
         final Transform<World> fromTransform = player.getTransform();
         WorldServer worldServer = this.mcServer.worldServerForDimension(targetDimension);
-        Transform<World> toTransform = new Transform<>(this.getPlayerRespawnLocation(entityPlayerMP, worldServer), Vector3d.ZERO, Vector3d.ZERO);
+        targetDimension = ((IMixinWorldServer) worldServer).getDimensionId();
+        Transform<World> toTransform = new Transform<>(this.getPlayerRespawnLocation(playerIn, worldServer), Vector3d.ZERO, Vector3d.ZERO);
         Location<World> location = toTransform.getLocation();
 
         // If coming from end, fire a teleport event for plugins
         if (conqueredEnd) {
             // When leaving the end, players are never placed inside the teleporter but instead "respawned" in the target world
-            MoveEntityEvent.Teleport teleportEvent = EntityUtil.handleDisplaceEntityTeleportEvent(entityPlayerMP, location);
+            MoveEntityEvent.Teleport teleportEvent = EntityUtil.handleDisplaceEntityTeleportEvent(playerIn, location);
             if (teleportEvent.isCancelled()) {
-                entityPlayerMP.playerConqueredTheEnd = false;
-                return entityPlayerMP;
+                playerIn.playerConqueredTheEnd = false;
+                return playerIn;
             }
 
             toTransform = teleportEvent.getToTransform();
@@ -460,31 +463,51 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
         // Keep players out of blocks
         Vector3d tempPos = player.getLocation().getPosition();
-        entityPlayerMP.setPosition(location.getX(), location.getY(), location.getZ());
-        while (!((WorldServer) location.getExtent()).getCollisionBoxes(entityPlayerMP, entityPlayerMP.getEntityBoundingBox()).isEmpty()) {
-            entityPlayerMP.setPosition(entityPlayerMP.posX, entityPlayerMP.posY + 1.0D, entityPlayerMP.posZ);
+        playerIn.setPosition(location.getX(), location.getY(), location.getZ());
+        while (!((WorldServer) location.getExtent()).getCollisionBoxes(playerIn, playerIn.getEntityBoundingBox()).isEmpty()) {
+            playerIn.setPosition(playerIn.posX, playerIn.posY + 1.0D, playerIn.posZ);
             location = location.add(0, 1, 0);
         }
-        entityPlayerMP.setPosition(tempPos.getX(), tempPos.getY(), tempPos.getZ());
+        playerIn.setPosition(tempPos.getX(), tempPos.getY(), tempPos.getZ());
 
         // ### PHASE 2 ### Remove player from current dimension
-        entityPlayerMP.getServerWorld().getEntityTracker().removePlayerFromTrackers(entityPlayerMP);
-        entityPlayerMP.getServerWorld().getPlayerChunkMap().removePlayer(entityPlayerMP);
-        this.playerEntityList.remove(entityPlayerMP);
-        this.mcServer.worldServerForDimension(entityPlayerMP.dimension).removeEntityDangerously(entityPlayerMP);
+        playerIn.getServerWorld().getEntityTracker().removePlayerFromTrackers(playerIn);
+        playerIn.getServerWorld().getEntityTracker().untrackEntity(playerIn);
+        playerIn.getServerWorld().getPlayerChunkMap().removePlayer(playerIn);
+        this.playerEntityList.remove(playerIn);
+        this.mcServer.worldServerForDimension(playerIn.dimension).removeEntityDangerously(playerIn);
 
         // ### PHASE 3 ### Reset player (if applicable)
-        entityPlayerMP.playerConqueredTheEnd = false;
-        if (!conqueredEnd) { // don't reset player if returning from end
-            ((IMixinEntityPlayerMP) entityPlayerMP).reset();
+        // Recreate the player object in order to support Forge's PlayerEvent.Clone
+        PlayerInteractionManager playerinteractionmanager;
+
+        if (this.mcServer.isDemo()) {
+            playerinteractionmanager = new DemoWorldManager(this.mcServer.worldServerForDimension(targetDimension));
+        } else {
+            playerinteractionmanager = new PlayerInteractionManager(this.mcServer.worldServerForDimension(targetDimension));
         }
-        entityPlayerMP.setSneaking(false);
+
+        EntityPlayerMP newPlayer = new EntityPlayerMP(SpongeImpl.getServer(), worldServer, playerIn.getGameProfile(), playerinteractionmanager);
+        newPlayer.connection = playerIn.connection;
+        newPlayer.clonePlayer(playerIn, conqueredEnd);
+        // set player dimension for RespawnPlayerEvent
+        newPlayer.dimension = targetDimension;
+        newPlayer.setEntityId(playerIn.getEntityId());
+        newPlayer.setCommandStats(playerIn);
+        newPlayer.setPrimaryHand(playerIn.getPrimaryHand());
+
+        for (String s : playerIn.getTags()) {
+            newPlayer.addTag(s);
+        }
+
+        this.setPlayerGameTypeBasedOnOther(newPlayer, playerIn, worldServer);
+        newPlayer.setSneaking(false);
         // update to safe location
         toTransform = toTransform.setLocation(location);
 
         // ### PHASE 4 ### Fire event and set new location on the player
-        final RespawnPlayerEvent event = SpongeImplHooks.createRespawnPlayerEvent(Cause.of(NamedCause.source(entityPlayerMP)), fromTransform,
-                toTransform, (Player) entityPlayerMP, this.tempIsBedSpawn);
+        final RespawnPlayerEvent event = SpongeEventFactory.createRespawnPlayerEvent(Cause.of(NamedCause.source(newPlayer)), fromTransform,
+                toTransform, (Player) playerIn, (Player) newPlayer, this.tempIsBedSpawn, !conqueredEnd);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
         ((IMixinEntity) (Object) player).setLocationAndAngles(event.getToTransform());
@@ -498,59 +521,59 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         worldServer = (WorldServer) location.getExtent();
 
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
-        entityPlayerMP.dimension = mixinWorldServer.getDimensionId();
-        entityPlayerMP.setWorld(worldServer);
-        entityPlayerMP.interactionManager.setWorld(worldServer);
+        // Set the dimension again in case a plugin changed the target world during RespawnPlayerEvent
+        newPlayer.dimension = mixinWorldServer.getDimensionId();
+        newPlayer.setWorld(worldServer);
+        newPlayer.interactionManager.setWorld(worldServer);
 
         worldServer.getChunkProvider().loadChunk((int) location.getX() >> 4, (int) location.getZ() >> 4);
 
         // ### PHASE 5 ### Respawn player in new world
 
         // Support vanilla clients logging into custom dimensions
-        final int dimensionId = WorldManager.getClientDimensionId(entityPlayerMP, worldServer);
+        final int dimensionId = WorldManager.getClientDimensionId(newPlayer, worldServer);
 
         // Send dimension registration
-        if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
-            WorldManager.sendDimensionRegistration(entityPlayerMP, worldServer.provider);
+        if (((IMixinEntityPlayerMP) newPlayer).usesCustomClient()) {
+            WorldManager.sendDimensionRegistration(newPlayer, worldServer.provider);
         } else {
             // Force vanilla client to refresh its chunk cache if same dimension type
             if (fromTransform.getExtent() != worldServer && fromTransform.getExtent().getDimension().getType() == toTransform.getExtent().getDimension().getType()) {
-                entityPlayerMP.connection.sendPacket(new SPacketRespawn((dimensionId >= 0 ? -1 : 0), worldServer.getDifficulty(), worldServer
-                        .getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
+                newPlayer.connection.sendPacket(new SPacketRespawn((dimensionId >= 0 ? -1 : 0), worldServer.getDifficulty(), worldServer
+                        .getWorldInfo().getTerrainType(), newPlayer.interactionManager.getGameType()));
             }
         }
-        entityPlayerMP.connection.sendPacket(new SPacketRespawn(dimensionId, worldServer.getDifficulty(), worldServer
-                .getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
-        entityPlayerMP.isDead = false;
-        entityPlayerMP.connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
+        newPlayer.connection.sendPacket(new SPacketRespawn(dimensionId, worldServer.getDifficulty(), worldServer
+                .getWorldInfo().getTerrainType(), newPlayer.interactionManager.getGameType()));
+        newPlayer.connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
                 (float) toTransform.getYaw(), (float) toTransform.getPitch());
 
         final BlockPos spawnLocation = worldServer.getSpawnPoint();
-        entityPlayerMP.connection.sendPacket(new SPacketSpawnPosition(spawnLocation));
-        entityPlayerMP.connection.sendPacket(new SPacketSetExperience(entityPlayerMP.experience, entityPlayerMP.experienceTotal,
-                entityPlayerMP.experienceLevel));
-        this.updateTimeAndWeatherForPlayer(entityPlayerMP, worldServer);
-        worldServer.getPlayerChunkMap().addPlayer(entityPlayerMP);
-        org.spongepowered.api.entity.Entity spongeEntity = player;
+        newPlayer.connection.sendPacket(new SPacketSpawnPosition(spawnLocation));
+        newPlayer.connection.sendPacket(new SPacketSetExperience(newPlayer.experience, newPlayer.experienceTotal,
+                newPlayer.experienceLevel));
+        this.updateTimeAndWeatherForPlayer(newPlayer, worldServer);
+        this.updatePermissionLevel(newPlayer);
+        worldServer.getPlayerChunkMap().addPlayer(newPlayer);
+        org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) newPlayer;
         SpawnCause spawnCause = EntitySpawnCause.builder()
                 .entity(spongeEntity)
                 .type(SpawnTypes.PLACEMENT)
                 .build();
         ((org.spongepowered.api.world.World) worldServer).spawnEntity(spongeEntity, Cause.of(NamedCause.source(spawnCause)));
-        this.playerEntityList.add(entityPlayerMP);
-        entityPlayerMP.addSelfToInternalCraftingInventory();
+        this.playerEntityList.add(newPlayer);
+        this.uuidToPlayerMap.put(newPlayer.getUniqueID(), newPlayer);
+        newPlayer.addSelfToInternalCraftingInventory();
 
         // Update reducedDebugInfo game rule
-        entityPlayerMP.connection.sendPacket(new SPacketEntityStatus(entityPlayerMP,
+        newPlayer.connection.sendPacket(new SPacketEntityStatus(newPlayer,
                 worldServer.getGameRules().getBoolean(DefaultGameRules.REDUCED_DEBUG_INFO) ? (byte) 22 : 23));
 
-        for (PotionEffect potioneffect : entityPlayerMP.getActivePotionEffects()) {
-            entityPlayerMP.connection.sendPacket(new SPacketEntityEffect(entityPlayerMP.getEntityId(), potioneffect));
+        for (PotionEffect potioneffect : newPlayer.getActivePotionEffects()) {
+            newPlayer.connection.sendPacket(new SPacketEntityEffect(newPlayer.getEntityId(), potioneffect));
         }
 
-        entityPlayerMP.sendPlayerAbilities();
-
-        return entityPlayerMP;
+        return newPlayer;
     }
 
     // Internal. Note: Has side-effects
@@ -850,5 +873,4 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Check the world info of the current world instead of overworld world info
         return player.worldObj.getWorldInfo();
     }
-
 }
