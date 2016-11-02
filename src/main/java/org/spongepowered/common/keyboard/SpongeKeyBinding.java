@@ -39,6 +39,7 @@ public class SpongeKeyBinding extends AbstractCatalogType implements KeyBinding 
 
     @Nullable private final Multimap<Class<?>, Consumer<?>> eventConsumers;
     @Nullable private final SpongeKeyContext keyContext;
+    private final int keyContextId;
     private final SpongeKeyCategory keyCategory;
     private final Text displayName;
     private final boolean def;
@@ -48,15 +49,17 @@ public class SpongeKeyBinding extends AbstractCatalogType implements KeyBinding 
         super(plugin, name);
         this.eventConsumers = eventConsumers;
         this.keyContext = keyContext;
+        this.keyContextId = keyContext.getInternalId();
         this.keyCategory = keyCategory;
         this.displayName = displayName;
         this.def = def;
     }
 
-    SpongeKeyBinding(String id, SpongeKeyCategory keyCategory, Text displayName, boolean def) {
+    public SpongeKeyBinding(String id, int keyContextId, SpongeKeyCategory keyCategory, Text displayName, boolean def) {
         super(id);
         this.keyContext = null;
         this.eventConsumers = null;
+        this.keyContextId = keyContextId;
         this.keyCategory = keyCategory;
         this.displayName = displayName;
         this.def = def;
@@ -85,5 +88,9 @@ public class SpongeKeyBinding extends AbstractCatalogType implements KeyBinding 
     @Nullable
     public Multimap<Class<?>, Consumer<?>> getEventConsumers() {
         return this.eventConsumers;
+    }
+
+    public int getKeyContextId() {
+        return this.keyContextId;
     }
 }

@@ -30,7 +30,6 @@ import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.Message;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.common.keyboard.ClientKeyBinding;
 import org.spongepowered.common.keyboard.SpongeKeyBinding;
 import org.spongepowered.common.keyboard.SpongeKeyCategory;
 import org.spongepowered.common.registry.type.keyboard.KeyCategoryRegistryModule;
@@ -107,7 +106,7 @@ public class MessageKeyboardData implements Message {
                         .orElseThrow(() -> new IllegalArgumentException("Received key binding with unknown category"));
             }
 
-            final ClientKeyBinding keyBinding = new ClientKeyBinding(id, contextId, keyCategory, displayName, false);
+            final SpongeKeyBinding keyBinding = new SpongeKeyBinding(id, contextId, keyCategory, displayName, false);
             keyBinding.setInternalId(internalId);
             keyBindings.add(keyBinding);
         }
