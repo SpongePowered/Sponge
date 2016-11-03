@@ -32,6 +32,7 @@ import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.player.LoginPermissions;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -52,11 +53,11 @@ public final class CommandPermissions {
     }
 
     public static boolean testPermission(CommandSource source, String commandName) {
-        if (commandName.equals(CommandPermissions.SELECTOR_COMMAND)) {
-            return source.hasPermission(CommandPermissions.SELECTOR_PERMISSION);
+        if (commandName.equals(SELECTOR_COMMAND)) {
+            return source.hasPermission(SELECTOR_PERMISSION);
         }
-        if (commandName.equals(CommandPermissions.COMMAND_BLOCK_COMMAND)) {
-            return source.hasPermission(CommandPermissions.COMMAND_BLOCK_PERMISSION);
+        if (commandName.equals(COMMAND_BLOCK_COMMAND)) {
+            return source.hasPermission(COMMAND_BLOCK_PERMISSION);
         }
         Optional<? extends CommandMapping> mapping = SpongeImpl.getGame().getCommandManager().get(commandName);
         if (mapping.isPresent()) {
@@ -70,14 +71,17 @@ public final class CommandPermissions {
     }
 
     public static void populateNonCommandPermissions(SubjectData data, BiFunction<Integer, String, Boolean> testPermission) {
-        if (testPermission.apply(CommandPermissions.COMMAND_BLOCK_LEVEL, CommandPermissions.COMMAND_BLOCK_COMMAND)) {
-            data.setPermission(SubjectData.GLOBAL_CONTEXT, CommandPermissions.SELECTOR_PERMISSION, Tristate.TRUE);
+        if (testPermission.apply(COMMAND_BLOCK_LEVEL, COMMAND_BLOCK_COMMAND)) {
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, COMMAND_BLOCK_PERMISSION, Tristate.TRUE);
         }
-        if (testPermission.apply(CommandPermissions.SELECTOR_LEVEL, CommandPermissions.SELECTOR_COMMAND)) {
-            data.setPermission(SubjectData.GLOBAL_CONTEXT, CommandPermissions.COMMAND_BLOCK_COMMAND, Tristate.TRUE);
+        if (testPermission.apply(SELECTOR_LEVEL, SELECTOR_COMMAND)) {
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, SELECTOR_PERMISSION, Tristate.TRUE);
         }
-        if (testPermission.apply(CommandPermissions.SPONGE_HELP_LEVEL, CommandPermissions.SPONGE_HELP_COMMAND)) {
-            data.setPermission(SubjectData.GLOBAL_CONTEXT, CommandPermissions.SPONGE_HELP_PERMISSION, Tristate.TRUE);
+        if (testPermission.apply(SPONGE_HELP_LEVEL, SPONGE_HELP_COMMAND)) {
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, SPONGE_HELP_PERMISSION, Tristate.TRUE);
+        }
+        if (testPermission.apply(LoginPermissions.BYPASS_WHITELIST_LEVEL, LoginPermissions.BYPASS_WHITELIST_PERMISSION)) {
+            data.setPermission(SubjectData.GLOBAL_CONTEXT, LoginPermissions.BYPASS_WHITELIST_PERMISSION, Tristate.TRUE);
         }
     }
 
