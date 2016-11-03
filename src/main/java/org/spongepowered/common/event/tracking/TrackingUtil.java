@@ -321,13 +321,17 @@ public final class TrackingUtil {
         final IPhaseState currentState = causeTracker.getCurrentState();
         final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState);
         if (shouldEnterBlockDropPhase) {
-            causeTracker.switchToPhase(BlockPhase.State.BLOCK_DROP_ITEMS, PhaseContext.start()
+            PhaseContext context = PhaseContext.start()
                     .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
                     .addBlockCaptures()
                     .addEntityCaptures()
                     .add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_FORTUNE, fortune))
-                    .add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_POSITION, pos))
+                    .add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_POSITION, pos));
+            // use current notifier and owner if available
+            context.notifier = causeTracker.getCurrentContext().notifier;
+            context.owner = causeTracker.getCurrentContext().owner;
                     .complete());
+            causeTracker.switchToPhase(BlockPhase.State.BLOCK_DROP_ITEMS, context);
         }
         block.dropBlockAsItemWithChance((WorldServer) mixinWorld, pos, state, chance, fortune);
         if (shouldEnterBlockDropPhase) {
