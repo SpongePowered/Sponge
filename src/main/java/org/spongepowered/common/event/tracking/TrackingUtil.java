@@ -330,7 +330,7 @@ public final class TrackingUtil {
             // use current notifier and owner if available
             context.notifier = causeTracker.getCurrentContext().notifier;
             context.owner = causeTracker.getCurrentContext().owner;
-                    .complete());
+            context.complete();
             causeTracker.switchToPhase(BlockPhase.State.BLOCK_DROP_ITEMS, context);
         }
         block.dropBlockAsItemWithChance((WorldServer) mixinWorld, pos, state, chance, fortune);
