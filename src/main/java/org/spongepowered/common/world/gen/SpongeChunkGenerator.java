@@ -76,7 +76,10 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;
+import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
+import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
+import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.util.gen.VirtualMutableBiomeBuffer;
 import org.spongepowered.common.world.extent.SoftBufferExtentViewDownsize;
 import org.spongepowered.common.world.gen.populators.SnowPopulator;
@@ -204,7 +207,13 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         checkNotNull(type, "type");
         BiomeGenerationSettings settings = this.biomeSettings.get(type);
         if (settings == null) {
-            settings = type.createDefaultGenerationSettings((org.spongepowered.api.world.World) this.world);
+            if (SpongeGenerationPopulator.class.isInstance(this.baseGenerator)) {
+                // If the base generator was mod provided then we assume that it will handle its own
+                // generation so we don't add the base game's generation
+                settings = new SpongeBiomeGenerationSettings();
+            } else {
+                settings = type.createDefaultGenerationSettings((org.spongepowered.api.world.World) this.world);
+            }
             this.biomeSettings.put(type, settings);
         }
         return settings;
@@ -255,10 +264,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
         // run our generator populators
         for (BiomeType type : uniqueBiomes) {
-            if (!this.biomeSettings.containsKey(type)) {
-                this.biomeSettings.put(type, type.createDefaultGenerationSettings((org.spongepowered.api.world.World) this.world));
-            }
-            for (GenerationPopulator populator : this.biomeSettings.get(type).getGenerationPopulators()) {
+            BiomeGenerationSettings settings = getBiomeSettings(type);
+            for (GenerationPopulator populator : settings.getGenerationPopulators()) {
                 populator.populate((org.spongepowered.api.world.World) this.world, blockBuffer, biomeBuffer);
             }
         }
@@ -294,9 +301,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
         org.spongepowered.api.world.Chunk chunk = (org.spongepowered.api.world.Chunk) this.world.getChunkFromChunkCoords(chunkX, chunkZ);
 
-        if (!this.biomeSettings.containsKey(biome)) {
-            this.biomeSettings.put(biome, biome.createDefaultGenerationSettings((org.spongepowered.api.world.World) this.world));
-        }
+        BiomeGenerationSettings settings = getBiomeSettings(biome);
 
         List<Populator> populators = new ArrayList<>(this.pop);
 
@@ -311,7 +316,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             }
         }
 
-        populators.addAll(this.biomeSettings.get(biome).getPopulators());
+        populators.addAll(settings.getPopulators());
         if (snowPopulator != null) {
             populators.add(snowPopulator);
         }
