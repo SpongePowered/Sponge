@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.IChunkGenerator;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.gen.BiomeGenerator;
@@ -37,6 +38,8 @@ import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
+import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
+import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
 import java.util.List;
 import java.util.Map;
@@ -129,7 +132,13 @@ public final class SpongeWorldGenerator implements WorldGenerator {
         checkNotNull(type);
         BiomeGenerationSettings settings = this.biomeSettings.get(type);
         if (settings == null) {
-            settings = type.createDefaultGenerationSettings((org.spongepowered.api.world.World) this.world);
+            if (SpongeGenerationPopulator.class.isInstance(this.baseGenerator)) {
+                // If the base generator was mod provided then we assume that it will handle its own
+                // generation so we don't add the base game's generation
+                settings = new SpongeBiomeGenerationSettings();
+            } else {
+                settings = type.createDefaultGenerationSettings((org.spongepowered.api.world.World) this.world);
+            }
             this.biomeSettings.put(type, settings);
         }
         return settings;
