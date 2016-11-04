@@ -607,9 +607,11 @@ public class SpongeCommonEventFactory {
                     container = player.openContainer;
                     break;
             }
-        } else {
+        } else if (inventory instanceof IInventory) {
             player.displayGUIChest(((IInventory) inventory));
             container = player.openContainer;
+        } else {
+            return null;
         }
 
         if (previousContainer == container) {
