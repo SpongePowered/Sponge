@@ -257,9 +257,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean canBlockFreezeNoWater(BlockPos pos);
     @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
     @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
+    @Shadow public abstract int getHeight(int x, int z);
 
     // @formatter:on
 
+    @Override
+    public int getHighestYAt(int x, int z) {
+        return this.getHeight(x, z);
+    }
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
             + "createWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
     private net.minecraft.world.border.WorldBorder onCreateWorldBorder(WorldProvider provider) {
@@ -346,7 +351,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
         return setBlock(x, y, z, block, BlockChangeFlag.ALL, cause);
     }
-
 
     @Override
     public BiomeType getBiome(int x, int y, int z) {
