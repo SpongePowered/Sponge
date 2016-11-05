@@ -128,6 +128,19 @@ final class DeathPhase extends EntityPhaseState {
                         }
                     }
                 });
+        // Forge always fires a living drop event even if nothing was captured
+        // This allows mods such as Draconic Evolution to add items to the drop list
+        if (context.getCapturedEntityItemDropSupplier().isEmpty() && context.getCapturedEntityDropSupplier().isEmpty()) {
+            final ArrayList<Entity> entities = new ArrayList<>();
+            final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld());
+            SpongeImpl.postEvent(destruct);
+            if (!destruct.isCancelled()) {
+                for (Entity entity : destruct.getEntities()) {
+                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                }
+            }
+            return;
+        }
         context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {
             final Collection<EntityItem> items = map.get(dyingEntity.getUniqueId());
             final ArrayList<Entity> entities = new ArrayList<>();
