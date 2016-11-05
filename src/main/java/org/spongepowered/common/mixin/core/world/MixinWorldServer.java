@@ -77,6 +77,7 @@ import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -1594,6 +1595,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return (PortalAgent) this.worldTeleporter;
     }
 
+    @Redirect(method = "canAddEntity", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;[Ljava/lang/Object;)V"))
+    public void onCanAddEntityLogWarn(Logger logger, String message, Object... params) {
+        // don't log anything to avoid useless spam
+    }
     /**************************** TIMINGS ***************************************/
     /*
     The remaining of these overridden methods are all injectors into World#updateEntities() to where
