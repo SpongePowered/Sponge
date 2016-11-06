@@ -269,10 +269,16 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
                         .build("minecraft:armor", "Armor"))
                 .with(new SpongeInventoryArchetypeBuilder()
                         .from(MENU_GRID)
-                        .property(new InventoryDimension(9, 3)).build("minecraft:player_main", "Player Main"))
+                        .property(new InventoryDimension(9, 3))
+                        .build("minecraft:player_main", "Player Main"))
                 .with(new SpongeInventoryArchetypeBuilder()
                         .from(MENU_GRID)
-                        .property(new InventoryDimension(9, 1)).build("minecraft:player_hotbar", "Player Hotbar"))
+                        .property(new InventoryDimension(9, 1))
+                        .build("minecraft:player_hotbar", "Player Hotbar"))
+                .with(new SpongeInventoryArchetypeBuilder()
+                        .from(SLOT)
+                        .property(new InventoryDimension(1, 1))
+                        .build("minecraft:player_offhand", "Player Offhand"))
                 .build("minecraft:player", "Player");
 
         UNKNOWN = builder.reset()
