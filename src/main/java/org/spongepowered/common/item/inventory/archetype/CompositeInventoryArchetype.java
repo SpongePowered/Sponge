@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -72,6 +71,9 @@ public class CompositeInventoryArchetype implements InventoryArchetype {
     public <T extends InventoryProperty<String, ?>> Optional<T> getProperty(Class<T> type, String key) {
 
         InventoryProperty<String, ?> property = this.properties.get(key);
+        if (property == null) {
+            return Optional.empty();
+        }
         if (type.isAssignableFrom(property.getClass())) {
             return Optional.of((T) property);
         }

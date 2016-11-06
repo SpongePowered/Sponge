@@ -39,6 +39,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.item.inventory.property.InventoryCapacity;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
 import org.spongepowered.api.text.TranslatableText;
@@ -54,6 +55,7 @@ import java.util.function.Consumer;
 
 public class CustomInventory implements IInventory, IInteractionObject {
 
+    public static final String INVENTORY_CAPACITY = InventoryCapacity.class.getSimpleName().toLowerCase(Locale.ENGLISH);
     public static final String INVENTORY_DIMENSION = InventoryDimension.class.getSimpleName().toLowerCase(Locale.ENGLISH);
     public static final String TITLE = InventoryTitle.class.getSimpleName().toLowerCase(Locale.ENGLISH);
 
@@ -70,20 +72,12 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.properties = properties;
         this.carrier = carrier;
 
-        int count = 0;
-        InventoryDimension size = (InventoryDimension)properties.getOrDefault(INVENTORY_DIMENSION,
-                archetype.getProperty(INVENTORY_DIMENSION).orElse(null));
+        int count;
+        InventoryDimension size = (InventoryDimension)properties.get(INVENTORY_DIMENSION); // TODO INVENTORY_CAPACITY
         if (size != null) {
             count = size.getColumns() * size.getRows();
-        }
-        else {
-            for (InventoryArchetype childArchetype : archetype.getChildArchetypes()) {
-                Optional<InventoryDimension> property = childArchetype.getProperty(InventoryDimension.class, INVENTORY_DIMENSION);
-                if (!property.isPresent()) {
-                    throw new IllegalArgumentException("Missing dimensions!");
-                }
-                count += property.get().getColumns() * property.get().getRows();
-            }
+        } else {
+            count = getSlotCount(archetype);
         }
 
         InventoryTitle titleProperty = (InventoryTitle) properties.getOrDefault(TITLE, archetype.getProperty(TITLE).orElse(null));
@@ -102,6 +96,27 @@ public class CustomInventory implements IInventory, IInteractionObject {
         for (Map.Entry<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> entry: listeners.entrySet()) {
             Sponge.getEventManager().registerListener(plugin, entry.getKey(), new CustomInventoryListener((Inventory) this, entry.getValue()));
         }
+    }
+
+    private static int getSlotCount(InventoryArchetype archetype) {
+        Optional<InventoryDimension> dimension = archetype.getProperty(InventoryDimension.class, INVENTORY_DIMENSION);
+        if (dimension.isPresent()) {
+            return dimension.get().getColumns() * dimension.get().getRows();
+        }
+        Optional<InventoryCapacity> capacity = archetype.getProperty(InventoryCapacity.class, INVENTORY_CAPACITY);
+        if (capacity.isPresent()) {
+            return capacity.get().getValue();
+        }
+
+        int count = 0;
+        List<InventoryArchetype> childs = archetype.getChildArchetypes();
+        if (childs.isEmpty()) {
+            throw new IllegalArgumentException("Missing dimensions!");
+        }
+        for (InventoryArchetype childArchetype : childs) {
+            count += getSlotCount(childArchetype);
+        }
+        return count;
     }
 
     public InventoryArchetype getArchetype() {
