@@ -152,7 +152,7 @@ public class PacketUtil {
             SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
             CPacketPlayerDigging packet = (CPacketPlayerDigging) packetIn;
             ItemStack stack = playerMP.getHeldItemMainhand();
-            if(stack != null && SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, stack, EnumHand.MAIN_HAND).isCancelled()) {
+            if(SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, stack, EnumHand.MAIN_HAND).isCancelled()) {
                 BlockUtil.sendClientBlockChange(playerMP, packet.getPosition());
                 return true;
             }
