@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.network;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -569,7 +570,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         if (!result) {
             IMixinContainer mixinContainer =(IMixinContainer) this.playerEntity.openContainer;
             mixinContainer.detectAndSendChanges(true);
-            PacketPhaseUtil.handleSlotRestore(this.playerEntity, mixinContainer.getCapturedTransactions(), true, false);
+            PacketPhaseUtil.handleSlotRestore(this.playerEntity, Lists.newArrayList(mixinContainer.getCapturedTransactions()), true, false);
             // restore cursor
             final CauseTracker causeTracker = ((IMixinWorldServer) this.playerEntity.worldObj).getCauseTracker();
             Optional<ItemStackSnapshot> cursorOpt = causeTracker.getCurrentContext().firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class);
