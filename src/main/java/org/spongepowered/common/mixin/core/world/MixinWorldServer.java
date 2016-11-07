@@ -795,7 +795,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         for (net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.getLoadedChunks()) {
             IMixinChunk spongeChunk = (IMixinChunk) chunk;
-            if (chunk.unloaded || spongeChunk.isPersistedChunk()) {
+            if (chunk.unloaded || spongeChunk.isPersistedChunk() || !this.provider.canDropChunk(chunk.xPosition, chunk.zPosition)) {
                 continue;
             }
 
