@@ -163,8 +163,13 @@ public class PaginationCalculator {
             Integer cp;
             while(i_it.hasNext()){
                 cp = i_it.next();
-                int width = getWidth(cp, bold);
-                total += width;
+                //The newline character is 10
+                if (cp == 10) {
+                    total = ((int) Math.ceil((double) total / LINE_WIDTH)) * LINE_WIDTH;
+                } else {
+                    int width = getWidth(cp, bold);
+                    total += width;
+                }
             }
         }
 
