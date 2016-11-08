@@ -442,6 +442,7 @@
         "world.MixinChunk",
         "world.MixinDimensionType",
         "world.MixinExplosion",
+        "world.MixinGameRules",
         "world.MixinNextTickListEntry",
         "world.MixinServerWorldEventHandler",
         "world.MixinTeleporter",

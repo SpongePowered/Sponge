@@ -77,6 +77,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.interfaces.world.IMixinGameRules;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
@@ -511,6 +512,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public Optional<String> getGameRule(String gameRule) {
+        checkNotNull(gameRule, "The gamerule cannot be null!");
         if (this.theGameRules.hasRule(gameRule)) {
             return Optional.of(this.theGameRules.getString(gameRule));
         }
@@ -528,7 +530,15 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public void setGameRule(String gameRule, String value) {
+        checkNotNull(gameRule, "The gamerule cannot be null!");
+        checkNotNull(value, "The gamerule value cannot be null!");
         this.theGameRules.setOrCreateGameRule(gameRule, value);
+    }
+
+    @Override
+    public boolean removeGameRule(String gameRule) {
+        checkNotNull(gameRule, "The gamerule cannot be null!");
+        return ((IMixinGameRules) this.theGameRules).removeGameRule(gameRule);
     }
 
     @Override
