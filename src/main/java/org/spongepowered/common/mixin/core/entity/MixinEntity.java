@@ -221,6 +221,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract net.minecraft.entity.Entity getLowestRidingEntity();
     @Shadow public abstract net.minecraft.entity.Entity getRidingEntity();
     @Shadow public abstract void dismountRidingEntity();
+    @Shadow public abstract void removePassengers();
     @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
     @Shadow public abstract boolean isSprinting();
@@ -232,6 +233,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract boolean hasNoGravity();
     @Shadow public abstract void setNoGravity(boolean noGravity);
     @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
+    @Shadow protected abstract void removePassenger(net.minecraft.entity.Entity passenger);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow protected abstract void setSize(float width, float height);
     @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
@@ -771,6 +773,35 @@ public abstract class MixinEntity implements IMixinEntity {
 
         passengerSnapshotsBuilder.add(entity.createSnapshot());
 
+        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerSnapshotsBuilder
+                .build())).build();
+    }
+
+    @Override
+    public DataTransactionResult removePassenger(Entity entity) {
+        checkNotNull(entity);
+        if (entity.getPassengers().contains(this)) {
+            throw new IllegalArgumentException(String.format("Cannot remove entity %s, because it is not a passenger of %s ", entity, this));
+        }
+
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        ((net.minecraft.entity.Entity) entity).dismountRidingEntity();
+
+        final ImmutableList.Builder<EntitySnapshot> passengerSnapshotsBuilder = ImmutableList.builder();
+
+        getPassengers().stream().map(Entity::createSnapshot).forEach(passengerSnapshotsBuilder::add);
+
+        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerSnapshotsBuilder
+                .build())).build();
+    }
+
+    @Override
+    public DataTransactionResult clearPassengers() {
+        this.removePassengers();
+
+        final ImmutableList.Builder<EntitySnapshot> passengerSnapshotsBuilder = ImmutableList.builder(); // This is an empty list. No passengers.
+
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerSnapshotsBuilder
                 .build())).build();
     }
