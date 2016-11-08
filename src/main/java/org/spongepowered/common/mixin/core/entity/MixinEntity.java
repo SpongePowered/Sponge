@@ -762,18 +762,18 @@ public abstract class MixinEntity implements IMixinEntity {
             throw new IllegalArgumentException(String.format("Cannot add entity %s as a passenger of %s, because the former already has the latter as a passenger!", entity, this));
         }
 
-        final ImmutableList.Builder<EntitySnapshot> passengerSnapshotsBuilder = ImmutableList.builder();
-        passengerSnapshotsBuilder.addAll(getPassengers().stream().map(Entity::createSnapshot).collect(Collectors.toList()));
+        final ImmutableList.Builder<UUID> passengerUUIDBuilder = ImmutableList.builder();
+        getPassengers().stream().map(Entity::getUniqueId).forEach(passengerUUIDBuilder::add);
 
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         if (!((net.minecraft.entity.Entity) entity).startRiding((net.minecraft.entity.Entity) (Object) this, true)) {
-            return builder.result(DataTransactionResult.Type.FAILURE).reject(new ImmutableSpongeListValue<>(Keys.PASSENGERS, ImmutableList.of(entity
-                    .createSnapshot()))).build();
+            return builder.result(DataTransactionResult.Type.FAILURE).reject(new ImmutableSpongeListValue<>(Keys.PASSENGERS, ImmutableList.of(((net.minecraft.entity.Entity) entity)
+                    .getUniqueID()))).build();
         }
 
-        passengerSnapshotsBuilder.add(entity.createSnapshot());
+        passengerUUIDBuilder.add(((net.minecraft.entity.Entity) entity).getUniqueID());
 
-        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerSnapshotsBuilder
+        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerUUIDBuilder
                 .build())).build();
     }
 
@@ -787,11 +787,10 @@ public abstract class MixinEntity implements IMixinEntity {
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         ((net.minecraft.entity.Entity) entity).dismountRidingEntity();
 
-        final ImmutableList.Builder<EntitySnapshot> passengerSnapshotsBuilder = ImmutableList.builder();
+        final ImmutableList.Builder<UUID> passengerUUIDBuilder = ImmutableList.builder();
+        getPassengers().stream().map(Entity::getUniqueId).forEach(passengerUUIDBuilder::add);
 
-        getPassengers().stream().map(Entity::createSnapshot).forEach(passengerSnapshotsBuilder::add);
-
-        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerSnapshotsBuilder
+        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerUUIDBuilder
                 .build())).build();
     }
 
@@ -799,10 +798,10 @@ public abstract class MixinEntity implements IMixinEntity {
     public DataTransactionResult clearPassengers() {
         this.removePassengers();
 
-        final ImmutableList.Builder<EntitySnapshot> passengerSnapshotsBuilder = ImmutableList.builder(); // This is an empty list. No passengers.
+        final ImmutableList.Builder<UUID> passengerUUIDBuilder = ImmutableList.builder(); // This is an empty list. No passengers.
 
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerSnapshotsBuilder
+        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerUUIDBuilder
                 .build())).build();
     }
 

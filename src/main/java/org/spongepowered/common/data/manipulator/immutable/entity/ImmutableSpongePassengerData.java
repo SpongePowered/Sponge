@@ -40,16 +40,18 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongePassengerD
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.List;
+import java.util.UUID;
 
-public class ImmutableSpongePassengerData extends AbstractImmutableListData<EntitySnapshot, ImmutablePassengerData, PassengerData> implements ImmutablePassengerData {
+public class ImmutableSpongePassengerData extends AbstractImmutableListData<UUID, ImmutablePassengerData, PassengerData> implements
+        ImmutablePassengerData {
 
 
-    public ImmutableSpongePassengerData(List<EntitySnapshot> passenger) {
+    public ImmutableSpongePassengerData(List<UUID> passenger) {
         super(ImmutablePassengerData.class, checkNotNull(passenger), Keys.PASSENGERS, SpongePassengerData.class);
     }
 
     @Override
-    public ImmutableListValue<EntitySnapshot> passengers() {
+    public ImmutableListValue<UUID> passengers() {
         return this.getValueGetter();
     }
 

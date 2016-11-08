@@ -29,33 +29,27 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePassengerData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PassengerData;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePassengerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @ImplementationRequiredForTest
-public class SpongePassengerData extends AbstractListData<EntitySnapshot, PassengerData, ImmutablePassengerData> implements PassengerData {
+public class SpongePassengerData extends AbstractListData<UUID, PassengerData, ImmutablePassengerData> implements PassengerData {
 
     public SpongePassengerData() {
         this(new ArrayList<>());
-        this.getValue().add(new SpongeEntitySnapshotBuilder().type(EntityTypes.UNKNOWN).build());
     }
 
-    public SpongePassengerData(List<EntitySnapshot> passengers) {
+    public SpongePassengerData(List<UUID> passengers) {
         super(PassengerData.class, passengers, Keys.PASSENGERS, ImmutableSpongePassengerData.class);
     }
 
     @Override
-    public ListValue<EntitySnapshot> passengers() {
+    public ListValue<UUID> passengers() {
         return getValueGetter();
     }
 
