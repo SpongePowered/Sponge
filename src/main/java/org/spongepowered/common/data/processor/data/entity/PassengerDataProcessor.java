@@ -24,34 +24,23 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import static org.spongepowered.common.data.util.DataUtil.getData;
-
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePassengerData;
-import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PassengerData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePassengerData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.entity.SpongeEntitySnapshot;
-import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 
 import java.util.List;
 import java.util.Optional;
