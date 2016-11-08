@@ -756,70 +756,46 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
-    public DataTransactionResult addPassenger(Entity entity) {
+    public boolean hasPassenger(Entity entity) {
+        checkNotNull(entity);
+        return entity.getPassengers().contains(this);
+    }
+
+    @Override
+    public boolean addPassenger(Entity entity) {
         checkNotNull(entity);
         if (entity.getPassengers().contains(this)) {
             throw new IllegalArgumentException(String.format("Cannot add entity %s as a passenger of %s, because the former already has the latter as a passenger!", entity, this));
         }
 
-        final ImmutableList.Builder<UUID> passengerUUIDBuilder = ImmutableList.builder();
-        getPassengers().stream().map(Entity::getUniqueId).forEach(passengerUUIDBuilder::add);
-
-        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        if (!((net.minecraft.entity.Entity) entity).startRiding((net.minecraft.entity.Entity) (Object) this, true)) {
-            return builder.result(DataTransactionResult.Type.FAILURE).reject(new ImmutableSpongeListValue<>(Keys.PASSENGERS, ImmutableList.of(((net.minecraft.entity.Entity) entity)
-                    .getUniqueID()))).build();
-        }
-
-        passengerUUIDBuilder.add(((net.minecraft.entity.Entity) entity).getUniqueID());
-
-        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerUUIDBuilder
-                .build())).build();
+        return ((net.minecraft.entity.Entity) entity).startRiding((net.minecraft.entity.Entity) (Object) this, true);
     }
 
     @Override
-    public DataTransactionResult removePassenger(Entity entity) {
+    public void removePassenger(Entity entity) {
         checkNotNull(entity);
         if (entity.getPassengers().contains(this)) {
             throw new IllegalArgumentException(String.format("Cannot remove entity %s, because it is not a passenger of %s ", entity, this));
         }
 
-        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         ((net.minecraft.entity.Entity) entity).dismountRidingEntity();
-
-        final ImmutableList.Builder<UUID> passengerUUIDBuilder = ImmutableList.builder();
-        getPassengers().stream().map(Entity::getUniqueId).forEach(passengerUUIDBuilder::add);
-
-        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerUUIDBuilder
-                .build())).build();
     }
 
     @Override
-    public DataTransactionResult clearPassengers() {
+    public void clearPassengers() {
         this.removePassengers();
-
-        final ImmutableList.Builder<UUID> passengerUUIDBuilder = ImmutableList.builder(); // This is an empty list. No passengers.
-
-        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerUUIDBuilder
-                .build())).build();
     }
 
     @Override
-    public DataTransactionResult setVehicle(@Nullable Entity entity) {
+    public boolean setVehicle(@Nullable Entity entity) {
         if (getRidingEntity() == null && entity == null) {
-            return DataTransactionResult.successNoData();
+            return false;
         }
-        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         if (getRidingEntity() != null) {
-            final EntitySnapshot previousVehicleSnapshot = ((Entity) getRidingEntity()).createSnapshot();
             dismountRidingEntity();
-            builder.replace(new ImmutableSpongeValue<>(Keys.VEHICLE, previousVehicleSnapshot));
+            return true;
         }
-        if (entity != null) {
-            builder.from(entity.addPassenger(this));
-        }
-        return builder.result(DataTransactionResult.Type.SUCCESS).build();
+        return entity != null && entity.addPassenger(this);
     }
 
 
