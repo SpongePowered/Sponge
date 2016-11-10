@@ -245,11 +245,9 @@ class UserDiscoverer {
 
         // Note: Uses the overworld's player data
         SaveHandler saveHandler = (SaveHandler) worldServer.get().getSaveHandler();
-        String[] uuids = saveHandler.getAvailablePlayerDat();
-        for (String playerUuid : uuids) {
-            if (uniqueId.toString().equals(playerUuid)) {
-                return new File(saveHandler.playersDirectory, playerUuid + ".dat");
-            }
+        File file = new File(saveHandler.playersDirectory, uniqueId.toString() + ".dat");
+        if (file.exists()) {
+            return file;
         }
         return null;
     }
