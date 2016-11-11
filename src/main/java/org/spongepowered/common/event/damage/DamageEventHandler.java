@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.damage;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -190,16 +191,16 @@ public class DamageEventHandler {
      */
     public static void acceptArmorModifier(EntityLivingBase entity, DamageSource damageSource, DamageModifier modifier, double damage) {
         Optional<DamageObject> property = modifier.getCause().first(DamageObject.class);
-        final net.minecraft.item.ItemStack[] inventory = entity instanceof EntityPlayer ? ((EntityPlayer) entity).inventory.armorInventory : entity.armorArray;
+        final Iterable<net.minecraft.item.ItemStack> inventory = entity.getArmorInventoryList();
         if (property.isPresent()) {
             damage = Math.abs(damage) * 25;
-            net.minecraft.item.ItemStack stack = inventory[property.get().slot];
+            net.minecraft.item.ItemStack stack = Iterables.get(inventory, property.get().slot);
+            if (stack == null) {
+                throw new IllegalStateException("Invalid slot position " + property.get().slot);
+            }
+
             int itemDamage = (int) (damage / 25D < 1 ? 1 : damage / 25D);
             stack.damageItem(itemDamage, entity);
-
-            if (stack.stackSize <= 0) {
-                inventory[property.get().slot] = null;
-            }
         }
     }
 
@@ -233,8 +234,8 @@ public class DamageEventHandler {
     private static double previousEnchantmentModifier = 0;
 
     public static Optional<List<Tuple<DamageModifier, Function<? super Double, Double>>>> createEnchantmentModifiers(EntityLivingBase entityLivingBase, DamageSource damageSource) {
-        net.minecraft.item.ItemStack[] inventory = entityLivingBase instanceof EntityPlayer ? ((EntityPlayer) entityLivingBase).inventory.armorInventory : entityLivingBase.armorArray;
-        if (EnchantmentHelper.getEnchantmentModifierDamage(Arrays.asList(inventory), damageSource) == 0) {
+        Iterable<net.minecraft.item.ItemStack> inventory = entityLivingBase.getArmorInventoryList();
+        if (EnchantmentHelper.getEnchantmentModifierDamage(Lists.newArrayList(entityLivingBase.getArmorInventoryList()), damageSource) == 0) {
             return Optional.empty();
         }
         List<Tuple<DamageModifier, Function<? super Double, Double>>> modifiers = new ArrayList<>();
