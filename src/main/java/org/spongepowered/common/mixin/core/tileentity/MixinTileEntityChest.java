@@ -191,7 +191,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
 
     @Override
     public void setCustomDisplayName(String customName) {
-        ((TileEntityChest) (Object) this).setCustomName(customName);
+        ((TileEntityChest) (Object) this).mth_000861_a(customName); // setCustomName
     }
 
     @SuppressWarnings({"RedundantCast", "unchecked"})

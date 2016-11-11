@@ -234,7 +234,7 @@ public abstract class MixinWorldEntitySpawner {
 
     @Inject(method = "canCreatureTypeSpawnAtLocation", at = @At("HEAD"), cancellable = true)
     private static void canCreatureTypeSpawnAtLocation(EntityLiving.SpawnPlacementType spawnPlacementTypeIn, World worldIn, BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        if (((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4) == null) {
+        if (((IMixinChunkProviderServer) worldIn.mth_000666_z()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4) == null) { // getChunkProvider
             cir.setReturnValue(false);
         }
     }

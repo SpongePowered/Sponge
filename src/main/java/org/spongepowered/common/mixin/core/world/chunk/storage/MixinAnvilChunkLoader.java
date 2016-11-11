@@ -31,6 +31,7 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
@@ -163,7 +164,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
                     EntityMinecart.Type.values()[compound.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
             compound.removeTag(NbtDataUtil.MINECART_TYPE);
         }
-        Class<? extends Entity> entityClass = EntityList.NAME_TO_CLASS.get(compound.getString(NbtDataUtil.ENTITY_TYPE_ID));
+        Class<? extends Entity> entityClass = EntityList.fld_001472_b.getObject(new ResourceLocation(compound.getString(NbtDataUtil.ENTITY_TYPE_ID)));
         if (entityClass == null) {
             return null;
         }

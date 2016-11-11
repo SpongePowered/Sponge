@@ -60,7 +60,7 @@ public final class CustomNameVisibleProcessor extends
 
     @Override
     protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(container.getAlwaysRenderNameTag());
+        return Optional.of(container.mth_001463_bj()); // getAlwaysRenderNameTag
     }
 
     @Override

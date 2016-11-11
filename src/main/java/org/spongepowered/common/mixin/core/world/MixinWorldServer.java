@@ -40,7 +40,7 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.passive.EntityHorse;
-import net.minecraft.entity.passive.HorseType;
+import net.minecraft.entity.passive.EntitySkeletonHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -541,9 +541,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         SpongeImpl.postEvent(constructEntityEvent);
                         if (!constructEntityEvent.isCancelled()) {
                             // Sponge End
-                            EntityHorse entityhorse = new EntityHorse((WorldServer) (Object) this);
-                            entityhorse.setType(HorseType.SKELETON);
-                            entityhorse.setSkeletonTrap(true);
+                            EntitySkeletonHorse entityhorse = new EntitySkeletonHorse((WorldServer) (Object) this);
+                            entityhorse.mth_001772_p(true); // setSkeletonTrap
                             entityhorse.setGrowingAge(0);
                             entityhorse.setPosition((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
                             this.spawnEntityInWorld(entityhorse);

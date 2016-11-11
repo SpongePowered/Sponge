@@ -48,7 +48,7 @@ public class AgentDataProcessor
 
     @Override
     protected boolean set(EntityLiving entity, Boolean value) {
-        entity.setNoAI(!value);
+        entity.mth_001519_n(!value); // setNoAI
         return true;
     }
 

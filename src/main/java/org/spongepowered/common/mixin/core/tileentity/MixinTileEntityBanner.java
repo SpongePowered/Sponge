@@ -31,6 +31,7 @@ import net.minecraft.item.EnumDyeColor;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.BannerPattern;
 import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.tileentity.Banner;
@@ -124,7 +125,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
         this.patterns = new NBTTagList();
         for (PatternLayer layer : this.patternLayers) {
             NBTTagCompound compound = new NBTTagCompound();
-            compound.setString(NbtDataUtil.BANNER_PATTERN_ID, ((TileEntityBanner.EnumBannerPattern) (Object) layer.getShape()).getPatternID());
+            compound.setString(NbtDataUtil.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.getShape()).mth_000801_b()); // getPatternID
             compound.setInteger(NbtDataUtil.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
             this.patterns.appendTag(compound);
         }

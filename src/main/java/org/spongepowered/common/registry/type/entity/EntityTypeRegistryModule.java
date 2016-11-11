@@ -36,6 +36,7 @@ import net.minecraft.entity.effect.EntityWeatherEffect;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.entity.projectile.EntityFishHook;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.HorseVariants;
@@ -165,10 +166,9 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "Human", -7, null));
     }
 
-    @SuppressWarnings("unchecked")
     private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
-        return new SpongeEntityType(EntityList.NAME_TO_ID.get(mcName), spongeName,
-                EntityList.NAME_TO_CLASS.get(mcName),
+    	Class<? extends Entity> cls = EntityList.fld_001472_b.getObject(new ResourceLocation(mcName));
+        return new SpongeEntityType(EntityList.fld_001472_b.getIDForObject(cls), spongeName, cls,
                 new SpongeTranslation("entity." + mcName + ".name"));
     }
 
@@ -176,11 +176,9 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         return newEntityTypeFromName(name, name);
     }
 
-    @SuppressWarnings("unchecked")
     private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, int entityId, Translation translation) {
         String entityFullName = String.format("%s.%s", SpongeImpl.ECOSYSTEM_NAME, entityName);
-        EntityList.CLASS_TO_NAME.put(entityClass, entityFullName);
-        EntityList.NAME_TO_CLASS.put(entityFullName, entityClass);
+        EntityList.fld_001472_b.register(entityId, new ResourceLocation(entityFullName), entityClass);
         return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);
     }
 

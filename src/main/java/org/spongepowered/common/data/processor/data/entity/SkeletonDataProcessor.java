@@ -57,16 +57,17 @@ public class SkeletonDataProcessor
 
     @Override
     protected boolean set(EntitySkeleton entity, SkeletonType value) {
-        if ((Object) value instanceof net.minecraft.entity.monster.SkeletonType) {
-            entity.setSkeletonType((net.minecraft.entity.monster.SkeletonType) (Object) value);
-            return true;
-        }
+//        if ((Object) value instanceof net.minecraft.entity.monster.SkeletonType) {
+//            entity.setSkeletonType((net.minecraft.entity.monster.SkeletonType) (Object) value);
+//            return true;
+//        }
         return false;
     }
 
     @Override
     protected Optional<SkeletonType> getVal(EntitySkeleton entity) {
-        return Optional.ofNullable((SkeletonType) (Object) entity.getSkeletonType());
+    	// TODO need some semblance of compatibility until these are removed in API 7.0.0
+        return Optional.ofNullable(SkeletonTypes.NORMAL);
     }
 
     @Override

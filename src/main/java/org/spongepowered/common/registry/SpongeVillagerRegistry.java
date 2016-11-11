@@ -145,7 +145,7 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
 
     static void registerVanillaTrades() {
         VillagerRegistry instance = getInstance();
-
+        /*
         { // Farmers
             { // Farmer
                 instance.setMutators(Careers.FARMER, 1, ImmutableList.of(
@@ -336,9 +336,10 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
                         ));
             }
         }
+        */
     }
 
-    private static TradeOfferListMutator generatorFor(EntityVillager.ITradeList iTradeList) {
+    private static TradeOfferListMutator generatorFor(EntityVillager.Unknown5f iTradeList) { // ITradeList
         return (TradeOfferListMutator) iTradeList;
     }
 

@@ -41,7 +41,7 @@ public abstract class MixinVillage {
 
     @Inject(method = "isWoodDoor", at = @At("HEAD"), cancellable = true)
     public void onIsWoodDoor(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        if (!this.worldObj.isRemote && ((IMixinChunkProviderServer) this.worldObj.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4) == null) {
+        if (!this.worldObj.isRemote && ((IMixinChunkProviderServer) this.worldObj.mth_000666_z()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4) == null) { // getChunkProvider
             cir.setReturnValue(false);
         }
     }

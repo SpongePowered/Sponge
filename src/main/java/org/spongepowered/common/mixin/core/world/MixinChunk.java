@@ -208,7 +208,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         for (Direction direction : CARDINAL_DIRECTIONS) {
             Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
-            IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) this.worldObj.getChunkProvider();
+            IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) this.worldObj.mth_000666_z(); // getChunkProvider
             net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.getLoadedChunkWithoutMarkingActive
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
@@ -228,7 +228,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         for (Direction direction : CARDINAL_DIRECTIONS) {
             Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
-            IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) this.worldObj.getChunkProvider();
+            IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) this.worldObj.mth_000666_z(); // getChunkProvider
             net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.getLoadedChunkWithoutMarkingActive
                     (neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
@@ -730,7 +730,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         // Sponge Start - Rewrite to use SpongeImplHooks because, again, unecessary block state retrieval.
         // return this.getBlockState(x, y, z).getLightOpacity(); // Vanilla
         // return this.unloaded ? state.getLightOpacity() : state.getLightOpacity(this.worldObj, new BlockPos(x, y, z)); // Forge
-        return this.unloaded ? state.getLightOpacity() : SpongeImplHooks.getChunkBlockLightOpacity(state, this.worldObj, x, y, z);
+        return this.unloaded ? state.mth_000887_c() : SpongeImplHooks.getChunkBlockLightOpacity(state, this.worldObj, x, y, z); // getLightOpacity
         // Sponge End
     }
 

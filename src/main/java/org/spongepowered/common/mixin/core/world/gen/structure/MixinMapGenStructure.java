@@ -84,7 +84,7 @@ public abstract class MixinMapGenStructure implements Populator {
         if (generatingStructures) {
             return false;
         }
-        Chunk chunk = ((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
+        Chunk chunk = ((IMixinChunkProviderServer) worldIn.mth_000666_z()).getLoadedChunkWithoutMarkingActive(chunkCoord.chunkXPos, chunkCoord.chunkZPos); // getChunkProvider
         if (chunk == null) {
             return false;
         }

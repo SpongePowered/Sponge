@@ -124,7 +124,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
 
     @Override
     public void setCustomDisplayName(String customName) {
-        ((TileEntityHopper) (Object) this).setCustomName(customName);
+        ((TileEntityHopper) (Object) this).mth_000861_a(customName); // setCustomName
     }
 
     @SuppressWarnings("unchecked")

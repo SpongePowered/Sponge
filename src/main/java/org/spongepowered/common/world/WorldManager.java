@@ -514,7 +514,7 @@ public final class WorldManager {
     public static void saveWorld(WorldServer worldServer, boolean flush) throws MinecraftException {
         worldServer.saveAllChunks(true, null);
         if (flush) {
-            worldServer.flush();
+            worldServer.mth_001145_s(); // flush
         }
     }
 

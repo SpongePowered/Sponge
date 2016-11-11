@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
@@ -180,7 +181,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                     throw new InvalidDataException("Schematic tileentity pos was not of length 3");
                 }
                 TileEntityType type = TileEntityTypeRegistryModule.getInstance()
-                        .getForClass(TileEntity.nameToClassMap.get(tile.getString(DataQuery.of("id")).get()));
+                        .getForClass(TileEntity.fld_000806_f.getObject(new ResourceLocation(tile.getString(DataQuery.of("id")).get())));
                 TileEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
                         .state(buffer.getBlock(pos[0] - offset[0], pos[1] - offset[1], pos[2] - offset[2]))
                         .tileData(tile)

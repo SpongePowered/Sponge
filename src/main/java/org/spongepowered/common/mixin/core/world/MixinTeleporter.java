@@ -479,7 +479,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                     int i12 = yFinalTarget + i10;
                     int l12 = zFinalTarget + (i9 - 1) * targetDirOffset;
                     BlockPos blockpos = new BlockPos(i11, i12, l12);
-                    this.worldServerInstance.notifyNeighborsOfStateChange(blockpos, this.worldServerInstance.getBlockState(blockpos).getBlock());
+                    this.worldServerInstance.mth_000643_a(blockpos, this.worldServerInstance.getBlockState(blockpos).getBlock(), blockpos); // notifyBlockOfStateChange
                 }
             }
         }

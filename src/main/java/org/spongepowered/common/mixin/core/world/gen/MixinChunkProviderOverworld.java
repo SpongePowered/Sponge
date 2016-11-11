@@ -114,7 +114,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
             generator.getGenerationPopulators().add((GenerationPopulator) this.caveGenerator);
         }
 
-        if (this.settings.useRavines) {
+        if (this.settings.fld_000934_z) { // useRavines
             generator.getGenerationPopulators().add((GenerationPopulator) this.ravineGenerator);
         }
 
@@ -146,9 +146,9 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
             generator.getPopulators().add((Populator) this.oceanMonumentGenerator);
         }
 
-        if (this.settings.useWaterLakes) {
+        if (this.settings.useRavines) { // useWaterLakes
             Lake lake = Lake.builder()
-                    .chance(1d / this.settings.waterLakeChance)
+                    .chance(1d / this.settings.fld_000936_C) // waterLakeChance
                     .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithRandomAddition(0, 256))
                     .build();
@@ -160,9 +160,9 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
             generator.getPopulators().add(filtered);
         }
 
-        if (this.settings.useLavaLakes) {
+        if (this.settings.fld_000937_D) { // useLavaLakes
             Lake lake = Lake.builder()
-                    .chance(1d / this.settings.waterLakeChance)
+                    .chance(1d / this.settings.fld_000938_E) // lavaLakeChance
                     .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithVariance(0,
                             VariableAmount.baseWithRandomAddition(8, VariableAmount.baseWithOptionalAddition(55, 193, 0.1))))

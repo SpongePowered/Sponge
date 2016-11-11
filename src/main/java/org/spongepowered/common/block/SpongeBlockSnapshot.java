@@ -35,6 +35,7 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -535,7 +536,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             return Optional.empty();
         }
         final String tileId = this.compound.getString(NbtDataUtil.BLOCK_ENTITY_ID);
-        final Class<? extends TileEntity> tileClass = TileEntity.nameToClassMap.get(tileId);
+        final Class<? extends TileEntity> tileClass = TileEntity.fld_000806_f.getObject(new ResourceLocation(tileId));
         if (tileClass == null) {
             return Optional.empty();
         }

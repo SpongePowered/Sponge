@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import net.minecraft.tileentity.BannerPattern;
 import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BannerPatternShapes;
@@ -57,18 +58,18 @@ public final class BannerPatternShapeRegistryModule implements CatalogRegistryMo
 
     @Override
     public void registerDefaults() {
-        for (TileEntityBanner.EnumBannerPattern pattern : TileEntityBanner.EnumBannerPattern.values()) {
+        for (BannerPattern pattern : BannerPattern.values()) {
             this.bannerPatternShapeMappings.put(pattern.name().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
-            this.bannerPatternShapeMappings.put(pattern.getPatternID().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
+            this.bannerPatternShapeMappings.put(pattern.mth_000801_b().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern); // getPatternID
         }
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
-        for (TileEntityBanner.EnumBannerPattern pattern : TileEntityBanner.EnumBannerPattern.values()) {
+        for (BannerPattern pattern : BannerPattern.values()) {
             if (!this.bannerPatternShapeMappings.containsKey(pattern.name())) {
                 this.bannerPatternShapeMappings.put(pattern.name().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
-                this.bannerPatternShapeMappings.put(pattern.getPatternID().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
+                this.bannerPatternShapeMappings.put(pattern.mth_000801_b().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern); // getPatternID
             }
         }
     }

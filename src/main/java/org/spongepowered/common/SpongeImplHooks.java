@@ -92,7 +92,7 @@ public final class SpongeImplHooks {
     }
 
     public static int getBlockLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return state.getLightOpacity();
+        return state.mth_000887_c(); // getLightOpacity
     }
 
     public static boolean shouldRefresh(TileEntity tile, net.minecraft.world.World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
@@ -185,15 +185,15 @@ public final class SpongeImplHooks {
     }
 
     public static int getChunkPosLight(IBlockState blockState, net.minecraft.world.World worldObj, BlockPos blockpos$mutableblockpos) {
-        return blockState.getLightValue();
+        return blockState.mth_000888_d(); // getLightValue
     }
 
     public static int getChunkBlockLightOpacity(IBlockState blockState, net.minecraft.world.World worldObj, BlockPos pos) {
-        return blockState.getLightOpacity();
+        return blockState.mth_000887_c(); // getLightOpacity
     }
 
     public static int getChunkBlockLightOpacity(IBlockState state, net.minecraft.world.World worldObj, int x, int y, int z) {
-        return state.getLightOpacity();
+        return state.mth_000887_c(); // getLightOpacity
     }
 
     public static BlockPos getRandomizedSpawnPoint(WorldServer worldServer) {

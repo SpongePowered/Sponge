@@ -99,7 +99,7 @@ public class SkullUtils {
 
     public static Optional<GameProfile> getProfile(ItemStack skull) {
         if (isValidItemStack(skull) && getSkullType(skull).equals(SkullTypes.PLAYER)) {
-            final NBTTagCompound nbt = skull.getSubCompound(NbtDataUtil.ITEM_SKULL_OWNER, false);
+            final NBTTagCompound nbt = skull.mth_000514_d(NbtDataUtil.ITEM_SKULL_OWNER); // The new nullable getSubCompound
             final com.mojang.authlib.GameProfile mcProfile = nbt == null ? null : NBTUtil.readGameProfileFromNBT(nbt);
             return Optional.ofNullable((GameProfile) mcProfile);
         }

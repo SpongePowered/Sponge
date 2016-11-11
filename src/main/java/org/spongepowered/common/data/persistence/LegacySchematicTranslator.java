@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.block.tileentity.TileEntityType;
@@ -135,7 +136,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 int y = tile.getInt(DataQueries.Y_POS).get();
                 int z = tile.getInt(DataQueries.Z_POS).get();
                 TileEntityType type = TileEntityTypeRegistryModule.getInstance()
-                        .getForClass(TileEntity.nameToClassMap.get(tile.getString(DataQuery.of("id")).get()));
+                        .getForClass(TileEntity.fld_000806_f.getObject(new ResourceLocation(tile.getString(DataQuery.of("id")).get())));
                 TileEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
                         .state(buffer.getBlock(x - offsetX, y - offsetY, z - offsetZ))
                         .tileData(tile)

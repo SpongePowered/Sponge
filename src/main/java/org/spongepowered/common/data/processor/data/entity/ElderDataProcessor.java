@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import net.minecraft.entity.monster.EntityElderGuardian;
 import net.minecraft.entity.monster.EntityGuardian;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -53,13 +54,12 @@ public class ElderDataProcessor extends AbstractEntitySingleDataProcessor<Entity
 
     @Override
     protected boolean set(EntityGuardian entity, Boolean value) {
-        entity.setElder(value);
-        return true;
+        throw new UnsupportedOperationException("See EntityTypes.ELDER_GUARDIAN");
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityGuardian entity) {
-        return Optional.of(entity.isElder());
+        return Optional.of(entity instanceof EntityElderGuardian);
     }
 
     @Override
