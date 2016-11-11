@@ -44,7 +44,7 @@ import java.util.Random;
 // added as the only thing needing to be done is a simple default implementation
 // with an empty MerchantRecipeList and diff the list with an empty one and
 // provide the resulting diff'ed MerchantRecipe (TradeOffer) as the result.
-@Mixin(EntityVillager.ListEnchantedBookForEmeralds.class)
+@Mixin(EntityVillager.Unknown8b.class)
 public class MixinEntityVillagerListEnchantedBookForEmeralds implements TradeOfferGenerator {
 
     @Override

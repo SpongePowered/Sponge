@@ -377,7 +377,7 @@ public final class TrackingUtil {
         }
 
 
-        if (newState.getLightOpacity() != currentState.getLightOpacity() || newState.getLightValue() != currentState.getLightValue()) {
+        if (newState.mth_000887_c() != currentState.mth_000887_c() || newState.mth_000888_d() != currentState.mth_000888_d()) {
             minecraftWorld.theProfiler.startSection("checkLight");
             minecraftWorld.checkLight(pos);
             minecraftWorld.theProfiler.endSection();

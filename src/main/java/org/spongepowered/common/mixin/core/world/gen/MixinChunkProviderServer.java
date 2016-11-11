@@ -129,7 +129,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     /**
      * @author blood - October 25th, 2016
      * @reason Removes usage of droppedChunksSet in favor of unloaded flag.
-     * 
+     *
      * @param chunkIn The chunk to queue
      */
     @Overwrite
@@ -218,7 +218,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             }
         }
 
-        
+
         return false;
     }
 
@@ -247,7 +247,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
      * @reason Refactors entire method to not use the droppedChunksSet by
      * simply looping through all loaded chunks and determining whether it
      * can unload or not.
-     * 
+     *
      * @return true if unload queue was processed
      */
     @Overwrite
@@ -279,7 +279,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             ((IMixinWorldServer) this.worldObj).getTimingsHandler().doChunkUnload.stopTiming();
         }
 
-        this.chunkLoader.chunkTick();
+        this.chunkLoader.mth_000920_a();
         return false;
     }
 

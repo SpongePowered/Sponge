@@ -49,7 +49,7 @@ public abstract class MixinWorldServer_Lighting_Inline_Valid_BlockPos extends Mi
     @Override
     public int getLight(BlockPos pos, boolean checkNeighbors) {
         if (((IMixinBlockPos) pos).isValidXZPosition()) { // Sponge - Replace with inlined method
-            if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness()) {
+            if (checkNeighbors && this.getBlockState(pos).mth_000889_f()) {
                 int i1 = this.getLight(pos.up(), false);
                 int i = this.getLight(pos.east(), false);
                 int j = this.getLight(pos.west(), false);

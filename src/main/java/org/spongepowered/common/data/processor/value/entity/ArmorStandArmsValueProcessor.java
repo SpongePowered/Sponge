@@ -49,13 +49,13 @@ public class ArmorStandArmsValueProcessor extends AbstractSpongeValueProcessor<E
 
     @Override
     protected boolean set(EntityArmorStand container, Boolean value) {
-        container.setShowArms(value);
+        container.mth_001797_n(value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityArmorStand container) {
-        return Optional.of(container.getShowArms());
+        return Optional.of(container.mth_001798_r());
     }
 
     @Override

@@ -49,7 +49,7 @@ public class ArmorStandSmallValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected boolean set(EntityArmorStand container, Boolean value) {
-        container.setSmall(value);
+        container.mth_001796_m(value);
         return true;
     }
 

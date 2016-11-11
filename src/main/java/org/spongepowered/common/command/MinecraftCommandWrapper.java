@@ -116,7 +116,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
             ((IMixinCommandHandler) handler).setExpandedSelector(true);
 
             for (Entity entity : list) {
-                splitArgs[usernameIndex] = entity.getUniqueID().toString();
+                splitArgs[usernameIndex] = entity.getCachedUniqueIdString();
 
                 if (tryExecute(handler, mcSender, splitArgs, arguments)) {
                     ++successCount;
@@ -135,6 +135,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
                 .affectedEntities(affectedEntities)
                 .successCount(successCount)
                 .build();
+
     }
 
     private boolean tryExecute(CommandHandler handler, ICommandSender mcSender, String[] splitArgs, String arguments) {

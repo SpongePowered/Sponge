@@ -73,13 +73,13 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
     public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand, ItemStack stack) {
         int random = rand.nextInt(bound);
         if (random == 0) {
-            stack.stackSize++;
+            stack.mth_000528_f(1);
             if (!SpongeImpl
                     .postEvent(SpongeEventFactory.createTameEntityEvent(Cause.of(NamedCause.source(player),
                             NamedCause.of(TameEntityEvent.USED_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot())),
                             this))) {
 
-                stack.stackSize--;
+                stack.mth_000529_g(1);
                 return random;
             }
 

@@ -490,8 +490,9 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         double d2 = target.posZ - this.posZ;
         double d3 = (double)MathHelper.sqrt_double(d0 * d0 + d2 * d2);
         entitytippedarrow.setThrowableHeading(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, (float)(14 - this.worldObj.getDifficulty().getDifficultyId() * 4));
-        int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.POWER, this);
-        int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
+        // These names are wrong
+        int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
+        int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this);
         entitytippedarrow.setDamage((double)(p_82196_2_ * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.worldObj.getDifficulty().getDifficultyId() * 0.11F));
 
         if (i > 0) {
@@ -508,7 +509,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
             entitytippedarrow.setPotionEffect(itemstack);
         }
 
-        this.playSound(SoundEvents.ENTITY_ARROW_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
+        this.playSound(SoundEvents.fld_001161_w, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
         this.worldObj.spawnEntityInWorld(entitytippedarrow);
     }
 }

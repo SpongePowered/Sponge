@@ -576,11 +576,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             Optional<ItemStackSnapshot> cursorOpt = causeTracker.getCurrentContext().firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class);
             if (cursorOpt.isPresent()) {
                 ItemStackSnapshot cursor = cursorOpt.get();
-                if (cursor == ItemStackSnapshot.NONE) {
-                    this.playerEntity.inventory.setItemStack(null);
-                } else {
-                    this.playerEntity.inventory.setItemStack((ItemStack) cursor.createStack());
-                }
+                this.playerEntity.inventory.mth_000416_e((ItemStack) cursor.createStack());
             }
             mixinContainer.getCapturedTransactions().clear();
             mixinContainer.setCaptureInventory(false);
@@ -617,7 +613,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         this.playerEntity.markPlayerActive();
 
         if (entity != null) {
-            boolean flag = this.playerEntity.canEntityBeSeen(entity);
+            boolean flag = this.playerEntity.mth_001505_D((entity));
             double d0 = 36.0D; // 6 blocks
 
             if (!flag) {
@@ -639,8 +635,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
                     if (!SpongeCommonEventFactory.callInteractEntityEventSecondary(this.playerEntity, entity, packetIn.getHand(), packetIn.getHitVec()).isCancelled()) {
                         // If INTERACT_AT returns a false result, we assume this packet was meant for interactWith
-                        if (entity.applyPlayerInteraction(this.playerEntity, packetIn.getHitVec(), itemstack, hand) != EnumActionResult.SUCCESS) {
-                            this.playerEntity.interact(entity, itemstack, hand);
+                        if (entity.mth_001465_a(this.playerEntity, packetIn.getHitVec(), hand) != EnumActionResult.SUCCESS) {
+                            this.playerEntity.mth_000427_a(entity, hand);
                         }
                     }
                 } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
@@ -664,7 +660,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         return;
                     }
 
-                    this.playerEntity.attackTargetEntityWithCurrentItem(entity);
+                    this.playerEntity.mth_000428_f(entity);
                 }
             }
         }

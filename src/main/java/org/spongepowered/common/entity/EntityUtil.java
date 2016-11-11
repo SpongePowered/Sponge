@@ -28,8 +28,6 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.Entity;
@@ -39,7 +37,6 @@ import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityPainting;
-import net.minecraft.entity.monster.ZombieType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -70,11 +67,9 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.data.type.Professions;
-import org.spongepowered.api.data.type.ZombieTypes;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -99,11 +94,11 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
-import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -131,15 +126,6 @@ public final class EntityUtil {
     public static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
     public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
     public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
-
-    private static final BiMap<Profession, ZombieType> ZOMBIE_TYPE_MAP =
-            ImmutableBiMap.<Profession, ZombieType>builder()
-                    .put(Professions.BLACKSMITH, ZombieType.VILLAGER_SMITH)
-                    .put(Professions.BUTCHER, ZombieType.VILLAGER_BUTCHER)
-                    .put(Professions.FARMER, ZombieType.VILLAGER_FARMER)
-                    .put(Professions.LIBRARIAN, ZombieType.VILLAGER_LIBRARIAN)
-                    .put(Professions.PRIEST, ZombieType.VILLAGER_PRIEST)
-                    .build();
 
     private EntityUtil() {
     }
@@ -257,14 +243,10 @@ public final class EntityUtil {
         return entityPlayerMP;
     }
 
-    public static boolean isNative(org.spongepowered.api.data.type.ZombieType type, @Nullable Profession profession) {
+    /*public static boolean isNative(org.spongepowered.api.data.type.ZombieType type, @Nullable Profession profession) {
         // No profession means native, husk means native, otherwise check the map (forge uses NORMAL + Profession for its types)
         return profession == null || type == ZombieTypes.HUSK || ZOMBIE_TYPE_MAP.containsKey(profession);
-    }
-
-    public static Optional<Profession> profFromNative(ZombieType type) {
-        return Optional.ofNullable(ZOMBIE_TYPE_MAP.inverse().get(type));
-    }
+    }*/
 
     public static boolean isEntityDead(org.spongepowered.api.entity.Entity entity) {
         return isEntityDead((net.minecraft.entity.Entity) entity);
@@ -753,7 +735,7 @@ public final class EntityUtil {
             entity.setWorld(toWorld);
             entityPlayerMP.connection.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
                     entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
-            entityPlayerMP.setSneaking(false);
+            entityPlayerMP.mth_001456_e(false);
             mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
             toWorld.getPlayerChunkMap().addPlayer(entityPlayerMP);
             toWorld.spawnEntityInWorld(entityPlayerMP);
@@ -839,7 +821,7 @@ public final class EntityUtil {
         final double posX = entity.posX;
         final double posY = entity.posY + offsetY;
         final double posZ = entity.posZ;
-        if (itemStack.stackSize == 0 || itemStack.getItem() == null) {
+        if (itemStack.mth_000526_E() == 0 || itemStack.getItem() == null) {
             return null;
         }
         // FIRST we want to throw the DropItemEvent.PRE
@@ -867,7 +849,7 @@ public final class EntityUtil {
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
 
-        if (item.stackSize != 0 && item.getItem() != null) {
+        if (item.mth_000526_E() != 0 && item.getItem() != null) {
             if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
@@ -1006,7 +988,7 @@ public final class EntityUtil {
 
         if (traceItem) {
             if (itemstack != null) {
-                player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.stackSize);
+                player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.mth_000526_E());
             }
 
             player.addStat(StatList.DROP);

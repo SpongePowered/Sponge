@@ -30,6 +30,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableSpawnableData;
@@ -57,7 +58,7 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
     @SuppressWarnings("unchecked")
     @Override
     public boolean set(ItemStack itemStack, EntityType value) {
-        final String name = EntityList.CLASS_TO_NAME.get((Class<? extends Entity>) value.getEntityClass());
+        final String name = EntityList.mth_001476_a((Class<? extends Entity>) value.getEntityClass()).toString();
         if (EntityList.ENTITY_EGGS.containsKey(name)) {
             final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(itemStack);
             final NBTTagCompound subCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.SPAWNABLE_ENTITY_TAG);
@@ -69,9 +70,9 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
 
     @Override
     public Optional<EntityType> getVal(ItemStack itemStack) {
-        final String name = ItemMonsterPlacer.getEntityIdFromItem(itemStack);
+        final ResourceLocation name = ItemMonsterPlacer.mth_000608_h(itemStack);
         if (name != null) {
-            final Class<? extends Entity> entity = EntityList.NAME_TO_CLASS.get(name);
+            final Class<? extends Entity> entity = EntityList.fld_001472_b.getObject(name);
             return Optional.ofNullable(EntityTypeRegistryModule.getInstance().getForClass(entity));
         }
         return Optional.empty();
