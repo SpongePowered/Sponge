@@ -76,7 +76,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
             final String titleString = mainCompound.getString(NbtDataUtil.ITEM_BOOK_TITLE);
             return Optional.of(SpongeTexts.fromLegacy(titleString));
         }
-        final NBTTagCompound mainCompound = container.getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
+        final NBTTagCompound mainCompound = container.mth_000514_d(NbtDataUtil.ITEM_DISPLAY);
         if (mainCompound != null && mainCompound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, NbtDataUtil.TAG_STRING)) {
             final String displayString = mainCompound.getString(NbtDataUtil.ITEM_DISPLAY_NAME);
             return Optional.of(SpongeTexts.fromLegacy(displayString));

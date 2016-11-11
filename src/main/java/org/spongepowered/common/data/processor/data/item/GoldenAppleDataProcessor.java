@@ -47,7 +47,7 @@ public class GoldenAppleDataProcessor
         extends AbstractItemSingleDataProcessor<GoldenApple, Value<GoldenApple>, GoldenAppleData, ImmutableGoldenAppleData> {
 
     public GoldenAppleDataProcessor() {
-        super(input -> input.getItem().equals(Items.GOLDEN_APPLE), Keys.GOLDEN_APPLE_TYPE);
+        super(input -> input.getItem().equals(Items.fld_000533_ar), Keys.GOLDEN_APPLE_TYPE);
     }
 
     @Override

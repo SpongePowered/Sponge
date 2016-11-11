@@ -88,25 +88,25 @@ public class MixinSpongeImplHooks_Item_Pre_Merge {
                 continue;
             }
             // now to actually merge the itemstacks
-            final int existingStackSize = existing.stackSize;
-            final int addingStackSize = itemStack.stackSize;
+            final int existingStackSize = existing.mth_000526_E();
+            final int addingStackSize = itemStack.mth_000526_E();
             final int existingMaxStackSize = existing.getMaxStackSize();
             final int proposedStackSize = existingStackSize + addingStackSize;
             if (existingMaxStackSize < proposedStackSize) {
-                existing.stackSize = existingMaxStackSize;
-                itemStack.stackSize = proposedStackSize - existingMaxStackSize;
+                existing.mth_000527_e(existingMaxStackSize);
+                itemStack.mth_000527_e(proposedStackSize - existingMaxStackSize);
                 addToList = true;
                 // Basically, if we are overflowing the current existing stack, we can delegate to the
                 // next "equals" item stack to potentially merge into that stack as well
             } else {
-                existing.stackSize = proposedStackSize;
-                itemStack.stackSize = 0;
+                existing.mth_000527_e(proposedStackSize);
+                itemStack.mth_000527_e(0);
                 addToList = false;
                 break;
             }
         }
         if (addToList) {
-            if (itemStack.getItem() != null || itemStack.stackSize > 0) {
+            if (itemStack.getItem() != null || itemStack.mth_000526_E() > 0) {
                 itemStacks.add(data);
             }
         }

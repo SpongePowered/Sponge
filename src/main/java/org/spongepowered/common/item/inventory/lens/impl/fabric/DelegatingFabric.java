@@ -35,13 +35,13 @@ import java.util.Collection;
 import java.util.Collections;
 
 public class DelegatingFabric extends MinecraftFabric {
-    
+
     private final Slot slot;
 
     public DelegatingFabric(Slot inventory) {
         this.slot = inventory;
     }
-    
+
     @Override
     public Collection<IInventory> allInventories() {
         return Collections.emptyList();
@@ -52,7 +52,7 @@ public class DelegatingFabric extends MinecraftFabric {
         if (this.slot.inventory != null) {
             return this.slot.inventory;
         }
-        
+
         throw new UnsupportedOperationException("Unable to access slot at " + index + " for delegating fabric of " + this.slot.getClass());
     }
 
@@ -78,18 +78,17 @@ public class DelegatingFabric extends MinecraftFabric {
 
     @Override
     public int getSize() {
-        ItemStack stack = this.slot.getStack();
-        return stack == null ? 0 : stack.stackSize;
+        return this.slot.getStack().mth_000526_E();
     }
 
     @Override
     public void clear() {
-        this.slot.putStack(null);
+        this.slot.putStack(ItemStack.fld_000503_a);
     }
-    
+
     @Override
     public void markDirty() {
         this.slot.onSlotChanged();
     }
-    
+
 }

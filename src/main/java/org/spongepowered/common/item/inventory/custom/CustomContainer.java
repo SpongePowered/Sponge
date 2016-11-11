@@ -85,9 +85,9 @@ public class CustomContainer extends Container {
                 return null;
             }
 
-            if (itemstack1.stackSize == 0)
+            if (itemstack1.mth_000526_E() == 0)
             {
-                slot.putStack((ItemStack)null);
+                slot.putStack(ItemStack.fld_000503_a);
             }
             else
             {

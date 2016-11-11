@@ -123,7 +123,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
             } else if (this.ticksCatchable > 0) {
                 LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.worldObj);
-                lootcontext$builder.withLuck((float) EnchantmentHelper.getLuckOfSeaModifier(this.angler) + this.angler.getLuck());
+                lootcontext$builder.withLuck((float) EnchantmentHelper.mth_000621_f(this.angler) + this.angler.getLuck());
 
                 // Sponge start
                 // TODO 1.9: Figure out how we want experience to work here

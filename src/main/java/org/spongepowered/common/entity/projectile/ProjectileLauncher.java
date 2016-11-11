@@ -322,7 +322,7 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getExtent(), egg, createCause(source));
             }
         });
-        registerProjectileLogic(SmallFireball.class, new SimpleItemLaunchLogic<SmallFireball>(SmallFireball.class, Items.FIRE_CHARGE) {
+        registerProjectileLogic(SmallFireball.class, new SimpleItemLaunchLogic<SmallFireball>(SmallFireball.class, Items.fld_000548_bW) {
 
             @Override
             protected Optional<SmallFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
@@ -333,7 +333,7 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getExtent(), fireball, createCause(source));
             }
         });
-        registerProjectileLogic(Firework.class, new SimpleItemLaunchLogic<Firework>(Firework.class, Items.FIREWORKS) {
+        registerProjectileLogic(Firework.class, new SimpleItemLaunchLogic<Firework>(Firework.class, Items.fld_000552_cm) {
 
             @Override
             protected Optional<Firework> createProjectile(EntityLivingBase source, Location<?> loc) {
@@ -349,7 +349,7 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getExtent(), snowball, createCause(source));
             }
         });
-        registerProjectileLogic(ThrownExpBottle.class, new SimpleItemLaunchLogic<ThrownExpBottle>(ThrownExpBottle.class, Items.EXPERIENCE_BOTTLE) {
+        registerProjectileLogic(ThrownExpBottle.class, new SimpleItemLaunchLogic<ThrownExpBottle>(ThrownExpBottle.class, Items.fld_000547_bV) {
 
             @Override
             protected Optional<ThrownExpBottle> createProjectile(EntityLivingBase source, Location<?> loc) {

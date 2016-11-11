@@ -188,15 +188,15 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     @Override
     public int getFirstAvailableSlot(ItemStack itemstack) {
         for (int i = 0; i < this.mainInventory.length; ++i) {
-            int stackSize = itemstack.stackSize;
+            int stackSize = itemstack.mth_000526_E();
 
             if (this.mainInventory[i] == null) {
                 // empty slot
                 return i;
             }
 
-            if (this.mainInventory[i] != null && this.mainInventory[i].getItem() == itemstack.getItem() && this.mainInventory[i].isStackable() && this.mainInventory[i].stackSize < this.mainInventory[i].getMaxStackSize() && this.mainInventory[i].stackSize < this.getInventoryStackLimit() && (!this.mainInventory[i].getHasSubtypes() || this.mainInventory[i].getItemDamage() == itemstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(this.mainInventory[i], itemstack)) {
-                stackSize -= (this.mainInventory[i].getMaxStackSize() < this.getInventoryStackLimit() ? this.mainInventory[i].getMaxStackSize() : this.getInventoryStackLimit()) - this.mainInventory[i].stackSize;
+            if (this.mainInventory[i] != null && this.mainInventory[i].getItem() == itemstack.getItem() && this.mainInventory[i].isStackable() && this.mainInventory[i].mth_000526_E() < this.mainInventory[i].getMaxStackSize() && this.mainInventory[i].mth_000526_E() < this.getInventoryStackLimit() && (!this.mainInventory[i].mth_000507_g() || this.mainInventory[i].getItemDamage() == itemstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(this.mainInventory[i], itemstack)) {
+                stackSize -= (this.mainInventory[i].getMaxStackSize() < this.getInventoryStackLimit() ? this.mainInventory[i].getMaxStackSize() : this.getInventoryStackLimit()) - this.mainInventory[i].mth_000526_E();
             }
 
             if (stackSize <= 0) {
