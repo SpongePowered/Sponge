@@ -1161,7 +1161,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
-        if (!this.isValid(pos)) {
+        if (!this.mth_000637_a(pos)) {
             return false;
         } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) { // isRemote is always false since this is WorldServer
             return false;
@@ -1173,7 +1173,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag) {
-        if (!this.isValid(pos)) {
+        if (!this.mth_000637_a(pos)) {
             return false;
         } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) { // isRemote is always false since this is WorldServer
             return false;
@@ -1223,7 +1223,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
-        if (!isValid(pos)) {
+        if (!mth_000637_a(pos)) {
             return;
         }
 
@@ -1252,7 +1252,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType) {
-        if (!isValid(pos)) {
+        if (!mth_000637_a(pos)) {
             return;
         }
 

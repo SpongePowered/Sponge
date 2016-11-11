@@ -230,7 +230,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract boolean isOnSameTeam(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract double getDistanceSqToEntity(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
-    @Shadow public abstract boolean hasNoGravity();
+    @Shadow public abstract boolean mth_001446_ae();
     @Shadow public abstract void setNoGravity(boolean noGravity);
     @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
@@ -368,7 +368,7 @@ public abstract class MixinEntity implements IMixinEntity {
         if (this.fire > 0) {
             manipulators.add(get(IgniteableData.class).get());
         }
-        manipulators.add(new SpongeGravityData(!this.hasNoGravity()));
+        manipulators.add(new SpongeGravityData(!this.mth_001446_ae()));
     }
 
     @Override

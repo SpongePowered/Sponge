@@ -1,5 +1,5 @@
 {
-    "required": true,
+    "required": false,
     "minVersion": "0.5.1",
     "package": "org.spongepowered.common.mixin.core",
     "refmap": "mixins.common.refmap.json",
@@ -175,7 +175,6 @@
         "data.types.MixinEnumLogAxis",
         "data.types.MixinFishType",
         "data.types.MixinGameType",
-        "data.types.MixinSkeletonType",
         "entity.MixinArmorEquipable",
         "entity.MixinEntity",
         "entity.MixinEntityAreaEffectCloud",
