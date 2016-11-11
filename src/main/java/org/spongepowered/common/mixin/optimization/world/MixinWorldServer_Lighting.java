@@ -100,7 +100,7 @@ public abstract class MixinWorldServer_Lighting extends MixinWorld_Lighting {
     @Override
     public int getLight(BlockPos pos, boolean checkNeighbors) {
         if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000) {
-            if (checkNeighbors && this.getBlockState(pos).mth_000889_f()()) {
+            if (checkNeighbors && this.getBlockState(pos).mth_000889_f()) {
                 int i1 = this.getLight(pos.up(), false);
                 int i = this.getLight(pos.east(), false);
                 int j = this.getLight(pos.west(), false);

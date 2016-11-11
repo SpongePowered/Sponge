@@ -42,13 +42,13 @@ import java.util.Random;
 // added as the only thing needing to be done is a simple default implementation
 // with an empty MerchantRecipeList and diff the list with an empty one and
 // provide the resulting diff'ed MerchantRecipe (TradeOffer) as the result.
-@Mixin(EntityVillager.ItemAndEmeraldToItem.class)
+@Mixin(EntityVillager.Unknown10d.class)
 public class MixinEntityVillagerItemAndEmeraldToItem implements TradeOfferGenerator {
 
     @Shadow public ItemStack buyingItemStack;
-    @Shadow public EntityVillager.PriceInfo buyingPriceInfo;
+    @Shadow public EntityVillager.Unknown6g buyingPriceInfo;
     @Shadow public ItemStack sellingItemstack;
-    @Shadow public EntityVillager.PriceInfo sellingPriceInfo;
+    @Shadow public EntityVillager.Unknown6g sellingPriceInfo;
 
     @Override
     public TradeOffer apply(Random random) {
@@ -56,13 +56,13 @@ public class MixinEntityVillagerItemAndEmeraldToItem implements TradeOfferGenera
         int buyingCount = 1;
 
         if (this.buyingItemStack != null) {
-            buyingCount = this.buyingPriceInfo.getPrice(random);
+            buyingCount = this.buyingPriceInfo.mth_000110_a(random);
         }
 
         int sellingCount = 1;
 
         if (this.sellingPriceInfo != null) {
-            sellingCount = this.sellingPriceInfo.getPrice(random);
+            sellingCount = this.sellingPriceInfo.mth_000110_a(random);
         }
 
         final ItemStack itemStackBuying = new ItemStack(this.buyingItemStack.getItem(), buyingCount, this.buyingItemStack.getMetadata());

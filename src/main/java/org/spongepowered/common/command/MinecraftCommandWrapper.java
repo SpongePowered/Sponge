@@ -99,7 +99,12 @@ public class MinecraftCommandWrapper implements CommandCallable {
         CommandHandler handler = (CommandHandler) SpongeImpl.getServer().getCommandManager();
         final ICommandSender mcSender = WrapperICommandSender.of(source);
         final String[] splitArgs = splitArgs(arguments);
-        int usernameIndex = handler.getUsernameIndex(this.command, splitArgs);
+        int usernameIndex = 0;
+        try {
+            usernameIndex = handler.getUsernameIndex(this.command, splitArgs);
+        } catch (net.minecraft.command.CommandException e) {
+            Throwables.propagate(e);
+        }
         int successCount = 0;
 
         if (!throwEvent(mcSender, splitArgs)) {
@@ -109,7 +114,12 @@ public class MinecraftCommandWrapper implements CommandCallable {
         int affectedEntities = 1;
         if (usernameIndex > -1) {
             @SuppressWarnings("unchecked")
-            List<Entity> list = EntitySelector.matchEntities(mcSender, splitArgs[usernameIndex], Entity.class);
+            List<Entity> list = null;
+            try {
+                list = EntitySelector.matchEntities(mcSender, splitArgs[usernameIndex], Entity.class);
+            } catch (net.minecraft.command.CommandException e) {
+                Throwables.propagate(e);
+            }
             String previousNameVal = splitArgs[usernameIndex];
             affectedEntities = list.size();
 
