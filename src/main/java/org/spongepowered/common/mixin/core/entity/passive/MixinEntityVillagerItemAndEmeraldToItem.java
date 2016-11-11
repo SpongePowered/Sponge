@@ -45,29 +45,29 @@ import java.util.Random;
 @Mixin(EntityVillager.Unknown10d.class)
 public class MixinEntityVillagerItemAndEmeraldToItem implements TradeOfferGenerator {
 
-    @Shadow public ItemStack buyingItemStack;
-    @Shadow public EntityVillager.Unknown6g buyingPriceInfo;
-    @Shadow public ItemStack sellingItemstack;
-    @Shadow public EntityVillager.Unknown6g sellingPriceInfo;
+    @Shadow public ItemStack fld_000118_a; // buyingItemStack
+    @Shadow public EntityVillager.Unknown6g fld_000119_b; // buyingPriceInfo
+    @Shadow public ItemStack fld_000120_c; // sellingItemstack
+    @Shadow public EntityVillager.Unknown6g fld_000121_d; // sellingPriceInfo
 
     @Override
     public TradeOffer apply(Random random) {
         checkNotNull(random, "Random cannot be null!");
         int buyingCount = 1;
 
-        if (this.buyingItemStack != null) {
-            buyingCount = this.buyingPriceInfo.mth_000110_a(random);
+        if (this.fld_000118_a != null) {
+            buyingCount = this.fld_000119_b.mth_000110_a(random);
         }
 
         int sellingCount = 1;
 
-        if (this.sellingPriceInfo != null) {
-            sellingCount = this.sellingPriceInfo.mth_000110_a(random);
+        if (this.fld_000121_d != null) {
+            sellingCount = this.fld_000121_d.mth_000110_a(random);
         }
 
-        final ItemStack itemStackBuying = new ItemStack(this.buyingItemStack.getItem(), buyingCount, this.buyingItemStack.getMetadata());
+        final ItemStack itemStackBuying = new ItemStack(this.fld_000118_a.getItem(), buyingCount, this.fld_000118_a.getMetadata());
         final ItemStack emeraldStack = new ItemStack(Items.EMERALD);
-        final ItemStack itemStackSelling = new ItemStack(this.sellingItemstack.getItem(), sellingCount, this.sellingItemstack.getMetadata());
+        final ItemStack itemStackSelling = new ItemStack(this.fld_000120_c.getItem(), sellingCount, this.fld_000120_c.getMetadata());
         return (TradeOffer) new MerchantRecipe(itemStackBuying, emeraldStack, itemStackSelling);
     }
 

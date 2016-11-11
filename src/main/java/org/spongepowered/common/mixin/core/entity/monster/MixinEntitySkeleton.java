@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAITasks;
+import net.minecraft.entity.monster.AbstractSkeleton;
 import net.minecraft.entity.monster.EntitySkeleton;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -43,7 +44,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.List;
 
-@Mixin(EntitySkeleton.class)
+@Mixin(AbstractSkeleton.class)
 public abstract class MixinEntitySkeleton extends MixinEntityMob implements Skeleton {
 
     @Override
@@ -52,7 +53,7 @@ public abstract class MixinEntitySkeleton extends MixinEntityMob implements Skel
         manipulators.add(getSkeletonData());
     }
 
-    @Redirect(method = "onInitialSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ai/EntityAITasks;addTask"
+    @Redirect(method = "mth_001827_dh", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ai/EntityAITasks;addTask"
             + "(ILnet/minecraft/entity/ai/EntityAIBase;)V"), require = 2)
     private void onAddTaskForInitialSpawn(EntityAITasks tasks, int molex, EntityAIBase aiBase) {
         if (this.worldObj.isRemote) {

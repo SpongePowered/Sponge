@@ -245,7 +245,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void mth_000641_c(BlockPos pos, Block blockType);
     @Shadow public abstract void mth_000640_a(BlockPos pos, Block blockType, boolean notifySelf);
     @Shadow public abstract void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
-    @Shadow public abstract void scheduleBlockUpdate(BlockPos pos, Block blockIn, int delay, int priority);
+    @Shadow public abstract void updateBlockTick(BlockPos pos, Block blockIn, int delay, int priority); // this is really scheduleUpdate
     @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow protected abstract void updateBlocks();
     @Shadow public abstract GameRules shadow$getGameRules();
@@ -254,11 +254,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean isRainingAt(BlockPos strikePosition);
     @Shadow public abstract DifficultyInstance getDifficultyForLocation(BlockPos pos);
     @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
-    @Shadow public abstract boolean canBlockFreezeNoWater(BlockPos pos);
+    @Shadow public abstract boolean mth_000658_v(BlockPos pos); // canBlockFreezeNoWater
     @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
     @Shadow public abstract boolean canSeeSky(BlockPos pos);
     @Shadow public abstract int getLightFor(EnumSkyBlock type, BlockPos pos);
-    @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(AxisAlignedBB bb);
     @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
 
     // @formatter:on
@@ -734,7 +733,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
         checkNotNull(box, "box");
-        return getCollisionBoxes(VecHelper.toMC(box)).stream()
+        return getCollisionBoxes(null, VecHelper.toMC(box)).stream()
                 .map(VecHelper::toSponge)
                 .collect(Collectors.toSet());
     }
@@ -996,7 +995,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return entities;
     }
 
-    @Redirect(method = "getClosestPlayer", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
+    @Redirect(method = "mth_000664_a", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false)) // getClosestPlayer
     private boolean onGetClosestPlayerCheck(com.google.common.base.Predicate<net.minecraft.entity.Entity> predicate, Object entityPlayer) {
         EntityPlayer player = (EntityPlayer) entityPlayer;
         IMixinEntity mixinEntity = (IMixinEntity) player;

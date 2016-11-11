@@ -45,16 +45,16 @@ import java.util.Random;
 @Mixin(EntityVillager.Unknown4e.class)
 public class MixinEntityVillagerListItemForEmeralds implements TradeOfferGenerator {
 
-    @Shadow public ItemStack itemToBuy;
-    @Shadow public EntityVillager.Unknown6g priceInfo;
+    @Shadow public ItemStack fld_000107_a; // itemToBuy
+    @Shadow public EntityVillager.Unknown6g fld_000108_b; // priceInfo
 
     @Override
     public TradeOffer apply(Random random) {
         checkNotNull(random, "Random cannot be null!");
         int amount = 1;
 
-        if (this.priceInfo != null) {
-            amount = this.priceInfo.mth_000110_a(random);
+        if (this.fld_000108_b != null) {
+            amount = this.fld_000108_b.mth_000110_a(random);
         }
 
         ItemStack itemstack;
@@ -62,10 +62,10 @@ public class MixinEntityVillagerListItemForEmeralds implements TradeOfferGenerat
 
         if (amount < 0) {
             itemstack = new ItemStack(Items.EMERALD, 1, 0);
-            itemstack1 = new ItemStack(this.itemToBuy.getItem(), -amount, this.itemToBuy.getMetadata());
+            itemstack1 = new ItemStack(this.fld_000107_a.getItem(), -amount, this.fld_000107_a.getMetadata());
         } else {
             itemstack = new ItemStack(Items.EMERALD, amount, 0);
-            itemstack1 = new ItemStack(this.itemToBuy.getItem(), 1, this.itemToBuy.getMetadata());
+            itemstack1 = new ItemStack(this.fld_000107_a.getItem(), 1, this.fld_000107_a.getMetadata());
         }
 
         return (TradeOffer) new MerchantRecipe(itemstack, itemstack1);

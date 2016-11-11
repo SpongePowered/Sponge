@@ -33,8 +33,6 @@ import javax.annotation.Nullable;
 
 public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
 
-    void reset();
-
     default boolean usesCustomClient() {
         return false;
     }
@@ -46,8 +44,6 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     MessageChannel getDeathMessageChannel();
 
     void initScoreboard();
-
-    void resetAttributeMap();
 
     IMixinWorldServer getMixinWorld();
 

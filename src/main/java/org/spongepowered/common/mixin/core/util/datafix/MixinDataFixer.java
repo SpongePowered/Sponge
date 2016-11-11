@@ -38,7 +38,7 @@ public abstract class MixinDataFixer {
 
     @ModifyConstant(
             method = "process(Lnet/minecraft/util/datafix/IFixType;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;",
-            constant = @Constant(intValue = 512)
+            constant = @Constant(intValue = 818)
     )
     private int modifyVersion(int versionComingIn) {
         return version;

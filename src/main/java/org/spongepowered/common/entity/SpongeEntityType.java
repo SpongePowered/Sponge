@@ -28,6 +28,7 @@ import com.google.common.base.Objects.ToStringHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
@@ -86,10 +87,14 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         this.entityName = name.toLowerCase(Locale.ENGLISH);
         this.entityClass = clazz;
         this.modId = modId.toLowerCase(Locale.ENGLISH);
-        String translationName = EntityList.mth_001476_a(clazz).getResourcePath();
-        if (translationName == null) {
+        String translationName;
+        ResourceLocation loc = EntityList.mth_001476_a(clazz);
+        if (loc == null) {
             translationName = "generic";
+        } else {
+            translationName = loc.getResourcePath();
         }
+
         this.translation = new SpongeTranslation("entity." + translationName + ".name");
     }
 

@@ -392,7 +392,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         return p_184816_1_.getEntityItem();
     }
 
-    @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY))
+    @Redirect(method = "mth_000422_c", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY)) // collideWithPlayer
     public void onPlayerCollideEntity(net.minecraft.entity.Entity entity, EntityPlayer player) {
         this.collidingEntityUuid = entity.getUniqueID();
         entity.onCollideWithPlayer(player);
@@ -561,7 +561,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                             this.motionX *= 0.6D;
                             this.motionZ *= 0.6D;
-                            this.setSprinting(false);
+                            this.mth_001457_f(false);
                         }
 
                         if (isSweapingAttack) {

@@ -50,9 +50,9 @@ import java.util.Random;
 @Mixin(WorldGenMinable.class)
 public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore {
 
-    @Shadow private IBlockState oreBlock;
-    @Shadow private int numberOfBlocks;
-    @Shadow private Predicate<IBlockState> predicate;
+    @Shadow private IBlockState fld_000958_a; // oreBlock
+    @Shadow private int fld_000959_b;
+    @Shadow private Predicate<IBlockState> fld_000960_c;
 
     private VariableAmount size;
     private VariableAmount count;
@@ -80,19 +80,19 @@ public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore
         BlockPos position = new BlockPos(min.getX() - 8, min.getY(), min.getZ() - 8);
         for (int i = 0; i < n; i++) {
             BlockPos pos = position.add(random.nextInt(size.getX()), this.height.getFlooredAmount(random), random.nextInt(size.getX()));
-            this.numberOfBlocks = this.size.getFlooredAmount(random);
+            this.fld_000959_b = this.size.getFlooredAmount(random);
             generate(world, random, pos);
         }
     }
 
     @Override
     public BlockState getOreBlock() {
-        return (BlockState) this.oreBlock;
+        return (BlockState) this.fld_000958_a;
     }
 
     @Override
     public void setOreBlock(BlockState block) {
-        this.oreBlock = (IBlockState) block;
+        this.fld_000958_a = (IBlockState) block;
     }
 
     @Override
@@ -128,20 +128,20 @@ public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore
     @SuppressWarnings("unchecked")
     @Override
     public java.util.function.Predicate<BlockState> getPlacementCondition() {
-        return (java.util.function.Predicate<BlockState>)(Object)GuavaJavaUtils.asJavaPredicate(this.predicate);
+        return (java.util.function.Predicate<BlockState>)(Object)GuavaJavaUtils.asJavaPredicate(this.fld_000960_c);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void setPlacementCondition(java.util.function.Predicate<BlockState> condition) {
-        this.predicate = (Predicate<IBlockState>)(Object)GuavaJavaUtils.asGuavaPredicate(condition);
+        this.fld_000960_c = (Predicate<IBlockState>)(Object)GuavaJavaUtils.asGuavaPredicate(condition);
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
                 .add("Type", "Ore")
-                .add("OreBlock", this.oreBlock)
+                .add("OreBlock", this.fld_000958_a)
                 .add("Size", this.size)
                 .add("PerChunk", this.count)
                 .add("Height", this.height)

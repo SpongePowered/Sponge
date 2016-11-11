@@ -39,7 +39,7 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 @Mixin(UnknownEntityAIMoveToBlock57uj.class)
 public abstract class MixinEntityAIHarvestFarmland extends EntityAIMoveToBlock {
 
-    @Shadow @Final private EntityVillager theVillager;
+    @Shadow @Final private EntityVillager fld_001557_c; // theVillager
 
     public MixinEntityAIHarvestFarmland(EntityCreature creature, double a, int b) {
         super(creature, a, b);
@@ -47,6 +47,6 @@ public abstract class MixinEntityAIHarvestFarmland extends EntityAIMoveToBlock {
 
     @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.theVillager).canGrief();
+        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.fld_001557_c).canGrief();
     }
 }

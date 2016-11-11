@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.item.ItemMap;
 import net.minecraft.item.ItemMapBase;
+import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSavedData;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,6 +36,12 @@ import org.spongepowered.common.world.WorldManager;
 
 @Mixin(ItemMap.class)
 public class MixinItemMap extends ItemMapBase {
+
+
+    @Redirect(method = "mth_000575_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
+    private static int onCreateMap(World worldIn, String key) {
+        return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
+    }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "loadItemData(Ljava/lang/Class;Ljava/lang/String;)Lnet/minecraft/world/WorldSavedData;"))

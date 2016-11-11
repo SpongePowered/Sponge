@@ -122,7 +122,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public CombatTracker _combatTracker;
     @Shadow public EntityLivingBase entityLivingToAttack;
     @Shadow protected AbstractAttributeMap attributeMap;
-    @Shadow public ItemStack[] armorArray;
     @Shadow protected int entityAge;
     @Shadow protected int recentlyHit;
     @Shadow protected float lastDamage;
@@ -150,13 +149,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract float getRotationYawHead();
     @Shadow public abstract void setRotationYawHead(float rotation);
     @Shadow public abstract Collection getActivePotionEffects();
-    @Shadow @Nullable public abstract EntityLivingBase getLastAttacker();
+    @Shadow @Nullable public abstract EntityLivingBase mth_001493_bM(); // getLastAttacker
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow @Nullable public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow protected abstract void applyEntityAttributes();
     @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
-    @Shadow protected abstract void damageShield(float p_184590_1_);
-    @Shadow public abstract void setActiveHand(EnumHand hand);
+    @Shadow protected abstract void mth_000425_k(float p_184590_1_); // damageShield
+    @Shadow public abstract void mth_001507_c(EnumHand hand); // setActiveHand
     @Shadow @Nullable public abstract ItemStack getHeldItem(EnumHand hand);
     @Shadow public abstract void setHeldItem(EnumHand hand, @Nullable ItemStack stack);
     @Shadow @Nullable public abstract ItemStack getHeldItemMainhand();
@@ -167,13 +166,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract void setAbsorptionAmount(float amount);
     @Shadow public abstract float getAbsorptionAmount();
     @Shadow public abstract CombatTracker getCombatTracker();
-    @Shadow public abstract void setSprinting(boolean sprinting);
+    @Shadow public abstract void mth_001457_f(boolean sprinting); // setSprinting
     @Shadow public abstract boolean isOnLadder();
     @Shadow @Nullable public abstract EntityLivingBase getAttackingEntity();
     @Shadow protected abstract void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source);
     @Shadow protected abstract boolean canDropLoot();
     @Shadow public abstract Random getRNG();
-    @Shadow private boolean canBlockDamageSource(DamageSource p_184583_1_) {
+    @Shadow private boolean mth_001499_e(DamageSource p_184583_1_) { // canBlockDamageSource
         return false; // Shadowed
     }
 
@@ -388,8 +387,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                 boolean flag = false;
 
-                if (amount > 0.0F && this.canBlockDamageSource(source)) {
-                    this.damageShield(amount);
+                if (amount > 0.0F && this.mth_001499_e(source)) {
+                    this.mth_000425_k(amount);
 
                     if (source.isProjectile()) {
                         amount = 0.0F;
@@ -845,12 +844,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Override
     public OptionalValue<Living> lastAttacker() {
-        return new SpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable((Living) this.getLastAttacker()));
+        return new SpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable((Living) this.mth_001493_bM()));
     }
 
     @Override
     public OptionalValue<Double> lastDamage() {
-        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.getLastAttacker() == null ? null : (double) this.lastDamage));
+        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.mth_001493_bM() == null ? null : (double) this.lastDamage));
     }
 
     @Override

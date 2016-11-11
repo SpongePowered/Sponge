@@ -37,6 +37,7 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -185,7 +186,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
     @Shadow public abstract void displayGUIChest(IInventory chestInventory);
     @Shadow public abstract void displayGui(IInteractionObject guiOwner);
-    @Shadow public abstract void openGuiHorseInventory(EntityHorse horse, IInventory horseInventory);
+    @Shadow public abstract void mth_000426_a(AbstractHorse horse, IInventory horseInventory);
 
     // Inventory
     @Shadow public abstract void addChatMessage(ITextComponent component);
@@ -465,45 +466,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void reset() {
-        float experience = 0;
-        boolean keepInventory = this.worldObj.getGameRules().getBoolean("keepInventory");
-
-        if (this.keepsLevel || keepInventory) {
-            experience = this.experience;
-            this.newTotalExperience = this.experienceTotal;
-            this.newLevel = this.experienceLevel;
-        }
-
-        this.clearActivePotions();
-        this._combatTracker = getNewTracker(this);
-        this.deathTime = 0;
-        this.experience = 0;
-        this.experienceLevel = this.newLevel;
-        this.experienceTotal = this.newTotalExperience;
-        this.fire = 0;
-        this.fallDistance = 0;
-        this.foodStats = new FoodStats();
-        this.potionsNeedUpdate = true;
-        this.openContainer = this.inventoryContainer;
-        this.attackingPlayer = null;
-        this.entityLivingToAttack = null;
-        this.lastExperience = -1;
-        this.lastHealth = -1.0F;
-        this.lastFoodLevel = -1;
-        this.setHealth(this.getMaxHealth());
-
-        if (this.keepsLevel || keepInventory) {
-            this.experience = experience;
-        } else {
-            this.addExperience(this.newExperience);
-        }
-
-        this.keepsLevel = false;
-        ((IMixinEntityPlayerMP) this).resetAttributeMap();
-    }
-
-    @Override
     public Optional<Container> getOpenInventory() {
         return Optional.ofNullable((Container) this.openContainer);
     }
@@ -685,15 +647,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z", ordinal = 0))
     public boolean onGetGameRules(GameRules gameRules, String gameRule) {
         return false; // Suppress death messages since this is handled together with the event calling
-    }
-
-    @Override
-    public void resetAttributeMap() {
-        this.attributeMap = new AttributeMap();
-        this.applyEntityAttributes();
-
-        // Re-create the array, so that attributes are properly re-added
-        this.armorArray = new ItemStack[5];
     }
 
     @Override

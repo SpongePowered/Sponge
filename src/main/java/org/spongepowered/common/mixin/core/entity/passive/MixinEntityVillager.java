@@ -84,17 +84,16 @@ import javax.annotation.Nullable;
 @Implements({@Interface(iface = Villager.class, prefix = "villager$"), @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
 public abstract class MixinEntityVillager extends MixinEntityAgeable implements Villager, IMixinVillager, CarriedInventory {
 
-    @Shadow private boolean isPlaying;
-    @Shadow private int careerId;
-    @Shadow private int careerLevel;
-    @Shadow @Nullable private MerchantRecipeList buyingList;
-    @Shadow @Final private InventoryBasic villagerInventory;
+    @Shadow private boolean fld_000361_bB; // isPlaying
+    @Shadow private int fld_000370_bJ; // careerId
+    @Shadow private int fld_000371_bK; // careerLevel
+    @Shadow @Nullable private MerchantRecipeList fld_000364_bD; // buyingList
+    @Shadow @Final private InventoryBasic fld_000374_bN; // villagerInventory
 
-    @Shadow public abstract int shadow$getProfession();
-    @Shadow public abstract void setProfession(int professionId);
+    @Shadow public abstract void mth_000379_g(int professionId); // setProfession
     @Shadow public abstract void setCustomer(EntityPlayer player);
-    @Shadow public abstract boolean shadow$isTrading();
-    @Shadow public abstract EntityPlayer shadow$getCustomer();
+    @Shadow public abstract boolean mth_000386_dk(); // isTrading
+    @Shadow public abstract EntityPlayer mth_000385_s_(); // getCustomer
     @Shadow public abstract MerchantRecipeList getRecipes(EntityPlayer player);
 
     private Fabric<IInventory> fabric;
@@ -103,14 +102,14 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
 
     private Profession profession;
 
-    @Inject(method = "setProfession(I)V", at = @At("RETURN"))
+    @Inject(method = "mth_000379_g(I)V", at = @At("RETURN"))
     public void onSetProfession(int professionId, CallbackInfo ci) {
         this.profession = EntityUtil.validateProfession(professionId);
     }
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.fabric = new DefaultInventoryFabric(this.villagerInventory);
+        this.fabric = new DefaultInventoryFabric(this.fld_000374_bN);
         this.slots = new SlotCollection.Builder().add(8).build();
         this.lens = new OrderedInventoryLensImpl(0, 8, 1, this.slots);
     }
@@ -129,27 +128,27 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
 
     @Override
     public boolean isPlaying() {
-        return this.isPlaying;
+        return this.fld_000361_bB;
     }
 
     @Override
     public void setPlaying(boolean playing) {
-        this.isPlaying = playing;
+        this.fld_000361_bB = playing;
     }
 
     @Intrinsic
     public boolean villager$isTrading() {
-        return shadow$isTrading();
+        return this.mth_000386_dk();
     }
 
     @Override
     public Career getCareer() {
         List<Career> careers = (List<Career>) this.profession.getCareers();
-        if (this.careerId == 0 || this.careerId > careers.size()) {
-            this.careerId = new Random().nextInt(careers.size()) + 1;
+        if (this.fld_000370_bJ == 0 || this.fld_000370_bJ > careers.size()) {
+            this.fld_000370_bJ = new Random().nextInt(careers.size()) + 1;
         }
         this.getRecipes(null);
-        return careers.get(this.careerId - 1);
+        return careers.get(this.fld_000370_bJ - 1);
     }
 
     @Override
@@ -159,16 +158,16 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
 
     @Override
     public void setCareer(Career career) {
-        setProfession(((SpongeEntityMeta) career.getProfession()).type);
-        this.buyingList = null;
-        this.careerId = ((SpongeCareer) career).type + 1;
-        this.careerLevel = 1;
+        mth_000379_g(((SpongeEntityMeta) career.getProfession()).type);
+        this.fld_000364_bD = null;
+        this.fld_000370_bJ = ((SpongeCareer) career).type + 1;
+        this.fld_000371_bK = 1;
         this.getRecipes(null);
     }
 
     @Override
     public Optional<Humanoid> getCustomer() {
-        return Optional.ofNullable((Humanoid) this.shadow$getCustomer());
+        return Optional.ofNullable((Humanoid) this.mth_000385_s_());
     }
 
     /**
@@ -181,29 +180,29 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
      */
     @SuppressWarnings("unchecked")
     @Overwrite
-    public void populateBuyingList() {
+    public void mth_000389_dt() { // populateBuyingList
         // Sponge
         List<Career> careers = (List<Career>) this.profession.getCareers();
 
         // EntityVillager.ITradeList[][][] aentityvillager$itradelist = DEFAULT_TRADE_LIST_MAP[this.getProfession()];
 
-        if (this.careerId != 0 && this.careerLevel != 0) {
-            ++this.careerLevel;
+        if (this.fld_000370_bJ != 0 && this.fld_000371_bK != 0) {
+            ++this.fld_000371_bK;
         } else {
             // Sponge change aentityvillager$itradelist to use this.profession.getCareers()
-            this.careerId = this.rand.nextInt(careers.size()) + 1;
-            this.careerLevel = 1;
+            this.fld_000370_bJ = this.rand.nextInt(careers.size()) + 1;
+            this.fld_000371_bK = 1;
         }
 
-        if (this.buyingList == null) {
-            this.buyingList = new MerchantRecipeList();
+        if (this.fld_000364_bD == null) {
+            this.fld_000364_bD = new MerchantRecipeList();
         }
 
         // Sponge start - use our own registry stuffs
-        checkState(this.careerId <= careers.size(), "The villager career id is out of bounds fo the available Careers! Found: " + this.careerId
+        checkState(this.fld_000370_bJ <= careers.size(), "The villager career id is out of bounds fo the available Careers! Found: " + this.fld_000370_bJ
                                                     + " when the current maximum is: " + careers.size());
-        final Career careerId = careers.get(this.careerId - 1);
-        SpongeVillagerRegistry.getInstance().populateOffers((List<TradeOffer>) (List<?>) this.buyingList, careerId, this.careerLevel, this.rand);
+        final Career fld_000370_bJ = careers.get(this.fld_000370_bJ - 1);
+        SpongeVillagerRegistry.getInstance().populateOffers((List<TradeOffer>) (List<?>) this.fld_000364_bD, fld_000370_bJ, this.fld_000371_bK, this.rand);
         // Sponge end
     }
 

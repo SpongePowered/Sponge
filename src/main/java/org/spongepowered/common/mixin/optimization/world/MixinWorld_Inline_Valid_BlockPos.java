@@ -34,6 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.asm.mixin.Mixin;
@@ -55,9 +56,8 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
     @Shadow public abstract Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract void notifyLightSet(BlockPos pos);
-    @Shadow public abstract IChunkProvider getChunkProvider();
 
-    @Shadow @Nullable private TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) {
+    @Shadow @Nullable private TileEntity mth_000654_F(BlockPos p_189508_1_) { // getPendingTileEntityAt
         return null; // Shadowed
     }
 
@@ -106,7 +106,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
             // Sponge end
 
             if (this.processingLoadedTiles) {
-                tileentity = this.getPendingTileEntityAt(pos);
+                tileentity = this.mth_000654_F(pos);
             }
 
             if (tileentity == null) {
@@ -114,7 +114,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
             }
 
             if (tileentity == null) {
-                tileentity = this.getPendingTileEntityAt(pos);
+                tileentity = this.mth_000654_F(pos);
             }
 
             return tileentity;
@@ -129,7 +129,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
      * @return True if the block position is valid
      */
     @Overwrite
-    protected boolean isValid(BlockPos pos) {
+    protected boolean mth_000637_a(BlockPos pos) { // isValid
         return ((IMixinBlockPos) pos).isValidPosition();
     }
 
@@ -141,7 +141,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
      * @return True if the block position is outside build height
      */
     @Overwrite
-    private boolean isOutsideBuildHeight(BlockPos pos) {
+    private boolean mth_000638_E(BlockPos pos) { // isOutsideValidBuildHeight
         return ((IMixinBlockPos) pos).isInvalidYPosition();
     }
 
@@ -165,7 +165,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
             // Sponge End
             return type.defaultLightValue;
         } else {
-            Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
             if (chunk == null) {
                 return type.defaultLightValue;
             }

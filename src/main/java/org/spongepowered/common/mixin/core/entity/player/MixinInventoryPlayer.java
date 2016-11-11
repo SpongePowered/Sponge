@@ -30,6 +30,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
+import net.minecraft.util.NonNullList;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
@@ -59,6 +60,7 @@ import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventory
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 
+import java.util.List;
 import java.util.Optional;
 
 @Mixin(InventoryPlayer.class)
@@ -66,10 +68,10 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @Shadow public int currentItem;
     @Shadow public EntityPlayer player;
-    @Shadow @Final public ItemStack[] mainInventory;
-    @Shadow @Final public ItemStack[] armorInventory;
-    @Shadow @Final public ItemStack[] offHandInventory;
-    @Shadow @Final private ItemStack[][] allInventories;
+    @Shadow @Final public NonNullList<ItemStack> fld_000404_a; // mainInventory
+    @Shadow @Final public NonNullList<ItemStack> fld_000405_b; // armorInventory
+    @Shadow @Final public NonNullList<ItemStack> fld_000406_c; // offHandInventory
+    @Shadow @Final private List<NonNullList<ItemStack>> fld_000407_g; // allInventories
 
     @Shadow public abstract int getInventoryStackLimit();
 
@@ -88,7 +90,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         if (playerIn instanceof EntityPlayerMP) {
             // We only care about Server inventories
             this.inventory = new DefaultInventoryFabric((IInventory) this);
-            this.slots = new SlotCollection.Builder().add(mainInventory.length).add(offHandInventory.length).add(armorInventory.length,
+            this.slots = new SlotCollection.Builder().add(fld_000404_a.size()).add(fld_000406_c.size()).add(fld_000405_b.size(),
                     EquipmentSlotAdapter.class).build();
             this.carrier = (Player) playerIn;
             this.lens = new PlayerInventoryLens(this, this.slots);
@@ -171,14 +173,14 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
      * @reason Prevents inventory from being cleared until after events.
      */
     @Overwrite
-    public void dropAllItems() {
-        for (ItemStack[] aitemstack : this.allInventories)
+    public void mth_000415_o() { // dropAllItems
+        for (NonNullList<ItemStack> aitemstack : this.fld_000407_g)
         {
-            for (int i = 0; i < aitemstack.length; ++i)
+            for (int i = 0; i < aitemstack.size(); ++i)
             {
-                if (aitemstack[i] != null)
+                if (aitemstack.get(i) != null)
                 {
-                    this.player.dropItem(aitemstack[i], true, false);
+                    this.player.dropItem(aitemstack.get(i), true, false);
                     //aitemstack[i] = null; // Sponge - we handle this after calling the death event
                 }
             }
@@ -187,16 +189,16 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @Override
     public int getFirstAvailableSlot(ItemStack itemstack) {
-        for (int i = 0; i < this.mainInventory.length; ++i) {
+        for (int i = 0; i < this.fld_000404_a.size(); ++i) {
             int stackSize = itemstack.mth_000526_E();
 
-            if (this.mainInventory[i] == null) {
+            if (this.fld_000404_a.get(i).mth_000526_E() == 0) {
                 // empty slot
                 return i;
             }
 
-            if (this.mainInventory[i] != null && this.mainInventory[i].getItem() == itemstack.getItem() && this.mainInventory[i].isStackable() && this.mainInventory[i].mth_000526_E() < this.mainInventory[i].getMaxStackSize() && this.mainInventory[i].mth_000526_E() < this.getInventoryStackLimit() && (!this.mainInventory[i].mth_000507_g() || this.mainInventory[i].getItemDamage() == itemstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(this.mainInventory[i], itemstack)) {
-                stackSize -= (this.mainInventory[i].getMaxStackSize() < this.getInventoryStackLimit() ? this.mainInventory[i].getMaxStackSize() : this.getInventoryStackLimit()) - this.mainInventory[i].mth_000526_E();
+            if (this.fld_000404_a.get(i).getItem() == itemstack.getItem() && this.fld_000404_a.get(i).isStackable() && this.fld_000404_a.get(i).mth_000526_E() < this.fld_000404_a.get(i).getMaxStackSize() && this.fld_000404_a.get(i).mth_000526_E() < this.getInventoryStackLimit() && (!this.fld_000404_a.get(i).mth_000507_g() || this.fld_000404_a.get(i).getItemDamage() == itemstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(this.fld_000404_a.get(i), itemstack)) {
+                stackSize -= (this.fld_000404_a.get(i).getMaxStackSize() < this.getInventoryStackLimit() ? this.fld_000404_a.get(i).getMaxStackSize() : this.getInventoryStackLimit()) - this.fld_000404_a.get(i).mth_000526_E();
             }
 
             if (stackSize <= 0) {

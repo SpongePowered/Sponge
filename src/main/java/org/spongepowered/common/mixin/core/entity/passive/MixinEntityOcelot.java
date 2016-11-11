@@ -67,7 +67,8 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
     @Shadow public abstract int getTameSkin();
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
-    public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand, ItemStack stack) {
+    public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand) {
+        ItemStack stack = player.getHeldItem(hand);
         int random = rand.nextInt(bound);
         if (random == 0) {
             stack.mth_000527_e(stack.mth_000526_E() + 1);

@@ -65,7 +65,7 @@ import java.util.Optional;
 public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer {
 
     @Shadow public List<Slot> inventorySlots;
-    @Shadow public List<ItemStack> inventoryItemStacks;
+    @Shadow public NonNullList<ItemStack> fld_000472_b ;
     @Shadow public int windowId;
     @Shadow protected List<IContainerListener> listeners;
 
@@ -156,7 +156,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         for (int i = 0; i < this.inventorySlots.size(); ++i) {
             final Slot slot = this.inventorySlots.get(i);
             final ItemStack itemstack = slot.getStack();
-            ItemStack itemstack1 = this.inventoryItemStacks.get(i);
+            ItemStack itemstack1 = this.fld_000472_b .get(i);
 
             if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
 
@@ -185,8 +185,8 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 }
                 // Sponge end
 
-                itemstack1 = itemstack == null ? null : itemstack.copy();
-                this.inventoryItemStacks.set(i, itemstack1);
+                itemstack1 = itemstack.copy();
+                this.fld_000472_b.set(i, itemstack1);
 
                 for (IContainerListener listener : this.listeners) {
                     listener.sendSlotContents((Container) (Object) this, i, itemstack1);

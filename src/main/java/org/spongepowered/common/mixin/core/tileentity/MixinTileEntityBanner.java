@@ -68,8 +68,8 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
 
     private List<PatternLayer> patternLayers = Lists.newArrayList();
 
-    @Inject(method = "setItemValues(Lnet/minecraft/item/ItemStack;)V", at = @At("RETURN"))
-    private void onSetItemValues(ItemStack stack, CallbackInfo ci) {
+    @Inject(method = "mth_000751_a", at = @At("RETURN")) // setItemValues
+    private void onSetItemValues(CallbackInfo ci) {
         updatePatterns();
     }
 

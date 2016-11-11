@@ -93,81 +93,85 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     @Override
     public void registerDefaults() {
         this.entityTypeMappings.put("item", newEntityTypeFromName("Item"));
-        this.entityTypeMappings.put("experience_orb", newEntityTypeFromName("XPOrb"));
-        this.entityTypeMappings.put("area_effect_cloud", newEntityTypeFromName("AreaEffectCloud"));
-        this.entityTypeMappings.put("dragon_fireball", newEntityTypeFromName("DragonFireball"));
-        this.entityTypeMappings.put("leash_hitch", newEntityTypeFromName("LeashKnot"));
-        this.entityTypeMappings.put("painting", newEntityTypeFromName("Painting"));
-        this.entityTypeMappings.put("tipped_arrow", newEntityTypeFromName("Arrow"));
-        this.entityTypeMappings.put("snowball", newEntityTypeFromName("Snowball"));
-        this.entityTypeMappings.put("fireball", newEntityTypeFromName("LargeFireball", "Fireball"));
-        this.entityTypeMappings.put("small_fireball", newEntityTypeFromName("SmallFireball"));
-        this.entityTypeMappings.put("ender_pearl", newEntityTypeFromName("ThrownEnderpearl"));
-        this.entityTypeMappings.put("eye_of_ender", newEntityTypeFromName("EyeOfEnderSignal"));
-        this.entityTypeMappings.put("splash_potion", newEntityTypeFromName("ThrownPotion"));
-        this.entityTypeMappings.put("thrown_exp_bottle", newEntityTypeFromName("ThrownExpBottle"));
-        this.entityTypeMappings.put("item_frame", newEntityTypeFromName("ItemFrame"));
-        this.entityTypeMappings.put("wither_skull", newEntityTypeFromName("WitherSkull"));
-        this.entityTypeMappings.put("primed_tnt", newEntityTypeFromName("PrimedTnt"));
-        this.entityTypeMappings.put("falling_block", newEntityTypeFromName("FallingSand"));
-        this.entityTypeMappings.put("firework", newEntityTypeFromName("FireworksRocketEntity"));
-        this.entityTypeMappings.put("armor_stand", newEntityTypeFromName("ArmorStand"));
-        this.entityTypeMappings.put("boat", newEntityTypeFromName("Boat"));
-        this.entityTypeMappings.put("rideable_minecart", newEntityTypeFromName("MinecartRideable"));
-        this.entityTypeMappings.put("chested_minecart", newEntityTypeFromName("MinecartChest"));
-        this.entityTypeMappings.put("furnace_minecart", newEntityTypeFromName("MinecartFurnace"));
-        this.entityTypeMappings.put("tnt_minecart", newEntityTypeFromName("MinecartTnt", "MinecartTNT"));
-        this.entityTypeMappings.put("hopper_minecart", newEntityTypeFromName("MinecartHopper"));
-        this.entityTypeMappings.put("mob_spawner_minecart", newEntityTypeFromName("MinecartSpawner"));
-        this.entityTypeMappings.put("commandblock_minecart", newEntityTypeFromName("MinecartCommandBlock"));
-        this.entityTypeMappings.put("creeper", newEntityTypeFromName("Creeper"));
-        this.entityTypeMappings.put("skeleton", newEntityTypeFromName("Skeleton"));
-        this.entityTypeMappings.put("spider", newEntityTypeFromName("Spider"));
-        this.entityTypeMappings.put("giant", newEntityTypeFromName("Giant"));
-        this.entityTypeMappings.put("zombie", newEntityTypeFromName("Zombie"));
-        this.entityTypeMappings.put("slime", newEntityTypeFromName("Slime"));
-        this.entityTypeMappings.put("ghast", newEntityTypeFromName("Ghast"));
-        this.entityTypeMappings.put("pig_zombie", newEntityTypeFromName("PigZombie"));
-        this.entityTypeMappings.put("enderman", newEntityTypeFromName("Enderman"));
-        this.entityTypeMappings.put("cave_spider", newEntityTypeFromName("CaveSpider"));
-        this.entityTypeMappings.put("silverfish", newEntityTypeFromName("Silverfish"));
-        this.entityTypeMappings.put("blaze", newEntityTypeFromName("Blaze"));
-        this.entityTypeMappings.put("magma_cube", newEntityTypeFromName("LavaSlime"));
-        this.entityTypeMappings.put("ender_dragon", newEntityTypeFromName("EnderDragon"));
-        this.entityTypeMappings.put("wither", newEntityTypeFromName("WitherBoss"));
-        this.entityTypeMappings.put("bat", newEntityTypeFromName("Bat"));
-        this.entityTypeMappings.put("witch", newEntityTypeFromName("Witch"));
-        this.entityTypeMappings.put("endermite", newEntityTypeFromName("Endermite"));
-        this.entityTypeMappings.put("guardian", newEntityTypeFromName("Guardian"));
-        this.entityTypeMappings.put("pig", newEntityTypeFromName("Pig"));
-        this.entityTypeMappings.put("sheep", newEntityTypeFromName("Sheep"));
-        this.entityTypeMappings.put("cow", newEntityTypeFromName("Cow"));
-        this.entityTypeMappings.put("chicken", newEntityTypeFromName("Chicken"));
-        this.entityTypeMappings.put("squid", newEntityTypeFromName("Squid"));
-        this.entityTypeMappings.put("wolf", newEntityTypeFromName("Wolf"));
-        this.entityTypeMappings.put("mushroom_cow", newEntityTypeFromName("MushroomCow"));
-        this.entityTypeMappings.put("snowman", newEntityTypeFromName("SnowMan"));
-        this.entityTypeMappings.put("ocelot", newEntityTypeFromName("Ocelot", "Ozelot"));
-        this.entityTypeMappings.put("iron_golem", newEntityTypeFromName("VillagerGolem"));
-        this.entityTypeMappings.put("horse", newEntityTypeFromName("EntityHorse"));
-        this.entityTypeMappings.put("rabbit", newEntityTypeFromName("Rabbit"));
-        this.entityTypeMappings.put("villager", newEntityTypeFromName("Villager"));
-        this.entityTypeMappings.put("ender_crystal", newEntityTypeFromName("EnderCrystal"));
-        this.entityTypeMappings.put("shulker", newEntityTypeFromName("Shulker"));
-        this.entityTypeMappings.put("shulker_bullet", newEntityTypeFromName("ShulkerBullet"));
-        this.entityTypeMappings.put("spectral_arrow", newEntityTypeFromName("SpectralArrow"));
-        this.entityTypeMappings.put("polar_bear", newEntityTypeFromName("PolarBear"));
-        this.entityTypeMappings.put("egg", new SpongeEntityType(-1, "Egg", EntityEgg.class, new SpongeTranslation("item.egg.name")));
+        this.entityTypeMappings.put("experience_orb", newEntityTypeFromName("xp_orb"));
+        this.entityTypeMappings.put("area_effect_cloud", newEntityTypeFromName("area_effect_cloud"));
+        this.entityTypeMappings.put("dragon_fireball", newEntityTypeFromName("dragon_fireball"));
+        this.entityTypeMappings.put("leash_hitch", newEntityTypeFromName("leash_knot"));
+        this.entityTypeMappings.put("painting", newEntityTypeFromName("painting"));
+        this.entityTypeMappings.put("tipped_arrow", newEntityTypeFromName("arrow"));
+        this.entityTypeMappings.put("snowball", newEntityTypeFromName("snowball"));
+        this.entityTypeMappings.put("fireball", newEntityTypeFromName("LargeFireball", "fireball"));
+        this.entityTypeMappings.put("small_fireball", newEntityTypeFromName("small_fireball"));
+        this.entityTypeMappings.put("ender_pearl", newEntityTypeFromName("ender_pearl"));
+        this.entityTypeMappings.put("eye_of_ender", newEntityTypeFromName("eye_of_ender_signal"));
+        this.entityTypeMappings.put("splash_potion", newEntityTypeFromName("potion"));
+        this.entityTypeMappings.put("thrown_exp_bottle", newEntityTypeFromName("xp_bottle"));
+        this.entityTypeMappings.put("item_frame", newEntityTypeFromName("item_frame"));
+        this.entityTypeMappings.put("wither_skull", newEntityTypeFromName("wither_skull"));
+        this.entityTypeMappings.put("primed_tnt", newEntityTypeFromName("tnt"));
+        this.entityTypeMappings.put("falling_block", newEntityTypeFromName("falling_block"));
+        this.entityTypeMappings.put("firework", newEntityTypeFromName("fireworks_rocket"));
+        this.entityTypeMappings.put("armor_stand", newEntityTypeFromName("armor_stand"));
+        this.entityTypeMappings.put("boat", newEntityTypeFromName("boat"));
+        this.entityTypeMappings.put("rideable_minecart", newEntityTypeFromName("minecart"));
+        this.entityTypeMappings.put("chested_minecart", newEntityTypeFromName("chest_minecart"));
+        this.entityTypeMappings.put("furnace_minecart", newEntityTypeFromName("furnace_minecart"));
+        this.entityTypeMappings.put("tnt_minecart", newEntityTypeFromName("tnt_minecart"));
+        this.entityTypeMappings.put("hopper_minecart", newEntityTypeFromName("hopper_minecart"));
+        this.entityTypeMappings.put("mob_spawner_minecart", newEntityTypeFromName("spawner_minecart"));
+        this.entityTypeMappings.put("commandblock_minecart", newEntityTypeFromName("commandblock_minecart"));
+        this.entityTypeMappings.put("creeper", newEntityTypeFromName("creeper"));
+        this.entityTypeMappings.put("skeleton", newEntityTypeFromName("skeleton"));
+        this.entityTypeMappings.put("spider", newEntityTypeFromName("spider"));
+        this.entityTypeMappings.put("giant", newEntityTypeFromName("giant"));
+        this.entityTypeMappings.put("zombie", newEntityTypeFromName("zombie"));
+        this.entityTypeMappings.put("slime", newEntityTypeFromName("slime"));
+        this.entityTypeMappings.put("ghast", newEntityTypeFromName("ghast"));
+        this.entityTypeMappings.put("pig_zombie", newEntityTypeFromName("zombie_pigman"));
+        this.entityTypeMappings.put("enderman", newEntityTypeFromName("enderman"));
+        this.entityTypeMappings.put("cave_spider", newEntityTypeFromName("cave_spider"));
+        this.entityTypeMappings.put("silverfish", newEntityTypeFromName("silverfish"));
+        this.entityTypeMappings.put("blaze", newEntityTypeFromName("blaze"));
+        this.entityTypeMappings.put("magma_cube", newEntityTypeFromName("magma_cube"));
+        this.entityTypeMappings.put("ender_dragon", newEntityTypeFromName("ender_dragon"));
+        this.entityTypeMappings.put("wither", newEntityTypeFromName("wither"));
+        this.entityTypeMappings.put("bat", newEntityTypeFromName("bat"));
+        this.entityTypeMappings.put("witch", newEntityTypeFromName("witch"));
+        this.entityTypeMappings.put("endermite", newEntityTypeFromName("endermite"));
+        this.entityTypeMappings.put("guardian", newEntityTypeFromName("guardian"));
+        this.entityTypeMappings.put("pig", newEntityTypeFromName("pig"));
+        this.entityTypeMappings.put("sheep", newEntityTypeFromName("sheep"));
+        this.entityTypeMappings.put("cow", newEntityTypeFromName("cow"));
+        this.entityTypeMappings.put("chicken", newEntityTypeFromName("chicken"));
+        this.entityTypeMappings.put("squid", newEntityTypeFromName("squid"));
+        this.entityTypeMappings.put("wolf", newEntityTypeFromName("wolf"));
+        this.entityTypeMappings.put("mushroom_cow", newEntityTypeFromName("mooshroom"));
+        this.entityTypeMappings.put("snowman", newEntityTypeFromName("snowman"));
+        this.entityTypeMappings.put("ocelot", newEntityTypeFromName("Ocelot"));
+        this.entityTypeMappings.put("iron_golem", newEntityTypeFromName("villager_golem"));
+        this.entityTypeMappings.put("horse", newEntityTypeFromName("horse"));
+        this.entityTypeMappings.put("rabbit", newEntityTypeFromName("rabbit"));
+        this.entityTypeMappings.put("villager", newEntityTypeFromName("villager"));
+        this.entityTypeMappings.put("ender_crystal", newEntityTypeFromName("ender_crystal"));
+        this.entityTypeMappings.put("shulker", newEntityTypeFromName("shulker"));
+        this.entityTypeMappings.put("shulker_bullet", newEntityTypeFromName("shulker_bullet"));
+        this.entityTypeMappings.put("spectral_arrow", newEntityTypeFromName("spectral_arrow"));
+        this.entityTypeMappings.put("polar_bear", newEntityTypeFromName("polar_bear"));
+        this.entityTypeMappings.put("egg", new SpongeEntityType(-1, "egg", EntityEgg.class, new SpongeTranslation("item.egg.name")));
         this.entityTypeMappings.put("fishing_hook", new SpongeEntityType(-2, "FishingHook", EntityFishHook.class, new SpongeTranslation("item.fishingRod.name")));
-        this.entityTypeMappings.put("lightning", new SpongeEntityType(-3, "Lightning", EntityLightningBolt.class, null));
+        this.entityTypeMappings.put("lightning", new SpongeEntityType(-3, "lightning", EntityLightningBolt.class, null));
         this.entityTypeMappings.put("weather", new SpongeEntityType(-4, "Weather", EntityWeatherEffect.class, new SpongeTranslation("soundCategory.weather")));
         this.entityTypeMappings.put("player", new SpongeEntityType(-5, "Player", EntityPlayerMP.class, new SpongeTranslation("soundCategory.player")));
         this.entityTypeMappings.put("complex_part", new SpongeEntityType(-6, "ComplexPart", EntityDragonPart.class, null));
-        this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "Human", -7, null));
+        this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "Human", 99999, null)); // TODO: Figure out what id to use, as negative ids no longer work
+        //this.entityClassToTypeMappings.put("human", new SpongeEntityType(-6))
     }
 
     private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
     	Class<? extends Entity> cls = EntityList.fld_001472_b.getObject(new ResourceLocation(mcName));
+        if (cls == null) {
+            throw new IllegalArgumentException("No class mapping for entity name " + mcName);
+        }
         return new SpongeEntityType(EntityList.fld_001472_b.getIDForObject(cls), spongeName, cls,
                 new SpongeTranslation("entity." + mcName + ".name"));
     }
@@ -178,7 +182,12 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
 
     private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, int entityId, Translation translation) {
         String entityFullName = String.format("%s.%s", SpongeImpl.ECOSYSTEM_NAME, entityName);
-        EntityList.fld_001472_b.register(entityId, new ResourceLocation(entityFullName), entityClass);
+        ResourceLocation location = new ResourceLocation(entityFullName);
+
+        EntityList.fld_001472_b.register(entityId, location, entityClass);
+        EntityList.fld_001473_d.add(location);
+        //EntityList.fld_001474_g.set(entityId, entityName);
+
         return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);
     }
 

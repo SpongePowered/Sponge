@@ -46,19 +46,19 @@ import java.util.Random;
 @Mixin(EntityVillager.Unknown7a.class)
 public class MixinEntityVillagerEmeraldForItems implements TradeOfferGenerator {
 
-    @Shadow public Item buyingItem;
-    @Shadow public EntityVillager.Unknown6g price;
+    @Shadow public Item fld_000114_a;
+    @Shadow public EntityVillager.Unknown6g fld_000115_b;
 
     @Override
     public TradeOffer apply(Random random) {
         checkNotNull(random, "Random cannot be null!");
         int buyingCount = 1;
 
-        if (this.price != null) {
-            buyingCount = this.price.mth_000110_a(random);
+        if (this.fld_000115_b != null) {
+            buyingCount = this.fld_000115_b.mth_000110_a(random);
         }
 
-        final ItemStack buyingItem = new ItemStack(this.buyingItem, buyingCount, 0);
+        final ItemStack buyingItem = new ItemStack(this.fld_000114_a, buyingCount, 0);
         return (TradeOffer) new MerchantRecipe(buyingItem, Items.EMERALD);
     }
 

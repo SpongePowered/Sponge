@@ -45,9 +45,9 @@ import java.util.Optional;
 
 public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<ItemType>, AlternateCatalogRegistryModule<ItemType> {
 
-    public static final Item NONE_ITEM = new Item().setUnlocalizedName("none").setMaxDamage(0).setMaxStackSize(1);
-    public static final ItemStack NONE = (ItemStack) new net.minecraft.item.ItemStack(ItemTypeRegistryModule.NONE_ITEM);
-    public static final ItemStackSnapshot NONE_SNAPSHOT = NONE.createSnapshot();
+    public static Item NONE_ITEM;
+    public static ItemStack NONE;
+    public static ItemStackSnapshot NONE_SNAPSHOT;
 
     public static ItemTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -95,6 +95,10 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
 
     @Override
     public void registerDefaults() {
+        ItemTypeRegistryModule.NONE_ITEM = new Item().setUnlocalizedName("none").setMaxDamage(0).setMaxStackSize(1);
+        ItemTypeRegistryModule.NONE = (ItemStack) new net.minecraft.item.ItemStack(ItemTypeRegistryModule.NONE_ITEM);
+        ItemTypeRegistryModule.NONE_SNAPSHOT = NONE.createSnapshot();
+
         setItemNone();
         this.itemTypeMappings.put("none", (ItemType) NONE_ITEM);
     }

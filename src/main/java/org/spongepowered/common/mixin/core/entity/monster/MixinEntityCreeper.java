@@ -73,7 +73,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     @Shadow public abstract void ignite();
     @Shadow public abstract int getCreeperState();
     @Shadow public abstract void setCreeperState(int state);
-    @Shadow private void explode() { }
+    @Shadow private void mth_001829_dn() { } // explode
 
     private Cause primeCause;
     private Cause detonationCause;
@@ -172,7 +172,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     @Override
     public void detonate(Cause cause) {
         this.detonationCause = checkNotNull(cause, "cause");
-        explode();
+        this.mth_001829_dn();
     }
 
     @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
@@ -199,7 +199,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
         }
     }
 
-    @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
+    @Redirect(method = "mth_001829_dn", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
     protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
             double y, double z, float strength, boolean smoking) {
         return detonate(getCause(this.detonationCause), Explosion.builder()
@@ -214,7 +214,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
                 });
     }
 
-    @Inject(method = "explode", at = @At("RETURN"))
+    @Inject(method = "mth_001829_dn", at = @At("RETURN"))
     protected void postExplode(CallbackInfo ci) {
         if (this.detonationCancelled) {
             this.detonationCancelled = this.isDead = false;

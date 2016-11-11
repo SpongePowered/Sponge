@@ -37,10 +37,10 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 @Mixin(EntityEnderman.Unknown13a.class)
 public abstract class MixinEntityEndermanAIPlaceBlock extends EntityAIBase {
 
-    @Shadow @Final private EntityEnderman enderman;
+    @Shadow @Final private EntityEnderman fld_000131_a;
 
     @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.enderman).canGrief();
+        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.fld_000131_a).canGrief();
     }
 }

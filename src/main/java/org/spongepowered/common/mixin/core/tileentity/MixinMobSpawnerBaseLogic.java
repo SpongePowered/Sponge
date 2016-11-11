@@ -144,7 +144,7 @@ public abstract class MixinMobSpawnerBaseLogic {
         return entity;
     }
 
-    @Inject(method = "updateSpawner", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/MobSpawnerBaseLogic;resetTimer()V"))
+    @Inject(method = "updateSpawner", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/MobSpawnerBaseLogic;mth_000636_i()V")) // resetTimer
     private void onReset(CallbackInfo callbackInfo) {
         this.posX = 0;
         this.posY = 0;

@@ -53,25 +53,24 @@ import java.util.Random;
 @Implements(value = @Interface(iface = IMixinAggressive.class, prefix = "aggr$"))
 public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf {
 
-    @Shadow(prefix = "shadow$")
-    public abstract boolean shadow$isAngry();
+    @Shadow public abstract boolean mth_001643_dr(); // isAngry
 
-    @Shadow(prefix = "shadow$")
-    public abstract void shadow$setAngry(boolean angry);
+    @Shadow public abstract void mth_001644_s(boolean angry); // setAngry
 
     @Intrinsic
     public boolean aggr$isAngry() {
-        return shadow$isAngry();
+        return this.mth_001643_dr();
     }
 
     @Intrinsic
     public void aggr$setAngry(boolean angry) {
-        this.shadow$setAngry(angry);
+        this.mth_001644_s(angry);
     }
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
-    public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand, ItemStack stack) {
+    public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand) {
         int random = rand.nextInt(bound);
+        ItemStack stack = player.getHeldItem(hand);
         if (random == 0) {
             stack.mth_000528_f(1);
             if (!SpongeImpl
@@ -91,6 +90,6 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(get(SittingData.class).get());
-        manipulators.add(new SpongeAggressiveData(shadow$isAngry()));
+        manipulators.add(new SpongeAggressiveData(this.mth_001643_dr()));
     }
 }
