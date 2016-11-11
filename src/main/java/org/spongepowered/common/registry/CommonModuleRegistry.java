@@ -423,6 +423,7 @@ public final class CommonModuleRegistry {
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
             .registerModule(ZombieType.class, ZombieTypeRegistryModule.getInstance())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
+            .registerModule(SkeletonType.class, new SkeletonTypeRegistryModule())
             ;
     }
 

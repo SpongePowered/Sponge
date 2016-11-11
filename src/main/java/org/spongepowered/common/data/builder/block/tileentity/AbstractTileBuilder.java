@@ -49,6 +49,7 @@ import net.minecraft.tileentity.TileEntityNote;
 import net.minecraft.tileentity.TileEntityPiston;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.tileentity.TileEntitySkull;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
@@ -93,7 +94,7 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
             throw new InvalidDataException("The provided container references a world that does not exist!");
         }
 
-        Class<? extends TileEntity> clazz = (Class<? extends TileEntity>) TileEntity.nameToClassMap.get(container.getString(DataQueries.TILE_TYPE).get());
+        Class<? extends TileEntity> clazz = (Class<? extends TileEntity>) TileEntity.fld_000806_f.getObject(new ResourceLocation(container.getString(DataQueries.TILE_TYPE).get()));
         if (clazz == null) {
             // TODO do we want to throw an InvalidDataException since the class is not registered?
             return Optional.empty(); // basically we didn't manage to find the class and the class isn't even registered with MC

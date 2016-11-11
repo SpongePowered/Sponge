@@ -32,6 +32,7 @@ import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.entity.SpongeEntityConstants;
+import org.spongepowered.common.entity.SpongeSkeletonType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -56,9 +57,9 @@ public class SkeletonTypeRegistryModule implements CatalogRegistryModule<Skeleto
 
     @Override
     public void registerDefaults() {
-        for (net.minecraft.entity.monster.SkeletonType type : net.minecraft.entity.monster.SkeletonType.values()) {
-            skeletonTypeMap.put(type.name().toLowerCase(Locale.ENGLISH), (SkeletonType) (Object) type);
-        }
+        skeletonTypeMap.put("normal", new SpongeSkeletonType("normal"));
+        skeletonTypeMap.put("stray", new SpongeSkeletonType("stray"));
+        skeletonTypeMap.put("wither", new SpongeSkeletonType("wither"));
     }
 
 }

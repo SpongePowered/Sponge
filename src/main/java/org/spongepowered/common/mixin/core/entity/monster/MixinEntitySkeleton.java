@@ -46,18 +46,6 @@ import java.util.List;
 @Mixin(EntitySkeleton.class)
 public abstract class MixinEntitySkeleton extends MixinEntityMob implements Skeleton {
 
-    @Shadow public abstract net.minecraft.entity.monster.SkeletonType getSkeletonType();
-
-    @Override
-    public SkeletonData getSkeletonData() {
-        return new SpongeSkeletonData((SkeletonType) (Object) this.getSkeletonType());
-    }
-
-    @Override
-    public Value<SkeletonType> variant() {
-        return new SpongeValue<>(Keys.SKELETON_TYPE, DataConstants.Catalog.DEFAULT_SKELETON, (SkeletonType) (Object) getSkeletonType());
-    }
-
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
