@@ -357,7 +357,7 @@ public final class CauseTracker {
             return false;
         }
 
-        final Block newBlock = newState.getBlock();
+        final Block block = newState.getBlock();
         // Sponge Start - Up to this point, we've copied exactly what Vanilla minecraft does.
         final IBlockState currentState = chunk.getBlockState(pos);
 
@@ -402,30 +402,42 @@ public final class CauseTracker {
             }
         }
         // Sponge End - continue with vanilla mechanics
-        final IBlockState iblockstate = chunk.setBlockState(pos, newState);
+        IBlockState iblockstate = chunk.setBlockState(pos, newState);
 
-        if (iblockstate == null) {
+        if (iblockstate == null)
+        {
             return false;
         }
-        if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
-            minecraftWorld.theProfiler.startSection("checkLight");
-            minecraftWorld.checkLight(pos);
-            minecraftWorld.theProfiler.endSection();
-        }
-
-        if ((flags & 2) != 0 && (flags & 4) == 0 && chunk.isPopulated()) {
-            minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, flags);
-        }
-
-        if (!minecraftWorld.isRemote && (flags & 1) != 0) {
-            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
-
-            if (newState.hasComparatorInputOverride()) {
-                minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
+        else
+        {
+            if (newState.mth_000887_c() != iblockstate.mth_000887_c() || newState.mth_000888_d() != iblockstate.mth_000888_d())
+            {
+                minecraftWorld.theProfiler.startSection("checkLight");
+                minecraftWorld.checkLight(pos);
+                minecraftWorld.theProfiler.endSection();
             }
-        }
 
-        return true;
+            if ((flags & 2) != 0 && (!minecraftWorld.isRemote || (flags & 4) == 0) && chunk.isPopulated())
+            {
+                minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, flags);
+            }
+
+            if (!minecraftWorld.isRemote && (flags & 1) != 0)
+            {
+                minecraftWorld.mth_000640_a(pos, iblockstate.getBlock(), true);
+
+                if (newState.mth_000896_o())
+                {
+                    minecraftWorld.updateComparatorOutputLevel(pos, block);
+                }
+            }
+            else if (!minecraftWorld.isRemote && (flags & 16) == 0)
+            {
+                minecraftWorld.mth_000641_c(pos, block);
+            }
+
+            return true;
+        }
     }
 
     public boolean setBlockStateWithFlag(BlockPos pos, IBlockState newState, BlockChangeFlag flag) {

@@ -47,7 +47,7 @@ public class BrewingStandDataProcessor extends
 
     @Override
     protected boolean set(TileEntityBrewingStand entity, Integer value) {
-        if (!entity.mth_000814_o(()) {
+        if (!entity.mth_000814_o()) {
             return false;
         }
 
