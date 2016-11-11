@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
+import net.minecraft.entity.monster.EntityHusk;
 import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.monster.EntityZombieVillager;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.ZombieType;
@@ -53,16 +55,19 @@ public class ZombieTypeValueProcessor extends AbstractSpongeValueProcessor<Entit
 
     @Override
     protected boolean set(EntityZombie container, ZombieType value) {
-        if (value == ZombieTypes.VILLAGER) {
-            return false;
-        }
-        container.setZombieType(EntityUtil.toNative(value, null));
-        return true;
+        throw new UnsupportedOperationException("ZombieData is deprecated - zombie types are now separate entities!");
     }
 
     @Override
-    protected Optional<ZombieType> getVal(EntityZombie container) {
-        return Optional.of(EntityUtil.typeFromNative(container.getZombieType()));
+    protected Optional<ZombieType> getVal(EntityZombie dataHolder) {
+        ZombieType type = ZombieTypes.NORMAL;
+        if (dataHolder instanceof EntityHusk) {
+            type = ZombieTypes.HUSK;
+        } else if (dataHolder instanceof EntityZombieVillager) {
+            type = ZombieTypes.VILLAGER;
+        }
+
+        return Optional.of(type);
     }
 
     @Override

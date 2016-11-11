@@ -53,7 +53,7 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
     private static final FluidStackSnapshot LAVA = new SpongeFluidStackBuilder().fluid(FluidTypes.LAVA).volume(1000).build().createSnapshot();
 
     public FluidItemDataProcessor() {
-        super((item) -> item.getItem() == Items.BUCKET || item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.LAVA_BUCKET, Keys.FLUID_ITEM_STACK);
+        super((item) -> item.getItem() == Items.BUCKET || item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.fld_000534_aB, Keys.FLUID_ITEM_STACK);
     }
 
     @SuppressWarnings("deprecation")
@@ -75,7 +75,7 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
     protected Optional<FluidStackSnapshot> getVal(ItemStack dataHolder) {
         if (dataHolder.getItem() == Items.WATER_BUCKET) {
             return Optional.of(WATER);
-        } else if (dataHolder.getItem() == Items.LAVA_BUCKET) {
+        } else if (dataHolder.getItem() == Items.fld_000534_aB) {
             return Optional.of(LAVA);
         }
         return Optional.empty();
@@ -104,7 +104,7 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
             if (itemStack.getItem() == Items.WATER_BUCKET) {
                 itemStack.setItem(Items.BUCKET);
                 return DataTransactionResult.successRemove(constructImmutableValue(WATER));
-            } else if (itemStack.getItem() == Items.LAVA_BUCKET) {
+            } else if (itemStack.getItem() == Items.fld_000534_aB {
                 itemStack.setItem(Items.BUCKET);
                 return DataTransactionResult.successRemove(constructImmutableValue(LAVA));
             }

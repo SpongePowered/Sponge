@@ -29,6 +29,7 @@ import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -70,7 +71,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     @SuppressWarnings("rawtypes")
     @Shadow
-    public abstract List getInventory();
+    public abstract NonNullList<ItemStack> mth_000473_a();
 
     @Shadow
     public abstract Slot getSlot(int slotId);
@@ -124,12 +125,12 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         if (this.listeners.contains(listener)) {
             // Sponge start
             // throw new IllegalArgumentException("Listener already listening");
-            listener.updateCraftingInventory(container, this.getInventory());
+            listener.mth_000479_a(container, this.mth_000473_a());
             container.detectAndSendChanges();
             // Sponge end
         } else {
             this.listeners.add(listener);
-            listener.updateCraftingInventory(container, this.getInventory());
+            listener.mth_000479_a(container, this.mth_000473_a());
             container.detectAndSendChanges();
         }
     }

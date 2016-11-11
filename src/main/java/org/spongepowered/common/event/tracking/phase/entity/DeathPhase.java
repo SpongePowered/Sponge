@@ -151,7 +151,7 @@ final class DeathPhase extends EntityPhaseState {
             if (isPlayer) {
                 // Forge and Vanilla always clear items on player death BEFORE drops occur
                 // This will also provide the highest compatibility with mods such as Tinkers Construct
-                entityPlayer.inventory.clear();
+                entityPlayer.inventory.mth_000418_m();
             }
 
             final DropItemEvent.Destruct
@@ -186,7 +186,7 @@ final class DeathPhase extends EntityPhaseState {
                 if (isPlayer) {
                     // Forge and Vanilla always clear items on player death BEFORE drops occur
                     // This will also provide the highest compatibility with mods such as Tinkers Construct
-                    entityPlayer.inventory.clear();
+                    entityPlayer.inventory.mth_000418_m();
                 }
 
                 final DropItemEvent.Destruct

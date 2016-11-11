@@ -51,7 +51,7 @@ import java.util.Optional;
 public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<EntityType, Value<EntityType>, SpawnableData, ImmutableSpawnableData> {
 
     public SpawnableDataProcessor() {
-        super(input -> input.getItem().equals(Items.SPAWN_EGG), Keys.SPAWNABLE_ENTITY_TYPE);
+        super(input -> input.getItem().equals(Items.fld_000546_bU), Keys.SPAWNABLE_ENTITY_TYPE);
     }
 
     @SuppressWarnings("unchecked")

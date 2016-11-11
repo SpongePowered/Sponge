@@ -34,13 +34,13 @@ import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import java.util.Collection;
 
 public class DefaultInventoryFabric extends MinecraftFabric {
-    
+
     private final IInventory inventory;
 
     public DefaultInventoryFabric(IInventory inventory) {
         this.inventory = inventory;
     }
-    
+
     @Override
     public Collection<IInventory> allInventories() {
         return ImmutableSet.of(this.inventory);
@@ -78,12 +78,12 @@ public class DefaultInventoryFabric extends MinecraftFabric {
 
     @Override
     public void clear() {
-        this.inventory.clear();
+        this.inventory.mth_000418_m();
     }
-    
+
     @Override
     public void markDirty() {
         this.inventory.markDirty();
     }
-    
+
 }
