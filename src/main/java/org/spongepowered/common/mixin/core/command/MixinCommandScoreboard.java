@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.command.CommandBase;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.EntityNotFoundException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandScoreboard;
@@ -69,12 +70,12 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
     }
 
     @Redirect(method = "joinTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
-    public String onGetEntityNameJoin(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
+    public String onGetEntityNameJoin(MinecraftServer server, ICommandSender sender, String string) throws CommandException {
         return this.onGetEntityName(server, sender, string);
     }
 
     @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
-    public String onGetEntityNameLeaveFirst(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
+    public String onGetEntityNameLeaveFirst(MinecraftServer server, ICommandSender sender, String string) throws CommandException {
         return this.onGetEntityName(server, sender, string);
     }
 
@@ -84,7 +85,7 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
         }
     }
 
-    private String onGetEntityName(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
+    private String onGetEntityName(MinecraftServer server, ICommandSender sender, String string) throws CommandException {
         if (this.realName != null) {
             String newString = this.realName;
             this.realName = null;
@@ -94,7 +95,7 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
     }
 
     @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 1))
-    public String onGetEntityNameLeaveSecond(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
+    public String onGetEntityNameLeaveSecond(MinecraftServer server, ICommandSender sender, String string) throws CommandException {
         String entityName = CommandBase.getEntityName(server, sender, string);
         if (this.isExpandedSelector()) {
             try {

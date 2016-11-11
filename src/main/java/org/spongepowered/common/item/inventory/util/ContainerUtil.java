@@ -132,11 +132,11 @@ public final class ContainerUtil {
                         float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
                         int stackSize = RANDOM.nextInt(21) + 10;
 
-                        if (stackSize > itemStack.stackSize) {
-                            stackSize = itemStack.stackSize;
+                        if (stackSize > itemStack.mth_000526_E()) {
+                            stackSize = itemStack.mth_000526_E();
                         }
 
-                        itemStack.stackSize -= stackSize;
+                        itemStack.mth_000527_e(itemStack.mth_000526_E() - stackSize);
                         final double posX = x + (double) f;
                         final double posY = y + (double) f1;
                         final double posZ = z + (double) f2;
@@ -177,11 +177,11 @@ public final class ContainerUtil {
                 float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
                 int stackSize = RANDOM.nextInt(21) + 10;
 
-                if (stackSize > itemStack.stackSize) {
-                    stackSize = itemStack.stackSize;
+                if (stackSize > itemStack.mth_000526_E()) {
+                    stackSize = itemStack.mth_000526_E();
                 }
 
-                itemStack.stackSize -= stackSize;
+                itemStack.mth_000527_e(itemStack.mth_000526_E() - stackSize);
                 final double posX = x + (double) f;
                 final double posY = y + (double) f1;
                 final double posZ = z + (double) f2;

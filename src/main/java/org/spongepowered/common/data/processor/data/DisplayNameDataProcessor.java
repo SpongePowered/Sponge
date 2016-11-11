@@ -100,8 +100,8 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
                 return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(NbtDataUtil.ITEM_BOOK_TITLE))));
             }
 
-            final NBTTagCompound compound = ((ItemStack) holder).getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
-            if (compound != null && compound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, NbtDataUtil.TAG_STRING)) {
+            final NBTTagCompound compound = ((ItemStack) holder).mth_000513_c(NbtDataUtil.ITEM_DISPLAY);
+            if (compound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, NbtDataUtil.TAG_STRING)) {
                 return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(NbtDataUtil.ITEM_DISPLAY_NAME))));
             } else {
                 return Optional.empty();
