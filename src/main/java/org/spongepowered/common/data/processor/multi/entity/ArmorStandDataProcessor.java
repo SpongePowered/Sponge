@@ -56,18 +56,18 @@ public class ArmorStandDataProcessor extends AbstractEntityDataProcessor<EntityA
         final boolean hasBasePlate = (boolean) keyValues.get(Keys.ARMOR_STAND_HAS_BASE_PLATE);
         final boolean isSmall = (boolean) keyValues.get(Keys.ARMOR_STAND_IS_SMALL);
         final boolean isMarker = (boolean) keyValues.get(Keys.ARMOR_STAND_MARKER);
-        dataHolder.setSmall(isSmall);
-        dataHolder.setMarker(isMarker);
-        dataHolder.setNoBasePlate(!hasBasePlate);
-        dataHolder.setShowArms(hasArms);
+        dataHolder.mth_001796_m(isSmall);
+        dataHolder.mth_001801_p(isMarker);
+        dataHolder.mth_001799_o(!hasBasePlate);
+        dataHolder.mth_001797_n(hasArms);
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityArmorStand dataHolder) {
         return ImmutableMap.<Key<?>, Object>builder()
-                .put(Keys.ARMOR_STAND_HAS_ARMS, dataHolder.getShowArms())
-                .put(Keys.ARMOR_STAND_HAS_BASE_PLATE, !dataHolder.hasNoBasePlate())
+                .put(Keys.ARMOR_STAND_HAS_ARMS, dataHolder.mth_001798_r())
+                .put(Keys.ARMOR_STAND_HAS_BASE_PLATE, !dataHolder.mth_001800_s())
                 .put(Keys.ARMOR_STAND_MARKER, dataHolder.hasMarker())
                 .put(Keys.ARMOR_STAND_IS_SMALL, dataHolder.isSmall())
                 .build();

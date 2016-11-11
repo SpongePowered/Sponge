@@ -411,7 +411,7 @@ public class ActivationRange {
         // Make sure not on edge of unloaded chunk
         int x = MathHelper.floor_double(entity.posX);
         int z = MathHelper.floor_double(entity.posZ);
-        Chunk chunk = isActive ? ((IMixinChunkProviderServer) entity.worldObj.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
+        Chunk chunk = isActive ? ((IMixinChunkProviderServer) ((WorldServer) entity.worldObj).getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
         if (isActive && !(chunk != null && ((IMixinChunk) chunk).areNeighborsLoaded())) {
             isActive = false;
         }

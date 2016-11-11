@@ -257,28 +257,6 @@ public final class EntityUtil {
         return entityPlayerMP;
     }
 
-    // Note: does NOT take into account any forge professions
-    public static ZombieType toNative(org.spongepowered.api.data.type.ZombieType type, @Nullable Profession profession) {
-        if (type == ZombieTypes.NORMAL) {
-            return ZombieType.NORMAL;
-        } else if (type == ZombieTypes.HUSK) {
-            return ZombieType.HUSK;
-        } else {
-            return ZOMBIE_TYPE_MAP.getOrDefault(profession, ZombieType.NORMAL);
-        }
-    }
-
-    public static org.spongepowered.api.data.type.ZombieType typeFromNative(ZombieType type) {
-        if (type == ZombieType.NORMAL) {
-            return ZombieTypes.NORMAL;
-        }
-        if (type == ZombieType.HUSK) {
-            return ZombieTypes.HUSK;
-        }
-
-        return ZombieTypes.VILLAGER;
-    }
-
     public static boolean isNative(org.spongepowered.api.data.type.ZombieType type, @Nullable Profession profession) {
         // No profession means native, husk means native, otherwise check the map (forge uses NORMAL + Profession for its types)
         return profession == null || type == ZombieTypes.HUSK || ZOMBIE_TYPE_MAP.containsKey(profession);
@@ -741,10 +719,10 @@ public final class EntityUtil {
             fromWorld.getEntityTracker().untrackEntity(entity);
         }
 
-        entity.worldObj.removeEntityDangerously(entity);
+        entity.worldObj.mth_000647_f(entity);
         entity.isDead = false;
         entity.dimension = targetDim;
-        entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
+        entity.mth_001449_a(location.getX(), location.getY(), location.getZ(), 0, 0);
         while (!toWorld.getCollisionBoxes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
             entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
         }

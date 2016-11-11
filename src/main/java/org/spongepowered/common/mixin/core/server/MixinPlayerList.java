@@ -264,7 +264,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         playerIn.dimension = ((IMixinWorldServer) worldServer).getDimensionId();
         playerIn.setWorld(worldServer);
         playerIn.interactionManager.setWorld((WorldServer) playerIn.worldObj);
-        playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
+        playerIn.mth_001449_a(x, y, z, yaw, pitch);
         // make sure the chunk is loaded for login
         worldServer.getChunkProvider().loadChunk(loginEvent.getToTransform().getLocation().getChunkPosition().getX(), loginEvent.getToTransform().getLocation().getChunkPosition().getZ());
         // Sponge end
@@ -360,10 +360,10 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
                     if (!playerIn.isRiding()) {
                         LOG.warn("Couldn\'t reattach entity to player");
-                        worldServer.removeEntityDangerously(entity2);
+                        worldServer.mth_000647_f(entity2);
 
                         for (Entity entity3 : entity2.getRecursivePassengers()) {
-                            worldServer.removeEntityDangerously(entity3);
+                            worldServer.mth_000647_f(entity3);
                         }
                     }
                 }
@@ -475,7 +475,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         playerIn.getServerWorld().getEntityTracker().untrackEntity(playerIn);
         playerIn.getServerWorld().getPlayerChunkMap().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
-        this.mcServer.worldServerForDimension(playerIn.dimension).removeEntityDangerously(playerIn);
+        this.mcServer.worldServerForDimension(playerIn.dimension).mth_000647_f(playerIn);
 
         // ### PHASE 3 ### Reset player (if applicable)
         // Recreate the player object in order to support Forge's PlayerEvent.Clone
@@ -649,7 +649,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             }
         }
         playerIn.connection.sendPacket(new SPacketRespawn(dimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
-        fromWorld.removeEntityDangerously(playerIn);
+        fromWorld.mth_000647_f(playerIn);
         playerIn.isDead = false;
         // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
         ((IMixinEntity) playerIn).setLocationAndAngles(event.getToTransform());

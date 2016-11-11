@@ -427,7 +427,7 @@ public abstract class MixinEntity implements IMixinEntity {
             this.rotationYaw = (float) event.getToTransform().getYaw();
         }
 
-        IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) this.worldObj.getChunkProvider();
+        IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.worldObj).getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);
         // detach passengers
         final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
