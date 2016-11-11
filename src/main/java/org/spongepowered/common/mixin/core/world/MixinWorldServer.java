@@ -237,7 +237,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow protected abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
-    @Shadow @Override public abstract ChunkProviderServer getChunkProvider();
+    @Shadow public abstract ChunkProviderServer getChunkProvider();
     @Shadow protected abstract void playerCheckLight();
     @Shadow protected abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
     @Shadow private boolean canAddEntity(net.minecraft.entity.Entity entityIn) {
@@ -554,7 +554,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         SpongeImpl.postEvent(lightning);
                         if (!lightning.isCancelled()) {
                             // Sponge End
-                            this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), true));
+                            this.mth_000646_d(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), true));
                         } // Sponge - Brackets.
                     }
                     else
@@ -567,7 +567,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             // Sponge End
-                            this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), false));
+                            this.mth_000646_d(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), false));
                         } // Sponge - Brackets.
                     }
                 }
@@ -1212,8 +1212,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * Technically an overwrite to properly track on *server* worlds.
      */
     @Override
-    public void notifyBlockOfStateChange(BlockPos pos, Block blockIn) {
-        this.getCauseTracker().notifyBlockOfStateChange(pos, blockIn, null);
+    public void mth_000643_a(BlockPos pos, Block blockIn, BlockPos otherPos) { // notifyBlockOfStateChange
+        this.getCauseTracker().notifyBlockOfStateChange(pos, blockIn, otherPos);
     }
 
     /**
@@ -1251,7 +1251,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * Technically an overwrite to properly track on *server* worlds.
      */
     @Override
-    public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType) {
+    public void mth_000641_c(BlockPos pos, Block blockType) { // notifyNeighborsOfStateChange
         if (!mth_000637_a(pos)) {
             return;
         }
@@ -1344,7 +1344,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {
         if ((flags & 1) != 0) {
-            this.notifyNeighborsRespectDebug(pos, newState.getBlock());
+            this.mth_000640_a(pos, newState.getBlock(), false);
 
             if (newState.mth_000896_o()) {
                 this.updateComparatorOutputLevel(pos, newState.getBlock());
@@ -1411,7 +1411,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         if (entity instanceof EntityLightningBolt) {
-            this.addWeatherEffect(entity);
+            this.mth_000646_d(entity);
             return true;
         }
 

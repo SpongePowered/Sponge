@@ -133,15 +133,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract Scoreboard getWorldScoreboard();
     @Shadow public abstract boolean isSpectator();
     @Shadow public abstract EntityItem dropItem(boolean dropAll);
-    @Shadow public abstract void onCriticalHit(net.minecraft.entity.Entity entityHit);
-    @Shadow public abstract void onEnchantmentCritical(net.minecraft.entity.Entity entityHit);
+    @Shadow public abstract void mth_000430_a(net.minecraft.entity.Entity entityHit);
+    @Shadow public abstract void mth_000431_b(net.minecraft.entity.Entity entityHit); // onEnchantmentCritical
     @Shadow public abstract void addExhaustion(float p_71020_1_);
     @Shadow public abstract void addStat(StatBase stat, int amount);
     @Shadow public abstract void addStat(StatBase stat);
     @Shadow public abstract float getCooledAttackStrength(float adjustTicks);
     @Shadow public abstract void resetCooldown();
     @Shadow public abstract float getAIMoveSpeed();
-    @Shadow public abstract void spawnSweepParticles();
+    @Shadow public abstract void mth_000432_cP(); //spawnSweepParticles()
     @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract String getName();
     @Shadow public abstract void takeStat(StatBase stat);
@@ -436,7 +436,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * @param targetEntity The target entity
      */
     @Overwrite
-    public void attackTargetEntityWithCurrentItem(Entity targetEntity) {
+    public void mth_000428_f(Entity targetEntity) {
         // Sponge Start - Add SpongeImpl hook to override in forge as necessary
         if (!SpongeImplHooks.checkAttackEntity((EntityPlayer) (Object) this, targetEntity)) {
             return;
@@ -587,7 +587,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             }
 
                             this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001298_eA, this.getSoundCategory(), 1.0F, 1.0F);
-                            this.spawnSweepParticles();
+                            this.mth_000432_cP();
                         }
 
                         if (targetEntity instanceof EntityPlayerMP && targetEntity.velocityChanged) {
@@ -600,7 +600,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                         if (isCriticalAttack) {
                             this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001294_ew, this.getSoundCategory(), 1.0F, 1.0F);
-                            this.onCriticalHit(targetEntity);
+                            this.mth_000430_a(targetEntity);
                         }
 
                         if (!isCriticalAttack && !isSweapingAttack) {
@@ -612,7 +612,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
 
                         if (enchantmentDamage > 0.0F) {
-                            this.onEnchantmentCritical(targetEntity);
+                            this.mth_000431_b(targetEntity);
                         }
 
                         if (!this.worldObj.isRemote && targetEntity instanceof EntityPlayer) {

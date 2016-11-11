@@ -63,8 +63,8 @@ import java.util.List;
 @Mixin(TileEntityBanner.class)
 public abstract class MixinTileEntityBanner extends MixinTileEntity implements Banner, IMixinBanner {
 
-    @Shadow private int baseColor;
-    @Shadow private NBTTagList patterns;
+    @Shadow private EnumDyeColor fld_000745_f; // base
+    @Shadow private NBTTagList fld_000746_g; // patterns
 
     private List<PatternLayer> patternLayers = Lists.newArrayList();
 
@@ -82,7 +82,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
     @Override
     public void sendDataToContainer(DataView dataView) {
         dataView.set(Keys.BANNER_PATTERNS.getQuery(), Lists.newArrayList(this.patternLayers));
-        dataView.set(Keys.BANNER_BASE_COLOR.getQuery(), this.baseColor);
+        dataView.set(Keys.BANNER_BASE_COLOR.getQuery(), this.fld_000745_f.getDyeDamage());
     }
 
     @Override
@@ -100,10 +100,10 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
 
     private void updatePatterns() {
         this.patternLayers.clear();
-        if (this.patterns != null) {
+        if (this.fld_000746_g != null) {
             SpongeGameRegistry registry = SpongeImpl.getGame().getRegistry();
-            for (int i = 0; i < this.patterns.tagCount(); i++) {
-                NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
+            for (int i = 0; i < this.fld_000746_g.tagCount(); i++) {
+                NBTTagCompound tagCompound = this.fld_000746_g.getCompoundTagAt(i);
                 String patternId = tagCompound.getString(NbtDataUtil.BANNER_PATTERN_ID);
                 this.patternLayers.add(new SpongePatternLayer(
                     SpongeImpl.getRegistry().getType(BannerPatternShape.class, patternId).get(),
@@ -122,19 +122,19 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
     public void setLayers(List<PatternLayer> layers) {
         this.patternLayers = new NonNullArrayList<>();
         this.patternLayers.addAll(layers);
-        this.patterns = new NBTTagList();
+        this.fld_000746_g = new NBTTagList();
         for (PatternLayer layer : this.patternLayers) {
             NBTTagCompound compound = new NBTTagCompound();
             compound.setString(NbtDataUtil.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.getShape()).mth_000801_b()); // getPatternID
             compound.setInteger(NbtDataUtil.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
-            this.patterns.appendTag(compound);
+            this.fld_000746_g.appendTag(compound);
         }
         markDirtyAndUpdate();
     }
 
     @Override
     public DyeColor getBaseColor() {
-        return DyeColorRegistryModule.fromId(this.baseColor).orElse(DyeColors.BLACK);
+        return (DyeColor) (Object) this.fld_000745_f;
     }
 
     @Override
@@ -142,9 +142,9 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
         checkNotNull(baseColor, "Null DyeColor!");
         try {
             EnumDyeColor color = (EnumDyeColor) (Object) baseColor;
-            this.baseColor = color.getDyeDamage();
+            this.fld_000745_f = color;
         } catch (Exception e) {
-            this.baseColor = EnumDyeColor.BLACK.getDyeDamage();
+            this.fld_000745_f = EnumDyeColor.BLACK;
         }
         markDirtyAndUpdate();
     }

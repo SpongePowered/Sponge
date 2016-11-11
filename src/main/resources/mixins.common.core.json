@@ -397,6 +397,7 @@
         "tileentity.MixinTileEntityHopper",
         "tileentity.MixinTileEntityJukebox",
         "tileentity.MixinTileEntityLockable",
+        "tileentity.MixinTileEntityLockableLoot",
         "tileentity.MixinTileEntityMobSpawner",
         "tileentity.MixinTileEntityNote",
         "tileentity.MixinTileEntityPiston",

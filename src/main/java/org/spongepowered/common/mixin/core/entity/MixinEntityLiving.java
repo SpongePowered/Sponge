@@ -127,7 +127,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     }
 
     @Inject(method = "processInitialInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
-    public void callLeashEvent(EntityPlayer playerIn, ItemStack itemStack, EnumHand hand, CallbackInfoReturnable<Boolean> ci) {
+    public void callLeashEvent(EntityPlayer playerIn, EnumHand hand, CallbackInfoReturnable<Boolean> ci) {
         if (!playerIn.worldObj.isRemote) {
             final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Cause.of(NamedCause.source(playerIn)), this);
             SpongeImpl.postEvent(event);

@@ -129,7 +129,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow @Nullable protected EntityPlayer attackingPlayer;
     @Shadow protected ItemStack activeItemStack;
     // Empty body so that we can call super() in MixinEntityPlayer
-    @Shadow public void stopActiveHand() {
+    @Shadow public void mth_001510_cE() { // stopActiveHand
 
     }
 
@@ -140,7 +140,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract SoundEvent getHurtSound();
     @Shadow public abstract void setHealth(float health);
     @Shadow public abstract void addPotionEffect(net.minecraft.potion.PotionEffect potionEffect);
-    @Shadow protected abstract void markPotionsDirty();
+    @Shadow protected abstract void mth_001506_cw(); // markPotionsDirty
     @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
     @Shadow public abstract void clearActivePotions();
     @Shadow public abstract void setLastAttacker(net.minecraft.entity.Entity entity);
@@ -407,7 +407,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 this.limbSwingAmount = 1.5F;
                 boolean flag1 = true;
 
-                if ((float) this.hurtResistantTime > (float) this.maxHurtResistantTime / 2.0F) {
+                if ((float) this.fld_001436_V > (float) this.maxHurtResistantTime / 2.0F) {
                     if (amount <= this.lastDamage) {
                         return false;
                     }
@@ -426,7 +426,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         return false;
                     }
                     this.lastDamage = amount;
-                    this.hurtResistantTime = this.maxHurtResistantTime;
+                    this.fld_001436_V = this.maxHurtResistantTime;
                     // this.damageEntity(source, amount); // handled above
                     // Sponge end
                     this.hurtTime = this.maxHurtTime = 10;

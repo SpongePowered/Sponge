@@ -217,11 +217,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
-    @Shadow public boolean addWeatherEffect(net.minecraft.entity.Entity entityIn) {
-        return false; // Note this is not actually going to return false, it's just a target
-    };
+    @Shadow public abstract boolean mth_000646_d(net.minecraft.entity.Entity entityIn); // addWeatherEffect
     @Shadow public abstract Biome getBiome(BlockPos pos);
-    @Shadow public abstract IChunkProvider getChunkProvider();
     @Shadow public abstract BiomeProvider getBiomeProvider();
     @Shadow @Nullable public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
@@ -230,8 +227,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow protected abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
     @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
             boolean isFlaming, boolean isSmoking);
-    @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
-            com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
+    @Shadow public abstract List<net.minecraft.entity.Entity> mth_000660_a(Class<net.minecraft.entity.Entity> entityType,
+            com.google.common.base.Predicate<net.minecraft.entity.Entity> filter); // getEntities
     @Shadow public abstract <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class <? extends T > clazz, AxisAlignedBB aabb,
             com.google.common.base.Predicate<? super T > filter);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
@@ -243,10 +240,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
     @Shadow public abstract void immediateBlockTick(BlockPos pos, IBlockState state, Random random);
     @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
-    @Shadow public abstract void notifyBlockOfStateChange(BlockPos pos, final Block blockIn);
+    @Shadow public abstract void mth_000643_a(BlockPos pos, final Block blockIn, BlockPos otherPos);
     @Shadow public abstract void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide);
-    @Shadow public abstract void notifyNeighborsOfStateChange(BlockPos pos, Block blockType);
-    @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType);
+    @Shadow public abstract void mth_000641_c(BlockPos pos, Block blockType);
+    @Shadow public abstract void mth_000640_a(BlockPos pos, Block blockType, boolean notifySelf);
     @Shadow public abstract void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
     @Shadow public abstract void scheduleBlockUpdate(BlockPos pos, Block blockIn, int delay, int priority);
     @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
@@ -376,7 +373,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // This already returns a new copy
-        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class,
+        return (Collection<Entity>) (Object) this.mth_000660_a(net.minecraft.entity.Entity.class,
                 Functional.java8ToGuava((Predicate<net.minecraft.entity.Entity>) (Object) filter));
     }
 
@@ -497,7 +494,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Iterable<Chunk> getLoadedChunks() {
-        return (List<Chunk>) (List<?>) Lists.newArrayList(((ChunkProviderServer) this.getChunkProvider()).getLoadedChunks());
+        return (List<Chunk>) (List<?>) Lists.newArrayList(((ChunkProviderServer) (((WorldServer) (Object) this).getChunkProvider())).getLoadedChunks());
     }
 
     @Override
@@ -1112,7 +1109,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Block block = this.getBlockState(pos).getBlock();
             // int blockLight = block.getLightValue(this, pos);
-            net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
             if (chunk == null || chunk.unloaded) {
                 return 0;
             }

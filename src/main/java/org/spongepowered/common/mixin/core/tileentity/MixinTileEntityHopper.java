@@ -74,10 +74,9 @@ import javax.annotation.Nullable;
 @Mixin(TileEntityHopper.class)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
         @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
-public abstract class MixinTileEntityHopper extends MixinTileEntityLockable implements Hopper, IMixinCustomNameable {
+public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot implements Hopper, IMixinCustomNameable {
 
     @Shadow private int transferCooldown;
-    @Shadow @Nullable private String customName;
 
     private Fabric<IInventory> fabric;
     private SlotCollection slots;
@@ -90,8 +89,8 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
         this.lens = new OrderedInventoryLensImpl(0, 5, 1, slots);
     }
 
-    @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"))
-    private static void onPutDrop(IInventory inventory, EntityItem entityItem, CallbackInfoReturnable<Boolean> callbackInfo) {
+    @Inject(method = "mth_000829_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;")) // putDropInInventoryAllSlots
+    private static void onPutDrop(IInventory inventory, IInventory hopper, EntityItem entityItem, CallbackInfoReturnable<Boolean> callbackInfo) {
         IMixinEntity spongeEntity = (IMixinEntity) entityItem;
         spongeEntity.getCreatorUser().ifPresent(owner -> {
             if (inventory instanceof TileEntity) {
@@ -106,11 +105,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(of("TransferCooldown"), this.transferCooldown);
-        if (this.customName != null) {
-            container.set(of("CustomName"), this.customName);
-        }
-        return container;
+        return container.set(of("TransferCooldown"), this.transferCooldown);
     }
 
     @Override

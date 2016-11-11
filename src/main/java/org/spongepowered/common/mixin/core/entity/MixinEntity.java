@@ -39,6 +39,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.MoverType;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -195,8 +196,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public boolean onGround;
     @Shadow public boolean inWater;
     @Shadow protected boolean isImmuneToFire;
-    @Shadow public int hurtResistantTime;
-    @Shadow public int fireResistance;
+    @Shadow public int fld_001436_V;
     @Shadow public int fire;
     @Shadow public int dimension;
     @Shadow protected Random rand;
@@ -305,14 +305,14 @@ public abstract class MixinEntity implements IMixinEntity {
         }
     }
 
-    @Inject(method = "moveEntity(DDD)V", at = @At("HEAD"), cancellable = true)
-    public void onMoveEntity(double x, double y, double z, CallbackInfo ci) {
+    @Inject(method = "moveEntity", at = @At("HEAD"), cancellable = true)
+    public void onMoveEntity(MoverType type, double x, double y, double z, CallbackInfo ci) {
         if (!this.worldObj.isRemote && !SpongeHooks.checkEntitySpeed(((net.minecraft.entity.Entity) (Object) this), x, y, z)) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "setOnFireFromLava()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC))
+    @Inject(method = "mth_001442_W()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC)) // setOnFireFromLava
     public void preSetOnFire(CallbackInfo callbackInfo) {
         if (!this.worldObj.isRemote) {
             this.originalLava = DamageSource.lava;
@@ -323,7 +323,7 @@ public abstract class MixinEntity implements IMixinEntity {
         }
     }
 
-    @Inject(method = "setOnFireFromLava()V", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD))
+    @Inject(method = "mth_001442_W()V", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD)) // setOnFireFromLava
     public void postSetOnFire(CallbackInfo callbackInfo) {
         if (!this.worldObj.isRemote) {
             if (this.originalLava == null) {
@@ -1049,7 +1049,7 @@ public abstract class MixinEntity implements IMixinEntity {
         this.setCurrentCollidingBlock(null);
     }
 
-    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
+    @Redirect(method = "mth_001445_ac", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V")) // doBlockCollisions
     public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
         // if block can't collide, return
         if (!((IMixinBlock) block).hasCollideWithStateLogic()) {

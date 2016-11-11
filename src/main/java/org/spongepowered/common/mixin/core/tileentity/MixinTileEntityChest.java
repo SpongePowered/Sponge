@@ -69,9 +69,8 @@ import java.util.Optional;
 @Mixin(TileEntityChest.class)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
         @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
-public abstract class MixinTileEntityChest extends MixinTileEntityLockable implements Chest, IMixinCustomNameable, ILockableContainer {
+public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot implements Chest, IMixinCustomNameable, ILockableContainer {
 
-    @Shadow public String customName;
     @Shadow public float lidAngle;
     @Shadow public int numPlayersUsing;
     @Shadow public TileEntityChest adjacentChestZNeg;
@@ -169,15 +168,6 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
 
             this.worldObj.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
         }
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        if (this.customName != null) {
-            container.set(of("CustomName"), this.customName);
-        }
-        return container;
     }
 
     @Override
