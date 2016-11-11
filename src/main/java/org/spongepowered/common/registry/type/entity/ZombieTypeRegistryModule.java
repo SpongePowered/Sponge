@@ -36,6 +36,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings("deprecation")
 public class ZombieTypeRegistryModule implements CatalogRegistryModule<ZombieType> {
 
     public static ZombieTypeRegistryModule getInstance() {
@@ -47,9 +48,9 @@ public class ZombieTypeRegistryModule implements CatalogRegistryModule<ZombieTyp
 
     @Override
     public void registerDefaults() {
-        this.types.put("normal", new SpongeZombieType("minecraft:normal"));
-        this.types.put("villager", new SpongeZombieType("minecraft:villager"));
-        this.types.put("husk", new SpongeZombieType("minecraft:husk"));
+        this.types.put("normal", new SpongeZombieType("minecraft:normal", "Zombie"));
+        this.types.put("villager", new SpongeZombieType("minecraft:villager", "ZombieVillager"));
+        this.types.put("husk", new SpongeZombieType("minecraft:husk", "Husk"));
     }
 
     @Override
