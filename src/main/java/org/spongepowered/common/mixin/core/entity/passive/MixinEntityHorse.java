@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.passive.EntityHorse;
-import net.minecraft.entity.passive.HorseType;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
@@ -37,8 +36,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.processor.common.HorseUtils;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;

@@ -51,6 +51,7 @@ import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -966,7 +967,7 @@ public abstract class MixinEntity implements IMixinEntity {
         try {
             final NBTTagCompound compound = new NBTTagCompound();
             writeToNBT(compound);
-            net.minecraft.entity.Entity entity = EntityList.createEntityByName(this.entityType.getId(), this.worldObj);
+            net.minecraft.entity.Entity entity = EntityList.mth_001479_a(new ResourceLocation(this.entityType.getId()), this.worldObj);
             compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
             entity.readFromNBT(compound);
             return (Entity) entity;

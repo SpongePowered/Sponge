@@ -80,7 +80,7 @@ public class TradeOfferDataProcessor
     @Override
     protected Optional<List<TradeOffer>> getVal(EntityVillager entity) {
         if (entity.fld_000364_bD == null) {
-            entity.th_000389_dt();
+            entity.mth_000389_dt();
         }
         return Optional.of(toTradeOfferList(entity.fld_000364_bD));
     }

@@ -349,7 +349,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
             boolean clickedHotbar = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
             boolean itemValidCheck = itemstack == null || itemstack.getItem() != null;
-            boolean itemValidCheck2 = itemstack == null || itemstack.getMetadata() >= 0 && itemstack.stackSize <= 64 && itemstack.stackSize > 0;
+            boolean itemValidCheck2 = itemstack == null || itemstack.getMetadata() >= 0 && itemstack.mth_000526_E() <= 64 && itemstack.mth_000526_E() > 0;
 
             // Sponge start - handle CreativeInventoryEvent
             if (itemValidCheck && itemValidCheck2) {
@@ -549,13 +549,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         EntityItem item = null;
         ItemStack stack = this.playerEntity.inventory.getCurrentItem();
         if (stack != null) {
-            int size = stack.stackSize;
+            int size = stack.mth_000526_E();
             item = this.playerEntity.dropItem(dropAll);
             // force client itemstack update if drop event was cancelled
             if (item == null) {
                 Slot slot = this.playerEntity.openContainer.getSlotFromInventory(this.playerEntity.inventory, this.playerEntity.inventory.currentItem);
                 int windowId = this.playerEntity.openContainer.windowId;
-                stack.stackSize = size;
+                stack.mth_000527_e(size);
                 this.sendPacket(new SPacketSetSlot(windowId, slot.slotNumber, stack));
             }
         }

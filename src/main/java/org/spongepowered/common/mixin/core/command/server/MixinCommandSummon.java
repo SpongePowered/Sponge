@@ -33,6 +33,7 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -73,7 +74,7 @@ public abstract class MixinCommandSummon extends CommandBase {
                     EntityMinecart.Type.values()[nbt.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
             nbt.removeTag(NbtDataUtil.MINECART_TYPE);
         }
-        Class<? extends Entity> entityClass = EntityList.NAME_TO_CLASS.get(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID));
+        Class<? extends Entity> entityClass = EntityList.fld_001472_b.getObject(new ResourceLocation(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID)));
         if (entityClass == null) {
             return null;
         }

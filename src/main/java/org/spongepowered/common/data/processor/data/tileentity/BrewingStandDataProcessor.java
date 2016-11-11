@@ -47,7 +47,7 @@ public class BrewingStandDataProcessor extends
 
     @Override
     protected boolean set(TileEntityBrewingStand entity, Integer value) {
-        if (!entity.canBrew()) {
+        if (!entity.mth_000814_o(()) {
             return false;
         }
 
@@ -57,7 +57,7 @@ public class BrewingStandDataProcessor extends
 
     @Override
     protected Optional<Integer> getVal(TileEntityBrewingStand entity) {
-        return Optional.of(entity.canBrew() ? entity.getField(0) : 0);
+        return Optional.of(entity.mth_000814_o(() ? entity.getField(0) : 0);
     }
 
     @Override
