@@ -804,8 +804,8 @@ public interface PacketFunction {
                 .orElseThrow(TrackingUtil.throwWithContext("Expected a previous highlighted slot, got nothing.", context));
         final Container inventoryContainer = player.inventoryContainer;
         final InventoryPlayer inventory = player.inventory;
-        final Slot sourceSlot = inventoryContainer.getSlot(previousSlot + inventory.mainInventory.length);
-        final Slot targetSlot = inventoryContainer.getSlot(itemChange.getSlotId() + inventory.mainInventory.length);
+        final Slot sourceSlot = inventoryContainer.getSlot(previousSlot + inventory.fld_000404_a.size());
+        final Slot targetSlot = inventoryContainer.getSlot(itemChange.getSlotId() + inventory.fld_000404_a.size());
 
         ItemStackSnapshot sourceSnapshot = ItemStackUtil.snapshotOf(sourceSlot.getStack());
         ItemStackSnapshot targetSnapshot = ItemStackUtil.snapshotOf(targetSlot.getStack());

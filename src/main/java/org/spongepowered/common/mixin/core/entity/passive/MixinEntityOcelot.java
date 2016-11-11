@@ -70,13 +70,13 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
     public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand, ItemStack stack) {
         int random = rand.nextInt(bound);
         if (random == 0) {
-            stack.stackSize++;
+            stack.mth_000527_e(stack.mth_000526_E() + 1);
             if (!SpongeImpl
                     .postEvent(SpongeEventFactory.createTameEntityEvent(Cause.of(NamedCause.source(player),
                             NamedCause.of(TameEntityEvent.USED_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot())),
                             this))) {
 
-                stack.stackSize--;
+                stack.mth_000527_e(stack.mth_000526_E() - 1);
                 return random;
             }
 

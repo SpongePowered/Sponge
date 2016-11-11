@@ -80,7 +80,7 @@ public class SlotAdapter extends Adapter implements Slot {
     @Override
     public int getStackSize() {
         net.minecraft.item.ItemStack stack = this.slot.getStack(this.inventory);
-        return stack != null ? stack.stackSize : 0;
+        return stack != null ? stack.mth_000526_E() : 0;
     }
 
     @SuppressWarnings("unchecked")
@@ -156,8 +156,8 @@ public class SlotAdapter extends Adapter implements Slot {
         if (old == null && this.slot.setStack(this.inventory, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
             remaining -= push;
         } else if (old != null && ItemStackUtil.compare(old, stack)) {
-            push = Math.max(Math.min(maxStackSize - old.stackSize, remaining), 0); // max() accounts for oversized stacks
-            old.stackSize += push;
+            push = Math.max(Math.min(maxStackSize - old.mth_000526_E(), remaining), 0); // max() accounts for oversized stacks
+            old.mth_000527_e(old.mth_000526_E() + push);
             remaining -= push;
         }
 
@@ -208,7 +208,7 @@ public class SlotAdapter extends Adapter implements Slot {
     @Override
     public int totalItems() {
         net.minecraft.item.ItemStack stack = this.slot.getStack(this.inventory);
-        return stack != null ? stack.stackSize : 0;
+        return stack != null ? stack.mth_000526_E() : 0;
     }
 
     @Override

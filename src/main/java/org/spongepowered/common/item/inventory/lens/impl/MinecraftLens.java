@@ -76,7 +76,7 @@ public abstract class MinecraftLens extends AbstractLens<IInventory, ItemStack> 
     @SuppressWarnings("unchecked")
     public static MinecraftLens of(Container container, SlotCollection collection) {
         if (container instanceof ContainerChest) {
-            return new ContainerChestInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection, ((ContainerChest) container).numRows);
+            return new ContainerChestInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection, ((ContainerChest) container).fld_000478_f);
         } else if (container instanceof ContainerPlayer) {
             return new ContainerPlayerInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection);
         }

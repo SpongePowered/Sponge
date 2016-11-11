@@ -239,7 +239,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
 
         if (!this.worldObj.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
-            this.inventory.dropAllItems();
+            this.inventory.mth_000415_o();
         }
 
         if (cause != null) {
@@ -330,7 +330,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Nullable
     @Overwrite
     public EntityItem dropItem(@Nullable ItemStack droppedItem, boolean dropAround, boolean traceItem) {
-        if (droppedItem == null || droppedItem.stackSize == 0 || droppedItem.getItem() == null) {
+        if (droppedItem == null || droppedItem.mth_000526_E() == 0 || droppedItem.getItem() == null) {
             return null;
         } else if (this.worldObj.isRemote) {
             double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
@@ -365,7 +365,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
             if (traceItem) {
                 if (itemstack != null) {
-                    this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.stackSize);
+                    this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.mth_000526_E());
                 }
 
                 this.addStat(StatList.DROP);
@@ -618,7 +618,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         if (!this.worldObj.isRemote && targetEntity instanceof EntityPlayer) {
                             EntityPlayer entityplayer = (EntityPlayer) targetEntity;
                             ItemStack itemstack2 = this.getHeldItemMainhand();
-                            ItemStack itemstack3 = entityplayer.isHandActive() ? entityplayer.getActiveItemStack() : null;
+                            ItemStack itemstack3 = entityplayer.isHandActive() ? entityplayer.mth_001508_cB() : null;
 
                             if (itemstack2 != null && itemstack3 != null && itemstack2.getItem() instanceof ItemAxe && itemstack3.getItem() == Items.SHIELD) {
                                 float f3 = 0.25F + (float) EnchantmentHelper.getEfficiencyModifier((EntityPlayer) (Object) this) * 0.05F;
@@ -659,7 +659,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         if (itemstack1 != null && entity instanceof EntityLivingBase) {
                             itemstack1.hitEntity((EntityLivingBase) entity, (EntityPlayer) (Object) this);
 
-                            if (itemstack1.stackSize <= 0) {
+                            if (itemstack1.mth_000526_E() <= 0) {
                                 this.setHeldItem(EnumHand.MAIN_HAND, (ItemStack) null);
                             }
                         }
