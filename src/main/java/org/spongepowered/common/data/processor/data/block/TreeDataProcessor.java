@@ -77,6 +77,9 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
     @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack stack, TreeType value) {
+        // TODO - the API needs to be changed, as its no longer possible to change an ItemStack's type
+        return false;
+        /*
         if (stack.getItem() == ItemTypes.LOG || stack.getItem() == ItemTypes.LEAVES) {
             if (value.equals(TreeTypes.OAK) || value.equals(TreeTypes.BIRCH) ||
                     value.equals(TreeTypes.SPRUCE) || value.equals(TreeTypes.JUNGLE)) {
@@ -111,7 +114,7 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
         } else {
             stack.setItemDamage(this.setToMeta(value));
             return true;
-        }
+        }*/
     }
 
     @Override

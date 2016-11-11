@@ -28,23 +28,10 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.entity.passive.EntityVillager.EmeraldForItems;
-import net.minecraft.entity.passive.EntityVillager.ItemAndEmeraldToItem;
-import net.minecraft.entity.passive.EntityVillager.ListEnchantedBookForEmeralds;
-import net.minecraft.entity.passive.EntityVillager.ListEnchantedItemForEmeralds;
-import net.minecraft.entity.passive.EntityVillager.ListItemForEmeralds;
-import net.minecraft.entity.passive.EntityVillager.PriceInfo;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.api.item.merchant.TradeOfferListMutator;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
 

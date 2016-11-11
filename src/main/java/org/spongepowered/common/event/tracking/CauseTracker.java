@@ -321,7 +321,7 @@ public final class CauseTracker {
             }
             // Sponge End
 
-            iblockstate.getBlock().neighborChanged(iblockstate, this.targetWorld, notifyPos, sourceBlock);
+            iblockstate.getBlock().neighborChanged(iblockstate, this.targetWorld, notifyPos, sourceBlock, sourcePos);
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
@@ -459,7 +459,7 @@ public final class CauseTracker {
         if (iblockstate == null) {
             return false;
         }
-        if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
+        if (newState.mth_000887_c() != iblockstate.mth_000887_c() || newState.mth_000888_d() != iblockstate.mth_000888_d()) {
             minecraftWorld.theProfiler.startSection("checkLight");
             minecraftWorld.checkLight(pos);
             minecraftWorld.theProfiler.endSection();
@@ -470,9 +470,9 @@ public final class CauseTracker {
         }
 
         if (flag.updateNeighbors()) { // Sponge - remove the isRemote check
-            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
+            minecraftWorld.mth_000641_c(pos, iblockstate.getBlock());
 
-            if (newState.hasComparatorInputOverride()) {
+            if (newState.mth_000896_o()) {
                 minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
             }
         }

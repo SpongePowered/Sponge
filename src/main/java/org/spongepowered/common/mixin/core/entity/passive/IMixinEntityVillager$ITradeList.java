@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity.passive;
 
+import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
+import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferListMutator;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,12 +41,12 @@ import java.util.Random;
 public interface IMixinEntityVillager$ITradeList extends TradeOfferListMutator, EntityVillager.Unknown5f {
 
     @Override
-    default void accept(List<TradeOffer> tradeOffers, Random random) {
+    default void accept(Merchant merchant, List<TradeOffer> tradeOffers, Random random) {
         MerchantRecipeList tempList = new MerchantRecipeList();
         for (TradeOffer offer : tradeOffers) {
             tempList.add(TradeOfferUtil.toNative(offer));
         }
-        mth_000109_a(tempList, random);
+        mth_000109_a((IMerchant) merchant, tempList, random);
         tradeOffers.clear();
         for (MerchantRecipe recipe : tempList) {
             tradeOffers.add(TradeOfferUtil.fromNative(recipe));

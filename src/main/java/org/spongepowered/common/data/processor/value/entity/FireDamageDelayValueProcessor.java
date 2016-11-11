@@ -62,13 +62,14 @@ public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<
     @Override
     protected boolean set(Entity container, Integer value) {
         checkArgument(value >= 0, "Fire tick delay must be equal to or greater than zero!");
-        container.fireResistance = value;
-        return true;
+        //container.fireResistance = value;
+        // TODO - this is no longer settable, so this needs to be a Property rather than Data
+        return false;
     }
 
     @Override
     protected Optional<Integer> getVal(Entity container) {
-        return Optional.of(container.fireResistance);
+        return Optional.of(container.mth_000421_bD());
     }
 
     @Override

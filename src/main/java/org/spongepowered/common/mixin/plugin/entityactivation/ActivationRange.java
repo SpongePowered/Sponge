@@ -357,7 +357,7 @@ public class ActivationRange {
             if (entity instanceof EntityCreature && ((EntityCreature) entity).getAITarget() != null) {
                 return true;
             }
-            if (entity instanceof EntityVillager && ((EntityVillager) entity).isMating()) {
+            if (entity instanceof EntityVillager && ((EntityVillager) entity).mth_000381_di()) {
                 return true;
             }
             if (entity instanceof EntityAnimal) {

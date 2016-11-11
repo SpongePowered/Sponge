@@ -59,6 +59,9 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
     @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack dataHolder, FluidStackSnapshot value) {
+        // TODO - the API needs to be refactored, as it's no longer possible to change the type of an ItemStack
+        return false;
+        /*
         FluidType fluidType = value.getFluid();
         if (fluidType == FluidTypes.WATER) {
             dataHolder.setItem(Items.WATER_BUCKET);
@@ -68,7 +71,7 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
             return true;
         } else {
             return false;
-        }
+        }*/
     }
 
     @Override
@@ -99,6 +102,7 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
     @SuppressWarnings("deprecation")
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        /*
         if (container instanceof ItemStack) {
             final ItemStack itemStack = (ItemStack) container;
             if (itemStack.getItem() == Items.WATER_BUCKET) {
@@ -108,7 +112,9 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
                 itemStack.setItem(Items.BUCKET);
                 return DataTransactionResult.successRemove(constructImmutableValue(LAVA));
             }
-        }
+        }*/
+
+        // TODO - the API needs to be refactored, as it's no longer possible to change the type of an ItemStack
         return DataTransactionResult.failNoData();
     }
 }

@@ -715,7 +715,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkBlockBounds(x, y, z);
         final BlockPos pos = new BlockPos(x, y, z);
         final IBlockState state = getBlockState(pos);
-        final AxisAlignedBB box = state.getBoundingBox((IBlockAccess) this, pos);
+        final AxisAlignedBB box = state.mth_000901_d((IBlockAccess) this, pos);
         try {
             return Optional.of(VecHelper.toSponge(box).offset(x, y, z));
         } catch (IllegalArgumentException exception) {

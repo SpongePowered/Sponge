@@ -26,6 +26,7 @@ package org.spongepowered.common.data.processor.common;
 
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
+import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.HorseType;
 import org.spongepowered.api.data.DataView;
@@ -45,7 +46,7 @@ public class HorseUtils {
     }
 
     public static HorseColor getHorseColor(EntityHorse horse) {
-        return SpongeEntityConstants.HORSE_COLOR_IDMAP.get(horse.getHorseVariant() & 255);
+        return SpongeEntityConstants.HORSE_COLOR_IDMAP.get(horse.mth_001739_dh() & 255);
     }
 
     public static HorseColor getHorseColor(DataView container) {
@@ -54,14 +55,14 @@ public class HorseUtils {
     }
 
     public static HorseStyle getHorseStyle(EntityHorse horse) {
-        return SpongeEntityConstants.HORSE_STYLE_IDMAP.get((horse.getHorseVariant() & 65280) >> 8);
+        return SpongeEntityConstants.HORSE_STYLE_IDMAP.get((horse.mth_001739_dh() & 65280) >> 8);
     }
 
     public static HorseStyle getHorseStyle(DataView container) {
         return SpongeImpl.getRegistry().getType(HorseStyle.class, getData(container, Keys.HORSE_STYLE, String.class)).get();
     }
 
-    public static HorseVariant getHorseVariant(HorseType type) {
+    public static HorseVariant getHorseVariant(Class<? extends AbstractHorse> type) {
         return SpongeEntityConstants.HORSE_VARIANT_IDMAP.get(type);
     }
 

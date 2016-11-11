@@ -41,7 +41,7 @@ public class FullBlockSelectionBoxPropertyStore extends AbstractBlockPropertySto
 
     @Override
     protected Optional<FullBlockSelectionBoxProperty> getForBlock(IBlockState block) {
-        return block.isFullCube() ? TRUE : FALSE;
+        return block.mth_000890_h() ? TRUE : FALSE;
     }
 
 }

@@ -1346,7 +1346,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if ((flags & 1) != 0) {
             this.notifyNeighborsRespectDebug(pos, newState.getBlock());
 
-            if (newState.hasComparatorInputOverride()) {
+            if (newState.mth_000896_o()) {
                 this.updateComparatorOutputLevel(pos, newState.getBlock());
             }
         }
