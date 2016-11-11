@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.block;
 
 import net.minecraft.dispenser.BehaviorDefaultDispenseItem;
-import net.minecraft.dispenser.BehaviorProjectileDispense;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.unknown.UnknownBehaviorDefaultDispenseItem50ks;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
 @NonnullByDefault
-@Mixin(BehaviorProjectileDispense.class)
+@Mixin(UnknownBehaviorDefaultDispenseItem50ks.class)
 public class MixinBehaviorProjectileDispense extends BehaviorDefaultDispenseItem {
 
     @Redirect(method = "dispenseStack", at = @At(value = "INVOKE",
