@@ -134,7 +134,7 @@ public abstract class ItemStackUtil {
 
     @Nullable
     public static net.minecraft.item.ItemStack fromSnapshotToNative(@Nullable ItemStackSnapshot snapshot) {
-        return snapshot == null ? null : snapshot == ItemStackSnapshot.NONE ? null : toNative(snapshot.createStack());
+        return snapshot == null ? net.minecraft.item.ItemStack.fld_000503_a : snapshot == ItemStackSnapshot.NONE ? net.minecraft.item.ItemStack.fld_000503_a: toNative(snapshot.createStack());
     }
 
     @Nullable

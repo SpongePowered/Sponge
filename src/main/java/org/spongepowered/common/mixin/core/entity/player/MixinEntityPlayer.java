@@ -586,7 +586,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                 }
                             }
 
-                            this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, this.getSoundCategory(), 1.0F, 1.0F);
+                            this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001298_eA, this.getSoundCategory(), 1.0F, 1.0F);
                             this.spawnSweepParticles();
                         }
 
@@ -599,15 +599,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
 
                         if (isCriticalAttack) {
-                            this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, this.getSoundCategory(), 1.0F, 1.0F);
+                            this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001294_ew, this.getSoundCategory(), 1.0F, 1.0F);
                             this.onCriticalHit(targetEntity);
                         }
 
                         if (!isCriticalAttack && !isSweapingAttack) {
                             if (isStrongAttack) {
-                                this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, this.getSoundCategory(), 1.0F, 1.0F);
+                                this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001297_ez, this.getSoundCategory(), 1.0F, 1.0F);
                             } else {
-                                this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_WEAK, this.getSoundCategory(), 1.0F, 1.0F);
+                                this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001299_eB , this.getSoundCategory(), 1.0F, 1.0F);
                             }
                         }
 
@@ -680,7 +680,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                         this.addExhaustion(0.3F);
                     } else {
-                        this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0F, 1.0F);
+                        this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001296_ey, this.getSoundCategory(), 1.0F, 1.0F);
 
                         if (litEntityOnFire) {
                             targetEntity.extinguish();

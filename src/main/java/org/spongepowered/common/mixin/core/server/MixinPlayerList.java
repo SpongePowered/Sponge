@@ -492,8 +492,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         newPlayer.clonePlayer(playerIn, conqueredEnd);
         // set player dimension for RespawnPlayerEvent
         newPlayer.dimension = targetDimension;
-        newPlayer.setEntityId(playerIn.getEntityId());
-        newPlayer.setCommandStats(playerIn);
+        newPlayer.mth_001441_h(playerIn.getEntityId());
+        newPlayer.mth_001464_v(playerIn);
         newPlayer.setPrimaryHand(playerIn.getPrimaryHand());
 
         for (String s : playerIn.getTags()) {
@@ -501,7 +501,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         this.setPlayerGameTypeBasedOnOther(newPlayer, playerIn, worldServer);
-        newPlayer.setSneaking(false);
+        newPlayer.mth_001456_e(false);
         // update to safe location
         toTransform = toTransform.setLocation(location);
 

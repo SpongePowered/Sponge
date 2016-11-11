@@ -81,7 +81,7 @@ public final class PacketPhaseUtil {
 
     public static void handleCustomCursor(EntityPlayerMP player, ItemStackSnapshot customCursor) {
         ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
-        player.inventory.setItemStack(cursor);
+        player.inventory.mth_000416_e(cursor);
         player.connection.sendPacket(new SPacketSetSlot(-1, -1, cursor));
     }
 

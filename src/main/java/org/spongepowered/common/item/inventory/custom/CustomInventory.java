@@ -89,7 +89,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.inv = new InventoryBasic(title, isCustom, count);
 
         // Updates the Inventory for all viewers on any change
-        this.inv.addInventoryChangeListener(i -> viewers.forEach(v -> {
+        this.inv.mth_001419_a(i -> viewers.forEach(v -> {
             v.openContainer.detectAndSendChanges();
         }));
 
@@ -193,6 +193,11 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
+    public boolean mth_000414_w_() {
+        return this.inv.mth_000414_w_();
+    }
+
+    @Override
     public ItemStack getStackInSlot(int index) {
         return this.inv.getStackInSlot(index);
     }
@@ -255,13 +260,13 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public int getFieldCount() {
-        return this.inv.getFieldCount();
+    public int mth_000417_h() {
+        return this.inv.mth_000417_h();
     }
 
     @Override
-    public void clear() {
-        this.inv.clear();
+    public void mth_000418_m() {
+        this.inv.mth_000418_m();
     }
 
     public Map<String, InventoryProperty> getProperties() {

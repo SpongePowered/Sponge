@@ -105,7 +105,7 @@ public class ContainerFabric extends MinecraftFabric {
 
     @Override
     public void clear() {
-        this.all.forEach(IInventory::clear);
+        this.all.forEach(IInventory::mth_000418_m);
     }
 
     @Override

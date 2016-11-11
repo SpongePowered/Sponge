@@ -29,6 +29,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockCommandBlock;
 import net.minecraft.block.BlockDoor;
+import net.minecraft.block.BlockStructure;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -149,14 +150,14 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         }
         // Sponge End
 
-        if (!player.isSneaking() || player.getHeldItemMainhand() == null && player.getHeldItemOffhand() == null) {
+        if (!player.isSneaking() || player.getHeldItemMainhand().mth_000506_b() && player.mth_001502_ch().mth_000506_b()) {
             // Sponge start - check event useBlockResult, and revert the client if it's FALSE.
             // Also, store the result instead of returning immediately
             if (event.getUseBlockResult() != Tristate.FALSE) {
                 IBlockState iblockstate = (IBlockState) currentSnapshot.getState();
                 Container lastOpenContainer = player.openContainer;
 
-                EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, stack, facing, offsetX, offsetY, offsetZ)
+                EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, facing, offsetX, offsetY, offsetZ)
                          ? EnumActionResult.SUCCESS
                          : EnumActionResult.PASS;
                 // if itemstack changed, avoid restore
@@ -181,12 +182,17 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             // Sponge End
         }
 
-        if (stack == null) {
+        if (stack.mth_000506_b()) {
             return EnumActionResult.PASS;
         } else if (player.getCooldownTracker().hasCooldown(stack.getItem())) {
             return EnumActionResult.PASS;
-        } else if (stack.getItem() instanceof ItemBlock && ((ItemBlock) stack.getItem()).getBlock() instanceof BlockCommandBlock && !player.canCommandSenderUseCommand(2, "")) {
-            return EnumActionResult.FAIL;
+        } else if (stack.getItem() instanceof ItemBlock && !player.canUseCommandBlock()) {
+            Block block = ((ItemBlock)stack.getItem()).getBlock();
+
+            if (block instanceof BlockCommandBlock || block instanceof BlockStructure)
+            {
+                return EnumActionResult.FAIL;
+            }
         } // else if (this.isCreative()) { // Sponge - Rewrite this to handle an isCreative check after the result, since we have a copied stack at the top of this method.
         //    int j = stack.getMetadata();
         //    int i = stack.stackSize;
@@ -202,7 +208,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         final EnumActionResult result = stack.onItemUse(player, worldIn, pos, hand, facing, offsetX, offsetY, offsetZ);
         if (this.isCreative()) {
             stack.setItemDamage(oldStack.getItemDamage());
-            stack.stackSize = oldStack.stackSize;
+            stack.mth_000527_e(oldStack.mth_000526_E());
         }
 
         if (!ItemStack.areItemStacksEqual(player.getHeldItem(hand), oldStack) || result != EnumActionResult.SUCCESS) {
