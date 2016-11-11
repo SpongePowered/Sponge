@@ -87,7 +87,7 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
 
     @Override
     protected Optional<List<Text>> getVal(ItemStack itemStack) {
-        final NBTTagCompound subCompound = itemStack.getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
+        final NBTTagCompound subCompound = itemStack.mth_000514_d(NbtDataUtil.ITEM_DISPLAY);
         if (subCompound == null) {
             return Optional.empty();
         }

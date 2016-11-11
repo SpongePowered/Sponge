@@ -30,6 +30,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
@@ -164,7 +165,7 @@ public final class SpongeParticleHelper {
                 // can be found at: EntityTrackerEntry#createSpawnPacket
                 // or: NetHandlerPlayClient#handleSpawnObject
                 packetSpawnObject.type = 76;
-                final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.FIREWORKS);
+                final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.fld_000552_cm);
                 FireworkUtils.setFireworkEffects(itemStack, effects);
                 final SPacketEntityMetadata packetEntityMetadata = new SPacketEntityMetadata();
                 packetEntityMetadata.entityId = FIREWORK_ROCKET_ID;

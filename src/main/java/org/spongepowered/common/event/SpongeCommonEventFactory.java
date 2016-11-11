@@ -142,7 +142,7 @@ public class SpongeCommonEventFactory {
         Slot slot = null;
         if (slotId != -1) {
             if (slotId < InventoryPlayer.getHotbarSize()) {
-                slot = player.inventoryContainer.getSlot(slotId + player.inventory.mainInventory.length);
+                slot = player.inventoryContainer.getSlot(slotId + player.inventory.fld_000404_a.size());
             } else {
                 slot = player.inventoryContainer.getSlot(slotId);
             }
@@ -155,7 +155,7 @@ public class SpongeCommonEventFactory {
             ItemStackSnapshot targetSnapshot = null;
             if (sourceSnapshot != ItemStackSnapshot.NONE) {
                 // combined slot
-                targetSnapshot = org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemStack).quantity(itemStack.stackSize + slot.getStack().stackSize).build().createSnapshot();
+                targetSnapshot = org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemStack).quantity(itemStack.mth_000526_E() + slot.getStack().mth_000526_E()).build().createSnapshot();
             } else {
                 // empty slot
                 targetSnapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot();
@@ -587,7 +587,7 @@ public class SpongeCommonEventFactory {
                     if (inventory instanceof CarriedInventory) {
                         if (((CarriedInventory) inventory).getCarrier().isPresent()
                                 && ((CarriedInventory) inventory).getCarrier().get() instanceof EntityHorse) {
-                            player.openGuiHorseInventory(((EntityHorse) ((CarriedInventory) inventory).getCarrier().get()), (IInventory) inventory);
+                            player.mth_000426_a(((EntityHorse) ((CarriedInventory) inventory).getCarrier().get()), (IInventory) inventory);
                             container = player.openContainer;
                         }
                     }

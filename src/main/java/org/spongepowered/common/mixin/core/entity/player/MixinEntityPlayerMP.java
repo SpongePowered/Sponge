@@ -275,7 +275,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
 
         if (!this.worldObj.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
-            this.inventory.dropAllItems();
+            this.inventory.mth_000415_o();
         }
 
         for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
