@@ -24,7 +24,13 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
+import net.minecraft.entity.monster.EntityZombieVillager;
+import net.minecraft.entity.passive.AbstractHorse;
+import net.minecraft.entity.passive.EntityDonkey;
 import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.EntityMule;
+import net.minecraft.entity.passive.EntitySkeletonHorse;
+import net.minecraft.entity.passive.EntityZombieHorse;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HorseVariant;
@@ -40,10 +46,10 @@ import org.spongepowered.common.entity.SpongeHorseVariant;
 
 import java.util.Optional;
 
-public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<EntityHorse, HorseVariant, Value<HorseVariant>> {
+public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<AbstractHorse, HorseVariant, Value<HorseVariant>> {
 
     public HorseVariantValueProcessor() {
-        super(EntityHorse.class, Keys.HORSE_VARIANT);
+        super(AbstractHorse.class, Keys.HORSE_VARIANT);
     }
 
     @Override
@@ -52,14 +58,24 @@ public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<Ent
     }
 
     @Override
-    protected boolean set(EntityHorse container, HorseVariant value) {
-        container.setType(((SpongeHorseVariant) value).getType());
-        return true;
+    protected boolean set(AbstractHorse container, HorseVariant value) {
+        throw new UnsupportedOperationException("HorseData is deprecated - horse types are now separate entities!");
     }
 
     @Override
-    protected Optional<HorseVariant> getVal(EntityHorse container) {
-        return Optional.of(HorseUtils.getHorseVariant(container.getType()));
+    protected Optional<HorseVariant> getVal(AbstractHorse container) {
+        if (container instanceof EntityHorse) {
+            return Optional.of(HorseVariants.HORSE);
+        } else if (container instanceof EntityDonkey) {
+            return Optional.of(HorseVariants.DONKEY);
+        } else if (container instanceof EntityMule) {
+            return Optional.of(HorseVariants.MULE);
+        } else if (container instanceof EntityZombieHorse) {
+            return Optional.of(HorseVariants.UNDEAD_HORSE);
+        } else if (container instanceof EntitySkeletonHorse) {
+            return Optional.of(HorseVariants.SKELETON_HORSE);
+        }
+        return Optional.empty();
     }
 
     @Override

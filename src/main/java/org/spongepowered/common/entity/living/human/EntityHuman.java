@@ -186,7 +186,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-        this.updateArmSwingProgress();
+        this.mth_001501_cd();
     }
 
     @Override

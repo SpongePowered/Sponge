@@ -56,13 +56,6 @@ public abstract class MixinEntityHorse extends MixinEntityAnimal implements Hors
     }
 
     @Override
-    public HorseData getHorseData() {
-        return new SpongeHorseData(HorseUtils.getHorseColor((EntityHorse) (Object) this),
-                HorseUtils.getHorseStyle((EntityHorse) (Object) this),
-                HorseUtils.getHorseVariant(this.shadow$getType()));
-    }
-
-    @Override
     public Value<HorseVariant> variant() {
         return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT);
     }

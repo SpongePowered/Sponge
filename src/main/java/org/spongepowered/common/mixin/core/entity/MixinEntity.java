@@ -1216,7 +1216,7 @@ public abstract class MixinEntity implements IMixinEntity {
     public void spongeEntityDropItem(net.minecraft.item.ItemStack itemStackIn, float offsetY, CallbackInfoReturnable<EntityItem> returnable) {
         // Gotta stick with the client side handling things
         if (this.worldObj.isRemote) {
-            if (itemStackIn.stackSize != 0 && itemStackIn.getItem() != null) {
+            if (itemStackIn.mth_000526_E() != 0 && itemStackIn.getItem() != null) {
                 EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY + (double) offsetY, this.posZ, itemStackIn);
                 entityitem.setDefaultPickupDelay();
                 this.worldObj.spawnEntityInWorld(entityitem);

@@ -26,6 +26,8 @@ package org.spongepowered.common.item.inventory.util;
 
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.AbstractChestHorse;
+import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -206,7 +208,7 @@ public final class ContainerUtil {
     @Nullable
     public static MinecraftLens getLens(net.minecraft.inventory.Container container, SlotCollection collection) {
         if (container instanceof ContainerChest) {
-            return new ContainerChestInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection, ((ContainerChest) container).numRows);
+            return new ContainerChestInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection, ((ContainerChest) container).fld_000478_f);
         } else if (container instanceof ContainerPlayer) {
             return new ContainerPlayerInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection);
         }
@@ -253,8 +255,8 @@ public final class ContainerUtil {
         } else if (container instanceof ContainerBeacon) {
             return InventoryArchetypes.BEACON;
         } else if (container instanceof ContainerHorseInventory) {
-            EntityHorse horse = ((ContainerHorseInventory) container).theHorse;
-            if (horse.isChested()) {
+            AbstractHorse horse = ((ContainerHorseInventory) container).fld_000487_f;
+            if (horse instanceof AbstractChestHorse && ((AbstractChestHorse) horse).mth_001653_dh()) {
                 return InventoryArchetypes.HORSE_WITH_CHEST;
             }
             return InventoryArchetypes.HORSE;
@@ -297,11 +299,11 @@ public final class ContainerUtil {
         } else if (container instanceof ContainerBeacon) {
             return carrierOrNull(((ContainerBeacon) container).getTileEntity());
         } else if (container instanceof ContainerHorseInventory) {
-            return (Carrier) ((ContainerHorseInventory) container).theHorse;
+            return (Carrier) ((ContainerHorseInventory) container).fld_000487_f;
         } else if (container instanceof ContainerMerchant && ((ContainerMerchant) container).theMerchant instanceof Carrier) {
             return (Carrier) ((ContainerMerchant) container).theMerchant;
         } else if (container instanceof ContainerPlayer) {
-            EntityPlayer player = ((ContainerPlayer) container).thePlayer;
+            EntityPlayer player = ((ContainerPlayer) container).fld_000484_i;
             if (player instanceof EntityPlayerMP) {
                 return (Carrier) player;
             }

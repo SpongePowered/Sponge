@@ -87,7 +87,7 @@ public class IgniteableDataProcessor extends AbstractEntityDataProcessor<Entity,
     @Override
     protected Map<Key<?>, ?> getValues(Entity entity) {
         final int fireTicks = entity.fire;
-        final int fireDamageDelay = entity.fireResistance;
+        final int fireDamageDelay = entity.mth_000421_bD();
         return ImmutableMap.<Key<?>, Object>of(Keys.FIRE_TICKS, fireTicks,
                                                Keys.FIRE_DAMAGE_DELAY, fireDamageDelay);
     }

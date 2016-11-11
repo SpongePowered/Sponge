@@ -63,7 +63,7 @@ public class FlowerPotDataProcessor extends
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        flowerPot.setFlowerPotData(null, 0);
+        flowerPot.mth_000817_a(ItemStack.fld_000503_a);
         flowerPot.markDirty();
         return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
     }
@@ -71,14 +71,13 @@ public class FlowerPotDataProcessor extends
     @Override
     protected boolean set(TileEntityFlowerPot flowerPot, ItemStackSnapshot stackSnapshot) {
         if (stackSnapshot == ItemStackSnapshot.NONE) {
-            flowerPot.setFlowerPotData(null, 0);
+            flowerPot.mth_000817_a(ItemStack.fld_000503_a);
         } else {
-            Item item = (Item) stackSnapshot.getType();
-            int meta = ((SpongeItemStackSnapshot) stackSnapshot).getDamageValue();
-            if (!((BlockFlowerPot) Blocks.FLOWER_POT).canContain(Block.getBlockFromItem(item), meta)) {
+            ItemStack stack = (ItemStack) stackSnapshot.createStack();
+            if (!((BlockFlowerPot) Blocks.FLOWER_POT).mth_000723_a(stack)) {
                 return false;
             }
-            flowerPot.setFlowerPotData(item, meta);
+            flowerPot.mth_000817_a(stack);
         }
         flowerPot.markDirty();
         flowerPot.getWorld().notifyBlockUpdate(flowerPot.getPos(), flowerPot.getWorld().getBlockState(flowerPot.getPos()), flowerPot.getWorld()
