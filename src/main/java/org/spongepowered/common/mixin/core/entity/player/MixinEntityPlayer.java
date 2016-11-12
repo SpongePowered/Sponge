@@ -364,7 +364,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             ItemStack itemstack = this.dropItemAndGetStack(entityitem);
 
             if (traceItem) {
-                if (itemstack != null) {
+                if (!itemstack.mth_000506_b()) {
                     this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.mth_000526_E());
                 }
 
@@ -511,7 +511,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.onGround && distanceWalkedDelta < (double) this.getAIMoveSpeed()) {
                         ItemStack itemstack = this.getHeldItem(EnumHand.MAIN_HAND);
 
-                        if (itemstack != null && itemstack.getItem() instanceof ItemSword) {
+                        if (itemstack.getItem() instanceof ItemSword) {
                             isSweapingAttack = true;
                         }
                     }
@@ -615,24 +615,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             this.mth_000431_b(targetEntity);
                         }
 
-                        if (!this.worldObj.isRemote && targetEntity instanceof EntityPlayer) {
-                            EntityPlayer entityplayer = (EntityPlayer) targetEntity;
-                            ItemStack itemstack2 = this.getHeldItemMainhand();
-                            ItemStack itemstack3 = entityplayer.isHandActive() ? entityplayer.mth_001508_cB() : null;
-
-                            if (itemstack2 != null && itemstack3 != null && itemstack2.getItem() instanceof ItemAxe && itemstack3.getItem() == Items.SHIELD) {
-                                float f3 = 0.25F + (float) EnchantmentHelper.getEfficiencyModifier((EntityPlayer) (Object) this) * 0.05F;
-
-                                if (isSprintingAttack) {
-                                    f3 += 0.75F;
-                                }
-
-                                if (this.rand.nextFloat() < f3) {
-                                    entityplayer.getCooldownTracker().setCooldown(Items.SHIELD, 100);
-                                    this.worldObj.setEntityState(entityplayer, (byte) 30);
-                                }
-                            }
-                        }
 
                         if (damage >= 18.0F) {
                             this.addStat(AchievementList.OVERKILL);
@@ -656,11 +638,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             }
                         }
 
-                        if (itemstack1 != null && entity instanceof EntityLivingBase) {
-                            itemstack1.hitEntity((EntityLivingBase) entity, (EntityPlayer) (Object) this);
-
-                            if (itemstack1.mth_000526_E() <= 0) {
-                                this.setHeldItem(EnumHand.MAIN_HAND, (ItemStack) null);
+                        if(!itemstack1.mth_000506_b() && targetEntity instanceof EntityLivingBase) {
+                            itemstack1.hitEntity((EntityLivingBase)targetEntity, (EntityPlayer) (Object) this);
+                            if(itemstack1.mth_000506_b()) {
+                                this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.fld_000503_a);
                             }
                         }
 

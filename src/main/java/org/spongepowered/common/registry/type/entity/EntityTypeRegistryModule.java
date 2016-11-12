@@ -120,11 +120,18 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("hopper_minecart", newEntityTypeFromName("hopper_minecart"));
         this.entityTypeMappings.put("mob_spawner_minecart", newEntityTypeFromName("spawner_minecart"));
         this.entityTypeMappings.put("commandblock_minecart", newEntityTypeFromName("commandblock_minecart"));
+        this.entityTypeMappings.put("evocation_fangs", newEntityTypeFromName("evocation_fangs"));
+        this.entityTypeMappings.put("evocation_illager", newEntityTypeFromName("evocation_illager"));
+        this.entityTypeMappings.put("vex", newEntityTypeFromName("vex"));
+        this.entityTypeMappings.put("vindication_illager", newEntityTypeFromName("vindication_illager"));
         this.entityTypeMappings.put("creeper", newEntityTypeFromName("creeper"));
         this.entityTypeMappings.put("skeleton", newEntityTypeFromName("skeleton"));
+        this.entityTypeMappings.put("stray", newEntityTypeFromName("stray"));
+        this.entityTypeMappings.put("wither_skeleton", newEntityTypeFromName("wither_skeleton"));
         this.entityTypeMappings.put("spider", newEntityTypeFromName("spider"));
         this.entityTypeMappings.put("giant", newEntityTypeFromName("giant"));
         this.entityTypeMappings.put("zombie", newEntityTypeFromName("zombie"));
+        this.entityTypeMappings.put("husk", newEntityTypeFromName("husk"));
         this.entityTypeMappings.put("slime", newEntityTypeFromName("slime"));
         this.entityTypeMappings.put("ghast", newEntityTypeFromName("ghast"));
         this.entityTypeMappings.put("pig_zombie", newEntityTypeFromName("zombie_pigman"));
@@ -139,6 +146,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("witch", newEntityTypeFromName("witch"));
         this.entityTypeMappings.put("endermite", newEntityTypeFromName("endermite"));
         this.entityTypeMappings.put("guardian", newEntityTypeFromName("guardian"));
+        this.entityTypeMappings.put("elder_guardian", newEntityTypeFromName("elder_guardian"));
         this.entityTypeMappings.put("pig", newEntityTypeFromName("pig"));
         this.entityTypeMappings.put("sheep", newEntityTypeFromName("sheep"));
         this.entityTypeMappings.put("cow", newEntityTypeFromName("cow"));
@@ -149,9 +157,18 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("snowman", newEntityTypeFromName("snowman"));
         this.entityTypeMappings.put("ocelot", newEntityTypeFromName("Ocelot"));
         this.entityTypeMappings.put("iron_golem", newEntityTypeFromName("villager_golem"));
+
         this.entityTypeMappings.put("horse", newEntityTypeFromName("horse"));
+        this.entityTypeMappings.put("skeleton_horse", newEntityTypeFromName("skeleton_horse"));
+        this.entityTypeMappings.put("zombie_horse", newEntityTypeFromName("zombie_horse"));
+        this.entityTypeMappings.put("donkey", newEntityTypeFromName("donkey"));
+        this.entityTypeMappings.put("mule", newEntityTypeFromName("mule"));
+        this.entityTypeMappings.put("llama", newEntityTypeFromName("llama"));
+
+        this.entityTypeMappings.put("llama_spit", newEntityTypeFromName("llama_spit"));
         this.entityTypeMappings.put("rabbit", newEntityTypeFromName("rabbit"));
         this.entityTypeMappings.put("villager", newEntityTypeFromName("villager"));
+        this.entityTypeMappings.put("zombie_villager", newEntityTypeFromName("zombie_villager"));
         this.entityTypeMappings.put("ender_crystal", newEntityTypeFromName("ender_crystal"));
         this.entityTypeMappings.put("shulker", newEntityTypeFromName("shulker"));
         this.entityTypeMappings.put("shulker_bullet", newEntityTypeFromName("shulker_bullet"));

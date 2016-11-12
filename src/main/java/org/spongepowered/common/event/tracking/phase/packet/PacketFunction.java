@@ -895,10 +895,12 @@ public interface PacketFunction {
     });
     PacketFunction CLIENT_SETTINGS = ((packet, state, player, context) -> {
         final CPacketClientSettings settings = (CPacketClientSettings) packet;
-        PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Cause.of(NamedCause.source(player)),
+        // TODO 1.11: The client is sending 'en_us' instead of 'en_US' as the locale.
+
+        /*PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Cause.of(NamedCause.source(player)),
                 (ChatVisibility) (Object) settings.getChatVisibility(), SkinUtil.fromFlags(settings.getModelPartFlags()),
                 LanguageUtil.LOCALE_CACHE.getUnchecked(settings.getLang()), (Player) player, settings.isColorsEnabled(), settings.view);
-        SpongeImpl.postEvent(event);
+        SpongeImpl.postEvent(event);*/
     });
     PacketFunction CLIENT_STATUS = ((packet, state, player, context) -> {
         if (state == PacketPhase.Inventory.OPEN_INVENTORY) {
