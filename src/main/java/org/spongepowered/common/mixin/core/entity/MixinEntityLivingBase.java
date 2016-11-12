@@ -127,6 +127,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected float lastDamage;
     @Shadow @Nullable protected EntityPlayer attackingPlayer;
     @Shadow protected ItemStack activeItemStack;
+    @Shadow private DamageSource field_189750_bF;
+    @Shadow private long field_189751_bG;
     // Empty body so that we can call super() in MixinEntityPlayer
     @Shadow public void mth_001510_cE() { // stopActiveHand
 
@@ -172,6 +174,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source);
     @Shadow protected abstract boolean canDropLoot();
     @Shadow public abstract Random getRNG();
+    @Shadow protected abstract void mth_000424_c(EntityLivingBase p_mth_000424_c_1_);
+    @Shadow public abstract boolean mth_001497_d(DamageSource p_mth_001497_d_1_);
     @Shadow private boolean mth_001499_e(DamageSource p_184583_1_) { // canBlockDamageSource
         return false; // Shadowed
     }
@@ -349,6 +353,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     /**
      * @author bloodmc - November 22, 2015
      * @author gabizou - Updated April 11th, 2016 - Update for 1.9 changes
+     * @author Aaron1011 - Updated Nov 11th, 2016 - Update for 1.11 changes
      *
      * @reason Reroute damageEntity calls to our hook in order to prevent damage.
      */
@@ -390,13 +395,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 if (amount > 0.0F && this.mth_001499_e(source)) {
                     this.mth_000425_k(amount);
 
-                    if (source.isProjectile()) {
-                        amount = 0.0F;
-                    } else {
-                        amount *= 0.33F;
+                    if (!source.isProjectile())
+                    {
+                        Entity entity = source.getSourceOfDamage();
 
-                        if (source.getSourceOfDamage() instanceof EntityLivingBase) {
-                            ((EntityLivingBase) source.getSourceOfDamage()).knockBack((EntityLivingBase) (Object) this, 0.5F, this.posX - source.getSourceOfDamage().posX, this.posZ - source.getSourceOfDamage().posZ);
+                        if (entity instanceof EntityLivingBase)
+                        {
+                            this.mth_000424_c((EntityLivingBase)entity);
                         }
                     }
 
@@ -481,33 +486,42 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }
 
                 if (this.getHealth() <= 0.0F) {
-                    SoundEvent soundevent = this.getDeathSound();
+                    if (!this.mth_001497_d(source)) {
+                        SoundEvent soundevent = this.getDeathSound();
 
-                    if (flag1 && soundevent != null) {
-                        this.playSound(soundevent, this.getSoundVolume(), this.getSoundPitch());
-                    }
+                        if (flag1 && soundevent != null) {
+                            this.playSound(soundevent, this.getSoundVolume(), this.getSoundPitch());
+                        }
 
-                    // Sponge Start - notify the cause tracker
-                    final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
-                    final boolean enterDeathPhase = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths();
-                    if (enterDeathPhase) {
-                        final PhaseContext context = PhaseContext.start()
-                                .add(NamedCause.source(this))
-                                .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, source));
-                        this.getCreatorUser().ifPresent(context::owner);
-                        this.getNotifierUser().ifPresent(context::notifier);
-                        causeTracker.switchToPhase(EntityPhase.State.DEATH, context
-                                .addCaptures()
-                                .addEntityDropCaptures()
-                                .complete());
-                    }
-                    this.onDeath(source);
-                    if (enterDeathPhase) {
-                        causeTracker.completePhase();
+                        // Sponge Start - notify the cause tracker
+                        final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
+                        final boolean enterDeathPhase = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths();
+                        if (enterDeathPhase) {
+                            final PhaseContext context = PhaseContext.start()
+                                    .add(NamedCause.source(this))
+                                    .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, source));
+                            this.getCreatorUser().ifPresent(context::owner);
+                            this.getNotifierUser().ifPresent(context::notifier);
+                            causeTracker.switchToPhase(EntityPhase.State.DEATH, context
+                                    .addCaptures()
+                                    .addEntityDropCaptures()
+                                    .complete());
+                        }
+                        this.onDeath(source);
+                        if (enterDeathPhase) {
+                            causeTracker.completePhase();
+                        }
                     }
                     // Sponge End
                 } else if (flag1) {
                     this.playHurtSound(source);
+                }
+
+
+                if (!flag || amount > 0.0F)
+                {
+                    this.field_189750_bF = source;
+                    this.field_189751_bG = this.worldObj.getTotalWorldTime();
                 }
 
                 return !flag || amount > 0.0F;
