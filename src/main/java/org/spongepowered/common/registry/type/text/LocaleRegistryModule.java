@@ -52,6 +52,7 @@ public class LocaleRegistryModule implements RegistryModule {
             String code = new String(c);
             try {
                 LanguageUtil.LOCALE_CACHE.put(code, (Locale) field.get(null));
+                LanguageUtil.LOCALE_CACHE.put(code.toLowerCase(), (Locale) field.get(null));
             } catch (IllegalAccessException ignored) {
             }
         }
