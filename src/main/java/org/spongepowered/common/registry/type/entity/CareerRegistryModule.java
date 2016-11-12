@@ -68,6 +68,8 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
             new SpongeCareer(1, "fisherman", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.fisherman"));
     public final SpongeCareer FARMER =
             new SpongeCareer(0, "farmer", ProfessionRegistryModule.FARMER, new SpongeTranslation("entity.Villager.farmer"));
+    public final SpongeCareer NITWIT =
+            new SpongeCareer(0, "nitwit", ProfessionRegistryModule.NITWIT, new SpongeTranslation("entity.Villager.nitwit"));
 
     public static CareerRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -138,6 +140,8 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
 
         this.careerMap.put("butcher", registerCareer(this.BUTCHER));
         this.careerMap.put("leatherworker", registerCareer(this.LEATHERWORKER));
+
+        this.careerMap.put("nitwit", registerCareer(this.NITWIT));
     }
 
     CareerRegistryModule() { }
