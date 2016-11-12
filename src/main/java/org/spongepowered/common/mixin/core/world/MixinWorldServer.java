@@ -1250,7 +1250,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      *
      * Technically an overwrite to properly track on *server* worlds.
      */
-    @Override
+    /*@Override
     public void mth_000641_c(BlockPos pos, Block blockType) { // notifyNeighborsOfStateChange
         if (!mth_000637_a(pos)) {
             return;
@@ -1270,7 +1270,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
             }
         }
-    }
+    }*/
 
     @SuppressWarnings("Duplicates")
     @Override
