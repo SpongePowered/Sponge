@@ -9,6 +9,7 @@
         "ai.MixinAbstractAITask",
         "event.cause.damage.MixinAbstractDamageSource",
         "event.cause.damage.MixinAbstractEntityDamageSource",
+        "item.merchant.MixinMerchant",
         "text.MixinText",
         "text.MixinTextLiteral",
         "text.MixinTextScore",

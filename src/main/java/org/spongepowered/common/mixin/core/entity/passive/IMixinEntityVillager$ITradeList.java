@@ -41,13 +41,12 @@ import java.util.Random;
 public interface IMixinEntityVillager$ITradeList extends TradeOfferListMutator, EntityVillager.Unknown5f {
 
     @Override
-    default void accept(List<TradeOffer> tradeOffers, Random random) {
+    default void accept(Merchant owner, List<TradeOffer> tradeOffers, Random random) {
         MerchantRecipeList tempList = new MerchantRecipeList();
         for (TradeOffer offer : tradeOffers) {
             tempList.add(TradeOfferUtil.toNative(offer));
         }
-        // TODO - this won't work for 'TreasureMapForEmeralds'. Do we need to change the API?
-        mth_000109_a(null, tempList, random);
+        mth_000109_a((IMerchant) owner, tempList, random);
         tradeOffers.clear();
         for (MerchantRecipe recipe : tempList) {
             tradeOffers.add(TradeOfferUtil.fromNative(recipe));

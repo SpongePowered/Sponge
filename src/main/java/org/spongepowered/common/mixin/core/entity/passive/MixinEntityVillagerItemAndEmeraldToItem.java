@@ -30,6 +30,7 @@ import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
+import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.asm.mixin.Mixin;
@@ -73,7 +74,7 @@ public class MixinEntityVillagerItemAndEmeraldToItem implements TradeOfferGenera
 
 
     @Override
-    public void accept(List<TradeOffer> tradeOffers, Random random) {
+    public void accept(Merchant owner, List<TradeOffer> tradeOffers, Random random) {
         tradeOffers.add(apply(random));
     }
 }

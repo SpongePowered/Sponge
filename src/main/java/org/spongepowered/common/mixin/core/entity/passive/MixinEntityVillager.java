@@ -202,7 +202,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         checkState(this.fld_000370_bJ <= careers.size(), "The villager career id is out of bounds fo the available Careers! Found: " + this.fld_000370_bJ
                                                     + " when the current maximum is: " + careers.size());
         final Career fld_000370_bJ = careers.get(this.fld_000370_bJ - 1);
-        SpongeVillagerRegistry.getInstance().populateOffers((List<TradeOffer>) (List<?>) this.fld_000364_bD, fld_000370_bJ, this.fld_000371_bK, this.rand);
+        SpongeVillagerRegistry.getInstance().populateOffers(this, (List<TradeOffer>) (List<?>) this.fld_000364_bD, fld_000370_bJ, this.fld_000371_bK, this.rand);
         // Sponge end
     }
 

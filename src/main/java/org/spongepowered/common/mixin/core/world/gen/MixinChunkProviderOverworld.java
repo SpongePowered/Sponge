@@ -40,6 +40,7 @@ import net.minecraft.world.gen.structure.MapGenScatteredFeature;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
+import net.minecraft.world.gen.structure.WoodlandMansion;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.event.cause.Cause;
@@ -82,13 +83,14 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
     @Shadow private ChunkProviderSettings settings;
     @Shadow @Final private Random rand;
 
-    @Shadow private MapGenBase caveGenerator;
-    @Shadow private MapGenStronghold strongholdGenerator;
-    @Shadow private MapGenVillage villageGenerator;
-    @Shadow private MapGenMineshaft mineshaftGenerator;
-    @Shadow private MapGenScatteredFeature scatteredFeatureGenerator;
-    @Shadow private MapGenBase ravineGenerator;
-    @Shadow private StructureOceanMonument oceanMonumentGenerator;
+    @Shadow @Final private MapGenBase caveGenerator;
+    @Shadow @Final private MapGenStronghold strongholdGenerator;
+    @Shadow @Final private MapGenVillage villageGenerator;
+    @Shadow @Final private MapGenMineshaft mineshaftGenerator;
+    @Shadow @Final private MapGenScatteredFeature scatteredFeatureGenerator;
+    @Shadow @Final private MapGenBase ravineGenerator;
+    @Shadow @Final private StructureOceanMonument oceanMonumentGenerator;
+    @Shadow @Final private WoodlandMansion fld_000947_C;
     @Shadow private Biome[] biomesForGeneration;
 
     @Shadow public abstract void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_);
@@ -144,6 +146,11 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
         if (this.settings.useMonuments && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.oceanMonumentGenerator);
             generator.getPopulators().add((Populator) this.oceanMonumentGenerator);
+        }
+
+        if (this.settings.fld_000934_z && this.mapFeaturesEnabled) {
+            generator.getGenerationPopulators().add((GenerationPopulator) this.fld_000947_C);
+            generator.getPopulators().add((Populator) this.fld_000947_C);
         }
 
         if (this.settings.useRavines) { // useWaterLakes

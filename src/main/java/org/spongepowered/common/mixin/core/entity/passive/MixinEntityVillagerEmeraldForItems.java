@@ -31,6 +31,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
+import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.asm.mixin.Mixin;
@@ -63,7 +64,7 @@ public class MixinEntityVillagerEmeraldForItems implements TradeOfferGenerator {
     }
 
     @Override
-    public void accept(List<TradeOffer> tradeOffers, Random random) {
+    public void accept(Merchant owner, List<TradeOffer> tradeOffers, Random random) {
         tradeOffers.add(apply(random));
     }
 }
