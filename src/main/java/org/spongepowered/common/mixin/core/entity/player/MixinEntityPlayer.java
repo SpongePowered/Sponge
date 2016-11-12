@@ -146,6 +146,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract String getName();
     @Shadow public abstract void takeStat(StatBase stat);
     @Shadow public abstract boolean canOpen(LockCode code);
+    @Shadow protected abstract void mth_000423_cN();
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;

@@ -236,6 +236,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow protected abstract void setSize(float width, float height);
     @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract void extinguish();
+    @Shadow protected abstract void setFlag(int flag, boolean set);
 
     // @formatter:on
 

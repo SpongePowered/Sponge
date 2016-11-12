@@ -232,6 +232,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     @Overwrite
     public void onDeath(DamageSource cause) {
+        // Sponge start
         if (!SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause)) {
             return;
         }
@@ -257,6 +258,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             causeTracker = null;
             tracksEntityDeaths = false;
         }
+        // Sponge end
 
         boolean flag = this.worldObj.getGameRules().getBoolean("showDeathMessages");
         this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
@@ -276,6 +278,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
 
         if (!this.worldObj.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+            this.mth_000423_cN();
             this.inventory.mth_000415_o();
         }
 
@@ -298,11 +301,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
         this.addStat(StatList.DEATHS);
         this.takeStat(StatList.TIME_SINCE_DEATH);
+        this.extinguish();
+        this.setFlag(0, false);
         this.getCombatTracker().reset();
         // Sponge Start - Finish cause tracker
         if (causeTracker != null && tracksEntityDeaths) {
             causeTracker.completePhase();
         }
+        // Sponge end
     }
 
     @Override
