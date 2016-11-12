@@ -158,7 +158,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract void mth_001507_c(EnumHand hand); // setActiveHand
     @Shadow @Nullable public abstract ItemStack getHeldItem(EnumHand hand);
     @Shadow public abstract void setHeldItem(EnumHand hand, @Nullable ItemStack stack);
-    @Shadow @Nullable public abstract ItemStack getHeldItemMainhand();
+    @Shadow public abstract ItemStack getHeldItemMainhand();
     @Shadow public abstract boolean isHandActive();
     @Shadow protected abstract void onDeathUpdate();
     @Shadow public abstract void knockBack(net.minecraft.entity.Entity entityIn, float p_70653_2_, double p_70653_3_, double p_70653_5_);

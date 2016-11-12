@@ -290,7 +290,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
         if (entitylivingbase != null) {
-            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getEntityString(entitylivingbase));
+            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.mth_001475_a(entitylivingbase));
 
             if (entitylist$entityegginfo != null) {
                 this.addStat(entitylist$entityegginfo.entityKilledByStat);

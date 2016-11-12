@@ -146,7 +146,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract String getName();
     @Shadow public abstract void takeStat(StatBase stat);
     @Shadow public abstract boolean canOpen(LockCode code);
-    @Shadow protected abstract void mth_000423_cN();
+    @Shadow protected abstract void mth_000423_cN(); // Filter vanishing curse enchanted items
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
@@ -240,6 +240,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
 
         if (!this.worldObj.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+            this.mth_000423_cN();
             this.inventory.mth_000415_o();
         }
 
@@ -252,6 +253,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
         this.addStat(StatList.DEATHS);
         this.takeStat(StatList.TIME_SINCE_DEATH);
+        this.extinguish();
+        this.setFlag(0, false);
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
