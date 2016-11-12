@@ -58,6 +58,7 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
     /**
      * @author gabizou - April 8th, 2016
      * @author gabizou - April 11th, 2016 - Update for 1.9 additions
+     * @author Aaro1011 - November 12, 2016 - Update for 1.11
      *
      * @reason Rewrite this to throw an {@link AttackEntityEvent} and process correctly.
      *
@@ -112,7 +113,7 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
             if (targetEntity instanceof EntityPlayer) {
                 EntityPlayer entityplayer = (EntityPlayer) targetEntity;
                 ItemStack itemstack = this.getHeldItemMainhand();
-                ItemStack itemstack1 = entityplayer.isHandActive() ? entityplayer.mth_001508_cB() : null;
+                ItemStack itemstack1 = entityplayer.isHandActive() ? entityplayer.mth_001508_cB() : ItemStack.fld_000503_a;
 
                 if (!itemstack.mth_000506_b() && !itemstack1.mth_000506_b() && itemstack.getItem() instanceof ItemAxe && itemstack1.getItem() == Items.SHIELD) {
                     float f1 = 0.25F + (float) EnchantmentHelper.getEfficiencyModifier((EntityMob) (Object) this) * 0.05F;
