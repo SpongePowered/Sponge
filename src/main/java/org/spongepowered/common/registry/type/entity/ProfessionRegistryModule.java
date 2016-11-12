@@ -50,6 +50,7 @@ public class ProfessionRegistryModule implements SpongeAdditionalCatalogRegistry
     public static final Profession PRIEST = new SpongeProfession(2, "minecraft:priest", "priest");
     public static final Profession BLACKSMITH = new SpongeProfession(3, "minecraft:blacksmith", "blacksmith");
     public static final Profession BUTCHER = new SpongeProfession(4, "minecraft:butcher", "butcher");
+    public static final Profession NITWIT = new SpongeProfession(5, "minecraft:nitwit", "nitwit");
 
     public static ProfessionRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -110,6 +111,7 @@ public class ProfessionRegistryModule implements SpongeAdditionalCatalogRegistry
         this.professionMap.put("priest", PRIEST);
         this.professionMap.put("blacksmith", BLACKSMITH);
         this.professionMap.put("butcher", BUTCHER);
+        this.professionMap.put("nitwit", NITWIT);
     }
 
     ProfessionRegistryModule() { }
