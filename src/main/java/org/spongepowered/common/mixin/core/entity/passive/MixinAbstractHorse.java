@@ -24,62 +24,60 @@
  */
 package org.spongepowered.common.mixin.core.entity.passive;
 
-import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.AbstractHorse;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseVariant;
-import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.living.animal.RideableHorse;
-import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
-import org.spongepowered.common.data.processor.common.HorseUtils;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.util.List;
-
-@SuppressWarnings("deprecation")
-@Mixin(EntityHorse.class)
-@Implements(@Interface(iface = RideableHorse.class, prefix = "rideableHorse$", unique = true))
-public abstract class MixinEntityHorse extends MixinAbstractHorse implements RideableHorse {
+@Mixin(AbstractHorse.class)
+@Implements(@Interface(iface = Horse.class, prefix = "horse$", unique = true))
+public abstract class MixinAbstractHorse extends MixinEntityAnimal implements Horse {
 
     @Override
-    public Translation getTranslation() {
-        final HorseData horseData = getHorseData();
-        final HorseVariant horseVariant = horseData.variant().get();
-        return horseVariant.getTranslation();
+    public HorseData getHorseData() {
+        printDeprecatedHorseUsage("HorseData is not applicable to Horse, only Rideable Horse!");
+        return new SpongeHorseData(DataConstants.Horse.DEFAULT_COLOR, DataConstants.Horse.DEFAULT_STYLE, DataConstants.Horse.DEFAULT_VARIANT);
     }
 
     @Override
     public Value<HorseVariant> variant() {
+        printDeprecatedHorseUsage("HorseVariant is no longer applicable to all horses! HorseVariants cannot be changed!");
         return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT);
     }
 
     @Override
     public Value<HorseStyle> style() {
-        return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Horse.DEFAULT_STYLE, HorseUtils.getHorseStyle((EntityHorse) (Object) this));
+        printDeprecatedHorseUsage("HorseStyle is only applicable to RideableHorses!");
+        return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Horse.DEFAULT_STYLE);
     }
 
     @Override
     public Value<HorseColor> color() {
-        return new SpongeValue<>(Keys.HORSE_COLOR, DataConstants.Horse.DEFAULT_COLOR, HorseUtils.getHorseColor((EntityHorse) (Object) this));
+        printDeprecatedHorseUsage("HorseColor is only applicable to RideableHorses!");
+        return new SpongeValue<>(Keys.HORSE_COLOR, DataConstants.Horse.DEFAULT_COLOR);
     }
 
-    @Override
-    public HorseData getHorseData() {
-        return new SpongeHorseData(HorseUtils.getHorseColor((EntityHorse) (Object) this), HorseUtils.getHorseStyle((EntityHorse) (Object) this), HorseVariants.HORSE);
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getHorseData());
+    @Unique
+    protected void printDeprecatedHorseUsage(String specificSubHeader) {
+        new PrettyPrinter(60).add("Deprecated Usage Detected").centre().hr()
+                .add(specificSubHeader)
+                .addWrapped(50,"Usage of these Horse related methods are no longer supported\n"
+                               + "while they work technically for data retrieval, setting\n"
+                               + "this unsupported data is no longer possible. Please \n"
+                               + "notify the plugin developer using these methods!")
+                .add(new UnsupportedOperationException("Deprecated Usage Detected"))
+                .trace();
     }
 }

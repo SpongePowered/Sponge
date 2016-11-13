@@ -22,42 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai;
+package org.spongepowered.common.mixin.core.entity.passive;
 
-import com.google.common.base.Preconditions;
-import net.minecraft.entity.passive.EntityHorse;
-import net.minecraft.unknown.UnknownEntityAIBase66vj;
-import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
-import org.spongepowered.api.entity.living.animal.RideableHorse;
+import net.minecraft.entity.passive.EntityDonkey;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.type.HorseVariant;
+import org.spongepowered.api.data.type.HorseVariants;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.living.animal.Donkey;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCrazyAITask.Builder {
-
-    double speed;
-
-    public SpongeRunAroundLikeCrazyAIBuilder() {
-        this.reset();
-    }
-
-    @Override
-    public RunAroundLikeCrazyAITask.Builder speed(double speed) {
-        this.speed = speed;
-        return this;
-    }
+@SuppressWarnings("deprecation")
+@Mixin(EntityDonkey.class)
+public abstract class MixinEntityDonkey extends MixinAbstractHorse implements Donkey {
 
     @Override
-    public RunAroundLikeCrazyAITask.Builder from(RunAroundLikeCrazyAITask value) {
-        return speed(value.getSpeed());
-    }
-
-    @Override
-    public RunAroundLikeCrazyAITask.Builder reset() {
-        this.speed = 1;
-        return this;
-    }
-
-    @Override
-    public RunAroundLikeCrazyAITask build(RideableHorse owner) {
-        Preconditions.checkNotNull(owner);
-        return (RunAroundLikeCrazyAITask) new UnknownEntityAIBase66vj((EntityHorse) owner, speed);
+    public Value<HorseVariant> variant() {
+        printDeprecatedHorseUsage("HorseVariant is no longer applicable to all horses! HorseVariants cannot be changed!");
+        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT, HorseVariants.DONKEY);
     }
 }

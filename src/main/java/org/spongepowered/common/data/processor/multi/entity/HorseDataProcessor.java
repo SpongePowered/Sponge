@@ -45,6 +45,7 @@ import org.spongepowered.common.entity.SpongeHorseVariant;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings("deprecation")
 public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse, HorseData, ImmutableHorseData> {
 
     public HorseDataProcessor() {
