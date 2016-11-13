@@ -32,7 +32,7 @@ import net.minecraft.item.ItemStack;
 
 public class CustomContainer extends Container {
 
-    private CustomInventory inv;
+    protected CustomInventory inv;
 
     public CustomContainer(EntityPlayer player, CustomInventory inventory) {
         this.inv = inventory;
