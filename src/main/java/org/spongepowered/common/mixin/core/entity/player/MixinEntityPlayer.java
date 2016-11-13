@@ -123,7 +123,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public PlayerCapabilities capabilities;
     @Shadow public InventoryPlayer inventory;
     @Shadow private BlockPos spawnChunk;
-    @Shadow private BlockPos playerLocation;
+    @Shadow public BlockPos playerLocation;
     @Shadow protected FoodStats foodStats;
     @Shadow public InventoryEnderChest theInventoryEnderChest;
 

@@ -47,7 +47,7 @@ import java.util.List;
 @Implements(@Interface(iface = IMixinAggressive.class, prefix = "aggressive$"))
 public abstract class MixinEntityPigZombie extends MixinEntityZombie implements ZombiePigman, IMixinAnger {
 
-    @Shadow private int angerLevel;
+    @Shadow public int angerLevel;
 
     @Shadow public abstract boolean isAngry();
     

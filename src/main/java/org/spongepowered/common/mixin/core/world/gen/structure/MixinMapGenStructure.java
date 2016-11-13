@@ -55,7 +55,7 @@ public abstract class MixinMapGenStructure implements Populator {
 
     @Shadow protected Long2ObjectMap<StructureStart> structureMap;
     @Shadow protected abstract void initializeStructureData(World worldIn);
-    @Shadow public abstract void setStructureStart(int chunkX, int chunkZ, StructureStart start);
+    @Shadow protected abstract void setStructureStart(int chunkX, int chunkZ, StructureStart start);
 
     @Override
     public PopulatorType getType() {

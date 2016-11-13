@@ -39,7 +39,7 @@ public abstract class MixinEntityItem_Activation extends MixinEntity_Activation 
     @Shadow public abstract ItemStack getEntityItem();
 
     @Shadow private int delayBeforeCanPickup;
-    @Shadow private int age;
+    @Shadow public int age;
 
     @Override
     public void inactiveTick() {

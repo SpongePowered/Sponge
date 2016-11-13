@@ -46,7 +46,7 @@ import java.util.Set;
 @Mixin(EntityTrackerEntry.class)
 public abstract class MixinEntityTrackerEntry {
 
-    @Shadow @Final public Entity trackedEntity;
+    @Shadow @Final private Entity trackedEntity;
     @Shadow @Final public Set<EntityPlayerMP> trackingPlayers;
 
     @Shadow public abstract void sendToTrackingAndSelf(Packet<?> packetIn);

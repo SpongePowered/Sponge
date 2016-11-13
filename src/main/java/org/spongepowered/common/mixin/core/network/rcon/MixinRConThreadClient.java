@@ -50,7 +50,7 @@ import java.net.Socket;
 @Mixin(RConThreadClient.class)
 public abstract class MixinRConThreadClient extends RConThreadBase implements RemoteConnection {
 
-    @Shadow private boolean loggedIn;
+    @Shadow public boolean loggedIn;
     @Shadow private Socket clientSocket;
 
     private RConConsoleSource source;

@@ -97,7 +97,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private boolean requiresLocationCheckForOpacity;
     private Timing timing;
 
-    @Shadow private boolean needsRandomTick;
+    @Shadow protected boolean needsRandomTick;
     @Shadow protected SoundType blockSoundType;
 
     @Shadow public abstract String getUnlocalizedName();

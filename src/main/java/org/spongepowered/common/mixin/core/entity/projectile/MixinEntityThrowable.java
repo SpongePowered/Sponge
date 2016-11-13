@@ -43,7 +43,7 @@ import javax.annotation.Nullable;
 @Mixin(EntityThrowable.class)
 public abstract class MixinEntityThrowable extends MixinEntity implements Projectile {
 
-    @Shadow private EntityLivingBase thrower;
+    @Shadow public EntityLivingBase thrower;
     @Shadow private String throwerName;
     @Shadow public abstract EntityLivingBase getThrower();
     @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);

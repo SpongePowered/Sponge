@@ -33,7 +33,7 @@ import org.spongepowered.common.interfaces.inventory.IMixinSlot;
 @Mixin(Slot.class)
 public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot {
 
-    @Shadow @Final private int slotIndex;
+    @Shadow @Final public int slotIndex;
 
     @Override
     public int getSlotIndex() {

@@ -88,10 +88,10 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Shadow public abstract Chunk getLoadedChunk(int x, int z);
     @Shadow public abstract Chunk loadChunk(int x, int z);
-    @Shadow public abstract Chunk loadChunkFromFile(int x, int z);
+    @Shadow protected abstract Chunk loadChunkFromFile(int x, int z);
     @Shadow public abstract Chunk provideChunk(int x, int z);
-    @Shadow public abstract void saveChunkExtraData(Chunk chunkIn);
-    @Shadow public abstract void saveChunkData(Chunk chunkIn);
+    @Shadow protected abstract void saveChunkExtraData(Chunk chunkIn);
+    @Shadow protected abstract void saveChunkData(Chunk chunkIn);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(WorldServer worldObjIn, IChunkLoader chunkLoaderIn, IChunkGenerator chunkGeneratorIn, CallbackInfo ci) {

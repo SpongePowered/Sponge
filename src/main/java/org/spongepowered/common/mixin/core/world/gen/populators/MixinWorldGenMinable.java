@@ -50,9 +50,9 @@ import java.util.Random;
 @Mixin(WorldGenMinable.class)
 public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore {
 
-    @Shadow private IBlockState oreBlock;
-    @Shadow private int numberOfBlocks;
-    @Shadow private Predicate<IBlockState> predicate;
+    @Shadow public IBlockState oreBlock;
+    @Shadow public int numberOfBlocks;
+    @Shadow public Predicate<IBlockState> predicate;
 
     private VariableAmount size;
     private VariableAmount count;

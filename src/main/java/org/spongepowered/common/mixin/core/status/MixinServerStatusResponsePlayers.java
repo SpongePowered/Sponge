@@ -40,8 +40,8 @@ import javax.annotation.Nullable;
 @Mixin(ServerStatusResponse.Players.class)
 public abstract class MixinServerStatusResponsePlayers implements ClientPingServerEvent.Response.Players {
 
-    @Shadow private int onlinePlayerCount;
-    @Shadow private int maxPlayers;
+    @Shadow public int onlinePlayerCount;
+    @Shadow public int maxPlayers;
 
     @Nullable private List<GameProfile> profiles;
 

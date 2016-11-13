@@ -59,8 +59,8 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
 
     @Shadow public Entity shootingEntity;
     @Shadow private int ticksInAir;
-    @Shadow public double damage;
-    @Shadow public boolean inGround;
+    @Shadow private double damage;
+    @Shadow protected boolean inGround;
 
     // Not all ProjectileSources are entities (e.g. BlockProjectileSource).
     // This field is used to store a ProjectileSource that isn't an entity.

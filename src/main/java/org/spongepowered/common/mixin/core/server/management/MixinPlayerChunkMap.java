@@ -43,7 +43,7 @@ import javax.annotation.Nullable;
 @Mixin(PlayerChunkMap.class)
 public abstract class MixinPlayerChunkMap implements IMixinPlayerChunkMap {
 
-    @Shadow @Final private WorldServer theWorldServer;
+    @Shadow @Final public WorldServer theWorldServer;
 
     @Shadow @Nullable public abstract PlayerChunkMapEntry getEntry(int chunkX, int chunkZ);
 

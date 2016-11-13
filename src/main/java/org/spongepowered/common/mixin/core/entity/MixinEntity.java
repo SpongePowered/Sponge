@@ -173,7 +173,7 @@ public abstract class MixinEntity implements IMixinEntity {
 	private UserStorageService userStorageService;
     private Timing timing;
 
-    @Shadow private UUID entityUniqueID;
+    @Shadow protected UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
     @Shadow public double posX;
     @Shadow public double posY;
@@ -192,7 +192,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public float fallDistance;
     @Shadow public boolean isDead;
     @Shadow public boolean onGround;
-    @Shadow public boolean inWater;
+    @Shadow protected boolean inWater;
     @Shadow protected boolean isImmuneToFire;
     @Shadow public int hurtResistantTime;
     @Shadow public int fireResistance;

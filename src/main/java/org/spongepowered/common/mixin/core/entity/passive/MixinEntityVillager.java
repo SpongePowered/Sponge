@@ -87,7 +87,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Shadow private boolean isPlaying;
     @Shadow private int careerId;
     @Shadow private int careerLevel;
-    @Shadow @Nullable private MerchantRecipeList buyingList;
+    @Shadow @Nullable public MerchantRecipeList buyingList;
     @Shadow @Final private InventoryBasic villagerInventory;
 
     @Shadow public abstract int shadow$getProfession();

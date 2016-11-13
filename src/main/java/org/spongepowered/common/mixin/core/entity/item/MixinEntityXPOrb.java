@@ -44,7 +44,7 @@ import java.util.List;
 @Mixin(EntityXPOrb.class)
 public abstract class MixinEntityXPOrb extends MixinEntity implements ExperienceOrb, IMixinEntityXPOrb {
 
-    @Shadow public int xpValue;
+    @Shadow private int xpValue;
 
     @Override
     public int getExperience() {

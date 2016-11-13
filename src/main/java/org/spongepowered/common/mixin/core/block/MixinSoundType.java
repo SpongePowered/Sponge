@@ -41,11 +41,11 @@ public abstract class MixinSoundType {
     @Shadow @Final public float volume;
     @Shadow @Final public float pitch;
 
-    @Shadow @Final public SoundEvent stepSound;
-    @Shadow @Final public SoundEvent placeSound;
-    @Shadow @Final public SoundEvent fallSound;
-    @Shadow @Final public SoundEvent breakSound;
-    @Shadow @Final public SoundEvent hitSound;
+    @Shadow @Final private SoundEvent stepSound;
+    @Shadow @Final private SoundEvent placeSound;
+    @Shadow @Final private SoundEvent fallSound;
+    @Shadow @Final private SoundEvent breakSound;
+    @Shadow @Final private SoundEvent hitSound;
 
     public double group$getVolume() {
         return this.volume;

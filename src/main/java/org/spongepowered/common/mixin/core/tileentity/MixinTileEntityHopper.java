@@ -76,7 +76,7 @@ import javax.annotation.Nullable;
         @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
 public abstract class MixinTileEntityHopper extends MixinTileEntityLockable implements Hopper, IMixinCustomNameable {
 
-    @Shadow private int transferCooldown;
+    @Shadow public int transferCooldown;
     @Shadow @Nullable private String customName;
 
     private Fabric<IInventory> fabric;
