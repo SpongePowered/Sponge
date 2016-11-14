@@ -25,22 +25,22 @@
 package org.spongepowered.common.gui.window;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.S0APacketUseBed;
-import net.minecraft.network.play.server.S0BPacketAnimation;
+import net.minecraft.network.play.server.SPacketAnimation;
+import net.minecraft.network.play.server.SPacketUseBed;
 import org.spongepowered.api.gui.window.SleepingWindow;
 
 public class SpongeSleepingWindow extends AbstractSpongeWindow implements SleepingWindow {
 
     @Override
     protected boolean show(EntityPlayerMP player) {
-        player.playerNetServerHandler.sendPacket(new S0APacketUseBed(player, VIRTUAL_POS));
-        player.playerNetServerHandler.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
+        player.connection.sendPacket(new SPacketUseBed(player, VIRTUAL_POS));
+        player.connection.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
         return true;
     }
 
     @Override
     protected void sendClose(EntityPlayerMP player) {
-        player.playerNetServerHandler.sendPacket(new S0BPacketAnimation(player, 2));
+        player.connection.sendPacket(new SPacketAnimation(player, 2));
     }
 
     @Override

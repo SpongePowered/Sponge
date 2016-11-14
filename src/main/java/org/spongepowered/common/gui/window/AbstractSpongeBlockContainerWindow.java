@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.gui.window;
 
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.gui.window.LocationBackedWindow;
 import org.spongepowered.api.world.Location;

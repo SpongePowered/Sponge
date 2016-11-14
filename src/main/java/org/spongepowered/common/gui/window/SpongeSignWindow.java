@@ -29,8 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
@@ -39,7 +38,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
-import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 import java.util.Optional;
@@ -101,14 +99,14 @@ public class SpongeSignWindow extends AbstractSpongeWindow implements SignWindow
         return true;
     }
 
-    public boolean onClientClose(EntityPlayerMP player, BlockPos pos, IChatComponent[] lines) {
+    public boolean onClientClose(EntityPlayerMP player, BlockPos pos, String[] lines) {
         if (!pos.equals(SpongeSignWindow.VIRTUAL_POS)) {
             return false;
         }
         if (!this.consumers.isEmpty()) {
             List<Text> text = Lists.newArrayList();
-            for (IChatComponent line : lines) {
-                text.add(line == null ? Text.EMPTY : SpongeTexts.toText(line));
+            for (String line : lines) {
+                text.add(line == null ? Text.EMPTY : Text.of(line));
             }
             ImmutableSpongeSignData data = new ImmutableSpongeSignData(text);
             for (Consumer<ImmutableSignData> c : this.consumers) {

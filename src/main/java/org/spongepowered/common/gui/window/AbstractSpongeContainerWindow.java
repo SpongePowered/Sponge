@@ -28,7 +28,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.network.play.server.S2DPacketOpenWindow;
+import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.gui.window.ContainerWindow;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
@@ -73,16 +73,16 @@ public abstract class AbstractSpongeContainerWindow extends AbstractSpongeWindow
     // Mostly copied from displayGUIChest, except use createVirtualContainer
     private void displayVirtualGui(EntityPlayerMP player, IInteractionObject obj) {
         int windowId = ((IMixinEntityPlayerMP) player).incrementAndGetWindowId();
-        S2DPacketOpenWindow packet;
+        SPacketOpenWindow packet;
         if (obj instanceof IInventory) {
-            packet = new S2DPacketOpenWindow(windowId, obj.getGuiID(), obj.getDisplayName(), ((InventoryPlayer) obj).getSizeInventory());
+            packet = new SPacketOpenWindow(windowId, obj.getGuiID(), obj.getDisplayName(), ((InventoryPlayer) obj).getSizeInventory());
         } else {
-            packet = new S2DPacketOpenWindow(windowId, obj.getGuiID(), obj.getDisplayName());
+            packet = new SPacketOpenWindow(windowId, obj.getGuiID(), obj.getDisplayName());
         }
-        player.playerNetServerHandler.sendPacket(packet);
+        player.connection.sendPacket(packet);
         player.openContainer = createVirtualContainer(obj, player.inventory, player);
         player.openContainer.windowId = windowId;
-        player.openContainer.onCraftGuiOpened(player);
+        player.openContainer.addListener(player);
     }
 
     protected Container createVirtualContainer(IInteractionObject obj, InventoryPlayer inventory, EntityPlayerMP player) {

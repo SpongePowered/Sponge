@@ -25,14 +25,14 @@
 package org.spongepowered.common.gui.window;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.S2BPacketChangeGameState;
+import net.minecraft.network.play.server.SPacketChangeGameState;
 import org.spongepowered.api.gui.window.WinGameWindow;
 
 public class SpongeWinGameWindow extends AbstractSpongeWindow implements WinGameWindow {
 
     @Override
     protected boolean show(EntityPlayerMP player) {
-        player.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(4, 1));
+        player.connection.sendPacket(new SPacketChangeGameState(4, 1));
         return true;
     }
 

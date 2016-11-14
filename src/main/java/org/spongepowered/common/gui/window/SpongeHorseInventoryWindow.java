@@ -30,9 +30,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.AnimalChest;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerHorseInventory;
-import net.minecraft.network.play.server.S0FPacketSpawnMob;
-import net.minecraft.network.play.server.S13PacketDestroyEntities;
-import net.minecraft.network.play.server.S2DPacketOpenWindow;
+import net.minecraft.network.play.server.SPacketDestroyEntities;
+import net.minecraft.network.play.server.SPacketOpenWindow;
+import net.minecraft.network.play.server.SPacketSpawnMob;
 import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.entity.living.animal.Horse;
@@ -77,18 +77,18 @@ public class SpongeHorseInventoryWindow extends AbstractSpongeContainerWindow im
         AnimalChest inventory = new AnimalChest(horse.getName(), horse.isChested() ? 17 : 2);
 
         // Spawn horse on client
-        player.playerNetServerHandler.sendPacket(new S0FPacketSpawnMob(horse));
+        player.connection.sendPacket(new SPacketSpawnMob(horse));
 
         // Open window on client and configure container
         int windowId = ((IMixinEntityPlayerMP) player).incrementAndGetWindowId();
-        player.playerNetServerHandler.sendPacket(
-                new S2DPacketOpenWindow(windowId, "EntityHorse", horse.getDisplayName(), inventory.getSizeInventory(), horse.getEntityId()));
+        player.connection.sendPacket(
+                new SPacketOpenWindow(windowId, "EntityHorse", horse.getDisplayName(), inventory.getSizeInventory(), horse.getEntityId()));
         player.openContainer = createContainerHorse(player, horse, inventory);
         player.openContainer.windowId = windowId;
-        player.openContainer.onCraftGuiOpened(player);
+        player.openContainer.addListener(player);
 
         // Despawn horse on client
-        player.playerNetServerHandler.sendPacket(new S13PacketDestroyEntities(horse.getEntityId()));
+        player.connection.sendPacket(new SPacketDestroyEntities(horse.getEntityId()));
     }
 
     private Container createContainerHorse(EntityPlayerMP player, EntityHorse horse, AnimalChest horseInventory) {

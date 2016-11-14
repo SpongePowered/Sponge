@@ -29,8 +29,8 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Sets;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.S2EPacketCloseWindow;
-import net.minecraft.util.BlockPos;
+import net.minecraft.network.play.server.SPacketCloseWindow;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.gui.window.Window;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
@@ -79,7 +79,7 @@ public abstract class AbstractSpongeWindow implements Window {
     protected void sendClose(EntityPlayerMP player) {
         // Calls displayGuiScreen(null) on the client
         // May cause problems with containers, be sure to override if it will
-        player.playerNetServerHandler.sendPacket(new S2EPacketCloseWindow(-1));
+        player.connection.sendPacket(new SPacketCloseWindow(-1));
     }
 
     protected void checkNotOpen() {

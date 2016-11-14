@@ -32,9 +32,9 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraft.world.IInteractionObject;
@@ -112,7 +112,7 @@ public class SpongeVillagerTradeWindow extends AbstractSpongeContainerWindow imp
         } else {
             buffer.writeByte(0);
         }
-        player.playerNetServerHandler.sendPacket(new S3FPacketCustomPayload("MC|TrList", buffer));
+        player.connection.sendPacket(new SPacketCustomPayload("MC|TrList", buffer));
     }
 
     private static class DummyMerchant implements IMerchant {
@@ -157,8 +157,8 @@ public class SpongeVillagerTradeWindow extends AbstractSpongeContainerWindow imp
         }
 
         @Override
-        public IChatComponent getDisplayName() {
-            return new ChatComponentText("Merchant");
+        public ITextComponent getDisplayName() {
+            return new TextComponentString("Merchant");
         }
 
     }
