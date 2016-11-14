@@ -27,25 +27,14 @@ package org.spongepowered.common.mixin.core.entity.monster;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.monster.EntitySkeleton;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.entity.living.monster.AbstractSkeleton;
+import net.minecraft.entity.monster.EntityStray;
 import org.spongepowered.api.entity.living.monster.Skeleton;
+import org.spongepowered.api.entity.living.monster.Stray;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.util.List;
+@Mixin(EntityStray.class)
+public abstract class MixinEntityStray extends MixinAbstractSkeleton implements Stray {
 
-@Mixin(EntitySkeleton.class)
-public abstract class MixinEntitySkeleton extends MixinAbstractSkeleton implements Skeleton {
-
-    @Redirect(method = "mth_001827_dh", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ai/EntityAITasks;addTask"
-            + "(ILn'et/minecraft/entity/ai/EntityAIBase;)V"), require = 2)
-    private void onAddTaskForInitialSpawn(EntityAITasks tasks, int molex, EntityAIBase aiBase) {
-        if (this.worldObj.isRemote) {
-            return;
-        }
-        this.initEntityAI();
-        tasks.addTask(molex, aiBase);
-    }
 }

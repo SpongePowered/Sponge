@@ -24,28 +24,30 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.EntityAITasks;
-import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntityVindicator;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.entity.living.monster.AbstractSkeleton;
-import org.spongepowered.api.entity.living.monster.Skeleton;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.living.monster.Vindicator;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.List;
 
-@Mixin(EntitySkeleton.class)
-public abstract class MixinEntitySkeleton extends MixinAbstractSkeleton implements Skeleton {
+@Mixin(EntityVindicator.class)
+public abstract class MixinEntityVindicator extends MixinEntityMob implements Vindicator {
 
-    @Redirect(method = "mth_001827_dh", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ai/EntityAITasks;addTask"
-            + "(ILn'et/minecraft/entity/ai/EntityAIBase;)V"), require = 2)
-    private void onAddTaskForInitialSpawn(EntityAITasks tasks, int molex, EntityAIBase aiBase) {
-        if (this.worldObj.isRemote) {
-            return;
-        }
-        this.initEntityAI();
-        tasks.addTask(molex, aiBase);
+    @Shadow private boolean fld_000310_b;
+
+    @Override
+    public Value<Boolean> johnny() {
+        return new SpongeValue<>(Keys.JOHNNY_VINDICATOR, false, this.fld_000310_b);
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        // TODO - add vindicatorData
     }
 }

@@ -193,10 +193,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
     @Shadow protected List<IWorldEventListener> eventListeners;
 
-    @Shadow private boolean processingLoadedTiles;
+    @Shadow public boolean processingLoadedTiles;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
     @Shadow protected WorldInfo worldInfo;
-    @Shadow @Final net.minecraft.world.border.WorldBorder worldBorder;
+    @Shadow @Final public net.minecraft.world.border.WorldBorder worldBorder;
     @Shadow protected int updateLCG;
 
     @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
