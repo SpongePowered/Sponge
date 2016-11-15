@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
@@ -57,6 +58,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(Container.class)
@@ -86,6 +90,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private Map<Integer, SlotAdapter> adapters = new HashMap<>();
     private InventoryArchetype archetype;
     protected Optional<Carrier> carrier;
+    protected Optional<Predicate<EntityPlayer>> canInteractWithPredicate = Optional.empty();
 
     private void init() {
         this.initialized = true;
@@ -256,6 +261,11 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             this.init();
         }
         return this.fabric;
+    }
+
+    @Override
+    public void setCanInteractWith(@Nullable Predicate<EntityPlayer> predicate) {
+        this.canInteractWithPredicate = Optional.ofNullable(predicate); // TODO mixin into all classes extending container
     }
 }
 

@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.interfaces;
 
+import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 
 import java.util.List;
+import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
 
 public interface IMixinContainer {
 
@@ -39,4 +43,6 @@ public interface IMixinContainer {
     void detectAndSendChanges(boolean captureOnly);
 
     void setSpectatorChest(boolean spectatorChest);
+
+    void setCanInteractWith(@Nullable Predicate<EntityPlayer> predicate);
 }
