@@ -334,6 +334,7 @@
         "item.data.MixinItemWritableBook",
         "item.data.MixinItemWrittenBook",
         "item.inventory.MixinContainer",
+        "item.inventory.MixinContainerCanInteract",
         "item.inventory.MixinContainerCarrier",
         "item.inventory.MixinSlot",
         "item.inventory.MixinSlotCrafting",
