@@ -89,7 +89,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.inv = new InventoryBasic(title, isCustom, count);
 
         // Updates the Inventory for all viewers on any change
-        this.inv.mth_001419_a(i -> viewers.forEach(v -> {
+        this.inv.mth_001420_a(i -> viewers.forEach(v -> {
             v.openContainer.detectAndSendChanges();
         }));
 

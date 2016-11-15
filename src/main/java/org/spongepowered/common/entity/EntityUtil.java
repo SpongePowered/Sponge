@@ -708,7 +708,7 @@ public final class EntityUtil {
         entity.worldObj.mth_000647_f(entity);
         entity.isDead = false;
         entity.dimension = targetDim;
-        entity.mth_001449_a(location.getX(), location.getY(), location.getZ(), 0, 0);
+        entity.mth_001450_a(location.getX(), location.getY(), location.getZ(), 0, 0);
         while (!toWorld.getCollisionBoxes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
             entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
         }
@@ -739,7 +739,7 @@ public final class EntityUtil {
             entity.setWorld(toWorld);
             entityPlayerMP.connection.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
                     entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
-            entityPlayerMP.mth_001456_e(false);
+            entityPlayerMP.mth_001457_e(false);
             mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
             toWorld.getPlayerChunkMap().addPlayer(entityPlayerMP);
             toWorld.spawnEntityInWorld(entityPlayerMP);

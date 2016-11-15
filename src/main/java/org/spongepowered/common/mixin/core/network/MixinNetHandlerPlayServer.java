@@ -613,7 +613,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         this.playerEntity.markPlayerActive();
 
         if (entity != null) {
-            boolean flag = this.playerEntity.mth_001505_D((entity));
+            boolean flag = this.playerEntity.mth_001506_D((entity));
             double d0 = 36.0D; // 6 blocks
 
             if (!flag) {
@@ -635,7 +635,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
                     if (!SpongeCommonEventFactory.callInteractEntityEventSecondary(this.playerEntity, entity, packetIn.getHand(), packetIn.getHitVec()).isCancelled()) {
                         // If INTERACT_AT returns a false result, we assume this packet was meant for interactWith
-                        if (entity.mth_001465_a(this.playerEntity, packetIn.getHitVec(), hand) != EnumActionResult.SUCCESS) {
+                        if (entity.mth_001466_a(this.playerEntity, packetIn.getHitVec(), hand) != EnumActionResult.SUCCESS) {
                             this.playerEntity.mth_000427_a(entity, hand);
                         }
                     }

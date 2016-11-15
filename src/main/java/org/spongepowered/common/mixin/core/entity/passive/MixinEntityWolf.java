@@ -53,18 +53,18 @@ import java.util.Random;
 @Implements(value = @Interface(iface = IMixinAggressive.class, prefix = "aggr$"))
 public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf {
 
-    @Shadow public abstract boolean mth_001643_dr(); // isAngry
+    @Shadow public abstract boolean mth_001644_dr(); // isAngry
 
-    @Shadow public abstract void mth_001644_s(boolean angry); // setAngry
+    @Shadow public abstract void mth_001645_s(boolean angry); // setAngry
 
     @Intrinsic
     public boolean aggr$isAngry() {
-        return this.mth_001643_dr();
+        return this.mth_001644_dr();
     }
 
     @Intrinsic
     public void aggr$setAngry(boolean angry) {
-        this.mth_001644_s(angry);
+        this.mth_001645_s(angry);
     }
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
@@ -90,6 +90,6 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(get(SittingData.class).get());
-        manipulators.add(new SpongeAggressiveData(this.mth_001643_dr()));
+        manipulators.add(new SpongeAggressiveData(this.mth_001644_dr()));
     }
 }

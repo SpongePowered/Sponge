@@ -58,8 +58,8 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     @Shadow public Rotations leftLegRotation;
     @Shadow public Rotations rightLegRotation;
 
-    @Shadow public abstract boolean mth_001798_r(); // getShowArms
-    @Shadow public abstract boolean mth_001800_s(); // hasNoBasePlate
+    @Shadow public abstract boolean mth_001799_r(); // getShowArms
+    @Shadow public abstract boolean mth_001801_s(); // hasNoBasePlate
     @Shadow public abstract boolean hasMarker();
     @Shadow public abstract boolean shadow$isSmall();
     @Shadow public abstract Rotations shadow$getHeadRotation();
@@ -77,17 +77,17 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
 
     @Override
     public Value<Boolean> basePlate() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_BASE_PLATE, true, !this.mth_001800_s());
+        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_BASE_PLATE, true, !this.mth_001801_s());
     }
 
     @Override
     public Value<Boolean> arms() {
-        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_ARMS, false, this.mth_001798_r());
+        return new SpongeValue<>(Keys.ARMOR_STAND_HAS_ARMS, false, this.mth_001799_r());
     }
 
     @Override
     public ArmorStandData getArmorStandData() {
-        return new SpongeArmorStandData(this.hasMarker(), this.shadow$isSmall(), this.mth_001798_r(), !this.mth_001800_s());
+        return new SpongeArmorStandData(this.hasMarker(), this.shadow$isSmall(), this.mth_001799_r(), !this.mth_001801_s());
     }
 
     @Override

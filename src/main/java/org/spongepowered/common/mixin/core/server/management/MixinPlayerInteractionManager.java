@@ -150,7 +150,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         }
         // Sponge End
 
-        if (!player.isSneaking() || player.getHeldItemMainhand().mth_000506_b() && player.mth_001502_ch().mth_000506_b()) {
+        if (!player.isSneaking() || player.getHeldItemMainhand().mth_000506_b() && player.mth_001503_ch().mth_000506_b()) {
             // Sponge start - check event useBlockResult, and revert the client if it's FALSE.
             // Also, store the result instead of returning immediately
             if (event.getUseBlockResult() != Tristate.FALSE) {

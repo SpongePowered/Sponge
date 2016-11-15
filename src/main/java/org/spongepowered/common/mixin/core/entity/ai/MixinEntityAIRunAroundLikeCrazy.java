@@ -34,16 +34,16 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(UnknownEntityAIBase66vj.class)
 public abstract class MixinEntityAIRunAroundLikeCrazy extends MixinEntityAIBase implements RunAroundLikeCrazyAITask {
 
-    @Shadow @Final @Mutable private double fld_001600_b;
+    @Shadow @Final @Mutable private double fld_001601_b;
 
     @Override
     public double getSpeed() {
-        return this.fld_001600_b;
+        return this.fld_001601_b;
     }
 
     @Override
     public RunAroundLikeCrazyAITask setSpeed(double speed) {
-        this.fld_001600_b = speed;
+        this.fld_001601_b = speed;
         return this;
     }
 }

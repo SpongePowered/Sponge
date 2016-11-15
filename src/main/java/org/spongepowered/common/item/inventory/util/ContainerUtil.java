@@ -256,7 +256,7 @@ public final class ContainerUtil {
             return InventoryArchetypes.BEACON;
         } else if (container instanceof ContainerHorseInventory) {
             AbstractHorse horse = ((ContainerHorseInventory) container).fld_000487_f;
-            if (horse instanceof AbstractChestHorse && ((AbstractChestHorse) horse).mth_001653_dh()) {
+            if (horse instanceof AbstractChestHorse && ((AbstractChestHorse) horse).mth_001654_dh()) {
                 return InventoryArchetypes.HORSE_WITH_CHEST;
             }
             return InventoryArchetypes.HORSE;

@@ -47,7 +47,7 @@ import java.util.Optional;
 public abstract class MixinEntityGuardian extends MixinEntityMob implements Guardian {
 
     @Shadow @Final private static DataParameter<Integer> TARGET_ENTITY;
-    @Shadow private void mth_001857_a(int entityId) { } // setTargetedEntity
+    @Shadow private void mth_001858_a(int entityId) { } // setTargetedEntity
 
     @Override
     public ElderData getElderData() {
@@ -73,9 +73,9 @@ public abstract class MixinEntityGuardian extends MixinEntityMob implements Guar
     @Override
     public void setBeamTarget(Living entity) {
         if (entity == null) {
-            this.mth_001857_a(0);
+            this.mth_001858_a(0);
         } else {
-            this.mth_001857_a(((EntityLivingBase) entity).getEntityId());
+            this.mth_001858_a(((EntityLivingBase) entity).getEntityId());
         }
     }
 }

@@ -290,7 +290,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
         if (entitylivingbase != null) {
-            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.mth_001475_a(entitylivingbase));
+            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.mth_001476_a(entitylivingbase));
 
             if (entitylist$entityegginfo != null) {
                 this.addStat(entitylist$entityegginfo.entityKilledByStat);
@@ -754,14 +754,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void mth_001510_cE() { // stopActiveHand
+    public void mth_001511_cE() { // stopActiveHand
         // Our using item state is probably desynced from the client (e.g. from the initial air interaction of a bow being cancelled).
         // We need to re-send the player's inventory to overwrite any client-side inventory changes that may have occured as a result
         // of the client (but not the server) calling Item#onPlayerStoppedUsing (which in the case of a bow, removes one arrow from the inventory).
         if (this.activeItemStack == null) {
             this$.sendContainerToPlayer(this$.inventoryContainer);
         }
-        super.mth_001510_cE();
+        super.mth_001511_cE();
     }
 
     @Override

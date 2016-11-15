@@ -186,7 +186,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     @Override
     public void onLivingUpdate() {
         super.onLivingUpdate();
-        this.mth_001501_cd();
+        this.mth_001502_cd();
     }
 
     @Override
@@ -509,7 +509,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
             entitytippedarrow.setPotionEffect(itemstack);
         }
 
-        this.playSound(SoundEvents.fld_001161_w, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
+        this.playSound(SoundEvents.fld_001162_w, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
         this.worldObj.spawnEntityInWorld(entitytippedarrow);
     }
 }

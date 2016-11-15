@@ -49,7 +49,7 @@ public class ArmorStandMarkerValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected boolean set(EntityArmorStand container, Boolean value) {
-        container.mth_001801_p(value);
+        container.mth_001802_p(value);
         return true;
     }
 

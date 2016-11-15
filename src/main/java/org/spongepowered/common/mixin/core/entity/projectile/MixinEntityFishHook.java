@@ -61,11 +61,11 @@ import javax.annotation.Nullable;
 @Mixin(EntityFishHook.class)
 public abstract class MixinEntityFishHook extends MixinEntity implements FishHook {
 
-    @Shadow private EntityPlayer fld_001804_e; // fld_001804_e
-    @Shadow public net.minecraft.entity.Entity fld_001810_a; // fld_001810_a
-    @Shadow private int fld_001806_g; // ticksCatchable
-    @Shadow private boolean fld_001802_c; // inGround
-    @Shadow protected abstract void mth_001822_k(); // bringInHookedEntity
+    @Shadow private EntityPlayer fld_001805_e; // fld_001804_e
+    @Shadow public net.minecraft.entity.Entity fld_001811_a; // fld_001810_a
+    @Shadow private int fld_001807_g; // ticksCatchable
+    @Shadow private boolean fld_001803_c; // inGround
+    @Shadow protected abstract void mth_001823_k(); // bringInHookedEntity
 
     @Nullable
     public ProjectileSource projectileSource;
@@ -76,8 +76,8 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     public ProjectileSource getShooter() {
         if (this.projectileSource != null) {
             return this.projectileSource;
-        } else if (this.fld_001804_e != null && this.fld_001804_e instanceof ProjectileSource) {
-            return (ProjectileSource) this.fld_001804_e;
+        } else if (this.fld_001805_e != null && this.fld_001805_e instanceof ProjectileSource) {
+            return (ProjectileSource) this.fld_001805_e;
         }
         return ProjectileSource.UNKNOWN;
     }
@@ -86,21 +86,21 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof EntityPlayer) {
             // This allows things like Vanilla kill attribution to take place
-            this.fld_001804_e = (EntityPlayer) shooter;
+            this.fld_001805_e = (EntityPlayer) shooter;
         } else {
-            this.fld_001804_e = null;
+            this.fld_001805_e = null;
         }
         this.projectileSource = shooter;
     }
 
     @Override
     public Optional<Entity> getHookedEntity() {
-        return Optional.ofNullable((Entity) this.fld_001810_a);
+        return Optional.ofNullable((Entity) this.fld_001811_a);
     }
 
     @Override
     public void setHookedEntity(@Nullable Entity entity) {
-        this.fld_001810_a = (net.minecraft.entity.Entity) entity;
+        this.fld_001811_a = (net.minecraft.entity.Entity) entity;
     }
 
     /**
@@ -110,56 +110,56 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
      */
 
     @Overwrite
-    public int mth_001821_j() { // handleHookRetraction
+    public int mth_001822_j() { // handleHookRetraction
         if (this.worldObj.isRemote) {
             return 0;
         } else {
             int i = 0;
 
-            if (this.fld_001810_a != null) {
-                this.mth_001822_k();
+            if (this.fld_001811_a != null) {
+                this.mth_001823_k();
                 this.worldObj.setEntityState((EntityFishHook) (Object) this, (byte)31);
-                i = this.fld_001810_a instanceof EntityItem ? 3 : 5;
+                i = this.fld_001811_a instanceof EntityItem ? 3 : 5;
 
-            } else if (this.fld_001806_g > 0) {
+            } else if (this.fld_001807_g > 0) {
                 LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.worldObj);
-                lootcontext$builder.withLuck((float) EnchantmentHelper.mth_000621_f(this.fld_001804_e) + this.fld_001804_e.getLuck());
+                lootcontext$builder.withLuck((float) EnchantmentHelper.mth_000621_f(this.fld_001805_e) + this.fld_001805_e.getLuck());
 
                 // Sponge start
                 // TODO 1.9: Figure out how we want experience to work here
                 List<net.minecraft.item.ItemStack> itemstacks = this.worldObj.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING).generateLootForPools(this.rand, lootcontext$builder.build());
-                FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.fld_001804_e)), 0, 0,
+                FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.fld_001805_e)), 0, 0,
                         this.createSnapshot(), this, itemstacks.stream().map(s -> {
                             ItemStackSnapshot snapshot = ((ItemStack) s).createSnapshot();
                             return new Transaction<>(snapshot, snapshot);
-                        }).collect(Collectors.toList()), (Player) this.fld_001804_e);
+                        }).collect(Collectors.toList()), (Player) this.fld_001805_e);
 
                 if (!SpongeImpl.postEvent(event)) {
                     for (net.minecraft.item.ItemStack itemstack : event.getItemStackTransaction().stream().filter(Transaction::isValid).map(t -> (net.minecraft.item.ItemStack) t.getFinal().createStack()).collect(Collectors.toList())) {
                         EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, itemstack);
-                        double d0 = this.fld_001804_e.posX - this.posX;
-                        double d1 = this.fld_001804_e.posY - this.posY;
-                        double d2 = this.fld_001804_e.posZ - this.posZ;
+                        double d0 = this.fld_001805_e.posX - this.posX;
+                        double d1 = this.fld_001805_e.posY - this.posY;
+                        double d2 = this.fld_001805_e.posZ - this.posZ;
                         double d3 = (double)MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
                         double d4 = 0.1D;
                         entityitem.motionX = d0 * d4;
                         entityitem.motionY = d1 * d4 + (double)MathHelper.sqrt_double(d3) * 0.08D;
                         entityitem.motionZ = d2 * d4;
                         this.worldObj.spawnEntityInWorld(entityitem);
-                        this.fld_001804_e.worldObj.spawnEntityInWorld(new EntityXPOrb(this.fld_001804_e.worldObj, this.fld_001804_e.posX, this.fld_001804_e.posY + 0.5D, this.fld_001804_e.posZ + 0.5D, this.rand.nextInt(6) + 1));
+                        this.fld_001805_e.worldObj.spawnEntityInWorld(new EntityXPOrb(this.fld_001805_e.worldObj, this.fld_001805_e.posX, this.fld_001805_e.posY + 0.5D, this.fld_001805_e.posZ + 0.5D, this.rand.nextInt(6) + 1));
                     } // Sponge end
                 }
 
                 i = 1;
             }
 
-            if (this.fld_001802_c)
+            if (this.fld_001803_c)
             {
                 i = 2;
             }
 
             this.setDead();
-            this.fld_001804_e.fishEntity = null;
+            this.fld_001805_e.fishEntity = null;
             return i;
         }
     }
@@ -173,6 +173,6 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.fld_001804_e);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.fld_001805_e);
     }
 }

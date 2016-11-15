@@ -234,13 +234,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow private int updateEntityTick;
 
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
-    @Shadow protected abstract void mth_001142_o(); // createBonusChest
+    @Shadow protected abstract void mth_001143_o(); // createBonusChest
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
     @Shadow public abstract ChunkProviderServer getChunkProvider();
     @Shadow protected abstract void playerCheckLight();
     @Shadow protected abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
-    @Shadow private boolean mth_001143_i(net.minecraft.entity.Entity entityIn) { // canAddEntity
+    @Shadow private boolean mth_001144_i(net.minecraft.entity.Entity entityIn) { // canAddEntity
         return false; // Shadowed
     }
 
@@ -270,7 +270,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.updateEntityTick = 0;
     }
 
-    @Inject(method = "mth_001142_o", at = @At(value = "HEAD"))
+    @Inject(method = "mth_001143_o", at = @At(value = "HEAD"))
     public void onCreateBonusChest(CallbackInfo ci) {
         if (CauseTracker.ENABLED) {
             this.getCauseTracker().switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
@@ -281,20 +281,20 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
 
-    @Inject(method = "mth_001142_o", at = @At(value = "RETURN"))
+    @Inject(method = "mth_001143_o", at = @At(value = "RETURN"))
     public void onCreateBonusChestEnd(CallbackInfo ci) {
         if (CauseTracker.ENABLED) {
             this.getCauseTracker().completePhase();
         }
     }
 
-    @Inject(method = "mth_001141_b(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true) // createSpawPosition
+    @Inject(method = "mth_001142_b(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true) // createSpawPosition
     public void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {
         GeneratorType generatorType = (GeneratorType) settings.getTerrainType();
 
         // Allow bonus chest generation for non-Overworld worlds
         if (!this.provider.canRespawnHere() && this.getProperties().doesGenerateBonusChest()) {
-            this.mth_001142_o();
+            this.mth_001143_o();
         }
 
         if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) || ((((WorldServer) (Object) this)).getChunkProvider().chunkGenerator instanceof ChunkProviderEnd)) {
@@ -303,7 +303,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    @Redirect(method = "mth_001141_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldSettings;isBonusChestEnabled()Z"))
+    @Redirect(method = "mth_001142_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldSettings;isBonusChestEnabled()Z"))
     public boolean onIsBonusChestEnabled(WorldSettings settings) {
         return this.getProperties().doesGenerateBonusChest();
     }
@@ -542,7 +542,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         if (!constructEntityEvent.isCancelled()) {
                             // Sponge End
                             EntitySkeletonHorse entityhorse = new EntitySkeletonHorse((WorldServer) (Object) this);
-                            entityhorse.mth_001772_p(true); // setSkeletonTrap
+                            entityhorse.mth_001773_p(true); // setSkeletonTrap
                             entityhorse.setGrowingAge(0);
                             entityhorse.setPosition((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
                             this.spawnEntityInWorld(entityhorse);
@@ -753,7 +753,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     // special handling for Pistons since they use their own event system
-    @Redirect(method = "mth_001144_ao", at = @At(value = "INVOKE",
+    @Redirect(method = "mth_001145_ao", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z")) // sendQueeudBlockEvents
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
         if (!CauseTracker.ENABLED) {
@@ -837,7 +837,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    @Redirect(method = "mth_001144_ao", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0) // sendQueuedBlocEvents
+    @Redirect(method = "mth_001145_ao", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0) // sendQueuedBlocEvents
     private int onGetDimensionIdForBlockEvents(DimensionType dimensionType) {
         return this.getDimensionId();
     }
@@ -1034,7 +1034,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         List<Entity> entityList = new ArrayList<>();
         for (net.minecraft.entity.Entity entity : entities) {
-            if (this.mth_001143_i(entity)) {
+            if (this.mth_001144_i(entity)) {
                 entityList.add((Entity) entity);
             }
         }
@@ -1148,7 +1148,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
-        return mth_001143_i(entity) && getCauseTracker().spawnEntity(EntityUtil.fromNative(entity));
+        return mth_001144_i(entity) && getCauseTracker().spawnEntity(EntityUtil.fromNative(entity));
     }
 
 
@@ -1594,7 +1594,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return (PortalAgent) this.worldTeleporter;
     }
 
-    @Redirect(method = "mth_001143_i", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 1))
+    @Redirect(method = "mth_001144_i", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 1))
     public void onCanAddEntityLogWarn(Logger logger, String message, Object... params) {
         // don't log anything to avoid useless spam
     }

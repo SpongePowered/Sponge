@@ -565,7 +565,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                             this.motionX *= 0.6D;
                             this.motionZ *= 0.6D;
-                            this.mth_001457_f(false);
+                            this.mth_001458_f(false);
                         }
 
                         if (isSweapingAttack) {
@@ -590,7 +590,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                 }
                             }
 
-                            this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001298_eA, this.getSoundCategory(), 1.0F, 1.0F);
+                            this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001299_eA, this.getSoundCategory(), 1.0F, 1.0F);
                             this.mth_000432_cP();
                         }
 
@@ -603,15 +603,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
 
                         if (isCriticalAttack) {
-                            this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001294_ew, this.getSoundCategory(), 1.0F, 1.0F);
+                            this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001295_ew, this.getSoundCategory(), 1.0F, 1.0F);
                             this.mth_000430_a(targetEntity);
                         }
 
                         if (!isCriticalAttack && !isSweapingAttack) {
                             if (isStrongAttack) {
-                                this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001297_ez, this.getSoundCategory(), 1.0F, 1.0F);
+                                this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001298_ez, this.getSoundCategory(), 1.0F, 1.0F);
                             } else {
-                                this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001299_eB , this.getSoundCategory(), 1.0F, 1.0F);
+                                this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001300_eB , this.getSoundCategory(), 1.0F, 1.0F);
                             }
                         }
 
@@ -665,7 +665,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                         this.addExhaustion(0.3F);
                     } else {
-                        this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001296_ey, this.getSoundCategory(), 1.0F, 1.0F);
+                        this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001297_ey, this.getSoundCategory(), 1.0F, 1.0F);
 
                         if (litEntityOnFire) {
                             targetEntity.extinguish();

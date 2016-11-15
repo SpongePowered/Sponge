@@ -264,7 +264,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         playerIn.dimension = ((IMixinWorldServer) worldServer).getDimensionId();
         playerIn.setWorld(worldServer);
         playerIn.interactionManager.setWorld((WorldServer) playerIn.worldObj);
-        playerIn.mth_001449_a(x, y, z, yaw, pitch);
+        playerIn.mth_001450_a(x, y, z, yaw, pitch);
         // make sure the chunk is loaded for login
         worldServer.getChunkProvider().loadChunk(loginEvent.getToTransform().getLocation().getChunkPosition().getX(), loginEvent.getToTransform().getLocation().getChunkPosition().getZ());
         // Sponge end
@@ -492,8 +492,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         newPlayer.clonePlayer(playerIn, conqueredEnd);
         // set player dimension for RespawnPlayerEvent
         newPlayer.dimension = targetDimension;
-        newPlayer.mth_001441_h(playerIn.getEntityId());
-        newPlayer.mth_001464_v(playerIn);
+        newPlayer.mth_001442_h(playerIn.getEntityId());
+        newPlayer.mth_001465_v(playerIn);
         newPlayer.setPrimaryHand(playerIn.getPrimaryHand());
 
         for (String s : playerIn.getTags()) {
@@ -501,7 +501,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         this.setPlayerGameTypeBasedOnOther(newPlayer, playerIn, worldServer);
-        newPlayer.mth_001456_e(false);
+        newPlayer.mth_001457_e(false);
         // update to safe location
         toTransform = toTransform.setLocation(location);
 

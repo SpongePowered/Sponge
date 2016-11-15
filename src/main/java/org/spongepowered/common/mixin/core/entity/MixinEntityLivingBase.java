@@ -130,7 +130,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow private DamageSource field_189750_bF;
     @Shadow private long field_189751_bG;
     // Empty body so that we can call super() in MixinEntityPlayer
-    @Shadow public void mth_001510_cE() { // stopActiveHand
+    @Shadow public void mth_001511_cE() { // stopActiveHand
 
     }
 
@@ -141,7 +141,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract SoundEvent getHurtSound();
     @Shadow public abstract void setHealth(float health);
     @Shadow public abstract void addPotionEffect(net.minecraft.potion.PotionEffect potionEffect);
-    @Shadow protected abstract void mth_001506_cw(); // markPotionsDirty
+    @Shadow protected abstract void mth_001507_cw(); // markPotionsDirty
     @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
     @Shadow public abstract void clearActivePotions();
     @Shadow public abstract void setLastAttacker(net.minecraft.entity.Entity entity);
@@ -151,13 +151,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract float getRotationYawHead();
     @Shadow public abstract void setRotationYawHead(float rotation);
     @Shadow public abstract Collection getActivePotionEffects();
-    @Shadow @Nullable public abstract EntityLivingBase mth_001493_bM(); // getLastAttacker
+    @Shadow @Nullable public abstract EntityLivingBase mth_001494_bM(); // getLastAttacker
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow @Nullable public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow protected abstract void applyEntityAttributes();
     @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
     @Shadow protected abstract void mth_000425_k(float p_184590_1_); // damageShield
-    @Shadow public abstract void mth_001507_c(EnumHand hand); // setActiveHand
+    @Shadow public abstract void mth_001508_c(EnumHand hand); // setActiveHand
     @Shadow @Nullable public abstract ItemStack getHeldItem(EnumHand hand);
     @Shadow public abstract void setHeldItem(EnumHand hand, @Nullable ItemStack stack);
     @Shadow public abstract ItemStack getHeldItemMainhand();
@@ -168,15 +168,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract void setAbsorptionAmount(float amount);
     @Shadow public abstract float getAbsorptionAmount();
     @Shadow public abstract CombatTracker getCombatTracker();
-    @Shadow public abstract void mth_001457_f(boolean sprinting); // setSprinting
+    @Shadow public abstract void mth_001458_f(boolean sprinting); // setSprinting
     @Shadow public abstract boolean isOnLadder();
     @Shadow @Nullable public abstract EntityLivingBase getAttackingEntity();
     @Shadow protected abstract void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source);
     @Shadow protected abstract boolean canDropLoot();
     @Shadow public abstract Random getRNG();
     @Shadow protected abstract void mth_000424_c(EntityLivingBase p_mth_000424_c_1_);
-    @Shadow public abstract boolean mth_001497_d(DamageSource p_mth_001497_d_1_);
-    @Shadow private boolean mth_001499_e(DamageSource p_184583_1_) { // canBlockDamageSource
+    @Shadow public abstract boolean mth_001498_d(DamageSource p_mth_001497_d_1_);
+    @Shadow private boolean mth_001500_e(DamageSource p_184583_1_) { // canBlockDamageSource
         return false; // Shadowed
     }
 
@@ -392,7 +392,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                 boolean flag = false;
 
-                if (amount > 0.0F && this.mth_001499_e(source)) {
+                if (amount > 0.0F && this.mth_001500_e(source)) {
                     this.mth_000425_k(amount);
 
                     if (!source.isProjectile())
@@ -411,7 +411,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 this.limbSwingAmount = 1.5F;
                 boolean flag1 = true;
 
-                if ((float) this.fld_001436_V > (float) this.maxHurtResistantTime / 2.0F) {
+                if ((float) this.fld_001437_V > (float) this.maxHurtResistantTime / 2.0F) {
                     if (amount <= this.lastDamage) {
                         return false;
                     }
@@ -430,7 +430,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         return false;
                     }
                     this.lastDamage = amount;
-                    this.fld_001436_V = this.maxHurtResistantTime;
+                    this.fld_001437_V = this.maxHurtResistantTime;
                     // this.damageEntity(source, amount); // handled above
                     // Sponge end
                     this.hurtTime = this.maxHurtTime = 10;
@@ -486,7 +486,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }
 
                 if (this.getHealth() <= 0.0F) {
-                    if (!this.mth_001497_d(source)) {
+                    if (!this.mth_001498_d(source)) {
                         SoundEvent soundevent = this.getDeathSound();
 
                         if (flag1 && soundevent != null) {
@@ -858,12 +858,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Override
     public OptionalValue<Living> lastAttacker() {
-        return new SpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable((Living) this.mth_001493_bM()));
+        return new SpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable((Living) this.mth_001494_bM()));
     }
 
     @Override
     public OptionalValue<Double> lastDamage() {
-        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.mth_001493_bM() == null ? null : (double) this.lastDamage));
+        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.mth_001494_bM() == null ? null : (double) this.lastDamage));
     }
 
     @Override

@@ -49,22 +49,22 @@ public class WolfWetDataProcessor extends AbstractEntitySingleDataProcessor<Enti
     @Override
     protected boolean set(EntityWolf entity, Boolean value) {
         if (value) {
-            entity.fld_001636_bF = true;
-            entity.fld_001637_bG = true;
-            entity.fld_001638_bH = 0F;
-            entity.fld_001639_bI = 0F;
+            entity.fld_001637_bF = true;
+            entity.fld_001638_bG = true;
+            entity.fld_001639_bH = 0F;
+            entity.fld_001640_bI = 0F;
         } else {
-            entity.fld_001636_bF = false;
-            entity.fld_001637_bG = false;
-            entity.fld_001638_bH = 0F;
-            entity.fld_001639_bI = 0F;
+            entity.fld_001637_bF = false;
+            entity.fld_001638_bG = false;
+            entity.fld_001639_bH = 0F;
+            entity.fld_001640_bI = 0F;
         }
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityWolf entity) {
-        final boolean isWet = entity.fld_001636_bF  || entity.fld_001637_bG ;
+        final boolean isWet = entity.fld_001637_bF  || entity.fld_001638_bG ;
         return Optional.of(isWet);
     }
 

@@ -51,7 +51,7 @@ public class HorseTameableDataProcessor
 
     @Override
     protected Optional<Optional<UUID>> getVal(EntityHorse tameable) {
-        return Optional.of(Optional.ofNullable(tameable.mth_001685_dq())); // getOwnerUniqueId
+        return Optional.of(Optional.ofNullable(tameable.mth_001686_dq())); // getOwnerUniqueId
     }
 
     @Override
@@ -70,11 +70,11 @@ public class HorseTameableDataProcessor
 
     @Override
     protected boolean set(EntityHorse horse, Optional<UUID> uuidOptional) {
-        horse.mth_001686_b(uuidOptional.orElse(null)); // setOwnerUniqueId
+        horse.mth_001687_b(uuidOptional.orElse(null)); // setOwnerUniqueId
         if (uuidOptional.isPresent()) {
-            horse.mth_001689_q(true); // setHorseTamed
+            horse.mth_001690_q(true); // setHorseTamed
         } else {
-            horse.mth_001689_q(false); // setHorseTamed
+            horse.mth_001690_q(false); // setHorseTamed
         }
         return true;
     }
