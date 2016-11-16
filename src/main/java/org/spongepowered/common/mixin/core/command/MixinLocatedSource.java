@@ -54,7 +54,7 @@ public abstract class MixinLocatedSource implements Locatable, IMixinCommandSour
         // May be null in some cases like when constructing
         if (commandSender == null) {
             if ((Object) this instanceof Entity) {
-                return (World) ((Entity) (Object) this).worldObj;
+                return (World) ((Entity) (Object) this).world;
             } else if ((Object) this instanceof TileEntity) {
                 return (World) ((TileEntity) (Object) this).getWorld();
             }

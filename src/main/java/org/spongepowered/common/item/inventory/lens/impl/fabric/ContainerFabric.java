@@ -30,7 +30,6 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.text.translation.FixedTranslation;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
@@ -105,7 +104,7 @@ public class ContainerFabric extends MinecraftFabric {
 
     @Override
     public void clear() {
-        this.all.forEach(IInventory::mth_000418_m);
+        this.all.forEach(IInventory::clear);
     }
 
     @Override

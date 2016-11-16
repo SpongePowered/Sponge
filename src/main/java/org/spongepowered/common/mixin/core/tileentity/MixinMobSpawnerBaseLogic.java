@@ -100,7 +100,7 @@ public abstract class MixinMobSpawnerBaseLogic {
      */
     private static Entity readEntityFromCompoundAtWorld(NBTTagCompound compound, World world, double x, double y, double z, boolean attemptToSpawn) {
         final String entityTypeString = compound.getString(NbtDataUtil.ENTITY_TYPE_ID);
-        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(EntityList.fld_001473_b.getObject(new ResourceLocation(entityTypeString)));
+        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(EntityList.field_191308_b.getObject(new ResourceLocation(entityTypeString)));
         if (type == null) {
             return null;
         }

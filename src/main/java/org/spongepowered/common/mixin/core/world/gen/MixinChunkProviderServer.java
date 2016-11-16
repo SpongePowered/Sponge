@@ -138,7 +138,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         if (!((IMixinChunk) chunkIn).isPersistedChunk() && this.worldObj.provider.canDropChunk(chunkIn.xPosition, chunkIn.zPosition))
         {
             // Sponge - we avoid using the queue and simply check the unloaded flag during unloads
-            //this.droppedChunksSet.add(Long.valueOf(ChunkPos.chunkXZ2Int(chunkIn.xPosition, chunkIn.zPosition)));
+            //this.droppedChunksSet.add(Long.valueOf(ChunkPos.asLong(chunkIn.xPosition, chunkIn.zPosition)));
             chunkIn.unloaded = true;
         }
     }
@@ -149,7 +149,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
         if (chunk != null)
         {
-            this.id2ChunkMap.put(ChunkPos.chunkXZ2Int(x, z), chunk);
+            this.id2ChunkMap.put(ChunkPos.asLong(x, z), chunk);
             chunk.onChunkLoad();
             chunk.populateChunk((ChunkProviderServer)(Object) this, this.chunkGenerator);
         }
@@ -175,7 +175,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         return chunk;
     }
 
-    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/ChunkPos;chunkXZ2Int(II)J"))
+    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/ChunkPos;asLong(II)J"))
     public void onProvideChunkStart(int x, int z, CallbackInfoReturnable<Chunk> cir) {
         if (CauseTracker.ENABLED) {
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
@@ -287,7 +287,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     // This allows the chunk to unload if currently queued.
     @Override
     public Chunk getLoadedChunkWithoutMarkingActive(int x, int z){
-        long i = ChunkPos.chunkXZ2Int(x, z);
+        long i = ChunkPos.asLong(x, z);
         Chunk chunk = this.id2ChunkMap.get(i);
         return chunk;
     }

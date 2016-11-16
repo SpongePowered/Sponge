@@ -71,7 +71,7 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
         int variant = HorseUtils.getInternalVariant(horseColor, horseStyle);
 
         //entity.setType(horseVariant.getType());
-        entity.mth_001739_o(variant);
+        entity.setHorseVariant(variant);
 
         return true;
     }

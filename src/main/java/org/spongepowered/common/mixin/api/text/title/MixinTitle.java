@@ -66,7 +66,7 @@ public abstract class MixinTitle implements IMixinTitle {
                 this.packets.add(new SPacketTitle(SPacketTitle.Type.RESET, null)); // SPacketTitle.Type.RESET is actually CLEAR
             }
             if (this.reset) {
-                this.packets.add(new SPacketTitle(SPacketTitle.Type.fld_000952_f, null));
+                this.packets.add(new SPacketTitle(SPacketTitle.Type.RESET, null));
             }
             if (this.fadeIn.isPresent() || this.stay.isPresent() || this.fadeOut.isPresent()) {
                 this.packets.add(new SPacketTitle(this.fadeIn.orElse(20), this.stay.orElse(60), this.fadeOut.orElse(20)));
@@ -75,7 +75,7 @@ public abstract class MixinTitle implements IMixinTitle {
                 this.packets.add(new SPacketTitle(SPacketTitle.Type.SUBTITLE, ((IMixinText) this.subtitle.get()).toComponent()));
             }
             if (this.actionBar.isPresent()) {
-                this.packets.add(new SPacketTitle(SPacketTitle.Type.fld_000951_c, ((IMixinText) this.actionBar.get()).toComponent()));
+                this.packets.add(new SPacketTitle(SPacketTitle.Type.ACTIONBAR, ((IMixinText) this.actionBar.get()).toComponent()));
             }
             if (this.title.isPresent()) {
                 this.packets.add(new SPacketTitle(SPacketTitle.Type.TITLE, ((IMixinText) this.title.get()).toComponent()));

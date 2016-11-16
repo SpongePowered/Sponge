@@ -41,7 +41,7 @@ public abstract class MixinEntitySilverfishAIHideInStone extends MixinEntityAIWa
     @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockSilverfish;canContainSilverfish"
             + "(Lnet/minecraft/block/state/IBlockState;)Z"))
     private boolean onCanGrief(IBlockState blockState) {
-        return BlockSilverfish.canContainSilverfish(blockState) && this.entity.worldObj.getGameRules().getBoolean("mobGriefing")
+        return BlockSilverfish.canContainSilverfish(blockState) && this.entity.world.getGameRules().getBoolean("mobGriefing")
                 && ((IMixinGriefer) this.entity).canGrief();
     }
 }

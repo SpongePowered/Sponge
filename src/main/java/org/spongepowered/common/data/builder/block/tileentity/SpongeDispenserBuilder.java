@@ -42,7 +42,7 @@ public class SpongeDispenserBuilder extends SpongeLockableBuilder<Dispenser> {
     protected Optional<Dispenser> buildContent(DataView container) throws InvalidDataException {
         return super.buildContent(container).map(dispenser -> {
             if (container.contains(DataQueries.CUSTOM_NAME)) {
-                ((TileEntityDispenser) dispenser).mth_000861_a(container.getString(DataQueries.CUSTOM_NAME).get()); // setCustomName
+                ((TileEntityDispenser) dispenser).func_190575_a(container.getString(DataQueries.CUSTOM_NAME).get()); // setCustomName
             }
             ((TileEntityDispenser) dispenser).validate();
             return dispenser;

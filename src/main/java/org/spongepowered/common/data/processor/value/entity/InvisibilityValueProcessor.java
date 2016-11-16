@@ -33,8 +33,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Optional;
 
@@ -51,7 +49,7 @@ public class InvisibilityValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected boolean set(Entity container, Boolean value) {
-        if (!container.worldObj.isRemote) {
+        if (!container.world.isRemote) {
             container.setInvisible(value);
             return true;
         }

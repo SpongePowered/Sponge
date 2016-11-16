@@ -182,7 +182,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             this.uuid = new UUID(this.world.getUniqueId().getMostSignificantBits() ^ (x * 2 + 1),
                     this.world.getUniqueId().getLeastSignificantBits() ^ (z * 2 + 1));
         }
-        this.cacheKey = ChunkPos.chunkXZ2Int(this.xPosition, this.zPosition);
+        this.cacheKey = ChunkPos.asLong(this.xPosition, this.zPosition);
     }
 
     @Override

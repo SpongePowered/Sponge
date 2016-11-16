@@ -73,7 +73,7 @@ public abstract class MixinEntityEnderCrystal extends MixinEntity implements End
     public void detonate(Cause cause) {
         this.detonationCause = checkNotNull(cause, "cause");
         setDead();
-        onExplode(this.worldObj, null, this.posX, this.posY, this.posZ, this.explosionStrength, true);
+        onExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionStrength, true);
     }
 
     @Inject(method = "attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z", at = @At(value = "INVOKE"))
@@ -82,10 +82,10 @@ public abstract class MixinEntityEnderCrystal extends MixinEntity implements End
     }
 
     @Redirect(method = "attackEntityFrom", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
-    protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, @Nullable Entity nil, double x,
+    protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World world, @Nullable Entity nil, double x,
                                                     double y, double z, float strength, boolean smoking) {
         return detonate(this.detonationCause, Explosion.builder()
-                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .location(new Location<>((World) world, new Vector3d(x, y, z)))
                 .radius(this.explosionStrength)
                 .shouldPlaySmoke(smoking))
                 .orElse(null);

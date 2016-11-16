@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.passive.EntityHorse;
-import net.minecraft.entity.passive.EntityTameable;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -51,7 +50,7 @@ public class HorseTameableDataProcessor
 
     @Override
     protected Optional<Optional<UUID>> getVal(EntityHorse tameable) {
-        return Optional.of(Optional.ofNullable(tameable.mth_001686_dq())); // getOwnerUniqueId
+        return Optional.of(Optional.ofNullable(tameable.getOwnerUniqueId()));
     }
 
     @Override
@@ -70,11 +69,11 @@ public class HorseTameableDataProcessor
 
     @Override
     protected boolean set(EntityHorse horse, Optional<UUID> uuidOptional) {
-        horse.mth_001687_b(uuidOptional.orElse(null)); // setOwnerUniqueId
+        horse.setOwnerUniqueId(uuidOptional.orElse(null));
         if (uuidOptional.isPresent()) {
-            horse.mth_001690_q(true); // setHorseTamed
+            horse.setHorseTamed(true);
         } else {
-            horse.mth_001690_q(false); // setHorseTamed
+            horse.setHorseTamed(false);
         }
         return true;
     }

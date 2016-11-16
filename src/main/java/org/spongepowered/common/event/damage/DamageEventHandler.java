@@ -45,7 +45,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.effect.potion.PotionEffect;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
@@ -71,7 +70,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -341,8 +339,8 @@ public class DamageEventHandler {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
                     BlockPos blockPos = new BlockPos(k1, l1, i2);
-                    if (predicate.test(entity.worldObj.getBlockState(blockPos))) {
-                        return new Location<>((World) entity.worldObj, k1, l1, i2);
+                    if (predicate.test(entity.world.getBlockState(blockPos))) {
+                        return new Location<>((World) entity.world, k1, l1, i2);
                     }
                 }
             }
@@ -443,8 +441,8 @@ public class DamageEventHandler {
             return null;
         }
 
-        if (entity.worldObj instanceof IMixinWorldServer) {
-            IMixinWorldServer spongeWorld = (IMixinWorldServer) entity.worldObj;
+        if (entity.world instanceof IMixinWorldServer) {
+            IMixinWorldServer spongeWorld = (IMixinWorldServer) entity.world;
             final PhaseData peek = spongeWorld.getCauseTracker().getCurrentPhaseData();
             return peek.state.getPhase().createDestructionDamageSource(peek.state, peek.context, entity).orElse(null);
         }

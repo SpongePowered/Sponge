@@ -43,19 +43,19 @@ import java.util.Random;
 // added as the only thing needing to be done is a simple default implementation
 // with an empty MerchantRecipeList and diff the list with an empty one and
 // provide the resulting diff'ed MerchantRecipe (TradeOffer) as the result.
-@Mixin(EntityVillager.Unknown4e.class)
+@Mixin(EntityVillager.ListItemForEmeralds.class)
 public class MixinEntityVillagerListItemForEmeralds implements TradeOfferGenerator {
 
-    @Shadow public ItemStack fld_000107_a; // itemToBuy
-    @Shadow public EntityVillager.Unknown6g fld_000108_b; // priceInfo
+    @Shadow public ItemStack itemToBuy;
+    @Shadow public EntityVillager.PriceInfo priceInfo;
 
     @Override
     public TradeOffer apply(Random random) {
         checkNotNull(random, "Random cannot be null!");
         int amount = 1;
 
-        if (this.fld_000108_b != null) {
-            amount = this.fld_000108_b.mth_000110_a(random);
+        if (this.priceInfo != null) {
+            amount = this.priceInfo.getPrice(random);
         }
 
         ItemStack itemstack;
@@ -63,10 +63,10 @@ public class MixinEntityVillagerListItemForEmeralds implements TradeOfferGenerat
 
         if (amount < 0) {
             itemstack = new ItemStack(Items.EMERALD, 1, 0);
-            itemstack1 = new ItemStack(this.fld_000107_a.getItem(), -amount, this.fld_000107_a.getMetadata());
+            itemstack1 = new ItemStack(this.itemToBuy.getItem(), -amount, this.itemToBuy.getMetadata());
         } else {
             itemstack = new ItemStack(Items.EMERALD, amount, 0);
-            itemstack1 = new ItemStack(this.fld_000107_a.getItem(), 1, this.fld_000107_a.getMetadata());
+            itemstack1 = new ItemStack(this.itemToBuy.getItem(), 1, this.itemToBuy.getMetadata());
         }
 
         return (TradeOffer) new MerchantRecipe(itemstack, itemstack1);

@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockFlowerPot;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFlowerPot;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -42,7 +40,6 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemDa
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 
 import java.util.Optional;
 
@@ -63,7 +60,7 @@ public class FlowerPotDataProcessor extends
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        flowerPot.mth_000817_a(ItemStack.fld_000503_a);
+        flowerPot.func_190614_a(ItemStack.field_190927_a);
         flowerPot.markDirty();
         return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
     }
@@ -71,13 +68,13 @@ public class FlowerPotDataProcessor extends
     @Override
     protected boolean set(TileEntityFlowerPot flowerPot, ItemStackSnapshot stackSnapshot) {
         if (stackSnapshot == ItemStackSnapshot.NONE) {
-            flowerPot.mth_000817_a(ItemStack.fld_000503_a);
+            flowerPot.func_190614_a(ItemStack.field_190927_a);
         } else {
             ItemStack stack = (ItemStack) stackSnapshot.createStack();
-            if (!((BlockFlowerPot) Blocks.FLOWER_POT).mth_000723_a(stack)) {
+            if (!((BlockFlowerPot) Blocks.FLOWER_POT).func_190951_a(stack)) {
                 return false;
             }
-            flowerPot.mth_000817_a(stack);
+            flowerPot.func_190614_a(stack);
         }
         flowerPot.markDirty();
         flowerPot.getWorld().notifyBlockUpdate(flowerPot.getPos(), flowerPot.getWorld().getBlockState(flowerPot.getPos()), flowerPot.getWorld()

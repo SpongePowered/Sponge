@@ -78,7 +78,7 @@ public class DefaultInventoryFabric extends MinecraftFabric {
 
     @Override
     public void clear() {
-        this.inventory.mth_000418_m();
+        this.inventory.clear();
     }
 
     @Override

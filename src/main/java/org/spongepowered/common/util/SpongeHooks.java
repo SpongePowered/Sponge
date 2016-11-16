@@ -100,31 +100,31 @@ public class SpongeHooks {
     }
 
     public static void logEntityDeath(Entity entity) {
-        if (entity == null || entity.worldObj.isRemote) {
+        if (entity == null || entity.world.isRemote) {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entityDeathLogging()) {
-            logInfo("Dim: {0} setDead(): {1}", ((IMixinWorldServer) entity.worldObj).getDimensionId(), entity);
+            logInfo("Dim: {0} setDead(): {1}", ((IMixinWorldServer) entity.world).getDimensionId(), entity);
             logStack(config);
         }
     }
 
     public static void logEntityDespawn(Entity entity, String reason) {
-        if (entity == null || entity.worldObj.isRemote) {
+        if (entity == null || entity.world.isRemote) {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entityDespawnLogging()) {
-            logInfo("Dim: {0} Despawning ({1}): {2}", ((IMixinWorldServer) entity.worldObj).getDimensionId(), reason, entity);
+            logInfo("Dim: {0} Despawning ({1}): {2}", ((IMixinWorldServer) entity.world).getDimensionId(), reason, entity);
             logStack(config);
         }
     }
 
     public static void logEntitySpawn(Cause cause, Entity entity) {
-        if (entity == null || entity.worldObj.isRemote) {
+        if (entity == null || entity.world.isRemote) {
             return;
         }
 
@@ -134,13 +134,13 @@ public class SpongeHooks {
         }
 
         Optional<User> user = cause.first(User.class);
-        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.world);
         if (config.getConfig().getLogging().entitySpawnLogging()) {
             logInfo("SPAWNED " + spawnName + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}]",
                     getFriendlyCauseName(cause),
                     user.isPresent() ? user.get().getName() : "None",
-                    entity.worldObj.getWorldInfo().getWorldName(),
-                    ((IMixinWorldServer) entity.worldObj).getDimensionId());
+                    entity.world.getWorldInfo().getWorldName(),
+                    ((IMixinWorldServer) entity.world).getDimensionId());
             logStack(config);
         }
     }
@@ -229,11 +229,11 @@ public class SpongeHooks {
     }
 
     public static void logExploitSignCommandUpdates(EntityPlayer player, TileEntity te, String command) {
-        if (player.worldObj.isRemote) {
+        if (player.world.isRemote) {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig((WorldServer) player.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) player.world);
         if (config.getConfig().getLogging().logExploitSignCommandUpdates) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to exploit sign in world ''{1}'' located at ''{2}'' with command ''{3}''",
                     player.getName(),
@@ -245,11 +245,11 @@ public class SpongeHooks {
     }
 
     public static void logExploitItemNameOverflow(EntityPlayer player, int length) {
-        if (player.worldObj.isRemote) {
+        if (player.world.isRemote) {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig((WorldServer) player.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) player.world);
         if (config.getConfig().getLogging().logExploitItemStackNameOverflow) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to send a creative itemstack update with a display name length of ''{1}'' (Max allowed length is 32767). This has been blocked to avoid server overflow.",
                     player.getName(),
@@ -259,11 +259,11 @@ public class SpongeHooks {
     }
 
     public static void logExploitRespawnInvisibility(EntityPlayer player) {
-        if (player.worldObj.isRemote) {
+        if (player.world.isRemote) {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig((WorldServer) player.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) player.world);
         if (config.getConfig().getLogging().logExploitRespawnInvisibility) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to perform a respawn invisibility exploit to surrounding players.",
                     player.getName());
@@ -272,11 +272,11 @@ public class SpongeHooks {
     }
 
     public static boolean checkBoundingBoxSize(Entity entity, AxisAlignedBB aabb) {
-        if (entity == null || entity.worldObj.isRemote) {
+        if (entity == null || entity.world.isRemote) {
             return false;
         }
 
-        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.world);
         if (!(entity instanceof EntityLivingBase) || entity instanceof EntityPlayer) {
             return false; // only check living entities that are not players
         }
@@ -311,11 +311,11 @@ public class SpongeHooks {
     }
 
     public static boolean checkEntitySpeed(Entity entity, double x, double y, double z) {
-        if (entity == null || entity.worldObj.isRemote) {
+        if (entity == null || entity.world.isRemote) {
             return false;
         }
 
-        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.world);
         int maxSpeed = config.getConfig().getEntity().getMaxSpeed();
         if (maxSpeed > 0) {
             double distance = x * x + z * z;
@@ -357,11 +357,11 @@ public class SpongeHooks {
     // TODO - needs to be hooked
     @SuppressWarnings("rawtypes")
     public static void logEntitySize(Entity entity, List list) {
-        if (entity == null || entity.worldObj.isRemote) {
+        if (entity == null || entity.world.isRemote) {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.world);
         if (!config.getConfig().getLogging().logEntityCollisionChecks()) {
             return;
         }
@@ -372,7 +372,7 @@ public class SpongeHooks {
         }
 
         if (collisionWarnSize > 0 && (entity.getEntityWorld().getMinecraftServer().getTickCounter() % 10) == 0 && list.size() >= collisionWarnSize) {
-            SpongeHooks.CollisionWarning warning = new SpongeHooks.CollisionWarning(entity.worldObj, entity);
+            SpongeHooks.CollisionWarning warning = new SpongeHooks.CollisionWarning(entity.world, entity);
             if (SpongeHooks.recentWarnings.containsKey(warning)) {
                 long lastWarned = SpongeHooks.recentWarnings.get(warning);
                 if ((MinecraftServer.getCurrentTimeMillis() - lastWarned) < 30000) {

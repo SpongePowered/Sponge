@@ -157,7 +157,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract void applyEntityAttributes();
     @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
     @Shadow protected abstract void mth_000425_k(float p_184590_1_); // damageShield
-    @Shadow public abstract void mth_001508_c(EnumHand hand); // setActiveHand
+    @Shadow public abstract void setActiveHand(EnumHand hand); // setActiveHand
     @Shadow @Nullable public abstract ItemStack getHeldItem(EnumHand hand);
     @Shadow public abstract void setHeldItem(EnumHand hand, @Nullable ItemStack stack);
     @Shadow public abstract ItemStack getHeldItemMainhand();
@@ -253,8 +253,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
         // Double check that the CauseTracker is already capturing the Death phase
         final CauseTracker causeTracker;
-        if (!this.worldObj.isRemote) {
-            causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+        if (!this.world.isRemote) {
+            causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
             this.tracksEntityDeaths = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
@@ -297,14 +297,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         this.dead = true;
         this.getCombatTracker().reset();
 
-        if (!this.worldObj.isRemote) {
+        if (!this.world.isRemote) {
             int i = 0;
 
             if (entity instanceof EntityPlayer) {
                 i = EnchantmentHelper.getLootingModifier((EntityLivingBase) entity);
             }
 
-            if (this.canDropLoot() && this.worldObj.getGameRules().getBoolean("doMobLoot")) {
+            if (this.canDropLoot() && this.world.getGameRules().getBoolean("doMobLoot")) {
                 boolean flag = this.recentlyHit > 0;
                 this.dropLoot(flag, i, cause);
             }
@@ -313,7 +313,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
         // Sponge Start - Don't send the state if this is a human. Fixes ghost items on client.
         if (!((EntityLivingBase) (Object) this instanceof EntityHuman)) {
-            this.worldObj.setEntityState((EntityLivingBase) (Object) this, (byte) 3);
+            this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 3);
         }
         if (causeTracker != null && this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
             this.tracksEntityDeaths = false;
@@ -371,7 +371,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         // Sponge end
         if (this.isEntityInvulnerable(source)) {
             return false;
-        } else if (this.worldObj.isRemote) {
+        } else if (this.world.isRemote) {
             return false;
         } else {
             this.entityAge = 0;
@@ -411,7 +411,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 this.limbSwingAmount = 1.5F;
                 boolean flag1 = true;
 
-                if ((float) this.fld_001437_V > (float) this.maxHurtResistantTime / 2.0F) {
+                if ((float) this.hurtResistantTime > (float) this.maxHurtResistantTime / 2.0F) {
                     if (amount <= this.lastDamage) {
                         return false;
                     }
@@ -430,7 +430,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         return false;
                     }
                     this.lastDamage = amount;
-                    this.fld_001437_V = this.maxHurtResistantTime;
+                    this.hurtResistantTime = this.maxHurtResistantTime;
                     // this.damageEntity(source, amount); // handled above
                     // Sponge end
                     this.hurtTime = this.maxHurtTime = 10;
@@ -459,11 +459,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                 if (flag1) {
                     if (flag) {
-                        this.worldObj.setEntityState((EntityLivingBase) (Object) this, (byte) 29);
+                        this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 29);
                     } else if (source instanceof net.minecraft.util.EntityDamageSource && ((net.minecraft.util.EntityDamageSource) source).getIsThornsDamage()) {
-                        this.worldObj.setEntityState((EntityLivingBase) (Object) this, (byte) 33);
+                        this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 33);
                     } else {
-                        this.worldObj.setEntityState((EntityLivingBase) (Object) this, (byte) 2);
+                        this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 2);
                     }
 
                     if (source != DamageSource.drown && (!flag || amount > 0.0F)) {
@@ -521,7 +521,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 if (!flag || amount > 0.0F)
                 {
                     this.field_189750_bF = source;
-                    this.field_189751_bG = this.worldObj.getTotalWorldTime();
+                    this.field_189751_bG = this.world.getTotalWorldTime();
                 }
 
                 return !flag || amount > 0.0F;
@@ -537,7 +537,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void spawnItemParticle(World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
             double yOffset, double zOffset, int ... p_175688_14_) {
         if (!this.isVanished()) {
-            this.worldObj.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }
 
@@ -650,7 +650,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         this.posZ = z;
         boolean flag = false;
         BlockPos blockpos = new BlockPos((Entity) (Object) this);
-        World world = this.worldObj;
+        World world = this.world;
         Random random = this.getRNG();
 
         if (world.isBlockLoaded(blockpos))
@@ -797,8 +797,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
     private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
-        if (!entityLivingBase.worldObj.isRemote && CauseTracker.ENABLED) {
-            final CauseTracker causeTracker = ((IMixinWorldServer) entityLivingBase.worldObj).getCauseTracker();
+        if (!entityLivingBase.world.isRemote && CauseTracker.ENABLED) {
+            final CauseTracker causeTracker = ((IMixinWorldServer) entityLivingBase.world).getCauseTracker();
             causeTracker.switchToPhase(EntityPhase.State.DEATH_UPDATE, PhaseContext.start()
                     .addCaptures()
                     .addEntityDropCaptures()
@@ -819,7 +819,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Inject(method = "onItemPickup", at = @At("HEAD"))
     public void onEntityItemPickup(net.minecraft.entity.Entity entityItem, int unused, CallbackInfo ci) {
-        if (!this.worldObj.isRemote) {
+        if (!this.world.isRemote) {
 //            EntityUtil.toMixin(entityItem).setDestructCause(Cause.of(NamedCause.of("PickedUp", this)));
         }
     }

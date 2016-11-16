@@ -41,14 +41,14 @@ final class AttackEntityPacketState extends BasicPacketState {
     public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
-        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.worldObj);
+        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.world);
         return entity == null;
     }
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
-        net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.worldObj);
+        net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.world);
         context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
         context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());

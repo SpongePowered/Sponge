@@ -32,17 +32,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.Vec4b;
 import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.api.item.merchant.TradeOfferListMutator;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
-import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeProfession;
 import org.spongepowered.common.registry.type.entity.CareerRegistryModule;
@@ -150,9 +142,9 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
         for (Career career: CareerRegistryModule.getInstance().getAll()) {
             SpongeCareer spongeCareer = (SpongeCareer) career;
 
-            EntityVillager.Unknown5f[][] careerLevels = EntityVillager.fld_000377_bO[((SpongeProfession) spongeCareer.getProfession()).type][spongeCareer.type];
+            EntityVillager.ITradeList[][] careerLevels = EntityVillager.DEFAULT_TRADE_LIST_MAP[((SpongeProfession) spongeCareer.getProfession()).type][spongeCareer.type];
             for (int level = 0; level < careerLevels.length; level++) {
-                EntityVillager.Unknown5f[] offers = careerLevels[level];
+                EntityVillager.ITradeList[] offers = careerLevels[level];
                 ImmutableList.Builder<TradeOfferListMutator> builder = ImmutableList.builder();
 
                 for (int i = 0; i < offers.length; i++) {
@@ -164,7 +156,7 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
         }
     }
 
-    private static TradeOfferListMutator generatorFor(EntityVillager.Unknown5f iTradeList) { // ITradeList
+    private static TradeOfferListMutator generatorFor(EntityVillager.ITradeList iTradeList) {
         return (TradeOfferListMutator) iTradeList;
     }
 

@@ -31,7 +31,6 @@ import net.minecraft.util.EnumHand;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
-import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Ocelot;
@@ -42,14 +41,10 @@ import org.spongepowered.api.event.entity.TameEntityEvent;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
@@ -71,13 +66,13 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
         ItemStack stack = player.getHeldItem(hand);
         int random = rand.nextInt(bound);
         if (random == 0) {
-            stack.mth_000527_e(stack.mth_000526_E() + 1);
+            stack.func_190920_e(stack.func_190916_E() + 1);
             if (!SpongeImpl
                     .postEvent(SpongeEventFactory.createTameEntityEvent(Cause.of(NamedCause.source(player),
                             NamedCause.of(TameEntityEvent.USED_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot())),
                             this))) {
 
-                stack.mth_000527_e(stack.mth_000526_E() - 1);
+                stack.func_190920_e(stack.func_190916_E() - 1);
                 return random;
             }
 
@@ -87,7 +82,7 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
 
     @Inject(method = "setupTamedAI", at = @At(value = "HEAD"), cancellable = true)
     public void onSetupTamedAi(CallbackInfo ci) {
-        if (this.worldObj.isRemote) {
+        if (this.world.isRemote) {
             // Because ocelot AI tasks are added on the client, for whatever reason
             ci.cancel();
         }

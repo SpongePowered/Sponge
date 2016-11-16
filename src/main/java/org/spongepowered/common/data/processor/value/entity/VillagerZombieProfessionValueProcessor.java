@@ -58,7 +58,7 @@ public class VillagerZombieProfessionValueProcessor extends AbstractSpongeValueP
     @Override
     protected boolean set(EntityZombie container, Optional<Profession> value) {
         if (value.isPresent() && container instanceof EntityZombieVillager) {
-            ((EntityZombieVillager) container).mth_000347_a(((SpongeProfession) value.get()).type);
+            ((EntityZombieVillager) container).func_190733_a(((SpongeProfession) value.get()).type);
             return true;
         }
         return false;
@@ -67,7 +67,7 @@ public class VillagerZombieProfessionValueProcessor extends AbstractSpongeValueP
     @Override
     protected Optional<Optional<Profession>> getVal(EntityZombie container) {
         if (container instanceof EntityZombieVillager) {
-            return Optional.of(Optional.of(EntityUtil.validateProfession(((EntityZombieVillager) container).mth_000348_dl())));
+            return Optional.of(Optional.of(EntityUtil.validateProfession(((EntityZombieVillager) container).func_190736_dl())));
         }
         return Optional.empty();
     }

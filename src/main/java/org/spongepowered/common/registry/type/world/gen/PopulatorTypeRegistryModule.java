@@ -33,7 +33,7 @@ import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import net.minecraft.world.gen.feature.WorldGenBigTree;
 import net.minecraft.world.gen.feature.WorldGenBirchTree;
 import net.minecraft.world.gen.feature.WorldGenBlockBlob;
-import net.minecraft.world.gen.feature.WorldGenBonusChest;
+import net.minecraft.world.gen.feature.WorldGeneratorBonusChest;
 import net.minecraft.world.gen.feature.WorldGenBush;
 import net.minecraft.world.gen.feature.WorldGenCactus;
 import net.minecraft.world.gen.feature.WorldGenClay;
@@ -165,7 +165,7 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         this.populatorClassToTypeMappings.put(WorldGenDoublePlant.class, this.populatorTypeMappings.get("double_plant"));
         this.populatorClassToTypeMappings.put(WorldGenDungeons.class, this.populatorTypeMappings.get("dungeon"));
         this.populatorClassToTypeMappings.put(WorldGenEndIsland.class, this.populatorTypeMappings.get("end_island"));
-        this.populatorClassToTypeMappings.put(WorldGenBonusChest.class, this.populatorTypeMappings.get("bonus_chest"));
+        this.populatorClassToTypeMappings.put(WorldGeneratorBonusChest.class, this.populatorTypeMappings.get("bonus_chest"));
         this.populatorClassToTypeMappings.put(WorldGenFire.class, this.populatorTypeMappings.get("generic_block"));
         this.populatorClassToTypeMappings.put(WorldGenFlowers.class, this.populatorTypeMappings.get("flower"));
         this.populatorClassToTypeMappings.put(WorldGenGlowStone1.class, this.populatorTypeMappings.get("glowstone"));

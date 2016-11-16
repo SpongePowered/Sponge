@@ -310,7 +310,7 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<Arrow> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Arrow arrow = (Arrow) new EntityTippedArrow(source.worldObj, source);
+                Arrow arrow = (Arrow) new EntityTippedArrow(source.world, source);
                 return doLaunch(loc.getExtent(), arrow, createCause(source));
             }
         });
@@ -318,26 +318,26 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<Egg> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Egg egg = (Egg) new EntityEgg(source.worldObj, source);
+                Egg egg = (Egg) new EntityEgg(source.world, source);
                 return doLaunch(loc.getExtent(), egg, createCause(source));
             }
         });
-        registerProjectileLogic(SmallFireball.class, new SimpleItemLaunchLogic<SmallFireball>(SmallFireball.class, Items.fld_000548_bW) {
+        registerProjectileLogic(SmallFireball.class, new SimpleItemLaunchLogic<SmallFireball>(SmallFireball.class, Items.FIRE_CHARGE) {
 
             @Override
             protected Optional<SmallFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
                 Vec3d lookVec = source.getLook(1);
-                SmallFireball fireball = (SmallFireball) new EntitySmallFireball(source.worldObj, source,
+                SmallFireball fireball = (SmallFireball) new EntitySmallFireball(source.world, source,
                         lookVec.xCoord * 4, lookVec.yCoord * 4, lookVec.zCoord * 4);
                 ((EntitySmallFireball) fireball).posY += source.getEyeHeight();
                 return doLaunch(loc.getExtent(), fireball, createCause(source));
             }
         });
-        registerProjectileLogic(Firework.class, new SimpleItemLaunchLogic<Firework>(Firework.class, Items.fld_000552_cm) {
+        registerProjectileLogic(Firework.class, new SimpleItemLaunchLogic<Firework>(Firework.class, Items.FIREWORKS) {
 
             @Override
             protected Optional<Firework> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Firework firework = (Firework) new EntityFireworkRocket(source.worldObj, loc.getX(), loc.getY(), loc.getZ(), null);
+                Firework firework = (Firework) new EntityFireworkRocket(source.world, loc.getX(), loc.getY(), loc.getZ(), null);
                 return doLaunch(loc.getExtent(), firework, createCause(source));
             }
         });
@@ -345,15 +345,15 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<Snowball> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Snowball snowball = (Snowball) new EntitySnowball(source.worldObj, source);
+                Snowball snowball = (Snowball) new EntitySnowball(source.world, source);
                 return doLaunch(loc.getExtent(), snowball, createCause(source));
             }
         });
-        registerProjectileLogic(ThrownExpBottle.class, new SimpleItemLaunchLogic<ThrownExpBottle>(ThrownExpBottle.class, Items.fld_000547_bV) {
+        registerProjectileLogic(ThrownExpBottle.class, new SimpleItemLaunchLogic<ThrownExpBottle>(ThrownExpBottle.class, Items.EXPERIENCE_BOTTLE) {
 
             @Override
             protected Optional<ThrownExpBottle> createProjectile(EntityLivingBase source, Location<?> loc) {
-                ThrownExpBottle expBottle = (ThrownExpBottle) new EntityExpBottle(source.worldObj, source);
+                ThrownExpBottle expBottle = (ThrownExpBottle) new EntityExpBottle(source.world, source);
                 return doLaunch(loc.getExtent(), expBottle, createCause(source));
             }
         });
@@ -362,7 +362,7 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<EnderPearl> createProjectile(EntityLivingBase source, Location<?> loc) {
-                EnderPearl pearl = (EnderPearl) new EntityEnderPearl(source.worldObj, source);
+                EnderPearl pearl = (EnderPearl) new EntityEnderPearl(source.world, source);
                 return doLaunch(loc.getExtent(), pearl, createCause(source));
             }
         });
@@ -371,7 +371,7 @@ public class ProjectileLauncher {
             @Override
             protected Optional<LargeFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
                 Vec3d lookVec = source.getLook(1);
-                LargeFireball fireball = (LargeFireball) new EntityLargeFireball(source.worldObj, source,
+                LargeFireball fireball = (LargeFireball) new EntityLargeFireball(source.world, source,
                         lookVec.xCoord * 4, lookVec.yCoord * 4, lookVec.zCoord * 4);
                 ((EntityLargeFireball) fireball).posY += source.getEyeHeight();
                 return doLaunch(loc.getExtent(), fireball, createCause(source));
@@ -398,7 +398,7 @@ public class ProjectileLauncher {
             @Override
             protected Optional<WitherSkull> createProjectile(EntityLivingBase source, Location<?> loc) {
                 Vec3d lookVec = source.getLook(1);
-                WitherSkull skull = (WitherSkull) new EntityWitherSkull(source.worldObj, source,
+                WitherSkull skull = (WitherSkull) new EntityWitherSkull(source.world, source,
                         lookVec.xCoord * 4, lookVec.yCoord * 4, lookVec.zCoord * 4);
                 ((EntityWitherSkull) skull).posY += source.getEyeHeight();
                 return doLaunch(loc.getExtent(), skull, createCause(source));
@@ -410,7 +410,7 @@ public class ProjectileLauncher {
             @Override
             protected Optional<FishHook> createProjectile(EntityLivingBase source, Location<?> loc) {
                 if (source instanceof EntityPlayer) {
-                    FishHook hook = (FishHook) new EntityFishHook(source.worldObj, (EntityPlayer) source);
+                    FishHook hook = (FishHook) new EntityFishHook(source.world, (EntityPlayer) source);
                     return doLaunch(loc.getExtent(), hook, createCause(source));
                 }
                 return super.createProjectile(source, loc);
@@ -420,7 +420,7 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<ThrownPotion> createProjectile(EntityLivingBase source, Location<?> loc) {
-                ThrownPotion potion = (ThrownPotion) new EntityPotion(source.worldObj, source, new ItemStack(Items.SPLASH_POTION, 1));
+                ThrownPotion potion = (ThrownPotion) new EntityPotion(source.world, source, new ItemStack(Items.SPLASH_POTION, 1));
                 return doLaunch(loc.getExtent(), potion, createCause(source));
             }
         });

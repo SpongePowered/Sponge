@@ -142,7 +142,7 @@ public class SpongeCommonEventFactory {
         Slot slot = null;
         if (slotId != -1) {
             if (slotId < InventoryPlayer.getHotbarSize()) {
-                slot = player.inventoryContainer.getSlot(slotId + player.inventory.fld_000404_a.size());
+                slot = player.inventoryContainer.getSlot(slotId + player.inventory.mainInventory.size());
             } else {
                 slot = player.inventoryContainer.getSlot(slotId);
             }
@@ -155,7 +155,7 @@ public class SpongeCommonEventFactory {
             ItemStackSnapshot targetSnapshot = null;
             if (sourceSnapshot != ItemStackSnapshot.NONE) {
                 // combined slot
-                targetSnapshot = org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemStack).quantity(itemStack.mth_000526_E() + slot.getStack().mth_000526_E()).build().createSnapshot();
+                targetSnapshot = org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemStack).quantity(itemStack.func_190916_E() + slot.getStack().func_190916_E()).build().createSnapshot();
             } else {
                 // empty slot
                 targetSnapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot();
@@ -341,7 +341,7 @@ public class SpongeCommonEventFactory {
 
     public static InteractBlockEvent.Primary callInteractBlockEventPrimary(EntityPlayer player, BlockPos pos, EnumHand hand, EnumFacing side) {
         InteractBlockEvent.Primary event;
-        BlockSnapshot blockSnapshot = new Location<>((World) player.worldObj, VecHelper.toVector3d(pos)).createSnapshot();
+        BlockSnapshot blockSnapshot = new Location<>((World) player.world, VecHelper.toVector3d(pos)).createSnapshot();
         Direction direction = DirectionFacingProvider.getInstance().getKey(side).get();
         if (hand == EnumHand.MAIN_HAND) {
             event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Cause.of(NamedCause.source(player)), HandTypes.MAIN_HAND, Optional.empty(), blockSnapshot, direction);
@@ -445,7 +445,7 @@ public class SpongeCommonEventFactory {
 
     public static boolean handleCollideImpactEvent(net.minecraft.entity.Entity projectile, @Nullable ProjectileSource projectileSource,
             RayTraceResult movingObjectPosition) {
-        final WorldServer worldServer = (WorldServer) projectile.worldObj;
+        final WorldServer worldServer = (WorldServer) projectile.world;
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
         final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
         RayTraceResult.Type movingObjectType = movingObjectPosition.typeOfHit;
@@ -457,11 +457,11 @@ public class SpongeCommonEventFactory {
                 .firstNamed(NamedCause.OWNER, User.class);
         owner.ifPresent(user -> builder.named(NamedCause.OWNER, user));
 
-        Location<World> impactPoint = new Location<>((World) projectile.worldObj, VecHelper.toVector3d(movingObjectPosition.hitVec));
+        Location<World> impactPoint = new Location<>((World) projectile.world, VecHelper.toVector3d(movingObjectPosition.hitVec));
         boolean cancelled = false;
 
         if (movingObjectType == RayTraceResult.Type.BLOCK) {
-            BlockSnapshot targetBlock = ((World) projectile.worldObj).createSnapshot(VecHelper.toVector3i(movingObjectPosition.getBlockPos()));
+            BlockSnapshot targetBlock = ((World) projectile.world).createSnapshot(VecHelper.toVector3i(movingObjectPosition.getBlockPos()));
             Direction side = Direction.NONE;
             if (movingObjectPosition.sideHit != null) {
                 side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.sideHit).get();
@@ -473,14 +473,14 @@ public class SpongeCommonEventFactory {
             // Track impact block if event is not cancelled
             if (!cancelled && owner.isPresent()) {
                 BlockPos targetPos = VecHelper.toBlockPos(impactPoint.getBlockPosition());
-                IMixinChunk spongeChunk = (IMixinChunk) projectile.worldObj.getChunkFromBlockCoords(targetPos);
+                IMixinChunk spongeChunk = (IMixinChunk) projectile.world.getChunkFromBlockCoords(targetPos);
                 spongeChunk.addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, owner.get(), PlayerTracker.Type.NOTIFIER);
             }
         } else if (movingObjectPosition.entityHit != null) { // entity
             ArrayList<Entity> entityList = new ArrayList<>();
             entityList.add((Entity) movingObjectPosition.entityHit);
             CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(builder.build(), entityList, impactPoint,
-                    (World) projectile.worldObj);
+                    (World) projectile.world);
             return SpongeImpl.postEvent(event);
         }
 
@@ -587,7 +587,7 @@ public class SpongeCommonEventFactory {
                     if (inventory instanceof CarriedInventory) {
                         if (((CarriedInventory) inventory).getCarrier().isPresent()
                                 && ((CarriedInventory) inventory).getCarrier().get() instanceof EntityHorse) {
-                            player.mth_000426_a(((EntityHorse) ((CarriedInventory) inventory).getCarrier().get()), (IInventory) inventory);
+                            player.openGuiHorseInventory(((EntityHorse) ((CarriedInventory) inventory).getCarrier().get()), (IInventory) inventory);
                             container = player.openContainer;
                         }
                     }

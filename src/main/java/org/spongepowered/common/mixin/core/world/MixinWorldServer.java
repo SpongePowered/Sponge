@@ -1212,7 +1212,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * Technically an overwrite to properly track on *server* worlds.
      */
     @Override
-    public void mth_000643_a(BlockPos pos, Block blockIn, BlockPos otherPos) { // notifyBlockOfStateChange
+    public void func_190524_a(BlockPos pos, Block blockIn, BlockPos otherPos) { // notifyBlockOfStateChange
         this.getCauseTracker().notifyBlockOfStateChange(pos, blockIn, otherPos);
     }
 
@@ -1346,7 +1346,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if ((flags & 1) != 0) {
             this.mth_000640_a(pos, newState.getBlock(), false);
 
-            if (newState.mth_000896_o()) {
+            if (newState.hasComparatorInputOverride()) {
                 this.updateComparatorOutputLevel(pos, newState.getBlock());
             }
         }

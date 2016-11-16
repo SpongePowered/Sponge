@@ -37,8 +37,8 @@ import org.spongepowered.common.item.inventory.util.TradeOfferUtil;
 import java.util.List;
 import java.util.Random;
 
-@Mixin(EntityVillager.Unknown5f.class)
-public interface IMixinEntityVillager$ITradeList extends TradeOfferListMutator, EntityVillager.Unknown5f {
+@Mixin(EntityVillager.ITradeList.class)
+public interface IMixinEntityVillager$ITradeList extends TradeOfferListMutator, EntityVillager.ITradeList {
 
     @Override
     default void accept(Merchant owner, List<TradeOffer> tradeOffers, Random random) {
@@ -46,7 +46,7 @@ public interface IMixinEntityVillager$ITradeList extends TradeOfferListMutator, 
         for (TradeOffer offer : tradeOffers) {
             tempList.add(TradeOfferUtil.toNative(offer));
         }
-        mth_000109_a((IMerchant) owner, tempList, random);
+        func_190888_a((IMerchant) owner, tempList, random);
         tradeOffers.clear();
         for (MerchantRecipe recipe : tempList) {
             tradeOffers.add(TradeOfferUtil.fromNative(recipe));

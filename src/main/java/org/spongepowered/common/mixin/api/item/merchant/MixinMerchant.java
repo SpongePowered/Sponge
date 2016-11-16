@@ -36,6 +36,8 @@ import net.minecraft.world.World;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
@@ -43,22 +45,20 @@ import org.spongepowered.common.interfaces.world.IMixinLocation;
 import javax.annotation.Nullable;
 
 @Mixin(value = Merchant.class, remap = false)
-public interface MixinMerchant extends Merchant, IMerchant {
+@Implements(@Interface(iface = IMerchant.class, prefix = "imerchant$"))
+public interface MixinMerchant extends Merchant {
 
-    @Override
-    default void setCustomer(EntityPlayer player) {
+    default void imerchant$setCustomer(EntityPlayer player) {
         this.setCustomer((Humanoid) player);
     }
 
-    @Override
-    default EntityPlayer mth_000385_s_() {
+    default EntityPlayer imerchant$getCustomer() {
         return this.getCustomer().map(EntityUtil.HUMANOID_TO_PLAYER).orElse(null);
     }
 
 
     @Nullable
-    @Override
-    default MerchantRecipeList getRecipes(EntityPlayer player) {
+    default MerchantRecipeList imerchant$getRecipes(EntityPlayer player) {
         final MerchantRecipeList merchantRecipes = new MerchantRecipeList();
         for (TradeOffer tradeOffer : getTradeOfferData().tradeOffers()) {
             merchantRecipes.add((MerchantRecipe) tradeOffer);
@@ -66,28 +66,23 @@ public interface MixinMerchant extends Merchant, IMerchant {
         return merchantRecipes;
     }
 
-    @Override
-    default void useRecipe(MerchantRecipe recipe) {
+    default void imerchant$useRecipe(MerchantRecipe recipe) {
 
     }
 
-    @Override
-    default void verifySellingItem(ItemStack stack) {
+    default void imerchant$verifySellingItem(ItemStack stack) {
 
     }
 
-    @Override
-    default ITextComponent getDisplayName() {
+    default ITextComponent imerchant$getDisplayName() {
         return new TextComponentString("nitwit");
     }
 
-    @Override
-    default World mth_000390_t_() {
+    default World imerchant$func_190670_t_() {
         return ((World) getLocation().getExtent());
     }
 
-    @Override
-    default BlockPos mth_000391_u_() {
+    default BlockPos imerchant$func_190671_u_() {
         return ((IMixinLocation) (Object) getLocation()).getBlockPos();
     }
 }

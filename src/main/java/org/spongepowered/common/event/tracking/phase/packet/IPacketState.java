@@ -112,7 +112,7 @@ public interface IPacketState extends IPhaseState {
      */
     default boolean spawnEntity(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
-        final WorldServer minecraftWorld = (WorldServer) minecraftEntity.worldObj;
+        final WorldServer minecraftWorld = (WorldServer) minecraftEntity.world;
         final Player player = context.getSource(Player.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a player", context));
         final ArrayList<Entity> entities = new ArrayList<>(1);

@@ -536,7 +536,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             return Optional.empty();
         }
         final String tileId = this.compound.getString(NbtDataUtil.BLOCK_ENTITY_ID);
-        final Class<? extends TileEntity> tileClass = TileEntity.fld_000806_f.getObject(new ResourceLocation(tileId));
+        final Class<? extends TileEntity> tileClass = TileEntity.field_190562_f.getObject(new ResourceLocation(tileId));
         if (tileClass == null) {
             return Optional.empty();
         }

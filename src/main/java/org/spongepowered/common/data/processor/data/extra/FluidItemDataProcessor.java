@@ -53,7 +53,7 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
     private static final FluidStackSnapshot LAVA = new SpongeFluidStackBuilder().fluid(FluidTypes.LAVA).volume(1000).build().createSnapshot();
 
     public FluidItemDataProcessor() {
-        super((item) -> item.getItem() == Items.BUCKET || item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.fld_000534_aB, Keys.FLUID_ITEM_STACK);
+        super((item) -> item.getItem() == Items.BUCKET || item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.LAVA_BUCKET, Keys.FLUID_ITEM_STACK);
     }
 
     @SuppressWarnings("deprecation")
@@ -78,7 +78,7 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
     protected Optional<FluidStackSnapshot> getVal(ItemStack dataHolder) {
         if (dataHolder.getItem() == Items.WATER_BUCKET) {
             return Optional.of(WATER);
-        } else if (dataHolder.getItem() == Items.fld_000534_aB) {
+        } else if (dataHolder.getItem() == Items.LAVA_BUCKET) {
             return Optional.of(LAVA);
         }
         return Optional.empty();

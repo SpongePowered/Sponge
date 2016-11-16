@@ -131,7 +131,7 @@ public class ActivationRange {
      * @return boolean If it should always tick.
      */
     public static boolean initializeEntityActivationState(Entity entity) {
-        if (entity.worldObj.isRemote) {
+        if (entity.world.isRemote) {
             return true;
         }
 
@@ -154,7 +154,7 @@ public class ActivationRange {
             return true;
         }
 
-        EntityActivationRangeCategory config = ((IMixinWorldServer) entity.worldObj).getActiveConfig().getConfig().getEntityActivationRange();
+        EntityActivationRangeCategory config = ((IMixinWorldServer) entity.world).getActiveConfig().getConfig().getEntityActivationRange();
         EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
 
         IModData_Activation spongeEntity = (IModData_Activation) entity;
@@ -262,13 +262,13 @@ public class ActivationRange {
 
             for (Object o : chunk.getEntityLists()[i]) {
                 Entity entity = (Entity) o;
-                SpongeConfig<?> config = ((IMixinWorldServer) entity.worldObj).getActiveConfig();
+                SpongeConfig<?> config = ((IMixinWorldServer) entity.world).getActiveConfig();
                 EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
                 if (config == null || type == EntityTypes.UNKNOWN) {
                     continue;
                 }
 
-                long currentTick = entity.worldObj.getWorldInfo().getWorldTotalTime();
+                long currentTick = entity.world.getWorldInfo().getWorldTotalTime();
                 if (currentTick > ((IModData_Activation) entity).getActivatedTick()) {
                     if (((IModData_Activation) entity).getDefaultActivationState()) {
                         ((IModData_Activation) entity).setActivatedTick(currentTick);
@@ -338,7 +338,7 @@ public class ActivationRange {
      */
     public static boolean checkEntityImmunities(Entity entity) {
         // quick checks.
-        if (entity.isInWater() || entity.fire > 0) {
+        if (entity.isInWater() || entity.field_190534_ay > 0) {
             return true;
         }
         if (!(entity instanceof EntityArrow)) {
@@ -357,7 +357,7 @@ public class ActivationRange {
             if (entity instanceof EntityCreature && ((EntityCreature) entity).getAITarget() != null) {
                 return true;
             }
-            if (entity instanceof EntityVillager && ((EntityVillager) entity).mth_000381_di()) {
+            if (entity instanceof EntityVillager && ((EntityVillager) entity).isMating()) {
                 return true;
             }
             if (entity instanceof EntityAnimal) {
@@ -384,11 +384,11 @@ public class ActivationRange {
      */
     public static boolean checkIfActive(Entity entity) {
         // Never safe to skip fireworks or entities not yet added to chunk
-        if (entity.worldObj.isRemote || !entity.addedToChunk || entity instanceof EntityFireworkRocket) {
+        if (entity.world.isRemote || !entity.addedToChunk || entity instanceof EntityFireworkRocket) {
             return true;
         }
 
-        long currentTick = entity.worldObj.getWorldInfo().getWorldTotalTime();
+        long currentTick = entity.world.getWorldInfo().getWorldTotalTime();
         IModData_Activation spongeEntity = (IModData_Activation) entity;
         boolean isActive =
                 spongeEntity.getActivatedTick() >= currentTick || spongeEntity.getDefaultActivationState();
@@ -411,7 +411,7 @@ public class ActivationRange {
         // Make sure not on edge of unloaded chunk
         int x = MathHelper.floor_double(entity.posX);
         int z = MathHelper.floor_double(entity.posZ);
-        Chunk chunk = isActive ? ((IMixinChunkProviderServer) ((WorldServer) entity.worldObj).getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
+        Chunk chunk = isActive ? ((IMixinChunkProviderServer) ((WorldServer) entity.world).getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
         if (isActive && !(chunk != null && ((IMixinChunk) chunk).areNeighborsLoaded())) {
             isActive = false;
         }

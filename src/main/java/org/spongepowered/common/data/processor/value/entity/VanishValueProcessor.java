@@ -49,10 +49,9 @@ public class VanishValueProcessor extends AbstractSpongeValueProcessor<Entity, B
         return new SpongeValue<>(Keys.VANISH, false, actualValue);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected boolean set(Entity container, Boolean value) {
-        if (!container.worldObj.isRemote) {
+        if (!container.world.isRemote) {
             EntityUtil.toMixin(container).setVanished(value);
             return true;
         }

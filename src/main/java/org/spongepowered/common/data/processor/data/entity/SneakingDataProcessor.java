@@ -52,7 +52,7 @@ public class SneakingDataProcessor extends AbstractEntitySingleDataProcessor<Ent
 
     @Override
     protected boolean set(Entity entity, Boolean value) {
-        entity.mth_001457_e(value); // setSneaking
+        entity.setSneaking(value);
         return true;
     }
 

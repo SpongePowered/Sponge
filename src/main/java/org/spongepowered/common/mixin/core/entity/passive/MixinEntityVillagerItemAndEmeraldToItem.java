@@ -43,32 +43,32 @@ import java.util.Random;
 // added as the only thing needing to be done is a simple default implementation
 // with an empty MerchantRecipeList and diff the list with an empty one and
 // provide the resulting diff'ed MerchantRecipe (TradeOffer) as the result.
-@Mixin(EntityVillager.Unknown10d.class)
+@Mixin(EntityVillager.ItemAndEmeraldToItem.class)
 public class MixinEntityVillagerItemAndEmeraldToItem implements TradeOfferGenerator {
 
-    @Shadow public ItemStack fld_000118_a; // buyingItemStack
-    @Shadow public EntityVillager.Unknown6g fld_000119_b; // buyingPriceInfo
-    @Shadow public ItemStack fld_000120_c; // sellingItemstack
-    @Shadow public EntityVillager.Unknown6g fld_000121_d; // sellingPriceInfo
+    @Shadow public ItemStack buyingItemStack;
+    @Shadow public EntityVillager.PriceInfo buyingPriceInfo;
+    @Shadow public ItemStack sellingItemstack;
+    @Shadow public EntityVillager.PriceInfo sellingPriceInfo;
 
     @Override
     public TradeOffer apply(Random random) {
         checkNotNull(random, "Random cannot be null!");
         int buyingCount = 1;
 
-        if (this.fld_000118_a != null) {
-            buyingCount = this.fld_000119_b.mth_000110_a(random);
+        if (this.buyingPriceInfo != null) {
+            buyingCount = this.buyingPriceInfo.getPrice(random);
         }
 
         int sellingCount = 1;
 
-        if (this.fld_000121_d != null) {
-            sellingCount = this.fld_000121_d.mth_000110_a(random);
+        if (this.sellingPriceInfo != null) {
+            sellingCount = this.sellingPriceInfo.getPrice(random);
         }
 
-        final ItemStack itemStackBuying = new ItemStack(this.fld_000118_a.getItem(), buyingCount, this.fld_000118_a.getMetadata());
+        final ItemStack itemStackBuying = new ItemStack(this.buyingItemStack.getItem(), buyingCount, this.buyingItemStack.getMetadata());
         final ItemStack emeraldStack = new ItemStack(Items.EMERALD);
-        final ItemStack itemStackSelling = new ItemStack(this.fld_000120_c.getItem(), sellingCount, this.fld_000120_c.getMetadata());
+        final ItemStack itemStackSelling = new ItemStack(this.sellingItemstack.getItem(), sellingCount, this.sellingItemstack.getMetadata());
         return (TradeOffer) new MerchantRecipe(itemStackBuying, emeraldStack, itemStackSelling);
     }
 

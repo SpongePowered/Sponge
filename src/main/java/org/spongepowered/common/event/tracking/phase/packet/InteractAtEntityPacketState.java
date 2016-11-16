@@ -46,7 +46,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
     public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
-        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.worldObj);
+        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.world);
         return entity == null;
     }
 
@@ -57,7 +57,7 @@ final class InteractAtEntityPacketState extends BasicPacketState {
         if (stack != null) {
             context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
         }
-        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.worldObj);
+        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.world);
         if (entity != null) {
             context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
             context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));

@@ -173,7 +173,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
      * @reason Prevents inventory from being cleared until after events.
      */
     @Overwrite
-    public void mth_000415_o() { // dropAllItems
+    public void dropAllItems() { // dropAllItems
         for (NonNullList<ItemStack> aitemstack : this.fld_000407_g)
         {
             for (int i = 0; i < aitemstack.size(); ++i)
@@ -190,15 +190,15 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
     @Override
     public int getFirstAvailableSlot(ItemStack itemstack) {
         for (int i = 0; i < this.fld_000404_a.size(); ++i) {
-            int stackSize = itemstack.mth_000526_E();
+            int stackSize = itemstack.func_190916_E();
 
-            if (this.fld_000404_a.get(i).mth_000526_E() == 0) {
+            if (this.fld_000404_a.get(i).func_190916_E() == 0) {
                 // empty slot
                 return i;
             }
 
-            if (this.fld_000404_a.get(i).getItem() == itemstack.getItem() && this.fld_000404_a.get(i).isStackable() && this.fld_000404_a.get(i).mth_000526_E() < this.fld_000404_a.get(i).getMaxStackSize() && this.fld_000404_a.get(i).mth_000526_E() < this.getInventoryStackLimit() && (!this.fld_000404_a.get(i).mth_000507_g() || this.fld_000404_a.get(i).getItemDamage() == itemstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(this.fld_000404_a.get(i), itemstack)) {
-                stackSize -= (this.fld_000404_a.get(i).getMaxStackSize() < this.getInventoryStackLimit() ? this.fld_000404_a.get(i).getMaxStackSize() : this.getInventoryStackLimit()) - this.fld_000404_a.get(i).mth_000526_E();
+            if (this.fld_000404_a.get(i).getItem() == itemstack.getItem() && this.fld_000404_a.get(i).isStackable() && this.fld_000404_a.get(i).func_190916_E() < this.fld_000404_a.get(i).getMaxStackSize() && this.fld_000404_a.get(i).func_190916_E() < this.getInventoryStackLimit() && (!this.fld_000404_a.get(i).mth_000507_g() || this.fld_000404_a.get(i).getItemDamage() == itemstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(this.fld_000404_a.get(i), itemstack)) {
+                stackSize -= (this.fld_000404_a.get(i).getMaxStackSize() < this.getInventoryStackLimit() ? this.fld_000404_a.get(i).getMaxStackSize() : this.getInventoryStackLimit()) - this.fld_000404_a.get(i).func_190916_E();
             }
 
             if (stackSize <= 0) {

@@ -165,7 +165,7 @@ public final class SpongeParticleHelper {
                 // can be found at: EntityTrackerEntry#createSpawnPacket
                 // or: NetHandlerPlayClient#handleSpawnObject
                 packetSpawnObject.type = 76;
-                final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.fld_000552_cm);
+                final net.minecraft.item.ItemStack itemStack = new net.minecraft.item.ItemStack(Items.FIREWORKS);
                 FireworkUtils.setFireworkEffects(itemStack, effects);
                 final SPacketEntityMetadata packetEntityMetadata = new SPacketEntityMetadata();
                 packetEntityMetadata.entityId = FIREWORK_ROCKET_ID;

@@ -67,7 +67,7 @@ public abstract class MixinEntityGuardian extends MixinEntityMob implements Guar
 
     @Override
     public Optional<Living> getBeamTarget() {
-        return Optional.ofNullable((Living) this.worldObj.getEntityByID(this.dataManager.get(TARGET_ENTITY)));
+        return Optional.ofNullable((Living) this.world.getEntityByID(this.dataManager.get(TARGET_ENTITY)));
     }
 
     @Override

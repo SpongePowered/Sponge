@@ -73,16 +73,16 @@ public class TradeOfferDataProcessor
 
     @Override
     protected boolean set(EntityVillager entity, List<TradeOffer> value) {
-        entity.fld_000364_bD = toMerchantRecipeList(value);
+        entity.buyingList = toMerchantRecipeList(value);
         return true;
     }
 
     @Override
     protected Optional<List<TradeOffer>> getVal(EntityVillager entity) {
-        if (entity.fld_000364_bD == null) {
-            entity.mth_000389_dt();
+        if (entity.buyingList == null) {
+            entity.populateBuyingList();
         }
-        return Optional.of(toTradeOfferList(entity.fld_000364_bD));
+        return Optional.of(toTradeOfferList(entity.buyingList));
     }
 
     @Override

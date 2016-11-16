@@ -95,7 +95,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Shadow public abstract int getMaxStackSize();
     @Shadow public abstract boolean hasTagCompound();
     @Shadow public abstract NBTTagCompound getTagCompound();
-    @Shadow public abstract NBTTagCompound mth_000513_c(String key);
+    @Shadow public abstract NBTTagCompound func_190925_c(String key);
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow @Nullable public abstract Item shadow$getItem();
 
@@ -342,7 +342,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
             for (DataView dataView : manipulatorViews) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(dataView));
             }
-            final NBTTagCompound spongeCompound = mth_000513_c(NbtDataUtil.SPONGE_DATA);
+            final NBTTagCompound spongeCompound = func_190925_c(NbtDataUtil.SPONGE_DATA);
             spongeCompound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, newList);
         } else {
             if (hasTagCompound()) {

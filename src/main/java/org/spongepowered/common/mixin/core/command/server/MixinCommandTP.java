@@ -90,7 +90,7 @@ public abstract class MixinCommandTP extends CommandBase {
                 {
                     throw new WrongUsageException("commands.tp.usage", new Object[0]);
                 }
-                else if (entity.worldObj != null)
+                else if (entity.world != null)
                 {
                     // int j = 4096;
                     int lvt_6_2_ = i + 1;
@@ -116,7 +116,7 @@ public abstract class MixinCommandTP extends CommandBase {
             {
                 Entity entity1 = getEntity(server, sender, args[args.length - 1]);
 
-                if (entity1.worldObj != entity.worldObj)
+                if (entity1.world != entity.world)
                 {
                     throw new CommandException("commands.tp.notSameDimension", new Object[0]);
                 }

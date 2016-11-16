@@ -24,26 +24,26 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import net.minecraft.unknown.UnknownEntityAIBase66vj;
+import net.minecraft.entity.ai.EntityAIRunAroundLikeCrazy;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(UnknownEntityAIBase66vj.class)
+@Mixin(EntityAIRunAroundLikeCrazy.class)
 public abstract class MixinEntityAIRunAroundLikeCrazy extends MixinEntityAIBase implements RunAroundLikeCrazyAITask {
 
-    @Shadow @Final @Mutable private double fld_001601_b;
+    @Shadow @Final @Mutable private double speed;
 
     @Override
     public double getSpeed() {
-        return this.fld_001601_b;
+        return this.speed;
     }
 
     @Override
     public RunAroundLikeCrazyAITask setSpeed(double speed) {
-        this.fld_001601_b = speed;
+        this.speed = speed;
         return this;
     }
 }

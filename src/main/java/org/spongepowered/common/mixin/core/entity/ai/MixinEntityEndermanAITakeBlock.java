@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
-@Mixin(EntityEnderman.Unknown14c.class)
+@Mixin(EntityEnderman.AITakeBlock.class)
 public abstract class MixinEntityEndermanAITakeBlock extends EntityAIBase {
 
     @Shadow @Final private EntityEnderman fld_000133_a; //enderman

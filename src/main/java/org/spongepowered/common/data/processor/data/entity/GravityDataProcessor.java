@@ -65,7 +65,7 @@ public class GravityDataProcessor extends AbstractEntitySingleDataProcessor<Enti
 
     @Override
     protected Optional<Boolean> getVal(Entity entity) {
-        return OptBool.of(!entity.mth_001447_ae()); // hasNoGravity
+        return OptBool.of(!entity.hasNoGravity());
     }
 
     @Override

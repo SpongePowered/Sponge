@@ -74,7 +74,7 @@ public abstract class MixinCommandSummon extends CommandBase {
                     EntityMinecart.Type.values()[nbt.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
             nbt.removeTag(NbtDataUtil.MINECART_TYPE);
         }
-        Class<? extends Entity> entityClass = EntityList.fld_001473_b.getObject(new ResourceLocation(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID)));
+        Class<? extends Entity> entityClass = EntityList.field_191308_b.getObject(new ResourceLocation(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID)));
         if (entityClass == null) {
             return null;
         }

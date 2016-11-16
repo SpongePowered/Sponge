@@ -86,7 +86,7 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
     @Override
     public void detonate(Cause cause) {
         this.detonationCause = checkNotNull(cause, "cause");
-        onExplode(this.worldObj, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
+        onExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
         setDead();
     }
 

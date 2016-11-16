@@ -150,7 +150,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         }
         // Sponge End
 
-        if (!player.isSneaking() || player.getHeldItemMainhand().mth_000506_b() && player.mth_001503_ch().mth_000506_b()) {
+        if (!player.isSneaking() || player.getHeldItemMainhand().func_190926_b() && player.mth_001503_ch().func_190926_b()) {
             // Sponge start - check event useBlockResult, and revert the client if it's FALSE.
             // Also, store the result instead of returning immediately
             if (event.getUseBlockResult() != Tristate.FALSE) {
@@ -182,7 +182,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             // Sponge End
         }
 
-        if (stack.mth_000506_b()) {
+        if (stack.func_190926_b()) {
             return EnumActionResult.PASS;
         } else if (player.getCooldownTracker().hasCooldown(stack.getItem())) {
             return EnumActionResult.PASS;
@@ -208,7 +208,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         final EnumActionResult result = stack.onItemUse(player, worldIn, pos, hand, facing, offsetX, offsetY, offsetZ);
         if (this.isCreative()) {
             stack.setItemDamage(oldStack.getItemDamage());
-            stack.mth_000527_e(oldStack.mth_000526_E());
+            stack.func_190920_e(oldStack.func_190916_E());
         }
 
         if (!ItemStack.areItemStacksEqual(player.getHeldItem(hand), oldStack) || result != EnumActionResult.SUCCESS) {

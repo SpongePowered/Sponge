@@ -52,7 +52,7 @@ import java.util.Optional;
 public class ItemPagedDataProcessor extends AbstractItemSingleDataProcessor<List<Text>, ListValue<Text>, PagedData, ImmutablePagedData> {
 
     public ItemPagedDataProcessor() {
-        super(input -> input.getItem() == Items.fld_000549_bX || input.getItem() == Items.WRITTEN_BOOK, Keys.BOOK_PAGES);
+        super(input -> input.getItem() == Items.WRITABLE_BOOK || input.getItem() == Items.WRITTEN_BOOK, Keys.BOOK_PAGES);
     }
 
     @SuppressWarnings("unchecked")

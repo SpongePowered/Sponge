@@ -107,8 +107,8 @@ public final class BlockUtil {
     }
 
     public static void sendClientBlockChange(EntityPlayerMP player, BlockPos pos) {
-        player.connection.sendPacket(new SPacketBlockChange(player.worldObj, pos));
-        player.worldObj.notifyBlockUpdate(pos, player.worldObj.getBlockState(pos), player.worldObj.getBlockState(pos), 3);
+        player.connection.sendPacket(new SPacketBlockChange(player.world, pos));
+        player.world.notifyBlockUpdate(pos, player.world.getBlockState(pos), player.world.getBlockState(pos), 3);
     }
 
     private BlockUtil() {

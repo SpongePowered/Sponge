@@ -98,11 +98,11 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
 
     @ModifyConstant(method = "searchForOtherItemsNearby", constant = @Constant(doubleValue = 0.5D))
     private double getSearchRadius(double originalRadius) {
-        if (this.worldObj.isRemote) {
+        if (this.world.isRemote) {
             return originalRadius;
         }
         if (this.cachedRadius == -1) {
-            final double configRadius = ((IMixinWorldServer) this.worldObj).getActiveConfig().getConfig().getWorld().getItemMergeRadius();
+            final double configRadius = ((IMixinWorldServer) this.world).getActiveConfig().getConfig().getWorld().getItemMergeRadius();
             this.cachedRadius = configRadius < 0 ? 0 : configRadius;
         }
         return this.cachedRadius;

@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.entity.ai;
 
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.ai.EntityAIHarvestFarmland;
 import net.minecraft.entity.ai.EntityAIMoveToBlock;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.unknown.UnknownEntityAIMoveToBlock57uj;
 import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,10 +36,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
-@Mixin(UnknownEntityAIMoveToBlock57uj.class)
+@Mixin(EntityAIHarvestFarmland.class)
 public abstract class MixinEntityAIHarvestFarmland extends EntityAIMoveToBlock {
 
-    @Shadow @Final private EntityVillager fld_001558_c; // theVillager
+    @Shadow @Final private EntityVillager theVillager;
 
     public MixinEntityAIHarvestFarmland(EntityCreature creature, double a, int b) {
         super(creature, a, b);
@@ -47,6 +47,6 @@ public abstract class MixinEntityAIHarvestFarmland extends EntityAIMoveToBlock {
 
     @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.fld_001558_c).canGrief();
+        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.theVillager).canGrief();
     }
 }

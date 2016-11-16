@@ -69,7 +69,7 @@ public abstract class MixinCommandTeleport extends CommandBase {
         {
             Entity entity = getEntity(server, sender, args[0]);
 
-            if (entity.worldObj != null)
+            if (entity.world != null)
             {
                 // int i = 4096;
                 Vec3d vec3d = sender.getPositionVector();

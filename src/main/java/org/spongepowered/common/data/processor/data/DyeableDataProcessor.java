@@ -88,7 +88,7 @@ public class DyeableDataProcessor extends AbstractSingleDataProcessor<DyeColor, 
             if (dataHolder instanceof EntitySheep) {
                 return Optional.of(new SpongeDyeableData((DyeColor) (Object) ((EntitySheep) dataHolder).getFleeceColor()));
             } else if (dataHolder instanceof EntityWolf) {
-                return Optional.of(new SpongeDyeableData((DyeColor) (Object) ((EntityWolf) dataHolder).mth_001646_ds()));
+                return Optional.of(new SpongeDyeableData((DyeColor) (Object) ((EntityWolf) dataHolder).getCollarColor()));
             } else if (dataHolder instanceof ItemStack) {
                 if(((ItemStack) dataHolder).getItem().equals(Items.DYE)) {
                     return Optional.of(new SpongeDyeableData((DyeColor) (Object) EnumDyeColor.byDyeDamage(((ItemStack) dataHolder).getItemDamage())));
@@ -119,7 +119,7 @@ public class DyeableDataProcessor extends AbstractSingleDataProcessor<DyeColor, 
                 ((EntitySheep) dataHolder).setFleeceColor((EnumDyeColor) (Object) merged.type().get());
                 return DataTransactionResult.successReplaceResult(origin.type().asImmutable(), merged.type().asImmutable());
             } else if (dataHolder instanceof EntityWolf) {
-                ((EntityWolf) dataHolder).mth_001647_a(((EnumDyeColor) (Object) merged.type().get()));
+                ((EntityWolf) dataHolder).setCollarColor(((EnumDyeColor) (Object) merged.type().get()));
                 return DataTransactionResult.successReplaceResult(origin.type().asImmutable(), merged.type().asImmutable());
             } else if (dataHolder instanceof ItemStack) {
                 if(((ItemStack) dataHolder).getItem().equals(Items.DYE)) {

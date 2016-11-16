@@ -54,7 +54,7 @@ public abstract class MixinCommandDifficulty {
             world.setAllowedSpawnTypes(world.getDifficulty() != EnumDifficulty.PEACEFUL, true);
         } else {
             world.getWorldInfo().setDifficulty(difficulty);
-            world.setAllowedSpawnTypes(server.mth_000171_U(), server.mth_000179_ad());
+            world.setAllowedSpawnTypes(server.allowSpawnMonsters(), server.getCanSpawnAnimals());
         }
     }
 

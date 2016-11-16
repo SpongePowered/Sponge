@@ -125,7 +125,7 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
      * Collide impact event post for plugins to cancel impact.
      */
     private void arrowImpact(CallbackInfo ci, RayTraceResult hitResult) {
-        if (!this.worldObj.isRemote) {
+        if (!this.world.isRemote) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent(this.mcEntity, getShooter(), hitResult)) {
                 // deflect and drop to ground
                 this.motionX *= -0.10000000149011612D;

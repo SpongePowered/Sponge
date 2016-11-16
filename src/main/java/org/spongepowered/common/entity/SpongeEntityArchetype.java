@@ -106,7 +106,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(spongeEntity), world);
         if (!event.isCancelled()) {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
-            entity.mth_001450_a(x, y, z, entity.rotationYaw, entity.rotationPitch);
+            entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);
             if (entity instanceof EntityLiving) {
                 mixinWorldServer.forceSpawnEntity(entity);
                 ((EntityLiving) entity).onInitialSpawn(worldServer.getDifficultyForLocation(blockPos), null);

@@ -60,7 +60,7 @@ public class InvisibilityDataProcessor
 
     @Override
     protected boolean set(Entity dataHolder, Map<Key<?>, Object> keyValues) {
-        if (!dataHolder.worldObj.isRemote) {
+        if (!dataHolder.world.isRemote) {
             final boolean invis = (Boolean) keyValues.get(Keys.INVISIBLE);
             final boolean collision = (Boolean) keyValues.get(Keys.VANISH_IGNORES_COLLISION);
             final boolean untargetable = (Boolean) keyValues.get(Keys.VANISH_PREVENTS_TARGETING);

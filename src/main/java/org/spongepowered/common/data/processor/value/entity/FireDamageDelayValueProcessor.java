@@ -69,7 +69,7 @@ public class FireDamageDelayValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Optional<Integer> getVal(Entity container) {
-        return Optional.of(container.mth_000421_bD());
+        return Optional.of(container.func_190531_bD());
     }
 
     @Override

@@ -410,7 +410,7 @@ public final class CauseTracker {
         }
         else
         {
-            if (newState.mth_000887_c() != iblockstate.mth_000887_c() || newState.mth_000888_d() != iblockstate.mth_000888_d())
+            if (newState.mth_000887_c() != iblockstate.mth_000887_c() || newState.getLightValue() != iblockstate.getLightValue())
             {
                 minecraftWorld.theProfiler.startSection("checkLight");
                 minecraftWorld.checkLight(pos);
@@ -426,7 +426,7 @@ public final class CauseTracker {
             {
                 minecraftWorld.mth_000640_a(pos, iblockstate.getBlock(), true);
 
-                if (newState.mth_000896_o())
+                if (newState.hasComparatorInputOverride())
                 {
                     minecraftWorld.updateComparatorOutputLevel(pos, block);
                 }
@@ -459,7 +459,7 @@ public final class CauseTracker {
         if (iblockstate == null) {
             return false;
         }
-        if (newState.mth_000887_c() != iblockstate.mth_000887_c() || newState.mth_000888_d() != iblockstate.mth_000888_d()) {
+        if (newState.mth_000887_c() != iblockstate.mth_000887_c() || newState.getLightValue() != iblockstate.getLightValue()) {
             minecraftWorld.theProfiler.startSection("checkLight");
             minecraftWorld.checkLight(pos);
             minecraftWorld.theProfiler.endSection();
@@ -472,7 +472,7 @@ public final class CauseTracker {
         if (flag.updateNeighbors()) { // Sponge - remove the isRemote check
             minecraftWorld.mth_000641_c(pos, iblockstate.getBlock());
 
-            if (newState.mth_000896_o()) {
+            if (newState.hasComparatorInputOverride()) {
                 minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
             }
         }

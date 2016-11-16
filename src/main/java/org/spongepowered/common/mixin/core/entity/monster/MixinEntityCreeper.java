@@ -92,8 +92,8 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
 
     @Inject(method = "onDeath", at = @At("RETURN"))
     private void onDeath(DamageSource damageSource, CallbackInfo ci) {
-        if (!this.worldObj.isRemote && this.tracksEntityDeaths) {
-            ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
+        if (!this.world.isRemote && this.tracksEntityDeaths) {
+            ((IMixinWorldServer) this.world).getCauseTracker().completePhase();
             this.tracksEntityDeaths = false;
         }
     }
@@ -200,10 +200,10 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
     }
 
     @Redirect(method = "mth_001830_dn", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
-    protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
+    protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World world, Entity self, double x,
             double y, double z, float strength, boolean smoking) {
         return detonate(getCause(this.detonationCause), Explosion.builder()
-                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .location(new Location<>((World) world, new Vector3d(x, y, z)))
                 .sourceExplosive(this)
                 .radius(strength)
                 .shouldPlaySmoke(smoking)

@@ -78,12 +78,12 @@ public class DelegatingFabric extends MinecraftFabric {
 
     @Override
     public int getSize() {
-        return this.slot.getStack().mth_000526_E();
+        return this.slot.getStack().func_190916_E();
     }
 
     @Override
     public void clear() {
-        this.slot.putStack(ItemStack.fld_000503_a);
+        this.slot.putStack(ItemStack.field_190927_a);
     }
 
     @Override

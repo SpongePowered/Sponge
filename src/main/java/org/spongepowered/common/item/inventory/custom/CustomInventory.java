@@ -89,7 +89,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.inv = new InventoryBasic(title, isCustom, count);
 
         // Updates the Inventory for all viewers on any change
-        this.inv.mth_001420_a(i -> viewers.forEach(v -> {
+        this.inv.addInventoryChangeListener(i -> this.viewers.forEach(v -> {
             v.openContainer.detectAndSendChanges();
         }));
 
@@ -120,7 +120,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     public InventoryArchetype getArchetype() {
-        return archetype;
+        return this.archetype;
     }
 
     @Override
@@ -143,27 +143,27 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     @Override
     public String getGuiID() {
-        if (archetype == InventoryArchetypes.CHEST || archetype == InventoryArchetypes.DOUBLE_CHEST) {
+        if (this.archetype == InventoryArchetypes.CHEST || this.archetype == InventoryArchetypes.DOUBLE_CHEST) {
             return "minecraft:chest";
-        } else if (archetype == InventoryArchetypes.HOPPER) {
+        } else if (this.archetype == InventoryArchetypes.HOPPER) {
             return "minecraft:hopper";
-        } else if (archetype == InventoryArchetypes.DISPENSER) {
+        } else if (this.archetype == InventoryArchetypes.DISPENSER) {
             return "minecraft:dispenser";
-        } else if (archetype == InventoryArchetypes.WORKBENCH) {
+        } else if (this.archetype == InventoryArchetypes.WORKBENCH) {
             return "minecraft:crafting_table";
-        } else if (archetype == InventoryArchetypes.FURNACE) {
+        } else if (this.archetype == InventoryArchetypes.FURNACE) {
             return "minecraft:furnace";
-        } else if (archetype == InventoryArchetypes.ENCHANTING_TABLE) {
+        } else if (this.archetype == InventoryArchetypes.ENCHANTING_TABLE) {
             return "minecraft:enchanting_table";
-        } else if (archetype == InventoryArchetypes.ANVIL) {
+        } else if (this.archetype == InventoryArchetypes.ANVIL) {
             return "minecraft:anvil";
-        } else if (archetype == InventoryArchetypes.BREWING_STAND) {
+        } else if (this.archetype == InventoryArchetypes.BREWING_STAND) {
             return "minecraft:brewing_stand";
-        } else if (archetype == InventoryArchetypes.BEACON) {
+        } else if (this.archetype == InventoryArchetypes.BEACON) {
             return "minecraft:beacon";
-        } else if (archetype == InventoryArchetypes.HORSE || archetype == InventoryArchetypes.HORSE_WITH_CHEST) {
+        } else if (this.archetype == InventoryArchetypes.HORSE || this.archetype == InventoryArchetypes.HORSE_WITH_CHEST) {
             return "EntityHorse";
-        } else if (archetype == InventoryArchetypes.VILLAGER) {
+        } else if (this.archetype == InventoryArchetypes.VILLAGER) {
             return "minecraft:villager";
         } else {
             return "minecraft:chest";
@@ -193,8 +193,8 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public boolean mth_000414_w_() {
-        return this.inv.mth_000414_w_();
+    public boolean func_191420_l() {
+        return this.inv.func_191420_l();
     }
 
     @Override
@@ -260,16 +260,16 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public int mth_000417_h() {
-        return this.inv.mth_000417_h();
+    public int getFieldCount() {
+        return this.inv.getFieldCount();
     }
 
     @Override
-    public void mth_000418_m() {
-        this.inv.mth_000418_m();
+    public void clear() {
+        this.inv.clear();
     }
 
     public Map<String, InventoryProperty> getProperties() {
-        return properties;
+        return this.properties;
     }
 }

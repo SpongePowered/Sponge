@@ -50,7 +50,7 @@ public class VanishCollisionValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected boolean set(Entity container, Boolean value) {
-        if (!container.worldObj.isRemote) {
+        if (!container.world.isRemote) {
             if (!((IMixinEntity) container).isVanished()) {
                 return false;
             }

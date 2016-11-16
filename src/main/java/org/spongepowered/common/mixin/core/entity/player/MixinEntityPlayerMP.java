@@ -239,8 +239,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // Double check that the CauseTracker is already capturing the Death phase
         final CauseTracker causeTracker;
         final boolean tracksEntityDeaths;
-        if (!this.worldObj.isRemote) {
-            causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+        if (!this.world.isRemote) {
+            causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
             tracksEntityDeaths = CauseTracker.ENABLED && causeTracker.getCurrentState().tracksEntityDeaths();
@@ -260,7 +260,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
         // Sponge end
 
-        boolean flag = this.worldObj.getGameRules().getBoolean("showDeathMessages");
+        boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
         this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
 
         if (flag) {
@@ -277,9 +277,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             }
         }
 
-        if (!this.worldObj.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+        if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
             this.mth_000423_cN();
-            this.inventory.mth_000415_o();
+            this.inventory.dropAllItems();
         }
 
         for (ScoreObjective scoreobjective : this.getWorldScoreboard().getObjectivesFromCriteria(IScoreCriteria.DEATH_COUNT)) {
@@ -313,7 +313,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public IMixinWorldServer getMixinWorld() {
-        return ((IMixinWorldServer) this.worldObj);
+        return ((IMixinWorldServer) this.world);
     }
 
     /**
@@ -511,7 +511,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public MessageChannel getDeathMessageChannel() {
         EntityPlayerMP player = (EntityPlayerMP) (Object) this;
-        if (player.worldObj.getGameRules().getBoolean("showDeathMessages")) {
+        if (player.world.getGameRules().getBoolean("showDeathMessages")) {
             @Nullable Team team = player.getTeam();
 
             if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
@@ -728,7 +728,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void resetBlockChange(int x, int y, int z) {
-        SPacketBlockChange packet = new SPacketBlockChange(this.worldObj, new BlockPos(x, y, z));
+        SPacketBlockChange packet = new SPacketBlockChange(this.world, new BlockPos(x, y, z));
         this.connection.sendPacket(packet);
     }
 
@@ -750,7 +750,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         //final Cause cause = Cause.source(SpawnCause.builder().type(InternalSpawnTypes.DROPPED_ITEM).build()).named(NamedCause.OWNER, this).build();
         // ASK MUMFREY HOW TO GET THE FRIGGING SLOT FOR THE EVENT?!
 
-        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.mth_000526_E() : 1), false, true);
+        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.func_190916_E() : 1), false, true);
     }
 
     @Override

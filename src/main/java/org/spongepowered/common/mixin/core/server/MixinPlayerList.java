@@ -263,8 +263,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         playerIn.dimension = ((IMixinWorldServer) worldServer).getDimensionId();
         playerIn.setWorld(worldServer);
-        playerIn.interactionManager.setWorld((WorldServer) playerIn.worldObj);
-        playerIn.mth_001450_a(x, y, z, yaw, pitch);
+        playerIn.interactionManager.setWorld((WorldServer) playerIn.world);
+        playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
         // make sure the chunk is loaded for login
         worldServer.getChunkProvider().loadChunk(loginEvent.getToTransform().getLocation().getChunkPosition().getX(), loginEvent.getToTransform().getLocation().getChunkPosition().getZ());
         // Sponge end
@@ -360,10 +360,10 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
                     if (!playerIn.isRiding()) {
                         LOG.warn("Couldn\'t reattach entity to player");
-                        worldServer.mth_000647_f(entity2);
+                        worldServer.removeEntityDangerously(entity2);
 
                         for (Entity entity3 : entity2.getRecursivePassengers()) {
-                            worldServer.mth_000647_f(entity3);
+                            worldServer.removeEntityDangerously(entity3);
                         }
                     }
                 }
@@ -475,7 +475,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         playerIn.getServerWorld().getEntityTracker().untrackEntity(playerIn);
         playerIn.getServerWorld().getPlayerChunkMap().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
-        this.mcServer.worldServerForDimension(playerIn.dimension).mth_000647_f(playerIn);
+        this.mcServer.worldServerForDimension(playerIn.dimension).removeEntityDangerously(playerIn);
 
         // ### PHASE 3 ### Reset player (if applicable)
         // Recreate the player object in order to support Forge's PlayerEvent.Clone
@@ -492,8 +492,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         newPlayer.clonePlayer(playerIn, conqueredEnd);
         // set player dimension for RespawnPlayerEvent
         newPlayer.dimension = targetDimension;
-        newPlayer.mth_001442_h(playerIn.getEntityId());
-        newPlayer.mth_001465_v(playerIn);
+        newPlayer.setEntityId(playerIn.getEntityId());
+        newPlayer.setCommandStats(playerIn);
         newPlayer.setPrimaryHand(playerIn.getPrimaryHand());
 
         for (String s : playerIn.getTags()) {
@@ -501,7 +501,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         this.setPlayerGameTypeBasedOnOther(newPlayer, playerIn, worldServer);
-        newPlayer.mth_001457_e(false);
+        newPlayer.setSneaking(false);
         // update to safe location
         toTransform = toTransform.setLocation(location);
 
@@ -578,7 +578,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
     // Internal. Note: Has side-effects
     private Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
-        final Location<World> location = ((World) playerIn.worldObj).getSpawnLocation();
+        final Location<World> location = ((World) playerIn.world).getSpawnLocation();
         this.tempIsBedSpawn = false;
         if (targetWorld == null) { // Target world doesn't exist? Use global
             return location;
@@ -649,7 +649,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             }
         }
         playerIn.connection.sendPacket(new SPacketRespawn(dimensionId, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
-        fromWorld.mth_000647_f(playerIn);
+        fromWorld.removeEntityDangerously(playerIn);
         playerIn.isDead = false;
         // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
         ((IMixinEntity) playerIn).setLocationAndAngles(event.getToTransform());
@@ -871,6 +871,6 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // We can't get the world from the game profile
 
         // Check the world info of the current world instead of overworld world info
-        return player.worldObj.getWorldInfo();
+        return player.world.getWorldInfo();
     }
 }

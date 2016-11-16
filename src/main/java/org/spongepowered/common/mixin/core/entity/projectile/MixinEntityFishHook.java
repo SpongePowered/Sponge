@@ -111,23 +111,23 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
     @Overwrite
     public int mth_001822_j() { // handleHookRetraction
-        if (this.worldObj.isRemote) {
+        if (this.world.isRemote) {
             return 0;
         } else {
             int i = 0;
 
             if (this.fld_001811_a != null) {
                 this.mth_001823_k();
-                this.worldObj.setEntityState((EntityFishHook) (Object) this, (byte)31);
+                this.world.setEntityState((EntityFishHook) (Object) this, (byte)31);
                 i = this.fld_001811_a instanceof EntityItem ? 3 : 5;
 
             } else if (this.fld_001807_g > 0) {
-                LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.worldObj);
+                LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.world);
                 lootcontext$builder.withLuck((float) EnchantmentHelper.mth_000621_f(this.fld_001805_e) + this.fld_001805_e.getLuck());
 
                 // Sponge start
                 // TODO 1.9: Figure out how we want experience to work here
-                List<net.minecraft.item.ItemStack> itemstacks = this.worldObj.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING).generateLootForPools(this.rand, lootcontext$builder.build());
+                List<net.minecraft.item.ItemStack> itemstacks = this.world.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING).generateLootForPools(this.rand, lootcontext$builder.build());
                 FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.fld_001805_e)), 0, 0,
                         this.createSnapshot(), this, itemstacks.stream().map(s -> {
                             ItemStackSnapshot snapshot = ((ItemStack) s).createSnapshot();
@@ -136,7 +136,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
                 if (!SpongeImpl.postEvent(event)) {
                     for (net.minecraft.item.ItemStack itemstack : event.getItemStackTransaction().stream().filter(Transaction::isValid).map(t -> (net.minecraft.item.ItemStack) t.getFinal().createStack()).collect(Collectors.toList())) {
-                        EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, itemstack);
+                        EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack);
                         double d0 = this.fld_001805_e.posX - this.posX;
                         double d1 = this.fld_001805_e.posY - this.posY;
                         double d2 = this.fld_001805_e.posZ - this.posZ;
@@ -145,8 +145,8 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                         entityitem.motionX = d0 * d4;
                         entityitem.motionY = d1 * d4 + (double)MathHelper.sqrt_double(d3) * 0.08D;
                         entityitem.motionZ = d2 * d4;
-                        this.worldObj.spawnEntityInWorld(entityitem);
-                        this.fld_001805_e.worldObj.spawnEntityInWorld(new EntityXPOrb(this.fld_001805_e.worldObj, this.fld_001805_e.posX, this.fld_001805_e.posY + 0.5D, this.fld_001805_e.posZ + 0.5D, this.rand.nextInt(6) + 1));
+                        this.world.spawnEntityInWorld(entityitem);
+                        this.fld_001805_e.world.spawnEntityInWorld(new EntityXPOrb(this.fld_001805_e.world, this.fld_001805_e.posX, this.fld_001805_e.posY + 0.5D, this.fld_001805_e.posZ + 0.5D, this.rand.nextInt(6) + 1));
                     } // Sponge end
                 }
 

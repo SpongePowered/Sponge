@@ -71,7 +71,7 @@ public final class SpongeMessageHandler {
         EntityPlayerMP sender = (EntityPlayerMP) player;
 
         BlockPos pos = new BlockPos(message.x, message.y, message.z);
-        if (!sender.worldObj.isBlockLoaded(pos)) {
+        if (!sender.world.isBlockLoaded(pos)) {
             return;
         }
 
@@ -81,11 +81,11 @@ public final class SpongeMessageHandler {
         Optional<User> notifier = Optional.empty();
 
         if (message.type == 0) { // block
-            IMixinChunk spongeChunk = (IMixinChunk) sender.worldObj.getChunkFromBlockCoords(pos);
+            IMixinChunk spongeChunk = (IMixinChunk) sender.world.getChunkFromBlockCoords(pos);
             owner = spongeChunk.getBlockOwner(pos);
             notifier = spongeChunk.getBlockNotifier(pos);
         } else if (message.type == 1) { // entity
-            Entity entity = sender.worldObj.getEntityByID(message.entityId);
+            Entity entity = sender.world.getEntityByID(message.entityId);
             if (entity != null) {
                 IMixinEntity spongeEntity = (IMixinEntity) entity;
                 owner = spongeEntity.getCreatorUser();

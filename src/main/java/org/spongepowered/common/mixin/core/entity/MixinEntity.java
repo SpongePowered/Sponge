@@ -176,7 +176,7 @@ public abstract class MixinEntity implements IMixinEntity {
     private Timing timing;
 
     @Shadow private UUID entityUniqueID;
-    @Shadow public net.minecraft.world.World worldObj;
+    @Shadow public net.minecraft.world.World world;
     @Shadow public double posX;
     @Shadow public double posY;
     @Shadow public double posZ;
@@ -196,7 +196,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public boolean onGround;
     @Shadow public boolean inWater;
     @Shadow protected boolean isImmuneToFire;
-    @Shadow public int fld_001437_V;
+    @Shadow public int hurtResistantTime;
     @Shadow public int fire;
     @Shadow public int dimension;
     @Shadow protected Random rand;
@@ -282,7 +282,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Inject(method = "startRiding(Lnet/minecraft/entity/Entity;Z)Z", at = @At(value = "FIELD", target = RIDING_ENTITY_FIELD, ordinal = 0),
             cancellable = true)
     public void onStartRiding(net.minecraft.entity.Entity vehicle, boolean force, CallbackInfoReturnable<Boolean> ci) {
-        if (!this.worldObj.isRemote && ShouldFire.RIDE_ENTITY_EVENT_MOUNT) {
+        if (!this.world.isRemote && ShouldFire.RIDE_ENTITY_EVENT_MOUNT) {
             if (SpongeImpl.postEvent(SpongeEventFactory.createRideEntityEventMount(Cause.of(NamedCause.source(this)), (Entity) vehicle))) {
                 ci.cancel();
             }
@@ -291,7 +291,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Inject(method = "dismountRidingEntity()V", at = @At(value = "FIELD", target = RIDING_ENTITY_FIELD, ordinal = 1), cancellable = true)
     public void onDismountRidingEntity(CallbackInfo ci) {
-        if (!this.worldObj.isRemote && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
+        if (!this.world.isRemote && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
             if (SpongeImpl.postEvent(SpongeEventFactory.
                     createRideEntityEventDismount(Cause.of(NamedCause.source(this)), (Entity) this.getRidingEntity()))) {
                 ci.cancel();
@@ -309,14 +309,14 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Inject(method = "moveEntity", at = @At("HEAD"), cancellable = true)
     public void onMoveEntity(MoverType type, double x, double y, double z, CallbackInfo ci) {
-        if (!this.worldObj.isRemote && !SpongeHooks.checkEntitySpeed(((net.minecraft.entity.Entity) (Object) this), x, y, z)) {
+        if (!this.world.isRemote && !SpongeHooks.checkEntitySpeed(((net.minecraft.entity.Entity) (Object) this), x, y, z)) {
             ci.cancel();
         }
     }
 
     @Inject(method = "mth_001443_W()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC)) // setOnFireFromLava
     public void preSetOnFire(CallbackInfo callbackInfo) {
-        if (!this.worldObj.isRemote) {
+        if (!this.world.isRemote) {
             this.originalLava = DamageSource.lava;
             AxisAlignedBB bb = this.getEntityBoundingBox().expand(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
@@ -327,7 +327,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Inject(method = "mth_001443_W()V", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD)) // setOnFireFromLava
     public void postSetOnFire(CallbackInfo callbackInfo) {
-        if (!this.worldObj.isRemote) {
+        if (!this.world.isRemote) {
             if (this.originalLava == null) {
                 SpongeImpl.getLogger().error("Original lava is null!");
                 Thread.dumpStack();
@@ -341,7 +341,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Inject(method = "dealFireDamage", at = @At(value = "FIELD", target = FIRE_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC))
     public void preFire(CallbackInfo callbackInfo) {
         // Sponge Start - Find the fire block!
-        if (!this.worldObj.isRemote) {
+        if (!this.world.isRemote) {
             this.originalInFire = DamageSource.inFire;
             AxisAlignedBB bb = this.getEntityBoundingBox().expand(-0.001D, -0.001D, -0.001D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
@@ -352,7 +352,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Inject(method = "dealFireDamage", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD))
     public void postDealFireDamage(CallbackInfo callbackInfo) {
-        if (!this.worldObj.isRemote) {
+        if (!this.world.isRemote) {
             if (this.originalInFire == null) {
                 SpongeImpl.getLogger().error("Original fire is null!");
                 Thread.dumpStack();
@@ -400,7 +400,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public Location<World> getLocation() {
-        return new Location<>((World) this.worldObj, getPosition());
+        return new Location<>((World) this.world, getPosition());
     }
 
     @Override
@@ -430,14 +430,14 @@ public abstract class MixinEntity implements IMixinEntity {
             this.rotationYaw = (float) event.getToTransform().getYaw();
         }
 
-        IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.worldObj).getChunkProvider();
+        IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) ((WorldServer) this.world).getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);
         // detach passengers
         final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
         final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
 
         net.minecraft.world.World nmsWorld = null;
-        if (location.getExtent().getUniqueId() != ((World) this.worldObj).getUniqueId()) {
+        if (location.getExtent().getUniqueId() != ((World) this.world).getUniqueId()) {
             nmsWorld = (net.minecraft.world.World) location.getExtent();
             if ((net.minecraft.entity.Entity) (Object) this instanceof EntityPlayerMP) {
                 // Close open containers
@@ -446,7 +446,7 @@ public abstract class MixinEntity implements IMixinEntity {
                     entityPlayerMP.closeContainer();
                 }
             }
-            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.worldObj).getDimensionId(), ((IMixinWorldServer) nmsWorld).getDimensionId());
+            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(), ((IMixinWorldServer) nmsWorld).getDimensionId());
         } else {
             if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
                 ((WorldServer) location.getExtent()).getChunkProvider().loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
@@ -475,8 +475,8 @@ public abstract class MixinEntity implements IMixinEntity {
         } else {
             this.setPosition(location.getX(), location.getY(), location.getZ());
         }
-        if (this.worldObj != location.getExtent()) {
-            this.worldObj = (net.minecraft.world.World) location.getExtent();
+        if (this.world != location.getExtent()) {
+            this.world = (net.minecraft.world.World) location.getExtent();
         }
     }
 
@@ -492,8 +492,8 @@ public abstract class MixinEntity implements IMixinEntity {
         } else {
             this.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
         }
-        if (this.worldObj != transform.getExtent()) {
-            this.worldObj = (net.minecraft.world.World) transform.getExtent();
+        if (this.world != transform.getExtent()) {
+            this.world = (net.minecraft.world.World) transform.getExtent();
         }
     }
 
@@ -566,8 +566,8 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Inject(method = "onUpdate", at = @At("RETURN"))
     private void spongeOnUpdate(CallbackInfo callbackInfo) {
-        if (this.pendingVisibilityUpdate && !this.worldObj.isRemote) {
-            final EntityTracker entityTracker = ((WorldServer) this.worldObj).getEntityTracker();
+        if (this.pendingVisibilityUpdate && !this.world.isRemote) {
+            final EntityTracker entityTracker = ((WorldServer) this.world).getEntityTracker();
             final EntityTrackerEntry lookup = entityTracker.trackedEntityHashTable.lookup(this.getEntityId());
             if (this.visibilityTicks % 4 == 0) {
                 if (this.isVanished) {
@@ -654,7 +654,7 @@ public abstract class MixinEntity implements IMixinEntity {
             ((EntityPlayerMP) (Entity) this).connection.setPlayerLocation(getPosition().getX(), getPosition().getY(),
                 getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
         } else {
-            if (!this.worldObj.isRemote) { // We can't set the rotation update on client worlds.
+            if (!this.world.isRemote) { // We can't set the rotation update on client worlds.
                 ((IMixinWorldServer) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
             }
 
@@ -805,7 +805,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Nullable
     @Overwrite
     public net.minecraft.entity.Entity changeDimension(int toDimensionId) {
-        if (!this.worldObj.isRemote && !this.isDead) {
+        if (!this.world.isRemote && !this.isDead) {
             // Sponge Start - Handle teleportation solely in TrackingUtil where everything can be debugged.
             return EntityUtil.transferEntityToDimension(this, toDimensionId);
             // Sponge End
@@ -969,7 +969,7 @@ public abstract class MixinEntity implements IMixinEntity {
         try {
             final NBTTagCompound compound = new NBTTagCompound();
             writeToNBT(compound);
-            net.minecraft.entity.Entity entity = EntityList.mth_001480_a(new ResourceLocation(this.entityType.getId()), this.worldObj);
+            net.minecraft.entity.Entity entity = EntityList.createEntityByIDFromName(new ResourceLocation(this.entityType.getId()), this.world);
             compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
             entity.readFromNBT(compound);
             return (Entity) entity;
@@ -1153,7 +1153,7 @@ public abstract class MixinEntity implements IMixinEntity {
     public void spawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
             double xOffset, double yOffset, double zOffset, int ... p_175688_14_) {
         if (!this.isVanished) {
-            this.worldObj.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }
 
@@ -1161,7 +1161,7 @@ public abstract class MixinEntity implements IMixinEntity {
     public void runningSpawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
             double xOffset, double yOffset, double zOffset, int ... p_175688_14_) {
         if (!this.isVanished) {
-            this.worldObj.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+            this.world.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }
 
@@ -1218,11 +1218,11 @@ public abstract class MixinEntity implements IMixinEntity {
     @Inject(method = "entityDropItem(Lnet/minecraft/item/ItemStack;F)Lnet/minecraft/entity/item/EntityItem;", at = @At("HEAD"), cancellable = true)
     public void spongeEntityDropItem(net.minecraft.item.ItemStack itemStackIn, float offsetY, CallbackInfoReturnable<EntityItem> returnable) {
         // Gotta stick with the client side handling things
-        if (this.worldObj.isRemote) {
-            if (itemStackIn.mth_000526_E() != 0 && itemStackIn.getItem() != null) {
-                EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY + (double) offsetY, this.posZ, itemStackIn);
+        if (this.world.isRemote) {
+            if (itemStackIn.func_190916_E() != 0 && itemStackIn.getItem() != null) {
+                EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY + (double) offsetY, this.posZ, itemStackIn);
                 entityitem.setDefaultPickupDelay();
-                this.worldObj.spawnEntityInWorld(entityitem);
+                this.world.spawnEntityInWorld(entityitem);
                 returnable.setReturnValue(entityitem);
                 return;
             }

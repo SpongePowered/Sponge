@@ -151,7 +151,7 @@ final class DeathPhase extends EntityPhaseState {
             if (isPlayer) {
                 // Forge and Vanilla always clear items on player death BEFORE drops occur
                 // This will also provide the highest compatibility with mods such as Tinkers Construct
-                entityPlayer.inventory.mth_000418_m();
+                entityPlayer.inventory.clear();
             }
 
             final DropItemEvent.Destruct
@@ -179,14 +179,14 @@ final class DeathPhase extends EntityPhaseState {
             if (!items.isEmpty()) {
                 final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(dyingEntity);
                 final List<Entity> itemEntities = items.stream()
-                        .map(data -> data.create((WorldServer) minecraftEntity.worldObj))
+                        .map(data -> data.create((WorldServer) minecraftEntity.world))
                         .map(EntityUtil::fromNative)
                         .collect(Collectors.toList());
 
                 if (isPlayer) {
                     // Forge and Vanilla always clear items on player death BEFORE drops occur
                     // This will also provide the highest compatibility with mods such as Tinkers Construct
-                    entityPlayer.inventory.mth_000418_m();
+                    entityPlayer.inventory.clear();
                 }
 
                 final DropItemEvent.Destruct

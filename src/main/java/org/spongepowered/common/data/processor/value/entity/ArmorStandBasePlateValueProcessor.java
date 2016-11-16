@@ -49,13 +49,13 @@ public class ArmorStandBasePlateValueProcessor extends AbstractSpongeValueProces
 
     @Override
     protected boolean set(EntityArmorStand container, Boolean value) {
-//        container.mth_001800_o(!value);
+    	container.setNoBasePlate(!value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityArmorStand container) {
-        return Optional.of(!container.mth_001801_s());
+        return Optional.of(!container.hasNoBasePlate());
     }
 
     @Override

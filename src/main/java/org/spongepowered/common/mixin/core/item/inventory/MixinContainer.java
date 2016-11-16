@@ -65,13 +65,13 @@ import java.util.Optional;
 public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer {
 
     @Shadow public List<Slot> inventorySlots;
-    @Shadow public NonNullList<ItemStack> fld_000472_b ;
+    @Shadow public NonNullList<ItemStack> inventoryItemStacks ;
     @Shadow public int windowId;
     @Shadow protected List<IContainerListener> listeners;
 
     @SuppressWarnings("rawtypes")
     @Shadow
-    public abstract NonNullList<ItemStack> mth_000473_a();
+    public abstract NonNullList<ItemStack> getInventory();
 
     @Shadow
     public abstract Slot getSlot(int slotId);
@@ -125,12 +125,12 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         if (this.listeners.contains(listener)) {
             // Sponge start
             // throw new IllegalArgumentException("Listener already listening");
-            listener.mth_000479_a(container, this.mth_000473_a());
+            listener.updateCraftingInventory(container, this.getInventory());
             container.detectAndSendChanges();
             // Sponge end
         } else {
             this.listeners.add(listener);
-            listener.mth_000479_a(container, this.mth_000473_a());
+            listener.updateCraftingInventory(container, this.getInventory());
             container.detectAndSendChanges();
         }
     }
@@ -156,7 +156,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         for (int i = 0; i < this.inventorySlots.size(); ++i) {
             final Slot slot = this.inventorySlots.get(i);
             final ItemStack itemstack = slot.getStack();
-            ItemStack itemstack1 = this.fld_000472_b .get(i);
+            ItemStack itemstack1 = this.inventoryItemStacks .get(i);
 
             if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
 
@@ -186,7 +186,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 // Sponge end
 
                 itemstack1 = itemstack.copy();
-                this.fld_000472_b.set(i, itemstack1);
+                this.inventoryItemStacks.set(i, itemstack1);
 
                 for (IContainerListener listener : this.listeners) {
                     listener.sendSlotContents((Container) (Object) this, i, itemstack1);

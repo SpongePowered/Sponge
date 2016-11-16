@@ -40,7 +40,7 @@ public abstract class MixinEntitySnowman extends MixinEntityGolem implements Sno
     @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;floor_double(D)I", ordinal = 3),
             cancellable = true)
     private void onCanGrief(CallbackInfo ci) {
-        if (!this.worldObj.getGameRules().getBoolean("mobGriefing") || !((IMixinGriefer) this).canGrief()) {
+        if (!this.world.getGameRules().getBoolean("mobGriefing") || !((IMixinGriefer) this).canGrief()) {
             ci.cancel();
         }
     }

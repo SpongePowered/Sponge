@@ -240,7 +240,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
     @Shadow public abstract void immediateBlockTick(BlockPos pos, IBlockState state, Random random);
     @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
-    @Shadow public abstract void mth_000643_a(BlockPos pos, final Block blockIn, BlockPos otherPos);
+    @Shadow public abstract void func_190524_a(BlockPos pos, final Block blockIn, BlockPos otherPos);
     @Shadow public abstract void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide);
     @Shadow public abstract void mth_000641_c(BlockPos pos, Block blockType);
     @Shadow public abstract void mth_000640_a(BlockPos pos, Block blockType, boolean notifySelf);
@@ -291,7 +291,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (this.isRemote || entity == null) {
             return;
         }
-        if (entity.worldObj != null && !entity.worldObj.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
+        if (entity.world != null && !entity.world.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
             // Removing misbehaved living entities
             cir.setReturnValue(new ArrayList());
         }

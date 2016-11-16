@@ -52,7 +52,7 @@ public class SprintDataProcessor extends AbstractEntitySingleDataProcessor<Entit
 
     @Override
     protected boolean set(Entity entity, Boolean value) {
-        entity.mth_001458_f(value); // setSprinting
+        entity.setSprinting(value);
         return true;
     }
 

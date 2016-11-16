@@ -26,7 +26,6 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import com.google.common.collect.Maps;
 import net.minecraft.entity.monster.EntityHusk;
-import net.minecraft.entity.monster.EntityPigZombie;
 import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.monster.EntityZombieVillager;
 import org.spongepowered.api.data.DataContainer;
@@ -82,7 +81,7 @@ public class ZombieDataProcessor
             return values;
         }
 
-        values.put(Keys.VILLAGER_ZOMBIE_PROFESSION, EntityUtil.validateProfession(((EntityZombieVillager) dataHolder).mth_000348_dl()));
+        values.put(Keys.VILLAGER_ZOMBIE_PROFESSION, EntityUtil.validateProfession(((EntityZombieVillager) dataHolder).func_190736_dl()));
         return values;
     }
 

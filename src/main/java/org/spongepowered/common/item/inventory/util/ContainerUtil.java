@@ -28,7 +28,6 @@ import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractChestHorse;
 import net.minecraft.entity.passive.AbstractHorse;
-import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerBeacon;
@@ -134,11 +133,11 @@ public final class ContainerUtil {
                         float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
                         int stackSize = RANDOM.nextInt(21) + 10;
 
-                        if (stackSize > itemStack.mth_000526_E()) {
-                            stackSize = itemStack.mth_000526_E();
+                        if (stackSize > itemStack.func_190916_E()) {
+                            stackSize = itemStack.func_190916_E();
                         }
 
-                        itemStack.mth_000527_e(itemStack.mth_000526_E() - stackSize);
+                        itemStack.func_190920_e(itemStack.func_190916_E() - stackSize);
                         final double posX = x + (double) f;
                         final double posY = y + (double) f1;
                         final double posZ = z + (double) f2;
@@ -179,11 +178,11 @@ public final class ContainerUtil {
                 float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
                 int stackSize = RANDOM.nextInt(21) + 10;
 
-                if (stackSize > itemStack.mth_000526_E()) {
-                    stackSize = itemStack.mth_000526_E();
+                if (stackSize > itemStack.func_190916_E()) {
+                    stackSize = itemStack.func_190916_E();
                 }
 
-                itemStack.mth_000527_e(itemStack.mth_000526_E() - stackSize);
+                itemStack.func_190920_e(itemStack.func_190916_E() - stackSize);
                 final double posX = x + (double) f;
                 final double posY = y + (double) f1;
                 final double posZ = z + (double) f2;
@@ -208,7 +207,7 @@ public final class ContainerUtil {
     @Nullable
     public static MinecraftLens getLens(net.minecraft.inventory.Container container, SlotCollection collection) {
         if (container instanceof ContainerChest) {
-            return new ContainerChestInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection, ((ContainerChest) container).fld_000478_f);
+            return new ContainerChestInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection, ((ContainerChest) container).numRows);
         } else if (container instanceof ContainerPlayer) {
             return new ContainerPlayerInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection);
         }
@@ -255,8 +254,8 @@ public final class ContainerUtil {
         } else if (container instanceof ContainerBeacon) {
             return InventoryArchetypes.BEACON;
         } else if (container instanceof ContainerHorseInventory) {
-            AbstractHorse horse = ((ContainerHorseInventory) container).fld_000487_f;
-            if (horse instanceof AbstractChestHorse && ((AbstractChestHorse) horse).mth_001654_dh()) {
+            AbstractHorse horse = ((ContainerHorseInventory) container).theHorse;
+            if (horse instanceof AbstractChestHorse && ((AbstractChestHorse) horse).func_190695_dh()) {
                 return InventoryArchetypes.HORSE_WITH_CHEST;
             }
             return InventoryArchetypes.HORSE;
@@ -299,11 +298,11 @@ public final class ContainerUtil {
         } else if (container instanceof ContainerBeacon) {
             return carrierOrNull(((ContainerBeacon) container).getTileEntity());
         } else if (container instanceof ContainerHorseInventory) {
-            return (Carrier) ((ContainerHorseInventory) container).fld_000487_f;
+            return (Carrier) ((ContainerHorseInventory) container).theHorse;
         } else if (container instanceof ContainerMerchant && ((ContainerMerchant) container).theMerchant instanceof Carrier) {
             return (Carrier) ((ContainerMerchant) container).theMerchant;
         } else if (container instanceof ContainerPlayer) {
-            EntityPlayer player = ((ContainerPlayer) container).fld_000484_i;
+            EntityPlayer player = ((ContainerPlayer) container).thePlayer;
             if (player instanceof EntityPlayerMP) {
                 return (Carrier) player;
             }

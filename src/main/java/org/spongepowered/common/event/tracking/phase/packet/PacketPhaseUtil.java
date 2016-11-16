@@ -81,7 +81,7 @@ public final class PacketPhaseUtil {
 
     public static void handleCustomCursor(EntityPlayerMP player, ItemStackSnapshot customCursor) {
         ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
-        player.inventory.mth_000416_e(cursor);
+        player.inventory.setItemStack(cursor);
         player.connection.sendPacket(new SPacketSetSlot(-1, -1, cursor));
     }
 
@@ -104,10 +104,10 @@ public final class PacketPhaseUtil {
         player.isChangingQuantityOnly = false;
         int slotId = 0;
         if (hand == EnumHand.OFF_HAND) {
-            player.inventory.fld_000406_c.set(0, itemStack);
-            slotId = (player.inventory.fld_000404_a.size() + InventoryPlayer.getHotbarSize());
+            player.inventory.offHandInventory.set(0, itemStack);
+            slotId = (player.inventory.mainInventory.size() + InventoryPlayer.getHotbarSize());
         } else {
-            player.inventory.fld_000404_a.set(player.inventory.currentItem, itemStack);
+            player.inventory.mainInventory.set(player.inventory.currentItem, itemStack);
             final Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
             slotId = slot.slotNumber;
         }

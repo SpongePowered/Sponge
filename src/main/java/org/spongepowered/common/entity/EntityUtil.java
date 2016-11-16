@@ -161,26 +161,26 @@ public final class EntityUtil {
             return null;
         }
 
-        entity.worldObj.theProfiler.startSection("changeDimension");
+        entity.world.theProfiler.startSection("changeDimension");
         // use the world from event
         final Transform<World> toTransform = event.getToTransform();
         WorldServer toWorld = (WorldServer) toTransform.getExtent();
-        entity.worldObj.removeEntity(entity);
+        entity.world.removeEntity(entity);
         entity.isDead = false;
-        entity.worldObj.theProfiler.startSection("reposition");
+        entity.world.theProfiler.startSection("reposition");
 
         final Vector3i toChunkPosition = toTransform.getLocation().getChunkPosition();
         toWorld.getChunkProvider().loadChunk(toChunkPosition.getX(), toChunkPosition.getZ());
         // Only need to update the entity location here as the portal is handled in SpongeCommonEventFactory
         final Vector3d toPosition = toTransform.getPosition();
         entity.setLocationAndAngles(toPosition.getX(), toPosition.getY(), toPosition.getZ(), (float) toTransform.getYaw(), (float) toTransform.getPitch());
-        entity.worldObj = toWorld;
+        entity.world = toWorld;
         toWorld.spawnEntityInWorld(entity);
         toWorld.updateEntityWithOptionalForce(entity, false);
-        entity.worldObj.theProfiler.endSection();
+        entity.world.theProfiler.endSection();
 
-        entity.worldObj.theProfiler.endSection();
-        entity.worldObj.theProfiler.endSection();
+        entity.world.theProfiler.endSection();
+        entity.world.theProfiler.endSection();
         return entity;
     }
 
@@ -198,7 +198,7 @@ public final class EntityUtil {
         boolean sameDimension = entityPlayerMP.dimension == suggestedDimensionId;
         // If leaving The End via End's Portal
         // Sponge Start - Check the provider, not the world's dimension
-        final WorldServer fromWorldServer = ((WorldServer) entityPlayerMP.worldObj);
+        final WorldServer fromWorldServer = ((WorldServer) entityPlayerMP.world);
         if (fromWorldServer.provider instanceof WorldProviderEnd && suggestedDimensionId == 1) { // if (this.dimension == 1 && dimensionIn == 1)
             // Sponge End
             fromWorldServer.removeEntity(entityPlayerMP);
@@ -300,7 +300,7 @@ public final class EntityUtil {
         final IMixinPlayerList mixinPlayerList = (IMixinPlayerList) mcServer.getPlayerList();
         final IMixinEntity mixinEntity = (IMixinEntity) entityIn;
         final Transform<World> fromTransform = mixinEntity.getTransform();
-        final WorldServer fromWorld = ((WorldServer) entityIn.worldObj);
+        final WorldServer fromWorld = ((WorldServer) entityIn.world);
         final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
         boolean sameDimension = entityIn.dimension == targetDimensionId;
         // handle the end
@@ -394,7 +394,7 @@ public final class EntityUtil {
 
         if (event.isCancelled()) {
             // update cache
-            ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+            ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
             mixinEntity.setLocationAndAngles(fromTransform);
             return event;
         }
@@ -408,7 +408,7 @@ public final class EntityUtil {
                 // force cancel so we know to skip remaining logic
                 event.setCancelled(true);
                 // update cache
-                toMixinTeleporter.removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+                toMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                 mixinEntity.setLocationAndAngles(toTransform);
                 if (entityIn instanceof EntityPlayerMP) {
                     EntityPlayerMP player = (EntityPlayerMP) entityIn;
@@ -421,7 +421,7 @@ public final class EntityUtil {
             }
         } else {
             if (toWorld.provider instanceof WorldProviderEnd) {
-                BlockPos blockpos = entityIn.worldObj.getTopSolidOrLiquidBlock(toWorld.getSpawnPoint());
+                BlockPos blockpos = entityIn.world.getTopSolidOrLiquidBlock(toWorld.getSpawnPoint());
                 entityIn.moveToBlockPosAndAngles(blockpos, entityIn.rotationYaw, entityIn.rotationPitch);
             }
         }
@@ -433,7 +433,7 @@ public final class EntityUtil {
 
         if (!capturedBlocks.isEmpty()
             && !TrackingUtil.processBlockCaptures(capturedBlocks, toCauseTracker, EntityPhase.State.CHANGING_TO_DIMENSION, context)) {
-            toMixinTeleporter.removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+            toMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
         }
 
         if (!event.getKeepsVelocity()) {
@@ -523,7 +523,7 @@ public final class EntityUtil {
     private static List<Entity> getTraceEntities(Entity source, double traceDistance, Vec3d dir, Predicate<Entity> filter) {
         AxisAlignedBB boundingBox = source.getEntityBoundingBox();
         AxisAlignedBB traceBox = boundingBox.addCoord(dir.xCoord, dir.yCoord, dir.zCoord);
-        List<Entity> entities = source.worldObj.getEntitiesInAABBexcluding(source, traceBox.expand(1.0F, 1.0F, 1.0F), filter);
+        List<Entity> entities = source.world.getEntitiesInAABBexcluding(source, traceBox.expand(1.0F, 1.0F, 1.0F), filter);
         return entities;
     }
 
@@ -531,7 +531,7 @@ public final class EntityUtil {
         Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
         Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
         Vec3d traceEnd = traceStart.add(lookDir);
-        return source.worldObj.rayTraceBlocks(traceStart, traceEnd, false, false, true);
+        return source.world.rayTraceBlocks(traceStart, traceEnd, false, false, true);
     }
 
     public static Vec3d getPositionEyes(Entity entity, float partialTicks)
@@ -548,7 +548,7 @@ public final class EntityUtil {
     }
     @SuppressWarnings("unchecked")
     public static boolean refreshPainting(EntityPainting painting, EntityPainting.EnumArt art) {
-        final EntityTracker paintingTracker = ((WorldServer) painting.worldObj).getEntityTracker();
+        final EntityTracker paintingTracker = ((WorldServer) painting.world).getEntityTracker();
         EntityTrackerEntry paintingEntry = paintingTracker.trackedEntityHashTable.lookup(painting.getEntityId());
         List<EntityPlayerMP> playerMPs = new ArrayList<>();
         for (EntityPlayerMP player : paintingEntry.trackingPlayers) {
@@ -705,10 +705,10 @@ public final class EntityUtil {
             fromWorld.getEntityTracker().untrackEntity(entity);
         }
 
-        entity.worldObj.mth_000647_f(entity);
+        entity.world.mth_000647_f(entity);
         entity.isDead = false;
         entity.dimension = targetDim;
-        entity.mth_001450_a(location.getX(), location.getY(), location.getZ(), 0, 0);
+        entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
         while (!toWorld.getCollisionBoxes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
             entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
         }
@@ -825,7 +825,7 @@ public final class EntityUtil {
         final double posX = entity.posX;
         final double posY = entity.posY + offsetY;
         final double posZ = entity.posZ;
-        if (itemStack.mth_000526_E() == 0 || itemStack.getItem() == null) {
+        if (itemStack.func_190916_E() == 0 || itemStack.getItem() == null) {
             return null;
         }
         // FIRST we want to throw the DropItemEvent.PRE
@@ -848,12 +848,12 @@ public final class EntityUtil {
         if (item == null) {
             return null;
         }
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) entity.worldObj;
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) entity.world;
         final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
 
-        if (item.mth_000526_E() != 0 && item.getItem() != null) {
+        if (item.func_190916_E() != 0 && item.getItem() != null) {
             if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
@@ -870,7 +870,7 @@ public final class EntityUtil {
                     return null;
                 }
             }
-            EntityItem entityitem = new EntityItem(entity.worldObj, posX, posY, posZ, item);
+            EntityItem entityitem = new EntityItem(entity.world, posX, posY, posZ, item);
             entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
@@ -886,7 +886,7 @@ public final class EntityUtil {
                 return entityitem;
             }
             // FINALLY - Spawn the entity in the world if all else didn't fail
-            entity.worldObj.spawnEntityInWorld(entityitem);
+            entity.world.spawnEntityInWorld(entityitem);
             return entityitem;
         }
         return null;
@@ -921,7 +921,7 @@ public final class EntityUtil {
         if (item == null) {
             return null;
         }
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.world;
         final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
@@ -951,7 +951,7 @@ public final class EntityUtil {
             }
         }
 
-        EntityItem entityitem = new EntityItem(player.worldObj, posX, adjustedPosY, posZ, droppedItem);
+        EntityItem entityitem = new EntityItem(player.world, posX, adjustedPosY, posZ, droppedItem);
         entityitem.setPickupDelay(40);
 
         if (traceItem) {
@@ -992,7 +992,7 @@ public final class EntityUtil {
 
         if (traceItem) {
             if (itemstack != null) {
-                player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.mth_000526_E());
+                player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.func_190916_E());
             }
 
             player.addStat(StatList.DROP);
@@ -1028,7 +1028,7 @@ public final class EntityUtil {
     private static ItemStack dropItemAndGetStack(EntityPlayer player, EntityItem item) {
         final ItemStack stack = item.getEntityItem();
         if (stack != null) {
-            player.worldObj.spawnEntityInWorld(item);
+            player.world.spawnEntityInWorld(item);
             return stack;
         }
         return null;

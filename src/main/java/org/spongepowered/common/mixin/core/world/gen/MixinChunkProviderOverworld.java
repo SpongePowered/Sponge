@@ -116,7 +116,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
             generator.getGenerationPopulators().add((GenerationPopulator) this.caveGenerator);
         }
 
-        if (this.settings.fld_000934_z) { // useRavines
+        if (this.settings.useRavines) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.ravineGenerator);
         }
 
@@ -148,14 +148,14 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
             generator.getPopulators().add((Populator) this.oceanMonumentGenerator);
         }
 
-        if (this.settings.fld_000934_z && this.mapFeaturesEnabled) {
+        if (this.settings.field_191077_z && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.fld_000947_C);
             generator.getPopulators().add((Populator) this.fld_000947_C);
         }
 
-        if (this.settings.useRavines) { // useWaterLakes
+        if (this.settings.useWaterLakes) {
             Lake lake = Lake.builder()
-                    .chance(1d / this.settings.fld_000936_C) // waterLakeChance
+                    .chance(1d / this.settings.waterLakeChance)
                     .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithRandomAddition(0, 256))
                     .build();
@@ -167,9 +167,9 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
             generator.getPopulators().add(filtered);
         }
 
-        if (this.settings.fld_000937_D) { // useLavaLakes
+        if (this.settings.useLavaLakes) {
             Lake lake = Lake.builder()
-                    .chance(1d / this.settings.fld_000938_E) // lavaLakeChance
+                    .chance(1d / this.settings.lavaLakeChance)
                     .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithVariance(0,
                             VariableAmount.baseWithRandomAddition(8, VariableAmount.baseWithOptionalAddition(55, 193, 0.1))))

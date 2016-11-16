@@ -44,7 +44,6 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
 import net.minecraft.nbt.NBTTagCompound;
@@ -239,9 +238,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             this.dropItem(new ItemStack(Items.APPLE, 1), true, false);
         }
 
-        if (!this.worldObj.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+        if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
             this.mth_000423_cN();
-            this.inventory.mth_000415_o();
+            this.inventory.dropAllItems();
         }
 
         if (cause != null) {
@@ -260,7 +259,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
     public boolean onIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
-            if (!this.worldObj.isRemote) {
+            if (!this.world.isRemote) {
                 SpongeImpl.postEvent(SpongeEventFactory.
                         createSleepingEventTick(Cause.of(NamedCause.source(this)),
                                                 this.getWorld().createSnapshot(VecHelper.toVector3i(this.playerLocation)), this));
@@ -278,7 +277,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
     public void playSound(World world, EntityPlayer player, double d1, double d2, double d3, SoundEvent sound, SoundCategory category, float volume, float pitch) {
         if (!this.isVanished()) {
-            this.worldObj.playSound(player, d1, d2, d3, sound, category, volume, pitch);
+            this.world.playSound(player, d1, d2, d3, sound, category, volume, pitch);
         }
     }
 
@@ -299,9 +298,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     @Override
     public void setTargetedLocation(@Nullable Vector3d vec) {
-        this.targetedLocation = vec != null ? vec : VecHelper.toVector3d(this.worldObj.getSpawnPoint());
+        this.targetedLocation = vec != null ? vec : VecHelper.toVector3d(this.world.getSpawnPoint());
         if (!((Object) this instanceof EntityPlayerMP)) {
-            this.worldObj.setSpawnPoint(VecHelper.toBlockPos(this.targetedLocation));
+            this.world.setSpawnPoint(VecHelper.toBlockPos(this.targetedLocation));
         }
     }
 
@@ -334,11 +333,11 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Nullable
     @Overwrite
     public EntityItem dropItem(@Nullable ItemStack droppedItem, boolean dropAround, boolean traceItem) {
-        if (droppedItem == null || droppedItem.mth_000526_E() == 0 || droppedItem.getItem() == null) {
+        if (droppedItem == null || droppedItem.func_190916_E() == 0 || droppedItem.getItem() == null) {
             return null;
-        } else if (this.worldObj.isRemote) {
+        } else if (this.world.isRemote) {
             double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
-            EntityItem entityitem = new EntityItem(this.worldObj, this.posX, d0, this.posZ, droppedItem);
+            EntityItem entityitem = new EntityItem(this.world, this.posX, d0, this.posZ, droppedItem);
             entityitem.setPickupDelay(40);
 
             if (traceItem) {
@@ -368,8 +367,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             ItemStack itemstack = this.dropItemAndGetStack(entityitem);
 
             if (traceItem) {
-                if (!itemstack.mth_000506_b()) {
-                    this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.mth_000526_E());
+                if (!itemstack.func_190926_b()) {
+                    this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.func_190916_E());
                 }
 
                 this.addStat(StatList.DROP);
@@ -392,7 +391,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Overwrite
     @Nullable
     protected ItemStack dropItemAndGetStack(EntityItem p_184816_1_) {
-        this.worldObj.spawnEntityInWorld(p_184816_1_);
+        this.world.spawnEntityInWorld(p_184816_1_);
         return p_184816_1_.getEntityItem();
     }
 
@@ -494,7 +493,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                     if (this.isSprinting() && isStrongAttack) {
                         // Sponge - Only play sound after the event has be thrown and not cancelled.
-                        // this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.entity_player_attack_knockback, this.getSoundCategory(), 1.0F, 1.0F);
+                        // this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.entity_player_attack_knockback, this.getSoundCategory(), 1.0F, 1.0F);
                         ++knockbackModifier;
                         isSprintingAttack = true;
                     }
@@ -569,7 +568,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
 
                         if (isSweapingAttack) {
-                            for (EntityLivingBase entitylivingbase : this.worldObj.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().expand(1.0D, 0.25D, 1.0D))) {
+                            for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().expand(1.0D, 0.25D, 1.0D))) {
                                 if (entitylivingbase != (EntityPlayer) (Object) this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSqToEntity(entitylivingbase) < 9.0D) {
                                     // Sponge Start - Do a small event for these entities
                                     // entitylivingbase.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
@@ -590,7 +589,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                 }
                             }
 
-                            this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001299_eA, this.getSoundCategory(), 1.0F, 1.0F);
+                            this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, this.getSoundCategory(), 1.0F, 1.0F);
                             this.mth_000432_cP();
                         }
 
@@ -603,15 +602,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
 
                         if (isCriticalAttack) {
-                            this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001295_ew, this.getSoundCategory(), 1.0F, 1.0F);
+                            this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, this.getSoundCategory(), 1.0F, 1.0F);
                             this.mth_000430_a(targetEntity);
                         }
 
                         if (!isCriticalAttack && !isSweapingAttack) {
                             if (isStrongAttack) {
-                                this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001298_ez, this.getSoundCategory(), 1.0F, 1.0F);
+                                this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_STRONG, this.getSoundCategory(), 1.0F, 1.0F);
                             } else {
-                                this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001300_eB , this.getSoundCategory(), 1.0F, 1.0F);
+                                this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_WEAK , this.getSoundCategory(), 1.0F, 1.0F);
                             }
                         }
 
@@ -642,10 +641,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             }
                         }
 
-                        if(!itemstack1.mth_000506_b() && targetEntity instanceof EntityLivingBase) {
+                        if(!itemstack1.func_190926_b() && targetEntity instanceof EntityLivingBase) {
                             itemstack1.hitEntity((EntityLivingBase)targetEntity, (EntityPlayer) (Object) this);
-                            if(itemstack1.mth_000506_b()) {
-                                this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.fld_000503_a);
+                            if(itemstack1.func_190926_b()) {
+                                this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.field_190927_a);
                             }
                         }
 
@@ -657,15 +656,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                 targetEntity.setFire(fireAspectModifier * 4);
                             }
 
-                            if (this.worldObj instanceof WorldServer && f5 > 2.0F) {
+                            if (this.world instanceof WorldServer && f5 > 2.0F) {
                                 int k = (int) ((double) f5 * 0.5D);
-                                ((WorldServer) this.worldObj).spawnParticle(EnumParticleTypes.DAMAGE_INDICATOR, targetEntity.posX, targetEntity.posY + (double) (targetEntity.height * 0.5F), targetEntity.posZ, k, 0.1D, 0.0D, 0.1D, 0.2D, new int[0]);
+                                ((WorldServer) this.world).spawnParticle(EnumParticleTypes.DAMAGE_INDICATOR, targetEntity.posX, targetEntity.posY + (double) (targetEntity.height * 0.5F), targetEntity.posZ, k, 0.1D, 0.0D, 0.1D, 0.2D, new int[0]);
                             }
                         }
 
                         this.addExhaustion(0.3F);
                     } else {
-                        this.worldObj.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.fld_001297_ey, this.getSoundCategory(), 1.0F, 1.0F);
+                        this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0F, 1.0F);
 
                         if (litEntityOnFire) {
                             targetEntity.extinguish();

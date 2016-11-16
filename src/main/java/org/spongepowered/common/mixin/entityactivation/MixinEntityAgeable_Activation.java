@@ -50,7 +50,7 @@ public abstract class MixinEntityAgeable_Activation extends EntityCreature {
     public void inactiveTick() {
         this.super$.inactiveTick();
 
-        if (this.worldObj.isRemote) {
+        if (this.world.isRemote) {
             this.setScaleForAge(this.isChild());
         } else {
             int i = this.getGrowingAge();

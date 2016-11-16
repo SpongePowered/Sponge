@@ -118,12 +118,12 @@ public interface PacketFunction {
 
     PacketFunction USE_ENTITY = (packet, state, player, context) -> {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
-        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.worldObj);
+        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.world);
         if (entity == null) {
             // Something happened?
         }
         //final Optional<ItemStack> itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.world;
         final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
         EntityUtil.toMixin(entity).setNotifier(player.getUniqueID());
 
@@ -368,7 +368,7 @@ public interface PacketFunction {
     };
 
     @SuppressWarnings("unchecked") PacketFunction ACTION = (packet, state, player, context) -> {
-        final CauseTracker causeTracker = ((IMixinWorldServer) player.worldObj).getCauseTracker();
+        final CauseTracker causeTracker = ((IMixinWorldServer) player.world).getCauseTracker();
         final ItemStack usedStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class)
                 .orElse(null);
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
@@ -610,7 +610,7 @@ public interface PacketFunction {
     }
 
     PacketFunction CREATIVE = (packet, state, player, context) -> {
-        final CauseTracker causeTracker = ((IMixinWorldServer) player.worldObj).getCauseTracker();
+        final CauseTracker causeTracker = ((IMixinWorldServer) player.world).getCauseTracker();
         context.getCapturedItemsSupplier()
                 .ifPresentAndNotEmpty(items -> {
                     if (items.isEmpty()) {
@@ -719,7 +719,7 @@ public interface PacketFunction {
         slotTransactions.clear();
     };
     PacketFunction USE_ITEM = ((packet, state, player, context) -> {
-        final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.worldObj;
+        final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.world;
         final World spongeWorld = (World) mixinWorld;
 
         final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
@@ -747,7 +747,7 @@ public interface PacketFunction {
         if (state == PacketPhase.General.INVALID) { // This basically is an out of world place, and nothing should occur here.
             return;
         }
-        final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.worldObj;
+        final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.world;
         final World spongeWorld = (World) mixinWorld;
         final CauseTracker causeTracker = mixinWorld.getCauseTracker();
 
@@ -814,8 +814,8 @@ public interface PacketFunction {
                 .orElseThrow(TrackingUtil.throwWithContext("Expected a previous highlighted slot, got nothing.", context));
         final Container inventoryContainer = player.inventoryContainer;
         final InventoryPlayer inventory = player.inventory;
-        final Slot sourceSlot = inventoryContainer.getSlot(previousSlot + inventory.fld_000404_a.size());
-        final Slot targetSlot = inventoryContainer.getSlot(itemChange.getSlotId() + inventory.fld_000404_a.size());
+        final Slot sourceSlot = inventoryContainer.getSlot(previousSlot + inventory.mainInventory.size());
+        final Slot targetSlot = inventoryContainer.getSlot(itemChange.getSlotId() + inventory.mainInventory.size());
 
         ItemStackSnapshot sourceSnapshot = ItemStackUtil.snapshotOf(sourceSlot.getStack());
         ItemStackSnapshot targetSnapshot = ItemStackUtil.snapshotOf(targetSlot.getStack());
@@ -898,7 +898,7 @@ public interface PacketFunction {
             });
             context.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blocks ->
-                            TrackingUtil.processBlockCaptures(blocks, ((IMixinWorldServer) player.worldObj).getCauseTracker(), state, context));
+                            TrackingUtil.processBlockCaptures(blocks, ((IMixinWorldServer) player.world).getCauseTracker(), state, context));
         }
     });
     PacketFunction ENCHANTMENT = ((packet, state, player, context) -> {
@@ -965,7 +965,7 @@ public interface PacketFunction {
         SpongeImpl.postEvent(event);
     });
     PacketFunction MOVEMENT = (packet, state, player, context) -> {
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.world;
         context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil
                 .processBlockCaptures(blocks, mixinWorldServer.getCauseTracker(), state, context));
     };

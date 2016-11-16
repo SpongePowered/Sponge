@@ -47,7 +47,7 @@ import java.util.Optional;
 public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Text, Value<Text>, AuthorData, ImmutableAuthorData> {
 
     public ItemAuthorDataProcessor() {
-        super(input -> input.getItem() == Items.fld_000549_bX|| input.getItem() == Items.WRITTEN_BOOK, Keys.BOOK_AUTHOR);
+        super(input -> input.getItem() == Items.WRITABLE_BOOK || input.getItem() == Items.WRITTEN_BOOK, Keys.BOOK_AUTHOR);
     }
 
     @Override
