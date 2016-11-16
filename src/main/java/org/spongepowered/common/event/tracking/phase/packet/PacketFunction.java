@@ -44,6 +44,7 @@ import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServerMulti;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -104,6 +105,15 @@ import java.util.stream.Collectors;
 public interface PacketFunction {
 
     PacketFunction IGNORED = (packet, state, player, context) -> {
+    };
+
+    PacketFunction STOP_SLEEPING = (packet, state, player, context) -> {
+        if (state == PacketPhase.General.STOP_SLEEPING) {
+            final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
+            final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.getServerWorld();
+            final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
+            TrackingUtil.processBlockCaptures(capturedBlocks, causeTracker, PacketPhase.General.STOP_SLEEPING, context);
+        }
     };
 
     PacketFunction USE_ENTITY = (packet, state, player, context) -> {
