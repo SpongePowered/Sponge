@@ -26,6 +26,37 @@ minecraft {
     atSource common.sourceSets.main
 }
 
+// Generate mcmod.info file for implementation
+apply plugin: 'org.spongepowered.meta'
+
+generateMetadata {
+    dependsOn common.resolveApiRevision
+}
+
+sponge {
+    plugin {
+        id = 'sponge'
+        meta.dependencies {
+            spongeapi {
+                forceVersion {common.apiVersion}
+            }
+
+            minecraft {
+                forceVersion project.minecraft.version
+            }
+        }
+    }
+
+    plugins {
+        spongeapi {
+            meta {
+                inherit api
+                version = {common.apiVersion}
+            }
+        }
+    }
+}
+
 jar {
     classifier = 'base'
 }
