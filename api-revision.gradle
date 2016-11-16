@@ -2,7 +2,7 @@
 // submodule to resolve the current API revision short hash. If successful, it
 // will append it to the SpongeAPI version included in the implementation
 // jar files.
-task('resolveApiRevision') << {
+task('resolveApiRevision').doLast {
     def process = ['git', 'rev-parse', '--short', 'HEAD'].execute(null as String[], api.projectDir)
 
     def result = process.waitFor()

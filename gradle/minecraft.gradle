@@ -132,7 +132,7 @@ configure([jar, devJar]) {
     dependsOn common.resolveApiRevision
 }
 
-common.tasks.resolveApiRevision << {
+common.tasks.resolveApiRevision.doLast {
     jar.manifest.attributes('Specification-Version': common.apiVersion)
 }
 
