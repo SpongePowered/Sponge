@@ -550,7 +550,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 return null;
             }
 
-            extendedblockstorage = this.storageArrays[yPos >> 4] = new ExtendedBlockStorage(yPos >> 4 << 4, this.worldObj.provider.getHasNoSky());
+            extendedblockstorage = this.storageArrays[yPos >> 4] = new ExtendedBlockStorage(yPos >> 4 << 4, this.worldObj.provider.func_191066_m());
             requiresNewLightCalculations = yPos >= currentHeight;
             // Sponge Start - properly initialize variable
         } else {
