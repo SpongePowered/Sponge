@@ -176,6 +176,7 @@
         "data.types.MixinFishType",
         "data.types.MixinGameType",
         "data.types.MixinSkeletonType",
+        "entity.IMixinAreaEffectCloud",
         "entity.MixinArmorEquipable",
         "entity.MixinEntity",
         "entity.MixinEntityAreaEffectCloud",

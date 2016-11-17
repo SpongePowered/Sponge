@@ -411,6 +411,9 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(DespawnDelayData.class, SpongeDespawnDelayData.class, ImmutableDespawnDelayData.class,
                 ImmutableSpongeDespawnDelayData.class, new DespawnDelayDataProcessor());
 
+        dataManager.registerDataProcessorAndImpl(AreaEffectCloudData.class, SpongeAreaEffectData.class, ImmutableAreaEffectCloudData.class,
+                ImmutableSpongeAreaEffectCloudData.class, new AreaEffectCloudDataProcessor());
+
         // Item Processors
 
         dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
@@ -751,6 +754,15 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.INFINITE_PICKUP_DELAY, new InfinitePickupDelayValueProcessor());
         dataManager.registerValueProcessor(Keys.DESPAWN_DELAY, new DespawnDelayValueProcessor());
         dataManager.registerValueProcessor(Keys.INFINITE_DESPAWN_DELAY, new InfiniteDespawnDelayValueProcessor());
+        dataManager.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_COLOR, new AreaEffectCloudColorProcessor());
+        dataManager.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_AGE, new AReaEffectCloudAgeProcessor());
+        dataManager.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_PARTICLE_TYPE, new AreaEffectCloudParticleTypeProcessor());
+        dataManager.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_DURATION, new AreaEffectCloudDurationProcessor());
+        dataManager.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE, new AreaEffectCloudDurationOnUseProcessor());
+        dataManager.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_RADIUS, new AreaEffectCloudRadiusProcessor());
+        dataManager.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, new AreaEffectCloudRadiusOnUseProcessor());
+        dataManager.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, new AreaEffectCloudWaitTimeProcessor());
+        dataManager.registerValueProcessor(Keys.POTION_EFFECTS, new AreaEffectCloudPotionEffectsProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
