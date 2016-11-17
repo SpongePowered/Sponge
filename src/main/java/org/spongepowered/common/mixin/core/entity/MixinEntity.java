@@ -207,6 +207,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public float prevDistanceWalkedModified;
     @Shadow public float distanceWalkedModified;
     @Shadow protected EntityDataManager dataManager;
+    @Shadow public int ticksExisted;
 
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();

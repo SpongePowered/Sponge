@@ -173,6 +173,7 @@
         "data.types.MixinEnumLogAxis",
         "data.types.MixinFishType",
         "data.types.MixinGameType",
+        "entity.IMixinAreaEffectCloud",
         "entity.MixinArmorEquipable",
         "entity.MixinEntity",
         "entity.MixinEntityAreaEffectCloud",

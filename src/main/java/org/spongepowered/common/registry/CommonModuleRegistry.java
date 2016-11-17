@@ -381,7 +381,7 @@ public final class CommonModuleRegistry {
             .registerModule(NotePitch.class, new NotePitchRegistryModule())
             .registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule())
             .registerModule(OcelotType.class, new OcelotTypeRegistryModule())
-            .registerModule(ParticleType.class, new ParticleRegistryModule())
+            .registerModule(ParticleType.class, ParticleRegistryModule.getInstance())
             .registerModule(ParticleOption.class, new ParticleOptionRegistryModule())
             .registerModule(PistonType.class, new PistonTypeRegistryModule())
             .registerModule(PlantType.class, new PlantTypeModuleRegistry())
