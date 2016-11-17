@@ -64,11 +64,4 @@ public abstract class MixinAbstractSkeleton extends MixinEntityMob implements Sk
         manipulators.add(getSkeletonData());
     }
 
-    @Redirect(method = "onInitialSpawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ai/EntityAITasks;addTask"
-                                                                            + "(ILnet/minecraft/entity/ai/EntityAIBase;)V"), require = 2)
-    private void onAddTaskForInitialSpawn(EntityAITasks tasks, int molex, EntityAIBase aiBase) {
-        this.initEntityAI();
-        tasks.addTask(molex, aiBase);
-    }
-
 }
