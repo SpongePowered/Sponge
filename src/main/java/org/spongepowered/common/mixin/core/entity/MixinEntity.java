@@ -197,7 +197,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public boolean inWater;
     @Shadow protected boolean isImmuneToFire;
     @Shadow public int hurtResistantTime;
-    @Shadow public int fire;
+    @Shadow public int field_190534_ay; // fire
     @Shadow public int dimension;
     @Shadow protected Random rand;
     @Shadow public float prevDistanceWalkedModified;
@@ -367,7 +367,7 @@ public abstract class MixinEntity implements IMixinEntity {
         if (vehicleData.isPresent()) {
             manipulators.add(vehicleData.get());
         }
-        if (this.fire > 0) {
+        if (this.field_190534_ay > 0) {
             manipulators.add(get(IgniteableData.class).get());
         }
         manipulators.add(new SpongeGravityData(!this.hasNoGravity()));

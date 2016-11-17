@@ -50,7 +50,7 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
      */
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
     public void onUpdate(CallbackInfo ci) {
-        if (this.worldObj == null || !this.worldObj.isRemote) {
+        if (this.world == null || !this.world.isRemote) {
             // chests should never tick on server
             ci.cancel();
         }
@@ -63,11 +63,11 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
             cancellable = true)
     public void onOpenChest(CallbackInfo ci) {
         // Moved out of tick loop
-        if (this.worldObj == null) {
+        if (this.world == null) {
             ci.cancel();
             return;
         }
-        if (this.worldObj.isRemote) {
+        if (this.world.isRemote) {
             return;
         }
 
@@ -77,7 +77,7 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
             double posY = (double)this.pos.getY() + 0.5D;
             double posZ = (double)this.pos.getZ() + 0.5D;
 
-            this.worldObj.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDERCHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDERCHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 
@@ -88,11 +88,11 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
             cancellable = true)
     public void onCloseChest(CallbackInfo ci) {
         // Moved out of tick loop
-        if (this.worldObj == null) {
+        if (this.world == null) {
             ci.cancel();
             return;
         }
-        if (this.worldObj.isRemote) {
+        if (this.world.isRemote) {
             return;
         }
 
@@ -102,7 +102,7 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
             double posZ = (double)this.pos.getZ() + 0.5D;
 
 
-            this.worldObj.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDERCHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDERCHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 }

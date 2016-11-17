@@ -122,7 +122,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public PlayerCapabilities capabilities;
     @Shadow public InventoryPlayer inventory;
     @Shadow private BlockPos spawnChunk;
-    @Shadow private BlockPos playerLocation;
+    @Shadow private BlockPos bedLocation;
     @Shadow protected FoodStats foodStats;
     @Shadow public InventoryEnderChest theInventoryEnderChest;
 
@@ -262,7 +262,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             if (!this.world.isRemote) {
                 SpongeImpl.postEvent(SpongeEventFactory.
                         createSleepingEventTick(Cause.of(NamedCause.source(this)),
-                                                this.getWorld().createSnapshot(VecHelper.toVector3i(this.playerLocation)), this));
+                                                this.getWorld().createSnapshot(VecHelper.toVector3i(this.bedLocation)), this));
             }
             return true;
         }

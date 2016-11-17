@@ -80,7 +80,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     private Timing timing;
 
     @Shadow protected boolean tileEntityInvalid;
-    @Shadow protected net.minecraft.world.World worldObj;
+    @Shadow protected net.minecraft.world.World world;
     @Shadow private int blockMetadata;
     @Shadow protected BlockPos pos;
 
@@ -96,8 +96,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Inject(method = "markDirty", at = @At(value = "HEAD"))
     public void onMarkDirty(CallbackInfo ci) {
-        if (this.worldObj != null && !this.worldObj.isRemote) {
-            IMixinWorldServer world = (IMixinWorldServer) this.worldObj;
+        if (this.world != null && !this.world.isRemote) {
+            IMixinWorldServer world = (IMixinWorldServer) this.world;
             // This handles transfers to this TE from a source such as a Hopper
             world.getCauseTracker().getCurrentPhaseData().context.getSource(TileEntity.class).ifPresent(currentTick -> {
                 if (currentTick != this) {
@@ -109,7 +109,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "addMapping(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))
+    @Inject(method = "func_190560_a(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))
     private static void onRegister(String name, Class clazz, CallbackInfo callbackInfo) {
         if (clazz != null) {
             TileEntityTypeRegistryModule.getInstance().doTileEntityRegistration(clazz, name);
@@ -118,7 +118,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public Location<World> getLocation() {
-        return new Location<>((World) this.worldObj, VecHelper.toVector3i(this.getPos()));
+        return new Location<>((World) this.world, VecHelper.toVector3i(this.getPos()));
     }
 
     @Override
@@ -130,7 +130,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     public DataContainer toContainer() {
         final DataContainer container = new MemoryDataContainer()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(Queries.WORLD_ID, ((World) this.worldObj).getUniqueId().toString())
+            .set(Queries.WORLD_ID, ((World) this.world).getUniqueId().toString())
             .set(Queries.POSITION_X, this.getPos().getX())
             .set(Queries.POSITION_Y, this.getPos().getY())
             .set(Queries.POSITION_Z, this.getPos().getZ())
@@ -178,7 +178,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public BlockState getBlock() {
-        return (BlockState) this.worldObj.getBlockState(this.getPos());
+        return (BlockState) this.world.getBlockState(this.getPos());
     }
 
     /**

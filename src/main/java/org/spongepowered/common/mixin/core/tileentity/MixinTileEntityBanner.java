@@ -28,10 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.BannerPattern;
 import net.minecraft.tileentity.TileEntityBanner;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.tileentity.Banner;
@@ -41,7 +39,6 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,7 +50,6 @@ import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.block.tile.IMixinBanner;
 import org.spongepowered.common.registry.SpongeGameRegistry;
-import org.spongepowered.common.registry.type.DyeColorRegistryModule;
 import org.spongepowered.common.util.NonNullArrayList;
 
 import java.util.ArrayList;
@@ -63,7 +59,7 @@ import java.util.List;
 @Mixin(TileEntityBanner.class)
 public abstract class MixinTileEntityBanner extends MixinTileEntity implements Banner, IMixinBanner {
 
-    @Shadow private EnumDyeColor base;
+    @Shadow private EnumDyeColor baseColor;
     @Shadow private NBTTagList patterns;
 
     private List<PatternLayer> patternLayers = Lists.newArrayList();
@@ -82,7 +78,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
     @Override
     public void sendDataToContainer(DataView dataView) {
         dataView.set(Keys.BANNER_PATTERNS.getQuery(), Lists.newArrayList(this.patternLayers));
-        dataView.set(Keys.BANNER_BASE_COLOR.getQuery(), this.base.getDyeDamage());
+        dataView.set(Keys.BANNER_BASE_COLOR.getQuery(), this.baseColor.getDyeDamage());
     }
 
     @Override
@@ -93,8 +89,8 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
 
     public void markDirtyAndUpdate() {
         this.markDirty();
-        if (this.worldObj != null && !this.worldObj.isRemote) {
-            ((WorldServer) this.worldObj).getPlayerChunkMap().markBlockForUpdate(this.getPos());
+        if (this.world != null && !this.world.isRemote) {
+            ((WorldServer) this.world).getPlayerChunkMap().markBlockForUpdate(this.getPos());
         }
     }
 
@@ -134,7 +130,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
 
     @Override
     public DyeColor getBaseColor() {
-        return (DyeColor) (Object) this.base;
+        return (DyeColor) (Object) this.baseColor;
     }
 
     @Override
@@ -142,9 +138,9 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
         checkNotNull(baseColor, "Null DyeColor!");
         try {
             EnumDyeColor color = (EnumDyeColor) (Object) baseColor;
-            this.base = color;
+            this.baseColor = color;
         } catch (Exception e) {
-            this.base = EnumDyeColor.BLACK;
+            this.baseColor = EnumDyeColor.BLACK;
         }
         markDirtyAndUpdate();
     }
