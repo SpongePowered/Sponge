@@ -203,7 +203,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
 
         EntityList.field_191308_b.register(entityId, location, entityClass);
         EntityList.field_191309_d.add(location);
-        //EntityList.fld_001474_g.set(entityId, entityName);
+        EntityList.field_191311_g.set(entityId, entityName);
 
         return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);
     }

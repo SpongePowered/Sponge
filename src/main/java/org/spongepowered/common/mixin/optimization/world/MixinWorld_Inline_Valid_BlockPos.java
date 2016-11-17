@@ -57,7 +57,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
     @Shadow public abstract Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract void notifyLightSet(BlockPos pos);
 
-    @Shadow @Nullable private TileEntity mth_000654_F(BlockPos p_189508_1_) { // getPendingTileEntityAt
+    @Shadow @Nullable private TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) { // getPendingTileEntityAt
         return null; // Shadowed
     }
 
@@ -106,7 +106,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
             // Sponge end
 
             if (this.processingLoadedTiles) {
-                tileentity = this.mth_000654_F(pos);
+                tileentity = this.getPendingTileEntityAt(pos);
             }
 
             if (tileentity == null) {
@@ -114,7 +114,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
             }
 
             if (tileentity == null) {
-                tileentity = this.mth_000654_F(pos);
+                tileentity = this.getPendingTileEntityAt(pos);
             }
 
             return tileentity;
@@ -129,7 +129,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
      * @return True if the block position is valid
      */
     @Overwrite
-    protected boolean mth_000637_a(BlockPos pos) { // isValid
+    protected boolean isValid(BlockPos pos) { // isValid
         return ((IMixinBlockPos) pos).isValidPosition();
     }
 
@@ -141,7 +141,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
      * @return True if the block position is outside build height
      */
     @Overwrite
-    private boolean mth_000638_E(BlockPos pos) { // isOutsideValidBuildHeight
+    private boolean isOutsideBuildHeight(BlockPos pos) { // isOutsideBuildHeight
         return ((IMixinBlockPos) pos).isInvalidYPosition();
     }
 

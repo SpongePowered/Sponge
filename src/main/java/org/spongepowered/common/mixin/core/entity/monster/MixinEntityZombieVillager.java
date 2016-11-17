@@ -39,10 +39,10 @@ import java.util.Optional;
 @Mixin(EntityZombieVillager.class)
 public abstract class MixinEntityZombieVillager extends MixinEntityZombie implements ZombieVillager {
 
-    @Shadow public abstract int mth_000348_dl(); // TODO: Get the real name for getProfession
+    @Shadow public abstract int func_190736_dl(); // TODO: Get the real name for getProfession
 
     @Override
     public ZombieData getZombieData() {
-        return new SpongeZombieData(ZombieTypes.VILLAGER, Optional.of(EntityUtil.validateProfession(mth_000348_dl())));
+        return new SpongeZombieData(ZombieTypes.VILLAGER, Optional.of(EntityUtil.validateProfession(func_190736_dl())));
     }
 }

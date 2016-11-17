@@ -230,7 +230,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract boolean isOnSameTeam(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract double getDistanceSqToEntity(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
-    @Shadow public abstract boolean mth_001447_ae();
+    @Shadow public abstract boolean hasNoGravity();
     @Shadow public abstract void setNoGravity(boolean noGravity);
     @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
@@ -314,7 +314,7 @@ public abstract class MixinEntity implements IMixinEntity {
         }
     }
 
-    @Inject(method = "mth_001443_W()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC)) // setOnFireFromLava
+    @Inject(method = "setOnFireFromLava()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC)) // setOnFireFromLava
     public void preSetOnFire(CallbackInfo callbackInfo) {
         if (!this.world.isRemote) {
             this.originalLava = DamageSource.lava;
@@ -325,7 +325,7 @@ public abstract class MixinEntity implements IMixinEntity {
         }
     }
 
-    @Inject(method = "mth_001443_W()V", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD)) // setOnFireFromLava
+    @Inject(method = "setOnFireFromLava()V", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD)) // setOnFireFromLava
     public void postSetOnFire(CallbackInfo callbackInfo) {
         if (!this.world.isRemote) {
             if (this.originalLava == null) {
@@ -370,7 +370,7 @@ public abstract class MixinEntity implements IMixinEntity {
         if (this.fire > 0) {
             manipulators.add(get(IgniteableData.class).get());
         }
-        manipulators.add(new SpongeGravityData(!this.mth_001447_ae()));
+        manipulators.add(new SpongeGravityData(!this.hasNoGravity()));
     }
 
     @Override
@@ -1051,7 +1051,7 @@ public abstract class MixinEntity implements IMixinEntity {
         this.setCurrentCollidingBlock(null);
     }
 
-    @Redirect(method = "mth_001446_ac", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V")) // doBlockCollisions
+    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V")) // doBlockCollisions
     public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
         // if block can't collide, return
         if (!((IMixinBlock) block).hasCollideWithStateLogic()) {

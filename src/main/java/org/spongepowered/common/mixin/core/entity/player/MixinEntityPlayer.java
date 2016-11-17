@@ -132,20 +132,20 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract Scoreboard getWorldScoreboard();
     @Shadow public abstract boolean isSpectator();
     @Shadow public abstract EntityItem dropItem(boolean dropAll);
-    @Shadow public abstract void mth_000430_a(net.minecraft.entity.Entity entityHit);
-    @Shadow public abstract void mth_000431_b(net.minecraft.entity.Entity entityHit); // onEnchantmentCritical
+    @Shadow public abstract void onCriticalHit(net.minecraft.entity.Entity entityHit);
+    @Shadow public abstract void onEnchantmentCritical(net.minecraft.entity.Entity entityHit); // onEnchantmentCritical
     @Shadow public abstract void addExhaustion(float p_71020_1_);
     @Shadow public abstract void addStat(StatBase stat, int amount);
     @Shadow public abstract void addStat(StatBase stat);
     @Shadow public abstract float getCooledAttackStrength(float adjustTicks);
     @Shadow public abstract void resetCooldown();
     @Shadow public abstract float getAIMoveSpeed();
-    @Shadow public abstract void mth_000432_cP(); //spawnSweepParticles()
+    @Shadow public abstract void spawnSweepParticles(); //spawnSweepParticles()
     @Shadow @Nullable public abstract Team getTeam();
     @Shadow public abstract String getName();
     @Shadow public abstract void takeStat(StatBase stat);
     @Shadow public abstract boolean canOpen(LockCode code);
-    @Shadow protected abstract void mth_000423_cN(); // Filter vanishing curse enchanted items
+    @Shadow protected abstract void func_190776_cN(); // Filter vanishing curse enchanted items
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
@@ -239,7 +239,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
 
         if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
-            this.mth_000423_cN();
+            this.func_190776_cN();
             this.inventory.dropAllItems();
         }
 
@@ -395,7 +395,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         return p_184816_1_.getEntityItem();
     }
 
-    @Redirect(method = "mth_000422_c", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY)) // collideWithPlayer
+    @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY)) // collideWithPlayer
     public void onPlayerCollideEntity(net.minecraft.entity.Entity entity, EntityPlayer player) {
         this.collidingEntityUuid = entity.getUniqueID();
         entity.onCollideWithPlayer(player);
@@ -439,7 +439,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * @param targetEntity The target entity
      */
     @Overwrite
-    public void mth_000428_f(Entity targetEntity) {
+    public void attackTargetEntityWithCurrentItem(Entity targetEntity) {
         // Sponge Start - Add SpongeImpl hook to override in forge as necessary
         if (!SpongeImplHooks.checkAttackEntity((EntityPlayer) (Object) this, targetEntity)) {
             return;
@@ -564,7 +564,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                             this.motionX *= 0.6D;
                             this.motionZ *= 0.6D;
-                            this.mth_001458_f(false);
+                            this.setSprinting(false);
                         }
 
                         if (isSweapingAttack) {
@@ -590,7 +590,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             }
 
                             this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, this.getSoundCategory(), 1.0F, 1.0F);
-                            this.mth_000432_cP();
+                            this.spawnSweepParticles();
                         }
 
                         if (targetEntity instanceof EntityPlayerMP && targetEntity.velocityChanged) {
@@ -603,7 +603,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                         if (isCriticalAttack) {
                             this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, this.getSoundCategory(), 1.0F, 1.0F);
-                            this.mth_000430_a(targetEntity);
+                            this.onCriticalHit(targetEntity);
                         }
 
                         if (!isCriticalAttack && !isSweapingAttack) {
@@ -615,7 +615,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
 
                         if (enchantmentDamage > 0.0F) {
-                            this.mth_000431_b(targetEntity);
+                            this.onEnchantmentCritical(targetEntity);
                         }
 
 

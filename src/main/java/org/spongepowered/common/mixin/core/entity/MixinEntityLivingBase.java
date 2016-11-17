@@ -130,7 +130,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow private DamageSource field_189750_bF;
     @Shadow private long field_189751_bG;
     // Empty body so that we can call super() in MixinEntityPlayer
-    @Shadow public void mth_001511_cE() { // stopActiveHand
+    @Shadow public void stopActiveHand() { // stopActiveHand
 
     }
 
@@ -141,7 +141,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract SoundEvent getHurtSound();
     @Shadow public abstract void setHealth(float health);
     @Shadow public abstract void addPotionEffect(net.minecraft.potion.PotionEffect potionEffect);
-    @Shadow protected abstract void mth_001507_cw(); // markPotionsDirty
+    @Shadow protected abstract void markPotionsDirty(); // markPotionsDirty
     @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
     @Shadow public abstract void clearActivePotions();
     @Shadow public abstract void setLastAttacker(net.minecraft.entity.Entity entity);
@@ -151,12 +151,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract float getRotationYawHead();
     @Shadow public abstract void setRotationYawHead(float rotation);
     @Shadow public abstract Collection getActivePotionEffects();
-    @Shadow @Nullable public abstract EntityLivingBase mth_001494_bM(); // getLastAttacker
+    @Shadow @Nullable public abstract EntityLivingBase getLastAttacker(); // getLastAttacker
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow @Nullable public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow protected abstract void applyEntityAttributes();
     @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
-    @Shadow protected abstract void mth_000425_k(float p_184590_1_); // damageShield
+    @Shadow protected abstract void damageShield(float p_184590_1_); // damageShield
     @Shadow public abstract void setActiveHand(EnumHand hand); // setActiveHand
     @Shadow @Nullable public abstract ItemStack getHeldItem(EnumHand hand);
     @Shadow public abstract void setHeldItem(EnumHand hand, @Nullable ItemStack stack);
@@ -168,15 +168,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract void setAbsorptionAmount(float amount);
     @Shadow public abstract float getAbsorptionAmount();
     @Shadow public abstract CombatTracker getCombatTracker();
-    @Shadow public abstract void mth_001458_f(boolean sprinting); // setSprinting
+    @Shadow public abstract void setSprinting(boolean sprinting); // setSprinting
     @Shadow public abstract boolean isOnLadder();
     @Shadow @Nullable public abstract EntityLivingBase getAttackingEntity();
     @Shadow protected abstract void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source);
     @Shadow protected abstract boolean canDropLoot();
     @Shadow public abstract Random getRNG();
-    @Shadow protected abstract void mth_000424_c(EntityLivingBase p_mth_000424_c_1_);
-    @Shadow public abstract boolean mth_001498_d(DamageSource p_mth_001497_d_1_);
-    @Shadow private boolean mth_001500_e(DamageSource p_184583_1_) { // canBlockDamageSource
+    @Shadow protected abstract void func_190629_c(EntityLivingBase p_190629_1_);
+    @Shadow public abstract boolean func_190628_d(DamageSource p_190628_1_);
+    @Shadow private boolean canBlockDamageSource(DamageSource p_184583_1_) { // canBlockDamageSource
         return false; // Shadowed
     }
 
@@ -392,8 +392,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                 boolean flag = false;
 
-                if (amount > 0.0F && this.mth_001500_e(source)) {
-                    this.mth_000425_k(amount);
+                if (amount > 0.0F && this.canBlockDamageSource(source)) {
+                    this.damageShield(amount);
 
                     if (!source.isProjectile())
                     {
@@ -401,7 +401,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                         if (entity instanceof EntityLivingBase)
                         {
-                            this.mth_000424_c((EntityLivingBase)entity);
+                            this.func_190629_c((EntityLivingBase)entity);
                         }
                     }
 
@@ -486,7 +486,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }
 
                 if (this.getHealth() <= 0.0F) {
-                    if (!this.mth_001498_d(source)) {
+                    if (!this.func_190628_d(source)) {
                         SoundEvent soundevent = this.getDeathSound();
 
                         if (flag1 && soundevent != null) {
@@ -858,12 +858,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Override
     public OptionalValue<Living> lastAttacker() {
-        return new SpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable((Living) this.mth_001494_bM()));
+        return new SpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable((Living) this.getLastAttacker()));
     }
 
     @Override
     public OptionalValue<Double> lastDamage() {
-        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.mth_001494_bM() == null ? null : (double) this.lastDamage));
+        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.getLastAttacker() == null ? null : (double) this.lastDamage));
     }
 
     @Override

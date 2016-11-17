@@ -54,7 +54,6 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
@@ -68,10 +67,10 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @Shadow public int currentItem;
     @Shadow public EntityPlayer player;
-    @Shadow @Final public NonNullList<ItemStack> fld_000404_a; // mainInventory
-    @Shadow @Final public NonNullList<ItemStack> fld_000405_b; // armorInventory
-    @Shadow @Final public NonNullList<ItemStack> fld_000406_c; // offHandInventory
-    @Shadow @Final private List<NonNullList<ItemStack>> fld_000407_g; // allInventories
+    @Shadow @Final public NonNullList<ItemStack> mainInventory;
+    @Shadow @Final public NonNullList<ItemStack> armorInventory;
+    @Shadow @Final public NonNullList<ItemStack> offHandInventory;
+    @Shadow @Final private List<NonNullList<ItemStack>> allInventories;
 
     @Shadow public abstract int getInventoryStackLimit();
 
@@ -90,7 +89,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         if (playerIn instanceof EntityPlayerMP) {
             // We only care about Server inventories
             this.inventory = new DefaultInventoryFabric((IInventory) this);
-            this.slots = new SlotCollection.Builder().add(fld_000404_a.size()).add(fld_000406_c.size()).add(fld_000405_b.size(),
+            this.slots = new SlotCollection.Builder().add(mainInventory.size()).add(offHandInventory.size()).add(armorInventory.size(),
                     EquipmentSlotAdapter.class).build();
             this.carrier = (Player) playerIn;
             this.lens = new PlayerInventoryLens(this, this.slots);
@@ -174,7 +173,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
      */
     @Overwrite
     public void dropAllItems() { // dropAllItems
-        for (NonNullList<ItemStack> aitemstack : this.fld_000407_g)
+        for (NonNullList<ItemStack> aitemstack : this.allInventories)
         {
             for (int i = 0; i < aitemstack.size(); ++i)
             {
@@ -189,16 +188,20 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @Override
     public int getFirstAvailableSlot(ItemStack itemstack) {
-        for (int i = 0; i < this.fld_000404_a.size(); ++i) {
+        for (int i = 0; i < this.mainInventory.size(); ++i) {
             int stackSize = itemstack.func_190916_E();
 
-            if (this.fld_000404_a.get(i).func_190916_E() == 0) {
+            if (this.mainInventory.get(i).func_190916_E() == 0) {
                 // empty slot
                 return i;
             }
 
-            if (this.fld_000404_a.get(i).getItem() == itemstack.getItem() && this.fld_000404_a.get(i).isStackable() && this.fld_000404_a.get(i).func_190916_E() < this.fld_000404_a.get(i).getMaxStackSize() && this.fld_000404_a.get(i).func_190916_E() < this.getInventoryStackLimit() && (!this.fld_000404_a.get(i).mth_000507_g() || this.fld_000404_a.get(i).getItemDamage() == itemstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(this.fld_000404_a.get(i), itemstack)) {
-                stackSize -= (this.fld_000404_a.get(i).getMaxStackSize() < this.getInventoryStackLimit() ? this.fld_000404_a.get(i).getMaxStackSize() : this.getInventoryStackLimit()) - this.fld_000404_a.get(i).func_190916_E();
+            if (this.mainInventory.get(i).getItem() == itemstack.getItem() && this.mainInventory.get(i).isStackable() && this.mainInventory.get(i).func_190916_E() < this.mainInventory
+                    .get(i).getMaxStackSize() && this.mainInventory.get(i).func_190916_E() < this.getInventoryStackLimit() && (!this.mainInventory.get(i).getHasSubtypes() || this.mainInventory
+                                                                                                                                                                                    .get(i).getItemDamage() == itemstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(this.mainInventory
+                    .get(i), itemstack)) {
+                stackSize -= (this.mainInventory.get(i).getMaxStackSize() < this.getInventoryStackLimit() ? this.mainInventory.get(i).getMaxStackSize() : this.getInventoryStackLimit()) - this.mainInventory
+                        .get(i).func_190916_E();
             }
 
             if (stackSize <= 0) {

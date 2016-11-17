@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
@@ -35,10 +34,8 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractHorse;
-import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
@@ -64,7 +61,6 @@ import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.stats.StatisticsManagerServer;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.FoodStats;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -186,7 +182,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
     @Shadow public abstract void displayGUIChest(IInventory chestInventory);
     @Shadow public abstract void displayGui(IInteractionObject guiOwner);
-    @Shadow public abstract void mth_000426_a(AbstractHorse horse, IInventory horseInventory);
+    @Shadow public abstract void openGuiHorseInventory(AbstractHorse horse, IInventory horseInventory);
 
     // Inventory
     @Shadow public abstract void addChatMessage(ITextComponent component);
@@ -278,7 +274,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
 
         if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
-            this.mth_000423_cN();
+            this.func_190776_cN();
             this.inventory.dropAllItems();
         }
 
@@ -290,7 +286,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
         if (entitylivingbase != null) {
-            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.mth_001476_a(entitylivingbase));
+            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.func_191301_a(entitylivingbase));
 
             if (entitylist$entityegginfo != null) {
                 this.addStat(entitylist$entityegginfo.entityKilledByStat);
@@ -754,14 +750,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void mth_001511_cE() { // stopActiveHand
+    public void stopActiveHand() { // stopActiveHand
         // Our using item state is probably desynced from the client (e.g. from the initial air interaction of a bow being cancelled).
         // We need to re-send the player's inventory to overwrite any client-side inventory changes that may have occured as a result
         // of the client (but not the server) calling Item#onPlayerStoppedUsing (which in the case of a bow, removes one arrow from the inventory).
         if (this.activeItemStack == null) {
             this$.sendContainerToPlayer(this$.inventoryContainer);
         }
-        super.mth_001511_cE();
+        super.stopActiveHand();
     }
 
     @Override
