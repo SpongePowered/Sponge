@@ -209,7 +209,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Shadow public abstract boolean checkLight(BlockPos pos);
-    @Shadow protected abstract boolean mth_000637_a(BlockPos pos);
+    @Shadow protected abstract boolean isValid(BlockPos pos);
     @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
     @Shadow protected abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
@@ -217,7 +217,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
-    @Shadow public abstract boolean mth_000646_d(net.minecraft.entity.Entity entityIn); // addWeatherEffect
+    @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract Biome getBiome(BlockPos pos);
     @Shadow public abstract BiomeProvider getBiomeProvider();
     @Shadow @Nullable public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
@@ -227,8 +227,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow protected abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
     @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
             boolean isFlaming, boolean isSmoking);
-    @Shadow public abstract List<net.minecraft.entity.Entity> mth_000660_a(Class<net.minecraft.entity.Entity> entityType,
-            com.google.common.base.Predicate<net.minecraft.entity.Entity> filter); // getEntities
+    @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
+            com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class <? extends T > clazz, AxisAlignedBB aabb,
             com.google.common.base.Predicate<? super T > filter);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
@@ -242,8 +242,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
     @Shadow public abstract void func_190524_a(BlockPos pos, final Block blockIn, BlockPos otherPos);
     @Shadow public abstract void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide);
-    @Shadow public abstract void mth_000641_c(BlockPos pos, Block blockType);
-    @Shadow public abstract void mth_000640_a(BlockPos pos, Block blockType, boolean notifySelf);
+    @Shadow public abstract void func_190522_c(BlockPos pos, Block blockType);
+    @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType, boolean notifySelf);
     @Shadow public abstract void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
     @Shadow public abstract void updateBlockTick(BlockPos pos, Block blockIn, int delay, int priority); // this is really scheduleUpdate
     @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
@@ -254,7 +254,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean isRainingAt(BlockPos strikePosition);
     @Shadow public abstract DifficultyInstance getDifficultyForLocation(BlockPos pos);
     @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
-    @Shadow public abstract boolean mth_000658_v(BlockPos pos); // canBlockFreezeNoWater
+    @Shadow public abstract boolean canBlockFreezeNoWater(BlockPos pos);
     @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
     @Shadow public abstract boolean canSeeSky(BlockPos pos);
     @Shadow public abstract int getLightFor(EnumSkyBlock type, BlockPos pos);
@@ -372,7 +372,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Collection<Entity> getEntities(Predicate<Entity> filter) {
         // This already returns a new copy
-        return (Collection<Entity>) (Object) this.mth_000660_a(net.minecraft.entity.Entity.class,
+        return (Collection<Entity>) (Object) this.getEntities(net.minecraft.entity.Entity.class,
                 Functional.java8ToGuava((Predicate<net.minecraft.entity.Entity>) (Object) filter));
     }
 
@@ -711,7 +711,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkBlockBounds(x, y, z);
         final BlockPos pos = new BlockPos(x, y, z);
         final IBlockState state = getBlockState(pos);
-        final AxisAlignedBB box = state.mth_000901_d((IBlockAccess) this, pos);
+        final AxisAlignedBB box = state.getBoundingBox((IBlockAccess) this, pos);
         try {
             return Optional.of(VecHelper.toSponge(box).offset(x, y, z));
         } catch (IllegalArgumentException exception) {
@@ -995,7 +995,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return entities;
     }
 
-    @Redirect(method = "mth_000664_a", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false)) // getClosestPlayer
+    @Redirect(method = "getClosestPlayer", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     private boolean onGetClosestPlayerCheck(com.google.common.base.Predicate<net.minecraft.entity.Entity> predicate, Object entityPlayer) {
         EntityPlayer player = (EntityPlayer) entityPlayer;
         IMixinEntity mixinEntity = (IMixinEntity) player;

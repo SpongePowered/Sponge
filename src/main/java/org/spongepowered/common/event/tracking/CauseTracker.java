@@ -410,7 +410,7 @@ public final class CauseTracker {
         }
         else
         {
-            if (newState.mth_000887_c() != iblockstate.mth_000887_c() || newState.getLightValue() != iblockstate.getLightValue())
+            if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue())
             {
                 minecraftWorld.theProfiler.startSection("checkLight");
                 minecraftWorld.checkLight(pos);
@@ -424,7 +424,7 @@ public final class CauseTracker {
 
             if (!minecraftWorld.isRemote && (flags & 1) != 0)
             {
-                minecraftWorld.mth_000640_a(pos, iblockstate.getBlock(), true);
+                minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
 
                 if (newState.hasComparatorInputOverride())
                 {
@@ -433,7 +433,7 @@ public final class CauseTracker {
             }
             else if (!minecraftWorld.isRemote && (flags & 16) == 0)
             {
-                minecraftWorld.mth_000641_c(pos, block);
+                minecraftWorld.func_190522_c(pos, block);
             }
 
             return true;
@@ -459,7 +459,7 @@ public final class CauseTracker {
         if (iblockstate == null) {
             return false;
         }
-        if (newState.mth_000887_c() != iblockstate.mth_000887_c() || newState.getLightValue() != iblockstate.getLightValue()) {
+        if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
             minecraftWorld.theProfiler.startSection("checkLight");
             minecraftWorld.checkLight(pos);
             minecraftWorld.theProfiler.endSection();
@@ -470,7 +470,7 @@ public final class CauseTracker {
         }
 
         if (flag.updateNeighbors()) { // Sponge - remove the isRemote check
-            minecraftWorld.mth_000641_c(pos, iblockstate.getBlock());
+            minecraftWorld.func_190522_c(pos, iblockstate.getBlock());
 
             if (newState.hasComparatorInputOverride()) {
                 minecraftWorld.updateComparatorOutputLevel(pos, newBlock);

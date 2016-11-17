@@ -61,11 +61,11 @@ import javax.annotation.Nullable;
 @Mixin(EntityFishHook.class)
 public abstract class MixinEntityFishHook extends MixinEntity implements FishHook {
 
-    @Shadow private EntityPlayer fld_001805_e; // fld_001804_e
-    @Shadow public net.minecraft.entity.Entity fld_001811_a; // fld_001810_a
-    @Shadow private int fld_001807_g; // ticksCatchable
-    @Shadow private boolean fld_001803_c; // inGround
-    @Shadow protected abstract void mth_001823_k(); // bringInHookedEntity
+    @Shadow private EntityPlayer angler;
+    @Shadow public net.minecraft.entity.Entity caughtEntity;
+    @Shadow private int ticksCatchable;
+    @Shadow private boolean inGround;
+    @Shadow protected abstract void bringInHookedEntity();
 
     @Nullable
     public ProjectileSource projectileSource;
@@ -76,8 +76,8 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     public ProjectileSource getShooter() {
         if (this.projectileSource != null) {
             return this.projectileSource;
-        } else if (this.fld_001805_e != null && this.fld_001805_e instanceof ProjectileSource) {
-            return (ProjectileSource) this.fld_001805_e;
+        } else if (this.angler != null && this.angler instanceof ProjectileSource) {
+            return (ProjectileSource) this.angler;
         }
         return ProjectileSource.UNKNOWN;
     }
@@ -86,21 +86,21 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     public void setShooter(ProjectileSource shooter) {
         if (shooter instanceof EntityPlayer) {
             // This allows things like Vanilla kill attribution to take place
-            this.fld_001805_e = (EntityPlayer) shooter;
+            this.angler = (EntityPlayer) shooter;
         } else {
-            this.fld_001805_e = null;
+            this.angler = null;
         }
         this.projectileSource = shooter;
     }
 
     @Override
     public Optional<Entity> getHookedEntity() {
-        return Optional.ofNullable((Entity) this.fld_001811_a);
+        return Optional.ofNullable((Entity) this.caughtEntity);
     }
 
     @Override
     public void setHookedEntity(@Nullable Entity entity) {
-        this.fld_001811_a = (net.minecraft.entity.Entity) entity;
+        this.caughtEntity = (net.minecraft.entity.Entity) entity;
     }
 
     /**
@@ -108,60 +108,58 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
      * @reason This needs to handle for both cases where a fish and/or an entity is being caught.
      * There's no real good way to do this with an injection.
      */
-
     @Overwrite
-    public int mth_001822_j() { // handleHookRetraction
+    public int handleHookRetraction() {
         if (this.world.isRemote) {
             return 0;
-        } else {
-            int i = 0;
-
-            if (this.fld_001811_a != null) {
-                this.mth_001823_k();
-                this.world.setEntityState((EntityFishHook) (Object) this, (byte)31);
-                i = this.fld_001811_a instanceof EntityItem ? 3 : 5;
-
-            } else if (this.fld_001807_g > 0) {
-                LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.world);
-                lootcontext$builder.withLuck((float) EnchantmentHelper.mth_000621_f(this.fld_001805_e) + this.fld_001805_e.getLuck());
-
-                // Sponge start
-                // TODO 1.9: Figure out how we want experience to work here
-                List<net.minecraft.item.ItemStack> itemstacks = this.world.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING).generateLootForPools(this.rand, lootcontext$builder.build());
-                FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.fld_001805_e)), 0, 0,
-                        this.createSnapshot(), this, itemstacks.stream().map(s -> {
-                            ItemStackSnapshot snapshot = ((ItemStack) s).createSnapshot();
-                            return new Transaction<>(snapshot, snapshot);
-                        }).collect(Collectors.toList()), (Player) this.fld_001805_e);
-
-                if (!SpongeImpl.postEvent(event)) {
-                    for (net.minecraft.item.ItemStack itemstack : event.getItemStackTransaction().stream().filter(Transaction::isValid).map(t -> (net.minecraft.item.ItemStack) t.getFinal().createStack()).collect(Collectors.toList())) {
-                        EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack);
-                        double d0 = this.fld_001805_e.posX - this.posX;
-                        double d1 = this.fld_001805_e.posY - this.posY;
-                        double d2 = this.fld_001805_e.posZ - this.posZ;
-                        double d3 = (double)MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
-                        double d4 = 0.1D;
-                        entityitem.motionX = d0 * d4;
-                        entityitem.motionY = d1 * d4 + (double)MathHelper.sqrt_double(d3) * 0.08D;
-                        entityitem.motionZ = d2 * d4;
-                        this.world.spawnEntityInWorld(entityitem);
-                        this.fld_001805_e.world.spawnEntityInWorld(new EntityXPOrb(this.fld_001805_e.world, this.fld_001805_e.posX, this.fld_001805_e.posY + 0.5D, this.fld_001805_e.posZ + 0.5D, this.rand.nextInt(6) + 1));
-                    } // Sponge end
-                }
-
-                i = 1;
-            }
-
-            if (this.fld_001803_c)
-            {
-                i = 2;
-            }
-
-            this.setDead();
-            this.fld_001805_e.fishEntity = null;
-            return i;
         }
+        int i = 0;
+
+        if (this.caughtEntity != null) {
+            this.bringInHookedEntity();
+            this.world.setEntityState((EntityFishHook) (Object) this, (byte)31);
+            i = this.caughtEntity instanceof EntityItem ? 3 : 5;
+
+        } else if (this.ticksCatchable > 0) {
+            LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.world);
+            lootcontext$builder.withLuck((float) EnchantmentHelper.getLuckOfSeaModifier(this.angler) + this.angler.getLuck());
+
+            // Sponge start
+            // TODO 1.9: Figure out how we want experience to work here
+            List<net.minecraft.item.ItemStack> itemstacks = this.world.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING).generateLootForPools(this.rand, lootcontext$builder.build());
+            FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.angler)), 0, 0,
+                    this.createSnapshot(), this, itemstacks.stream().map(s -> {
+                        ItemStackSnapshot snapshot = ((ItemStack) s).createSnapshot();
+                        return new Transaction<>(snapshot, snapshot);
+                    }).collect(Collectors.toList()), (Player) this.angler);
+
+            if (!SpongeImpl.postEvent(event)) {
+                for (net.minecraft.item.ItemStack itemstack : event.getItemStackTransaction().stream().filter(Transaction::isValid).map(t -> (net.minecraft.item.ItemStack) t.getFinal().createStack()).collect(Collectors.toList())) {
+                    EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack);
+                    double d0 = this.angler.posX - this.posX;
+                    double d1 = this.angler.posY - this.posY;
+                    double d2 = this.angler.posZ - this.posZ;
+                    double d3 = (double)MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
+                    double d4 = 0.1D;
+                    entityitem.motionX = d0 * d4;
+                    entityitem.motionY = d1 * d4 + (double)MathHelper.sqrt_double(d3) * 0.08D;
+                    entityitem.motionZ = d2 * d4;
+                    this.world.spawnEntityInWorld(entityitem);
+                    this.angler.world.spawnEntityInWorld(new EntityXPOrb(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D, this.rand.nextInt(6) + 1));
+                } // Sponge end
+            }
+
+            i = 1;
+        }
+
+        if (this.inGround)
+        {
+            i = 2;
+        }
+
+        this.setDead();
+        this.angler.fishEntity = null;
+        return i;
     }
 
     @Override
@@ -173,6 +171,6 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.fld_001805_e);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.angler);
     }
 }

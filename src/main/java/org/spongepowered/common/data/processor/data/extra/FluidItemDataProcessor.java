@@ -108,7 +108,7 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
             if (itemStack.getItem() == Items.WATER_BUCKET) {
                 itemStack.setItem(Items.BUCKET);
                 return DataTransactionResult.successRemove(constructImmutableValue(WATER));
-            } else if (itemStack.getItem() == Items.fld_000534_aB) {
+            } else if (itemStack.getItem() == Items.LAVA_BUCKET) {
                 itemStack.setItem(Items.BUCKET);
                 return DataTransactionResult.successRemove(constructImmutableValue(LAVA));
             }

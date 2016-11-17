@@ -45,7 +45,7 @@ public class HorseUtils {
     }
 
     public static HorseColor getHorseColor(EntityHorse horse) {
-        return SpongeEntityConstants.HORSE_COLOR_IDMAP.get(horse.mth_001740_dh() & 255);
+        return SpongeEntityConstants.HORSE_COLOR_IDMAP.get(horse.getHorseVariant() & 255);
     }
 
     public static HorseColor getHorseColor(DataView container) {
@@ -54,7 +54,7 @@ public class HorseUtils {
     }
 
     public static HorseStyle getHorseStyle(EntityHorse horse) {
-        return SpongeEntityConstants.HORSE_STYLE_IDMAP.get((horse.mth_001740_dh() & 65280) >> 8);
+        return SpongeEntityConstants.HORSE_STYLE_IDMAP.get((horse.getHorseVariant() & 65280) >> 8);
     }
 
     public static HorseStyle getHorseStyle(DataView container) {

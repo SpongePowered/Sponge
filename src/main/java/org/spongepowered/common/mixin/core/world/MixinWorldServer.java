@@ -234,13 +234,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow private int updateEntityTick;
 
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
-    @Shadow protected abstract void mth_001143_o(); // createBonusChest
+    @Shadow protected abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
     @Shadow public abstract ChunkProviderServer getChunkProvider();
     @Shadow protected abstract void playerCheckLight();
     @Shadow protected abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
-    @Shadow private boolean mth_001144_i(net.minecraft.entity.Entity entityIn) { // canAddEntity
+    @Shadow private boolean canAddEntity(net.minecraft.entity.Entity entityIn) {
         return false; // Shadowed
     }
 
@@ -270,7 +270,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.updateEntityTick = 0;
     }
 
-    @Inject(method = "mth_001143_o", at = @At(value = "HEAD"))
+    @Inject(method = "createBonusChest", at = @At(value = "HEAD"))
     public void onCreateBonusChest(CallbackInfo ci) {
         if (CauseTracker.ENABLED) {
             this.getCauseTracker().switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
@@ -281,20 +281,20 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
 
-    @Inject(method = "mth_001143_o", at = @At(value = "RETURN"))
+    @Inject(method = "createBonusChest", at = @At(value = "RETURN"))
     public void onCreateBonusChestEnd(CallbackInfo ci) {
         if (CauseTracker.ENABLED) {
             this.getCauseTracker().completePhase();
         }
     }
 
-    @Inject(method = "mth_001142_b(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true) // createSpawPosition
+    @Inject(method = "createSpawPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
     public void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {
         GeneratorType generatorType = (GeneratorType) settings.getTerrainType();
 
         // Allow bonus chest generation for non-Overworld worlds
         if (!this.provider.canRespawnHere() && this.getProperties().doesGenerateBonusChest()) {
-            this.mth_001143_o();
+            this.createBonusChest();
         }
 
         if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) || ((((WorldServer) (Object) this)).getChunkProvider().chunkGenerator instanceof ChunkProviderEnd)) {
@@ -303,7 +303,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    @Redirect(method = "mth_001142_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldSettings;isBonusChestEnabled()Z"))
+    @Redirect(method = "createSpawPosition", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldSettings;isBonusChestEnabled()Z"))
     public boolean onIsBonusChestEnabled(WorldSettings settings) {
         return this.getProperties().doesGenerateBonusChest();
     }
@@ -542,7 +542,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         if (!constructEntityEvent.isCancelled()) {
                             // Sponge End
                             EntitySkeletonHorse entityhorse = new EntitySkeletonHorse((WorldServer) (Object) this);
-                            entityhorse.mth_001773_p(true); // setSkeletonTrap
+                            entityhorse.func_190691_p(true);
                             entityhorse.setGrowingAge(0);
                             entityhorse.setPosition((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
                             this.spawnEntityInWorld(entityhorse);
@@ -554,7 +554,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         SpongeImpl.postEvent(lightning);
                         if (!lightning.isCancelled()) {
                             // Sponge End
-                            this.mth_000646_d(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), true));
+                            this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), true));
                         } // Sponge - Brackets.
                     }
                     else
@@ -567,7 +567,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         SpongeImpl.postEvent(event);
                         if (!event.isCancelled()) {
                             // Sponge End
-                            this.mth_000646_d(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), false));
+                            this.addWeatherEffect(new EntityLightningBolt((WorldServer) (Object) this, (double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), false));
                         } // Sponge - Brackets.
                     }
                 }
@@ -597,7 +597,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 BlockPos blockpos1 = this.getPrecipitationHeight(new BlockPos(j + (j2 & 15), 0, k + (j2 >> 8 & 15)));
                 BlockPos blockpos2 = blockpos1.down();
 
-                if (this.mth_000658_v(blockpos2))
+                if (this.canBlockFreezeNoWater(blockpos2))
                 {
                     this.setBlockState(blockpos2, Blocks.ICE.getDefaultState());
                 }
@@ -753,8 +753,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     // special handling for Pistons since they use their own event system
-    @Redirect(method = "mth_001145_ao", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z")) // sendQueeudBlockEvents
+    @Redirect(method = "sendQueeudBlockEvents", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
         if (!CauseTracker.ENABLED) {
             fireBlockEvent(event);
@@ -837,7 +837,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    @Redirect(method = "mth_001145_ao", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0) // sendQueuedBlocEvents
+    @Redirect(method = "sendQueuedBlocEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     private int onGetDimensionIdForBlockEvents(DimensionType dimensionType) {
         return this.getDimensionId();
     }
@@ -1006,7 +1006,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * @return True if the spawn was successful and the effect is played.
      */
     // We expect 0 because forge patches it correctly
-    @Redirect(method = "mth_000646_d", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0) // addWeatherEffect
+    @Redirect(method = "addWeatherEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     public int getDimensionIdForWeatherEffect(DimensionType id) {
         return this.getDimensionId();
     }
@@ -1034,7 +1034,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         List<Entity> entityList = new ArrayList<>();
         for (net.minecraft.entity.Entity entity : entities) {
-            if (this.mth_001144_i(entity)) {
+            if (this.canAddEntity(entity)) {
                 entityList.add((Entity) entity);
             }
         }
@@ -1148,7 +1148,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
-        return mth_001144_i(entity) && getCauseTracker().spawnEntity(EntityUtil.fromNative(entity));
+        return canAddEntity(entity) && getCauseTracker().spawnEntity(EntityUtil.fromNative(entity));
     }
 
 
@@ -1161,7 +1161,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
-        if (!this.mth_000637_a(pos)) {
+        if (!this.isValid(pos)) {
             return false;
         } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) { // isRemote is always false since this is WorldServer
             return false;
@@ -1173,7 +1173,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag) {
-        if (!this.mth_000637_a(pos)) {
+        if (!this.isValid(pos)) {
             return false;
         } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) { // isRemote is always false since this is WorldServer
             return false;
@@ -1223,7 +1223,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
-        if (!mth_000637_a(pos)) {
+        if (!isValid(pos)) {
             return;
         }
 
@@ -1251,8 +1251,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * Technically an overwrite to properly track on *server* worlds.
      */
     /*@Override
-    public void mth_000641_c(BlockPos pos, Block blockType) { // notifyNeighborsOfStateChange
-        if (!mth_000637_a(pos)) {
+    public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType) {
+        if (!isValid(pos)) {
             return;
         }
 
@@ -1344,7 +1344,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {
         if ((flags & 1) != 0) {
-            this.mth_000640_a(pos, newState.getBlock(), false);
+            this.notifyNeighborsRespectDebug(pos, newState.getBlock(), false);
 
             if (newState.hasComparatorInputOverride()) {
                 this.updateComparatorOutputLevel(pos, newState.getBlock());
@@ -1411,7 +1411,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         if (entity instanceof EntityLightningBolt) {
-            this.mth_000646_d(entity);
+            this.addWeatherEffect(entity);
             return true;
         }
 
@@ -1594,7 +1594,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return (PortalAgent) this.worldTeleporter;
     }
 
-    @Redirect(method = "mth_001144_i", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 1))
+    @Redirect(method = "canAddEntity", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 1))
     public void onCanAddEntityLogWarn(Logger logger, String message, Object... params) {
         // don't log anything to avoid useless spam
     }

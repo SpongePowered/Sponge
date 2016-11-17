@@ -31,9 +31,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.tileentity.TileEntityEnderChest;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -45,7 +42,6 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -59,10 +55,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -115,7 +109,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "mth_000807_a(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN")) // addMapping
+    @Inject(method = "addMapping(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))
     private static void onRegister(String name, Class clazz, CallbackInfo callbackInfo) {
         if (clazz != null) {
             TileEntityTypeRegistryModule.getInstance().doTileEntityRegistration(clazz, name);

@@ -90,7 +90,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
     @Shadow @Final private MapGenScatteredFeature scatteredFeatureGenerator;
     @Shadow @Final private MapGenBase ravineGenerator;
     @Shadow @Final private StructureOceanMonument oceanMonumentGenerator;
-    @Shadow @Final private WoodlandMansion fld_000947_C;
+    @Shadow @Final private WoodlandMansion field_191060_C;
     @Shadow private Biome[] biomesForGeneration;
 
     @Shadow public abstract void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_);
@@ -149,8 +149,8 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
         }
 
         if (this.settings.field_191077_z && this.mapFeaturesEnabled) {
-            generator.getGenerationPopulators().add((GenerationPopulator) this.fld_000947_C);
-            generator.getPopulators().add((Populator) this.fld_000947_C);
+            generator.getGenerationPopulators().add((GenerationPopulator) this.field_191060_C);
+            generator.getPopulators().add((Populator) this.field_191060_C);
         }
 
         if (this.settings.useWaterLakes) {

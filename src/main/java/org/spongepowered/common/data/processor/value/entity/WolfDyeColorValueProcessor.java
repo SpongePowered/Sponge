@@ -51,13 +51,13 @@ public class WolfDyeColorValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected boolean set(EntityWolf container, DyeColor value) {
-        container.mth_001647_a((EnumDyeColor) (Object) value);
+        container.setCollarColor((EnumDyeColor) (Object) value);
         return true;
     }
 
     @Override
     protected Optional<DyeColor> getVal(EntityWolf container) {
-        return Optional.of((DyeColor) (Object) container.mth_001646_ds());
+        return Optional.of((DyeColor) (Object) container.getCollarColor());
     }
 
     @Override

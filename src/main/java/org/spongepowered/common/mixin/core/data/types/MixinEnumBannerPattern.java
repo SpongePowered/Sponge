@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.tileentity.BannerPattern;
-import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
@@ -36,17 +35,17 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(BannerPattern.class)
 public class MixinEnumBannerPattern implements BannerPatternShape {
 
-    @Shadow @Final private String fld_000757_N ;
-    @Shadow @Final private String fld_000758_O;
+    @Shadow @Final private String field_191014_N ;
+    @Shadow @Final private String field_191015_O;
 
     @Override
     public String getName() {
-        return this.fld_000757_N ;
+        return this.field_191014_N;
     }
 
     @Override
     public String getId() {
-        return this.fld_000758_O;
+        return this.field_191015_O;
     }
 
 }

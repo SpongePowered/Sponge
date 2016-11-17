@@ -50,7 +50,7 @@ public class MixinBlockFalling {
     private static final String WORLD_IS_AREA_LOADED =
             "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z";
 
-    @Redirect(method = "mth_000716_c", at = @At(value = "INVOKE", target = WORLD_IS_AREA_LOADED)) // checkFallable
+    @Redirect(method = "checkFallable", at = @At(value = "INVOKE", target = WORLD_IS_AREA_LOADED))
     private boolean onIsAreaLoadedCheck(World world, BlockPos pos, BlockPos to) {
         if (world.isAreaLoaded(pos, to)) {
             if (!world.isRemote) {

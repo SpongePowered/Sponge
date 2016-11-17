@@ -41,7 +41,7 @@ public class StatisticsTrackedPropertyStore extends AbstractBlockPropertyStore<S
 
     @Override
     protected Optional<StatisticsTrackedProperty> getForBlock(IBlockState block) {
-        return Optional.of(block.getBlock().mth_000709_o() ? TRUE : FALSE);
+        return Optional.of(block.getBlock().getEnableStats() ? TRUE : FALSE);
     }
 
 }

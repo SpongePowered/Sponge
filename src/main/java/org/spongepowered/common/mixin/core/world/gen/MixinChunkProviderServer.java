@@ -88,10 +88,10 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Shadow public abstract Chunk getLoadedChunk(int x, int z);
     @Shadow public abstract Chunk loadChunk(int x, int z);
-    @Shadow public abstract Chunk mth_001134_f(int x, int z); // loadChunkFromFile
+    @Shadow public abstract Chunk loadChunkFromFile(int x, int z);
     @Shadow public abstract Chunk provideChunk(int x, int z);
-    @Shadow public abstract void mth_001135_b(Chunk chunkIn); // saveChunkExtraData
-    @Shadow public abstract void mth_001136_c(Chunk chunkIn); // saveChunkData
+    @Shadow public abstract void saveChunkExtraData(Chunk chunkIn);
+    @Shadow public abstract void saveChunkData(Chunk chunkIn);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(WorldServer worldObjIn, IChunkLoader chunkLoaderIn, IChunkGenerator chunkGeneratorIn, CallbackInfo ci) {
@@ -145,7 +145,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     // split from loadChunk to avoid 2 lookups with our inject
     private Chunk loadChunkForce(int x, int z) {
-        Chunk chunk = this.mth_001134_f(x, z);
+        Chunk chunk = this.loadChunkFromFile(x, z);
 
         if (chunk != null)
         {
@@ -270,8 +270,8 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
                         spongeChunk.setScheduledForUnload(-1);
                     }
                     chunk.onChunkUnload();
-                    this.mth_001136_c(chunk);
-                    this.mth_001135_b(chunk);
+                    this.saveChunkData(chunk);
+                    this.saveChunkExtraData(chunk);
                     iterator.remove();
                     chunksUnloaded++;
                 }
@@ -279,7 +279,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             ((IMixinWorldServer) this.worldObj).getTimingsHandler().doChunkUnload.stopTiming();
         }
 
-        this.chunkLoader.mth_000920_a();
+        this.chunkLoader.chunkTick();
         return false;
     }
 
@@ -299,7 +299,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         }
     }
 
-    @Inject(method = "mth_001136_c", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "saveChunkData", at = @At("HEAD"), cancellable = true)
     public void onSaveChunkData(Chunk chunkIn, CallbackInfo ci) {
         if (((WorldProperties)this.worldObj.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             ci.cancel();

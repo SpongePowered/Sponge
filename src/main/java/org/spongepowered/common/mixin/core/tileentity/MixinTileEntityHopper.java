@@ -89,7 +89,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
         this.lens = new OrderedInventoryLensImpl(0, 5, 1, slots);
     }
 
-    @Inject(method = "mth_000829_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;")) // putDropInInventoryAllSlots
+    @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"))
     private static void onPutDrop(IInventory inventory, IInventory hopper, EntityItem entityItem, CallbackInfoReturnable<Boolean> callbackInfo) {
         IMixinEntity spongeEntity = (IMixinEntity) entityItem;
         spongeEntity.getCreatorUser().ifPresent(owner -> {

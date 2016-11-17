@@ -60,7 +60,7 @@ import java.util.Map;
 public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorProvider {
 
     @Shadow @Final private IBlockState[] cachedBlockIDs;
-    @Shadow @Final private Map<String, MapGenStructure> fld_000943_e; // structureGenerators
+    @Shadow @Final private Map<String, MapGenStructure> structureGenerators;
     @Shadow @Final private boolean hasDecoration;
     @Shadow @Final private boolean hasDungeons;
     @Shadow @Final private FlatGeneratorInfo flatWorldGenInfo;
@@ -68,7 +68,7 @@ public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorPr
 
     @Override
     public void addPopulators(WorldGenerator generator) {
-        for (Object o : this.fld_000943_e.values()) {
+        for (Object o : this.structureGenerators.values()) {
             if (o instanceof MapGenBase) {
                 generator.getGenerationPopulators().add((GenerationPopulator) o);
                 if (o instanceof MapGenStructure) {

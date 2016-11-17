@@ -705,7 +705,7 @@ public final class EntityUtil {
             fromWorld.getEntityTracker().untrackEntity(entity);
         }
 
-        entity.world.mth_000647_f(entity);
+        entity.world.removeEntityDangerously(entity);
         entity.isDead = false;
         entity.dimension = targetDim;
         entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
@@ -739,7 +739,7 @@ public final class EntityUtil {
             entity.setWorld(toWorld);
             entityPlayerMP.connection.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
                     entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
-            entityPlayerMP.mth_001457_e(false);
+            entityPlayerMP.setSneaking(false);
             mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
             toWorld.getPlayerChunkMap().addPlayer(entityPlayerMP);
             toWorld.spawnEntityInWorld(entityPlayerMP);
