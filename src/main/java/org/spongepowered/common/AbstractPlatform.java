@@ -67,13 +67,17 @@ public abstract class AbstractPlatform implements Platform {
     }
 
     @Override
-    public PluginContainer getApi() {
-        return this.api;
-    }
-
-    @Override
-    public PluginContainer getImplementation() {
-        return this.impl;
+    public PluginContainer getContainer(Component component) {
+        switch (component) {
+            case API:
+                return this.api;
+            case IMPLEMENTATION:
+                return this.impl;
+            case GAME:
+                return SpongeImpl.getMinecraftPlugin();
+            default:
+                throw new AssertionError("Unknown platform component: " + component);
+        }
     }
 
     @Override

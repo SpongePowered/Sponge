@@ -25,6 +25,7 @@
 package co.aikar.timings;
 
 import static co.aikar.timings.TimingsManager.HISTORY;
+import static org.spongepowered.api.Platform.Component.IMPLEMENTATION;
 
 import co.aikar.util.JSONUtil;
 import co.aikar.util.JSONUtil.JsonObjectBuilder;
@@ -92,7 +93,7 @@ class TimingsExport extends Thread {
         Platform platform = SpongeImpl.getGame().getPlatform();
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
-                .add("version", platform.getImplementation().getVersion().orElse(platform.getMinecraftVersion().getName() + "-DEV"))
+                .add("version", platform.getContainer(IMPLEMENTATION).getVersion().orElse(platform.getMinecraftVersion().getName() + "-DEV"))
                 .add("maxplayers", SpongeImpl.getGame().getServer().getMaxPlayers())
                 .add("start", TimingsManager.timingStart / 1000)
                 .add("end", System.currentTimeMillis() / 1000)
