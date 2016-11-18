@@ -42,7 +42,7 @@ public class ChunkBufferPrimer extends ChunkPrimer {
     private static final IBlockState defaultState = Blocks.AIR.getDefaultState();
     private final MutableBlockVolume buffer;
     private final Vector3i min;
-    private final Cause cause = Cause.source(SpongeImpl.getPlugin()).build();
+    private final Cause cause = SpongeImpl.getImplementationCause();
 
     public ChunkBufferPrimer(MutableBlockVolume buffer) {
         this.buffer = buffer;

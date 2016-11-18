@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common;
 
-import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spongepowered.api.Platform.Component.IMPLEMENTATION;
 import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
 
 import com.google.inject.Injector;
@@ -45,6 +45,7 @@ import org.spongepowered.api.event.game.state.GameStateEvent;
 import org.spongepowered.api.event.game.state.GameStoppedEvent;
 import org.spongepowered.api.event.game.state.GameStoppingEvent;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.event.SpongeEventManager;
@@ -54,12 +55,10 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Random;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
@@ -68,14 +67,10 @@ public final class SpongeImpl {
     public static final String GAME_ID = "minecraft";
     public static final String GAME_NAME = "Minecraft";
 
-    public static final String API_NAME = firstNonNull(getPackage().getSpecificationTitle(), "SpongeAPI");
-    public static final Optional<String> API_VERSION = Optional.ofNullable(getPackage().getSpecificationVersion());
+    public static final String API_NAME = "SpongeAPI";
 
     public static final String ECOSYSTEM_ID = "sponge";
     public static final String ECOSYSTEM_NAME = "Sponge";
-
-    public static final Optional<String> IMPLEMENTATION_NAME = Optional.ofNullable(getPackage().getImplementationTitle());
-    public static final Optional<String> IMPLEMENTATION_VERSION =  Optional.ofNullable(getPackage().getImplementationVersion());
 
     // TODO: Keep up to date
     public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.10.2", 210);
@@ -88,28 +83,36 @@ public final class SpongeImpl {
 
     @Nullable private static SpongeConfig<GlobalConfig> globalConfig;
 
+    @Nullable private static PluginContainer minecraftPlugin;
+
 
     public static final Random random = new Random();
 
     private final Injector injector;
     private final Game game;
-    private final PluginContainer plugin;
-    private final PluginContainer minecraftPlugin;
     private final Cause implementationCause;
 
-    @Nullable
-    private static List<PluginContainer> components;
+    private final List<PluginContainer> internalPlugins = new ArrayList<>();
 
     @Inject
-    public SpongeImpl(Injector injector, Game game, @Named(ECOSYSTEM_ID) PluginContainer plugin, @Named(GAME_ID) PluginContainer minecraftPlugin) {
+    public SpongeImpl(Injector injector, Game game, PluginManager manager) {
         checkState(instance == null, "SpongeImpl was already initialized");
         instance = this;
 
         this.injector = checkNotNull(injector, "injector");
         this.game = checkNotNull(game, "game");
-        this.plugin = checkNotNull(plugin, "plugin");
-        this.minecraftPlugin = checkNotNull(minecraftPlugin, "minecraftPlugin");
-        this.implementationCause = Cause.source(this.plugin).build();
+
+        Platform platform = game.getPlatform();
+
+        if (minecraftPlugin == null) {
+            minecraftPlugin = manager.getPlugin(GAME_ID).get();
+        }
+
+        for (Platform.Component component : Platform.Component.values()) {
+            internalPlugins.add(platform.getContainer(component));
+        }
+
+        this.implementationCause = Cause.source(platform.getContainer(IMPLEMENTATION)).build();
     }
 
     public static SpongeImpl getInstance() {
@@ -150,11 +153,17 @@ public final class SpongeImpl {
     }
 
     public static PluginContainer getPlugin() {
-        return getInstance().plugin;
+        return Sponge.getPlatform().getContainer(IMPLEMENTATION);
     }
 
     public static PluginContainer getMinecraftPlugin() {
-        return getInstance().minecraftPlugin;
+        checkState(minecraftPlugin != null, "Minecraft plugin container is not initialized");
+        return minecraftPlugin;
+    }
+
+    public static void setMinecraftPlugin(PluginContainer minecraft) {
+        checkState(minecraftPlugin == null, "Minecraft plugin container is already initialized");
+        minecraftPlugin = minecraft;
     }
 
     public static Path getGameDir() {
@@ -182,15 +191,7 @@ public final class SpongeImpl {
     }
 
     public static List<PluginContainer> getInternalPlugins() {
-        if (components == null) {
-            components = new ArrayList<>(6);
-
-            for (Platform.Component component : Platform.Component.values()) {
-                components.add(Sponge.getPlatform().getContainer(component));
-            }
-        }
-
-        return components;
+        return getInstance().internalPlugins;
     }
 
     public static void postState(Class<? extends GameStateEvent> type, GameState state) {
@@ -203,11 +204,8 @@ public final class SpongeImpl {
         postState(GameStoppedEvent.class, GameState.GAME_STOPPED);
     }
 
-    private static Package getPackage() {
-        return SpongeImpl.class.getPackage();
-    }
-
     public static Cause getImplementationCause() {
         return getInstance().implementationCause;
     }
+
 }

@@ -25,21 +25,25 @@
 package org.spongepowered.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.plugin.PluginManager;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
-public abstract class AbstractPlatform implements Platform {
+public class SpongePlatform implements Platform {
 
     private final PluginContainer api;
     private final PluginContainer impl;
+    private final PluginContainer minecraft;
     private final MinecraftVersion minecraftVersion;
 
     protected final Map<String, Object> platformMap = new HashMap<String, Object>() {
@@ -53,10 +57,17 @@ public abstract class AbstractPlatform implements Platform {
         }
     };
 
-    protected AbstractPlatform(PluginContainer api, PluginContainer impl, MinecraftVersion minecraftVersion) {
-        this.api = api;
-        this.impl = impl;
-        this.minecraftVersion = minecraftVersion;
+    @Inject
+    public SpongePlatform(PluginManager manager, MinecraftVersion minecraftVersion) {
+        this(manager, manager.getPlugin(SpongeImpl.ECOSYSTEM_ID).get(), minecraftVersion);
+    }
+
+    // For SpongeForge (implementation container isn't registered when SpongePlatform is initialized)
+    protected SpongePlatform(PluginManager manager, PluginContainer impl, MinecraftVersion minecraftVersion) {
+        this.api = manager.getPlugin(Platform.API_ID).get();
+        this.impl = checkNotNull(impl, "impl");
+        this.minecraft = manager.getPlugin(SpongeImpl.GAME_ID).get();
+        this.minecraftVersion = checkNotNull(minecraftVersion, "minecraftVersion");
 
         this.platformMap.put("Type", this.getType());
         this.platformMap.put("ApiName", this.api.getName());
@@ -64,6 +75,19 @@ public abstract class AbstractPlatform implements Platform {
         this.platformMap.put("ImplementationName", this.impl.getName());
         this.platformMap.put("ImplementationVersion", this.impl.getVersion());
         this.platformMap.put("MinecraftVersion", this.getMinecraftVersion());
+    }
+
+    // For SpongeCommon we assume that we are always on the server
+    // SpongeForge overrides this to return CLIENT when running in a client environment
+
+    @Override
+    public Type getType() {
+        return Type.SERVER;
+    }
+
+    @Override
+    public Type getExecutionType() {
+        return Type.SERVER;
     }
 
     @Override
@@ -74,14 +98,14 @@ public abstract class AbstractPlatform implements Platform {
             case IMPLEMENTATION:
                 return this.impl;
             case GAME:
-                return SpongeImpl.getMinecraftPlugin();
+                return this.minecraft;
             default:
                 throw new AssertionError("Unknown platform component: " + component);
         }
     }
 
     @Override
-    public MinecraftVersion getMinecraftVersion() {
+    public final MinecraftVersion getMinecraftVersion() {
         return this.minecraftVersion;
     }
 

@@ -63,7 +63,7 @@ public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorPr
     @Shadow @Final private boolean hasDecoration;
     @Shadow @Final private boolean hasDungeons;
     @Shadow @Final private FlatGeneratorInfo flatWorldGenInfo;
-    private final Cause providerCause = Cause.source(SpongeImpl.getPlugin()).build();
+    private final Cause providerCause = SpongeImpl.getImplementationCause();
 
     @Override
     public void addPopulators(WorldGenerator generator) {

@@ -93,7 +93,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
 
     @Shadow public abstract void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_);
 
-    private Cause cause = Cause.source(SpongeImpl.getPlugin()).build();
+    private Cause cause = SpongeImpl.getImplementationCause();
     private BiomeGenerator biomegen;
 
     @Inject(method = "<init>", at = @At("RETURN"))

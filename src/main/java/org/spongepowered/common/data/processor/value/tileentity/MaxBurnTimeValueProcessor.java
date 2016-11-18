@@ -60,7 +60,7 @@ public class MaxBurnTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
     protected boolean set(TileEntityFurnace container, Integer value) {
         if (!container.isBurning() && value > 0 || container.isBurning() && value == 0) {
             if (this.cause == null) {
-                this.cause = Cause.source(SpongeImpl.getPlugin()).build();
+                this.cause = SpongeImpl.getImplementationCause();
             }
             final World world = (World) container.getWorld();
             world.setBlockType(container.getPos().getX(), container.getPos().getY(),

@@ -329,7 +329,10 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         if (delay == 0) {
             removeTask.run();
         } else {
-            SpongeImpl.getGame().getScheduler().createTaskBuilder().execute(removeTask).delayTicks(delay).submit(SpongeImpl.getPlugin());
+            SpongeImpl.getGame().getScheduler().createTaskBuilder()
+                    .execute(removeTask)
+                    .delayTicks(delay)
+                    .submit(SpongeImpl.getPlugin());
         }
     }
 

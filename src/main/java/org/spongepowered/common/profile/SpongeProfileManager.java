@@ -53,7 +53,10 @@ public final class SpongeProfileManager implements GameProfileManager {
 
     public SpongeProfileManager() {
         this.gameProfileQueryTask = new GameProfileQueryTask();
-        SpongeScheduler.getInstance().createTaskBuilder().interval(SpongeImpl.getGlobalConfig().getConfig().getWorld().getGameProfileQueryTaskInterval(), TimeUnit.SECONDS).execute(this.gameProfileQueryTask).name("GameProfileQueryTask").submit(SpongeImpl.getPlugin());
+        SpongeScheduler.getInstance().createTaskBuilder()
+                .interval(SpongeImpl.getGlobalConfig().getConfig().getWorld().getGameProfileQueryTaskInterval(), TimeUnit.SECONDS)
+                .execute(this.gameProfileQueryTask).name("GameProfileQueryTask")
+                .submit(SpongeImpl.getPlugin());
     }
 
     public GameProfileQueryTask getGameProfileQueryTask() {

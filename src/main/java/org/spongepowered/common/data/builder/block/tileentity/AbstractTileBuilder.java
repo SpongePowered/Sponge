@@ -109,7 +109,7 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         final int y = container.getInt(DataQueries.Y_POS).get();
         final int z = container.getInt(DataQueries.Z_POS).get();
 
-        worldOptional.get().getLocation(x, y, z).setBlockType(type, Cause.source(SpongeImpl.getPlugin()).build());
+        worldOptional.get().getLocation(x, y, z).setBlockType(type, SpongeImpl.getImplementationCause());
         BlockPos pos = new BlockPos(x, y, z);
         TileEntity tileEntity = ((net.minecraft.world.World) worldOptional.get()).getTileEntity(pos);
         if (tileEntity == null) {
