@@ -36,6 +36,7 @@ import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameState;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactoryUtils;
@@ -183,9 +184,10 @@ public final class SpongeImpl {
     public static List<PluginContainer> getInternalPlugins() {
         if (components == null) {
             components = new ArrayList<>(6);
-            components.add(SpongeImpl.getMinecraftPlugin());
-            components.add(Sponge.getPlatform().getApi());
-            components.add(Sponge.getPlatform().getImplementation());
+
+            for (Platform.Component component : Platform.Component.values()) {
+                components.add(Sponge.getPlatform().getContainer(component));
+            }
         }
 
         return components;
