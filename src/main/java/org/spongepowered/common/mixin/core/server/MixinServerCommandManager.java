@@ -101,7 +101,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         MinecraftCommandWrapper cmd = wrapCommand(command);
         if (cmd.getOwner().getId().equalsIgnoreCase("minecraft")) {
             this.lowPriorityCommands.add(cmd);
-        } else if (SpongeImpl.getGame() == null) { // TODO: How?
+        } else if (!SpongeImpl.isInitialized()) { // TODO: How?
             this.earlyRegisterCommands.add(cmd);
         } else {
             SpongeImpl.getGame().getCommandManager().register(cmd.getOwner(), cmd, cmd.getNames());

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command;
 
+import static org.spongepowered.api.Platform.Component.IMPLEMENTATION;
 import static org.spongepowered.api.command.args.GenericArguments.choices;
 import static org.spongepowered.api.command.args.GenericArguments.dimension;
 import static org.spongepowered.api.command.args.GenericArguments.firstParsing;
@@ -44,6 +45,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandCallable;
@@ -357,7 +359,7 @@ public class SpongeCommand {
     }
 
     private static final Text IMPLEMENTATION_NAME = Text.of(TextColors.YELLOW, TextStyles.BOLD,
-            Sponge.getPlatform().getImplementation().getName());
+            Sponge.getPlatform().getContainer(IMPLEMENTATION).getName());
 
     private static CommandSpec getVersionCommand() {
         return CommandSpec.builder()

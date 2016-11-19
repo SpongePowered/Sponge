@@ -68,7 +68,7 @@ public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEn
         // 2 : cookTime -> equal to passedCookTime
         // 3 : totalCookTime -> equal to maxCookTime
         if (this.cause == null) { // lazy evaluation because of tests
-            this.cause = Cause.source(SpongeImpl.getPlugin()).build();
+            this.cause = SpongeImpl.getImplementationCause();
         }
 
         final int passedBurnTime = (Integer) keyValues.get(Keys.PASSED_BURN_TIME); //time (int) the fuel item already burned
