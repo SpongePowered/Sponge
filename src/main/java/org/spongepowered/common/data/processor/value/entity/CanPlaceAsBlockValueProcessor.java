@@ -49,13 +49,13 @@ public class CanPlaceAsBlockValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected boolean set(EntityFallingBlock container, Boolean value) {
-        container.canSetAsBlock = value;
+        container.dontSetBlock = !value;
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityFallingBlock container) {
-        return Optional.of(container.canSetAsBlock);
+        return Optional.of(!container.dontSetBlock);
     }
 
     @Override

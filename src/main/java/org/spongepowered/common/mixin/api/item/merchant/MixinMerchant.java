@@ -78,11 +78,11 @@ public interface MixinMerchant extends Merchant {
         return new TextComponentString("nitwit");
     }
 
-    default World imerchant$func_190670_t_() {
+    default World imerchant$getWorld() {
         return ((World) getLocation().getExtent());
     }
 
-    default BlockPos imerchant$func_190671_u_() {
+    default BlockPos imerchant$getPos() {
         return ((IMixinLocation) (Object) getLocation()).getBlockPos();
     }
 }

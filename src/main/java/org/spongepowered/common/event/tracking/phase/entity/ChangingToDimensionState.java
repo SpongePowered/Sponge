@@ -145,7 +145,7 @@ final class ChangingToDimensionState extends EntityPhaseState {
         final Vector3d position = event.getToTransform().getPosition();
         teleportingEntity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(),
                 (float) event.getToTransform().getPitch());
-        toWorld.spawnEntityInWorld(teleportingEntity);
+        toWorld.spawnEntity(teleportingEntity);
         teleportingEntity.world = toWorld;
 
         toWorld.updateEntityWithOptionalForce(teleportingEntity, false);

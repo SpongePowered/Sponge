@@ -66,13 +66,13 @@ public abstract class MixinDamageSource implements DamageSource {
 
     @Inject(method = "causeExplosionDamage(Lnet/minecraft/world/Explosion;)Lnet/minecraft/util/DamageSource;", at = @At("HEAD"), cancellable = true)
     private static void onSetExplosionSource(Explosion explosionIn, CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
-        if (explosionIn != null && explosionIn.exploder != null && explosionIn.worldObj != null) {
+        if (explosionIn != null && explosionIn.exploder != null && explosionIn.world != null) {
             if (explosionIn.getExplosivePlacedBy() == null) {
                 // check creator
                 Entity spongeEntity = (Entity) explosionIn.exploder;
                 Optional<UUID> creatorUuid = spongeEntity.getCreator();
                 if (creatorUuid.isPresent()) {
-                    EntityPlayer player = explosionIn.worldObj.getPlayerEntityByUUID(creatorUuid.get());
+                    EntityPlayer player = explosionIn.world.getPlayerEntityByUUID(creatorUuid.get());
                     if (player != null) {
                         EntityDamageSourceIndirect damageSource =
                                 new EntityDamageSourceIndirect("explosion.player",

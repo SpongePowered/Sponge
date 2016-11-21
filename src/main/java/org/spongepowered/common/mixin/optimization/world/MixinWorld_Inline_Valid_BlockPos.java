@@ -206,12 +206,12 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
     @Overwrite
     public boolean collidesWithAnyBlock(AxisAlignedBB bbox) {
         List<AxisAlignedBB> list = Lists.<AxisAlignedBB>newArrayList();
-        int i = MathHelper.floor_double(bbox.minX) - 1;
-        int j = MathHelper.ceiling_double_int(bbox.maxX) + 1;
-        int k = MathHelper.floor_double(bbox.minY) - 1;
-        int l = MathHelper.ceiling_double_int(bbox.maxY) + 1;
-        int i1 = MathHelper.floor_double(bbox.minZ) - 1;
-        int j1 = MathHelper.ceiling_double_int(bbox.maxZ) + 1;
+        int i = MathHelper.floor(bbox.minX) - 1;
+        int j = MathHelper.ceil(bbox.maxX) + 1;
+        int k = MathHelper.floor(bbox.minY) - 1;
+        int l = MathHelper.ceil(bbox.maxY) + 1;
+        int i1 = MathHelper.floor(bbox.minZ) - 1;
+        int j1 = MathHelper.ceil(bbox.maxZ) + 1;
         BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
 
         try {

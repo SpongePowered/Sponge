@@ -145,7 +145,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
 
     @Shadow public abstract void sendPacket(final Packet<?> packetIn);
-    @Shadow public abstract void kickPlayerFromServer(String reason);
+    @Shadow public abstract void disconnect(String reason);
     @Shadow private void captureCurrentPosition() {}
     @Shadow public abstract void setPlayerLocation(double x, double y, double z, float yaw, float pitch);
     @Shadow private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) { return false; } // Shadowed
@@ -349,7 +349,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
             boolean clickedHotbar = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
             boolean itemValidCheck = itemstack == null || itemstack.getItem() != null;
-            boolean itemValidCheck2 = itemstack == null || itemstack.getMetadata() >= 0 && itemstack.func_190916_E() <= 64 && itemstack.func_190916_E() > 0;
+            boolean itemValidCheck2 = itemstack == null || itemstack.getMetadata() >= 0 && itemstack.getCount() <= 64 && itemstack.getCount() > 0;
 
             // Sponge start - handle CreativeInventoryEvent
             if (itemValidCheck && itemValidCheck2) {
@@ -517,7 +517,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
-    @Redirect(method = "processRightClickBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClickBlock(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;"))
+    @Redirect(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClickBlock(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;"))
     public EnumActionResult onProcessRightClickBlock(PlayerInteractionManager interactionManager, EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
         EnumActionResult actionResult = interactionManager.processRightClickBlock(this.playerEntity, worldIn, stack, hand, pos, facing, hitX, hitY, hitZ);
         // If result is not SUCCESS, we need to avoid throwing an InteractBlockEvent.Secondary for AIR
@@ -549,13 +549,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         EntityItem item = null;
         ItemStack stack = this.playerEntity.inventory.getCurrentItem();
         if (stack != null) {
-            int size = stack.func_190916_E();
+            int size = stack.getCount();
             item = this.playerEntity.dropItem(dropAll);
             // force client itemstack update if drop event was cancelled
             if (item == null) {
                 Slot slot = this.playerEntity.openContainer.getSlotFromInventory(this.playerEntity.inventory, this.playerEntity.inventory.currentItem);
                 int windowId = this.playerEntity.openContainer.windowId;
-                stack.func_190920_e(size);
+                stack.setCount(size);
                 this.sendPacket(new SPacketSetSlot(windowId, slot.slotNumber, stack));
             }
         }
@@ -636,7 +636,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     if (!SpongeCommonEventFactory.callInteractEntityEventSecondary(this.playerEntity, entity, packetIn.getHand(), packetIn.getHitVec()).isCancelled()) {
                         // If INTERACT_AT returns a false result, we assume this packet was meant for interactWith
                         if (entity.applyPlayerInteraction(this.playerEntity, packetIn.getHitVec(), hand) != EnumActionResult.SUCCESS) {
-                            this.playerEntity.func_190775_a(entity, hand);
+                            this.playerEntity.interactOn(entity, hand);
                         }
                     }
                 } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
@@ -646,7 +646,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
 
                     if (entity instanceof EntityItem || entity instanceof EntityXPOrb || entity instanceof EntityArrow || entity == this.playerEntity) {
-                        this.kickPlayerFromServer("Attempting to attack an invalid entity");
+                        this.disconnect("Attempting to attack an invalid entity");
                         this.serverController.logWarning("Player " + this.playerEntity.getName() + " tried to attack an invalid entity");
                         return;
                     }

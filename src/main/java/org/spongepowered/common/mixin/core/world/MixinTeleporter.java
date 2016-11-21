@@ -443,7 +443,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         }
 
         if (closest < 0.0D) {
-            yAdjustedTarget = MathHelper.clamp_int(yAdjustedTarget, 70, this.worldServerInstance.getActualHeight() - 10);
+            yAdjustedTarget = MathHelper.clamp(yAdjustedTarget, 70, this.worldServerInstance.getActualHeight() - 10);
             yFinalTarget = yAdjustedTarget;
 
             for (int j7 = -1; j7 <= 1; ++j7) {
@@ -479,7 +479,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                     int i12 = yFinalTarget + i10;
                     int l12 = zFinalTarget + (i9 - 1) * targetDirOffset;
                     BlockPos blockpos = new BlockPos(i11, i12, l12);
-                    this.worldServerInstance.func_190524_a(blockpos, this.worldServerInstance.getBlockState(blockpos).getBlock(), blockpos);
+                    this.worldServerInstance.neighborChanged(blockpos, this.worldServerInstance.getBlockState(blockpos).getBlock(), blockpos);
                 }
             }
         }

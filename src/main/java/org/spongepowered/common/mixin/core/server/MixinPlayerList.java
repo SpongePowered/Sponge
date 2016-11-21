@@ -472,7 +472,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         // ### PHASE 2 ### Remove player from current dimension
         playerIn.getServerWorld().getEntityTracker().removePlayerFromTrackers(playerIn);
-        playerIn.getServerWorld().getEntityTracker().untrackEntity(playerIn);
+        playerIn.getServerWorld().getEntityTracker().untrack(playerIn);
         playerIn.getServerWorld().getPlayerChunkMap().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
         this.mcServer.worldServerForDimension(playerIn.dimension).removeEntityDangerously(playerIn);
@@ -654,7 +654,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
         ((IMixinEntity) playerIn).setLocationAndAngles(event.getToTransform());
         playerIn.setWorld(toWorld);
-        toWorld.spawnEntityInWorld(playerIn);
+        toWorld.spawnEntity(playerIn);
         toWorld.updateEntityWithOptionalForce(playerIn, false);
         this.preparePlayer(playerIn, fromWorld);
         playerIn.connection.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
@@ -708,8 +708,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
         if (!(pOld instanceof WorldProviderEnd)) {
             oldWorldIn.theProfiler.startSection("placing");
-            x = (double)MathHelper.clamp_int((int)x, -29999872, 29999872);
-            z = (double)MathHelper.clamp_int((int)z, -29999872, 29999872);
+            x = (double)MathHelper.clamp((int)x, -29999872, 29999872);
+            z = (double)MathHelper.clamp((int)z, -29999872, 29999872);
 
             if (entityIn.isEntityAlive()) {
                 entityIn.setLocationAndAngles(x, y, z, entityIn.rotationYaw, entityIn.rotationPitch);
@@ -755,7 +755,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         entityIn.setLocationAndAngles(event.getToTransform().getPosition().getX(), event.getToTransform().getPosition().getY(), event.getToTransform().getPosition().getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
-        toWorld.spawnEntityInWorld(entityIn);
+        toWorld.spawnEntity(entityIn);
         toWorld.updateEntityWithOptionalForce(entityIn, false);
         entityIn.setWorld(toWorld);
     }
@@ -770,11 +770,11 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     }
 
     @Inject(method = "setPlayerManager", at = @At("HEAD"), cancellable = true)
-    private void onSetPlayerManager(WorldServer[] worldServers, CallbackInfo callbackInfo) {
+    private void onSetPlayerManager(WorldServer[] worlds, CallbackInfo callbackInfo) {
         if (this.playerNBTManagerObj == null) {
-            this.playerNBTManagerObj = worldServers[0].getSaveHandler().getPlayerNBTManager();
+            this.playerNBTManagerObj = worlds[0].getSaveHandler().getPlayerNBTManager();
             // This is already added in our world constructor
-            //worldServers[0].getWorldBorder().addListener(new PlayerBorderListener(0));
+            //worlds[0].getWorldBorder().addListener(new PlayerBorderListener(0));
         }
         callbackInfo.cancel();
     }
@@ -842,7 +842,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Spawn player into level
         WorldServer level = this.mcServer.worldServerForDimension(player.dimension);
         // TODO direct this appropriately
-        level.spawnEntityInWorld(player);
+        level.spawnEntity(player);
         this.preparePlayer(player, null);
 
         // We always want to cancel.

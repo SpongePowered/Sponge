@@ -139,13 +139,13 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                     double d0 = this.angler.posX - this.posX;
                     double d1 = this.angler.posY - this.posY;
                     double d2 = this.angler.posZ - this.posZ;
-                    double d3 = (double)MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
+                    double d3 = (double)MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                     double d4 = 0.1D;
                     entityitem.motionX = d0 * d4;
-                    entityitem.motionY = d1 * d4 + (double)MathHelper.sqrt_double(d3) * 0.08D;
+                    entityitem.motionY = d1 * d4 + (double)MathHelper.sqrt(d3) * 0.08D;
                     entityitem.motionZ = d2 * d4;
-                    this.world.spawnEntityInWorld(entityitem);
-                    this.angler.world.spawnEntityInWorld(new EntityXPOrb(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D, this.rand.nextInt(6) + 1));
+                    this.world.spawnEntity(entityitem);
+                    this.angler.world.spawnEntity(new EntityXPOrb(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D, this.rand.nextInt(6) + 1));
                 } // Sponge end
             }
 

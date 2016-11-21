@@ -81,7 +81,7 @@ public class ZombieDataProcessor
             return values;
         }
 
-        values.put(Keys.VILLAGER_ZOMBIE_PROFESSION, EntityUtil.validateProfession(((EntityZombieVillager) dataHolder).func_190736_dl()));
+        values.put(Keys.VILLAGER_ZOMBIE_PROFESSION, EntityUtil.validateProfession(((EntityZombieVillager) dataHolder).getProfession()));
         return values;
     }
 

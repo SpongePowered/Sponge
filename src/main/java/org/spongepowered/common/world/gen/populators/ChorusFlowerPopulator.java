@@ -98,7 +98,7 @@ public class ChorusFlowerPopulator implements ChorusFlower {
     private float func_185960_a(int x, int z, int p_185960_3_, int p_185960_4_) {
         float f = x * 2 + p_185960_3_;
         float f1 = z * 2 + p_185960_4_;
-        float f2 = 100.0F - MathHelper.sqrt_float(f * f + f1 * f1) * 8.0F;
+        float f2 = 100.0F - MathHelper.sqrt(f * f + f1 * f1) * 8.0F;
 
         if (f2 > 80.0F) {
             f2 = 80.0F;
@@ -117,7 +117,7 @@ public class ChorusFlowerPopulator implements ChorusFlower {
                     float f3 = (MathHelper.abs(k) * 3439.0F + MathHelper.abs(l) * 147.0F) % 13.0F + 9.0F;
                     f = p_185960_3_ - i * 2;
                     f1 = p_185960_4_ - j * 2;
-                    float f4 = 100.0F - MathHelper.sqrt_float(f * f + f1 * f1) * f3;
+                    float f4 = 100.0F - MathHelper.sqrt(f * f + f1 * f1) * f3;
 
                     if (f4 > 80.0F) {
                         f4 = 80.0F;

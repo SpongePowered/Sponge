@@ -46,7 +46,7 @@ public interface IMixinEntityVillager$ITradeList extends TradeOfferListMutator, 
         for (TradeOffer offer : tradeOffers) {
             tempList.add(TradeOfferUtil.toNative(offer));
         }
-        func_190888_a((IMerchant) owner, tempList, random);
+        addMerchantRecipe((IMerchant) owner, tempList, random);
         tradeOffers.clear();
         for (MerchantRecipe recipe : tempList) {
             tradeOffers.add(TradeOfferUtil.fromNative(recipe));

@@ -79,7 +79,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
 
     @Shadow @Final private double[] heightMap;
     @Shadow @Final private boolean mapFeaturesEnabled;
-    @Shadow @Final private net.minecraft.world.World worldObj;
+    @Shadow @Final private net.minecraft.world.World world;
     @Shadow private ChunkProviderSettings settings;
     @Shadow @Final private Random rand;
 
@@ -148,7 +148,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
             generator.getPopulators().add((Populator) this.oceanMonumentGenerator);
         }
 
-        if (this.settings.field_191077_z && this.mapFeaturesEnabled) {
+        if (this.settings.useMansions && this.mapFeaturesEnabled) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.field_191060_C);
             generator.getPopulators().add((Populator) this.field_191060_C);
         }
@@ -160,7 +160,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
                     .height(VariableAmount.baseWithRandomAddition(0, 256))
                     .build();
             FilteredPopulator filtered = new FilteredPopulator(lake, (c) -> {
-                Biome biomegenbase = this.worldObj.getBiome(VecHelper.toBlockPos(c.getBlockMin()).add(16, 0, 16));
+                Biome biomegenbase = this.world.getBiome(VecHelper.toBlockPos(c.getBlockMin()).add(16, 0, 16));
                 return biomegenbase != Biomes.DESERT && biomegenbase != Biomes.DESERT_HILLS;
             });
             filtered.setRequiredFlags(WorldGenConstants.VILLAGE_FLAG);

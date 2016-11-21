@@ -185,7 +185,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract void openGuiHorseInventory(AbstractHorse horse, IInventory horseInventory);
 
     // Inventory
-    @Shadow public abstract void addChatMessage(ITextComponent component);
+    @Shadow public abstract void sendMessage(ITextComponent component);
     @Shadow public abstract void closeScreen();
     @Shadow public int currentWindowId;
     @Shadow private void getNextWindowId() { }
@@ -286,7 +286,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
         if (entitylivingbase != null) {
-            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.func_191301_a(entitylivingbase));
+            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
 
             if (entitylist$entityegginfo != null) {
                 this.addStat(entitylist$entityegginfo.entityKilledByStat);
@@ -746,7 +746,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         //final Cause cause = Cause.source(SpawnCause.builder().type(InternalSpawnTypes.DROPPED_ITEM).build()).named(NamedCause.OWNER, this).build();
         // ASK MUMFREY HOW TO GET THE FRIGGING SLOT FOR THE EVENT?!
 
-        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.func_190916_E() : 1), false, true);
+        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.getCount() : 1), false, true);
     }
 
     @Override

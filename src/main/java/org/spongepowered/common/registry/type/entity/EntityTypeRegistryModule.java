@@ -185,11 +185,11 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     }
 
     private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
-    	Class<? extends Entity> cls = EntityList.field_191308_b.getObject(new ResourceLocation(mcName));
+    	Class<? extends Entity> cls = EntityList.REGISTRY.getObject(new ResourceLocation(mcName));
         if (cls == null) {
             throw new IllegalArgumentException("No class mapping for entity name " + mcName);
         }
-        return new SpongeEntityType(EntityList.field_191308_b.getIDForObject(cls), spongeName, cls,
+        return new SpongeEntityType(EntityList.REGISTRY.getIDForObject(cls), spongeName, cls,
                 new SpongeTranslation("entity." + mcName + ".name"));
     }
 
@@ -201,8 +201,8 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         String entityFullName = String.format("%s.%s", SpongeImpl.ECOSYSTEM_NAME, entityName);
         ResourceLocation location = new ResourceLocation(entityFullName);
 
-        EntityList.field_191308_b.register(entityId, location, entityClass);
-        EntityList.field_191309_d.add(location);
+        EntityList.REGISTRY.register(entityId, location, entityClass);
+        EntityList.KNOWN_TYPES.add(location);
 //        EntityList.field_191311_g.set(entityId, entityName);
 
         return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);

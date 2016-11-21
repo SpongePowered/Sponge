@@ -43,13 +43,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class MixinBehaviorProjectileDispense extends BehaviorDefaultDispenseItem {
 
     @Redirect(method = "dispenseStack", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
-    public boolean onSpawnEntityInWorld(World world, Entity entity, IBlockSource source, ItemStack stack) {
+            target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
+    public boolean onspawnEntity(World world, Entity entity, IBlockSource source, ItemStack stack) {
         TileEntity tileEntity = source.getBlockTileEntity();
         if (entity instanceof Projectile && tileEntity instanceof ProjectileSource) {
             ((Projectile) entity).setShooter((ProjectileSource) tileEntity);
         }
-        return world.spawnEntityInWorld(entity);
+        return world.spawnEntity(entity);
     }
 
 }

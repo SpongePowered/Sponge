@@ -289,7 +289,7 @@ public final class NbtDataUtil {
 
     public static void setLoreToNBT(ItemStack stack, List<Text> lore) {
         final NBTTagList list =  SpongeTexts.asLegacy(lore);
-        stack.func_190925_c(ITEM_DISPLAY).setTag(ITEM_LORE, list); // setSubCompound
+        stack.getOrCreateSubCompound(ITEM_DISPLAY).setTag(ITEM_LORE, list); // setSubCompound
     }
 
     public static boolean hasColorFromNBT(ItemStack stack) {
@@ -314,7 +314,7 @@ public final class NbtDataUtil {
 
     public static void setColorToNbt(ItemStack stack, Color color) {
         final int mojangColor = ColorUtil.javaColorToMojangColor(color);
-        stack.func_190925_c(ITEM_DISPLAY).setInteger(ITEM_COLOR, mojangColor);
+        stack.getOrCreateSubCompound(ITEM_DISPLAY).setInteger(ITEM_COLOR, mojangColor);
     }
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {

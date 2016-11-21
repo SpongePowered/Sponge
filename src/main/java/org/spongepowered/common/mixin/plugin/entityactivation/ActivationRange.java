@@ -235,10 +235,10 @@ public class ActivationRange {
             ((IModData_Activation) player).setActivatedTick(world.getWorldInfo().getWorldTotalTime());
             growBb(maxBB, player.getEntityBoundingBox(), maxRange, 256, maxRange);
 
-            int i = MathHelper.floor_double(maxBB.minX / 16.0D);
-            int j = MathHelper.floor_double(maxBB.maxX / 16.0D);
-            int k = MathHelper.floor_double(maxBB.minZ / 16.0D);
-            int l = MathHelper.floor_double(maxBB.maxZ / 16.0D);
+            int i = MathHelper.floor(maxBB.minX / 16.0D);
+            int j = MathHelper.floor(maxBB.maxX / 16.0D);
+            int k = MathHelper.floor(maxBB.minZ / 16.0D);
+            int l = MathHelper.floor(maxBB.maxZ / 16.0D);
 
             for (int i1 = i; i1 <= j; ++i1) {
                 for (int j1 = k; j1 <= l; ++j1) {
@@ -338,7 +338,7 @@ public class ActivationRange {
      */
     public static boolean checkEntityImmunities(Entity entity) {
         // quick checks.
-        if (entity.isInWater() || entity.field_190534_ay > 0) {
+        if (entity.isInWater() || entity.fire > 0) {
             return true;
         }
         if (!(entity instanceof EntityArrow)) {
@@ -409,8 +409,8 @@ public class ActivationRange {
         }
 
         // Make sure not on edge of unloaded chunk
-        int x = MathHelper.floor_double(entity.posX);
-        int z = MathHelper.floor_double(entity.posZ);
+        int x = MathHelper.floor(entity.posX);
+        int z = MathHelper.floor(entity.posZ);
         Chunk chunk = isActive ? ((IMixinChunkProviderServer) ((WorldServer) entity.world).getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
         if (isActive && !(chunk != null && ((IMixinChunk) chunk).areNeighborsLoaded())) {
             isActive = false;

@@ -58,7 +58,7 @@ public class FallingBlockDataProcessor extends AbstractEntityDataProcessor<Entit
         entity.fallHurtAmount = ((Double) keyValues.get(Keys.FALL_DAMAGE_PER_BLOCK)).floatValue();
         entity.fallHurtMax = ((Double) keyValues.get(Keys.MAX_FALL_DAMAGE)).intValue();
         entity.fallTile = (IBlockState) keyValues.get(Keys.FALLING_BLOCK_STATE);
-        entity.canSetAsBlock = (Boolean) keyValues.get(Keys.CAN_PLACE_AS_BLOCK);
+        entity.dontSetBlock = !(Boolean) keyValues.get(Keys.CAN_PLACE_AS_BLOCK);
         entity.shouldDropItem = (Boolean) keyValues.get(Keys.CAN_DROP_AS_ITEM);
         entity.fallTime = (Integer) keyValues.get(Keys.FALL_TIME);
         entity.hurtEntities = (Boolean) keyValues.get(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES);
@@ -71,7 +71,7 @@ public class FallingBlockDataProcessor extends AbstractEntityDataProcessor<Entit
                 .put(Keys.FALL_DAMAGE_PER_BLOCK, (double)entity.fallHurtAmount)
                 .put(Keys.MAX_FALL_DAMAGE, (double)entity.fallHurtMax)
                 .put(Keys.FALLING_BLOCK_STATE, entity.fallTile)
-                .put(Keys.CAN_PLACE_AS_BLOCK, entity.canSetAsBlock)
+                .put(Keys.CAN_PLACE_AS_BLOCK, !entity.dontSetBlock)
                 .put(Keys.CAN_DROP_AS_ITEM, entity.shouldDropItem)
                 .put(Keys.FALL_TIME, entity.fallTime)
                 .put(Keys.FALLING_BLOCK_CAN_HURT_ENTITIES, entity.hurtEntities)

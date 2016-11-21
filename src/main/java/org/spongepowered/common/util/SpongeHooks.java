@@ -285,12 +285,12 @@ public class SpongeHooks {
         if (maxBoundingBoxSize <= 0) {
             return false;
         }
-        int x = MathHelper.floor_double(aabb.minX);
-        int x1 = MathHelper.floor_double(aabb.maxX + 1.0D);
-        int y = MathHelper.floor_double(aabb.minY);
-        int y1 = MathHelper.floor_double(aabb.maxY + 1.0D);
-        int z = MathHelper.floor_double(aabb.minZ);
-        int z1 = MathHelper.floor_double(aabb.maxZ + 1.0D);
+        int x = MathHelper.floor(aabb.minX);
+        int x1 = MathHelper.floor(aabb.maxX + 1.0D);
+        int y = MathHelper.floor(aabb.minY);
+        int y1 = MathHelper.floor(aabb.maxY + 1.0D);
+        int z = MathHelper.floor(aabb.minZ);
+        int z1 = MathHelper.floor(aabb.maxZ + 1.0D);
 
         int size = Math.abs(x1 - x) * Math.abs(y1 - y) * Math.abs(z1 - z);
         if (size > maxBoundingBoxSize) {

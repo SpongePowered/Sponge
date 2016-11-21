@@ -38,14 +38,10 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
 import org.spongepowered.api.item.inventory.type.TileEntityInventory;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -63,12 +59,9 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(TileEntityHopper.class)
@@ -86,7 +79,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(5).build();
-        this.lens = new OrderedInventoryLensImpl(0, 5, 1, slots);
+        this.lens = new OrderedInventoryLensImpl(0, 5, 1, this.slots);
     }
 
     @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"))
@@ -119,7 +112,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
 
     @Override
     public void setCustomDisplayName(String customName) {
-        ((TileEntityHopper) (Object) this).func_190575_a(customName); // setCustomName
+        ((TileEntityHopper) (Object) this).setCustomName(customName);
     }
 
     @SuppressWarnings("unchecked")

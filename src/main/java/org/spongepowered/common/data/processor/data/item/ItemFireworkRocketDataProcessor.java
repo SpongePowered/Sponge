@@ -63,7 +63,7 @@ public class ItemFireworkRocketDataProcessor
 
     @Override
     protected Optional<Integer> getVal(ItemStack itemStack) {
-        NBTTagCompound fireworks = itemStack.func_190925_c("Fireworks");
+        NBTTagCompound fireworks = itemStack.getOrCreateSubCompound("Fireworks");
         if (fireworks.hasKey("Flight")) {
             return Optional.of((int) fireworks.getByte("Flight"));
         }
@@ -72,7 +72,7 @@ public class ItemFireworkRocketDataProcessor
 
     @Override
     protected boolean set(ItemStack itemStack, Integer modifier) {
-        NBTTagCompound fireworks = itemStack.func_190925_c("Fireworks");
+        NBTTagCompound fireworks = itemStack.getOrCreateSubCompound("Fireworks");
         fireworks.setByte("Flight", modifier.byteValue());
         return true;
     }

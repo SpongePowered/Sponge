@@ -116,13 +116,13 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
 
         for (int k = 0; k < height; ++k) {
             float f = (1.0F - (float) k / (float) height) * width;
-            int l = MathHelper.ceiling_float_int(f);
+            int l = MathHelper.ceil(f);
 
             for (int i1 = -l; i1 <= l; ++i1) {
-                float f1 = MathHelper.abs_int(i1) - 0.25F;
+                float f1 = MathHelper.abs(i1) - 0.25F;
 
                 for (int j1 = -l; j1 <= l; ++j1) {
-                    float f2 = MathHelper.abs_int(j1) - 0.25F;
+                    float f2 = MathHelper.abs(j1) - 0.25F;
 
                     if ((i1 == 0 && j1 == 0 || f1 * f1 + f2 * f2 <= f * f)
                             && (i1 != -l && i1 != l && j1 != -l && j1 != l || rand.nextFloat() <= 0.75F)) {

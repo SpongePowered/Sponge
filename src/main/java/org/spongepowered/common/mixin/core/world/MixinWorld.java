@@ -234,7 +234,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
     @Shadow public abstract MinecraftServer getMinecraftServer();
     // Methods needed for MixinWorldServer & Tracking
-    @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entity); // This is overridden in MixinWorldServer
+    @Shadow public abstract boolean spawnEntity(net.minecraft.entity.Entity entity); // This is overridden in MixinWorldServer
     @Shadow public abstract void updateAllPlayersSleepingFlag();
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state);
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
@@ -995,7 +995,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return entities;
     }
 
-    @Redirect(method = "func_190525_a", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
+    @Redirect(method = "getClosestPlayer(DDDDLcom/google/common/base/Predicate;)Lnet/minecraft/entity/player/EntityPlayer;", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     private boolean onGetClosestPlayerCheck(com.google.common.base.Predicate<net.minecraft.entity.Entity> predicate, Object entityPlayer) {
         EntityPlayer player = (EntityPlayer) entityPlayer;
         IMixinEntity mixinEntity = (IMixinEntity) player;
@@ -1269,7 +1269,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.startTileTickTimer(); // Sponge
             net.minecraft.tileentity.TileEntity tileentity = iterator.next();
 
-            if (!tileentity.isInvalid() && tileentity.hasWorldObj()) {
+            if (!tileentity.isInvalid() && tileentity.hasWorld()) {
                 BlockPos blockpos = tileentity.getPos();
 
                 if (this.isBlockLoaded(blockpos) && this.worldBorder.contains(blockpos)) {

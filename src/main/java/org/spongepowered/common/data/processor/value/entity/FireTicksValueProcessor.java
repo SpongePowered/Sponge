@@ -45,7 +45,7 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof Entity) {
-            if (((Entity) container).field_190534_ay >= DataConstants.MINIMUM_FIRE_TICKS) {
+            if (((Entity) container).fire >= DataConstants.MINIMUM_FIRE_TICKS) {
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
                 builder.replace(getApiValueFromContainer(container).get().asImmutable());
                 builder.replace(container.getValue(Keys.FIRE_DAMAGE_DELAY).get().asImmutable());
@@ -68,14 +68,14 @@ public class FireTicksValueProcessor extends AbstractSpongeValueProcessor<Entity
 
     @Override
     protected boolean set(Entity container, Integer value) {
-        container.field_190534_ay = value;
+        container.fire = value;
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(Entity container) {
-        if (container.field_190534_ay > 0) {
-            return Optional.of(container.field_190534_ay);
+        if (container.fire > 0) {
+            return Optional.of(container.fire);
         }
         return Optional.empty();
     }

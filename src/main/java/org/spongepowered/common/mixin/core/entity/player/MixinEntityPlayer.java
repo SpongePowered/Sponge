@@ -111,7 +111,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     private static final String WORLD_PLAY_SOUND_AT =
             "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
-    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
+    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z";
     private static final String PLAYER_COLLIDE_ENTITY = "Lnet/minecraft/entity/Entity;onCollideWithPlayer(Lnet/minecraft/entity/player/EntityPlayer;)V";
 
     @Shadow public Container inventoryContainer;
@@ -333,7 +333,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Nullable
     @Overwrite
     public EntityItem dropItem(@Nullable ItemStack droppedItem, boolean dropAround, boolean traceItem) {
-        if (droppedItem == null || droppedItem.func_190916_E() == 0 || droppedItem.getItem() == null) {
+        if (droppedItem == null || droppedItem.getCount() == 0 || droppedItem.getItem() == null) {
             return null;
         } else if (this.world.isRemote) {
             double d0 = this.posY - 0.30000001192092896D + (double) this.getEyeHeight();
@@ -367,8 +367,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             ItemStack itemstack = this.dropItemAndGetStack(entityitem);
 
             if (traceItem) {
-                if (!itemstack.func_190926_b()) {
-                    this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.func_190916_E());
+                if (!itemstack.isEmpty()) {
+                    this.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
                 }
 
                 this.addStat(StatList.DROP);
@@ -391,7 +391,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Overwrite
     @Nullable
     protected ItemStack dropItemAndGetStack(EntityItem p_184816_1_) {
-        this.world.spawnEntityInWorld(p_184816_1_);
+        this.world.spawnEntity(p_184816_1_);
         return p_184816_1_.getEntityItem();
     }
 
@@ -641,10 +641,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             }
                         }
 
-                        if(!itemstack1.func_190926_b() && targetEntity instanceof EntityLivingBase) {
+                        if(!itemstack1.isEmpty() && targetEntity instanceof EntityLivingBase) {
                             itemstack1.hitEntity((EntityLivingBase)targetEntity, (EntityPlayer) (Object) this);
-                            if(itemstack1.func_190926_b()) {
-                                this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.field_190927_a);
+                            if(itemstack1.isEmpty()) {
+                                this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
                             }
                         }
 

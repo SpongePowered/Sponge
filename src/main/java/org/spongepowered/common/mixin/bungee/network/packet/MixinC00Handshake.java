@@ -41,9 +41,8 @@ public abstract class MixinC00Handshake {
     public String onReadPacketData(PacketBuffer buf, int value) {
         if (!SpongeImpl.getGlobalConfig().getConfig().getModules().usePluginBungeeCord()
                 || !SpongeImpl.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding()) {
-            return buf.readStringFromBuffer(255);
-        } else {
-            return buf.readStringFromBuffer(Short.MAX_VALUE);
+            return buf.readString(255);
         }
+        return buf.readString(Short.MAX_VALUE);
     }
 }

@@ -71,7 +71,7 @@ public abstract class ItemStackUtil {
     public static net.minecraft.item.ItemStack cloneDefensiveNative(@Nullable net.minecraft.item.ItemStack stack, int newSize) {
         net.minecraft.item.ItemStack clone = stack.copy();
         if (clone != null) {
-            clone.func_190920_e(newSize);
+            clone.setCount(newSize);
         }
         return clone;
     }
@@ -134,7 +134,7 @@ public abstract class ItemStackUtil {
 
     @Nullable
     public static net.minecraft.item.ItemStack fromSnapshotToNative(@Nullable ItemStackSnapshot snapshot) {
-        return snapshot == null ? net.minecraft.item.ItemStack.field_190927_a : snapshot == ItemStackSnapshot.NONE ? net.minecraft.item.ItemStack.field_190927_a: toNative(snapshot.createStack());
+        return snapshot == null ? net.minecraft.item.ItemStack.EMPTY : snapshot == ItemStackSnapshot.NONE ? net.minecraft.item.ItemStack.EMPTY: toNative(snapshot.createStack());
     }
 
     @Nullable

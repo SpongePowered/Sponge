@@ -75,7 +75,7 @@ public abstract class MixinRConConsoleSource implements ICommandSender, IMixinCo
      * Add newlines between output lines for a command
      * @param component
      */
-    @Inject(method = "addChatMessage", at = @At("RETURN"))
+    @Inject(method = "sendMessage", at = @At("RETURN"))
     public void addNewlines(ITextComponent component, CallbackInfo ci) {
         this.buffer.append('\n');
     }

@@ -175,7 +175,7 @@ public final class EntityUtil {
         final Vector3d toPosition = toTransform.getPosition();
         entity.setLocationAndAngles(toPosition.getX(), toPosition.getY(), toPosition.getZ(), (float) toTransform.getYaw(), (float) toTransform.getPitch());
         entity.world = toWorld;
-        toWorld.spawnEntityInWorld(entity);
+        toWorld.spawnEntity(entity);
         toWorld.updateEntityWithOptionalForce(entity, false);
         entity.world.theProfiler.endSection();
 
@@ -700,9 +700,9 @@ public final class EntityUtil {
         if (entity instanceof EntityPlayer) {
             fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
             fromWorld.getPlayerChunkMap().removePlayer((EntityPlayerMP) entity);
-            mcServer.getPlayerList().getPlayerList().remove(entity);
+            mcServer.getPlayerList().getPlayers().remove(entity);
         } else {
-            fromWorld.getEntityTracker().untrackEntity(entity);
+            fromWorld.getEntityTracker().untrack(entity);
         }
 
         entity.world.removeEntityDangerously(entity);
@@ -742,8 +742,8 @@ public final class EntityUtil {
             entityPlayerMP.setSneaking(false);
             mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
             toWorld.getPlayerChunkMap().addPlayer(entityPlayerMP);
-            toWorld.spawnEntityInWorld(entityPlayerMP);
-            mcServer.getPlayerList().getPlayerList().add(entityPlayerMP);
+            toWorld.spawnEntity(entityPlayerMP);
+            mcServer.getPlayerList().getPlayers().add(entityPlayerMP);
             entityPlayerMP.interactionManager.setWorld(toWorld);
             entityPlayerMP.addSelfToInternalCraftingInventory();
             entityPlayerMP.setHealth(entityPlayerMP.getHealth());
@@ -753,7 +753,7 @@ public final class EntityUtil {
             entityPlayerMP.sendPlayerAbilities();
         } else {
             entity.setWorld(toWorld);
-            toWorld.spawnEntityInWorld(entity);
+            toWorld.spawnEntity(entity);
         }
 
         fromWorld.resetUpdateEntityTick();
@@ -793,8 +793,8 @@ public final class EntityUtil {
 
         if (!(pOld instanceof WorldProviderEnd)) {
             fromWorld.theProfiler.startSection("placing");
-            x = (double) MathHelper.clamp_int((int)x, -29999872, 29999872);
-            z = (double)MathHelper.clamp_int((int)z, -29999872, 29999872);
+            x = (double) MathHelper.clamp((int)x, -29999872, 29999872);
+            z = (double)MathHelper.clamp((int)z, -29999872, 29999872);
 
             if (entity.isEntityAlive()) {
                 entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
@@ -825,7 +825,7 @@ public final class EntityUtil {
         final double posX = entity.posX;
         final double posY = entity.posY + offsetY;
         final double posZ = entity.posZ;
-        if (itemStack.func_190916_E() == 0 || itemStack.getItem() == null) {
+        if (itemStack.isEmpty()) {
             return null;
         }
         // FIRST we want to throw the DropItemEvent.PRE
@@ -853,7 +853,7 @@ public final class EntityUtil {
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
 
-        if (item.func_190916_E() != 0 && item.getItem() != null) {
+        if (item.isEmpty()) {
             if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
@@ -886,7 +886,7 @@ public final class EntityUtil {
                 return entityitem;
             }
             // FINALLY - Spawn the entity in the world if all else didn't fail
-            entity.world.spawnEntityInWorld(entityitem);
+            entity.world.spawnEntity(entityitem);
             return entityitem;
         }
         return null;
@@ -992,7 +992,7 @@ public final class EntityUtil {
 
         if (traceItem) {
             if (itemstack != null) {
-                player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.func_190916_E());
+                player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
             }
 
             player.addStat(StatList.DROP);
@@ -1028,7 +1028,7 @@ public final class EntityUtil {
     private static ItemStack dropItemAndGetStack(EntityPlayer player, EntityItem item) {
         final ItemStack stack = item.getEntityItem();
         if (stack != null) {
-            player.world.spawnEntityInWorld(item);
+            player.world.spawnEntity(item);
             return stack;
         }
         return null;

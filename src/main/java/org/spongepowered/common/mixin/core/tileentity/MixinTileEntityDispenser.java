@@ -85,7 +85,7 @@ public abstract class MixinTileEntityDispenser extends MixinTileEntityLockable i
 
     @Override
     public void setCustomDisplayName(String customName) {
-        ((TileEntityDispenser) (Object) this).func_190575_a(customName); // hasCustomName
+        ((TileEntityDispenser) (Object) this).setCustomName(customName);
     }
 
     @SuppressWarnings("unchecked")

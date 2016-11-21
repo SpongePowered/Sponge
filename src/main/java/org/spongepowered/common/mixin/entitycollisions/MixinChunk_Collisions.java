@@ -51,14 +51,14 @@ import java.util.stream.Stream;
 @Mixin(net.minecraft.world.chunk.Chunk.class)
 public class MixinChunk_Collisions {
 
-    @Shadow @Final private World worldObj;
+    @Shadow @Final private World world;
 
     @Inject(method = "getEntitiesWithinAABBForEntity",
             at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false), cancellable = true)
     public void onAddCollisionEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<? super Entity> predicate,
             CallbackInfo ci) {
         // ignore players and entities with parts (ex. EnderDragon)
-        if (this.worldObj.isRemote || entityIn == null || entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
+        if (this.world.isRemote || entityIn == null || entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
             return;
         }
 
@@ -73,7 +73,7 @@ public class MixinChunk_Collisions {
             Predicate<? super T> p_177430_4_, CallbackInfo ci) {
         // ignore player checks
         // ignore item check (ex. Hoppers)
-        if (this.worldObj.isRemote || EntityPlayer.class.isAssignableFrom(entityClass) || EntityItem.class == entityClass) {
+        if (this.world.isRemote || EntityPlayer.class.isAssignableFrom(entityClass) || EntityItem.class == entityClass) {
             return;
         }
 
@@ -83,8 +83,8 @@ public class MixinChunk_Collisions {
     }
 
     private <T extends Entity> boolean allowEntityCollision(List<T> listToFill) {
-        if (this.worldObj instanceof IMixinWorldServer) {
-            IMixinWorldServer spongeWorld = (IMixinWorldServer) this.worldObj;
+        if (this.world instanceof IMixinWorldServer) {
+            IMixinWorldServer spongeWorld = (IMixinWorldServer) this.world;
             if (spongeWorld.isProcessingExplosion()) {
                 // allow explosions
                 return true;
@@ -97,7 +97,7 @@ public class MixinChunk_Collisions {
                         BlockType blockType = tickBlock.getState().getType();
                         IModData_Collisions spongeBlock = (IModData_Collisions) blockType;
                         if (spongeBlock.requiresCollisionsCacheRefresh()) {
-                            spongeBlock.initializeCollisionState(this.worldObj);
+                            spongeBlock.initializeCollisionState(this.world);
                             spongeBlock.requiresCollisionsCacheRefresh(false);
                         }
 
@@ -105,7 +105,7 @@ public class MixinChunk_Collisions {
                     }),
                     () -> phaseContext.getSource(IModData_Collisions.class).map(spongeEntity -> {
                             if (spongeEntity.requiresCollisionsCacheRefresh()) {
-                                spongeEntity.initializeCollisionState(this.worldObj);
+                                spongeEntity.initializeCollisionState(this.world);
                                 spongeEntity.requiresCollisionsCacheRefresh(false);
                             }
 

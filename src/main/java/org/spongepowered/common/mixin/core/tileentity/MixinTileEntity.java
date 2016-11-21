@@ -109,7 +109,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "func_190560_a(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))
+    @Inject(method = "register(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))
     private static void onRegister(String name, Class clazz, CallbackInfo callbackInfo) {
         if (clazz != null) {
             TileEntityTypeRegistryModule.getInstance().doTileEntityRegistration(clazz, name);

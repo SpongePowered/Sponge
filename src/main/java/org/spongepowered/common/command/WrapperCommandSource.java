@@ -59,7 +59,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
         // ICommandSenders have a *very* basic understanding of permissions, so
         // get what we can.
-        CommandPermissions.populateNonCommandPermissions(this.data, this.sender::canCommandSenderUseCommand);
+        CommandPermissions.populateNonCommandPermissions(this.data, this.sender::canUseCommand);
         for (CommandMapping command : SpongeImpl.getGame().getCommandManager().getCommands()) {
             if (command.getCallable() instanceof MinecraftCommandWrapper) {
                 MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
@@ -98,7 +98,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
     @Override
     public void sendMessage(Text message) {
         checkNotNull(message, "message");
-        this.sender.addChatMessage(SpongeTexts.toComponent(message));
+        this.sender.sendMessage(SpongeTexts.toComponent(message));
     }
 
     @Override

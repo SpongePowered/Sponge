@@ -53,9 +53,9 @@ import java.util.Random;
 @Implements(value = @Interface(iface = IMixinAggressive.class, prefix = "aggr$"))
 public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf {
 
-    @Shadow public abstract boolean isAngry(); // isAngry
+    @Shadow public abstract boolean isAngry();
 
-    @Shadow public abstract void setAngry(boolean angry); // setAngry
+    @Shadow public abstract void setAngry(boolean angry);
 
     @Intrinsic
     public boolean aggr$isAngry() {
@@ -72,13 +72,11 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
         int random = rand.nextInt(bound);
         ItemStack stack = player.getHeldItem(hand);
         if (random == 0) {
-            stack.func_190918_g(1);
-            if (!SpongeImpl
-                    .postEvent(SpongeEventFactory.createTameEntityEvent(Cause.of(NamedCause.source(player),
+            stack.shrink(1);
+            if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(Cause.of(NamedCause.source(player),
                             NamedCause.of(TameEntityEvent.USED_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot())),
                             this))) {
-
-                stack.func_190918_g(1);
+                stack.grow(1);
                 return random;
             }
 

@@ -169,7 +169,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
     }
 
     public String getCommandPermission() {
-        return this.owner.getId().toLowerCase() + ".command." + this.command.getCommandName();
+        return this.owner.getId().toLowerCase() + ".command." + this.command.getName();
     }
 
     public PluginContainer getOwner() {
@@ -189,7 +189,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
 
     @Override
     public Optional<Text> getHelp(CommandSource source) {
-        String translation = this.command.getCommandUsage(WrapperICommandSender.of(source));
+        String translation = this.command.getUsage(WrapperICommandSender.of(source));
         if (translation == null) {
             return Optional.empty();
         }
@@ -199,7 +199,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
     @Override
     public Text getUsage(CommandSource source) {
         final ICommandSender mcSender = WrapperICommandSender.of(source);
-        String usage = this.command.getCommandUsage(mcSender);
+        String usage = this.command.getUsage(mcSender);
         if (usage == null) { // Silly modders
             return Text.of();
         }
@@ -212,7 +212,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
         }
 
         List<String> parts = new ArrayList<>(Arrays.asList(usage.split(" ")));
-        parts.removeAll(Collections.singleton("/" + this.command.getCommandName()));
+        parts.removeAll(Collections.singleton("/" + this.command.getName()));
         StringBuilder out = new StringBuilder();
         for (String s : parts) {
             out.append(s);
@@ -227,7 +227,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
             return ImmutableList.of();
         }
         @SuppressWarnings("unchecked")
-        List<String> suggestions = this.command.getTabCompletionOptions(SpongeImpl.getServer(),
+        List<String> suggestions = this.command.getTabCompletions(SpongeImpl.getServer(),
                 WrapperICommandSender.of(source), arguments.split(" ", -1), targetPosition == null ? null : VecHelper.toBlockPos(targetPosition));
         if (suggestions == null) {
             return ImmutableList.of();
@@ -237,7 +237,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
 
     @SuppressWarnings("unchecked")
     public List<String> getNames() {
-        return ImmutableList.<String>builder().add(this.command.getCommandName()).addAll(this.command.getCommandAliases()).build();
+        return ImmutableList.<String>builder().add(this.command.getName()).addAll(this.command.getAliases()).build();
     }
 
     public static void setError(Throwable error) {

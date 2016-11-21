@@ -55,7 +55,7 @@ import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 @Mixin(MobSpawnerBaseLogic.class)
 public abstract class MixinMobSpawnerBaseLogic {
 
-    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
+    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z";
     private static final String
             ANVIL_CHUNK_LOADER_READ_ENTITY =
             "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;";
@@ -100,7 +100,7 @@ public abstract class MixinMobSpawnerBaseLogic {
      */
     private static Entity readEntityFromCompoundAtWorld(NBTTagCompound compound, World world, double x, double y, double z, boolean attemptToSpawn) {
         final String entityTypeString = compound.getString(NbtDataUtil.ENTITY_TYPE_ID);
-        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(EntityList.field_191308_b.getObject(new ResourceLocation(entityTypeString)));
+        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(EntityList.REGISTRY.getObject(new ResourceLocation(entityTypeString)));
         if (type == null) {
             return null;
         }
@@ -126,7 +126,7 @@ public abstract class MixinMobSpawnerBaseLogic {
 
         entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
 
-        if (attemptToSpawn && !world.spawnEntityInWorld(entity)) {
+        if (attemptToSpawn && !world.spawnEntity(entity)) {
             return null;
         }
 

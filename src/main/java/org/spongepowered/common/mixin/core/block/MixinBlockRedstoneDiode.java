@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import net.minecraft.block.BlockDirectional;
 import net.minecraft.block.BlockHorizontal;
 import net.minecraft.block.BlockRedstoneDiode;
 import net.minecraft.block.material.Material;
@@ -51,7 +50,7 @@ public abstract class MixinBlockRedstoneDiode extends BlockHorizontal {
         EnumFacing enumfacing = state.getValue(BlockHorizontal.FACING);
         BlockPos blockpos = pos.offset(enumfacing.getOpposite());
         if (worldIn.isRemote) {
-            worldIn.func_190524_a(blockpos, this, pos);
+            worldIn.neighborChanged(blockpos, this, pos);
             worldIn.notifyNeighborsOfStateExcept(blockpos, this, enumfacing);
             ci.cancel();
             return;
@@ -59,7 +58,7 @@ public abstract class MixinBlockRedstoneDiode extends BlockHorizontal {
 
         NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent((World) worldIn, pos, java.util.EnumSet.of(enumfacing.getOpposite()));
         if (event == null || (!event.isCancelled() && !event.getNeighbors().isEmpty())) {
-            worldIn.func_190524_a(blockpos, (BlockRedstoneDiode)(Object) this, pos);
+            worldIn.neighborChanged(blockpos, (BlockRedstoneDiode)(Object) this, pos);
             worldIn.notifyNeighborsOfStateExcept(blockpos, (BlockRedstoneDiode)(Object) this, enumfacing);
         }
         // We cancel here to avoid Forge event call in SF

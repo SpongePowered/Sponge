@@ -64,6 +64,6 @@ public abstract class MixinPlayerChunkMapEntry implements IMixinPlayerChunkMapEn
     @Override
     public void markBiomesForUpdate() {
         this.updateBiomes = true;
-        this.playerChunkMap.playerInstancesToUpdate.add((PlayerChunkMapEntry) (Object) this);
+        this.playerChunkMap.dirtyEntries.add((PlayerChunkMapEntry) (Object) this);
     }
 }

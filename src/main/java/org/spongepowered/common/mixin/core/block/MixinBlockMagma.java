@@ -47,10 +47,10 @@ public abstract class MixinBlockMagma extends MixinBlock {
     private boolean onEntityWalkRedirectForMagma(Entity entity, DamageSource originalDamageSource, float damage, net.minecraft.world.World world,
             BlockPos pos, Entity original) {
         if (!world.isRemote) {
-            DamageSource.hotFloor =
+            DamageSource.HOT_FLOOR =
                     new MinecraftBlockDamageSource("hotFloor", new Location<>((World) world, VecHelper.toVector3i(pos))).setFireDamage();
-            boolean result = entity.attackEntityFrom(DamageSource.hotFloor, damage);
-            DamageSource.hotFloor = originalDamageSource;
+            boolean result = entity.attackEntityFrom(DamageSource.HOT_FLOOR, damage);
+            DamageSource.HOT_FLOOR = originalDamageSource;
             return result;
         }
         return entity.attackEntityFrom(originalDamageSource, damage);

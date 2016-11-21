@@ -54,7 +54,7 @@ public abstract class MixinCommandGameRule {
         return getGameRules(sender);
     }
 
-    @Redirect(method = "getTabCompletionOptions", at = @At(value = "INVOKE", target = GET_GAME_RULES))
+    @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE", target = GET_GAME_RULES))
     private GameRules onGetGameRules(CommandGameRule self, MinecraftServer server, MinecraftServer server2,
             ICommandSender sender, String[] args, BlockPos pos) {
         return getGameRules(sender);

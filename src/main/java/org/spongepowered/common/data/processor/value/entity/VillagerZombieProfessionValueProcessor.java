@@ -29,11 +29,9 @@ import net.minecraft.entity.monster.EntityZombieVillager;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.data.type.ZombieTypes;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
-import org.spongepowered.api.entity.living.monster.ZombieVillager;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
@@ -58,7 +56,7 @@ public class VillagerZombieProfessionValueProcessor extends AbstractSpongeValueP
     @Override
     protected boolean set(EntityZombie container, Optional<Profession> value) {
         if (value.isPresent() && container instanceof EntityZombieVillager) {
-            ((EntityZombieVillager) container).func_190733_a(((SpongeProfession) value.get()).type);
+            ((EntityZombieVillager) container).setProfession(((SpongeProfession) value.get()).type);
             return true;
         }
         return false;
@@ -67,7 +65,7 @@ public class VillagerZombieProfessionValueProcessor extends AbstractSpongeValueP
     @Override
     protected Optional<Optional<Profession>> getVal(EntityZombie container) {
         if (container instanceof EntityZombieVillager) {
-            return Optional.of(Optional.of(EntityUtil.validateProfession(((EntityZombieVillager) container).func_190736_dl())));
+            return Optional.of(Optional.of(EntityUtil.validateProfession(((EntityZombieVillager) container).getProfession())));
         }
         return Optional.empty();
     }

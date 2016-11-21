@@ -52,12 +52,12 @@ public class MixinItemFirework extends Item {
     private boolean primeCancelled;
 
     @Redirect(method = "onItemUse", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
-    private boolean onSpawnEntityInWorld(World world, Entity firework, EntityPlayer player, World worldIn, BlockPos pos, EnumHand side, EnumFacing hitX, float hitY, float hitZ, float p_180614_9_) {
+            target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
+    private boolean onspawnEntity(World world, Entity firework, EntityPlayer player, World worldIn, BlockPos pos, EnumHand side, EnumFacing hitX, float hitY, float hitZ, float p_180614_9_) {
         ((Firework) firework).setShooter((ProjectileSource) player);
         this.primeCancelled = !((IMixinEntityFireworkRocket) firework)
                 .shouldPrime(Cause.of(NamedCause.of(NamedCause.IGNITER, player)));
-        return !this.primeCancelled && world.spawnEntityInWorld(firework);
+        return !this.primeCancelled && world.spawnEntity(firework);
     }
 
     @Redirect(method = "onItemUse", at = @At(value = "FIELD", target = TARGET_CREATIVE_MODE, opcode = Opcodes.GETFIELD))

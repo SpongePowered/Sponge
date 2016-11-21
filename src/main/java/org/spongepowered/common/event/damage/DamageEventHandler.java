@@ -218,7 +218,7 @@ public class DamageEventHandler {
 
     public static Optional<Tuple<DamageModifier, Function<? super Double, Double>>> createResistanceModifier(EntityLivingBase entityLivingBase,
                                                                                                              DamageSource damageSource) {
-        if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(MobEffects.RESISTANCE) && damageSource != DamageSource.outOfWorld) {
+        if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(MobEffects.RESISTANCE) && damageSource != DamageSource.OUT_OF_WORLD) {
             PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(MobEffects.RESISTANCE));
             return Optional.of(new Tuple<>(DamageModifier.builder()
                                                .cause(Cause.of(NamedCause.of(DamageEntityEvent.RESISTANCE, effect)))
@@ -329,12 +329,12 @@ public class DamageEventHandler {
 
 
     public static Location<World> findFirstMatchingBlock(Entity entity, AxisAlignedBB bb, Predicate<IBlockState> predicate) {
-        int i = MathHelper.floor_double(bb.minX);
-        int j = MathHelper.floor_double(bb.maxX + 1.0D);
-        int k = MathHelper.floor_double(bb.minY);
-        int l = MathHelper.floor_double(bb.maxY + 1.0D);
-        int i1 = MathHelper.floor_double(bb.minZ);
-        int j1 = MathHelper.floor_double(bb.maxZ + 1.0D);
+        int i = MathHelper.floor(bb.minX);
+        int j = MathHelper.floor(bb.maxX + 1.0D);
+        int k = MathHelper.floor(bb.minY);
+        int l = MathHelper.floor(bb.maxY + 1.0D);
+        int i1 = MathHelper.floor(bb.minZ);
+        int j1 = MathHelper.floor(bb.maxZ + 1.0D);
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {

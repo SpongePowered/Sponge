@@ -156,7 +156,7 @@ public class FireworkUtils {
             NBTTagList nbtEffects = new NBTTagList();
             effects.stream().map(FireworkUtils::toNbt).forEach(nbtEffects::appendTag);
 
-            NBTTagCompound fireworks = item.func_190925_c("Fireworks");
+            NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
             fireworks.setTag("Explosions", nbtEffects);
             return true;
         }
@@ -207,7 +207,7 @@ public class FireworkUtils {
             NbtDataUtil.getOrCreateCompound(item).removeTag("Explosion");
             return true;
         } else if(item.getItem() == Items.FIREWORKS) {
-            NBTTagCompound fireworks = item.func_190925_c("Fireworks");
+            NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
             fireworks.removeTag("Explosions");
             return true;
         }

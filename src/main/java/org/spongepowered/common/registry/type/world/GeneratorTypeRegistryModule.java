@@ -75,7 +75,7 @@ public final class GeneratorTypeRegistryModule implements CatalogRegistryModule<
     public void registerAdditional() {
         for (WorldType worldType : WorldType.WORLD_TYPES) {
             if (worldType != null && !this.generatorTypeMappings.values().contains(worldType)) {
-                this.generatorTypeMappings.put(worldType.getWorldTypeName().toLowerCase(Locale.ENGLISH), (GeneratorType) worldType);
+                this.generatorTypeMappings.put(worldType.getName().toLowerCase(Locale.ENGLISH), (GeneratorType) worldType);
             }
         }
         // Re-map fields in case mods have changed vanilla world types

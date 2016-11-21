@@ -66,7 +66,7 @@ public class FireworkRocketDataProcessor extends
     @Override
     protected Optional<Integer> getVal(EntityFireworkRocket firework) {
         ItemStack item = FireworkUtils.getItem(firework);
-        NBTTagCompound fireworks = item.func_190925_c("Fireworks");
+        NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
         if (fireworks.hasKey("Flight")) {
             return Optional.of((int) fireworks.getByte("Flight"));
         }
@@ -77,7 +77,7 @@ public class FireworkRocketDataProcessor extends
     @Override
     protected boolean set(EntityFireworkRocket firework, Integer modifier) {
         ItemStack item = FireworkUtils.getItem(firework);
-        NBTTagCompound fireworks = item.func_190925_c("Fireworks");
+        NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
         fireworks.setByte("Flight", modifier.byteValue());
         ((IMixinEntityFireworkRocket) firework).setModifier(modifier.byteValue());
         return true;

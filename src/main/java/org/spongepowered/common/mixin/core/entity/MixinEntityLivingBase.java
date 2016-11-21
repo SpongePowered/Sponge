@@ -466,7 +466,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 2);
                     }
 
-                    if (source != DamageSource.drown && (!flag || amount > 0.0F)) {
+                    if (source != DamageSource.DROWN && (!flag || amount > 0.0F)) {
                         this.setBeenAttacked();
                     }
 

@@ -87,7 +87,7 @@ public abstract class MixinEntityTrackerEntry {
         }
     }
 
-    @Inject(method = "sendMetadataToAllAssociatedPlayers", at = @At("HEAD"))
+    @Inject(method = "sendMetadata", at = @At("HEAD"))
     public void onSendMetadata(CallbackInfo ci) {
         if (!(this.trackedEntity instanceof EntityHuman)) {
             return;

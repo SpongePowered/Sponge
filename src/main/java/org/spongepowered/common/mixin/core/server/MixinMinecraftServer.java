@@ -125,11 +125,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private boolean enableBonusChest;
     @Shadow private int tickCounter;
     @Shadow private String motd;
-    @Shadow public WorldServer[] worldServers;
+    @Shadow public WorldServer[] worlds;
     @Shadow private Thread serverThread;
 
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
-    @Shadow public abstract void addChatMessage(ITextComponent message);
+    @Shadow public abstract void sendMessage(ITextComponent message);
     @Shadow public abstract void initiateShutdown();
     @Shadow public abstract boolean isServerInOnlineMode();
     @Shadow public abstract boolean isServerRunning();
@@ -210,10 +210,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Player> getOnlinePlayers() {
-        if (getPlayerList() == null || getPlayerList().getPlayerList() == null) {
+        if (getPlayerList() == null || getPlayerList().getPlayers() == null) {
             return ImmutableList.of();
         }
-        return ImmutableList.copyOf((List) getPlayerList().getPlayerList());
+        return ImmutableList.copyOf((List) getPlayerList().getPlayers());
     }
 
     @Override
@@ -336,7 +336,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      */
     @Overwrite
     protected void initialWorldChunkLoad() {
-        for (WorldServer worldServer: this.worldServers) {
+        for (WorldServer worldServer: this.worlds) {
             this.prepareSpawnArea(worldServer);
         }
         this.clearCurrentTask();
@@ -566,7 +566,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         // Note: This injection must come after Forge's post world tick event or it will cause issues with mods.
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldServer;
         if (spongeWorld.getChunkGCTickInterval() > 0) {
-            worldServer.getChunkProvider().unloadQueuedChunks();
+            worldServer.getChunkProvider().tick();
         }
         return worldServer.getEntityTracker();
     }
@@ -640,7 +640,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Overwrite
     protected void saveAllWorlds(boolean dontLog)
     {
-        for (WorldServer worldserver : this.worldServers)
+        for (WorldServer worldserver : this.worlds)
         {
             if (worldserver != null)
             {

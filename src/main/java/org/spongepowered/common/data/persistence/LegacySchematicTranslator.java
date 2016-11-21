@@ -136,7 +136,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 int y = tile.getInt(DataQueries.Y_POS).get();
                 int z = tile.getInt(DataQueries.Z_POS).get();
                 TileEntityType type = TileEntityTypeRegistryModule.getInstance()
-                        .getForClass(TileEntity.field_190562_f.getObject(new ResourceLocation(tile.getString(DataQuery.of("id")).get())));
+                        .getForClass(TileEntity.REGISTRY.getObject(new ResourceLocation(tile.getString(DataQuery.of("id")).get())));
                 TileEntityArchetype archetype = new SpongeTileEntityArchetypeBuilder()
                         .state(buffer.getBlock(x - offsetX, y - offsetY, z - offsetZ))
                         .tileData(tile)

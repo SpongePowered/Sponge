@@ -193,8 +193,8 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public boolean func_191420_l() {
-        return this.inv.func_191420_l();
+    public boolean isEmpty() {
+        return this.inv.isEmpty();
     }
 
     @Override
@@ -228,8 +228,8 @@ public class CustomInventory implements IInventory, IInteractionObject {
     }
 
     @Override
-    public boolean isUseableByPlayer(EntityPlayer player) {
-        return this.inv.isUseableByPlayer(player);
+    public boolean isUsableByPlayer(EntityPlayer player) {
+        return this.inv.isUsableByPlayer(player);
     }
 
     @Override

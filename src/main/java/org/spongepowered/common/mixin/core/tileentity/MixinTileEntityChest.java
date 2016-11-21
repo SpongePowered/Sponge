@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.IInventory;
@@ -39,7 +37,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -181,7 +178,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     @Override
     public void setCustomDisplayName(String customName) {
-        ((TileEntityChest) (Object) this).func_190575_a(customName); // setCustomName
+        ((TileEntityChest) (Object) this).setCustomName(customName);
     }
 
     @SuppressWarnings({"RedundantCast", "unchecked"})

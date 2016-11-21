@@ -39,7 +39,7 @@ public abstract class MixinEntityBlazeAIFireballAttack extends EntityAIBase {
 
     @Shadow(aliases = "this$0") @Final private EntityBlaze blaze;
 
-    @ModifyArg(method = "updateTask", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntityInWorld"
+    @ModifyArg(method = "updateTask", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntity"
             + "(Lnet/minecraft/entity/Entity;)Z"))
     protected Entity onSpawnFireball(Entity entity) {
         ((IMixinGriefer) entity).setCanGrief(((IMixinGriefer) this.blaze).canGrief());

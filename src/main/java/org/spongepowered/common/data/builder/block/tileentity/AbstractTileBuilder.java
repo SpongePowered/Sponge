@@ -94,7 +94,7 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
             throw new InvalidDataException("The provided container references a world that does not exist!");
         }
 
-        Class<? extends TileEntity> clazz = (Class<? extends TileEntity>) TileEntity.field_190562_f.getObject(new ResourceLocation(container.getString(DataQueries.TILE_TYPE).get()));
+        Class<? extends TileEntity> clazz = TileEntity.REGISTRY.getObject(new ResourceLocation(container.getString(DataQueries.TILE_TYPE).get()));
         if (clazz == null) {
             // TODO do we want to throw an InvalidDataException since the class is not registered?
             return Optional.empty(); // basically we didn't manage to find the class and the class isn't even registered with MC

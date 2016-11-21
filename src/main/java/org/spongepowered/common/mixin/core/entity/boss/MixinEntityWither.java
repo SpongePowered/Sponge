@@ -94,7 +94,7 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
     }
 
     @ModifyArg(method = "launchWitherSkullToCoords", at = @At(value = "INVOKE",
-               target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
+               target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
     protected Entity onSpawnWitherSkull(Entity entity) {
         ((IMixinGriefer) entity).setCanGrief(((IMixinGriefer) this).canGrief());
         return entity;

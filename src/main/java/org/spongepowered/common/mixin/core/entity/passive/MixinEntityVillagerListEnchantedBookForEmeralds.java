@@ -52,7 +52,7 @@ public class MixinEntityVillagerListEnchantedBookForEmeralds implements TradeOff
     public TradeOffer apply(Random random) {
         checkNotNull(random, "Random cannot be null!");
         Enchantment enchantment = Enchantment.REGISTRY.getRandomObject(random);
-        int enchantmentLevel = MathHelper.getRandomIntegerInRange(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+        int enchantmentLevel = MathHelper.getInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
         ItemStack itemstack = Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, enchantmentLevel));
         int emeraldCount = 2 + random.nextInt(5 + enchantmentLevel * 10) + 3 * enchantmentLevel;
 

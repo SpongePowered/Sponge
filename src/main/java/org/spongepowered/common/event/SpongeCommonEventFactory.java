@@ -155,7 +155,7 @@ public class SpongeCommonEventFactory {
             ItemStackSnapshot targetSnapshot = null;
             if (sourceSnapshot != ItemStackSnapshot.NONE) {
                 // combined slot
-                targetSnapshot = org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemStack).quantity(itemStack.func_190916_E() + slot.getStack().func_190916_E()).build().createSnapshot();
+                targetSnapshot = org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemStack).quantity(itemStack.getCount() + slot.getStack().getCount()).build().createSnapshot();
             } else {
                 // empty slot
                 targetSnapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot();

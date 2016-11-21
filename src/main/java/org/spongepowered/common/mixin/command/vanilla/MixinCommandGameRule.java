@@ -42,7 +42,7 @@ public abstract class MixinCommandGameRule {
     @Redirect(method = "execute", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/GameRules;setOrCreateGameRule(Ljava/lang/String;Ljava/lang/String;)V"))
     private void onSetOrCreateGameRule(GameRules gameRules, String key, String value) {
-        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+        for (WorldServer world : SpongeImpl.getServer().worlds) {
             world.getGameRules().setOrCreateGameRule(key, value);
         }
     }

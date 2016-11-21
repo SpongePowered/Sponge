@@ -55,16 +55,16 @@ import javax.annotation.Nullable;
 @Mixin(BlockCactus.class)
 public abstract class MixinBlockCactus extends MixinBlock {
 
-    private static final String CACTUS_DAMAGE_FIELD = "Lnet/minecraft/util/DamageSource;cactus:Lnet/minecraft/util/DamageSource;";
+    private static final String CACTUS_DAMAGE_FIELD = "Lnet/minecraft/util/DamageSource;CACTUS:Lnet/minecraft/util/DamageSource;";
 
     @Nullable private DamageSource originalCactus;
 
     @Inject(method = "onEntityCollidedWithBlock", at = @At(value = "FIELD", target = CACTUS_DAMAGE_FIELD, opcode = Opcodes.GETSTATIC))
     public void preSetOnFire(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Entity entityIn, CallbackInfo callbackInfo) {
         if (!worldIn.isRemote) {
-            this.originalCactus = DamageSource.cactus;
+            this.originalCactus = DamageSource.CACTUS;
             Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
-            DamageSource.cactus = new MinecraftBlockDamageSource("cactus", location).setFireDamage();
+            DamageSource.CACTUS = new MinecraftBlockDamageSource("cactus", location).setFireDamage();
         }
     }
 
@@ -75,7 +75,7 @@ public abstract class MixinBlockCactus extends MixinBlock {
                 SpongeImpl.getLogger().error("Original cactus is null!");
                 Thread.dumpStack();
             }
-            DamageSource.cactus = this.originalCactus;
+            DamageSource.CACTUS = this.originalCactus;
         }
     }
 

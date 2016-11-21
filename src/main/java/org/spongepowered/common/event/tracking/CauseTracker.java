@@ -433,7 +433,7 @@ public final class CauseTracker {
             }
             else if (!minecraftWorld.isRemote && (flags & 16) == 0)
             {
-                minecraftWorld.func_190522_c(pos, block);
+                minecraftWorld.updateObservingBlocksAt(pos, block);
             }
 
             return true;
@@ -470,7 +470,7 @@ public final class CauseTracker {
         }
 
         if (flag.updateNeighbors()) { // Sponge - remove the isRemote check
-            minecraftWorld.func_190522_c(pos, iblockstate.getBlock());
+            minecraftWorld.updateObservingBlocksAt(pos, iblockstate.getBlock());
 
             if (newState.hasComparatorInputOverride()) {
                 minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
@@ -481,7 +481,7 @@ public final class CauseTracker {
     }
 
     /**
-     * This is the replacement of {@link WorldServer#spawnEntityInWorld(net.minecraft.entity.Entity)}
+     * This is the replacement of {@link WorldServer#spawnEntity(net.minecraft.entity.Entity)}
      * where it captures into phases. The causes and relations are processed by the phases.
      *
      * The difference between {@link #spawnEntityWithCause(Entity, Cause)} is that it bypasses
@@ -512,8 +512,8 @@ public final class CauseTracker {
         }
 
         // Sponge End - continue with vanilla mechanics
-        final int chunkX = MathHelper.floor_double(minecraftEntity.posX / 16.0D);
-        final int chunkZ = MathHelper.floor_double(minecraftEntity.posZ / 16.0D);
+        final int chunkX = MathHelper.floor(minecraftEntity.posX / 16.0D);
+        final int chunkZ = MathHelper.floor(minecraftEntity.posZ / 16.0D);
 
         if (!isForced && !getMixinWorld().isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
             return false;
@@ -574,8 +574,8 @@ public final class CauseTracker {
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
         // Sponge End - continue with vanilla mechanics
 
-        final int chunkX = MathHelper.floor_double(minecraftEntity.posX / 16.0D);
-        final int chunkZ = MathHelper.floor_double(minecraftEntity.posZ / 16.0D);
+        final int chunkX = MathHelper.floor(minecraftEntity.posX / 16.0D);
+        final int chunkZ = MathHelper.floor(minecraftEntity.posZ / 16.0D);
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 
         if (!isForced && !getMixinWorld().isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
