@@ -40,7 +40,7 @@ import javax.annotation.Nullable;
 @Mixin(SlotCrafting.class)
 public abstract class MixinSlotCrafting extends Slot {
 
-    @Shadow @Final private EntityPlayer thePlayer;
+    @Shadow @Final private EntityPlayer player;
 
     public MixinSlotCrafting(IInventory inventoryIn, int index, int xPosition, int yPosition) {
         super(inventoryIn, index, xPosition, yPosition);
@@ -49,8 +49,8 @@ public abstract class MixinSlotCrafting extends Slot {
     @Override
     public void putStack(@Nullable ItemStack stack) {
         super.putStack(stack);
-        if (this.thePlayer instanceof EntityPlayerMP) {
-            ((EntityPlayerMP) this.thePlayer).connection.sendPacket(new SPacketSetSlot(0, 0, stack));
+        if (this.player instanceof EntityPlayerMP) {
+            ((EntityPlayerMP) this.player).connection.sendPacket(new SPacketSetSlot(0, 0, stack));
         }
     }
 }

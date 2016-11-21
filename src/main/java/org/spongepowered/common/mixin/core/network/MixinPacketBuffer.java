@@ -379,6 +379,7 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
+    @Intrinsic
     public int cbuf$readVarInt() {
         return this.readVarInt();
     }
@@ -464,6 +465,7 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
+    @Intrinsic
     public UUID cbuf$readUniqueId() {
         return this.readUniqueId();
     }
