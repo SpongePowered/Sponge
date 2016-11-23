@@ -44,7 +44,7 @@ import org.spongepowered.common.interfaces.world.IMixinLocation;
 
 import javax.annotation.Nullable;
 
-@Mixin(value = Merchant.class, remap = false)
+@Mixin(value = Merchant.class)
 @Implements(@Interface(iface = IMerchant.class, prefix = "imerchant$"))
 public interface MixinMerchant extends Merchant {
 
