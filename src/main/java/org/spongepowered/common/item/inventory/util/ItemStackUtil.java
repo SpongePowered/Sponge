@@ -88,6 +88,10 @@ public abstract class ItemStackUtil {
         return ItemStackUtil.cloneDefensive(ItemStackUtil.toNative(stack), newSize);
     }
 
+    public static net.minecraft.item.ItemStack cloneDefensiveToNative(@Nullable ItemStack stack) {
+        return ItemStackUtil.toNative(ItemStackUtil.cloneDefensive(stack));
+    }
+
     public static Optional<ItemStack> cloneDefensiveOptional(net.minecraft.item.ItemStack stack) {
         return Optional.<ItemStack>ofNullable(ItemStackUtil.cloneDefensive(stack));
     }

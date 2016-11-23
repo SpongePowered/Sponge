@@ -342,6 +342,7 @@
         "item.inventory.TraitInventoryObservable",
         "item.inventory.MixinCustomInventory",
         "item.inventory.MixinCustomContainer",
+        "item.recipe.MixinFurnaceRecipes",
         "item.merchant.MixinMerchantRecipe",
         "nbt.MixinNBTTagCompound",
         "network.MixinNetHandlerPlayServer",
