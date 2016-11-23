@@ -240,9 +240,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
     @Shadow public abstract void immediateBlockTick(BlockPos pos, IBlockState state, Random random);
     @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
-    @Shadow public abstract void func_190524_a(BlockPos pos, final Block blockIn, BlockPos otherPos);
+    @Shadow public abstract void neighborChanged(BlockPos pos, final Block blockIn, BlockPos otherPos);
     @Shadow public abstract void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide);
-    @Shadow public abstract void func_190522_c(BlockPos pos, Block blockType);
+    @Shadow public abstract void updateObservingBlocksAt(BlockPos pos, Block blockType);
     @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType, boolean notifySelf);
     @Shadow public abstract void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
     @Shadow public abstract void updateBlockTick(BlockPos pos, Block blockIn, int delay, int priority); // this is really scheduleUpdate

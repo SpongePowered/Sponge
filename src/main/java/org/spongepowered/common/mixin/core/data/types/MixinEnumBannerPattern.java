@@ -35,17 +35,17 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(BannerPattern.class)
 public class MixinEnumBannerPattern implements BannerPatternShape {
 
-    @Shadow @Final private String field_191014_N ;
-    @Shadow @Final private String field_191015_O;
+    @Shadow @Final private String fileName;
+    @Shadow @Final private String hashname;
 
     @Override
     public String getName() {
-        return this.field_191014_N;
+        return this.fileName;
     }
 
     @Override
     public String getId() {
-        return this.field_191015_O;
+        return this.hashname;
     }
 
 }

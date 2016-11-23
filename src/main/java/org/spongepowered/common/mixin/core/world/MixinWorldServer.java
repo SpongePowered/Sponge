@@ -1211,7 +1211,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * Technically an overwrite to properly track on *server* worlds.
      */
     @Override
-    public void func_190524_a(BlockPos pos, Block blockIn, BlockPos otherPos) { // notifyBlockOfStateChange
+    public void neighborChanged(BlockPos pos, Block blockIn, BlockPos otherPos) { // notifyBlockOfStateChange
         this.getCauseTracker().notifyBlockOfStateChange(pos, blockIn, otherPos);
     }
 
@@ -1593,7 +1593,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return (PortalAgent) this.worldTeleporter;
     }
 
-    @Redirect(method = "canAddEntity", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 1))
+    @Redirect(method = "canAddEntity", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 1, remap = false))
     public void onCanAddEntityLogWarn(Logger logger, String message, Object... params) {
         // don't log anything to avoid useless spam
     }

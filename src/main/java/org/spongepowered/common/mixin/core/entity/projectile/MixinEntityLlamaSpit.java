@@ -37,11 +37,11 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 @Mixin(EntityLlamaSpit.class)
 public abstract class MixinEntityLlamaSpit extends MixinEntity implements LlamaSpit {
 
-    @Shadow public EntityLlama field_190539_a;
+    @Shadow public EntityLlama owner;
 
     @Override
     public ProjectileSource getShooter() {
-        return (ProjectileSource) this.field_190539_a;
+        return (ProjectileSource) this.owner;
     }
 
     @Override
@@ -49,6 +49,6 @@ public abstract class MixinEntityLlamaSpit extends MixinEntity implements LlamaS
         if (!(shooter instanceof EntityLlama)) {
             throw new IllegalArgumentException("Cound not set this LlamaSpit's shooter as anyone else!");
         }
-        this.field_190539_a = (EntityLlama) shooter;
+        this.owner = (EntityLlama) shooter;
     }
 }

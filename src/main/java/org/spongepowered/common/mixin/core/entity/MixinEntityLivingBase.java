@@ -127,8 +127,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected float lastDamage;
     @Shadow @Nullable protected EntityPlayer attackingPlayer;
     @Shadow protected ItemStack activeItemStack;
-    @Shadow private DamageSource field_189750_bF;
-    @Shadow private long field_189751_bG;
+    @Shadow private DamageSource lastDamageSource;
+    @Shadow private long lastDamageStamp;
     // Empty body so that we can call super() in MixinEntityPlayer
     @Shadow public void stopActiveHand() { // stopActiveHand
 
@@ -174,8 +174,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source);
     @Shadow protected abstract boolean canDropLoot();
     @Shadow public abstract Random getRNG();
-    @Shadow protected abstract void func_190629_c(EntityLivingBase p_190629_1_);
-    @Shadow public abstract boolean func_190628_d(DamageSource p_190628_1_);
+    @Shadow protected abstract void blockUsingShield(EntityLivingBase p_190629_1_);
+    @Shadow public abstract boolean checkTotemDeathProtection(DamageSource p_190628_1_);
     @Shadow private boolean canBlockDamageSource(DamageSource p_184583_1_) { // canBlockDamageSource
         return false; // Shadowed
     }
@@ -401,7 +401,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                         if (entity instanceof EntityLivingBase)
                         {
-                            this.func_190629_c((EntityLivingBase)entity);
+                            this.blockUsingShield((EntityLivingBase)entity);
                         }
                     }
 
@@ -486,7 +486,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }
 
                 if (this.getHealth() <= 0.0F) {
-                    if (!this.func_190628_d(source)) {
+                    if (!this.checkTotemDeathProtection(source)) {
                         SoundEvent soundevent = this.getDeathSound();
 
                         if (flag1 && soundevent != null) {
@@ -520,8 +520,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                 if (!flag || amount > 0.0F)
                 {
-                    this.field_189750_bF = source;
-                    this.field_189751_bG = this.world.getTotalWorldTime();
+                    this.lastDamageSource = source;
+                    this.lastDamageStamp = this.world.getTotalWorldTime();
                 }
 
                 return !flag || amount > 0.0F;

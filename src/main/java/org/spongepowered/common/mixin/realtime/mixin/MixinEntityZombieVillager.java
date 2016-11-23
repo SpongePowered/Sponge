@@ -24,24 +24,24 @@
  */
 package org.spongepowered.common.mixin.realtime.mixin;
 
-import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.monster.EntityZombieVillager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
 
-@Mixin(EntityZombie.class)
-public abstract class MixinEntityZombie {
+@Mixin(EntityZombieVillager.class)
+public abstract class MixinEntityZombieVillager {
 
-    private static final String ENTITY_ZOMBIE_GET_CONVERSION_BOOST_METHOD = "Lnet/minecraft/entity/monster/EntityZombie;getConversionTimeBoost()I";
+    private static final String ENTITY_ZOMBIE_GET_CONVERSION_BOOST_METHOD = "Lnet/minecraft/entity/monster/EntityZombieVillager;getConversionProgress()I";
 
-    @Shadow protected abstract int getConversionTimeBoost();
+    @Shadow protected abstract int getConversionProgress();
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = ENTITY_ZOMBIE_GET_CONVERSION_BOOST_METHOD, ordinal = 0))
-    public int fixupConversionTimeBoost(EntityZombie self) {
+    public int fixupConversionTimeBoost(EntityZombieVillager self) {
         int ticks = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks();
-        return this.getConversionTimeBoost() * ticks;
+        return this.getConversionProgress() * ticks;
     }
 
 }

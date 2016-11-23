@@ -38,11 +38,11 @@ import java.util.List;
 @Mixin(EntityVindicator.class)
 public abstract class MixinEntityVindicator extends MixinEntityMob implements Vindicator {
 
-    @Shadow private boolean field_190643_b;
+    @Shadow private boolean johnny;
 
     @Override
     public Value<Boolean> johnny() {
-        return new SpongeValue<>(Keys.JOHNNY_VINDICATOR, false, this.field_190643_b);
+        return new SpongeValue<>(Keys.JOHNNY_VINDICATOR, false, this.johnny);
     }
 
     @Override

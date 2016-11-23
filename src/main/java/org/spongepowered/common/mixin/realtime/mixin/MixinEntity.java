@@ -40,18 +40,18 @@ public abstract class MixinEntity {
     private static final String ENTITY_RIDABLE_COOLDOWN_FIELD = "Lnet/minecraft/entity/Entity;rideCooldown:I";
     private static final String ENTITY_PORTAL_COUNTER_FIELD = "Lnet/minecraft/entity/Entity;portalCounter:I";
     @Shadow protected int rideCooldown;
-    @Shadow public World worldObj;
+    @Shadow public World world;
     @Shadow protected int portalCounter;
 
     @Redirect(method = "onEntityUpdate", at = @At(value = "FIELD", target = ENTITY_RIDABLE_COOLDOWN_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupEntityCooldown(Entity self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) this.worldObj.getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinMinecraftServer) this.world.getMinecraftServer()).getRealTimeTicks();
         this.rideCooldown = Math.max(0, this.rideCooldown - ticks);
     }
 
     @Redirect(method = "onEntityUpdate", at = @At(value = "FIELD", target = ENTITY_PORTAL_COUNTER_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupPortalCounter(Entity self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) this.worldObj.getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinMinecraftServer) this.world.getMinecraftServer()).getRealTimeTicks();
         this.portalCounter += ticks;
     }
 

@@ -164,7 +164,6 @@ public abstract class MixinEntity implements IMixinEntity {
     @Nullable private DamageSource originalLava;
     protected boolean isConstructing = true;
     @Nullable private Text displayName;
-    protected DamageSource lastDamageSource;
     protected Cause destructCause;
     private BlockState currentCollidingBlock;
     private BlockPos lastCollidedBlockPos;

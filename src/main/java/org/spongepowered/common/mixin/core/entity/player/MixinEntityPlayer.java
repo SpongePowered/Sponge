@@ -145,7 +145,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract String getName();
     @Shadow public abstract void takeStat(StatBase stat);
     @Shadow public abstract boolean canOpen(LockCode code);
-    @Shadow protected abstract void func_190776_cN(); // Filter vanishing curse enchanted items
+    @Shadow protected abstract void destroyVanishingCursedItems(); // Filter vanishing curse enchanted items
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
@@ -239,7 +239,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
 
         if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
-            this.func_190776_cN();
+            this.destroyVanishingCursedItems();
             this.inventory.dropAllItems();
         }
 

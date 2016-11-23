@@ -46,9 +46,9 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 @Implements(@Interface(iface = Llama.class, prefix = "llama$", unique = true))
 public abstract class MixinEntityLlama extends MixinAbstractHorse implements Llama {
 
-    @Shadow public abstract int func_190707_dL();
-    @Shadow public abstract int func_190719_dM();
-    @Shadow public abstract void func_190710_o(int p_190710_1_);
+    @Shadow public abstract int getStrength();
+    @Shadow public abstract int getVariant();
+    @Shadow public abstract void setVariant(int p_190710_1_);
 
     @Override
     public Value<HorseVariant> variant() {
@@ -58,7 +58,7 @@ public abstract class MixinEntityLlama extends MixinAbstractHorse implements Lla
 
     @Override
     public Value<LlamaVariant> llamaVariant() {
-        final int i = func_190719_dM();
+        final int i = getVariant();
         final LlamaVariant variant;
         if (i == 0) {
             variant = LlamaVariants.CREAMY;
@@ -69,7 +69,7 @@ public abstract class MixinEntityLlama extends MixinAbstractHorse implements Lla
         } else if (i == 3) {
             variant = LlamaVariants.GRAY;
         } else {
-            func_190710_o(0); // Basically some validation
+            setVariant(0); // Basically some validation
             variant = LlamaVariants.CREAMY;
         }
         return new SpongeValue<>(Keys.LLAMA_VARIANT, DataConstants.Llama.DEFAULT_VARIANT, variant);
@@ -82,7 +82,7 @@ public abstract class MixinEntityLlama extends MixinAbstractHorse implements Lla
                 .defaultValue(DataConstants.Llama.DEFAULT_STRENGTH)
                 .minimum(DataConstants.Llama.MINIMUM_STRENGTH)
                 .maximum(DataConstants.Llama.MAXIMUM_STRENGTH)
-                .actualValue(func_190707_dL())
+                .actualValue(getStrength())
                 .build();
     }
 

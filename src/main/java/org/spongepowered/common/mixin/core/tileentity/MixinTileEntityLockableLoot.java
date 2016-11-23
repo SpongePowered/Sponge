@@ -34,13 +34,13 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(TileEntityLockableLoot.class)
 public abstract class MixinTileEntityLockableLoot extends MixinTileEntityLockable {
 
-    @Shadow protected String field_190577_o; // customName
+    @Shadow protected String customName;
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        if (this.field_190577_o != null) {
-            container.set(of("CustomName"), this.field_190577_o);
+        if (this.customName != null) {
+            container.set(of("CustomName"), this.customName);
         }
         return container;
     }

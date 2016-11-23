@@ -58,7 +58,7 @@ import java.util.Optional;
 @Mixin(CustomContainer.class)
 public abstract class MixinCustomContainer implements MinecraftInventoryAdapter, Inventory {
 
-    @Shadow private CustomInventory inv;
+    @Shadow(remap = false) private CustomInventory inv;
 
     private Fabric<IInventory> inventory;
     private SlotCollection slots;
