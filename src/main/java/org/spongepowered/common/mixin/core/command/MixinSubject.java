@@ -48,6 +48,7 @@ import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.service.permission.SubjectSettingCallback;
 
+import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -65,7 +66,7 @@ import javax.annotation.Nullable;
 public abstract class MixinSubject implements Subject, IMixinCommandSource, IMixinSubject {
 
     @Nullable
-    private Subject thisSubject;
+    private WeakReference<Subject> thisSubject;
 
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     public void subjectConstructor(CallbackInfo ci) {
@@ -76,18 +77,18 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
 
     @Override
     public void setSubject(Subject subj) {
-        this.thisSubject = subj;
+        this.thisSubject = new WeakReference<>(subj);
     }
 
     @Nullable
     private Subject internalSubject() {
-        if (this.thisSubject == null) {
+        if (this.thisSubject == null || this.thisSubject.get() == null) {
             Optional<PermissionService> serv = SpongeImpl.getGame().getServiceManager().provide(PermissionService.class);
             if (serv.isPresent()) {
                 new SubjectSettingCallback(this).test(serv.get());
             }
         }
-        return this.thisSubject;
+        return this.thisSubject.get();
     }
 
     @Override
