@@ -114,9 +114,9 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         // TODO cleanup: sensible defaults?
         this.compound = builder.compound == null ? null : builder.compound.copy();
         this.worldUuid = builder.worldId == null ? null : builder.worldId;
-        this.position = builder.position == null ? null : builder.position;
+        this.position = builder.position == null ? Vector3d.ZERO : builder.position;
         this.rotation = builder.rotation == null ? Vector3d.ZERO : builder.rotation;
-        this.scale = builder.scale == null ? null : builder.scale;
+        this.scale = builder.scale == null ? Vector3d.ZERO : builder.scale;
         this.entityReference = builder.entityReference;
         if(this.compound != null) {
             this.compound.setTag("Pos", NbtDataUtil.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
