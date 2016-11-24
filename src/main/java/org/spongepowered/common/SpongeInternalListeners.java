@@ -48,7 +48,6 @@ public class SpongeInternalListeners {
 
     @SuppressWarnings("unchecked")
     public <T> void registerExpirableServiceCallback(Class<T> service, Predicate<T> callback) {
-        Sponge.getServiceManager().provide(service).ifPresent(callback::test);
         this.serviceCallbacks.put(service, (Predicate<Object>) callback);
     }
 
