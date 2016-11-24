@@ -49,6 +49,7 @@ import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.entity.living.human.EntityHuman;
@@ -180,16 +181,16 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("weather", new SpongeEntityType(-4, "Weather", EntityWeatherEffect.class, new SpongeTranslation("soundCategory.weather")));
         this.entityTypeMappings.put("player", new SpongeEntityType(-5, "Player", EntityPlayerMP.class, new SpongeTranslation("soundCategory.player")));
         this.entityTypeMappings.put("complex_part", new SpongeEntityType(-6, "ComplexPart", EntityDragonPart.class, null));
-        this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "Human", 99999, null)); // TODO: Figure out what id to use, as negative ids no longer work
+        this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "human", "Human", 300, null)); // TODO: Figure out what id to use, as negative ids no longer work
         //this.entityClassToTypeMappings.put("human", new SpongeEntityType(-6))
     }
 
     private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
-    	Class<? extends Entity> cls = EntityList.REGISTRY.getObject(new ResourceLocation(mcName));
+        Class<? extends Entity> cls = SpongeImplHooks.getEntityClass(new ResourceLocation(mcName));
         if (cls == null) {
             throw new IllegalArgumentException("No class mapping for entity name " + mcName);
         }
-        return new SpongeEntityType(EntityList.REGISTRY.getIDForObject(cls), spongeName, cls,
+        return new SpongeEntityType(SpongeImplHooks.getEntityId(cls), spongeName, cls,
                 new SpongeTranslation("entity." + mcName + ".name"));
     }
 
@@ -197,14 +198,8 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         return newEntityTypeFromName(name, name);
     }
 
-    private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, int entityId, Translation translation) {
-        String entityFullName = String.format("%s.%s", SpongeImpl.ECOSYSTEM_NAME, entityName);
-        ResourceLocation location = new ResourceLocation(entityFullName);
-
-        EntityList.REGISTRY.register(entityId, location, entityClass);
-        EntityList.KNOWN_TYPES.add(location);
-//        EntityList.field_191311_g.set(entityId, entityName);
-
+    private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, String oldName, int entityId, Translation translation) {
+        EntityList.register(entityId, SpongeImpl.ECOSYSTEM_ID + ':' + entityName, entityClass, oldName);
         return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);
     }
 

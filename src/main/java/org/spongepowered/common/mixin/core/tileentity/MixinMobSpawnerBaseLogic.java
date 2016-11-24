@@ -49,6 +49,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
@@ -100,7 +101,7 @@ public abstract class MixinMobSpawnerBaseLogic {
      */
     private static Entity readEntityFromCompoundAtWorld(NBTTagCompound compound, World world, double x, double y, double z, boolean attemptToSpawn) {
         final String entityTypeString = compound.getString(NbtDataUtil.ENTITY_TYPE_ID);
-        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(EntityList.REGISTRY.getObject(new ResourceLocation(entityTypeString)));
+        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(SpongeImplHooks.getEntityClass(new ResourceLocation(entityTypeString)));
         if (type == null) {
             return null;
         }

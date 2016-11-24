@@ -40,6 +40,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeSpawnableData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -72,7 +73,7 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
     public Optional<EntityType> getVal(ItemStack itemStack) {
         final ResourceLocation name = ItemMonsterPlacer.getNamedIdFrom(itemStack);
         if (name != null) {
-            final Class<? extends Entity> entity = EntityList.REGISTRY.getObject(name);
+            final Class<? extends Entity> entity = SpongeImplHooks.getEntityClass(name);
             return Optional.ofNullable(EntityTypeRegistryModule.getInstance().getForClass(entity));
         }
         return Optional.empty();

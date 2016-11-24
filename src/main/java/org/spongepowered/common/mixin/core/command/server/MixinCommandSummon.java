@@ -56,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -74,7 +75,7 @@ public abstract class MixinCommandSummon extends CommandBase {
                     EntityMinecart.Type.values()[nbt.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
             nbt.removeTag(NbtDataUtil.MINECART_TYPE);
         }
-        Class<? extends Entity> entityClass = EntityList.REGISTRY.getObject(new ResourceLocation(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID)));
+        Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID)));
         if (entityClass == null) {
             return null;
         }

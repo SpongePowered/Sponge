@@ -56,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -164,7 +165,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
                     EntityMinecart.Type.values()[compound.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
             compound.removeTag(NbtDataUtil.MINECART_TYPE);
         }
-        Class<? extends Entity> entityClass = EntityList.REGISTRY.getObject(new ResourceLocation(compound.getString(NbtDataUtil.ENTITY_TYPE_ID)));
+        Class<? extends Entity> entityClass = SpongeImplHooks.getEntityClass(new ResourceLocation(compound.getString(NbtDataUtil.ENTITY_TYPE_ID)));
         if (entityClass == null) {
             return null;
         }

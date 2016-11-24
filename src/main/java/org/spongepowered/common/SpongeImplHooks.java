@@ -30,6 +30,7 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.monster.EntitySlime;
@@ -39,6 +40,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
@@ -221,4 +223,16 @@ public final class SpongeImplHooks {
     public static void onTileChunkUnload(TileEntity te) {
         // This is a forge only hook.
     }
+
+    // Entity registry
+
+    @Nullable
+    public static Class<? extends Entity> getEntityClass(ResourceLocation name) {
+        return EntityList.REGISTRY.getObject(name);
+    }
+
+    public static int getEntityId(Class<? extends Entity> entityClass) {
+        return EntityList.REGISTRY.getIDForObject(entityClass);
+    }
+
 }
