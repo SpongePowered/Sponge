@@ -298,15 +298,14 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static InteractEntityEvent.Secondary callInteractEntityEventSecondary(EntityPlayerMP player, net.minecraft.entity.Entity entity, EnumHand hand, Vec3d hitVec) {
+    public static InteractEntityEvent.Secondary callInteractEntityEventSecondary(EntityPlayerMP player, net.minecraft.entity.Entity entity, EnumHand hand, Optional<Vector3d> interactionPoint) {
         InteractEntityEvent.Secondary event;
-        Optional<Vector3d> hitVector = hitVec == null ? Optional.empty() : Optional.of(VecHelper.toVector3d(hitVec));
         if (hand == EnumHand.MAIN_HAND) {
             event = SpongeEventFactory.createInteractEntityEventSecondaryMainHand(
-                    Cause.of(NamedCause.source(player)), HandTypes.MAIN_HAND, hitVector, EntityUtil.fromNative(entity));
+                    Cause.of(NamedCause.source(player)), HandTypes.MAIN_HAND, interactionPoint, EntityUtil.fromNative(entity));
         } else {
             event = SpongeEventFactory.createInteractEntityEventSecondaryOffHand(
-                    Cause.of(NamedCause.source(player)), HandTypes.OFF_HAND, hitVector, EntityUtil.fromNative(entity));
+                    Cause.of(NamedCause.source(player)), HandTypes.OFF_HAND, interactionPoint, EntityUtil.fromNative(entity));
         }
         SpongeImpl.postEvent(event);
         return event;
@@ -323,12 +322,12 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static InteractItemEvent callInteractItemEventSecondary(EntityPlayer player, ItemStack stack, EnumHand hand) {
+    public static InteractItemEvent callInteractItemEventSecondary(EntityPlayer player, ItemStack stack, EnumHand hand, Optional<Vector3d> interactionPoint) {
         InteractItemEvent.Secondary event;
         if (hand == EnumHand.MAIN_HAND) {
-            event = SpongeEventFactory.createInteractItemEventSecondaryMainHand(Cause.of(NamedCause.source(player)), HandTypes.MAIN_HAND, Optional.empty(), ItemStackUtil.snapshotOf(stack));
+            event = SpongeEventFactory.createInteractItemEventSecondaryMainHand(Cause.of(NamedCause.source(player)), HandTypes.MAIN_HAND, interactionPoint, ItemStackUtil.snapshotOf(stack));
         } else {
-            event = SpongeEventFactory.createInteractItemEventSecondaryOffHand(Cause.of(NamedCause.source(player)), HandTypes.OFF_HAND, Optional.empty(), ItemStackUtil.snapshotOf(stack));
+            event = SpongeEventFactory.createInteractItemEventSecondaryOffHand(Cause.of(NamedCause.source(player)), HandTypes.OFF_HAND, interactionPoint, ItemStackUtil.snapshotOf(stack));
         }
         SpongeImpl.postEvent(event);
         return event;

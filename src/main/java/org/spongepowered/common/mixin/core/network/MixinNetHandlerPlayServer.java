@@ -109,6 +109,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
 import java.net.InetSocketAddress;
@@ -633,11 +634,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 ItemStack itemstack = hand != null ? this.playerEntity.getHeldItem(hand) : null;
                 if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT_AT) {
                     SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
+                    Vec3d hitVec = packetIn.getHitVec();
+                    Optional<Vector3d> interactionPoint = hitVec == null ? Optional.empty() : Optional.of(VecHelper.toVector3d(hitVec));
                     // Is interaction allowed with item in hand
-                    if(SpongeCommonEventFactory.callInteractItemEventSecondary(this.playerEntity, itemstack, hand).isCancelled()) {
+                    if(SpongeCommonEventFactory.callInteractItemEventSecondary(this.playerEntity, itemstack, hand, interactionPoint).isCancelled()) {
                         return;
                     }
-                    if (!SpongeCommonEventFactory.callInteractEntityEventSecondary(this.playerEntity, entity, packetIn.getHand(), packetIn.getHitVec()).isCancelled()) {
+                    if (!SpongeCommonEventFactory.callInteractEntityEventSecondary(this.playerEntity, entity, packetIn.getHand(), interactionPoint).isCancelled()) {
                         // If INTERACT_AT returns a false result, we assume this packet was meant for interactWith
                         if (entity.applyPlayerInteraction(this.playerEntity, packetIn.getHitVec(), itemstack, hand) != EnumActionResult.SUCCESS) {
                             this.playerEntity.interact(entity, itemstack, hand);
