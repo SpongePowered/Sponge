@@ -101,7 +101,7 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.shootingEntity);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, this.getShooter(), this.shootingEntity);
     }
 
     /**
