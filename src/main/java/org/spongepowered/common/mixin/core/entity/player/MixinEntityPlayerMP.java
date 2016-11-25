@@ -171,7 +171,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow @Final public PlayerInteractionManager interactionManager;
     @Shadow private String language;
     @Shadow public NetHandlerPlayServer connection;
-    @Shadow public int lastExperience;
+    @Shadow private int lastExperience;
     @Shadow private EntityPlayer.EnumChatVisibility chatVisibility = EntityPlayer.EnumChatVisibility.FULL;
     @Shadow private boolean chatColours;
     @Shadow public boolean playerConqueredTheEnd;
@@ -190,7 +190,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     // Inventory
     @Shadow public abstract void addChatMessage(ITextComponent component);
     @Shadow public abstract void closeScreen();
-    @Shadow public int currentWindowId;
+    @Shadow private int currentWindowId;
     @Shadow private void getNextWindowId() { }
 
     private EntityPlayerMP this$ = (EntityPlayerMP) (Object) this;

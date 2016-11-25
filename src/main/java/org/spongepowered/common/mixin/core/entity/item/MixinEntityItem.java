@@ -70,7 +70,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
 
     private static final int MAGIC_PREVIOUS = -1;
     @Shadow private int delayBeforeCanPickup;
-    @Shadow private int age;
+    @Shadow public int age;
     @Shadow public abstract ItemStack getEntityItem();
     /**
      * A simple cached value of the merge radius for this item.

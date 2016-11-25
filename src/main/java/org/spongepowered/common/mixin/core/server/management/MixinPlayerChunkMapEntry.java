@@ -41,8 +41,8 @@ import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMa
 @Mixin(PlayerChunkMapEntry.class)
 public abstract class MixinPlayerChunkMapEntry implements IMixinPlayerChunkMapEntry {
 
-    @Shadow @Final private PlayerChunkMap playerChunkMap;
-    @Shadow @Final private ChunkPos pos;
+    @Shadow @Final public PlayerChunkMap playerChunkMap;
+    @Shadow @Final public ChunkPos pos;
     @Shadow public int changes;
     @Shadow public int changedSectionFilter;
     @Shadow public abstract void sendPacket(Packet<?> packetIn);

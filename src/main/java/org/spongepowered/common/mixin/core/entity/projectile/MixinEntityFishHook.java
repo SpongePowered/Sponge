@@ -62,7 +62,7 @@ import javax.annotation.Nullable;
 public abstract class MixinEntityFishHook extends MixinEntity implements FishHook {
 
     @Shadow private boolean inGround;
-    @Shadow private EntityPlayer angler;
+    @Shadow public EntityPlayer angler;
     @Shadow public net.minecraft.entity.Entity caughtEntity;
     @Shadow private int ticksCatchable;
     @Shadow protected abstract void bringInHookedEntity();

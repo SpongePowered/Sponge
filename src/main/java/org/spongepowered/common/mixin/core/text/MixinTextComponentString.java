@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(TextComponentString.class)
 public abstract class MixinTextComponentString extends MixinTextComponentBase {
 
-    @Shadow private String text;
+    @Shadow public String text;
 
     @Override
     protected Text.Builder createBuilder() {

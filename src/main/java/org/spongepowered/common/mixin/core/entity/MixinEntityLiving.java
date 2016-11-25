@@ -82,8 +82,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
 
     private static final String GET_CLOSEST_PLAYER =
             "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;";
-    @Shadow @Final private EntityAITasks tasks;
-    @Shadow @Final private EntityAITasks targetTasks;
+    @Shadow @Final protected EntityAITasks tasks;
+    @Shadow @Final protected EntityAITasks targetTasks;
     @Shadow @Nullable private EntityLivingBase attackTarget;
 
     @Shadow public abstract boolean isAIDisabled();

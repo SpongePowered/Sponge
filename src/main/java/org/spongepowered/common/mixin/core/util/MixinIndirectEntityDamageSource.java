@@ -41,7 +41,7 @@ import java.util.Optional;
 @Mixin(value = EntityDamageSourceIndirect.class, priority = 992)
 public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageSource implements IndirectEntityDamageSource {
 
-    @Shadow private Entity indirectEntity;
+    @Shadow protected Entity indirectEntity;
 
     private Optional<User> owner;
 

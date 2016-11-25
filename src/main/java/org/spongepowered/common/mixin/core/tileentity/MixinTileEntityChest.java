@@ -71,7 +71,7 @@ import java.util.Optional;
         @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
 public abstract class MixinTileEntityChest extends MixinTileEntityLockable implements Chest, IMixinCustomNameable, ILockableContainer {
 
-    @Shadow public String customName;
+    @Shadow private String customName;
     @Shadow public float lidAngle;
     @Shadow public int numPlayersUsing;
     @Shadow public TileEntityChest adjacentChestZNeg;

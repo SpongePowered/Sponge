@@ -39,7 +39,7 @@ import java.util.List;
 @Mixin(UserList.class)
 public abstract class MixinUserList {
 
-    @Shadow private static Logger LOGGER;
+    @Shadow public static Logger LOGGER;
     @Shadow public File saveFile;
     @Shadow public abstract String getObjectKey(Object obj);
 

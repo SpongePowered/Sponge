@@ -100,7 +100,7 @@ import java.util.UUID;
 @Implements(@Interface(iface = WorldProperties.class, prefix = "worldproperties$"))
 public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo {
 
-    @Shadow private long randomSeed;
+    @Shadow public long randomSeed;
     @Shadow private WorldType terrainType;
     @Shadow private String generatorOptions;
     @Shadow private int spawnX;

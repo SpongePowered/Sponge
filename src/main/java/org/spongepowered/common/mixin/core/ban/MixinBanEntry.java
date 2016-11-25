@@ -52,10 +52,10 @@ public abstract class MixinBanEntry<T> extends UserListEntry<T> implements Ban {
         super(p_i1146_1_);
     }
 
-    @Shadow @Final private String reason;
-    @Shadow @Final private String bannedBy;
-    @Shadow @Final private Date banStartDate;
-    @Shadow @Final private Date banEndDate;
+    @Shadow @Final protected String reason;
+    @Shadow @Final protected String bannedBy;
+    @Shadow @Final protected Date banStartDate;
+    @Shadow @Final protected Date banEndDate;
 
     private Optional<Text> spongeReason;
     private Text source;

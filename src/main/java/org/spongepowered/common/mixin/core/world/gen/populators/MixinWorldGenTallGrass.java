@@ -60,7 +60,7 @@ import javax.annotation.Nullable;
 @Mixin(WorldGenTallGrass.class)
 public abstract class MixinWorldGenTallGrass extends WorldGenerator implements Shrub {
 
-    @Shadow private IBlockState tallGrassState;
+    @Shadow public IBlockState tallGrassState;
 
     private WeightedTable<ShrubType> types;
     @Nullable private Function<Location<Extent>, ShrubType> override = null;

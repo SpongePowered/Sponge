@@ -142,8 +142,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
             "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
     @Shadow @Final private static Logger LOG;
     @Shadow @Final private MinecraftServer mcServer;
-    @Shadow @Final public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
-    @Shadow @Final public List<EntityPlayerMP> playerEntityList;
+    @Shadow @Final private Map<UUID, EntityPlayerMP> uuidToPlayerMap;
+    @Shadow @Final private List<EntityPlayerMP> playerEntityList;
     @Shadow private IPlayerFileData playerNBTManagerObj;
     @Shadow public abstract NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn);
     @Shadow public abstract MinecraftServer getServerInstance();

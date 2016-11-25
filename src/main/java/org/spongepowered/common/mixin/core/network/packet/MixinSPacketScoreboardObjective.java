@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(SPacketScoreboardObjective.class)
 public abstract class MixinSPacketScoreboardObjective {
 
-    @Shadow public IScoreCriteria.EnumRenderType type;
+    @Shadow private IScoreCriteria.EnumRenderType type;
 
     @Inject(method = "<init>(Lnet/minecraft/scoreboard/ScoreObjective;I)V", at = @At("RETURN"), remap = false)
     public void onInit(ScoreObjective objective, int i, CallbackInfo ci) {

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.inventory;
 
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
@@ -47,8 +46,8 @@ import org.spongepowered.common.item.inventory.lens.impl.minecraft.LargeChestInv
 @Mixin(InventoryLargeChest.class)
 public abstract class MixinInventoryLargeChest implements MinecraftInventoryAdapter {
 
-    @Shadow @Final private ILockableContainer upperChest;
-    @Shadow @Final private ILockableContainer lowerChest;
+    @Shadow @Final public ILockableContainer upperChest;
+    @Shadow @Final public ILockableContainer lowerChest;
 
     protected SlotCollection slots;
     protected Fabric<IInventory> inventory;

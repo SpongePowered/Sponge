@@ -77,9 +77,9 @@ import org.spongepowered.common.world.gen.populators.WrappedBiomeDecorator;
 @Mixin(Biome.class)
 public abstract class MixinBiome implements BiomeType, IMixinBiome {
 
-    @Shadow @Final public String biomeName;
-    @Shadow @Final public float temperature;
-    @Shadow @Final public float rainfall;
+    @Shadow @Final private String biomeName;
+    @Shadow @Final private float temperature;
+    @Shadow @Final private float rainfall;
     @Shadow public IBlockState topBlock;
     @Shadow public IBlockState fillerBlock;
     @Shadow public BiomeDecorator theBiomeDecorator;
