@@ -194,6 +194,10 @@ public class PacketUtil {
             CPacketPlayerTryUseItemOnBlock packet = (CPacketPlayerTryUseItemOnBlock) packetIn;
             SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
             if(SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand()).isCancelled()) {
+                // update client
+                BlockPos pos = packet.getPos();
+                playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.worldObj, pos));
+                playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.worldObj, pos.offset(packet.getDirection())));
                 return true;
             }
         }
