@@ -38,6 +38,7 @@ import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeHorseColor;
 import org.spongepowered.common.entity.SpongeHorseStyle;
 
+@SuppressWarnings("deprecation")
 public class HorseUtils {
 
     public static int getInternalVariant(SpongeHorseColor color, SpongeHorseStyle style) {

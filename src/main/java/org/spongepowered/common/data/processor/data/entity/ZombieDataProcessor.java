@@ -46,6 +46,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings("deprecation")
 public class ZombieDataProcessor
         extends AbstractEntityDataProcessor<EntityZombie, ZombieData, ImmutableZombieData> {
 

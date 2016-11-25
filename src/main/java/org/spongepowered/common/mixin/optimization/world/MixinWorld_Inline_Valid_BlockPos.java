@@ -51,11 +51,15 @@ import javax.annotation.Nullable;
 public abstract class MixinWorld_Inline_Valid_BlockPos {
 
     @Shadow public boolean processingLoadedTiles;
+    @Shadow protected IChunkProvider chunkProvider;
 
 
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
     @Shadow public abstract Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract void notifyLightSet(BlockPos pos);
+    @Shadow public abstract int getSkylightSubtracted();
+    @Shadow public abstract int getLight(BlockPos pos);
+    @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
 
     @Shadow @Nullable private TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) { // getPendingTileEntityAt
         return null; // Shadowed
@@ -165,10 +169,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
             // Sponge End
             return type.defaultLightValue;
         } else {
-            Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
-            if (chunk == null) {
-                return type.defaultLightValue;
-            }
+            Chunk chunk = this.getChunkFromBlockCoords(pos);
             return chunk.getLightFor(type, pos);
         }
     }

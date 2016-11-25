@@ -1108,7 +1108,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Block block = this.getBlockState(pos).getBlock();
             // int blockLight = block.getLightValue(this, pos);
-            net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            // Must check remote or not
+            final net.minecraft.world.chunk.Chunk chunk;
+            if (!this.isRemote) {
+                chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            } else {
+                chunk = this.getChunkFromBlockCoords(pos);
+            }
             if (chunk == null || chunk.unloaded) {
                 return 0;
             }

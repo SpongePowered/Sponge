@@ -32,6 +32,7 @@ import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkeletonData;
 
+@SuppressWarnings("deprecation")
 public class ImmutableSpongeSkeletonData extends AbstractImmutableSingleCatalogData<SkeletonType, ImmutableSkeletonData, SkeletonData> implements ImmutableSkeletonData {
 
     public ImmutableSpongeSkeletonData(SkeletonType type) {

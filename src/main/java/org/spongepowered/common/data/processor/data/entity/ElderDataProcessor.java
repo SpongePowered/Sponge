@@ -41,6 +41,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
+@SuppressWarnings("deprecation")
 public class ElderDataProcessor extends AbstractEntitySingleDataProcessor<EntityGuardian, Boolean, Value<Boolean>, ElderData, ImmutableElderData> {
 
     public ElderDataProcessor() {

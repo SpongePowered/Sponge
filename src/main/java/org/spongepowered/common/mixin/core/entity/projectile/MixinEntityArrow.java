@@ -106,8 +106,8 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
 
     /**
      * This is the injection used in dev.
-     */ // TODO - THIS ONE IS BROKEN!!! at least, for some reason it is broken in a SpongeForge workspace.
-    @Inject(method = "onUpdate", at = @At(value = "FIELD", target = RTR_CTOR_ENTITY, ordinal = 2, shift = At.Shift.AFTER),
+     */
+    @Inject(method = "onUpdate", at = @At(value = "FIELD", target = RTR_CTOR_ENTITY, ordinal = 1, shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, require = 0)
     private void onArrowImpact(CallbackInfo ci, BlockPos pos, IBlockState state, Block block, Vec3d vecA, Vec3d vecB, RayTraceResult hitResult, Entity entity) {
         this.arrowImpact(ci, hitResult);
