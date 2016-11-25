@@ -218,16 +218,22 @@ public class SpongeCommonEventFactory {
     }
 
     public static boolean handleChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos) {
+        return handleChangeBlockEventPre(worldIn, pos, null);
+    }
+
+    public static boolean handleChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, BlockSnapshot source) {
         final CauseTracker causeTracker = worldIn.getCauseTracker();
         PhaseData data = causeTracker.getCurrentPhaseData();
-        Optional<BlockSnapshot> block = data.context.getSource(BlockSnapshot.class);
-        if (!block.isPresent()) {
-            // safety measure
-            return false;
+        if (source == null) {
+            source = data.context.getSource(BlockSnapshot.class).orElse(null);
+            if (source == null) {
+                // safety measure
+                return false;
+            }
         }
 
         Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
-        final Cause.Builder builder = Cause.source(block.get());
+        final Cause.Builder builder = Cause.source(source);
         final Optional<User> notifier = causeTracker.getCurrentPhaseData()
                 .context
                 .firstNamed(NamedCause.NOTIFIER, User.class);
