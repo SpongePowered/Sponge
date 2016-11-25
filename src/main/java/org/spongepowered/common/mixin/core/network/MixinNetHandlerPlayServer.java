@@ -637,7 +637,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     Vec3d hitVec = packetIn.getHitVec();
                     Optional<Vector3d> interactionPoint = hitVec == null ? Optional.empty() : Optional.of(VecHelper.toVector3d(hitVec));
                     // Is interaction allowed with item in hand
-                    if(SpongeCommonEventFactory.callInteractItemEventSecondary(this.playerEntity, itemstack, hand, interactionPoint).isCancelled()) {
+                    if(SpongeCommonEventFactory.callInteractItemEventSecondary(this.playerEntity, itemstack, hand, interactionPoint, entity).isCancelled()) {
                         return;
                     }
                     if (!SpongeCommonEventFactory.callInteractEntityEventSecondary(this.playerEntity, entity, packetIn.getHand(), interactionPoint).isCancelled()) {
@@ -648,7 +648,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
                 } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
                     SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
-                    if(itemstack != null && SpongeCommonEventFactory.callInteractItemEventPrimary(this.playerEntity, itemstack, hand).isCancelled()) {
+                    if(SpongeCommonEventFactory.callInteractItemEventPrimary(this.playerEntity, itemstack, hand, Optional.empty(), entity).isCancelled()) {
                         return;
                     }
 

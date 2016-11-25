@@ -51,6 +51,7 @@ import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -585,7 +586,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             EntityPlayerMP player = SpongeCommonEventFactory.lastAnimationPlayer.get();
             if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
                 if (player.getHeldItemMainhand() != null) {
-                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND).isCancelled()) {
+                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, Optional.empty(), BlockSnapshot.NONE).isCancelled()) {
                         SpongeCommonEventFactory.lastAnimationPacketTick = 0;
                         return;
                     }
