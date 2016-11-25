@@ -85,7 +85,7 @@ public abstract class MixinEntityThrowable extends MixinEntity implements Projec
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.thrower);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, this.getShooter(), this.thrower);
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityThrowable;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
@@ -95,7 +95,7 @@ public abstract class MixinEntityThrowable extends MixinEntity implements Projec
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.projectileSource, movingObjectPosition)) {
+        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.getShooter(), movingObjectPosition)) {
             this.onImpact(movingObjectPosition);
         }
     }

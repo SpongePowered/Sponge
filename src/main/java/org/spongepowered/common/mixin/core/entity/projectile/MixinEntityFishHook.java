@@ -173,6 +173,6 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.angler);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, this.getShooter(), this.angler);
     }
 }
