@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.network;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
@@ -60,8 +61,10 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.VecHelper;
 
 import java.lang.ref.WeakReference;
+import java.util.Optional;
 
 public class PacketUtil {
 
@@ -188,13 +191,14 @@ public class PacketUtil {
         } else if (packetIn instanceof CPacketPlayerTryUseItem) {
             CPacketPlayerTryUseItem packet = (CPacketPlayerTryUseItem) packetIn;
             SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
-            if(SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand()).isCancelled()) {
+            if(SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand(), Optional.empty()).isCancelled()) {
                 return true;
             }
         } else if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
             CPacketPlayerTryUseItemOnBlock packet = (CPacketPlayerTryUseItemOnBlock) packetIn;
             SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
-            if(SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand()).isCancelled()) {
+            Vector3d interactionPoint = VecHelper.toVector3d(packet.getPos());
+            if(SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand(), Optional.of(interactionPoint)).isCancelled()) {
                 // update client
                 BlockPos pos = packet.getPos();
                 playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.worldObj, pos));
