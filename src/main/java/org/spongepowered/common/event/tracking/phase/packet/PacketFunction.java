@@ -81,6 +81,7 @@ import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -914,6 +915,7 @@ public interface PacketFunction {
             if (event.isCancelled()) {
                 player.closeScreen();
             } else {
+                ((IMixinEntityPlayerMP) player).setPlayerInventoryOpen();
                 // Custom cursor
                 if (event.getCursorTransaction().getCustom().isPresent()) {
                     PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());

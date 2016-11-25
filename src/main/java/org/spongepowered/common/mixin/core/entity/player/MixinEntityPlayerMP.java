@@ -195,6 +195,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     private EntityPlayerMP this$ = (EntityPlayerMP) (Object) this;
 
+    private boolean playerInventoryOpen;
+
     public int newExperience = 0;
     public int newLevel = 0;
     public int newTotalExperience = 0;
@@ -486,6 +488,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.foodStats = new FoodStats();
         this.potionsNeedUpdate = true;
         this.openContainer = this.inventoryContainer;
+        this.playerInventoryOpen = false;
         this.attackingPlayer = null;
         this.entityLivingToAttack = null;
         this.lastExperience = -1;
@@ -505,6 +508,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Optional<Container> getOpenInventory() {
+        if (this.openContainer == this.inventoryContainer && !this.playerInventoryOpen) {
+            return Optional.empty();
+        }
         return Optional.ofNullable((Container) this.openContainer);
     }
 
@@ -827,5 +833,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             mixinContainer.setCaptureInventory(false);
             mixinContainer.getCapturedTransactions().clear();
         }
+        this.playerInventoryOpen = false;
+    }
+
+    @Override
+    public void setPlayerInventoryOpen() {
+        this.playerInventoryOpen = true;
     }
 }
