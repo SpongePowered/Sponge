@@ -31,8 +31,11 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -40,8 +43,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.helpers.Booleans;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -60,7 +63,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.BiConsumer;
 
@@ -511,6 +513,40 @@ public final class CauseTracker {
                 minecraftWorld.playerEntities.add(entityplayer);
                 minecraftWorld.updateAllPlayersSleepingFlag();
                 SpongeImplHooks.firePlayerJoinSpawnEvent((EntityPlayerMP) entityplayer);
+            } else {
+                // Sponge start - check for vanilla owner
+                if (minecraftEntity instanceof EntityTameable) {
+                    EntityTameable tameable = (EntityTameable) entity;
+                    EntityLivingBase owner = tameable.getOwner();
+                    if (owner != null) {
+                        User user = null;
+                        if (!(owner instanceof EntityPlayer)) {
+                            user = ((IMixinEntity) owner).getCreatorUser().orElse(null);
+                        } else {
+                           user = (User) owner;
+                        }
+                        if (user != null) {
+                            context.owner = user;
+                            entity.setCreator(user.getUniqueId());
+                        }
+                    }
+                } else if (minecraftEntity instanceof EntityThrowable) {
+                    EntityThrowable throwable = (EntityThrowable) minecraftEntity;
+                    EntityLivingBase thrower = throwable.getThrower();
+                    if (thrower != null) {
+                        User user = null;
+                        if (!(thrower instanceof EntityPlayer)) {
+                            user = ((IMixinEntity) thrower).getCreatorUser().orElse(null);
+                        } else {
+                            user = (User) thrower;
+                        }
+                        if (user != null) {
+                            context.owner = user;
+                            entity.setCreator(user.getUniqueId());
+                        }
+                    }
+                }
+                // Sponge end
             }
             // Sponge Start
             // First, check if the owning world is a remote world. Then check if the spawn is forced.

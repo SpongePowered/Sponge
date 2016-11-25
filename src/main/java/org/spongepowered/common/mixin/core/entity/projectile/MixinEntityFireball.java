@@ -77,7 +77,7 @@ public abstract class MixinEntityFireball extends MixinEntity implements Firebal
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.shootingEntity);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, this.getShooter(), this.shootingEntity);
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
@@ -87,7 +87,7 @@ public abstract class MixinEntityFireball extends MixinEntity implements Firebal
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.projectileSource, movingObjectPosition)) {
+        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.getShooter(), movingObjectPosition)) {
             this.onImpact(movingObjectPosition);
         }
     }
