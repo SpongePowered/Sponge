@@ -107,7 +107,7 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
     /**
      * This is the injection used in dev.
      */
-    @Inject(method = "onUpdate", at = @At(value = "FIELD", target = RTR_CTOR_ENTITY, ordinal = 2, shift = At.Shift.AFTER),
+    @Inject(method = "onUpdate", at = @At(value = "FIELD", target = RTR_CTOR_ENTITY, ordinal = 1, shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, require = 0)
     private void onArrowImpact(CallbackInfo ci, BlockPos pos, IBlockState state, Block block, Vec3d vecA, Vec3d vecB, RayTraceResult hitResult, Entity entity) {
         this.arrowImpact(ci, hitResult);
@@ -125,7 +125,7 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
      * Collide impact event post for plugins to cancel impact.
      */
     private void arrowImpact(CallbackInfo ci, RayTraceResult hitResult) {
-        if (!this.worldObj.isRemote) {
+        if (!this.world.isRemote) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent(this.mcEntity, getShooter(), hitResult)) {
                 // deflect and drop to ground
                 this.motionX *= -0.10000000149011612D;

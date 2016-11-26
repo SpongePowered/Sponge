@@ -22,26 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.realtime.mixin;
+package org.spongepowered.common.mixin.core.entity.passive;
 
-import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.passive.EntityMule;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.type.HorseVariant;
+import org.spongepowered.api.data.type.HorseVariants;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.living.animal.Mule;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
+import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-@Mixin(EntityZombie.class)
-public abstract class MixinEntityZombie {
+@SuppressWarnings("deprecation")
+@Mixin(EntityMule.class)
+@Implements(@Interface(iface = Mule.class, prefix = "mule$", unique = true))
+public abstract class MixinEntityMule extends MixinAbstractHorse implements Mule {
 
-    private static final String ENTITY_ZOMBIE_GET_CONVERSION_BOOST_METHOD = "Lnet/minecraft/entity/monster/EntityZombie;getConversionTimeBoost()I";
-
-    @Shadow protected abstract int getConversionTimeBoost();
-
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = ENTITY_ZOMBIE_GET_CONVERSION_BOOST_METHOD, ordinal = 0))
-    public int fixupConversionTimeBoost(EntityZombie self) {
-        int ticks = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks();
-        return this.getConversionTimeBoost() * ticks;
+    @Override
+    public Value<HorseVariant> variant() {
+        printDeprecatedHorseUsage("HorseVariant is no longer applicable to all horses! HorseVariants cannot be changed!");
+        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT, HorseVariants.DONKEY);
     }
 
 }

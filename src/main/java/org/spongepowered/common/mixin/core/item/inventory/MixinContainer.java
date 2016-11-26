@@ -29,6 +29,7 @@ import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.NonNullList;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -64,13 +65,13 @@ import java.util.Optional;
 public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer {
 
     @Shadow public List<Slot> inventorySlots;
-    @Shadow public List<ItemStack> inventoryItemStacks;
+    @Shadow public NonNullList<ItemStack> inventoryItemStacks ;
     @Shadow public int windowId;
     @Shadow protected List<IContainerListener> listeners;
 
     @SuppressWarnings("rawtypes")
     @Shadow
-    public abstract List getInventory();
+    public abstract NonNullList<ItemStack> getInventory();
 
     @Shadow
     public abstract Slot getSlot(int slotId);
@@ -155,7 +156,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         for (int i = 0; i < this.inventorySlots.size(); ++i) {
             final Slot slot = this.inventorySlots.get(i);
             final ItemStack itemstack = slot.getStack();
-            ItemStack itemstack1 = this.inventoryItemStacks.get(i);
+            ItemStack itemstack1 = this.inventoryItemStacks .get(i);
 
             if (!ItemStack.areItemStacksEqual(itemstack1, itemstack)) {
 
@@ -184,7 +185,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 }
                 // Sponge end
 
-                itemstack1 = itemstack == null ? null : itemstack.copy();
+                itemstack1 = itemstack.copy();
                 this.inventoryItemStacks.set(i, itemstack1);
 
                 for (IContainerListener listener : this.listeners) {

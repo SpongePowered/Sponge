@@ -57,17 +57,17 @@ public abstract class MixinPacketBuffer extends ByteBuf {
 
     // mojang methods, fluent in target
     @Shadow public abstract PacketBuffer writeByteArray(byte[] array);
-    @Shadow public abstract PacketBuffer writeVarIntToBuffer(int input);
+    @Shadow public abstract PacketBuffer writeVarInt(int input);
     @Shadow public abstract PacketBuffer writeString(String string);
-    @Shadow public abstract PacketBuffer writeNBTTagCompoundToBuffer(@Nullable NBTTagCompound nbt);
+    @Shadow public abstract PacketBuffer writeCompoundTag(@Nullable NBTTagCompound nbt);
     
     // mojang methods, non-fluent
     @Shadow public abstract byte[] readByteArray();
     @Shadow public abstract byte[] readByteArray(int limit);
-    @Shadow public abstract int readVarIntFromBuffer();
-    @Shadow public abstract String readStringFromBuffer(int maxLength);
-    @Shadow public abstract NBTTagCompound readNBTTagCompoundFromBuffer() throws IOException;
-    @Shadow public abstract UUID readUuid();
+    @Shadow public abstract int readVarInt();
+    @Shadow public abstract String readString(int maxLength);
+    @Shadow public abstract NBTTagCompound readCompoundTag() throws IOException;
+    @Shadow public abstract UUID readUniqueId();
 
     public int cbuf$getCapacity() {
         return this.capacity();
@@ -368,25 +368,26 @@ public abstract class MixinPacketBuffer extends ByteBuf {
     }
 
     public ChannelBuf cbuf$writeVarInt(int value) {
-        return (ChannelBuf) this.writeVarIntToBuffer(value); // fluent in target
+        return (ChannelBuf) this.writeVarInt(value); // fluent in target
     }
 
     public ChannelBuf cbuf$setVarInt(int index, int value) {
         final int oldIndex = this.writerIndex();
         this.writerIndex(index);
-        this.writeVarIntToBuffer(value);
+        this.writeVarInt(value);
         this.writerIndex(oldIndex);
         return (ChannelBuf) this;
     }
 
+    @Intrinsic
     public int cbuf$readVarInt() {
-        return this.readVarIntFromBuffer();
+        return this.readVarInt();
     }
 
     public int cbuf$getVarInt(int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
-        final int value = readVarIntFromBuffer();
+        final int value = readVarInt();
         this.readerIndex(oldIndex);
         return value;
     }
@@ -405,13 +406,13 @@ public abstract class MixinPacketBuffer extends ByteBuf {
     }
 
     public String cbuf$readString() {
-        return this.readStringFromBuffer(MixinPacketBuffer.MAX_STRING_LENGTH);
+        return this.readString(MixinPacketBuffer.MAX_STRING_LENGTH);
     }
 
     public String cbuf$getString(int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
-        final String value = this.readStringFromBuffer(MixinPacketBuffer.MAX_STRING_LENGTH);
+        final String value = this.readString(MixinPacketBuffer.MAX_STRING_LENGTH);
         this.readerIndex(oldIndex);
         return value;
     }
@@ -464,21 +465,22 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
+    @Intrinsic
     public UUID cbuf$readUniqueId() {
-        return this.readUuid();
+        return this.readUniqueId();
     }
 
     public UUID getUniqueId(int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
-        final UUID data = this.readUuid();
+        final UUID data = this.readUniqueId();
         this.readerIndex(oldIndex);
         return data;
     }
 
     public ChannelBuf cbuf$writeDataView(DataView data) {
         final NBTTagCompound compound = NbtTranslator.getInstance().translateData(checkNotNull(data, "data"));
-        this.writeNBTTagCompoundToBuffer(compound);
+        this.writeCompoundTag(compound);
         return (ChannelBuf) this;
     }
 
@@ -493,7 +495,7 @@ public abstract class MixinPacketBuffer extends ByteBuf {
 
     public DataView cbuf$readDataView() {
         try {
-            return NbtTranslator.getInstance().translateFrom(this.readNBTTagCompoundFromBuffer());
+            return NbtTranslator.getInstance().translateFrom(this.readCompoundTag());
         } catch (IOException e) {
             throw new DecoderException(e);
         }

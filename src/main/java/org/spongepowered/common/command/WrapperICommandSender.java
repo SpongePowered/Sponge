@@ -63,12 +63,12 @@ public class WrapperICommandSender implements ICommandSender {
     }
 
     @Override
-    public void addChatMessage(ITextComponent component) {
+    public void sendMessage(ITextComponent component) {
         this.source.sendMessage(SpongeTexts.toText(component));
     }
 
     @Override
-    public boolean canCommandSenderUseCommand(int permLevel, String commandName) {
+    public boolean canUseCommand(int permLevel, String commandName) {
         return CommandPermissions.testPermission(this.source, commandName);
     }
 

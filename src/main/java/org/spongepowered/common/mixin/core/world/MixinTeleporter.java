@@ -183,7 +183,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         BlockPos portalPosition = BlockPos.ORIGIN;
         // Sponge - use the chunk coords instead of block coords
         Vector3i chunkPosition = searchLocation.getChunkPosition();
-        long targetPosition = ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ());
+        long targetPosition = ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ());
 
         if (this.destinationCoordinateCache.containsKey(targetPosition)) {
             Teleporter.PortalPosition teleporter$portalposition = this.destinationCoordinateCache.get(targetPosition);
@@ -443,7 +443,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         }
 
         if (closest < 0.0D) {
-            yAdjustedTarget = MathHelper.clamp_int(yAdjustedTarget, 70, this.worldServerInstance.getActualHeight() - 10);
+            yAdjustedTarget = MathHelper.clamp(yAdjustedTarget, 70, this.worldServerInstance.getActualHeight() - 10);
             yFinalTarget = yAdjustedTarget;
 
             for (int j7 = -1; j7 <= 1; ++j7) {
@@ -479,7 +479,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                     int i12 = yFinalTarget + i10;
                     int l12 = zFinalTarget + (i9 - 1) * targetDirOffset;
                     BlockPos blockpos = new BlockPos(i11, i12, l12);
-                    this.worldServerInstance.notifyNeighborsOfStateChange(blockpos, this.worldServerInstance.getBlockState(blockpos).getBlock());
+                    this.worldServerInstance.neighborChanged(blockpos, this.worldServerInstance.getBlockState(blockpos).getBlock(), blockpos);
                 }
             }
         }
@@ -499,7 +499,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 //                causeTracker.removeCurrentCause();
 //                causeTracker.setSpecificCapture(false);
 //                // update cache
-//                this.removePortalPositionFromCache(ChunkPos.chunkXZ2Int(xFinalTarget, zFinalTarget));
+//                this.removePortalPositionFromCache(ChunkPos.asLong(xFinalTarget, zFinalTarget));
 //                return Optional.empty();
 //            }
         }

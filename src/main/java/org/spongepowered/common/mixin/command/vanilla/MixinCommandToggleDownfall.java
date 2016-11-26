@@ -39,8 +39,8 @@ public abstract class MixinCommandToggleDownfall {
      */
     @Overwrite
     protected void toggleRainfall(MinecraftServer server) {
-        boolean raining = !server.worldServers[0].getWorldInfo().isRaining();
-        for (WorldServer world : server.worldServers) {
+        boolean raining = !server.worlds[0].getWorldInfo().isRaining();
+        for (WorldServer world : server.worlds) {
             world.getWorldInfo().setRaining(raining);
         }
     }

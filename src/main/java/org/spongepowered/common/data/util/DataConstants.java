@@ -28,40 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.type.Art;
-import org.spongepowered.api.data.type.Arts;
-import org.spongepowered.api.data.type.BigMushroomType;
-import org.spongepowered.api.data.type.BigMushroomTypes;
-import org.spongepowered.api.data.type.BrickType;
-import org.spongepowered.api.data.type.BrickTypes;
-import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Careers;
-import org.spongepowered.api.data.type.ComparatorType;
-import org.spongepowered.api.data.type.ComparatorTypes;
-import org.spongepowered.api.data.type.DirtType;
-import org.spongepowered.api.data.type.DirtTypes;
-import org.spongepowered.api.data.type.DisguisedBlockType;
-import org.spongepowered.api.data.type.DisguisedBlockTypes;
-import org.spongepowered.api.data.type.DoublePlantType;
-import org.spongepowered.api.data.type.DoublePlantTypes;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.type.DyeColors;
-import org.spongepowered.api.data.type.HorseColor;
-import org.spongepowered.api.data.type.HorseColors;
-import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.type.HorseStyles;
-import org.spongepowered.api.data.type.HorseVariant;
-import org.spongepowered.api.data.type.HorseVariants;
-import org.spongepowered.api.data.type.OcelotType;
-import org.spongepowered.api.data.type.OcelotTypes;
-import org.spongepowered.api.data.type.PickupRule;
-import org.spongepowered.api.data.type.PickupRules;
-import org.spongepowered.api.data.type.RabbitType;
-import org.spongepowered.api.data.type.RabbitTypes;
-import org.spongepowered.api.data.type.SkeletonType;
-import org.spongepowered.api.data.type.SkeletonTypes;
-import org.spongepowered.api.data.type.ZombieType;
-import org.spongepowered.api.data.type.ZombieTypes;
+import org.spongepowered.api.data.type.*;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Axis;
@@ -203,6 +170,15 @@ public final class DataConstants {
     public static final class Ocelot {
 
         public static final OcelotType DEFAULT_TYPE = OcelotTypes.WILD_OCELOT;
+
+    }
+
+    public static final class Llama {
+
+        public static final LlamaVariant DEFAULT_VARIANT = LlamaVariants.WHITE;
+        public static final int DEFAULT_STRENGTH = 1;
+        public static final int MINIMUM_STRENGTH = 1;
+        public static final int MAXIMUM_STRENGTH = 5;
 
     }
 }

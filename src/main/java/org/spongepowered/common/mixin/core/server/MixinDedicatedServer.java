@@ -54,6 +54,9 @@ import java.util.Optional;
 @Mixin(DedicatedServer.class)
 public abstract class MixinDedicatedServer extends MinecraftServer {
 
+    @Shadow public abstract String getHostname();
+    @Shadow public abstract int getPort();
+
     @Shadow private boolean guiIsEnabled;
 
     public MixinDedicatedServer() {
@@ -61,7 +64,7 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
     }
 
     public Optional<InetSocketAddress> getBoundAddress() {
-        return Optional.of(new InetSocketAddress(getServerHostname(), getServerPort()));
+        return Optional.of(new InetSocketAddress(this.getHostname(), this.getPort()));
     }
 
     /**

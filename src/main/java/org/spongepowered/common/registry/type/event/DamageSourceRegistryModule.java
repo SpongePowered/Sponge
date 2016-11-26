@@ -44,16 +44,16 @@ public final class DamageSourceRegistryModule implements RegistryModule {
             DAMAGESOURCE_POISON = (new net.minecraft.util.DamageSource("poison")).setDamageBypassesArmor().setMagicDamage();
             DAMAGESOURCE_MELTING = (new net.minecraft.util.DamageSource("melting")).setDamageBypassesArmor().setFireDamage();
             IGNORED_DAMAGE_SOURCE = new net.minecraft.util.DamageSource("spongespecific").setDamageBypassesArmor().setDamageAllowedInCreativeMode();
-            DamageSources.class.getDeclaredField("DROWNING").set(null, (DamageSource) net.minecraft.util.DamageSource.drown);
-            DamageSources.class.getDeclaredField("FALLING").set(null, (DamageSource) net.minecraft.util.DamageSource.fall);
-            DamageSources.class.getDeclaredField("FIRE_TICK").set(null, (DamageSource) net.minecraft.util.DamageSource.onFire);
-            DamageSources.class.getDeclaredField("GENERIC").set(null, (DamageSource) net.minecraft.util.DamageSource.generic);
-            DamageSources.class.getDeclaredField("MAGIC").set(null, (DamageSource) net.minecraft.util.DamageSource.magic);
+            DamageSources.class.getDeclaredField("DROWNING").set(null, (DamageSource) net.minecraft.util.DamageSource.DROWN);
+            DamageSources.class.getDeclaredField("FALLING").set(null, (DamageSource) net.minecraft.util.DamageSource.FALL);
+            DamageSources.class.getDeclaredField("FIRE_TICK").set(null, (DamageSource) net.minecraft.util.DamageSource.ON_FIRE);
+            DamageSources.class.getDeclaredField("GENERIC").set(null, (DamageSource) net.minecraft.util.DamageSource.GENERIC);
+            DamageSources.class.getDeclaredField("MAGIC").set(null, (DamageSource) net.minecraft.util.DamageSource.MAGIC);
             DamageSources.class.getDeclaredField("MELTING").set(null, DAMAGESOURCE_MELTING);
             DamageSources.class.getDeclaredField("POISON").set(null, DAMAGESOURCE_POISON);
-            DamageSources.class.getDeclaredField("STARVATION").set(null, (DamageSource) net.minecraft.util.DamageSource.starve);
-            DamageSources.class.getDeclaredField("WITHER").set(null, (DamageSource) net.minecraft.util.DamageSource.wither);
-            DamageSources.class.getDeclaredField("VOID").set(null, (DamageSource) net.minecraft.util.DamageSource.outOfWorld);
+            DamageSources.class.getDeclaredField("STARVATION").set(null, (DamageSource) net.minecraft.util.DamageSource.STARVE);
+            DamageSources.class.getDeclaredField("WITHER").set(null, (DamageSource) net.minecraft.util.DamageSource.WITHER);
+            DamageSources.class.getDeclaredField("VOID").set(null, (DamageSource) net.minecraft.util.DamageSource.OUT_OF_WORLD);
         } catch (Exception e) {
             e.printStackTrace();
         }

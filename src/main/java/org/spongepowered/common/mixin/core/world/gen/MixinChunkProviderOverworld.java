@@ -40,6 +40,7 @@ import net.minecraft.world.gen.structure.MapGenScatteredFeature;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
+import net.minecraft.world.gen.structure.WoodlandMansion;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.event.cause.Cause;
@@ -78,17 +79,18 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
 
     @Shadow @Final private double[] heightMap;
     @Shadow @Final private boolean mapFeaturesEnabled;
-    @Shadow @Final private net.minecraft.world.World worldObj;
+    @Shadow @Final private net.minecraft.world.World world;
     @Shadow private ChunkProviderSettings settings;
     @Shadow @Final private Random rand;
 
-    @Shadow private MapGenBase caveGenerator;
-    @Shadow private MapGenStronghold strongholdGenerator;
-    @Shadow private MapGenVillage villageGenerator;
-    @Shadow private MapGenMineshaft mineshaftGenerator;
-    @Shadow private MapGenScatteredFeature scatteredFeatureGenerator;
-    @Shadow private MapGenBase ravineGenerator;
-    @Shadow private StructureOceanMonument oceanMonumentGenerator;
+    @Shadow @Final private MapGenBase caveGenerator;
+    @Shadow @Final private MapGenStronghold strongholdGenerator;
+    @Shadow @Final private MapGenVillage villageGenerator;
+    @Shadow @Final private MapGenMineshaft mineshaftGenerator;
+    @Shadow @Final private MapGenScatteredFeature scatteredFeatureGenerator;
+    @Shadow @Final private MapGenBase ravineGenerator;
+    @Shadow @Final private StructureOceanMonument oceanMonumentGenerator;
+    @Shadow @Final private WoodlandMansion woodlandMansionGenerator;
     @Shadow private Biome[] biomesForGeneration;
 
     @Shadow public abstract void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_);
@@ -146,6 +148,11 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
             generator.getPopulators().add((Populator) this.oceanMonumentGenerator);
         }
 
+        if (this.settings.useMansions && this.mapFeaturesEnabled) {
+            generator.getGenerationPopulators().add((GenerationPopulator) this.woodlandMansionGenerator);
+            generator.getPopulators().add((Populator) this.woodlandMansionGenerator);
+        }
+
         if (this.settings.useWaterLakes) {
             Lake lake = Lake.builder()
                     .chance(1d / this.settings.waterLakeChance)
@@ -153,7 +160,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
                     .height(VariableAmount.baseWithRandomAddition(0, 256))
                     .build();
             FilteredPopulator filtered = new FilteredPopulator(lake, (c) -> {
-                Biome biomegenbase = this.worldObj.getBiome(VecHelper.toBlockPos(c.getBlockMin()).add(16, 0, 16));
+                Biome biomegenbase = this.world.getBiome(VecHelper.toBlockPos(c.getBlockMin()).add(16, 0, 16));
                 return biomegenbase != Biomes.DESERT && biomegenbase != Biomes.DESERT_HILLS;
             });
             filtered.setRequiredFlags(WorldGenConstants.VILLAGE_FLAG);
@@ -162,7 +169,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
 
         if (this.settings.useLavaLakes) {
             Lake lake = Lake.builder()
-                    .chance(1d / this.settings.waterLakeChance)
+                    .chance(1d / this.settings.lavaLakeChance)
                     .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithVariance(0,
                             VariableAmount.baseWithRandomAddition(8, VariableAmount.baseWithOptionalAddition(55, 193, 0.1))))

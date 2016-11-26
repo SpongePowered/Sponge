@@ -49,7 +49,7 @@ public class SlimeDataProcessor
 
     @Override
     protected boolean set(EntitySlime entity, Integer value) {
-        entity.setSlimeSize(value + 1);
+        entity.setSlimeSize(value + 1, false);
         return true;
     }
 

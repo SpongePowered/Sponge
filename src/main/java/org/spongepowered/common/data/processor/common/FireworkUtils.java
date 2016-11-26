@@ -57,16 +57,16 @@ public class FireworkUtils {
             .build();
 
     public static ItemStack getItem(EntityFireworkRocket firework) {
-        ItemStack item = firework.getDataManager().get(EntityFireworkRocket.FIREWORK_ITEM).orNull();
+        ItemStack item = firework.getDataManager().get(EntityFireworkRocket.FIREWORK_ITEM);
         if (item == null) {
             item = (ItemStack) new SpongeItemStackBuilder().itemType(ItemTypes.FIREWORKS).build();
-            firework.getDataManager().set(EntityFireworkRocket.FIREWORK_ITEM, com.google.common.base.Optional.of(item));
+            firework.getDataManager().set(EntityFireworkRocket.FIREWORK_ITEM, item);
         }
         return item;
     }
 
     public static FireworkEffect getChargeEffect(ItemStack item) {
-        Preconditions.checkArgument(item.getItem() == Items.FIREWORK_CHARGE, "Item is not a firework!");
+        Preconditions.checkArgument(item.getItem() == Items.FIREWORK_CHARGE, "Item is not a firework!"); // FIREWORK_CHARGE
         NBTTagCompound firework = NbtDataUtil.getOrCreateCompound(item).getCompoundTag("Explosion");
         if(firework == null) return null;
 
@@ -156,7 +156,7 @@ public class FireworkUtils {
             NBTTagList nbtEffects = new NBTTagList();
             effects.stream().map(FireworkUtils::toNbt).forEach(nbtEffects::appendTag);
 
-            NBTTagCompound fireworks = item.getSubCompound("Fireworks", true);
+            NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
             fireworks.setTag("Explosions", nbtEffects);
             return true;
         }
@@ -175,7 +175,7 @@ public class FireworkUtils {
 
         List<FireworkEffect> effects;
         if(item.getItem() == Items.FIREWORKS) {
-            NBTTagCompound fireworks = item.getSubCompound("Fireworks", false);
+            NBTTagCompound fireworks = item.getSubCompound("Fireworks");
             if(fireworks == null || !fireworks.hasKey("Explosions")) return Optional.empty();
 
             NBTTagList effectsNbt = fireworks.getTagList("Explosions", NbtDataUtil.TAG_COMPOUND);
@@ -207,7 +207,7 @@ public class FireworkUtils {
             NbtDataUtil.getOrCreateCompound(item).removeTag("Explosion");
             return true;
         } else if(item.getItem() == Items.FIREWORKS) {
-            NBTTagCompound fireworks = item.getSubCompound("Fireworks", true);
+            NBTTagCompound fireworks = item.getOrCreateSubCompound("Fireworks");
             fireworks.removeTag("Explosions");
             return true;
         }

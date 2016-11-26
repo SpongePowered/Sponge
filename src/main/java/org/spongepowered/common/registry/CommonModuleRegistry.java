@@ -391,7 +391,6 @@ public final class CommonModuleRegistry {
             .registerModule(SelectorType.class, new SelectorTypeRegistryModule())
             .registerModule(SerializationBehavior.class, new SerializationBehaviorRegistryModule())
             .registerModule(ShrubType.class, new ShrubTypeRegistryModule())
-            .registerModule(SkeletonType.class, new SkeletonTypeRegistryModule())
             .registerModule(SkullType.class, new SkullTypeRegistryModule())
             .registerModule(SlabType.class, new SlabTypeRegistryModule())
             .registerModule(SoundType.class, new SoundRegistryModule())
@@ -424,6 +423,7 @@ public final class CommonModuleRegistry {
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
             .registerModule(ZombieType.class, ZombieTypeRegistryModule.getInstance())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
+            .registerModule(SkeletonType.class, new SkeletonTypeRegistryModule())
             ;
     }
 

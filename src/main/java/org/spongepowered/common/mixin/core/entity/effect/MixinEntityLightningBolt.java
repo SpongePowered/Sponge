@@ -130,7 +130,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
         if (this.isDead) {
             return;
         }
-        World world = (World) this.worldObj;
+        World world = (World) this.world;
         LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(this.cause, this.struckEntities, world, this.struckBlocks);
         Sponge.getEventManager().post(strike);
 

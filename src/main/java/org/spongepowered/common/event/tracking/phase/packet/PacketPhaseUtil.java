@@ -104,10 +104,10 @@ public final class PacketPhaseUtil {
         player.isChangingQuantityOnly = false;
         int slotId = 0;
         if (hand == EnumHand.OFF_HAND) {
-            player.inventory.offHandInventory[0] = itemStack;
-            slotId = (player.inventory.mainInventory.length + InventoryPlayer.getHotbarSize());
+            player.inventory.offHandInventory.set(0, itemStack);
+            slotId = (player.inventory.mainInventory.size() + InventoryPlayer.getHotbarSize());
         } else {
-            player.inventory.mainInventory[player.inventory.currentItem] = itemStack;
+            player.inventory.mainInventory.set(player.inventory.currentItem, itemStack);
             final Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
             slotId = slot.slotNumber;
         }

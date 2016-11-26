@@ -193,10 +193,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
     @Shadow protected List<IWorldEventListener> eventListeners;
 
-    @Shadow private boolean processingLoadedTiles;
+    @Shadow public boolean processingLoadedTiles;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
     @Shadow protected WorldInfo worldInfo;
-    @Shadow @Final net.minecraft.world.border.WorldBorder worldBorder;
+    @Shadow @Final public net.minecraft.world.border.WorldBorder worldBorder;
     @Shadow protected int updateLCG;
 
     @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
@@ -217,11 +217,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
-    @Shadow public boolean addWeatherEffect(net.minecraft.entity.Entity entityIn) {
-        return false; // Note this is not actually going to return false, it's just a target
-    };
+    @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract Biome getBiome(BlockPos pos);
-    @Shadow public abstract IChunkProvider getChunkProvider();
     @Shadow public abstract BiomeProvider getBiomeProvider();
     @Shadow @Nullable public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
@@ -237,18 +234,18 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
     @Shadow public abstract MinecraftServer getMinecraftServer();
     // Methods needed for MixinWorldServer & Tracking
-    @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entity); // This is overridden in MixinWorldServer
+    @Shadow public abstract boolean spawnEntity(net.minecraft.entity.Entity entity); // This is overridden in MixinWorldServer
     @Shadow public abstract void updateAllPlayersSleepingFlag();
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state);
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
     @Shadow public abstract void immediateBlockTick(BlockPos pos, IBlockState state, Random random);
     @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
-    @Shadow public abstract void notifyBlockOfStateChange(BlockPos pos, final Block blockIn);
+    @Shadow public abstract void neighborChanged(BlockPos pos, final Block blockIn, BlockPos otherPos);
     @Shadow public abstract void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide);
-    @Shadow public abstract void notifyNeighborsOfStateChange(BlockPos pos, Block blockType);
-    @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType);
+    @Shadow public abstract void updateObservingBlocksAt(BlockPos pos, Block blockType);
+    @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType, boolean notifySelf);
     @Shadow public abstract void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
-    @Shadow public abstract void scheduleBlockUpdate(BlockPos pos, Block blockIn, int delay, int priority);
+    @Shadow public abstract void updateBlockTick(BlockPos pos, Block blockIn, int delay, int priority); // this is really scheduleUpdate
     @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow protected abstract void updateBlocks();
     @Shadow public abstract GameRules shadow$getGameRules();
@@ -261,7 +258,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
     @Shadow public abstract boolean canSeeSky(BlockPos pos);
     @Shadow public abstract int getLightFor(EnumSkyBlock type, BlockPos pos);
-    @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(AxisAlignedBB bb);
     @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
 
     // @formatter:on
@@ -292,10 +288,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Inject(method = "getCollisionBoxes", at = @At("HEAD"), cancellable = true)
     public void onGetCollisionBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis,
             CallbackInfoReturnable<List> cir) {
-        if (this.isRemote) {
+        if (this.isRemote || entity == null) {
             return;
         }
-        if (entity.worldObj != null && !entity.worldObj.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
+        if (entity.world != null && !entity.world.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
             // Removing misbehaved living entities
             cir.setReturnValue(new ArrayList());
         }
@@ -497,7 +493,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Iterable<Chunk> getLoadedChunks() {
-        return (List<Chunk>) (List<?>) Lists.newArrayList(((ChunkProviderServer) this.getChunkProvider()).getLoadedChunks());
+        return (List<Chunk>) (List<?>) Lists.newArrayList(((ChunkProviderServer) (((WorldServer) (Object) this).getChunkProvider())).getLoadedChunks());
     }
 
     @Override
@@ -737,7 +733,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
         checkNotNull(box, "box");
-        return getCollisionBoxes(VecHelper.toMC(box)).stream()
+        return getCollisionBoxes(null, VecHelper.toMC(box)).stream()
                 .map(VecHelper::toSponge)
                 .collect(Collectors.toSet());
     }
@@ -999,7 +995,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return entities;
     }
 
-    @Redirect(method = "getClosestPlayer", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
+    @Redirect(method = "getClosestPlayer(DDDDLcom/google/common/base/Predicate;)Lnet/minecraft/entity/player/EntityPlayer;", at = @At(value = "INVOKE", target = "Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z", remap = false))
     private boolean onGetClosestPlayerCheck(com.google.common.base.Predicate<net.minecraft.entity.Entity> predicate, Object entityPlayer) {
         EntityPlayer player = (EntityPlayer) entityPlayer;
         IMixinEntity mixinEntity = (IMixinEntity) player;
@@ -1112,7 +1108,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Block block = this.getBlockState(pos).getBlock();
             // int blockLight = block.getLightValue(this, pos);
-            net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            // Must check remote or not
+            final net.minecraft.world.chunk.Chunk chunk;
+            if (!this.isRemote) {
+                chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            } else {
+                chunk = this.getChunkFromBlockCoords(pos);
+            }
             if (chunk == null || chunk.unloaded) {
                 return 0;
             }
@@ -1273,7 +1275,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.startTileTickTimer(); // Sponge
             net.minecraft.tileentity.TileEntity tileentity = iterator.next();
 
-            if (!tileentity.isInvalid() && tileentity.hasWorldObj()) {
+            if (!tileentity.isInvalid() && tileentity.hasWorld()) {
                 BlockPos blockpos = tileentity.getPos();
 
                 if (this.isBlockLoaded(blockpos) && this.worldBorder.contains(blockpos)) {

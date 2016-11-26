@@ -33,7 +33,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 public abstract class ItemStackUtil {
-    
+
     private ItemStackUtil() {
     }
 
@@ -64,14 +64,14 @@ public abstract class ItemStackUtil {
 
     @Nullable
     public static net.minecraft.item.ItemStack cloneDefensiveNative(@Nullable net.minecraft.item.ItemStack stack) {
-        return net.minecraft.item.ItemStack.copyItemStack(stack);
+        return stack.copy();
     }
 
     @Nullable
     public static net.minecraft.item.ItemStack cloneDefensiveNative(@Nullable net.minecraft.item.ItemStack stack, int newSize) {
-        net.minecraft.item.ItemStack clone = net.minecraft.item.ItemStack.copyItemStack(stack);
+        net.minecraft.item.ItemStack clone = stack.copy();
         if (clone != null) {
-            clone.stackSize = newSize;
+            clone.setCount(newSize);
         }
         return clone;
     }
@@ -95,7 +95,7 @@ public abstract class ItemStackUtil {
     public static ItemStack cloneDefensive(@Nullable ItemStack stack, int newSize) {
         return ItemStackUtil.cloneDefensive(ItemStackUtil.toNative(stack), newSize);
     }
-    
+
     public static Optional<ItemStack> cloneDefensiveOptional(@Nullable net.minecraft.item.ItemStack stack) {
         return Optional.<ItemStack>ofNullable(ItemStackUtil.cloneDefensive(stack));
     }
@@ -105,9 +105,9 @@ public abstract class ItemStackUtil {
     }
 
     public static boolean compare(net.minecraft.item.ItemStack stack1, net.minecraft.item.ItemStack stack2) {
-        return stack1.isItemEqual(stack2) && net.minecraft.item.ItemStack.areItemStackTagsEqual(stack1, stack2);
+        return net.minecraft.item.ItemStack.areItemStacksEqual(stack1, stack2);
     }
-    
+
     public static boolean compare(net.minecraft.item.ItemStack stack1, ItemStack stack2) {
         return ItemStackUtil.compare(stack1, ItemStackUtil.toNative(stack2));
     }
@@ -134,7 +134,7 @@ public abstract class ItemStackUtil {
 
     @Nullable
     public static net.minecraft.item.ItemStack fromSnapshotToNative(@Nullable ItemStackSnapshot snapshot) {
-        return snapshot == null ? null : snapshot == ItemStackSnapshot.NONE ? null : toNative(snapshot.createStack());
+        return snapshot == null ? net.minecraft.item.ItemStack.EMPTY : snapshot == ItemStackSnapshot.NONE ? net.minecraft.item.ItemStack.EMPTY: toNative(snapshot.createStack());
     }
 
     @Nullable

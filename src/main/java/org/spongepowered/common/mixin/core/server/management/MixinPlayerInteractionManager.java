@@ -29,6 +29,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockChest;
 import net.minecraft.block.BlockCommandBlock;
 import net.minecraft.block.BlockDoor;
+import net.minecraft.block.BlockStructure;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -70,8 +71,8 @@ import javax.annotation.Nullable;
 @Mixin(value = PlayerInteractionManager.class)
 public abstract class MixinPlayerInteractionManager implements IMixinPlayerInteractionManager {
 
-    @Shadow public EntityPlayerMP thisPlayerMP;
-    @Shadow public net.minecraft.world.World theWorld;
+    @Shadow public EntityPlayerMP player;
+    @Shadow public net.minecraft.world.World world;
     @Shadow private GameType gameType;
 
     @Shadow public abstract boolean isCreative();
@@ -110,13 +111,13 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
 
         } // else { // Sponge - Remove unecessary else
         // Sponge Start - Create an interact block event before something happens.
-        @Nullable final ItemStack oldStack = ItemStack.copyItemStack(stack);
+        @Nullable final ItemStack oldStack = stack.copy();
 
         final BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
         final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)),
                 Optional.of(new Vector3d(offsetX, offsetY, offsetZ)), currentSnapshot,
                 DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
-        if (!ItemStack.areItemStacksEqual(oldStack, this.thisPlayerMP.getHeldItem(hand))) {
+        if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
             SpongeCommonEventFactory.playerInteractItemChanged = true;
         }
 
@@ -125,22 +126,22 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
 
             if (state.getBlock() == Blocks.COMMAND_BLOCK) {
                 // CommandBlock GUI opens solely on the client, we need to force it close on cancellation
-                this.thisPlayerMP.connection.sendPacket(new SPacketCloseWindow(0));
+                this.player.connection.sendPacket(new SPacketCloseWindow(0));
 
             } else if (state.getProperties().containsKey(BlockDoor.HALF)) {
                 // Stopping a door from opening while `g the top part will allow the door to open, we need to update the
                 // client to resolve this
                 if (state.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER) {
-                    this.thisPlayerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up()));
+                    this.player.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up()));
                 } else {
-                    this.thisPlayerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.down()));
+                    this.player.connection.sendPacket(new SPacketBlockChange(worldIn, pos.down()));
                 }
 
             } else if (oldStack != null) {
                 // Stopping the placement of a door or double plant causes artifacts (ghosts) on the top-side of the block. We need to remove it
                 final Item item = oldStack.getItem();
                 if (item instanceof ItemDoor || (item instanceof ItemBlock && ((ItemBlock) item).getBlock().equals(Blocks.DOUBLE_PLANT))) {
-                    this.thisPlayerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up(2)));
+                    this.player.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up(2)));
                 }
             }
 
@@ -149,22 +150,22 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         }
         // Sponge End
 
-        if (!player.isSneaking() || player.getHeldItemMainhand() == null && player.getHeldItemOffhand() == null) {
+        if (!player.isSneaking() || player.getHeldItemMainhand().isEmpty() && player.getHeldItemOffhand().isEmpty()) {
             // Sponge start - check event useBlockResult, and revert the client if it's FALSE.
             // Also, store the result instead of returning immediately
             if (event.getUseBlockResult() != Tristate.FALSE) {
                 IBlockState iblockstate = (IBlockState) currentSnapshot.getState();
                 Container lastOpenContainer = player.openContainer;
 
-                EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, stack, facing, offsetX, offsetY, offsetZ)
+                EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, facing, offsetX, offsetY, offsetZ)
                          ? EnumActionResult.SUCCESS
                          : EnumActionResult.PASS;
                 // if itemstack changed, avoid restore
-                if (!ItemStack.areItemStacksEqual(oldStack, this.thisPlayerMP.getHeldItem(hand))) {
+                if (!ItemStack.areItemStacksEqual(oldStack, this.player.getHeldItem(hand))) {
                     SpongeCommonEventFactory.playerInteractItemChanged = true;
                 }
 
-                result = this.handleOpenEvent(lastOpenContainer, this.thisPlayerMP, result);
+                result = this.handleOpenEvent(lastOpenContainer, this.player, result);
 
                 if (result != EnumActionResult.PASS) {
 
@@ -173,7 +174,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             } else {
                 // Need to send a block change to the client, because otherwise, they are not
                 // going to be told about the block change.
-                this.thisPlayerMP.connection.sendPacket(new SPacketBlockChange(this.theWorld, pos));
+                this.player.connection.sendPacket(new SPacketBlockChange(this.world, pos));
                 // Since the event was explicitly set to fail, we need to respect it and treat it as if
                 // it wasn't cancelled, but perform no further processing.
                 return EnumActionResult.FAIL;
@@ -181,12 +182,17 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
             // Sponge End
         }
 
-        if (stack == null) {
+        if (stack.isEmpty()) {
             return EnumActionResult.PASS;
         } else if (player.getCooldownTracker().hasCooldown(stack.getItem())) {
             return EnumActionResult.PASS;
-        } else if (stack.getItem() instanceof ItemBlock && ((ItemBlock) stack.getItem()).getBlock() instanceof BlockCommandBlock && !player.canCommandSenderUseCommand(2, "")) {
-            return EnumActionResult.FAIL;
+        } else if (stack.getItem() instanceof ItemBlock && !player.canUseCommandBlock()) {
+            Block block = ((ItemBlock)stack.getItem()).getBlock();
+
+            if (block instanceof BlockCommandBlock || block instanceof BlockStructure)
+            {
+                return EnumActionResult.FAIL;
+            }
         } // else if (this.isCreative()) { // Sponge - Rewrite this to handle an isCreative check after the result, since we have a copied stack at the top of this method.
         //    int j = stack.getMetadata();
         //    int i = stack.stackSize;
@@ -202,7 +208,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         final EnumActionResult result = stack.onItemUse(player, worldIn, pos, hand, facing, offsetX, offsetY, offsetZ);
         if (this.isCreative()) {
             stack.setItemDamage(oldStack.getItemDamage());
-            stack.stackSize = oldStack.stackSize;
+            stack.setCount(oldStack.getCount());
         }
 
         if (!ItemStack.areItemStacksEqual(player.getHeldItem(hand), oldStack) || result != EnumActionResult.SUCCESS) {

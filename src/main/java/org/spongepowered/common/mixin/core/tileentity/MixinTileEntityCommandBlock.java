@@ -58,7 +58,7 @@ public abstract class MixinTileEntityCommandBlock extends MixinTileEntity implem
 
     @Override
     public void execute() {
-        getCommandBlockLogic().trigger(this.worldObj);
+        getCommandBlockLogic().trigger(this.world);
     }
 
     @Override

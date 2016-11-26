@@ -43,13 +43,13 @@ import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvider {
 
     @Shadow public WorldType terrainType;
-    @Shadow protected World worldObj;
+    @Shadow protected World world;
     @Shadow public abstract net.minecraft.world.DimensionType getDimensionType();
     @Shadow public abstract boolean canRespawnHere();
     @Shadow public abstract int getAverageGroundLevel();
     @Shadow public abstract boolean doesWaterVaporize();
     @Shadow public abstract WorldBorder createWorldBorder();
-    @Shadow public abstract boolean getHasNoSky();
+    @Shadow public abstract boolean hasNoSky();
     @Shadow private String generatorSettings;
 
     @Override
@@ -79,7 +79,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
 
     @Override
     public boolean hasSky() {
-        return !getHasNoSky();
+        return !hasNoSky();
     }
 
     @Override

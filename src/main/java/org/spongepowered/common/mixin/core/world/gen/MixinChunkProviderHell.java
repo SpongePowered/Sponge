@@ -48,10 +48,10 @@ import java.util.Random;
 public abstract class MixinChunkProviderHell implements IChunkProvider, GenerationPopulator, IPopulatorProvider {
 
     @Shadow @Final private boolean generateStructures;
-    @Shadow @Final public Random rand;
+    @Shadow @Final private Random rand;
     @Shadow @Final private net.minecraft.world.World world;
-    @Shadow private MapGenNetherBridge genNetherBridge;
-    @Shadow private MapGenBase genNetherCaves;
+    @Shadow @Final private MapGenNetherBridge genNetherBridge;
+    @Shadow @Final private MapGenBase genNetherCaves;
     @Shadow public abstract void prepareHeights(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
     @Shadow public abstract void buildSurfaces(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
 

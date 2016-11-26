@@ -31,9 +31,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.tileentity.TileEntityEnderChest;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -45,7 +42,6 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -59,10 +55,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -86,7 +80,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     private Timing timing;
 
     @Shadow protected boolean tileEntityInvalid;
-    @Shadow protected net.minecraft.world.World worldObj;
+    @Shadow protected net.minecraft.world.World world;
     @Shadow private int blockMetadata;
     @Shadow protected BlockPos pos;
 
@@ -102,8 +96,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Inject(method = "markDirty", at = @At(value = "HEAD"))
     public void onMarkDirty(CallbackInfo ci) {
-        if (this.worldObj != null && !this.worldObj.isRemote) {
-            IMixinWorldServer world = (IMixinWorldServer) this.worldObj;
+        if (this.world != null && !this.world.isRemote) {
+            IMixinWorldServer world = (IMixinWorldServer) this.world;
             // This handles transfers to this TE from a source such as a Hopper
             world.getCauseTracker().getCurrentPhaseData().context.getSource(TileEntity.class).ifPresent(currentTick -> {
                 if (currentTick != this) {
@@ -115,8 +109,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "addMapping(Ljava/lang/Class;Ljava/lang/String;)V", at = @At(value = "RETURN"))
-    private static void onRegister(Class clazz, String name, CallbackInfo callbackInfo) {
+    @Inject(method = "register(Ljava/lang/String;Ljava/lang/Class;)V", at = @At(value = "RETURN"))
+    private static void onRegister(String name, Class clazz, CallbackInfo callbackInfo) {
         if (clazz != null) {
             TileEntityTypeRegistryModule.getInstance().doTileEntityRegistration(clazz, name);
         }
@@ -124,7 +118,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public Location<World> getLocation() {
-        return new Location<>((World) this.worldObj, VecHelper.toVector3i(this.getPos()));
+        return new Location<>((World) this.world, VecHelper.toVector3i(this.getPos()));
     }
 
     @Override
@@ -136,7 +130,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     public DataContainer toContainer() {
         final DataContainer container = new MemoryDataContainer()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(Queries.WORLD_ID, ((World) this.worldObj).getUniqueId().toString())
+            .set(Queries.WORLD_ID, ((World) this.world).getUniqueId().toString())
             .set(Queries.POSITION_X, this.getPos().getX())
             .set(Queries.POSITION_Y, this.getPos().getY())
             .set(Queries.POSITION_Z, this.getPos().getZ())
@@ -184,7 +178,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public BlockState getBlock() {
-        return (BlockState) this.worldObj.getBlockState(this.getPos());
+        return (BlockState) this.world.getBlockState(this.getPos());
     }
 
     /**

@@ -38,7 +38,7 @@ public abstract class MixinCommandSetDefaultSpawnpoint {
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "setSpawnPoint(Lnet/minecraft/util/math/BlockPos;)V"))
     private void onSetSpawnPoint(World world, BlockPos pos) {
-        for (WorldServer worldServer : world.getMinecraftServer().worldServers) {
+        for (WorldServer worldServer : world.getMinecraftServer().worlds) {
             worldServer.setSpawnPoint(pos);
         }
     }

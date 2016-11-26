@@ -34,7 +34,7 @@ import org.spongepowered.common.command.WrapperCommandSource;
 @Mixin(EntitySelector.class)
 public abstract class MixinEntitySelector {
 
-    @Redirect(method = "matchEntities", at = @At(value = "INVOKE", target = "net.minecraft.command.ICommandSender.canCommandSenderUseCommand"
+    @Redirect(method = "matchEntities", at = @At(value = "INVOKE", target = "net.minecraft.command.ICommandSender.canUseCommand"
             + "(ILjava/lang/String;)Z"))
     private static boolean redirectCanUseCommand(ICommandSender self, int opLevel, String command) {
         return WrapperCommandSource.of(self).hasPermission("minecraft.selector");

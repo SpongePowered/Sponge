@@ -52,7 +52,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
     private SpongeEntityType spongeEntityType;
     private String entityName = "unknown";
     private String entityModId = "unknown";
-    @Shadow public World worldObj;
+    @Shadow public World world;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onEntityConstruction(World world, CallbackInfo ci) {
@@ -74,8 +74,8 @@ public class MixinEntity_Collisions implements IModData_Collisions {
             }
 
             this.entityModId = this.spongeEntityType.getModId();
-            if (!this.worldObj.isRemote) {
-                initializeCollisionState(this.worldObj);
+            if (!this.world.isRemote) {
+                initializeCollisionState(this.world);
             }
         }
     }

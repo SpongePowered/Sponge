@@ -44,23 +44,23 @@ import javax.annotation.Nullable;
 @Mixin(ServerWorldEventHandler.class)
 public abstract class MixinServerWorldEventHandler implements IMixinServerWorldEventHandler {
 
-    @Shadow @Final private WorldServer theWorldServer;
+    @Shadow @Final private WorldServer world;
     @Shadow @Final private MinecraftServer mcServer;
 
     @Redirect(method = "playSoundToAllNearExcept", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     private int getDimensionForPlayingSound(DimensionType dimensionType) {
-        return ((IMixinWorldServer) this.theWorldServer).getDimensionId();
+        return ((IMixinWorldServer) this.world).getDimensionId();
     }
 
     @Redirect(method = "playEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     private int getDimensionForSoundEffects(DimensionType dimensionType) {
-        return ((IMixinWorldServer) this.theWorldServer).getDimensionId();
+        return ((IMixinWorldServer) this.world).getDimensionId();
     }
 
     @Override
     public void playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, String soundIn, SoundCategory category, double x, double y, double z,
             float volume, float pitch) {
         this.mcServer.getPlayerList().sendToAllNearExcept(player, x, y, z, volume > 1.0F ? (double)(16.0F * volume) : 16.0D,
-                ((IMixinWorldServer) this.theWorldServer).getDimensionId(), new SPacketCustomSound(soundIn, category, x, y, z, volume, pitch));
+                ((IMixinWorldServer) this.world).getDimensionId(), new SPacketCustomSound(soundIn, category, x, y, z, volume, pitch));
     }
 }

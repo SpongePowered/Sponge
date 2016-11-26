@@ -28,8 +28,6 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.Entity;
@@ -39,7 +37,6 @@ import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityPainting;
-import net.minecraft.entity.monster.ZombieType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
@@ -70,11 +67,10 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.data.type.Professions;
-import org.spongepowered.api.data.type.ZombieTypes;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -99,11 +95,11 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
-import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.interfaces.IMixinPlayerList;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -122,6 +118,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -132,15 +129,6 @@ public final class EntityUtil {
     public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
     public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
 
-    private static final BiMap<Profession, ZombieType> ZOMBIE_TYPE_MAP =
-            ImmutableBiMap.<Profession, ZombieType>builder()
-                    .put(Professions.BLACKSMITH, ZombieType.VILLAGER_SMITH)
-                    .put(Professions.BUTCHER, ZombieType.VILLAGER_BUTCHER)
-                    .put(Professions.FARMER, ZombieType.VILLAGER_FARMER)
-                    .put(Professions.LIBRARIAN, ZombieType.VILLAGER_LIBRARIAN)
-                    .put(Professions.PRIEST, ZombieType.VILLAGER_PRIEST)
-                    .build();
-
     private EntityUtil() {
     }
 
@@ -150,6 +138,8 @@ public final class EntityUtil {
             return entity != null && entity.canBeCollidedWith();
         }
     });
+
+    public static final Function<Humanoid, EntityPlayer> HUMANOID_TO_PLAYER = (humanoid) -> humanoid instanceof EntityPlayer ? (EntityPlayer) humanoid : null;
 
     /**
      * Called specifically from {@link MixinEntity#changeDimension(int)} to overwrite
@@ -171,26 +161,26 @@ public final class EntityUtil {
             return null;
         }
 
-        entity.worldObj.theProfiler.startSection("changeDimension");
+        entity.world.theProfiler.startSection("changeDimension");
         // use the world from event
         final Transform<World> toTransform = event.getToTransform();
         WorldServer toWorld = (WorldServer) toTransform.getExtent();
-        entity.worldObj.removeEntity(entity);
+        entity.world.removeEntity(entity);
         entity.isDead = false;
-        entity.worldObj.theProfiler.startSection("reposition");
+        entity.world.theProfiler.startSection("reposition");
 
         final Vector3i toChunkPosition = toTransform.getLocation().getChunkPosition();
         toWorld.getChunkProvider().loadChunk(toChunkPosition.getX(), toChunkPosition.getZ());
         // Only need to update the entity location here as the portal is handled in SpongeCommonEventFactory
         final Vector3d toPosition = toTransform.getPosition();
         entity.setLocationAndAngles(toPosition.getX(), toPosition.getY(), toPosition.getZ(), (float) toTransform.getYaw(), (float) toTransform.getPitch());
-        entity.worldObj = toWorld;
-        toWorld.spawnEntityInWorld(entity);
+        entity.world = toWorld;
+        toWorld.spawnEntity(entity);
         toWorld.updateEntityWithOptionalForce(entity, false);
-        entity.worldObj.theProfiler.endSection();
+        entity.world.theProfiler.endSection();
 
-        entity.worldObj.theProfiler.endSection();
-        entity.worldObj.theProfiler.endSection();
+        entity.world.theProfiler.endSection();
+        entity.world.theProfiler.endSection();
         return entity;
     }
 
@@ -208,7 +198,7 @@ public final class EntityUtil {
         boolean sameDimension = entityPlayerMP.dimension == suggestedDimensionId;
         // If leaving The End via End's Portal
         // Sponge Start - Check the provider, not the world's dimension
-        final WorldServer fromWorldServer = ((WorldServer) entityPlayerMP.worldObj);
+        final WorldServer fromWorldServer = ((WorldServer) entityPlayerMP.world);
         if (fromWorldServer.provider instanceof WorldProviderEnd && suggestedDimensionId == 1) { // if (this.dimension == 1 && dimensionIn == 1)
             // Sponge End
             fromWorldServer.removeEntity(entityPlayerMP);
@@ -257,36 +247,10 @@ public final class EntityUtil {
         return entityPlayerMP;
     }
 
-    // Note: does NOT take into account any forge professions
-    public static ZombieType toNative(org.spongepowered.api.data.type.ZombieType type, @Nullable Profession profession) {
-        if (type == ZombieTypes.NORMAL) {
-            return ZombieType.NORMAL;
-        } else if (type == ZombieTypes.HUSK) {
-            return ZombieType.HUSK;
-        } else {
-            return ZOMBIE_TYPE_MAP.getOrDefault(profession, ZombieType.NORMAL);
-        }
-    }
-
-    public static org.spongepowered.api.data.type.ZombieType typeFromNative(ZombieType type) {
-        if (type == ZombieType.NORMAL) {
-            return ZombieTypes.NORMAL;
-        }
-        if (type == ZombieType.HUSK) {
-            return ZombieTypes.HUSK;
-        }
-
-        return ZombieTypes.VILLAGER;
-    }
-
-    public static boolean isNative(org.spongepowered.api.data.type.ZombieType type, @Nullable Profession profession) {
+    /*public static boolean isNative(org.spongepowered.api.data.type.ZombieType type, @Nullable Profession profession) {
         // No profession means native, husk means native, otherwise check the map (forge uses NORMAL + Profession for its types)
         return profession == null || type == ZombieTypes.HUSK || ZOMBIE_TYPE_MAP.containsKey(profession);
-    }
-
-    public static Optional<Profession> profFromNative(ZombieType type) {
-        return Optional.ofNullable(ZOMBIE_TYPE_MAP.inverse().get(type));
-    }
+    }*/
 
     public static boolean isEntityDead(org.spongepowered.api.entity.Entity entity) {
         return isEntityDead((net.minecraft.entity.Entity) entity);
@@ -336,7 +300,7 @@ public final class EntityUtil {
         final IMixinPlayerList mixinPlayerList = (IMixinPlayerList) mcServer.getPlayerList();
         final IMixinEntity mixinEntity = (IMixinEntity) entityIn;
         final Transform<World> fromTransform = mixinEntity.getTransform();
-        final WorldServer fromWorld = ((WorldServer) entityIn.worldObj);
+        final WorldServer fromWorld = ((WorldServer) entityIn.world);
         final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
         boolean sameDimension = entityIn.dimension == targetDimensionId;
         // handle the end
@@ -430,7 +394,7 @@ public final class EntityUtil {
 
         if (event.isCancelled()) {
             // update cache
-            ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+            ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
             mixinEntity.setLocationAndAngles(fromTransform);
             return event;
         }
@@ -444,7 +408,7 @@ public final class EntityUtil {
                 // force cancel so we know to skip remaining logic
                 event.setCancelled(true);
                 // update cache
-                toMixinTeleporter.removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+                toMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
                 mixinEntity.setLocationAndAngles(toTransform);
                 if (entityIn instanceof EntityPlayerMP) {
                     EntityPlayerMP player = (EntityPlayerMP) entityIn;
@@ -457,7 +421,7 @@ public final class EntityUtil {
             }
         } else {
             if (toWorld.provider instanceof WorldProviderEnd) {
-                BlockPos blockpos = entityIn.worldObj.getTopSolidOrLiquidBlock(toWorld.getSpawnPoint());
+                BlockPos blockpos = entityIn.world.getTopSolidOrLiquidBlock(toWorld.getSpawnPoint());
                 entityIn.moveToBlockPosAndAngles(blockpos, entityIn.rotationYaw, entityIn.rotationPitch);
             }
         }
@@ -469,7 +433,7 @@ public final class EntityUtil {
 
         if (!capturedBlocks.isEmpty()
             && !TrackingUtil.processBlockCaptures(capturedBlocks, toCauseTracker, EntityPhase.State.CHANGING_TO_DIMENSION, context)) {
-            toMixinTeleporter.removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+            toMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
         }
 
         if (!event.getKeepsVelocity()) {
@@ -559,7 +523,7 @@ public final class EntityUtil {
     private static List<Entity> getTraceEntities(Entity source, double traceDistance, Vec3d dir, Predicate<Entity> filter) {
         AxisAlignedBB boundingBox = source.getEntityBoundingBox();
         AxisAlignedBB traceBox = boundingBox.addCoord(dir.xCoord, dir.yCoord, dir.zCoord);
-        List<Entity> entities = source.worldObj.getEntitiesInAABBexcluding(source, traceBox.expand(1.0F, 1.0F, 1.0F), filter);
+        List<Entity> entities = source.world.getEntitiesInAABBexcluding(source, traceBox.expand(1.0F, 1.0F, 1.0F), filter);
         return entities;
     }
 
@@ -567,7 +531,7 @@ public final class EntityUtil {
         Vec3d traceStart = EntityUtil.getPositionEyes(source, partialTicks);
         Vec3d lookDir = source.getLook(partialTicks).scale(traceDistance);
         Vec3d traceEnd = traceStart.add(lookDir);
-        return source.worldObj.rayTraceBlocks(traceStart, traceEnd, false, false, true);
+        return source.world.rayTraceBlocks(traceStart, traceEnd, false, false, true);
     }
 
     public static Vec3d getPositionEyes(Entity entity, float partialTicks)
@@ -584,7 +548,7 @@ public final class EntityUtil {
     }
     @SuppressWarnings("unchecked")
     public static boolean refreshPainting(EntityPainting painting, EntityPainting.EnumArt art) {
-        final EntityTracker paintingTracker = ((WorldServer) painting.worldObj).getEntityTracker();
+        final EntityTracker paintingTracker = ((WorldServer) painting.world).getEntityTracker();
         EntityTrackerEntry paintingEntry = paintingTracker.trackedEntityHashTable.lookup(painting.getEntityId());
         List<EntityPlayerMP> playerMPs = new ArrayList<>();
         for (EntityPlayerMP player : paintingEntry.trackingPlayers) {
@@ -736,12 +700,12 @@ public final class EntityUtil {
         if (entity instanceof EntityPlayer) {
             fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
             fromWorld.getPlayerChunkMap().removePlayer((EntityPlayerMP) entity);
-            mcServer.getPlayerList().getPlayerList().remove(entity);
+            mcServer.getPlayerList().getPlayers().remove(entity);
         } else {
-            fromWorld.getEntityTracker().untrackEntity(entity);
+            fromWorld.getEntityTracker().untrack(entity);
         }
 
-        entity.worldObj.removeEntityDangerously(entity);
+        entity.world.removeEntityDangerously(entity);
         entity.isDead = false;
         entity.dimension = targetDim;
         entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
@@ -778,8 +742,8 @@ public final class EntityUtil {
             entityPlayerMP.setSneaking(false);
             mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
             toWorld.getPlayerChunkMap().addPlayer(entityPlayerMP);
-            toWorld.spawnEntityInWorld(entityPlayerMP);
-            mcServer.getPlayerList().getPlayerList().add(entityPlayerMP);
+            toWorld.spawnEntity(entityPlayerMP);
+            mcServer.getPlayerList().getPlayers().add(entityPlayerMP);
             entityPlayerMP.interactionManager.setWorld(toWorld);
             entityPlayerMP.addSelfToInternalCraftingInventory();
             entityPlayerMP.setHealth(entityPlayerMP.getHealth());
@@ -789,7 +753,7 @@ public final class EntityUtil {
             entityPlayerMP.sendPlayerAbilities();
         } else {
             entity.setWorld(toWorld);
-            toWorld.spawnEntityInWorld(entity);
+            toWorld.spawnEntity(entity);
         }
 
         fromWorld.resetUpdateEntityTick();
@@ -829,8 +793,8 @@ public final class EntityUtil {
 
         if (!(pOld instanceof WorldProviderEnd)) {
             fromWorld.theProfiler.startSection("placing");
-            x = (double) MathHelper.clamp_int((int)x, -29999872, 29999872);
-            z = (double)MathHelper.clamp_int((int)z, -29999872, 29999872);
+            x = (double) MathHelper.clamp((int)x, -29999872, 29999872);
+            z = (double)MathHelper.clamp((int)z, -29999872, 29999872);
 
             if (entity.isEntityAlive()) {
                 entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
@@ -861,7 +825,7 @@ public final class EntityUtil {
         final double posX = entity.posX;
         final double posY = entity.posY + offsetY;
         final double posZ = entity.posZ;
-        if (itemStack.stackSize == 0 || itemStack.getItem() == null) {
+        if (itemStack.isEmpty()) {
             return null;
         }
         // FIRST we want to throw the DropItemEvent.PRE
@@ -884,12 +848,12 @@ public final class EntityUtil {
         if (item == null) {
             return null;
         }
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) entity.worldObj;
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) entity.world;
         final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
 
-        if (item.stackSize != 0 && item.getItem() != null) {
+        if (item.isEmpty()) {
             if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
@@ -906,7 +870,7 @@ public final class EntityUtil {
                     return null;
                 }
             }
-            EntityItem entityitem = new EntityItem(entity.worldObj, posX, posY, posZ, item);
+            EntityItem entityitem = new EntityItem(entity.world, posX, posY, posZ, item);
             entityitem.setDefaultPickupDelay();
 
             // FIFTH - Capture the entity maybe?
@@ -922,7 +886,7 @@ public final class EntityUtil {
                 return entityitem;
             }
             // FINALLY - Spawn the entity in the world if all else didn't fail
-            entity.worldObj.spawnEntityInWorld(entityitem);
+            entity.world.spawnEntity(entityitem);
             return entityitem;
         }
         return null;
@@ -957,7 +921,7 @@ public final class EntityUtil {
         if (item == null) {
             return null;
         }
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.world;
         final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
@@ -987,7 +951,7 @@ public final class EntityUtil {
             }
         }
 
-        EntityItem entityitem = new EntityItem(player.worldObj, posX, adjustedPosY, posZ, droppedItem);
+        EntityItem entityitem = new EntityItem(player.world, posX, adjustedPosY, posZ, droppedItem);
         entityitem.setPickupDelay(40);
 
         if (traceItem) {
@@ -1028,7 +992,7 @@ public final class EntityUtil {
 
         if (traceItem) {
             if (itemstack != null) {
-                player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.stackSize);
+                player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
             }
 
             player.addStat(StatList.DROP);
@@ -1064,7 +1028,7 @@ public final class EntityUtil {
     private static ItemStack dropItemAndGetStack(EntityPlayer player, EntityItem item) {
         final ItemStack stack = item.getEntityItem();
         if (stack != null) {
-            player.worldObj.spawnEntityInWorld(item);
+            player.world.spawnEntity(item);
             return stack;
         }
         return null;

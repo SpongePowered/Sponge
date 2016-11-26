@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.IInventory;
@@ -39,7 +37,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -69,9 +66,8 @@ import java.util.Optional;
 @Mixin(TileEntityChest.class)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
         @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
-public abstract class MixinTileEntityChest extends MixinTileEntityLockable implements Chest, IMixinCustomNameable, ILockableContainer {
+public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot implements Chest, IMixinCustomNameable, ILockableContainer {
 
-    @Shadow public String customName;
     @Shadow public float lidAngle;
     @Shadow public int numPlayersUsing;
     @Shadow public TileEntityChest adjacentChestZNeg;
@@ -99,7 +95,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
      */
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
     public void onUpdate(CallbackInfo ci) {
-        if (this.worldObj == null || !this.worldObj.isRemote) {
+        if (this.world == null || !this.world.isRemote) {
             // chests should never tick on server
             ci.cancel();
         }
@@ -108,11 +104,11 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
     @Inject(method = "openInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"), cancellable = true)
     public void onOpenInventory(EntityPlayer player, CallbackInfo ci) {
         // Moved out of tick loop
-        if (this.worldObj == null) {
+        if (this.world == null) {
             ci.cancel();
             return;
         }
-        if (this.worldObj.isRemote) {
+        if (this.world.isRemote) {
             return;
         }
 
@@ -131,18 +127,18 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
                 posZ += 0.5D;
             }
 
-            this.worldObj.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 
     @Inject(method = "closeInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"), cancellable = true)
     public void onCloseInventory(EntityPlayer player, CallbackInfo ci) {
         // Moved out of tick loop
-        if (this.worldObj == null) {
+        if (this.world == null) {
             ci.cancel();
             return;
         }
-        if (this.worldObj.isRemote) {
+        if (this.world.isRemote) {
             return;
         }
 
@@ -167,17 +163,8 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
                 posZ += 0.5D;
             }
 
-            this.worldObj.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.worldObj.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        if (this.customName != null) {
-            container.set(of("CustomName"), this.customName);
-        }
-        return container;
     }
 
     @Override
@@ -230,7 +217,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
         for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
             BlockPos blockpos = this.pos.offset(enumfacing);
 
-            TileEntity tileentity1 = this.worldObj.getTileEntity(blockpos);
+            TileEntity tileentity1 = this.world.getTileEntity(blockpos);
 
             if (tileentity1 instanceof TileEntityChest) {
                 InventoryLargeChest inventory;

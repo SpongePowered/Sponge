@@ -95,7 +95,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Shadow public abstract int getMaxStackSize();
     @Shadow public abstract boolean hasTagCompound();
     @Shadow public abstract NBTTagCompound getTagCompound();
-    @Shadow public abstract NBTTagCompound getSubCompound(String key, boolean create);
+    @Shadow public abstract NBTTagCompound getOrCreateSubCompound(String key);
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow @Nullable public abstract Item shadow$getItem();
 
@@ -106,7 +106,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
         }
     }
 
-    @Inject(method = "readFromNBT", at = @At("RETURN"))
+    @Inject(method = "<init>(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
     private void onRead(NBTTagCompound compound, CallbackInfo info) {
         if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
             readFromNbt(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
@@ -342,7 +342,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
             for (DataView dataView : manipulatorViews) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(dataView));
             }
-            final NBTTagCompound spongeCompound = getSubCompound(NbtDataUtil.SPONGE_DATA, true);
+            final NBTTagCompound spongeCompound = getOrCreateSubCompound(NbtDataUtil.SPONGE_DATA);
             spongeCompound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, newList);
         } else {
             if (hasTagCompound()) {

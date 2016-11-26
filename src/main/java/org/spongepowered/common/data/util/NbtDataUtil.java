@@ -281,15 +281,15 @@ public final class NbtDataUtil {
     }
 
     public static void removeLoreFromNBT(ItemStack stack) {
-        if(stack.getSubCompound(ITEM_DISPLAY, false) == null) {
+        if(stack.getSubCompound(ITEM_DISPLAY) == null) {
             return;
         }
-        stack.getSubCompound(ITEM_DISPLAY, false).removeTag(ITEM_LORE);
+        stack.getSubCompound(ITEM_DISPLAY).removeTag(ITEM_LORE);
     }
 
     public static void setLoreToNBT(ItemStack stack, List<Text> lore) {
         final NBTTagList list =  SpongeTexts.asLegacy(lore);
-        stack.getSubCompound(ITEM_DISPLAY, true).setTag(ITEM_LORE, list);
+        stack.getOrCreateSubCompound(ITEM_DISPLAY).setTag(ITEM_LORE, list); // setSubCompound
     }
 
     public static boolean hasColorFromNBT(ItemStack stack) {
@@ -306,15 +306,15 @@ public final class NbtDataUtil {
     }
 
     public static void removeColorFromNBT(ItemStack stack) {
-        if(stack.getSubCompound(ITEM_DISPLAY, false) == null) {
+        if(stack.getSubCompound(ITEM_DISPLAY) == null) {
             return;
         }
-        stack.getSubCompound(ITEM_DISPLAY, false).removeTag(ITEM_COLOR);
+        stack.getSubCompound(ITEM_DISPLAY).removeTag(ITEM_COLOR);
     }
 
     public static void setColorToNbt(ItemStack stack, Color color) {
         final int mojangColor = ColorUtil.javaColorToMojangColor(color);
-        stack.getSubCompound(ITEM_DISPLAY, true).setInteger(ITEM_COLOR, mojangColor);
+        stack.getOrCreateSubCompound(ITEM_DISPLAY).setInteger(ITEM_COLOR, mojangColor);
     }
 
     public static List<Text> getPagesFromNBT(NBTTagCompound compound) {

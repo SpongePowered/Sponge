@@ -50,16 +50,16 @@ public abstract class MixinTileEntityJukebox extends MixinTileEntity implements 
     @Override
     public void playRecord() {
         if (getRecord() != null) {
-            this.worldObj.playEvent(null, 1005, this.pos, Item.getIdFromItem(getRecord().getItem()));
+            this.world.playEvent(null, 1005, this.pos, Item.getIdFromItem(getRecord().getItem()));
         }
     }
 
     @Override
     public void ejectRecord() {
-        IBlockState block = this.worldObj.getBlockState(this.pos);
+        IBlockState block = this.world.getBlockState(this.pos);
         if (block.getBlock() == Blocks.JUKEBOX) {
-            ((BlockJukebox) block.getBlock()).dropRecord(this.worldObj, this.pos, block);
-            this.worldObj.setBlockState(this.pos, block.withProperty(BlockJukebox.HAS_RECORD, false), 2);
+            ((BlockJukebox) block.getBlock()).dropRecord(this.world, this.pos, block);
+            this.world.setBlockState(this.pos, block.withProperty(BlockJukebox.HAS_RECORD, false), 2);
         }
     }
 
@@ -69,11 +69,11 @@ public abstract class MixinTileEntityJukebox extends MixinTileEntity implements 
         if (!(itemStack.getItem() instanceof ItemRecord)) {
             return;
         }
-        IBlockState block = this.worldObj.getBlockState(this.pos);
+        IBlockState block = this.world.getBlockState(this.pos);
         if (block.getBlock() == Blocks.JUKEBOX) {
             // Don't use BlockJukebox#insertRecord - it looses item data
             this.setRecord(itemStack);
-            this.worldObj.setBlockState(this.pos, block.withProperty(BlockJukebox.HAS_RECORD, true), 2);
+            this.world.setBlockState(this.pos, block.withProperty(BlockJukebox.HAS_RECORD, true), 2);
         }
     }
 

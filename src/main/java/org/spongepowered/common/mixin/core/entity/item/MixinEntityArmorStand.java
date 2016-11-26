@@ -58,8 +58,8 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     @Shadow public Rotations leftLegRotation;
     @Shadow public Rotations rightLegRotation;
 
-    @Shadow public abstract boolean getShowArms();
-    @Shadow public abstract boolean hasNoBasePlate();
+    @Shadow public abstract boolean getShowArms(); // getShowArms
+    @Shadow public abstract boolean hasNoBasePlate(); // hasNoBasePlate
     @Shadow public abstract boolean hasMarker();
     @Shadow public abstract boolean shadow$isSmall();
     @Shadow public abstract Rotations shadow$getHeadRotation();

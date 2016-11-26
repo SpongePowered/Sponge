@@ -43,6 +43,7 @@ public abstract class MixinTitle implements IMixinTitle {
 
     @Shadow @Final protected Optional<Text> title;
     @Shadow @Final protected Optional<Text> subtitle;
+    @Shadow @Final protected Optional<Text> actionBar;
     @Shadow @Final protected Optional<Integer> fadeIn;
     @Shadow @Final protected Optional<Integer> stay;
     @Shadow @Final protected Optional<Integer> fadeOut;
@@ -62,7 +63,7 @@ public abstract class MixinTitle implements IMixinTitle {
         if (this.packets == null) {
             this.packets = new ArrayList<>();
             if (this.clear) {
-                this.packets.add(new SPacketTitle(SPacketTitle.Type.CLEAR, null));
+                this.packets.add(new SPacketTitle(SPacketTitle.Type.RESET, null)); // SPacketTitle.Type.RESET is actually CLEAR
             }
             if (this.reset) {
                 this.packets.add(new SPacketTitle(SPacketTitle.Type.RESET, null));
@@ -72,6 +73,9 @@ public abstract class MixinTitle implements IMixinTitle {
             }
             if (this.subtitle.isPresent()) {
                 this.packets.add(new SPacketTitle(SPacketTitle.Type.SUBTITLE, ((IMixinText) this.subtitle.get()).toComponent()));
+            }
+            if (this.actionBar.isPresent()) {
+                this.packets.add(new SPacketTitle(SPacketTitle.Type.ACTIONBAR, ((IMixinText) this.actionBar.get()).toComponent()));
             }
             if (this.title.isPresent()) {
                 this.packets.add(new SPacketTitle(SPacketTitle.Type.TITLE, ((IMixinText) this.title.get()).toComponent()));

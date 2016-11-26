@@ -32,21 +32,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.passive.EntityVillager;
-import net.minecraft.entity.passive.EntityVillager.EmeraldForItems;
-import net.minecraft.entity.passive.EntityVillager.ItemAndEmeraldToItem;
-import net.minecraft.entity.passive.EntityVillager.ListEnchantedBookForEmeralds;
-import net.minecraft.entity.passive.EntityVillager.ListEnchantedItemForEmeralds;
-import net.minecraft.entity.passive.EntityVillager.ListItemForEmeralds;
-import net.minecraft.entity.passive.EntityVillager.PriceInfo;
-import net.minecraft.init.Blocks;
-import net.minecraft.init.Items;
-import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.type.Career;
-import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.api.item.merchant.TradeOfferListMutator;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
+import org.spongepowered.common.entity.SpongeCareer;
+import org.spongepowered.common.entity.SpongeProfession;
+import org.spongepowered.common.registry.type.entity.CareerRegistryModule;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -146,194 +137,21 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
     static void registerVanillaTrades() {
         VillagerRegistry instance = getInstance();
 
-        { // Farmers
-            { // Farmer
-                instance.setMutators(Careers.FARMER, 1, ImmutableList.of(
-                        generatorFor(new EmeraldForItems(Items.WHEAT, new PriceInfo(18, 22))),
-                        generatorFor(new EmeraldForItems(Items.POTATO, new PriceInfo(15, 19))),
-                        generatorFor(new EmeraldForItems(Items.CARROT, new PriceInfo(15, 19))),
-                        generatorFor(new ListItemForEmeralds(Items.BREAD, new PriceInfo(-4, -2)))
-                ))
-                        .setMutators(Careers.FARMER, 2, ImmutableList.of(
-                                generatorFor(new EmeraldForItems(Item.getItemFromBlock(Blocks.PUMPKIN), new PriceInfo(8, 13))),
-                                generatorFor(new ListItemForEmeralds(Items.PUMPKIN_PIE, new PriceInfo(-3, -2)))
-                        ))
-                        .setMutators(Careers.FARMER, 3, ImmutableList.of(
-                                generatorFor(new EmeraldForItems(Item.getItemFromBlock(Blocks.MELON_BLOCK), new PriceInfo(7, 12))),
-                                generatorFor(new ListItemForEmeralds(Items.APPLE, new PriceInfo(-5, -7)))
-                        ))
-                        .setMutators(Careers.FARMER, 4, ImmutableList.of(
-                                generatorFor(new ListItemForEmeralds(Items.COOKIE, new PriceInfo(-6, -10))),
-                                generatorFor(new ListItemForEmeralds(Items.CAKE, new PriceInfo(1, 1)))
-                        ));
-            }
-            { // Fisherman
-                instance.setMutators(Careers.FISHERMAN, 1, ImmutableList.of(
-                        generatorFor(new EmeraldForItems(Items.STRING, new PriceInfo(15, 20))),
-                        generatorFor(new EmeraldForItems(Items.COAL, new PriceInfo(16, 24))),
-                        generatorFor(new ItemAndEmeraldToItem(Items.FISH, new PriceInfo(6, 6), Items.COOKED_FISH, new PriceInfo(6, 6)))
-                ))
-                        .setMutators(Careers.FISHERMAN, 2, ImmutableList.of(
-                                generatorFor(new ListEnchantedItemForEmeralds(Items.FISHING_ROD, new PriceInfo(7, 8)))
-                        ));
-            }
-            { // Shepherd
-                instance.setMutators(Careers.SHEPHERD, 1, ImmutableList.of(
-                        generatorFor(new EmeraldForItems(Item.getItemFromBlock(Blocks.WOOL), new PriceInfo(16, 22))),
-                        generatorFor(new ListItemForEmeralds(Items.SHEARS, new PriceInfo(3, 4)))
-                ))
-                        .setMutators(Careers.SHEPHERD, 2, ImmutableList.of(
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 0), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 1), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 2), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 3), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 4), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 5), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 6), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 7), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 8), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 9), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 10), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 11), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 12), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 13), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 14), new PriceInfo(1, 2))),
-                                generatorFor(new ListItemForEmeralds(new ItemStack(Blocks.WOOL, 1, 15), new PriceInfo(1, 2)))
-                        ));
-            }
-            { // Fletcher
-                instance.setMutators(Careers.FLETCHER, 1, ImmutableList.of(
-                        generatorFor(new EmeraldForItems(Items.STRING, new PriceInfo(15, 20))),
-                        generatorFor(new ListItemForEmeralds(Items.ARROW, new PriceInfo(-12, -8)))
-                ))
-                        .setMutators(Careers.FLETCHER, 2, ImmutableList.of(
-                                generatorFor(new ListItemForEmeralds(Items.BOW, new PriceInfo(2, 3))),
-                                generatorFor(new ItemAndEmeraldToItem(Item.getItemFromBlock(Blocks.GRAVEL), new PriceInfo(10, 10), Items.FLINT,
-                                        new PriceInfo(6, 10)))
-                        ));
-            }
-        }
-        { // Librarian
-            { // Librarian
-                instance.setMutators(Careers.LIBRARIAN, 1, ImmutableList.of(
-                        generatorFor(new EmeraldForItems(Items.PAPER, new PriceInfo(24, 36))),
-                        generatorFor(new ListEnchantedBookForEmeralds())
-                ))
-                        .setMutators(Careers.LIBRARIAN, 2, ImmutableList.of(
-                                generatorFor(new EmeraldForItems(Items.BOOK, new PriceInfo(8, 10))),
-                                generatorFor(new ListItemForEmeralds(Items.COMPASS, new PriceInfo(10, 12))),
-                                generatorFor(new ListItemForEmeralds(Item.getItemFromBlock(Blocks.BOOKSHELF), new PriceInfo(3, 4)))
-                        ))
-                        .setMutators(Careers.LIBRARIAN, 3, ImmutableList.of(
-                                generatorFor(new EmeraldForItems(Items.WRITTEN_BOOK, new PriceInfo(2, 2))),
-                                generatorFor(new ListItemForEmeralds(Items.CLOCK, new PriceInfo(10, 12))),
-                                generatorFor(new ListItemForEmeralds(Item.getItemFromBlock(Blocks.GLASS), new PriceInfo(-5, -3)))
-                        ))
-                        .setMutators(Careers.LIBRARIAN, 4, ImmutableList.of(
-                                generatorFor(new ListEnchantedBookForEmeralds())
-                        ))
-                        .setMutators(Careers.LIBRARIAN, 5, ImmutableList.of(
-                                generatorFor(new ListEnchantedBookForEmeralds())
-                        ))
-                        .setMutators(Careers.LIBRARIAN, 6, ImmutableList.of(
-                                generatorFor(new ListItemForEmeralds(Items.NAME_TAG, new PriceInfo(20, 22)))
-                        ));
-            }
-        }
-        { // Priest
-            { // Cleric
-                instance.setMutators(Careers.CLERIC, 1, ImmutableList.of(
-                        generatorFor(new EmeraldForItems(Items.ROTTEN_FLESH, new PriceInfo(36, 40))),
-                        generatorFor(new EmeraldForItems(Items.GOLD_INGOT, new PriceInfo(8, 10)))
-                ))
-                        .setMutators(Careers.CLERIC, 2, ImmutableList.of(
-                                generatorFor(new ListItemForEmeralds(Items.REDSTONE, new PriceInfo(-4, -1))),
-                                generatorFor(
-                                        new ListItemForEmeralds(new ItemStack(Items.DYE, 1, EnumDyeColor.BLUE.getDyeDamage()), new PriceInfo(-2, -1)))
-                        ))
-                        .setMutators(Careers.CLERIC, 3, ImmutableList.of(
-                                generatorFor(new ListItemForEmeralds(Items.ENDER_EYE, new PriceInfo(7, 11))),
-                                generatorFor(new ListItemForEmeralds(Item.getItemFromBlock(Blocks.GLOWSTONE), new PriceInfo(-3, -1)))
-                        ))
-                        .setMutators(Careers.CLERIC, 4, ImmutableList.of(
-                                generatorFor(new ListItemForEmeralds(Items.EXPERIENCE_BOTTLE, new PriceInfo(3, 11)))
-                        ));
-            }
-        }
-        { // Blacksmith
-            { // Armorer
-                instance.setMutators(Careers.ARMORER, 1, ImmutableList.of(
-                        generatorFor(new EmeraldForItems(Items.COAL, new PriceInfo(16, 24))),
-                        generatorFor(new ListItemForEmeralds(Items.IRON_HELMET, new PriceInfo(4, 6)))
-                ))
-                        .setMutators(Careers.ARMORER, 2, ImmutableList.of(
-                                generatorFor(new EmeraldForItems(Items.IRON_INGOT, new PriceInfo(7, 9))),
-                                generatorFor(new ListItemForEmeralds(Items.IRON_CHESTPLATE, new PriceInfo(10, 14)))
-                        ))
-                        .setMutators(Careers.ARMORER, 3, ImmutableList.of(
-                                generatorFor(new EmeraldForItems(Items.DIAMOND, new PriceInfo(3, 4))),
-                                generatorFor(new ListEnchantedItemForEmeralds(Items.DIAMOND_CHESTPLATE, new PriceInfo(16, 19)))
-                        ))
-                        .setMutators(Careers.ARMORER, 4, ImmutableList.of(
-                                generatorFor(new ListItemForEmeralds(Items.CHAINMAIL_BOOTS, new PriceInfo(5, 7))),
-                                generatorFor(new ListItemForEmeralds(Items.CHAINMAIL_LEGGINGS, new PriceInfo(9, 11))),
-                                generatorFor(new ListItemForEmeralds(Items.CHAINMAIL_HELMET, new PriceInfo(5, 7))),
-                                generatorFor(new ListItemForEmeralds(Items.CHAINMAIL_CHESTPLATE, new PriceInfo(11, 15)))
-                        ));
-            }
-            { // Weapon Smith
-                instance.setMutators(Careers.WEAPON_SMITH, 1, ImmutableList.of(
-                        generatorFor(new EmeraldForItems(Items.COAL, new PriceInfo(16, 24))),
-                        generatorFor(new ListItemForEmeralds(Items.IRON_AXE, new PriceInfo(6, 8)))
-                ))
-                        .setMutators(Careers.WEAPON_SMITH, 2, ImmutableList.of(
-                                generatorFor(new EmeraldForItems(Items.IRON_INGOT, new PriceInfo(7, 9))),
-                                generatorFor(new ListEnchantedItemForEmeralds(Items.IRON_SWORD, new PriceInfo(9, 10)))
-                        ))
-                        .setMutators(Careers.WEAPON_SMITH, 3, ImmutableList.of(
-                                generatorFor(new EmeraldForItems(Items.DIAMOND, new PriceInfo(3, 4))),
-                                generatorFor(new ListEnchantedItemForEmeralds(Items.DIAMOND_SWORD, new PriceInfo(12, 15))),
-                                generatorFor(new ListEnchantedItemForEmeralds(Items.DIAMOND_AXE, new PriceInfo(9, 12)))
-                        ));
-            }
-            { // Tool Smith
-                instance.setMutators(Careers.TOOL_SMITH, 1, ImmutableList.of(
-                        generatorFor(new EmeraldForItems(Items.COAL, new PriceInfo(16, 24))),
-                        generatorFor(new ListEnchantedItemForEmeralds(Items.IRON_SHOVEL, new PriceInfo(5, 7)))
-                ))
-                        .setMutators(Careers.TOOL_SMITH, 2, ImmutableList.of(
-                                generatorFor(new EmeraldForItems(Items.IRON_INGOT, new PriceInfo(7, 9))),
-                                generatorFor(new ListEnchantedItemForEmeralds(Items.IRON_PICKAXE, new PriceInfo(9, 11)))
-                        ))
-                        .setMutators(Careers.TOOL_SMITH, 3, ImmutableList.of(
-                                generatorFor(new EmeraldForItems(Items.DIAMOND, new PriceInfo(3, 4))),
-                                generatorFor(new ListEnchantedItemForEmeralds(Items.DIAMOND_PICKAXE, new PriceInfo(12, 15)))
-                        ));
-            }
-        }
-        { // Butcher
-            { // Butcher
-                instance.setMutators(Careers.BUTCHER, 1, ImmutableList.of(
-                        generatorFor(new EmeraldForItems(Items.PORKCHOP, new PriceInfo(14, 18))),
-                        generatorFor(new EmeraldForItems(Items.CHICKEN, new PriceInfo(14, 18)))
-                ))
-                        .setMutators(Careers.BUTCHER, 2, ImmutableList.of(
-                                generatorFor(new EmeraldForItems(Items.COAL, new PriceInfo(16, 24))),
-                                generatorFor(new ListItemForEmeralds(Items.COOKED_PORKCHOP, new PriceInfo(-7, -5))),
-                                generatorFor(new ListItemForEmeralds(Items.COOKED_CHICKEN, new PriceInfo(-8, -6)))
-                        ));
-            }
-            { // Leather Worker
-                instance.setMutators(Careers.LEATHERWORKER, 1, ImmutableList.of(
-                        generatorFor(new EmeraldForItems(Items.LEATHER, new PriceInfo(9, 12))),
-                        generatorFor(new ListItemForEmeralds(Items.LEATHER_LEGGINGS, new PriceInfo(2, 4)))
-                ))
-                        .setMutators(Careers.LEATHERWORKER, 2, ImmutableList.of(
-                                generatorFor(new ListEnchantedItemForEmeralds(Items.LEATHER_CHESTPLATE, new PriceInfo(7, 12)))
-                        ))
-                        .setMutators(Careers.LEATHERWORKER, 3, ImmutableList.of(
-                                generatorFor(new ListItemForEmeralds(Items.SADDLE, new PriceInfo(8, 10)))
-                        ));
+        // See https://gist.github.com/Aaron1011/028bc7d21268458b96bf36cd8e397f7b
+
+        for (Career career: CareerRegistryModule.getInstance().getAll()) {
+            SpongeCareer spongeCareer = (SpongeCareer) career;
+
+            EntityVillager.ITradeList[][] careerLevels = EntityVillager.DEFAULT_TRADE_LIST_MAP[((SpongeProfession) spongeCareer.getProfession()).type][spongeCareer.type];
+            for (int level = 0; level < careerLevels.length; level++) {
+                EntityVillager.ITradeList[] offers = careerLevels[level];
+                ImmutableList.Builder<TradeOfferListMutator> builder = ImmutableList.builder();
+
+                for (int i = 0; i < offers.length; i++) {
+                    builder.add(generatorFor(offers[i]));
+                }
+
+                instance.setMutators(career, level + 1, builder.build());
             }
         }
     }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.tileentity.TileEntityBanner;
+import net.minecraft.tileentity.BannerPattern;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
@@ -32,20 +32,20 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @NonnullByDefault
-@Mixin(TileEntityBanner.EnumBannerPattern.class)
+@Mixin(BannerPattern.class)
 public class MixinEnumBannerPattern implements BannerPatternShape {
 
-    @Shadow @Final private String patternName;
-    @Shadow @Final private String patternID;
+    @Shadow @Final private String fileName;
+    @Shadow @Final private String hashname;
 
     @Override
     public String getName() {
-        return this.patternName;
+        return this.fileName;
     }
 
     @Override
     public String getId() {
-        return this.patternID;
+        return this.hashname;
     }
 
 }

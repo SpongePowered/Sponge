@@ -63,14 +63,12 @@ import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.OutputSlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
-import org.spongepowered.common.item.inventory.lens.impl.slots.OutputSlotLensImpl;
 import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
 import org.spongepowered.common.registry.SpongeVillagerRegistry;
 
@@ -84,17 +82,16 @@ import javax.annotation.Nullable;
 @Implements({@Interface(iface = Villager.class, prefix = "villager$"), @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
 public abstract class MixinEntityVillager extends MixinEntityAgeable implements Villager, IMixinVillager, CarriedInventory {
 
-    @Shadow private boolean isPlaying;
-    @Shadow private int careerId;
-    @Shadow private int careerLevel;
-    @Shadow @Nullable private MerchantRecipeList buyingList;
-    @Shadow @Final private InventoryBasic villagerInventory;
+    @Shadow private boolean isPlaying; // isPlaying
+    @Shadow private int careerId; // careerId
+    @Shadow private int careerLevel; // careerLevel
+    @Shadow @Nullable private MerchantRecipeList buyingList; // buyingList
+    @Shadow @Final private InventoryBasic villagerInventory; // villagerInventory
 
-    @Shadow public abstract int shadow$getProfession();
-    @Shadow public abstract void setProfession(int professionId);
+    @Shadow public abstract void setProfession(int professionId); // setProfession
     @Shadow public abstract void setCustomer(EntityPlayer player);
-    @Shadow public abstract boolean shadow$isTrading();
-    @Shadow public abstract EntityPlayer shadow$getCustomer();
+    @Shadow public abstract boolean shadow$isTrading(); // isTrading
+    @Shadow @Nullable public abstract EntityPlayer shadow$getCustomer(); // getCustomer
     @Shadow public abstract MerchantRecipeList getRecipes(EntityPlayer player);
 
     private Fabric<IInventory> fabric;
@@ -139,7 +136,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
 
     @Intrinsic
     public boolean villager$isTrading() {
-        return shadow$isTrading();
+        return this.shadow$isTrading();
     }
 
     @Override
@@ -181,7 +178,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
      */
     @SuppressWarnings("unchecked")
     @Overwrite
-    public void populateBuyingList() {
+    public void populateBuyingList() { // populateBuyingList
         // Sponge
         List<Career> careers = (List<Career>) this.profession.getCareers();
 
@@ -202,8 +199,8 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         // Sponge start - use our own registry stuffs
         checkState(this.careerId <= careers.size(), "The villager career id is out of bounds fo the available Careers! Found: " + this.careerId
                                                     + " when the current maximum is: " + careers.size());
-        final Career careerId = careers.get(this.careerId - 1);
-        SpongeVillagerRegistry.getInstance().populateOffers((List<TradeOffer>) (List<?>) this.buyingList, careerId, this.careerLevel, this.rand);
+        final Career careerLevel = careers.get(this.careerId - 1);
+        SpongeVillagerRegistry.getInstance().populateOffers(this, (List<TradeOffer>) (List<?>) this.buyingList, careerLevel, this.careerLevel, this.rand);
         // Sponge end
     }
 

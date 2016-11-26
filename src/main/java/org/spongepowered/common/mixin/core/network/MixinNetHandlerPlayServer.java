@@ -146,7 +146,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
 
     @Shadow public abstract void sendPacket(final Packet<?> packetIn);
-    @Shadow public abstract void kickPlayerFromServer(String reason);
+    @Shadow public abstract void disconnect(String reason);
     @Shadow private void captureCurrentPosition() {}
     @Shadow public abstract void setPlayerLocation(double x, double y, double z, float yaw, float pitch);
     @Shadow private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) { return false; } // Shadowed
@@ -192,11 +192,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;onUpdateEntity()V"))
     private void onPlayerTick(EntityPlayerMP playerEntity) {
-        if (playerEntity.worldObj.isRemote || !CauseTracker.ENABLED) {
+        if (playerEntity.world.isRemote || !CauseTracker.ENABLED) {
             playerEntity.onUpdateEntity();
             return;
         }
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) playerEntity.worldObj;
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) playerEntity.world;
         final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
         causeTracker.switchToPhase(TickPhase.Tick.PLAYER, PhaseContext.start()
                 .add(NamedCause.source(playerEntity))
@@ -335,7 +335,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
                 if (nbttagcompound.hasKey("x") && nbttagcompound.hasKey("y") && nbttagcompound.hasKey("z")) {
                     BlockPos blockpos = new BlockPos(nbttagcompound.getInteger("x"), nbttagcompound.getInteger("y"), nbttagcompound.getInteger("z"));
-                    TileEntity tileentity = this.playerEntity.worldObj.getTileEntity(blockpos);
+                    TileEntity tileentity = this.playerEntity.world.getTileEntity(blockpos);
 
                     if (tileentity != null) {
                         NBTTagCompound nbttagcompound1 = new NBTTagCompound();
@@ -350,7 +350,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
             boolean clickedHotbar = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
             boolean itemValidCheck = itemstack == null || itemstack.getItem() != null;
-            boolean itemValidCheck2 = itemstack == null || itemstack.getMetadata() >= 0 && itemstack.stackSize <= 64 && itemstack.stackSize > 0;
+            boolean itemValidCheck2 = itemstack == null || itemstack.getMetadata() >= 0 && itemstack.getCount() <= 64 && itemstack.getCount() > 0;
 
             // Sponge start - handle CreativeInventoryEvent
             if (itemValidCheck && itemValidCheck2) {
@@ -518,7 +518,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
-    @Redirect(method = "processRightClickBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClickBlock(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;"))
+    @Redirect(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClickBlock(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;"))
     public EnumActionResult onProcessRightClickBlock(PlayerInteractionManager interactionManager, EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
         EnumActionResult actionResult = interactionManager.processRightClickBlock(this.playerEntity, worldIn, stack, hand, pos, facing, hitX, hitY, hitZ);
         // If result is not SUCCESS, we need to avoid throwing an InteractBlockEvent.Secondary for AIR
@@ -527,7 +527,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             //SpongeCommonEventFactory.ignoreRightClickAirEvent = true;
             // If a plugin or mod has changed the item, avoid restoring
             if (!SpongeCommonEventFactory.playerInteractItemChanged) {
-                final CauseTracker causeTracker = ((IMixinWorldServer) player.worldObj).getCauseTracker();
+                final CauseTracker causeTracker = ((IMixinWorldServer) player.world).getCauseTracker();
                 final PhaseData peek = causeTracker.getCurrentPhaseData();
                 final ItemStack itemStack = peek.context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
 
@@ -550,13 +550,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         EntityItem item = null;
         ItemStack stack = this.playerEntity.inventory.getCurrentItem();
         if (stack != null) {
-            int size = stack.stackSize;
+            int size = stack.getCount();
             item = this.playerEntity.dropItem(dropAll);
             // force client itemstack update if drop event was cancelled
             if (item == null) {
                 Slot slot = this.playerEntity.openContainer.getSlotFromInventory(this.playerEntity.inventory, this.playerEntity.inventory.currentItem);
                 int windowId = this.playerEntity.openContainer.windowId;
-                stack.stackSize = size;
+                stack.setCount(size);
                 this.sendPacket(new SPacketSetSlot(windowId, slot.slotNumber, stack));
             }
         }
@@ -573,15 +573,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             mixinContainer.detectAndSendChanges(true);
             PacketPhaseUtil.handleSlotRestore(this.playerEntity, Lists.newArrayList(mixinContainer.getCapturedTransactions()), true, false);
             // restore cursor
-            final CauseTracker causeTracker = ((IMixinWorldServer) this.playerEntity.worldObj).getCauseTracker();
+            final CauseTracker causeTracker = ((IMixinWorldServer) this.playerEntity.world).getCauseTracker();
             Optional<ItemStackSnapshot> cursorOpt = causeTracker.getCurrentContext().firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class);
             if (cursorOpt.isPresent()) {
                 ItemStackSnapshot cursor = cursorOpt.get();
-                if (cursor == ItemStackSnapshot.NONE) {
-                    this.playerEntity.inventory.setItemStack(null);
-                } else {
-                    this.playerEntity.inventory.setItemStack((ItemStack) cursor.createStack());
-                }
+                this.playerEntity.inventory.setItemStack((ItemStack) cursor.createStack());
             }
             mixinContainer.getCapturedTransactions().clear();
             mixinContainer.setCaptureInventory(false);
@@ -618,7 +614,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         this.playerEntity.markPlayerActive();
 
         if (entity != null) {
-            boolean flag = this.playerEntity.canEntityBeSeen(entity);
+            boolean flag = this.playerEntity.canEntityBeSeen((entity));
             double d0 = 36.0D; // 6 blocks
 
             if (!flag) {
@@ -642,8 +638,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
                     if (!SpongeCommonEventFactory.callInteractEntityEventSecondary(this.playerEntity, entity, packetIn.getHand(), interactionPoint).isCancelled()) {
                         // If INTERACT_AT returns a false result, we assume this packet was meant for interactWith
-                        if (entity.applyPlayerInteraction(this.playerEntity, packetIn.getHitVec(), itemstack, hand) != EnumActionResult.SUCCESS) {
-                            this.playerEntity.interact(entity, itemstack, hand);
+                        if (entity.applyPlayerInteraction(this.playerEntity, packetIn.getHitVec(), hand) != EnumActionResult.SUCCESS) {
+                            this.playerEntity.interactOn(entity, hand);
                         }
                     }
                 } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
@@ -653,12 +649,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
 
                     if (entity instanceof EntityItem || entity instanceof EntityXPOrb || entity instanceof EntityArrow || entity == this.playerEntity) {
-                        this.kickPlayerFromServer("Attempting to attack an invalid entity");
+                        this.disconnect("Attempting to attack an invalid entity");
                         this.serverController.logWarning("Player " + this.playerEntity.getName() + " tried to attack an invalid entity");
                         return;
                     }
 
-                    if (entity instanceof Player && !((World) this.playerEntity.worldObj).getProperties().isPVPEnabled()) {
+                    if (entity instanceof Player && !((World) this.playerEntity.world).getProperties().isPVPEnabled()) {
                         return; // PVP is disabled, ignore
                     }
 

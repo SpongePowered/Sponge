@@ -30,6 +30,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
+import net.minecraft.util.NonNullList;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
@@ -53,12 +54,12 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 
+import java.util.List;
 import java.util.Optional;
 
 @Mixin(InventoryPlayer.class)
@@ -66,10 +67,10 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @Shadow public int currentItem;
     @Shadow public EntityPlayer player;
-    @Shadow @Final public ItemStack[] mainInventory;
-    @Shadow @Final public ItemStack[] armorInventory;
-    @Shadow @Final public ItemStack[] offHandInventory;
-    @Shadow @Final private ItemStack[][] allInventories;
+    @Shadow @Final public NonNullList<ItemStack> mainInventory;
+    @Shadow @Final public NonNullList<ItemStack> armorInventory;
+    @Shadow @Final public NonNullList<ItemStack> offHandInventory;
+    @Shadow @Final private List<NonNullList<ItemStack>> allInventories;
 
     @Shadow public abstract int getInventoryStackLimit();
 
@@ -88,7 +89,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
         if (playerIn instanceof EntityPlayerMP) {
             // We only care about Server inventories
             this.inventory = new DefaultInventoryFabric((IInventory) this);
-            this.slots = new SlotCollection.Builder().add(mainInventory.length).add(offHandInventory.length).add(armorInventory.length,
+            this.slots = new SlotCollection.Builder().add(mainInventory.size()).add(offHandInventory.size()).add(armorInventory.size(),
                     EquipmentSlotAdapter.class).build();
             this.carrier = (Player) playerIn;
             this.lens = new PlayerInventoryLens(this, this.slots);
@@ -171,14 +172,14 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
      * @reason Prevents inventory from being cleared until after events.
      */
     @Overwrite
-    public void dropAllItems() {
-        for (ItemStack[] aitemstack : this.allInventories)
+    public void dropAllItems() { // dropAllItems
+        for (NonNullList<ItemStack> aitemstack : this.allInventories)
         {
-            for (int i = 0; i < aitemstack.length; ++i)
+            for (int i = 0; i < aitemstack.size(); ++i)
             {
-                if (aitemstack[i] != null)
+                if (aitemstack.get(i) != null)
                 {
-                    this.player.dropItem(aitemstack[i], true, false);
+                    this.player.dropItem(aitemstack.get(i), true, false);
                     //aitemstack[i] = null; // Sponge - we handle this after calling the death event
                 }
             }
@@ -187,16 +188,20 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Pla
 
     @Override
     public int getFirstAvailableSlot(ItemStack itemstack) {
-        for (int i = 0; i < this.mainInventory.length; ++i) {
-            int stackSize = itemstack.stackSize;
+        for (int i = 0; i < this.mainInventory.size(); ++i) {
+            int stackSize = itemstack.getCount();
 
-            if (this.mainInventory[i] == null) {
+            if (this.mainInventory.get(i).getCount() == 0) {
                 // empty slot
                 return i;
             }
 
-            if (this.mainInventory[i] != null && this.mainInventory[i].getItem() == itemstack.getItem() && this.mainInventory[i].isStackable() && this.mainInventory[i].stackSize < this.mainInventory[i].getMaxStackSize() && this.mainInventory[i].stackSize < this.getInventoryStackLimit() && (!this.mainInventory[i].getHasSubtypes() || this.mainInventory[i].getItemDamage() == itemstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(this.mainInventory[i], itemstack)) {
-                stackSize -= (this.mainInventory[i].getMaxStackSize() < this.getInventoryStackLimit() ? this.mainInventory[i].getMaxStackSize() : this.getInventoryStackLimit()) - this.mainInventory[i].stackSize;
+            if (this.mainInventory.get(i).getItem() == itemstack.getItem() && this.mainInventory.get(i).isStackable() && this.mainInventory.get(i).getCount() < this.mainInventory
+                    .get(i).getMaxStackSize() && this.mainInventory.get(i).getCount() < this.getInventoryStackLimit() && (!this.mainInventory.get(i).getHasSubtypes() || this.mainInventory
+                                                                                                                                                                                    .get(i).getItemDamage() == itemstack.getItemDamage()) && ItemStack.areItemStackTagsEqual(this.mainInventory
+                    .get(i), itemstack)) {
+                stackSize -= (this.mainInventory.get(i).getMaxStackSize() < this.getInventoryStackLimit() ? this.mainInventory.get(i).getMaxStackSize() : this.getInventoryStackLimit()) - this.mainInventory
+                        .get(i).getCount();
             }
 
             if (stackSize <= 0) {

@@ -25,14 +25,16 @@
 package org.spongepowered.common.mixin.optimization.world;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 @Mixin(value = WorldServer.class, priority = 1200)
-public abstract class MixinWorldServer_Lighting_Inline_Valid_BlockPos extends MixinWorld_Lighting {
+public abstract class MixinWorldServer_Lighting_Inline_Valid_BlockPos extends MixinWorld_Inline_Valid_BlockPos {
 
     /**
      * @author gabizou - April 8th, 2016
@@ -89,6 +91,34 @@ public abstract class MixinWorldServer_Lighting_Inline_Valid_BlockPos extends Mi
             }
         } else {
             return 15;
+        }
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param type The type of sky lighting
+     * @param pos The position
+     * @return The light for the defined sky type and block position
+     */
+    @Override
+    public int getLightFor(EnumSkyBlock type, BlockPos pos) {
+        if (pos.getY() < 0) {
+            pos = new BlockPos(pos.getX(), 0, pos.getZ());
+        }
+
+        // Sponge Start - Replace with inlined method to check
+        // if (!this.isValid(pos)) // vanilla
+        if (!((IMixinBlockPos) pos).isValidPosition()) {
+            // Sponge End
+            return type.defaultLightValue;
+        } else {
+            Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            if (chunk == null) {
+                return type.defaultLightValue;
+            }
+            return chunk.getLightFor(type, pos);
         }
     }
 

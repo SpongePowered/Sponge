@@ -73,7 +73,7 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
         for (int i = 0; i < 2; i++) {
             int id = getWatchedTargetId(i);
             if (id > 0) {
-                values.add((Living) this.worldObj.getEntityByID(id));
+                values.add((Living) this.world.getEntityByID(id));
             }
         }
         return values;
@@ -94,7 +94,7 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
     }
 
     @ModifyArg(method = "launchWitherSkullToCoords", at = @At(value = "INVOKE",
-               target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
+               target = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z"))
     protected Entity onSpawnWitherSkull(Entity entity) {
         ((IMixinGriefer) entity).setCanGrief(((IMixinGriefer) this).canGrief());
         return entity;

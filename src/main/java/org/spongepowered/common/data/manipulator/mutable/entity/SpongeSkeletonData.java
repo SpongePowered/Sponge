@@ -33,6 +33,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
+@SuppressWarnings("deprecation")
 @ImplementationRequiredForTest
 public class SpongeSkeletonData extends AbstractSingleCatalogData<SkeletonType, SkeletonData, ImmutableSkeletonData> implements SkeletonData {
 

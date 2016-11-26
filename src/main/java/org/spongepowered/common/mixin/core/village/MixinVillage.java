@@ -37,11 +37,11 @@ import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 @Mixin(Village.class)
 public abstract class MixinVillage {
 
-    @Shadow private World worldObj;
+    @Shadow private World world;
 
     @Inject(method = "isWoodDoor", at = @At("HEAD"), cancellable = true)
     public void onIsWoodDoor(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-        if (!this.worldObj.isRemote && ((IMixinChunkProviderServer) this.worldObj.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4) == null) {
+        if (!this.world.isRemote && ((IMixinChunkProviderServer) this.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4) == null) {
             cir.setReturnValue(false);
         }
     }

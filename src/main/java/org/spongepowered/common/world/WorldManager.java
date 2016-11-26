@@ -828,7 +828,7 @@ public final class WorldManager {
     }
 
     public static void reorderWorldsVanillaFirst() {
-        final List<WorldServer> worldServers = new ArrayList<>(worldByDimensionId.values());
+        final List<WorldServer> worlds = new ArrayList<>(worldByDimensionId.values());
         final List<WorldServer> sorted = new LinkedList<>();
 
         int vanillaWorldsCount = 0;
@@ -853,10 +853,10 @@ public final class WorldManager {
             vanillaWorldsCount++;
         }
 
-        final List<WorldServer> nonVanillaWorlds = worldServers.subList(vanillaWorldsCount, worldServers.size());
+        final List<WorldServer> nonVanillaWorlds = worlds.subList(vanillaWorldsCount, worlds.size());
         nonVanillaWorlds.sort(WORLD_SERVER_COMPARATOR);
         sorted.addAll(nonVanillaWorlds);
-        SpongeImpl.getServer().worldServers = sorted.toArray(new WorldServer[sorted.size()]);
+        SpongeImpl.getServer().worlds = sorted.toArray(new WorldServer[sorted.size()]);
     }
 
     /**

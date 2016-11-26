@@ -80,14 +80,15 @@ public class IgniteableDataProcessor extends AbstractEntityDataProcessor<Entity,
     @Override
     protected boolean set(Entity entity, Map<Key<?>, Object> keyValues) {
         entity.fire = (Integer) keyValues.get(Keys.FIRE_TICKS);
-        entity.fireResistance = (Integer) keyValues.get(Keys.FIRE_DAMAGE_DELAY);
+        // TODO - this needs to be a property
+        //entity.fireResistance = (Integer) keyValues.get(Keys.FIRE_DAMAGE_DELAY);
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(Entity entity) {
         final int fireTicks = entity.fire;
-        final int fireDamageDelay = entity.fireResistance;
+        final int fireDamageDelay = entity.getFireImmuneTicks();
         return ImmutableMap.<Key<?>, Object>of(Keys.FIRE_TICKS, fireTicks,
                                                Keys.FIRE_DAMAGE_DELAY, fireDamageDelay);
     }

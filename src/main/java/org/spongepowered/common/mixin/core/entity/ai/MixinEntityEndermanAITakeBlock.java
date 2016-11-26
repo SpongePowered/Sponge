@@ -37,7 +37,7 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 @Mixin(EntityEnderman.AITakeBlock.class)
 public abstract class MixinEntityEndermanAITakeBlock extends EntityAIBase {
 
-    @Shadow @Final private EntityEnderman enderman;
+    @Shadow @Final private EntityEnderman enderman; //enderman
 
     @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean onCanGrief(GameRules gameRules, String rule) {

@@ -22,22 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.types;
+package org.spongepowered.common.mixin.core.entity.passive;
 
-import net.minecraft.entity.monster.SkeletonType;
+import net.minecraft.entity.passive.EntitySkeletonHorse;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.type.HorseVariant;
+import org.spongepowered.api.data.type.HorseVariants;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.living.animal.SkeletonHorse;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-@Mixin(SkeletonType.class)
-public abstract class MixinSkeletonType implements org.spongepowered.api.data.type.SkeletonType {
+@SuppressWarnings("deprecation")
+@Mixin(EntitySkeletonHorse.class)
+@Implements(@Interface(iface = SkeletonHorse.class, prefix = "skeleton$", unique = true))
+public abstract class MixinEntitySkeletonHorse extends MixinAbstractHorse implements SkeletonHorse {
 
     @Override
-    public String getId() {
-        return ((SkeletonType) (Object) this).name();
-    }
-
-    @Override
-    public String getName() {
-        return getId();
+    public Value<HorseVariant> variant() {
+        printDeprecatedHorseUsage("HorseVariant is no longer applicable to all horses! HorseVariants cannot be changed!");
+        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT, HorseVariants.SKELETON_HORSE);
     }
 
 }

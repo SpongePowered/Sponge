@@ -40,13 +40,12 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("deprecation")
 @Mixin(EntityZombie.class)
 public abstract class MixinEntityZombie extends MixinEntityMob implements Zombie {
 
     @Shadow public abstract boolean isChild();
     @Shadow public abstract void setChildSize(boolean isChild);
-    @Shadow @Nullable public abstract net.minecraft.entity.monster.ZombieType getZombieType();
-
 
     @Override
     public void setScaleForAge() {
@@ -61,12 +60,6 @@ public abstract class MixinEntityZombie extends MixinEntityMob implements Zombie
 
     @Override
     public ZombieData getZombieData() {
-        net.minecraft.entity.monster.ZombieType nativeType = getZombieType();
-        ZombieType type = EntityUtil.typeFromNative(nativeType);
-        if (type != ZombieTypes.VILLAGER) {
-            return new SpongeZombieData(type, Optional.empty());
-        }
-
-        return new SpongeZombieData(ZombieTypes.VILLAGER, EntityUtil.profFromNative(nativeType));
+        return new SpongeZombieData(ZombieTypes.VILLAGER, Optional.empty());
     }
 }

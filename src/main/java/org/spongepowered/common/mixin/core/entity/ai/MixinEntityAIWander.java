@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
+import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.ai.EntityAIWander;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
 import org.spongepowered.asm.mixin.Final;
@@ -34,6 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(EntityAIWander.class)
 public abstract class MixinEntityAIWander extends MixinEntityAIBase implements WanderAITask {
 
+    @Shadow @Final protected EntityCreature entity;
     @Shadow @Final @Mutable private double speed;
     @Shadow private int executionChance;
 

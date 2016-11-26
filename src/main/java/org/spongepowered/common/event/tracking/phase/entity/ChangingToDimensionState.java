@@ -67,7 +67,7 @@ final class ChangingToDimensionState extends EntityPhaseState {
 //
 //                final IMixinTeleporter targetMixinTeleporter = (IMixinTeleporter) targetTeleporter;
 //                if (portalEvent.isCancelled()) {
-//                    targetMixinTeleporter.removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+//                    targetMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
 //                    mixinEntity.setLocationAndAngles(fromTransform);
 //                    return;
 //                }
@@ -86,7 +86,7 @@ final class ChangingToDimensionState extends EntityPhaseState {
 //                    if (fromWorldServer == eventTargetTransform.getExtent()) {
 //                        portalEvent.setCancelled(true);
 //
-//                        targetMixinTeleporter.removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+//                        targetMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
 //                        mixinEntity.setLocationAndAngles(eventTargetTransform);
 //                        if (minecraftEntity instanceof EntityPlayerMP) {
 //                            final EntityPlayerMP minecraftPlayer = (EntityPlayerMP) minecraftEntity;
@@ -100,7 +100,7 @@ final class ChangingToDimensionState extends EntityPhaseState {
 //                    }
 //                } else {
 //                    if (targetWorldServer.provider instanceof WorldProviderEnd) {
-//                        final BlockPos blockpos = minecraftEntity.worldObj.getTopSolidOrLiquidBlock(targetWorldServer.getSpawnPoint());
+//                        final BlockPos blockpos = minecraftEntity.world.getTopSolidOrLiquidBlock(targetWorldServer.getSpawnPoint());
 //                        minecraftEntity.moveToBlockPosAndAngles(blockpos, minecraftEntity.rotationYaw, minecraftEntity.rotationPitch);
 //                    }
 //                }
@@ -110,7 +110,7 @@ final class ChangingToDimensionState extends EntityPhaseState {
 //                final CauseTracker targetCauseTracker = targetMixinWorldServer.getCauseTracker();
 //                if (capturedBlocks.isEmpty()
 //                    || !GeneralFunctions.processBlockCaptures(capturedBlocks, targetCauseTracker, State.CHANGING_TO_DIMENSION, context)) {
-//                    targetMixinTeleporter.removePortalPositionFromCache(ChunkPos.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ()));
+//                    targetMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
 //                }
 //
 //                if (!portalEvent.getKeepsVelocity()) {
@@ -135,24 +135,24 @@ final class ChangingToDimensionState extends EntityPhaseState {
             return null;
         }
 
-        teleportingEntity.worldObj.theProfiler.startSection("changeDimension");
+        teleportingEntity.world.theProfiler.startSection("changeDimension");
 
         WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
 
-        teleportingEntity.worldObj.removeEntity(teleportingEntity);
+        teleportingEntity.world.removeEntity(teleportingEntity);
         teleportingEntity.isDead = false;
-        teleportingEntity.worldObj.theProfiler.startSection("reposition");
+        teleportingEntity.world.theProfiler.startSection("reposition");
         final Vector3d position = event.getToTransform().getPosition();
         teleportingEntity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(),
                 (float) event.getToTransform().getPitch());
-        toWorld.spawnEntityInWorld(teleportingEntity);
-        teleportingEntity.worldObj = toWorld;
+        toWorld.spawnEntity(teleportingEntity);
+        teleportingEntity.world = toWorld;
 
         toWorld.updateEntityWithOptionalForce(teleportingEntity, false);
-        teleportingEntity.worldObj.theProfiler.endStartSection("reloading");
+        teleportingEntity.world.theProfiler.endStartSection("reloading");
 
-        teleportingEntity.worldObj.theProfiler.endSection();
-        teleportingEntity.worldObj.theProfiler.endSection();
+        teleportingEntity.world.theProfiler.endSection();
+        teleportingEntity.world.theProfiler.endSection();
         return teleportingEntity;
     }
 }

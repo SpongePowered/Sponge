@@ -46,23 +46,23 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 @Mixin(EntityTracker.class)
 public abstract class MixinEntityTracker {
 
-    @Shadow @Final private WorldServer theWorld;
+    @Shadow @Final private WorldServer world;
 
     @Shadow
-    public abstract void trackEntity(Entity entityIn, int trackingRange, int updateFrequency);
+    public abstract void track(Entity entityIn, int trackingRange, int updateFrequency);
 
-    @Inject(method = "trackEntity", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "track", at = @At("HEAD"), cancellable = true)
     public void onTrackEntity(Entity entityIn, CallbackInfo ci) {
         if (entityIn instanceof EntityHuman) {
-            this.trackEntity(entityIn, 512, 2);
+            this.track(entityIn, 512, 2);
             ci.cancel();
         }
     }
 
 
-    @Redirect(method = "addEntityToTracker", at = @At(value = "NEW", args = "class=java/lang/IllegalStateException"))
+    @Redirect(method = "track(Lnet/minecraft/entity/Entity;IIZ)V", at = @At(value = "NEW", args = "class=java/lang/IllegalStateException"))
     private IllegalStateException reportEntityAlreadyTrackedWithWorld(String string, Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates) {
-        IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, ((World) this.theWorld).getName()));;
+        IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, ((World) this.world).getName()));;
         CauseTracker tracker = ((IMixinWorldServer) entityIn.getEntityWorld()).getCauseTracker();
         if (CauseTracker.ENABLED && tracker.verboseErrors) {
             tracker.printMessageWithCaughtException("Exception tracking entity", "An entity that was already tracked was added to the tracker!", exception);
@@ -70,7 +70,7 @@ public abstract class MixinEntityTracker {
         return exception;
     }
 
-    @Inject(method = "addEntityToTracker", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "track(Lnet/minecraft/entity/Entity;IIZ)V", at = @At("HEAD"), cancellable = true)
     public void onAddEntityToTracker(Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates, CallbackInfo ci) {
         if (!SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
             Thread.dumpStack();
@@ -81,7 +81,7 @@ public abstract class MixinEntityTracker {
         }
     }
 
-    @Inject(method = "untrackEntity", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "untrack", at = @At("HEAD"), cancellable = true)
     public void onUntrackEntity(Entity entityIn, CallbackInfo ci) {
         if (!SpongeImpl.getServer().isCallingFromMinecraftThread() ) {
             Thread.dumpStack();

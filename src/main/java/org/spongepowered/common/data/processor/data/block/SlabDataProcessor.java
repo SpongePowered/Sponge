@@ -64,6 +64,9 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
     @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack stack, SlabType value) {
+        // TODO - the API needs to be refactored, as it's no longer possible to change the type of an ItemStack
+        return false;
+        /*
         if (stack.getItem() == ItemTypes.STONE_SLAB) {
             if (!value.equals(SlabTypes.RED_SAND)) {
                 stack.setItemDamage(((BlockStoneSlab.EnumType) (Object) value).getMetadata());
@@ -81,7 +84,7 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
                 }
             }
         }
-        return true;
+        return true;*/
     }
 
     @Override

@@ -43,7 +43,7 @@ import javax.annotation.Nullable;
 @Mixin(PlayerChunkMap.class)
 public abstract class MixinPlayerChunkMap implements IMixinPlayerChunkMap {
 
-    @Shadow @Final private WorldServer theWorldServer;
+    @Shadow @Final private WorldServer world;
 
     @Shadow @Nullable public abstract PlayerChunkMapEntry getEntry(int chunkX, int chunkZ);
 
@@ -63,8 +63,8 @@ public abstract class MixinPlayerChunkMap implements IMixinPlayerChunkMap {
         // and queue the chunk to be unloaded.
         // -- blood
 
-        if (((IMixinWorldServer) this.theWorldServer).getChunkGCTickInterval() <= 0
-                || ((IMixinWorldServer) this.theWorldServer).getChunkUnloadDelay() <= 0) {
+        if (((IMixinWorldServer) this.world).getChunkGCTickInterval() <= 0
+                || ((IMixinWorldServer) this.world).getChunkUnloadDelay() <= 0) {
             chunkProvider.unload(chunk);
         } else {
             ((IMixinChunk) chunk).setScheduledForUnload(System.currentTimeMillis());

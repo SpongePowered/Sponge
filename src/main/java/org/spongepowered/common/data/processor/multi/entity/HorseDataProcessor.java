@@ -45,6 +45,7 @@ import org.spongepowered.common.entity.SpongeHorseVariant;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings("deprecation")
 public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse, HorseData, ImmutableHorseData> {
 
     public HorseDataProcessor() {
@@ -69,7 +70,7 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
 
         int variant = HorseUtils.getInternalVariant(horseColor, horseStyle);
 
-        entity.setType(horseVariant.getType());
+        //entity.setType(horseVariant.getType());
         entity.setHorseVariant(variant);
 
         return true;
@@ -80,7 +81,7 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
         return ImmutableMap.<Key<?>, Object>of(
                 Keys.HORSE_COLOR, HorseUtils.getHorseColor(entity),
                 Keys.HORSE_STYLE, HorseUtils.getHorseStyle(entity),
-                Keys.HORSE_VARIANT, HorseUtils.getHorseVariant(entity.getType())
+                Keys.HORSE_VARIANT, HorseUtils.getHorseVariant(entity.getClass())
         );
     }
 

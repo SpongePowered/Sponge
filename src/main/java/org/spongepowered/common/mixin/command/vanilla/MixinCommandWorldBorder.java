@@ -38,14 +38,14 @@ public abstract class MixinCommandWorldBorder {
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;setTransition(DDJ)V"))
     private void onSetTransition(WorldBorder border, double oldSize, double newSize, long time) {
-        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+        for (WorldServer world : SpongeImpl.getServer().worlds) {
             world.getWorldBorder().setTransition(time);
         }
     }
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;setCenter(DD)V"))
     private void onSetCenter(WorldBorder border, double x, double z) {
-        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+        for (WorldServer world : SpongeImpl.getServer().worlds) {
             if (world.provider instanceof WorldProviderHell) {
                 // Unlike Vanilla, Sponge uses separate world borders per world.
                 // Because of that, Vanilla stores the world border center as overworld coordinates.
@@ -60,28 +60,28 @@ public abstract class MixinCommandWorldBorder {
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;setDamageBuffer(D)V"))
     private void onSetDamageBuffer(WorldBorder border, double buffer) {
-        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+        for (WorldServer world : SpongeImpl.getServer().worlds) {
             world.getWorldBorder().setDamageBuffer(buffer);
         }
     }
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;setDamageAmount(D)V"))
     private void onSetDamageAmount(WorldBorder border, double amount) {
-        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+        for (WorldServer world : SpongeImpl.getServer().worlds) {
             world.getWorldBorder().setDamageAmount(amount);
         }
     }
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;setWarningTime(I)V"))
     private void onSetWarningTime(WorldBorder border, int time) {
-        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+        for (WorldServer world : SpongeImpl.getServer().worlds) {
             world.getWorldBorder().setWarningTime(time);
         }
     }
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/border/WorldBorder;setWarningDistance(I)V"))
     private void onSetWarningDistance(WorldBorder border, int distance) {
-        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+        for (WorldServer world : SpongeImpl.getServer().worlds) {
             world.getWorldBorder().setWarningDistance(distance);
         }
     }

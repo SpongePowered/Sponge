@@ -30,6 +30,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
@@ -169,8 +170,7 @@ public final class SpongeParticleHelper {
                 final SPacketEntityMetadata packetEntityMetadata = new SPacketEntityMetadata();
                 packetEntityMetadata.entityId = FIREWORK_ROCKET_ID;
                 packetEntityMetadata.dataManagerEntries = new ArrayList<>();
-                packetEntityMetadata.dataManagerEntries.add(new EntityDataManager.DataEntry<>(
-                        EntityFireworkRocket.FIREWORK_ITEM, com.google.common.base.Optional.of(itemStack)));
+                packetEntityMetadata.dataManagerEntries.add(new EntityDataManager.DataEntry<>(EntityFireworkRocket.FIREWORK_ITEM, itemStack));
                 final List<Packet<?>> packets = new ArrayList<>();
                 packets.add(packetSpawnObject);
                 packets.add(packetEntityMetadata);
@@ -187,7 +187,7 @@ public final class SpongeParticleHelper {
                 for (PotionType potionType : PotionType.REGISTRY) {
                     for (net.minecraft.potion.PotionEffect potionEffect : potionType.getEffects()) {
                         if (potionEffect.getPotion() == potion) {
-                            return Collections.singletonList(new SPacketEffect(2002, pos, PotionType.getID(potionType), false));
+                            return Collections.singletonList(new SPacketEffect(2002, pos, PotionType.REGISTRY.getIDForObject(potionType), false));
                         }
                     }
                 }

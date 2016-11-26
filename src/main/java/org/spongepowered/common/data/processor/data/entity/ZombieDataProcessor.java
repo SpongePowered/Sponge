@@ -25,7 +25,9 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import com.google.common.collect.Maps;
+import net.minecraft.entity.monster.EntityHusk;
 import net.minecraft.entity.monster.EntityZombie;
+import net.minecraft.entity.monster.EntityZombieVillager;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -36,6 +38,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.ZombieData;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.ZombieType;
 import org.spongepowered.api.data.type.ZombieTypes;
+import org.spongepowered.api.entity.living.monster.Zombie;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeZombieData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.entity.EntityUtil;
@@ -43,6 +46,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings("deprecation")
 public class ZombieDataProcessor
         extends AbstractEntityDataProcessor<EntityZombie, ZombieData, ImmutableZombieData> {
 
@@ -58,26 +62,27 @@ public class ZombieDataProcessor
     @SuppressWarnings("unchecked")
     @Override
     protected boolean set(EntityZombie dataHolder, Map<Key<?>, Object> keyValues) {
-        ZombieType type = (ZombieType) keyValues.get(Keys.ZOMBIE_TYPE);
-        Optional<Profession> profession = (Optional<Profession>) keyValues.get(Keys.VILLAGER_ZOMBIE_PROFESSION);
-        // Should not be null for all vanilla types
-        dataHolder.setZombieType(EntityUtil.toNative(type, profession.orElse(null)));
-        return true;
+        throw new UnsupportedOperationException("ZombieData is deprecated - zombie types are now separate entities!");
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityZombie dataHolder) {
         Map<Key<?>, Object> values = Maps.newHashMap();
 
-        net.minecraft.entity.monster.ZombieType nativeType = dataHolder.getZombieType();
-        ZombieType type = EntityUtil.typeFromNative(nativeType);
+        ZombieType type = ZombieTypes.NORMAL;
+        if (dataHolder instanceof EntityHusk) {
+            type = ZombieTypes.HUSK;
+        } else if (dataHolder instanceof EntityZombieVillager) {
+            type = ZombieTypes.VILLAGER;
+        }
+
         values.put(Keys.ZOMBIE_TYPE, type);
         if (type != ZombieTypes.VILLAGER) {
             values.put(Keys.VILLAGER_ZOMBIE_PROFESSION, Optional.empty());
             return values;
         }
 
-        values.put(Keys.VILLAGER_ZOMBIE_PROFESSION, EntityUtil.profFromNative(nativeType));
+        values.put(Keys.VILLAGER_ZOMBIE_PROFESSION, EntityUtil.validateProfession(((EntityZombieVillager) dataHolder).getProfession()));
         return values;
     }
 

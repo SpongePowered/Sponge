@@ -54,12 +54,13 @@ import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.FilteredPopulator;
 
 import java.util.List;
+import java.util.Map;
 
 @Mixin(ChunkProviderFlat.class)
 public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorProvider {
 
     @Shadow @Final private IBlockState[] cachedBlockIDs;
-    @Shadow @Final private List<MapGenStructure> structureGenerators;
+    @Shadow @Final private Map<String, MapGenStructure> structureGenerators;
     @Shadow @Final private boolean hasDecoration;
     @Shadow @Final private boolean hasDungeons;
     @Shadow @Final private FlatGeneratorInfo flatWorldGenInfo;
@@ -67,7 +68,7 @@ public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorPr
 
     @Override
     public void addPopulators(WorldGenerator generator) {
-        for (Object o : this.structureGenerators) {
+        for (Object o : this.structureGenerators.values()) {
             if (o instanceof MapGenBase) {
                 generator.getGenerationPopulators().add((GenerationPopulator) o);
                 if (o instanceof MapGenStructure) {
@@ -105,7 +106,7 @@ public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorPr
                     .build();
             generator.getPopulators().add(dungeon);
         }
-        
+
         for (BiomeType type : Sponge.getRegistry().getAllOf(BiomeType.class)) {
             BiomeGenerationSettings settings = generator.getBiomeSettings(type);
             settings.getGroundCoverLayers().clear();

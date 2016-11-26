@@ -39,8 +39,7 @@ import net.minecraft.block.BlockEventData;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.passive.EntityHorse;
-import net.minecraft.entity.passive.HorseType;
+import net.minecraft.entity.passive.EntitySkeletonHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -227,7 +226,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
-    @Shadow @Final private PlayerChunkMap thePlayerManager;
+    @Shadow @Final private PlayerChunkMap playerChunkMap;
     @Shadow @Final @Mutable private Teleporter worldTeleporter;
     @Shadow @Final private WorldServer.ServerBlockEventList[] blockEventQueue;
     @Shadow private int blockEventCacheIndex;
@@ -237,7 +236,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow protected abstract void createBonusChest();
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
     @Shadow public abstract PlayerChunkMap getPlayerChunkMap();
-    @Shadow @Override public abstract ChunkProviderServer getChunkProvider();
+    @Shadow public abstract ChunkProviderServer getChunkProvider();
     @Shadow protected abstract void playerCheckLight();
     @Shadow protected abstract BlockPos adjustPosToNearbyEntity(BlockPos pos);
     @Shadow private boolean canAddEntity(net.minecraft.entity.Entity entityIn) {
@@ -469,7 +468,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD)
         {
-            Iterator<net.minecraft.world.chunk.Chunk> iterator1 = this.thePlayerManager.getChunkIterator();
+            Iterator<net.minecraft.world.chunk.Chunk> iterator1 = this.playerChunkMap.getChunkIterator();
 
             while (iterator1.hasNext())
             {
@@ -541,12 +540,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                         SpongeImpl.postEvent(constructEntityEvent);
                         if (!constructEntityEvent.isCancelled()) {
                             // Sponge End
-                            EntityHorse entityhorse = new EntityHorse((WorldServer) (Object) this);
-                            entityhorse.setType(HorseType.SKELETON);
-                            entityhorse.setSkeletonTrap(true);
+                            EntitySkeletonHorse entityhorse = new EntitySkeletonHorse((WorldServer) (Object) this);
+                            entityhorse.setTrap(true);
                             entityhorse.setGrowingAge(0);
                             entityhorse.setPosition((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ());
-                            this.spawnEntityInWorld(entityhorse);
+                            this.spawnEntity(entityhorse);
                             // Sponge Start - Throw a construct event for the lightning
                         }
 
@@ -768,14 +766,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event);
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;unloadQueuedChunks()Z"))
-    public boolean onTickUnloadQueuedChunks(IChunkProvider chunkProvider) {
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;tick()Z"))
+    public boolean onTicktick(IChunkProvider chunkProvider) {
         // chunk unloads are moved at end of server tick to avoid clashing with chunk GC
         if (this.chunkGCTickInterval > 0) {
             return false;
         }
 
-        return chunkProvider.unloadQueuedChunks();
+        return chunkProvider.tick();
     }
 
     // Chunk GC
@@ -806,7 +804,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
             // If we reach this point the chunk leaked so queue for unload
             chunkProviderServer.unload(chunk);
-            SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.worldObj, chunk);
+            SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.world, chunk);
         }
     }
 
@@ -858,13 +856,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Nullable
     private NextTickListEntry tmpScheduledObj;
 
-    @Redirect(method = "updateBlockTick",
+    /*@Redirect(method = "updateBlockTick",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onUpdateScheduledBlock(NextTickListEntry sbu, int priority) {
         this.onCreateScheduledBlockUpdate(sbu, priority);
-    }
+    }*/
 
-    @Redirect(method = "scheduleBlockUpdate",
+    @Redirect(method = "updateBlockTick", // really scheduleUpdate
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
         final CauseTracker causeTracker = this.getCauseTracker();
@@ -888,7 +886,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public ScheduledBlockUpdate addScheduledUpdate(int x, int y, int z, int priority, int ticks) {
         BlockPos pos = new BlockPos(x, y, z);
-        this.scheduleBlockUpdate(pos, getBlockState(pos).getBlock(), ticks, priority);
+        this.updateBlockTick(pos, getBlockState(pos).getBlock(), ticks, priority);
         ScheduledBlockUpdate sbu = (ScheduledBlockUpdate) this.tmpScheduledObj;
         this.tmpScheduledObj = null;
         return sbu;
@@ -1148,7 +1146,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      *    passed along normal spawning handling.
      */
     @Override
-    public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
+    public boolean spawnEntity(net.minecraft.entity.Entity entity) {
         return canAddEntity(entity) && getCauseTracker().spawnEntity(EntityUtil.fromNative(entity));
     }
 
@@ -1213,8 +1211,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * Technically an overwrite to properly track on *server* worlds.
      */
     @Override
-    public void notifyBlockOfStateChange(BlockPos pos, Block blockIn) {
-        this.getCauseTracker().notifyBlockOfStateChange(pos, blockIn, null);
+    public void neighborChanged(BlockPos pos, Block blockIn, BlockPos otherPos) { // notifyBlockOfStateChange
+        this.getCauseTracker().notifyBlockOfStateChange(pos, blockIn, otherPos);
     }
 
     /**
@@ -1251,7 +1249,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      *
      * Technically an overwrite to properly track on *server* worlds.
      */
-    @Override
+    /*@Override
     public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType) {
         if (!isValid(pos)) {
             return;
@@ -1271,7 +1269,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
             }
         }
-    }
+    }*/
 
     @SuppressWarnings("Duplicates")
     @Override
@@ -1345,7 +1343,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {
         if ((flags & 1) != 0) {
-            this.notifyNeighborsRespectDebug(pos, newState.getBlock());
+            this.notifyNeighborsRespectDebug(pos, newState.getBlock(), false);
 
             if (newState.hasComparatorInputOverride()) {
                 this.updateComparatorOutputLevel(pos, newState.getBlock());
@@ -1595,7 +1593,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return (PortalAgent) this.worldTeleporter;
     }
 
-    @Redirect(method = "canAddEntity", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 1))
+    @Redirect(method = "canAddEntity", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 1, remap = false))
     public void onCanAddEntityLogWarn(Logger logger, String message, Object... params) {
         // don't log anything to avoid useless spam
     }

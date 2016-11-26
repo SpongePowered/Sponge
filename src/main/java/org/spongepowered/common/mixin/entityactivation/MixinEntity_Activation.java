@@ -49,7 +49,7 @@ public abstract class MixinEntity_Activation implements Entity, IModData_Activat
     private int activationRange;
     private boolean refreshCache = false;
 
-    @Shadow public World worldObj;
+    @Shadow public World world;
     @Shadow public boolean onGround;
 
     @Shadow

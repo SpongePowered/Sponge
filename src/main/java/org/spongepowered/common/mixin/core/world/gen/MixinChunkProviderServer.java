@@ -80,7 +80,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     private long chunkUnloadDelay = 15000;
     private int maxChunkUnloads = 100;
 
-    @Shadow @Final public WorldServer worldObj;
+    @Shadow @Final public WorldServer world;
     @Shadow @Final private IChunkLoader chunkLoader;
     @Shadow public IChunkGenerator chunkGenerator;
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -113,32 +113,32 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Override
     public CompletableFuture<Boolean> doesChunkExist(Vector3i chunkCoords) {
-        return WorldStorageUtil.doesChunkExist(this.worldObj, this.chunkLoader, chunkCoords);
+        return WorldStorageUtil.doesChunkExist(this.world, this.chunkLoader, chunkCoords);
     }
 
     @Override
     public CompletableFuture<Optional<DataContainer>> getChunkData(Vector3i chunkCoords) {
-        return WorldStorageUtil.getChunkData(this.worldObj, this.chunkLoader, chunkCoords);
+        return WorldStorageUtil.getChunkData(this.world, this.chunkLoader, chunkCoords);
     }
 
     @Override
     public WorldProperties getWorldProperties() {
-        return (WorldProperties) this.worldObj.getWorldInfo();
+        return (WorldProperties) this.world.getWorldInfo();
     }
 
     /**
      * @author blood - October 25th, 2016
      * @reason Removes usage of droppedChunksSet in favor of unloaded flag.
-     * 
+     *
      * @param chunkIn The chunk to queue
      */
     @Overwrite
     public void unload(Chunk chunkIn)
     {
-        if (!((IMixinChunk) chunkIn).isPersistedChunk() && this.worldObj.provider.canDropChunk(chunkIn.xPosition, chunkIn.zPosition))
+        if (!((IMixinChunk) chunkIn).isPersistedChunk() && this.world.provider.canDropChunk(chunkIn.xPosition, chunkIn.zPosition))
         {
             // Sponge - we avoid using the queue and simply check the unloaded flag during unloads
-            //this.droppedChunksSet.add(Long.valueOf(ChunkPos.chunkXZ2Int(chunkIn.xPosition, chunkIn.zPosition)));
+            //this.droppedChunksSet.add(Long.valueOf(ChunkPos.asLong(chunkIn.xPosition, chunkIn.zPosition)));
             chunkIn.unloaded = true;
         }
     }
@@ -149,7 +149,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
         if (chunk != null)
         {
-            this.id2ChunkMap.put(ChunkPos.chunkXZ2Int(x, z), chunk);
+            this.id2ChunkMap.put(ChunkPos.asLong(x, z), chunk);
             chunk.onChunkLoad();
             chunk.populateChunk((ChunkProviderServer)(Object) this, this.chunkGenerator);
         }
@@ -175,10 +175,10 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         return chunk;
     }
 
-    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/ChunkPos;chunkXZ2Int(II)J"))
+    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/ChunkPos;asLong(II)J"))
     public void onProvideChunkStart(int x, int z, CallbackInfoReturnable<Chunk> cir) {
         if (CauseTracker.ENABLED) {
-            final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+            final CauseTracker causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
             causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                     .addCaptures()
                     .complete());
@@ -188,13 +188,13 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populateChunk(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", shift = Shift.AFTER))
     public void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
         if (CauseTracker.ENABLED) {
-            ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
+            ((IMixinWorldServer) this.world).getCauseTracker().completePhase();
         }
     }
 
     private boolean canDenyChunkRequest() {
         if (CauseTracker.ENABLED) {
-            final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+            final CauseTracker causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
             final IPhaseState currentState = causeTracker.getCurrentState();
             // States that cannot deny chunks
             if (currentState == TickPhase.Tick.PLAYER
@@ -218,7 +218,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             }
         }
 
-        
+
         return false;
     }
 
@@ -247,15 +247,15 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
      * @reason Refactors entire method to not use the droppedChunksSet by
      * simply looping through all loaded chunks and determining whether it
      * can unload or not.
-     * 
+     *
      * @return true if unload queue was processed
      */
     @Overwrite
-    public boolean unloadQueuedChunks()
+    public boolean tick()
     {
-        if (!this.worldObj.disableLevelSaving)
+        if (!this.world.disableLevelSaving)
         {
-            ((IMixinWorldServer) this.worldObj).getTimingsHandler().doChunkUnload.startTiming();
+            ((IMixinWorldServer) this.world).getTimingsHandler().doChunkUnload.startTiming();
             Iterator<Chunk> iterator = this.id2ChunkMap.values().iterator();
             int chunksUnloaded = 0;
             long now = System.currentTimeMillis();
@@ -276,7 +276,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
                     chunksUnloaded++;
                 }
             }
-            ((IMixinWorldServer) this.worldObj).getTimingsHandler().doChunkUnload.stopTiming();
+            ((IMixinWorldServer) this.world).getTimingsHandler().doChunkUnload.stopTiming();
         }
 
         this.chunkLoader.chunkTick();
@@ -287,28 +287,28 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     // This allows the chunk to unload if currently queued.
     @Override
     public Chunk getLoadedChunkWithoutMarkingActive(int x, int z){
-        long i = ChunkPos.chunkXZ2Int(x, z);
+        long i = ChunkPos.asLong(x, z);
         Chunk chunk = this.id2ChunkMap.get(i);
         return chunk;
     }
 
     @Inject(method = "canSave", at = @At("HEAD"), cancellable = true)
     public void onCanSave(CallbackInfoReturnable<Boolean> cir) {
-        if (((WorldProperties)this.worldObj.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
+        if (((WorldProperties)this.world.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             cir.setReturnValue(false);
         }
     }
 
     @Inject(method = "saveChunkData", at = @At("HEAD"), cancellable = true)
     public void onSaveChunkData(Chunk chunkIn, CallbackInfo ci) {
-        if (((WorldProperties)this.worldObj.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
+        if (((WorldProperties)this.world.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             ci.cancel();
         }
     }
 
     @Inject(method = "saveExtraData", at = @At("HEAD"), cancellable = true)
     public void onSaveExtraData(CallbackInfo ci) {
-        if (((WorldProperties)this.worldObj.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
+        if (((WorldProperties)this.world.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             ci.cancel();
         }
     }

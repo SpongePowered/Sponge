@@ -48,7 +48,6 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
     @Shadow public int fallHurtMax;
     @Shadow public float fallHurtAmount;
     @Shadow public NBTTagCompound tileEntityData;
-    @Shadow public boolean canSetAsBlock;
 
     private DamageSource original;
     private boolean isAnvil;
@@ -56,11 +55,11 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
     @Inject(method = "fall(FF)V", at = @At(value = "JUMP", opcode = Opcodes.IFEQ, ordinal = 1))
     public void beforeFall(float distance, float damageMultipleier, CallbackInfo callbackInfo) {
         this.isAnvil = this.fallTile.getBlock() == Blocks.ANVIL;
-        this.original = this.isAnvil ? DamageSource.anvil : DamageSource.fallingBlock;
+        this.original = this.isAnvil ? DamageSource.ANVIL : DamageSource.FALLING_BLOCK;
         if (this.isAnvil) {
-            DamageSource.anvil = new MinecraftFallingBlockDamageSource("anvil", (EntityFallingBlock) (Object) this);
+            DamageSource.ANVIL = new MinecraftFallingBlockDamageSource("anvil", (EntityFallingBlock) (Object) this);
         } else {
-            DamageSource.fallingBlock = new MinecraftFallingBlockDamageSource("fallingblock", (EntityFallingBlock) (Object) this);
+            DamageSource.FALLING_BLOCK = new MinecraftFallingBlockDamageSource("fallingblock", (EntityFallingBlock) (Object) this);
         }
     }
 
@@ -70,9 +69,9 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
             return;
         }
         if (this.isAnvil) {
-            DamageSource.anvil = this.original;
+            DamageSource.ANVIL = this.original;
         } else {
-            DamageSource.fallingBlock = this.original;
+            DamageSource.FALLING_BLOCK = this.original;
         }
     }
 

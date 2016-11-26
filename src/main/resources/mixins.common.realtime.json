@@ -12,7 +12,7 @@
         "MixinEntityPlayer",
         "MixinEntityPlayerMP",
         "MixinEntityXPOrb",
-        "MixinEntityZombie",
+        "MixinEntityZombieVillager",
         "MixinMinecraftServer",
         "MixinNetHandlerPlayServer",
         "MixinPlayerInteractionManager",

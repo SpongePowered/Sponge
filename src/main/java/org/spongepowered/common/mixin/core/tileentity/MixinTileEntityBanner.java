@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import net.minecraft.item.EnumDyeColor;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntityBanner;
@@ -40,7 +39,6 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -52,7 +50,6 @@ import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.block.tile.IMixinBanner;
 import org.spongepowered.common.registry.SpongeGameRegistry;
-import org.spongepowered.common.registry.type.DyeColorRegistryModule;
 import org.spongepowered.common.util.NonNullArrayList;
 
 import java.util.ArrayList;
@@ -62,13 +59,13 @@ import java.util.List;
 @Mixin(TileEntityBanner.class)
 public abstract class MixinTileEntityBanner extends MixinTileEntity implements Banner, IMixinBanner {
 
-    @Shadow private int baseColor;
+    @Shadow private EnumDyeColor baseColor;
     @Shadow private NBTTagList patterns;
 
     private List<PatternLayer> patternLayers = Lists.newArrayList();
 
-    @Inject(method = "setItemValues(Lnet/minecraft/item/ItemStack;)V", at = @At("RETURN"))
-    private void onSetItemValues(ItemStack stack, CallbackInfo ci) {
+    @Inject(method = "setItemValues", at = @At("RETURN"))
+    private void onSetItemValues(CallbackInfo ci) {
         updatePatterns();
     }
 
@@ -81,7 +78,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
     @Override
     public void sendDataToContainer(DataView dataView) {
         dataView.set(Keys.BANNER_PATTERNS.getQuery(), Lists.newArrayList(this.patternLayers));
-        dataView.set(Keys.BANNER_BASE_COLOR.getQuery(), this.baseColor);
+        dataView.set(Keys.BANNER_BASE_COLOR.getQuery(), this.baseColor.getDyeDamage());
     }
 
     @Override
@@ -92,8 +89,8 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
 
     public void markDirtyAndUpdate() {
         this.markDirty();
-        if (this.worldObj != null && !this.worldObj.isRemote) {
-            ((WorldServer) this.worldObj).getPlayerChunkMap().markBlockForUpdate(this.getPos());
+        if (this.world != null && !this.world.isRemote) {
+            ((WorldServer) this.world).getPlayerChunkMap().markBlockForUpdate(this.getPos());
         }
     }
 
@@ -124,7 +121,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
         this.patterns = new NBTTagList();
         for (PatternLayer layer : this.patternLayers) {
             NBTTagCompound compound = new NBTTagCompound();
-            compound.setString(NbtDataUtil.BANNER_PATTERN_ID, ((TileEntityBanner.EnumBannerPattern) (Object) layer.getShape()).getPatternID());
+            compound.setString(NbtDataUtil.BANNER_PATTERN_ID, ((BannerPatternShape) (Object) layer.getShape()).getName());
             compound.setInteger(NbtDataUtil.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
             this.patterns.appendTag(compound);
         }
@@ -133,7 +130,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
 
     @Override
     public DyeColor getBaseColor() {
-        return DyeColorRegistryModule.fromId(this.baseColor).orElse(DyeColors.BLACK);
+        return (DyeColor) (Object) this.baseColor;
     }
 
     @Override
@@ -141,9 +138,9 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
         checkNotNull(baseColor, "Null DyeColor!");
         try {
             EnumDyeColor color = (EnumDyeColor) (Object) baseColor;
-            this.baseColor = color.getDyeDamage();
+            this.baseColor = color;
         } catch (Exception e) {
-            this.baseColor = EnumDyeColor.BLACK.getDyeDamage();
+            this.baseColor = EnumDyeColor.BLACK;
         }
         markDirtyAndUpdate();
     }

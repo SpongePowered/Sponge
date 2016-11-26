@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.type;
 
 import net.minecraft.init.Biomes;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.biome.BiomeProviderSingle;
@@ -45,6 +46,6 @@ public class SpongeWorldTypeEnd extends SpongeWorldType {
 
     @Override
     public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
-        return new ChunkProviderEnd(world, true, world.getSeed());
+        return new ChunkProviderEnd(world, true, world.getSeed(), new BlockPos(100, 50, 0));
     }
 }

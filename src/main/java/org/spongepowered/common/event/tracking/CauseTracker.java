@@ -323,7 +323,7 @@ public final class CauseTracker {
             }
             // Sponge End
 
-            iblockstate.getBlock().neighborChanged(iblockstate, this.targetWorld, notifyPos, sourceBlock);
+            iblockstate.getBlock().neighborChanged(iblockstate, this.targetWorld, notifyPos, sourceBlock, sourcePos);
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
@@ -359,7 +359,7 @@ public final class CauseTracker {
             return false;
         }
 
-        final Block newBlock = newState.getBlock();
+        final Block block = newState.getBlock();
         // Sponge Start - Up to this point, we've copied exactly what Vanilla minecraft does.
         final IBlockState currentState = chunk.getBlockState(pos);
 
@@ -404,30 +404,42 @@ public final class CauseTracker {
             }
         }
         // Sponge End - continue with vanilla mechanics
-        final IBlockState iblockstate = chunk.setBlockState(pos, newState);
+        IBlockState iblockstate = chunk.setBlockState(pos, newState);
 
-        if (iblockstate == null) {
+        if (iblockstate == null)
+        {
             return false;
         }
-        if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
-            minecraftWorld.theProfiler.startSection("checkLight");
-            minecraftWorld.checkLight(pos);
-            minecraftWorld.theProfiler.endSection();
-        }
-
-        if ((flags & 2) != 0 && (flags & 4) == 0 && chunk.isPopulated()) {
-            minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, flags);
-        }
-
-        if (!minecraftWorld.isRemote && (flags & 1) != 0) {
-            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
-
-            if (newState.hasComparatorInputOverride()) {
-                minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
+        else
+        {
+            if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue())
+            {
+                minecraftWorld.theProfiler.startSection("checkLight");
+                minecraftWorld.checkLight(pos);
+                minecraftWorld.theProfiler.endSection();
             }
-        }
 
-        return true;
+            if ((flags & 2) != 0 && (!minecraftWorld.isRemote || (flags & 4) == 0) && chunk.isPopulated())
+            {
+                minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, flags);
+            }
+
+            if (!minecraftWorld.isRemote && (flags & 1) != 0)
+            {
+                minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
+
+                if (newState.hasComparatorInputOverride())
+                {
+                    minecraftWorld.updateComparatorOutputLevel(pos, block);
+                }
+            }
+            else if (!minecraftWorld.isRemote && (flags & 16) == 0)
+            {
+                minecraftWorld.updateObservingBlocksAt(pos, block);
+            }
+
+            return true;
+        }
     }
 
     public boolean setBlockStateWithFlag(BlockPos pos, IBlockState newState, BlockChangeFlag flag) {
@@ -460,7 +472,7 @@ public final class CauseTracker {
         }
 
         if (flag.updateNeighbors()) { // Sponge - remove the isRemote check
-            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
+            minecraftWorld.updateObservingBlocksAt(pos, iblockstate.getBlock());
 
             if (newState.hasComparatorInputOverride()) {
                 minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
@@ -471,7 +483,7 @@ public final class CauseTracker {
     }
 
     /**
-     * This is the replacement of {@link WorldServer#spawnEntityInWorld(net.minecraft.entity.Entity)}
+     * This is the replacement of {@link WorldServer#spawnEntity(net.minecraft.entity.Entity)}
      * where it captures into phases. The causes and relations are processed by the phases.
      *
      * The difference between {@link #spawnEntityWithCause(Entity, Cause)} is that it bypasses
@@ -502,8 +514,8 @@ public final class CauseTracker {
         }
 
         // Sponge End - continue with vanilla mechanics
-        final int chunkX = MathHelper.floor_double(minecraftEntity.posX / 16.0D);
-        final int chunkZ = MathHelper.floor_double(minecraftEntity.posZ / 16.0D);
+        final int chunkX = MathHelper.floor(minecraftEntity.posX / 16.0D);
+        final int chunkZ = MathHelper.floor(minecraftEntity.posZ / 16.0D);
 
         if (!isForced && !getMixinWorld().isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
             return false;
@@ -598,8 +610,8 @@ public final class CauseTracker {
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
         // Sponge End - continue with vanilla mechanics
 
-        final int chunkX = MathHelper.floor_double(minecraftEntity.posX / 16.0D);
-        final int chunkZ = MathHelper.floor_double(minecraftEntity.posZ / 16.0D);
+        final int chunkX = MathHelper.floor(minecraftEntity.posX / 16.0D);
+        final int chunkZ = MathHelper.floor(minecraftEntity.posZ / 16.0D);
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 
         if (!isForced && !getMixinWorld().isMinecraftChunkLoaded(chunkX, chunkZ, true)) {

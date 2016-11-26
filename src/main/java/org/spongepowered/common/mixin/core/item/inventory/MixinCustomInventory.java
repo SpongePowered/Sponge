@@ -58,9 +58,9 @@ import java.util.function.Consumer;
 @Mixin(CustomInventory.class)
 public abstract class MixinCustomInventory implements MinecraftInventoryAdapter, Inventory, CarriedInventory<Carrier> {
 
-    @Shadow private InventoryArchetype archetype;
-    @Shadow public InventoryBasic inv;
-    @Shadow public Carrier carrier;
+    @Shadow(remap = false) private InventoryArchetype archetype;
+    @Shadow(remap = false) public InventoryBasic inv;
+    @Shadow(remap = false) public Carrier carrier;
 
     private Fabric<IInventory> inventory;
     private SlotCollection slots;

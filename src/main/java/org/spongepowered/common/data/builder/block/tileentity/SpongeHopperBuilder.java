@@ -49,7 +49,7 @@ public class SpongeHopperBuilder extends SpongeLockableBuilder<Hopper> {
                 ((TileEntityHopper) hopper).invalidate();
                 return Optional.empty();
             }
-            ((TileEntityHopper) hopper).setTransferCooldown(container.getInt(Keys.COOLDOWN.getQuery()).get());
+            ((TileEntityHopper) hopper).transferCooldown = container.getInt(Keys.COOLDOWN.getQuery()).get();
             ((TileEntityHopper) hopper).validate();
             return Optional.of(hopper);
         });

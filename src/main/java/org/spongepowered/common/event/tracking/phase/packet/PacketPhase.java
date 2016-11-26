@@ -113,7 +113,7 @@ public final class PacketPhase extends TrackingPhase {
         public static final IPacketState STOP_SNEAKING = new BasicPacketState();
         public static final IPacketState START_SPRINTING = new BasicPacketState();
         public static final IPacketState STOP_SPRINTING = new BasicPacketState();
-        public static final IPacketState STOP_SLEEPING = new BasicPacketState();
+        public static final IPacketState STOP_SLEEPING = new StopSleepingPacketState();
         public static final IPacketState CLOSE_WINDOW = new CloseWindowState();
         public static final IPacketState UPDATE_SIGN = new UpdateSignState();
         public static final IPacketState RESOURCE_PACK = new UpdateSignState();
@@ -401,7 +401,7 @@ public final class PacketPhase extends TrackingPhase {
         this.packetUnwindMap.put(CPacketPlayerTryUseItem.class, PacketFunction.USE_ITEM);
         this.packetUnwindMap.put(CPacketPlayerTryUseItemOnBlock.class, PacketFunction.PLACE_BLOCK);
         this.packetUnwindMap.put(CPacketHeldItemChange.class, PacketFunction.HELD_ITEM_CHANGE);
-        this.packetUnwindMap.put(CPacketAnimation.class, PacketFunction.IGNORED);
+        this.packetUnwindMap.put(CPacketAnimation.class, PacketFunction.STOP_SLEEPING);
         this.packetUnwindMap.put(CPacketEntityAction.class, PacketFunction.IGNORED);
         this.packetUnwindMap.put(CPacketInput.class, PacketFunction.IGNORED);
         this.packetUnwindMap.put(CPacketCloseWindow.class, PacketFunction.CLOSE_WINDOW);

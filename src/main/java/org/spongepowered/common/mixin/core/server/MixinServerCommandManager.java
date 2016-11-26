@@ -160,7 +160,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
      */
     @Override
     @SuppressWarnings("rawtypes")
-    public List<String> getTabCompletionOptions(ICommandSender sender, String input, @Nullable BlockPos pos) {
+    public List<String> getTabCompletions(ICommandSender sender, String input, @Nullable BlockPos pos) {
         @Nullable Location<org.spongepowered.api.world.World> targetPos = null;
         if (pos != null) {
             targetPos = new Location<>((org.spongepowered.api.world.World) sender.getEntityWorld(), VecHelper.toVector3i(pos));

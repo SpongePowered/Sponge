@@ -75,7 +75,7 @@ final class DropItemOutsideWindowState extends BasicInventoryPacketState {
         for (Entity currentEntity : capturedEntities) {
             currentEntity.setCreator(playerMP.getUniqueID());
         }
-        final World spongeWorld = (World) playerMP.worldObj;
+        final World spongeWorld = (World) playerMP.world;
         return usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID ?
                SpongeEventFactory
                        .createClickInventoryEventDropOutsidePrimary   (spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions) :

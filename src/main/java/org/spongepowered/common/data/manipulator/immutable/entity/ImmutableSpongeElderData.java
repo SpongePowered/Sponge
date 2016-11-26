@@ -31,6 +31,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElderData;
 
+
+@SuppressWarnings("deprecation")
 public class ImmutableSpongeElderData extends AbstractImmutableBooleanData<ImmutableElderData, ElderData> implements ImmutableElderData {
 
     public ImmutableSpongeElderData(boolean value) {

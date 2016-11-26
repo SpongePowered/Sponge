@@ -58,7 +58,7 @@ public abstract class MixinTileEntityFurnace extends TileEntity {
     @Redirect(method = "update", at = @At(value = "FIELD", target = FURNACE_COOK_TIME_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 3))
     public void fixupCookTimeCooldown(TileEntityFurnace self, int modifier) {
         int ticks = (int) ((IMixinMinecraftServer) this.getWorld().getMinecraftServer()).getRealTimeTicks();
-        this.cookTime = MathHelper.clamp_int(this.cookTime - (2 * ticks), 0, this.totalCookTime);
+        this.cookTime = MathHelper.clamp(this.cookTime - (2 * ticks), 0, this.totalCookTime);
     }
 
 }

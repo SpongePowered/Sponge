@@ -128,7 +128,7 @@ public final class TrackingUtil {
     public static void tickEntity(CauseTracker causeTracker, net.minecraft.entity.Entity entityIn) {
         checkArgument(entityIn instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entityIn);
         checkNotNull(entityIn, "Cannot capture on a null ticking entity!");
-        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) entityIn.worldObj.getChunkProvider()).getLoadedChunkWithoutMarkingActive(entityIn.getPosition().getX() >> 4,  entityIn.getPosition().getZ() >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) entityIn.world).getChunkProvider()).getLoadedChunkWithoutMarkingActive(entityIn.getPosition().getX() >> 4,  entityIn.getPosition().getZ() >> 4);
         if (chunk == null || (chunk.unloaded && !((IMixinChunk) chunk).isPersistedChunk())) {
             // Don't tick entities in chunks queued for unload
             return;
@@ -155,7 +155,7 @@ public final class TrackingUtil {
     public static void tickRidingEntity(CauseTracker causeTracker, net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) entity.worldObj.getChunkProvider()).getLoadedChunkWithoutMarkingActive(entity.getPosition().getX() >> 4,  entity.getPosition().getZ() >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) entity.world).getChunkProvider()).getLoadedChunkWithoutMarkingActive(entity.getPosition().getX() >> 4,  entity.getPosition().getZ() >> 4);
         if (chunk == null || (chunk.unloaded && !((IMixinChunk) chunk).isPersistedChunk())) {
             // Don't tick entity in chunks queued for unload
             return;

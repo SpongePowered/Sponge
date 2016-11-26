@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockFlowerPot;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFlowerPot;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -42,7 +40,6 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemDa
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 
 import java.util.Optional;
 
@@ -63,7 +60,7 @@ public class FlowerPotDataProcessor extends
         if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        flowerPot.setFlowerPotData(null, 0);
+        flowerPot.setItemStack(ItemStack.EMPTY);
         flowerPot.markDirty();
         return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
     }
@@ -71,14 +68,13 @@ public class FlowerPotDataProcessor extends
     @Override
     protected boolean set(TileEntityFlowerPot flowerPot, ItemStackSnapshot stackSnapshot) {
         if (stackSnapshot == ItemStackSnapshot.NONE) {
-            flowerPot.setFlowerPotData(null, 0);
+            flowerPot.setItemStack(ItemStack.EMPTY);
         } else {
-            Item item = (Item) stackSnapshot.getType();
-            int meta = ((SpongeItemStackSnapshot) stackSnapshot).getDamageValue();
-            if (!((BlockFlowerPot) Blocks.FLOWER_POT).canContain(Block.getBlockFromItem(item), meta)) {
+            ItemStack stack = (ItemStack) stackSnapshot.createStack();
+            if (!((BlockFlowerPot) Blocks.FLOWER_POT).canBePotted(stack)) {
                 return false;
             }
-            flowerPot.setFlowerPotData(item, meta);
+            flowerPot.setItemStack(stack);
         }
         flowerPot.markDirty();
         flowerPot.getWorld().notifyBlockUpdate(flowerPot.getPos(), flowerPot.getWorld().getBlockState(flowerPot.getPos()), flowerPot.getWorld()

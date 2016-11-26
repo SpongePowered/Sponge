@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import net.minecraft.entity.monster.AbstractSkeleton;
 import net.minecraft.entity.monster.EntitySkeleton;
+import net.minecraft.entity.monster.EntityStray;
+import net.minecraft.entity.monster.EntityWitherSkeleton;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSkeletonData;
@@ -44,10 +47,10 @@ import org.spongepowered.common.entity.SpongeEntityConstants;
 import java.util.Optional;
 
 public class SkeletonDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntitySkeleton, SkeletonType, Value<SkeletonType>, SkeletonData, ImmutableSkeletonData> {
+        extends AbstractEntitySingleDataProcessor<AbstractSkeleton, SkeletonType, Value<SkeletonType>, SkeletonData, ImmutableSkeletonData> {
 
     public SkeletonDataProcessor() {
-        super(EntitySkeleton.class, Keys.SKELETON_TYPE);
+        super(AbstractSkeleton.class, Keys.SKELETON_TYPE);
     }
 
     @Override
@@ -56,17 +59,20 @@ public class SkeletonDataProcessor
     }
 
     @Override
-    protected boolean set(EntitySkeleton entity, SkeletonType value) {
-        if ((Object) value instanceof net.minecraft.entity.monster.SkeletonType) {
-            entity.setSkeletonType((net.minecraft.entity.monster.SkeletonType) (Object) value);
-            return true;
-        }
-        return false;
+    protected boolean set(AbstractSkeleton entity, SkeletonType value) {
+        throw new UnsupportedOperationException("SkeletonData is deprecated - skeleton types are now separate entities!");
     }
 
     @Override
-    protected Optional<SkeletonType> getVal(EntitySkeleton entity) {
-        return Optional.ofNullable((SkeletonType) (Object) entity.getSkeletonType());
+    protected Optional<SkeletonType> getVal(AbstractSkeleton entity) {
+        if (entity instanceof EntitySkeleton) {
+            return Optional.of(SkeletonTypes.NORMAL);
+        } else if (entity instanceof EntityStray) {
+            return Optional.of(SkeletonTypes.STRAY);
+        } else if (entity instanceof EntityWitherSkeleton) {
+            return Optional.of(SkeletonTypes.WITHER);
+        }
+        return Optional.empty();
     }
 
     @Override

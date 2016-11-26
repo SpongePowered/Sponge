@@ -144,7 +144,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     @Override
     public Team getTeam() {
-        return this.worldObj.getScoreboard().getPlayersTeam(this.fakeProfile.getName());
+        return this.world.getScoreboard().getPlayersTeam(this.fakeProfile.getName());
     }
 
     @Override
@@ -372,7 +372,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     }
 
     private boolean isAliveAndInWorld() {
-        return this.worldObj.getEntityByID(this.getEntityId()) == this && !this.isDead;
+        return this.world.getEntityByID(this.getEntityId()) == this && !this.isDead;
     }
 
     private void respawnOnClient() {
@@ -431,7 +431,6 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
      * @param action The action to apply on the tab list
      * @return A new tab list packet
      */
-    @SuppressWarnings("unchecked")
     public SPacketPlayerListItem createPlayerListPacket(SPacketPlayerListItem.Action action) {
         SPacketPlayerListItem packet = new SPacketPlayerListItem(action);
         packet.players.add(packet.new AddPlayerData(this.fakeProfile, 0, GameType.NOT_SET, this.getDisplayName()));
@@ -487,15 +486,16 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     public void attackEntityWithRangedAttack(EntityLivingBase target, float p_82196_2_) {
         // Borrowed from Skeleton
         // TODO Figure out how to API this out
-        final EntityTippedArrow entitytippedarrow = new EntityTippedArrow(this.worldObj, this);
+        final EntityTippedArrow entitytippedarrow = new EntityTippedArrow(this.world, this);
         double d0 = target.posX - this.posX;
         double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - entitytippedarrow.posY;
         double d2 = target.posZ - this.posZ;
-        double d3 = (double)MathHelper.sqrt_double(d0 * d0 + d2 * d2);
-        entitytippedarrow.setThrowableHeading(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, (float)(14 - this.worldObj.getDifficulty().getDifficultyId() * 4));
-        int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.POWER, this);
-        int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
-        entitytippedarrow.setDamage((double)(p_82196_2_ * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.worldObj.getDifficulty().getDifficultyId() * 0.11F));
+        double d3 = (double)MathHelper.sqrt(d0 * d0 + d2 * d2);
+        entitytippedarrow.setThrowableHeading(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, (float)(14 - this.world.getDifficulty().getDifficultyId() * 4));
+        // These names are wrong
+        int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
+        int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this);
+        entitytippedarrow.setDamage((double)(p_82196_2_ * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.world.getDifficulty().getDifficultyId() * 0.11F));
 
         if (i > 0) {
             entitytippedarrow.setDamage(entitytippedarrow.getDamage() + (double)i * 0.5D + 0.5D);
@@ -512,6 +512,6 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         }
 
         this.playSound(SoundEvents.ENTITY_ARROW_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
-        this.worldObj.spawnEntityInWorld(entitytippedarrow);
+        this.world.spawnEntity(entitytippedarrow);
     }
 }

@@ -22,35 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item;
+package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.item.ItemEmptyMap;
-import net.minecraft.item.ItemMapBase;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldSavedData;
+import net.minecraft.entity.passive.EntityLlama;
+import net.minecraft.entity.projectile.EntityLlamaSpit;
+import net.minecraft.entity.projectile.EntityPotion;
+import org.spongepowered.api.entity.projectile.LlamaSpit;
+import org.spongepowered.api.entity.projectile.ThrownPotion;
+import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.WorldManager;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
-@Mixin(ItemEmptyMap.class)
-public class MixinItemEmptyMap extends ItemMapBase {
+@Mixin(EntityLlamaSpit.class)
+public abstract class MixinEntityLlamaSpit extends MixinEntity implements LlamaSpit {
 
-    @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
-    private int getOverworldUniqueDataId(World worldIn, String key) {
-        if (worldIn.isRemote) {
-            return worldIn.getUniqueDataId(key);
-        }
-        return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
+    @Shadow public EntityLlama owner;
+
+    @Override
+    public ProjectileSource getShooter() {
+        return (ProjectileSource) this.owner;
     }
 
-    @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
-            + "setItemData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
-    private void setOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
-        if (worldIn.isRemote) {
-            worldIn.setItemData(dataId, data);
-        } else {
-            WorldManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
+    @Override
+    public void setShooter(ProjectileSource shooter) {
+        if (!(shooter instanceof EntityLlama)) {
+            throw new IllegalArgumentException("Cound not set this LlamaSpit's shooter as anyone else!");
         }
+        this.owner = (EntityLlama) shooter;
     }
 }

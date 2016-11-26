@@ -179,7 +179,7 @@ final class DeathPhase extends EntityPhaseState {
             if (!items.isEmpty()) {
                 final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(dyingEntity);
                 final List<Entity> itemEntities = items.stream()
-                        .map(data -> data.create((WorldServer) minecraftEntity.worldObj))
+                        .map(data -> data.create((WorldServer) minecraftEntity.world))
                         .map(EntityUtil::fromNative)
                         .collect(Collectors.toList());
 

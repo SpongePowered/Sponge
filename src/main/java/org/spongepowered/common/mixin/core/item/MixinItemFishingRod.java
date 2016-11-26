@@ -49,15 +49,15 @@ import org.spongepowered.common.SpongeImpl;
 public abstract class MixinItemFishingRod extends Item {
 
     @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"), cancellable = true)
-    private void onThrowEvent(ItemStack itemStack, World world, EntityPlayer player, EnumHand hand, CallbackInfoReturnable<ActionResult<ItemStack>> callbackInfoReturnable) {
+    private void onThrowEvent(World world, EntityPlayer player, EnumHand hand, CallbackInfoReturnable<ActionResult<ItemStack>> callbackInfoReturnable) {
         EntityFishHook fishHook = new EntityFishHook(world, player);
         EntitySnapshot fishHookSnapshot = ((Entity) fishHook).createSnapshot();
         // only fire event on server-side to avoid crash on client
-        if (!player.worldObj.isRemote
+        if (!player.world.isRemote
             && SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Cause.of(NamedCause.source(player)),
                 fishHookSnapshot, (FishHook) fishHook))) {
             player.fishEntity = null;
-            callbackInfoReturnable.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, itemStack));
+            callbackInfoReturnable.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, player.getHeldItem(hand)));
         }
     }
 

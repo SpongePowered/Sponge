@@ -318,7 +318,7 @@ class EntityTickPhaseState extends TickPhaseState {
                     entity.rotationPitch = (float) currentRotationVector.getX();
                     entity.rotationYaw = (float) currentRotationVector.getY();
                 }
-                //entity.setPositionAndRotation(position.getX(), position.getY(), position.getZ(), rotation.getFloorX(), rotation.getFloorY());
+                //entity.setPositionWithRotation(position.getX(), position.getY(), position.getZ(), rotation.getFloorX(), rotation.getFloorY());
                     /*
                     Some thoughts from gabizou: The interesting thing here is that while this is only called
                     in World.updateEntityWithOptionalForce, by default, it supposedly handles updating the rider entity

@@ -37,7 +37,7 @@ import org.spongepowered.common.interfaces.IMixinCommandSender;
 public abstract class MixinICommandSender implements ICommandSender, IMixinCommandSender {
 
     @Override
-    public boolean canCommandSenderUseCommand(int permissionLevel, String commandName) {
+    public boolean canUseCommand(int permissionLevel, String commandName) {
         return CommandPermissions.testPermission(this.asCommandSource(), commandName);
     }
 }

@@ -38,7 +38,7 @@ public abstract class MixinEntityAIRunAroundLikeCrazy extends MixinEntityAIBase 
 
     @Override
     public double getSpeed() {
-        return speed;
+        return this.speed;
     }
 
     @Override

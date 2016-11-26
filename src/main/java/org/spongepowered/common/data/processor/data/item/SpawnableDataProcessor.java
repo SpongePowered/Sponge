@@ -30,6 +30,7 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemMonsterPlacer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableSpawnableData;
@@ -39,6 +40,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeSpawnableData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -57,7 +59,7 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
     @SuppressWarnings("unchecked")
     @Override
     public boolean set(ItemStack itemStack, EntityType value) {
-        final String name = EntityList.CLASS_TO_NAME.get((Class<? extends Entity>) value.getEntityClass());
+        final String name = EntityList.getKey((Class<? extends Entity>) value.getEntityClass()).toString();
         if (EntityList.ENTITY_EGGS.containsKey(name)) {
             final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(itemStack);
             final NBTTagCompound subCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.SPAWNABLE_ENTITY_TAG);
@@ -69,9 +71,9 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
 
     @Override
     public Optional<EntityType> getVal(ItemStack itemStack) {
-        final String name = ItemMonsterPlacer.getEntityIdFromItem(itemStack);
+        final ResourceLocation name = ItemMonsterPlacer.getNamedIdFrom(itemStack);
         if (name != null) {
-            final Class<? extends Entity> entity = EntityList.NAME_TO_CLASS.get(name);
+            final Class<? extends Entity> entity = SpongeImplHooks.getEntityClass(name);
             return Optional.ofNullable(EntityTypeRegistryModule.getInstance().getForClass(entity));
         }
         return Optional.empty();

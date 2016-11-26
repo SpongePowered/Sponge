@@ -47,10 +47,15 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.ChunkProviderOverworld;
+import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
+import net.minecraft.world.gen.structure.MapGenMineshaft;
+import net.minecraft.world.gen.structure.MapGenScatteredFeature;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenStructure;
+import net.minecraft.world.gen.structure.MapGenVillage;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
+import net.minecraft.world.gen.structure.WoodlandMansion;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -76,7 +81,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;
-import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
 import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
@@ -207,7 +211,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         BiomeGenerationSettings settings = this.biomeSettings.get(type);
         if (settings == null) {
             if (SpongeGenerationPopulator.class.isInstance(this.baseGenerator)) {
-                // If the base generator was mod provided then we assume that it will handle its own
+                // If the base generator was mod provided then we assume that it
+                // will handle its own
                 // generation so we don't add the base game's generation
                 settings = new SpongeBiomeGenerationSettings();
             } else {
@@ -420,16 +425,32 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Nullable
     @Override
-    public BlockPos getStrongholdGen(World worldIn, String structureName, BlockPos position) {
-        if ("Stronghold".equals(structureName)) {
-            for (GenerationPopulator gen : this.genpop) {
-                if (gen instanceof MapGenStronghold) {
-                    return ((MapGenStronghold) gen).getClosestStrongholdPos(worldIn, position);
-                }
+    public BlockPos getStrongholdGen(World worldIn, String structureName, BlockPos position, boolean p_180513_4_) {
+        Class<? extends MapGenStructure> target = null;
+        if("Stronghold".equals(structureName)) {
+            target = MapGenStronghold.class;
+        } else if("Mansion".equals(structureName)) {
+            target = WoodlandMansion.class;
+        } else if("Monument".equals(structureName)) {
+            target = StructureOceanMonument.class;
+        } else if("Village".equals(structureName)) {
+            target = MapGenVillage.class;
+        } else if("Mineshaft".equals(structureName)) {
+            target = MapGenMineshaft.class;
+        } else if("Temple".equals(structureName)) {
+            target = MapGenScatteredFeature.class;
+        }
+        if (target == null) {
+            return null;
+        }
+        for (GenerationPopulator gen : this.genpop) {
+            if (target.isInstance(gen)) {
+                return ((MapGenStructure) gen).getClosestStrongholdPos(worldIn, position, p_180513_4_);
             }
         }
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
-            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).getStrongholdGen(worldIn, structureName, position);
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).getStrongholdGen(worldIn, structureName, position,
+                    p_180513_4_); // getStrongholdGen
         }
         return null;
     }

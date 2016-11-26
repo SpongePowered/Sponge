@@ -39,35 +39,35 @@ public abstract class MixinCommandWeather {
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setCleanWeatherTime(I)V"))
     private void onSetCleanWeatherTime(WorldInfo info, int time) {
-        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+        for (WorldServer world : SpongeImpl.getServer().worlds) {
             world.getWorldInfo().setCleanWeatherTime(time);
         }
     }
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setRainTime(I)V"))
     private void onSetRainTime(WorldInfo info, int time) {
-        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+        for (WorldServer world : SpongeImpl.getServer().worlds) {
             world.getWorldInfo().setRainTime(time);
         }
     }
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setThunderTime(I)V"))
     private void onSetThunderTime(WorldInfo info, int time) {
-        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+        for (WorldServer world : SpongeImpl.getServer().worlds) {
             world.getWorldInfo().setThunderTime(time);
         }
     }
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setRaining(Z)V"))
     private void onSetRaining(WorldInfo info, boolean state) {
-        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+        for (WorldServer world : SpongeImpl.getServer().worlds) {
             world.getWorldInfo().setRaining(state);
         }
     }
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/storage/WorldInfo;setThundering(Z)V"))
     private void onSetThundering(WorldInfo info, boolean state) {
-        for (WorldServer world : SpongeImpl.getServer().worldServers) {
+        for (WorldServer world : SpongeImpl.getServer().worlds) {
             world.getWorldInfo().setThundering(state);
         }
     }

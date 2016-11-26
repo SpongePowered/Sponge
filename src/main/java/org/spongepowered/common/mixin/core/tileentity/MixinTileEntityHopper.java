@@ -38,14 +38,10 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
 import org.spongepowered.api.item.inventory.type.TileEntityInventory;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -63,21 +59,17 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(TileEntityHopper.class)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
         @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
-public abstract class MixinTileEntityHopper extends MixinTileEntityLockable implements Hopper, IMixinCustomNameable {
+public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot implements Hopper, IMixinCustomNameable {
 
     @Shadow private int transferCooldown;
-    @Shadow @Nullable private String customName;
 
     private Fabric<IInventory> fabric;
     private SlotCollection slots;
@@ -87,11 +79,11 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(5).build();
-        this.lens = new OrderedInventoryLensImpl(0, 5, 1, slots);
+        this.lens = new OrderedInventoryLensImpl(0, 5, 1, this.slots);
     }
 
     @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"))
-    private static void onPutDrop(IInventory inventory, EntityItem entityItem, CallbackInfoReturnable<Boolean> callbackInfo) {
+    private static void onPutDrop(IInventory inventory, IInventory hopper, EntityItem entityItem, CallbackInfoReturnable<Boolean> callbackInfo) {
         IMixinEntity spongeEntity = (IMixinEntity) entityItem;
         spongeEntity.getCreatorUser().ifPresent(owner -> {
             if (inventory instanceof TileEntity) {
@@ -106,11 +98,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(of("TransferCooldown"), this.transferCooldown);
-        if (this.customName != null) {
-            container.set(of("CustomName"), this.customName);
-        }
-        return container;
+        return container.set(of("TransferCooldown"), this.transferCooldown);
     }
 
     @Override

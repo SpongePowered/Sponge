@@ -269,7 +269,7 @@ public abstract class TrackingPhase {
     public boolean spawnEntityOrCapture(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
             int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
-        final WorldServer minecraftWorld = (WorldServer) minecraftEntity.worldObj;
+        final WorldServer minecraftWorld = (WorldServer) minecraftEntity.world;
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
         if (user != null) {
             entity.setCreator(user.getUniqueId());

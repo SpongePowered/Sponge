@@ -43,8 +43,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
+import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.UUID;
@@ -72,7 +72,7 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
                         setHandle(TextActions.showAchievement((Achievement) checkNotNull(StatList.getOneShotStat(stat), "Unknown statistic: %s", stat)));
                         break;
                     case SHOW_ITEM:
-                        setHandle(TextActions.showItem(ItemStackUtil.createSnapshot(net.minecraft.item.ItemStack.loadItemStackFromNBT(loadNbt()))));
+                        setHandle(TextActions.showItem(ItemStackUtil.createSnapshot(new net.minecraft.item.ItemStack(loadNbt()))));
                         break;
                     case SHOW_ENTITY:
                         NBTTagCompound nbt = loadNbt();

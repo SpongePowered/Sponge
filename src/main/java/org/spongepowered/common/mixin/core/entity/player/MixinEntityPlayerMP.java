@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
@@ -35,9 +34,8 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
@@ -63,7 +61,6 @@ import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.stats.StatisticsManagerServer;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.FoodStats;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -185,10 +182,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
     @Shadow public abstract void displayGUIChest(IInventory chestInventory);
     @Shadow public abstract void displayGui(IInteractionObject guiOwner);
-    @Shadow public abstract void openGuiHorseInventory(EntityHorse horse, IInventory horseInventory);
+    @Shadow public abstract void openGuiHorseInventory(AbstractHorse horse, IInventory horseInventory);
 
     // Inventory
-    @Shadow public abstract void addChatMessage(ITextComponent component);
+    @Shadow public abstract void sendMessage(ITextComponent component);
     @Shadow public abstract void closeScreen();
     @Shadow public int currentWindowId;
     @Shadow private void getNextWindowId() { }
@@ -231,14 +228,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     @Overwrite
     public void onDeath(DamageSource cause) {
+        // Sponge start
         if (!SpongeCommonEventFactory.callDestructEntityEventDeath((EntityPlayerMP) (Object) this, cause)) {
             return;
         }
         // Double check that the CauseTracker is already capturing the Death phase
         final CauseTracker causeTracker;
         final boolean tracksEntityDeaths;
-        if (!this.worldObj.isRemote) {
-            causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+        if (!this.world.isRemote) {
+            causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
             tracksEntityDeaths = CauseTracker.ENABLED && causeTracker.getCurrentState().tracksEntityDeaths();
@@ -256,8 +254,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             causeTracker = null;
             tracksEntityDeaths = false;
         }
+        // Sponge end
 
-        boolean flag = this.worldObj.getGameRules().getBoolean("showDeathMessages");
+        boolean flag = this.world.getGameRules().getBoolean("showDeathMessages");
         this.connection.sendPacket(new SPacketCombatEvent(this.getCombatTracker(), SPacketCombatEvent.Event.ENTITY_DIED, flag));
 
         if (flag) {
@@ -274,7 +273,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             }
         }
 
-        if (!this.worldObj.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+        if (!this.world.getGameRules().getBoolean("keepInventory") && !this.isSpectator()) {
+            this.destroyVanishingCursedItems();
             this.inventory.dropAllItems();
         }
 
@@ -286,7 +286,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
         if (entitylivingbase != null) {
-            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getEntityString(entitylivingbase));
+            EntityList.EntityEggInfo entitylist$entityegginfo = EntityList.ENTITY_EGGS.get(EntityList.getKey(entitylivingbase));
 
             if (entitylist$entityegginfo != null) {
                 this.addStat(entitylist$entityegginfo.entityKilledByStat);
@@ -297,16 +297,19 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
         this.addStat(StatList.DEATHS);
         this.takeStat(StatList.TIME_SINCE_DEATH);
+        this.extinguish();
+        this.setFlag(0, false);
         this.getCombatTracker().reset();
         // Sponge Start - Finish cause tracker
         if (causeTracker != null && tracksEntityDeaths) {
             causeTracker.completePhase();
         }
+        // Sponge end
     }
 
     @Override
     public IMixinWorldServer getMixinWorld() {
-        return ((IMixinWorldServer) this.worldObj);
+        return ((IMixinWorldServer) this.world);
     }
 
     /**
@@ -465,45 +468,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void reset() {
-        float experience = 0;
-        boolean keepInventory = this.worldObj.getGameRules().getBoolean("keepInventory");
-
-        if (this.keepsLevel || keepInventory) {
-            experience = this.experience;
-            this.newTotalExperience = this.experienceTotal;
-            this.newLevel = this.experienceLevel;
-        }
-
-        this.clearActivePotions();
-        this._combatTracker = getNewTracker(this);
-        this.deathTime = 0;
-        this.experience = 0;
-        this.experienceLevel = this.newLevel;
-        this.experienceTotal = this.newTotalExperience;
-        this.fire = 0;
-        this.fallDistance = 0;
-        this.foodStats = new FoodStats();
-        this.potionsNeedUpdate = true;
-        this.openContainer = this.inventoryContainer;
-        this.attackingPlayer = null;
-        this.entityLivingToAttack = null;
-        this.lastExperience = -1;
-        this.lastHealth = -1.0F;
-        this.lastFoodLevel = -1;
-        this.setHealth(this.getMaxHealth());
-
-        if (this.keepsLevel || keepInventory) {
-            this.experience = experience;
-        } else {
-            this.addExperience(this.newExperience);
-        }
-
-        this.keepsLevel = false;
-        ((IMixinEntityPlayerMP) this).resetAttributeMap();
-    }
-
-    @Override
     public Optional<Container> getOpenInventory() {
         return Optional.ofNullable((Container) this.openContainer);
     }
@@ -543,7 +507,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public MessageChannel getDeathMessageChannel() {
         EntityPlayerMP player = (EntityPlayerMP) (Object) this;
-        if (player.worldObj.getGameRules().getBoolean("showDeathMessages")) {
+        if (player.world.getGameRules().getBoolean("showDeathMessages")) {
             @Nullable Team team = player.getTeam();
 
             if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
@@ -688,15 +652,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void resetAttributeMap() {
-        this.attributeMap = new AttributeMap();
-        this.applyEntityAttributes();
-
-        // Re-create the array, so that attributes are properly re-added
-        this.armorArray = new ItemStack[5];
-    }
-
-    @Override
     public TabList getTabList() {
         return this.tabList;
     }
@@ -769,7 +724,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void resetBlockChange(int x, int y, int z) {
-        SPacketBlockChange packet = new SPacketBlockChange(this.worldObj, new BlockPos(x, y, z));
+        SPacketBlockChange packet = new SPacketBlockChange(this.world, new BlockPos(x, y, z));
         this.connection.sendPacket(packet);
     }
 
@@ -791,11 +746,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         //final Cause cause = Cause.source(SpawnCause.builder().type(InternalSpawnTypes.DROPPED_ITEM).build()).named(NamedCause.OWNER, this).build();
         // ASK MUMFREY HOW TO GET THE FRIGGING SLOT FOR THE EVENT?!
 
-        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.stackSize : 1), false, true);
+        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.getCount() : 1), false, true);
     }
 
     @Override
-    public void stopActiveHand() {
+    public void stopActiveHand() { // stopActiveHand
         // Our using item state is probably desynced from the client (e.g. from the initial air interaction of a bow being cancelled).
         // We need to re-send the player's inventory to overwrite any client-side inventory changes that may have occured as a result
         // of the client (but not the server) calling Item#onPlayerStoppedUsing (which in the case of a bow, removes one arrow from the inventory).

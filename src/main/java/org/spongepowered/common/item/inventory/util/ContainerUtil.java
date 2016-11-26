@@ -26,7 +26,8 @@ package org.spongepowered.common.item.inventory.util;
 
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.AbstractChestHorse;
+import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerBeacon;
@@ -132,11 +133,11 @@ public final class ContainerUtil {
                         float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
                         int stackSize = RANDOM.nextInt(21) + 10;
 
-                        if (stackSize > itemStack.stackSize) {
-                            stackSize = itemStack.stackSize;
+                        if (stackSize > itemStack.getCount()) {
+                            stackSize = itemStack.getCount();
                         }
 
-                        itemStack.stackSize -= stackSize;
+                        itemStack.setCount(itemStack.getCount() - stackSize);
                         final double posX = x + (double) f;
                         final double posY = y + (double) f1;
                         final double posZ = z + (double) f2;
@@ -177,11 +178,11 @@ public final class ContainerUtil {
                 float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
                 int stackSize = RANDOM.nextInt(21) + 10;
 
-                if (stackSize > itemStack.stackSize) {
-                    stackSize = itemStack.stackSize;
+                if (stackSize > itemStack.getCount()) {
+                    stackSize = itemStack.getCount();
                 }
 
-                itemStack.stackSize -= stackSize;
+                itemStack.setCount(itemStack.getCount() - stackSize);
                 final double posX = x + (double) f;
                 final double posY = y + (double) f1;
                 final double posZ = z + (double) f2;
@@ -195,7 +196,7 @@ public final class ContainerUtil {
                 entityitem.motionX = RANDOM.nextGaussian() * (double) f3;
                 entityitem.motionY = RANDOM.nextGaussian() * (double) f3 + 0.20000000298023224D;
                 entityitem.motionZ = RANDOM.nextGaussian() * (double) f3;
-                worldServer.spawnEntityInWorld(entityitem);
+                worldServer.spawnEntity(entityitem);
             }
         }
     }
@@ -253,8 +254,8 @@ public final class ContainerUtil {
         } else if (container instanceof ContainerBeacon) {
             return InventoryArchetypes.BEACON;
         } else if (container instanceof ContainerHorseInventory) {
-            EntityHorse horse = ((ContainerHorseInventory) container).theHorse;
-            if (horse.isChested()) {
+            AbstractHorse horse = ((ContainerHorseInventory) container).theHorse;
+            if (horse instanceof AbstractChestHorse && ((AbstractChestHorse) horse).hasChest()) {
                 return InventoryArchetypes.HORSE_WITH_CHEST;
             }
             return InventoryArchetypes.HORSE;
@@ -301,7 +302,7 @@ public final class ContainerUtil {
         } else if (container instanceof ContainerMerchant && ((ContainerMerchant) container).theMerchant instanceof Carrier) {
             return (Carrier) ((ContainerMerchant) container).theMerchant;
         } else if (container instanceof ContainerPlayer) {
-            EntityPlayer player = ((ContainerPlayer) container).thePlayer;
+            EntityPlayer player = ((ContainerPlayer) container).player;
             if (player instanceof EntityPlayerMP) {
                 return (Carrier) player;
             }

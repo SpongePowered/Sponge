@@ -395,7 +395,7 @@ public class SpongeCommand {
                                 "Failed to find an entity! Please execute the command when looking at an entity!"));
                         return CommandResult.empty();
                     }
-                    final WorldServer worldServer = (WorldServer) entityPlayerMP.worldObj;
+                    final WorldServer worldServer = (WorldServer) entityPlayerMP.world;
                     final Chunk chunk = worldServer.getChunkFromBlockCoords(rayTraceResult.getBlockPos());
                     final IMixinChunk mixinChunk = (IMixinChunk) chunk;
                     final IBlockState blockState = worldServer.getBlockState(rayTraceResult.getBlockPos());

@@ -35,12 +35,10 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 @Mixin(EntitySnowman.class)
 public abstract class MixinEntitySnowman extends MixinEntityGolem implements SnowGolem {
 
-    // This behavior will have to be changed in 1.9
-    // then there will also be a "mobGriefing" rule check (says the changelog)
-    @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;floor_double(D)I", ordinal = 3),
+    @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;floor(D)I", ordinal = 3),
             cancellable = true)
     private void onCanGrief(CallbackInfo ci) {
-        if (!this.worldObj.getGameRules().getBoolean("mobGriefing") || !((IMixinGriefer) this).canGrief()) {
+        if (!this.world.getGameRules().getBoolean("mobGriefing") || !((IMixinGriefer) this).canGrief()) {
             ci.cancel();
         }
     }

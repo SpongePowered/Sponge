@@ -24,40 +24,39 @@
  */
 package org.spongepowered.common.entity;
 
-import net.minecraft.entity.passive.HorseType;
+import net.minecraft.entity.passive.AbstractHorse;
+import net.minecraft.entity.passive.EntityDonkey;
+import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.EntityMule;
+import net.minecraft.entity.passive.EntitySkeletonHorse;
+import net.minecraft.entity.passive.EntityZombieHorse;
 import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 public class SpongeHorseVariant extends SpongeEntityMeta implements HorseVariant {
 
-    // This actually contains the horse variants, not armor types
-    private HorseType horseType;
+    private final Class<? extends AbstractHorse> type;
 
-    public SpongeHorseVariant(int variant, HorseType type, String name) {
+    public SpongeHorseVariant(int variant, Class<? extends AbstractHorse> type, String name) {
         super(variant, name);
-        this.horseType = type;
-    }
-
-    public HorseType getType() {
-        return this.horseType;
+        this.type = type;
     }
 
     @Override
     public Translation getTranslation() {
-        switch (type) {
-            case 0:
-            default:
-                return new SpongeTranslation("entity.horse.name");
-            case 1:
-                return new SpongeTranslation("entity.donkey.name");
-            case 2:
-                return new SpongeTranslation("entity.mule.name");
-            case 3:
-                return new SpongeTranslation("entity.zombiehorse.name");
-            case 4:
-                return new SpongeTranslation("entity.skeletonhorse.name");
+        if (this.type == EntityHorse.class) {
+            return new SpongeTranslation("entity.horse.name");
+        } else if (this.type == EntityDonkey.class) {
+            return new SpongeTranslation("entity.donkey.name");
+        } else if (this.type == EntityMule.class) {
+            return new SpongeTranslation("entity.mule.name");
+        } else if (this.type == EntityZombieHorse.class) {
+            return new SpongeTranslation("entity.zombiehorse.name");
+        } else if (this.type == EntitySkeletonHorse.class) {
+            return new SpongeTranslation("entity.skeletonhorse.name");
         }
+        return new SpongeTranslation("entity.horse.name");
     }
 
 }

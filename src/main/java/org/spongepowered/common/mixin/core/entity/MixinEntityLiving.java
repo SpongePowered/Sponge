@@ -127,8 +127,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     }
 
     @Inject(method = "processInitialInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
-    public void callLeashEvent(EntityPlayer playerIn, ItemStack itemStack, EnumHand hand, CallbackInfoReturnable<Boolean> ci) {
-        if (!playerIn.worldObj.isRemote) {
+    public void callLeashEvent(EntityPlayer playerIn, EnumHand hand, CallbackInfoReturnable<Boolean> ci) {
+        if (!playerIn.world.isRemote) {
             final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Cause.of(NamedCause.source(playerIn)), this);
             SpongeImpl.postEvent(event);
             if(event.isCancelled()) {
@@ -140,7 +140,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Inject(method = "clearLeashed", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z", opcode = Opcodes.PUTFIELD), cancellable = true)
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
         net.minecraft.entity.Entity entity = getLeashedToEntity();
-        if (!this.worldObj.isRemote) {
+        if (!this.world.isRemote) {
             UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(entity == null ? Cause.of(NamedCause.of("Self", this))
                 : Cause.of(NamedCause.source(entity)), this);
             SpongeImpl.postEvent(event);
@@ -163,8 +163,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
 
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 16384.0D))
     private double getHardDespawnRange(double value) {
-        if (!this.worldObj.isRemote) {
-            return Math.pow(((IMixinWorldServer) this.worldObj).getWorldConfig().getConfig().getEntity().getHardDespawnRange(), 2);
+        if (!this.world.isRemote) {
+            return Math.pow(((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getHardDespawnRange(), 2);
         }
         return value;
     }
@@ -172,16 +172,16 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     // Note that this should inject twice.
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 1024.0D), expect = 2)
     private double getSoftDespawnRange(double value) {
-        if (!this.worldObj.isRemote) {
-            return Math.pow(((IMixinWorldServer) this.worldObj).getWorldConfig().getConfig().getEntity().getSoftDespawnRange(), 2);
+        if (!this.world.isRemote) {
+            return Math.pow(((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getSoftDespawnRange(), 2);
         }
         return value;
     }
 
     @ModifyConstant(method = "despawnEntity", constant = @Constant(intValue = 600))
     private int getMinimumLifetime(int value) {
-        if (!this.worldObj.isRemote) {
-            return ((IMixinWorldServer) this.worldObj).getWorldConfig().getConfig().getEntity().getMinimumLife() * 20;
+        if (!this.world.isRemote) {
+            return ((IMixinWorldServer) this.world).getWorldConfig().getConfig().getEntity().getMinimumLife() * 20;
         }
         return value;
     }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.monster.EntityElderGuardian;
 import net.minecraft.entity.monster.EntityGuardian;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.api.data.key.Keys;
@@ -46,17 +47,16 @@ import java.util.Optional;
 public abstract class MixinEntityGuardian extends MixinEntityMob implements Guardian {
 
     @Shadow @Final private static DataParameter<Integer> TARGET_ENTITY;
-    @Shadow public abstract boolean isElder();
-    @Shadow private void setTargetedEntity(int entityId) { }
+    @Shadow private void setTargetedEntity(int entityId) { } // setTargetedEntity
 
     @Override
     public ElderData getElderData() {
-        return new SpongeElderData(isElder());
+        return new SpongeElderData((Object) this instanceof EntityElderGuardian);
     }
 
     @Override
     public Value<Boolean> elder() {
-        return new SpongeValue<>(Keys.ELDER_GUARDIAN, false, this.isElder());
+        return new SpongeValue<>(Keys.ELDER_GUARDIAN, false, (Object) this instanceof EntityElderGuardian);
     }
 
     @Override
@@ -67,7 +67,7 @@ public abstract class MixinEntityGuardian extends MixinEntityMob implements Guar
 
     @Override
     public Optional<Living> getBeamTarget() {
-        return Optional.ofNullable((Living) this.worldObj.getEntityByID(this.dataManager.get(TARGET_ENTITY)));
+        return Optional.ofNullable((Living) this.world.getEntityByID(this.dataManager.get(TARGET_ENTITY)));
     }
 
     @Override

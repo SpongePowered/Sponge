@@ -150,8 +150,8 @@ public abstract class MixinWorldGenEndIsland extends WorldGenerator implements E
         double radius = this.initial.getFlooredAmount(rand);
 
         for (int y = 0; radius > 0.5F; --y) {
-            for (int x = MathHelper.floor_double(-radius); x <= MathHelper.ceiling_double_int(radius); ++x) {
-                for (int z = MathHelper.floor_double(-radius); z <= MathHelper.ceiling_double_int(radius); ++z) {
+            for (int x = MathHelper.floor(-radius); x <= MathHelper.ceil(radius); ++x) {
+                for (int z = MathHelper.floor(-radius); z <= MathHelper.ceil(radius); ++z) {
                     if (x * x + z * z <= (radius + 1.0F) * (radius + 1.0F)) {
                         // this.setBlockAndNotifyAdequately(worldIn,
                         // position.add(k, j, l),
@@ -171,7 +171,7 @@ public abstract class MixinWorldGenEndIsland extends WorldGenerator implements E
     private float func_185960_a(int p_185960_1_, int p_185960_2_, int p_185960_3_, int p_185960_4_) {
         float f = p_185960_1_ * 2 + p_185960_3_;
         float f1 = p_185960_2_ * 2 + p_185960_4_;
-        float f2 = 100.0F - MathHelper.sqrt_float(f * f + f1 * f1) * 8.0F;
+        float f2 = 100.0F - MathHelper.sqrt(f * f + f1 * f1) * 8.0F;
 
         if (f2 > 80.0F) {
             f2 = 80.0F;
@@ -190,7 +190,7 @@ public abstract class MixinWorldGenEndIsland extends WorldGenerator implements E
                     float f3 = (MathHelper.abs(k) * 3439.0F + MathHelper.abs(l) * 147.0F) % 13.0F + 9.0F;
                     f = p_185960_3_ - i * 2;
                     f1 = p_185960_4_ - j * 2;
-                    float f4 = 100.0F - MathHelper.sqrt_float(f * f + f1 * f1) * f3;
+                    float f4 = 100.0F - MathHelper.sqrt(f * f + f1 * f1) * f3;
 
                     if (f4 > 80.0F) {
                         f4 = 80.0F;

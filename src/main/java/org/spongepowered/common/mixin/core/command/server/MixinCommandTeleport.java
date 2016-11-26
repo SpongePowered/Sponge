@@ -69,7 +69,7 @@ public abstract class MixinCommandTeleport extends CommandBase {
         {
             Entity entity = getEntity(server, sender, args[0]);
 
-            if (entity.worldObj != null)
+            if (entity.world != null)
             {
                 // int i = 4096;
                 Vec3d vec3d = sender.getPositionVector();
@@ -148,7 +148,7 @@ public abstract class MixinCommandTeleport extends CommandBase {
         {
             float f2 = (float)MathHelper.wrapDegrees(p_189862_4_.getResult());
             float f3 = (float)MathHelper.wrapDegrees(p_189862_5_.getResult());
-            f3 = MathHelper.clamp_float(f3, -90.0F, 90.0F);
+            f3 = MathHelper.clamp(f3, -90.0F, 90.0F);
 
             // Sponge start
             double x = p_189862_1_.getResult();

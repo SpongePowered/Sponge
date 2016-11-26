@@ -112,7 +112,7 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         }
 
         final WorldType other = (WorldType) obj;
-        return this.getName().equals(other.getWorldTypeName()) && this.worldTypeId == other.getWorldTypeID();
+        return this.getName().equals(other.getName()) && this.worldTypeId == other.getWorldTypeID();
     }
 
     @Override

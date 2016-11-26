@@ -119,7 +119,7 @@ public class DyeableDataProcessor extends AbstractSingleDataProcessor<DyeColor, 
                 ((EntitySheep) dataHolder).setFleeceColor((EnumDyeColor) (Object) merged.type().get());
                 return DataTransactionResult.successReplaceResult(origin.type().asImmutable(), merged.type().asImmutable());
             } else if (dataHolder instanceof EntityWolf) {
-                ((EntityWolf) dataHolder).setCollarColor((EnumDyeColor) (Object) merged.type().get());
+                ((EntityWolf) dataHolder).setCollarColor(((EnumDyeColor) (Object) merged.type().get()));
                 return DataTransactionResult.successReplaceResult(origin.type().asImmutable(), merged.type().asImmutable());
             } else if (dataHolder instanceof ItemStack) {
                 if(((ItemStack) dataHolder).getItem().equals(Items.DYE)) {

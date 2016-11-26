@@ -25,11 +25,10 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.monster.EntityZombie;
-import net.minecraft.entity.monster.ZombieType;
+import net.minecraft.entity.monster.EntityZombieVillager;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.data.type.ZombieTypes;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
@@ -37,9 +36,11 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.entity.SpongeProfession;
 
 import java.util.Optional;
 
+// TODO - do we want to make this only apply to EntityZombieVillager?
 public class VillagerZombieProfessionValueProcessor extends AbstractSpongeValueProcessor<EntityZombie, Optional<Profession>,
         OptionalValue<Profession>> {
 
@@ -54,18 +55,19 @@ public class VillagerZombieProfessionValueProcessor extends AbstractSpongeValueP
 
     @Override
     protected boolean set(EntityZombie container, Optional<Profession> value) {
-        if (value.isPresent()) {
-            container.setZombieType(EntityUtil.toNative(ZombieTypes.VILLAGER, value.get()));
-        } else {
-            // Should we change to normal, or return false?
-            container.setZombieType(ZombieType.NORMAL);
+        if (value.isPresent() && container instanceof EntityZombieVillager) {
+            ((EntityZombieVillager) container).setProfession(((SpongeProfession) value.get()).type);
+            return true;
         }
-        return true;
+        return false;
     }
 
     @Override
     protected Optional<Optional<Profession>> getVal(EntityZombie container) {
-        return Optional.of(EntityUtil.profFromNative(container.getZombieType()));
+        if (container instanceof EntityZombieVillager) {
+            return Optional.of(Optional.of(EntityUtil.validateProfession(((EntityZombieVillager) container).getProfession())));
+        }
+        return Optional.empty();
     }
 
     @Override

@@ -110,7 +110,7 @@ public class PacketUtil {
                 packetIn.processPacket(netHandler);
             } else {
                 final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
-                final IMixinWorldServer world = (IMixinWorldServer) packetPlayer.worldObj;
+                final IMixinWorldServer world = (IMixinWorldServer) packetPlayer.world;
                 final CauseTracker causeTracker = world.getCauseTracker();
                 final IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
                 if (packetState == null) {
@@ -163,7 +163,7 @@ public class PacketUtil {
             CPacketPlayerDigging packet = (CPacketPlayerDigging) packetIn;
             ItemStack stack = playerMP.getHeldItemMainhand();
             Vector3d interactionPoint = VecHelper.toVector3d(packet.getPosition());
-            BlockSnapshot blockSnapshot = new Location<>((World) playerMP.worldObj, interactionPoint).createSnapshot();
+            BlockSnapshot blockSnapshot = new Location<>((World) playerMP.world, interactionPoint).createSnapshot();
             if(SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, stack, EnumHand.MAIN_HAND, Optional.of(interactionPoint), blockSnapshot).isCancelled()) {
                 BlockUtil.sendClientBlockChange(playerMP, packet.getPosition());
                 return true;
@@ -214,14 +214,14 @@ public class PacketUtil {
             lastTryBlockPacketTimeStamp = System.currentTimeMillis();
             SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
             Vector3d interactionPoint = VecHelper.toVector3d(packet.getPos());
-            BlockSnapshot blockSnapshot = new Location<>((World) playerMP.worldObj, interactionPoint).createSnapshot();
+            BlockSnapshot blockSnapshot = new Location<>((World) playerMP.world, interactionPoint).createSnapshot();
             boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand(), Optional.of(interactionPoint), blockSnapshot).isCancelled();
             lastTryBlockPacketItemResult = isCancelled;
             if(isCancelled) {
                 // update client
                 BlockPos pos = packet.getPos();
-                playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.worldObj, pos));
-                playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.worldObj, pos.offset(packet.getDirection())));
+                playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.world, pos));
+                playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.world, pos.offset(packet.getDirection())));
                 return true;
             }
         }

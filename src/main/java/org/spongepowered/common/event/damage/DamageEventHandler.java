@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.damage;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -44,7 +45,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.effect.potion.PotionEffect;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
@@ -70,7 +70,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -190,16 +189,16 @@ public class DamageEventHandler {
      */
     public static void acceptArmorModifier(EntityLivingBase entity, DamageSource damageSource, DamageModifier modifier, double damage) {
         Optional<DamageObject> property = modifier.getCause().first(DamageObject.class);
-        final net.minecraft.item.ItemStack[] inventory = entity instanceof EntityPlayer ? ((EntityPlayer) entity).inventory.armorInventory : entity.armorArray;
+        final Iterable<net.minecraft.item.ItemStack> inventory = entity.getArmorInventoryList();
         if (property.isPresent()) {
             damage = Math.abs(damage) * 25;
-            net.minecraft.item.ItemStack stack = inventory[property.get().slot];
+            net.minecraft.item.ItemStack stack = Iterables.get(inventory, property.get().slot);
+            if (stack == null) {
+                throw new IllegalStateException("Invalid slot position " + property.get().slot);
+            }
+
             int itemDamage = (int) (damage / 25D < 1 ? 1 : damage / 25D);
             stack.damageItem(itemDamage, entity);
-
-            if (stack.stackSize <= 0) {
-                inventory[property.get().slot] = null;
-            }
         }
     }
 
@@ -219,7 +218,7 @@ public class DamageEventHandler {
 
     public static Optional<Tuple<DamageModifier, Function<? super Double, Double>>> createResistanceModifier(EntityLivingBase entityLivingBase,
                                                                                                              DamageSource damageSource) {
-        if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(MobEffects.RESISTANCE) && damageSource != DamageSource.outOfWorld) {
+        if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(MobEffects.RESISTANCE) && damageSource != DamageSource.OUT_OF_WORLD) {
             PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(MobEffects.RESISTANCE));
             return Optional.of(new Tuple<>(DamageModifier.builder()
                                                .cause(Cause.of(NamedCause.of(DamageEntityEvent.RESISTANCE, effect)))
@@ -233,8 +232,8 @@ public class DamageEventHandler {
     private static double previousEnchantmentModifier = 0;
 
     public static Optional<List<Tuple<DamageModifier, Function<? super Double, Double>>>> createEnchantmentModifiers(EntityLivingBase entityLivingBase, DamageSource damageSource) {
-        net.minecraft.item.ItemStack[] inventory = entityLivingBase instanceof EntityPlayer ? ((EntityPlayer) entityLivingBase).inventory.armorInventory : entityLivingBase.armorArray;
-        if (EnchantmentHelper.getEnchantmentModifierDamage(Arrays.asList(inventory), damageSource) == 0) {
+        Iterable<net.minecraft.item.ItemStack> inventory = entityLivingBase.getArmorInventoryList();
+        if (EnchantmentHelper.getEnchantmentModifierDamage(Lists.newArrayList(entityLivingBase.getArmorInventoryList()), damageSource) == 0) {
             return Optional.empty();
         }
         List<Tuple<DamageModifier, Function<? super Double, Double>>> modifiers = new ArrayList<>();
@@ -330,18 +329,18 @@ public class DamageEventHandler {
 
 
     public static Location<World> findFirstMatchingBlock(Entity entity, AxisAlignedBB bb, Predicate<IBlockState> predicate) {
-        int i = MathHelper.floor_double(bb.minX);
-        int j = MathHelper.floor_double(bb.maxX + 1.0D);
-        int k = MathHelper.floor_double(bb.minY);
-        int l = MathHelper.floor_double(bb.maxY + 1.0D);
-        int i1 = MathHelper.floor_double(bb.minZ);
-        int j1 = MathHelper.floor_double(bb.maxZ + 1.0D);
+        int i = MathHelper.floor(bb.minX);
+        int j = MathHelper.floor(bb.maxX + 1.0D);
+        int k = MathHelper.floor(bb.minY);
+        int l = MathHelper.floor(bb.maxY + 1.0D);
+        int i1 = MathHelper.floor(bb.minZ);
+        int j1 = MathHelper.floor(bb.maxZ + 1.0D);
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
                     BlockPos blockPos = new BlockPos(k1, l1, i2);
-                    if (predicate.test(entity.worldObj.getBlockState(blockPos))) {
-                        return new Location<>((World) entity.worldObj, k1, l1, i2);
+                    if (predicate.test(entity.world.getBlockState(blockPos))) {
+                        return new Location<>((World) entity.world, k1, l1, i2);
                     }
                 }
             }
@@ -442,8 +441,8 @@ public class DamageEventHandler {
             return null;
         }
 
-        if (entity.worldObj instanceof IMixinWorldServer) {
-            IMixinWorldServer spongeWorld = (IMixinWorldServer) entity.worldObj;
+        if (entity.world instanceof IMixinWorldServer) {
+            IMixinWorldServer spongeWorld = (IMixinWorldServer) entity.world;
             final PhaseData peek = spongeWorld.getCauseTracker().getCurrentPhaseData();
             return peek.state.getPhase().createDestructionDamageSource(peek.state, peek.context, entity).orElse(null);
         }

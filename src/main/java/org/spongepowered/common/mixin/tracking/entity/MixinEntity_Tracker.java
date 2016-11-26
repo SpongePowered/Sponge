@@ -49,7 +49,7 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
 
     private SpongeProfileManager spongeProfileManager;
     private UserStorageService userStorageService;
-    @Shadow public net.minecraft.world.World worldObj;
+    @Shadow public net.minecraft.world.World world;
 
     @Override
     public void trackEntityUniqueId(String nbtKey, @Nullable UUID uuid) {

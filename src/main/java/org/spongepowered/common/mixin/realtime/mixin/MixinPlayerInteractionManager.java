@@ -37,12 +37,12 @@ import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
 public abstract class MixinPlayerInteractionManager {
 
     private static final String PLAYER_INTERACTION_BLOCK_DAMAGE_FIELD = "Lnet/minecraft/server/management/PlayerInteractionManager;curblockDamage:I";
-    @Shadow public World theWorld;
+    @Shadow public World world;
     @Shadow private int curblockDamage;
 
     @Redirect(method = "updateBlockRemoving", at = @At(value = "FIELD", target = PLAYER_INTERACTION_BLOCK_DAMAGE_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupDiggingTime(PlayerInteractionManager self, int modifier) {
-        int ticks = (int) ((IMixinMinecraftServer) this.theWorld.getMinecraftServer()).getRealTimeTicks();
+        int ticks = (int) ((IMixinMinecraftServer) this.world.getMinecraftServer()).getRealTimeTicks();
         this.curblockDamage += ticks;
     }
 

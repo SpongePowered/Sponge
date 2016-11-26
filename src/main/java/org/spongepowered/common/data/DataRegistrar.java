@@ -109,6 +109,7 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
+@SuppressWarnings("deprecation")
 public class DataRegistrar {
 
     @SuppressWarnings("unchecked")
