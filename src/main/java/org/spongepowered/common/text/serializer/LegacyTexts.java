@@ -150,8 +150,6 @@ public final class LegacyTexts {
             case OBFUSCATED:
                 builder.style(TextStyles.OBFUSCATED);
                 break;
-            case RESET:
-                return true;
             default:
                 if (builder.getColor() == TextColors.NONE) {
                     builder.color(SpongeTextColor.of(formatting));
@@ -258,8 +256,6 @@ public final class LegacyTexts {
             case OBFUSCATED:
                 style.obfuscated = true;
                 break;
-            case RESET:
-                return true;
             default:
                 if (style.color == null) {
                     style.color = formatting;
