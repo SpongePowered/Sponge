@@ -853,7 +853,7 @@ public final class EntityUtil {
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
 
-        if (item.isEmpty()) {
+        if (!item.isEmpty()) {
             if (CauseTracker.ENABLED && !currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 if (currentState.tracksEntitySpecificDrops()) {
                     final Multimap<UUID, ItemDropData> multimap = phaseContext.getCapturedEntityDropSupplier().get();
