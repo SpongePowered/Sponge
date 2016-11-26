@@ -55,7 +55,7 @@ public class BookFaker {
         item.offer(Keys.BOOK_PAGES, bookView.getPages());
 
         InventoryPlayer inventory = mcPlayer.inventory;
-        int bookSlot = inventory.allInventories.size() + inventory.currentItem;
+        int bookSlot = inventory.mainInventory.size() + inventory.currentItem;
         receiver.sendPacket(new SPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
 
         // Next we tell the client to open the Book GUI
