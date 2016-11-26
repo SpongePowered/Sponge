@@ -28,10 +28,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -39,9 +39,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.entity.projectile.IMixinEntityArrow;
@@ -54,13 +52,20 @@ import javax.annotation.Nullable;
 @Mixin(EntityArrow.class)
 public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMixinEntityArrow {
 
-    private static final String RTR_CTOR_ENTITY = "net/minecraft/util/math/RayTraceResult.entityHit:Lnet/minecraft/entity/Entity;";
     private EntityArrow mcEntity = (EntityArrow) (Object) this;
 
     @Shadow public Entity shootingEntity;
     @Shadow private int ticksInAir;
     @Shadow public double damage;
     @Shadow public boolean inGround;
+    @Shadow public int arrowShake;
+    @Shadow private int xTile;
+    @Shadow private int yTile;
+    @Shadow private int zTile;
+    @Shadow private Block inTile;
+    @Shadow private int inData;
+
+    @Shadow public abstract void setIsCritical(boolean critical);
 
     // Not all ProjectileSources are entities (e.g. BlockProjectileSource).
     // This field is used to store a ProjectileSource that isn't an entity.
@@ -105,26 +110,10 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
     }
 
     /**
-     * This is the injection used in dev.
-     */
-    @Inject(method = "onUpdate", at = @At(value = "FIELD", target = RTR_CTOR_ENTITY, ordinal = 2, shift = At.Shift.AFTER),
-            locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, require = 0)
-    private void onArrowImpact(CallbackInfo ci, BlockPos pos, IBlockState state, Block block, Vec3d vecA, Vec3d vecB, RayTraceResult hitResult, Entity entity) {
-        this.arrowImpact(ci, hitResult);
-    }
-
-    /**
-     * This is the injection used in production.
-     */
-    @Surrogate
-    private void onArrowImpact(CallbackInfo ci, Vec3d vecA, Vec3d vecB, RayTraceResult hitResult) {
-        this.arrowImpact(ci, hitResult);
-    }
-
-    /**
      * Collide impact event post for plugins to cancel impact.
      */
-    private void arrowImpact(CallbackInfo ci, RayTraceResult hitResult) {
+    @Inject(method = "onHit", at = @At("HEAD"), cancellable = true)
+    public void onProjectileHit(RayTraceResult hitResult, CallbackInfo ci) {
         if (!this.worldObj.isRemote) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent(this.mcEntity, getShooter(), hitResult)) {
                 // deflect and drop to ground
@@ -134,6 +123,20 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMi
                 this.rotationYaw += 180.0F;
                 this.mcEntity.prevRotationYaw += 180.0F;
                 this.ticksInAir = 0;
+                this.playSound(SoundEvents.ENTITY_ARROW_HIT, 1.0F, 1.2F / (this.rand.nextFloat() * 0.2F + 0.9F));
+                // if block was hit, change state to reflect it hit block to avoid onHit logic repeating indefinitely
+                if (hitResult.entityHit == null) {
+                    BlockPos blockpos = hitResult.getBlockPos();
+                    this.xTile = blockpos.getX();
+                    this.yTile = blockpos.getY();
+                    this.zTile = blockpos.getZ();
+                    IBlockState iblockstate = this.worldObj.getBlockState(blockpos);
+                    this.inTile = iblockstate.getBlock();
+                    this.inData = this.inTile.getMetaFromState(iblockstate);
+                    this.inGround = true;
+                    this.arrowShake = 7;
+                    this.setIsCritical(false);
+                }
                 ci.cancel();
             }
         }
