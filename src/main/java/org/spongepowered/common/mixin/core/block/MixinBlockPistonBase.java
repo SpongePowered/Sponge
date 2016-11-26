@@ -30,7 +30,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -44,15 +43,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeExtendedData;
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.MutableWrapper;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -75,26 +73,16 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
      * @param direction The direction to move in
      * @param extending Whether the piston is in an extended state
      */
-    @Inject(method = "doMove", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "doMove", at = @At("HEAD"))
     public void onDoMoveHead(World worldIn, BlockPos pos, EnumFacing direction, boolean extending, CallbackInfoReturnable<Boolean> ci) {
         if (!worldIn.isRemote && CauseTracker.ENABLED) {
             final CauseTracker causeTracker = ((IMixinWorldServer) worldIn).getCauseTracker();
-            final PhaseData data = causeTracker.getCurrentPhaseData();
-            BlockSnapshot source = data.context.getSource(BlockSnapshot.class).orElse(null);
-            BlockPos targetPos = pos.offset(direction);
-            final IBlockState blockstate = worldIn.getBlockState(pos);
-            if (source == null) {
-                source = ((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(blockstate, blockstate, pos, 2);
-            }
-            String namedCause = extending ? NamedCause.PISTON_EXTEND : NamedCause.PISTON_RETRACT;
-            if (!worldIn.isRemote && SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, targetPos, NamedCause.of(namedCause, worldIn), source).isCancelled()) {
-                ci.setReturnValue(false);
-                return;
-            }
 
+            final IBlockState currentState = worldIn.getBlockState(pos);
+            final SpongeBlockSnapshot snapshot = ((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(currentState, currentState, pos, 0);
             final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunkFromBlockCoords(pos);
             final PhaseContext phaseContext = PhaseContext.start()
-                    .add(NamedCause.source(source))
+                    .add(NamedCause.source(snapshot))
                     .add(NamedCause.of(InternalNamedCauses.Piston.POSITION, pos))
                     .add(NamedCause.of(InternalNamedCauses.Piston.DIRECTION, direction))
                     .add(NamedCause.of(InternalNamedCauses.Piston.DUMMY_CALLBACK, new MutableWrapper<CallbackInfoReturnable<Boolean>>(null)))
