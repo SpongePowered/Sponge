@@ -870,6 +870,7 @@ public final class EntityUtil {
         original.add(snapshot);
         final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(entity)),
                 ImmutableList.of(snapshot), original);
+        SpongeImpl.postEvent(dropEvent);
         if (dropEvent.isCancelled()) {
             return null;
         }
@@ -944,6 +945,7 @@ public final class EntityUtil {
         original.add(snapshot);
         final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(player)),
                 ImmutableList.of(snapshot), original);
+        SpongeImpl.postEvent(dropEvent);
         if (dropEvent.isCancelled()) {
             return null;
         }
