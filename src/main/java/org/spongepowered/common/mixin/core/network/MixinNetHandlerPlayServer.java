@@ -330,7 +330,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             boolean clickedOutside = packetIn.getSlotId() < 0;
             ItemStack itemstack = packetIn.getStack();
 
-            if (itemstack != null && itemstack.hasTagCompound() && itemstack.getTagCompound().hasKey("BlockEntityTag", 10)) {
+            if (!itemstack.isEmpty() && itemstack.hasTagCompound() && itemstack.getTagCompound().hasKey("BlockEntityTag", 10)) {
                 NBTTagCompound nbttagcompound = itemstack.getTagCompound().getCompoundTag("BlockEntityTag");
 
                 if (nbttagcompound.hasKey("x") && nbttagcompound.hasKey("y") && nbttagcompound.hasKey("z")) {
@@ -349,11 +349,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             }
 
             boolean clickedHotbar = packetIn.getSlotId() >= 1 && packetIn.getSlotId() <= 45;
-            boolean itemValidCheck = itemstack == null || itemstack.getItem() != null;
-            boolean itemValidCheck2 = itemstack == null || itemstack.getMetadata() >= 0 && itemstack.getCount() <= 64 && itemstack.getCount() > 0;
+            boolean itemValidCheck = itemstack.isEmpty() || itemstack.getMetadata() >= 0 && itemstack.getCount() <= 64 && !itemstack.isEmpty();
 
             // Sponge start - handle CreativeInventoryEvent
-            if (itemValidCheck && itemValidCheck2) {
+            if (itemValidCheck) {
                 if (!ignoresCreative) {
                     ClickInventoryEvent.Creative clickEvent = SpongeCommonEventFactory.callCreativeClickInventoryEvent(this.playerEntity, packetIn);
                     if (clickEvent.isCancelled()) {
@@ -362,15 +361,15 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                             this.playerEntity.connection.sendPacket(
                                     new SPacketSetSlot(this.playerEntity.inventoryContainer.windowId, packetIn.getSlotId(),
                                             this.playerEntity.inventoryContainer.getSlot(packetIn.getSlotId()).getStack()));
-                            this.playerEntity.connection.sendPacket(new SPacketSetSlot(-1, -1, null));
+                            this.playerEntity.connection.sendPacket(new SPacketSetSlot(-1, -1, ItemStack.EMPTY));
                         }
                         return;
                     }
                 }
 
                 if (clickedHotbar) {
-                    if (itemstack == null) {
-                        this.playerEntity.inventoryContainer.putStackInSlot(packetIn.getSlotId(), null);
+                    if (itemstack.isEmpty()) {
+                        this.playerEntity.inventoryContainer.putStackInSlot(packetIn.getSlotId(), ItemStack.EMPTY);
                     } else {
                         this.playerEntity.inventoryContainer.putStackInSlot(packetIn.getSlotId(), itemstack);
                     }
