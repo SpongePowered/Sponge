@@ -31,7 +31,6 @@ import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.hanging.Hanging;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
@@ -41,10 +40,10 @@ import org.spongepowered.common.interfaces.entity.IMixinEntityHanging;
 
 import java.util.Optional;
 
-public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcessor<Hanging, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
+public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcessor<IMixinEntityHanging, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
 
     public HangingDataProcessor() {
-        super(Keys.DIRECTION, Hanging.class);
+        super(Keys.DIRECTION, IMixinEntityHanging.class);
     }
 
     @Override
@@ -53,14 +52,14 @@ public class HangingDataProcessor extends AbstractSingleDataSingleTargetProcesso
     }
 
     @Override
-    protected boolean set(Hanging dataHolder, Direction value) {
-        ((IMixinEntityHanging) dataHolder).setDirection(value);
+    protected boolean set(IMixinEntityHanging dataHolder, Direction value) {
+        dataHolder.setDirection(value);
         return true;
     }
 
     @Override
-    protected Optional<Direction> getVal(Hanging dataHolder) {
-        return Optional.of(((IMixinEntityHanging) dataHolder).getDirection());
+    protected Optional<Direction> getVal(IMixinEntityHanging dataHolder) {
+        return Optional.of(dataHolder.getDirection());
     }
 
     @Override
