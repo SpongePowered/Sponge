@@ -143,7 +143,7 @@ public class PacketUtil {
                 ((IMixinEntityPlayerMP) packetPlayer).setPacketItem(null);
                 if (packetIn instanceof CPacketClickWindow) {
                     CPacketClickWindow packet = (CPacketClickWindow) packetIn;
-                    SpongeCommonEventFactory.lastInventoryActionNumber = packet.getActionNumber();
+                    SpongeCommonEventFactory.lastClickInventoryActionNumber = packet.getActionNumber();
                 }
             }
         } else { // client

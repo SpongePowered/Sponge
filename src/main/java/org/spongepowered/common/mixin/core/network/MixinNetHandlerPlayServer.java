@@ -576,7 +576,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             	return result;
             }
             // Validate last packet came from same source otherwise ignore
-            if (packet.getActionNumber() != (SpongeCommonEventFactory.lastInventoryActionNumber + 1)) {
+            if (packet.getActionNumber() != (SpongeCommonEventFactory.lastClickInventoryActionNumber + 1)) {
             	return result;
             }
 
