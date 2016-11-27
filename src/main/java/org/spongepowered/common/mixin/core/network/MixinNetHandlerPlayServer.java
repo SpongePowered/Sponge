@@ -41,6 +41,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketThreadUtil;
+import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketUpdateSign;
@@ -568,16 +569,22 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         boolean result = ItemStack.areItemsEqual(stackA, stackB);
         // If the client sends an invalid inventory packet, detect changes only then restore and notify client.
         if (!result) {
+            final CauseTracker causeTracker = ((IMixinWorldServer) this.playerEntity.world).getCauseTracker();
+            ItemStackSnapshot cursor = causeTracker.getCurrentContext().firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class).orElse(null);
+            CPacketClickWindow packet = causeTracker.getCurrentContext().firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, CPacketClickWindow.class).orElse(null);
+            if (cursor == null || packet == null) {
+            	return result;
+            }
+            // Validate last packet came from same source otherwise ignore
+            if (packet.getActionNumber() != (SpongeCommonEventFactory.lastInventoryActionNumber + 1)) {
+            	return result;
+            }
+
             IMixinContainer mixinContainer =(IMixinContainer) this.playerEntity.openContainer;
             mixinContainer.detectAndSendChanges(true);
             PacketPhaseUtil.handleSlotRestore(this.playerEntity, Lists.newArrayList(mixinContainer.getCapturedTransactions()), true, false);
             // restore cursor
-            final CauseTracker causeTracker = ((IMixinWorldServer) this.playerEntity.world).getCauseTracker();
-            Optional<ItemStackSnapshot> cursorOpt = causeTracker.getCurrentContext().firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class);
-            if (cursorOpt.isPresent()) {
-                ItemStackSnapshot cursor = cursorOpt.get();
-                this.playerEntity.inventory.setItemStack((ItemStack) cursor.createStack());
-            }
+            this.playerEntity.inventory.setItemStack((ItemStack) cursor.createStack());
             mixinContainer.getCapturedTransactions().clear();
             mixinContainer.setCaptureInventory(false);
         }

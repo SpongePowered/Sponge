@@ -31,6 +31,7 @@ import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketAnimation;
+import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.client.CPacketClientStatus;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
@@ -140,6 +141,10 @@ public class PacketUtil {
                 }
                 causeTracker.completePhase();
                 ((IMixinEntityPlayerMP) packetPlayer).setPacketItem(null);
+                if (packetIn instanceof CPacketClickWindow) {
+                    CPacketClickWindow packet = (CPacketClickWindow) packetIn;
+                    SpongeCommonEventFactory.lastInventoryActionNumber = packet.getActionNumber();
+                }
             }
         } else { // client
             packetIn.processPacket(netHandler);
