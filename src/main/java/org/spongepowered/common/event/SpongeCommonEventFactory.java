@@ -129,6 +129,8 @@ public class SpongeCommonEventFactory {
     public static boolean playerInteractItemChanged = false;
     // Set if any of the events fired during interaction with a block (open inventory or interact block) were cancelled
     public static boolean interactBlockEventCancelled = false;
+    // Used to validate client packets in MixinNetHandlerPlayServer#onProcessClickWindowItemValidate
+    public static int lastClickInventoryActionNumber = 0;
 
     // For animation packet
     public static int lastAnimationPacketTick = 0;
