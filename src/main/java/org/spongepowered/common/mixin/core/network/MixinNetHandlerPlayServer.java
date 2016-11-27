@@ -663,7 +663,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
 
                     if (SpongeCommonEventFactory.callInteractEntityEventPrimary(this.playerEntity, entity, packetIn.getHand(), packetIn.getHitVec()).isCancelled()) {
-                        ((IMixinEntityPlayerMP) this.playerEntity).restorePacketItem();
+                        ((IMixinEntityPlayerMP) this.playerEntity).restorePacketItem(hand);
                         return;
                     }
 

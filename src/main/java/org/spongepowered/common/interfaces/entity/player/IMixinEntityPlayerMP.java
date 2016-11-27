@@ -25,6 +25,8 @@
 package org.spongepowered.common.interfaces.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -53,6 +55,7 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
 
     void refreshXpHealthAndFood();
 
-    // todo
-    void restorePacketItem();
+    void restorePacketItem(EnumHand hand);
+
+    void setPacketItem(ItemStack itemstack);
 }
