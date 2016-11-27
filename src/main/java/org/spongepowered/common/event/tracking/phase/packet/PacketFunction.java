@@ -82,6 +82,7 @@ import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -395,7 +396,8 @@ public interface PacketFunction {
                         SpongeImpl.postEvent(dropItemEvent);
                         if (!dropItemEvent.isCancelled()) {
                             processSpawnedEntities(player, causeTracker, dropItemEvent);
-
+                        } else {
+                            ((IMixinEntityPlayerMP) player).restorePacketItem(EnumHand.MAIN_HAND);
                         }
                     });
             context.getCapturedEntityDropSupplier()
@@ -425,7 +427,6 @@ public interface PacketFunction {
                         SpongeImpl.postEvent(dropItemEvent);
                         if (!dropItemEvent.isCancelled()) {
                             processSpawnedEntities(player, causeTracker, dropItemEvent);
-
                         }
                     });
 

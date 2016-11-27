@@ -40,6 +40,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -48,6 +49,7 @@ import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
 import net.minecraft.network.play.server.SPacketCustomSound;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.scoreboard.IScoreCriteria;
@@ -61,6 +63,7 @@ import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.stats.StatisticsManagerServer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -174,6 +177,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public boolean playerConqueredTheEnd;
     @Shadow private float lastHealth;
     @Shadow private int lastFoodLevel;
+    @Shadow public boolean isChangingQuantityOnly;
 
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
@@ -197,6 +201,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public int newTotalExperience = 0;
     public boolean keepsLevel = false;
     private boolean sleepingIgnored;
+    // Used to restore original item received in a packet after canceling an event
+    private ItemStack packetItem;
 
     private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
@@ -462,9 +468,23 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void restorePacketItem() {
-        // TODO - apparently this was a thing in 1.8.9, not sure how to do it in 1.10
+    public void setPacketItem(ItemStack itemstack) {
+        this.packetItem = itemstack;
+    }
 
+    @Override
+    public void restorePacketItem(EnumHand hand) {
+        if (this.packetItem == null) {
+            return;
+        }
+
+        this.isChangingQuantityOnly = true;
+        this.setHeldItem(hand, this.packetItem);
+        Slot slot = this.openContainer.getSlotFromInventory(this.inventory, this.inventory.currentItem);
+        this.openContainer.detectAndSendChanges();
+        this.isChangingQuantityOnly = false;
+        // force client itemstack update if place event was cancelled
+        this.connection.sendPacket(new SPacketSetSlot(this.openContainer.windowId, slot.slotNumber, this.packetItem));
     }
 
     @Override
