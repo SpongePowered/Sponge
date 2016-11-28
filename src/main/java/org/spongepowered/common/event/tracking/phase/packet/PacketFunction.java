@@ -885,7 +885,7 @@ public interface PacketFunction {
                 .orElseThrow(TrackingUtil.throwWithContext("Expected a cursor item stack, but had nothing!", context));
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         final Cause cause = Cause.source(player).build();
-        InteractInventoryEvent.Close event = SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, container, player, lastCursor, newCursor);
+        InteractInventoryEvent.Close event = SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, container, player, lastCursor, newCursor, true);
         if (!event.isCancelled()) {
             // Non-merged items
             context.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {

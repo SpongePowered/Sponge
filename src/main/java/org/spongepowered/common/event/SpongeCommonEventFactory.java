@@ -40,6 +40,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
+import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -108,8 +109,8 @@ import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -630,28 +631,34 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractInventoryEvent.Close callInteractInventoryCloseEvent(Cause cause, Container container, EntityPlayerMP player, ItemStackSnapshot lastCursor, ItemStackSnapshot newCursor) {
+    public static InteractInventoryEvent.Close callInteractInventoryCloseEvent(Cause cause, Container container, EntityPlayerMP player, ItemStackSnapshot lastCursor, ItemStackSnapshot newCursor, boolean clientSource) {
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-        final InteractInventoryEvent.Close
-                event =
-                SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction, ContainerUtil.fromNative(container));
+        final InteractInventoryEvent.Close event
+                = SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction, ContainerUtil.fromNative(container));
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
-            if (container.getSlot(0) != null) {
-                player.openContainer = container;
-                final Slot slot = container.getSlot(0);
-                final String guiId;
-                final IInventory slotInventory = slot.inventory;
-                if (slotInventory instanceof IInteractionObject) {
-                    guiId = ((IInteractionObject) slotInventory).getGuiID();
-                } else {
-                    guiId = "unknown";
-                }
-                slotInventory.openInventory(player);
-                player.connection.sendPacket(new SPacketOpenWindow(container.windowId, guiId, slotInventory
+            if (clientSource && container.getSlot(0) != null) {
+                if (!(container instanceof ContainerPlayer)) {
+                    // Inventory closed by client, reopen window and send container
+                    player.openContainer = container;
+                    final String guiId;
+                    final Slot slot = container.getSlot(0);
+                    final IInventory slotInventory = slot.inventory;
+                    if (slotInventory instanceof IInteractionObject) {
+                        guiId = ((IInteractionObject) slotInventory).getGuiID();
+                    } else {
+                        guiId = "minecraft:container"; // expected fallback for unknown types
+                    }
+                    slotInventory.openInventory(player);
+                    player.connection.sendPacket(new SPacketOpenWindow(container.windowId, guiId, slotInventory
                         .getDisplayName(), slotInventory.getSizeInventory()));
-                // resync data to client
-                player.sendContainerToPlayer(container);
+                    // resync data to client
+                    player.sendContainerToPlayer(container);
+                } else {
+                    // TODO: Maybe print a warning or throw an exception here? The player gui cannot be opened from the
+                    // server so allowing this event to be cancellable when the GUI has been closed already would result
+                    // in opening the wrong GUI window.
+                }
             }
         } else {
             IMixinContainer mixinContainer = (IMixinContainer) player.openContainer;
@@ -661,7 +668,11 @@ public class SpongeCommonEventFactory {
             if (event.getCursorTransaction().getCustom().isPresent()) {
                 handleCustomCursor(player, event.getCursorTransaction().getFinal());
             }
+            if (!clientSource) {
+                player.closeScreen();
+            }
         }
+
         return event;
     }
 
