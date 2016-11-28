@@ -150,7 +150,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.BookFaker;
-import org.spongepowered.common.util.LanguageUtil;
+import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
@@ -355,7 +355,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Locale getLocale() {
-        return LanguageUtil.LOCALE_CACHE.getUnchecked(this.language);
+        return LocaleCache.getLocale(this.language);
     }
 
     @Override

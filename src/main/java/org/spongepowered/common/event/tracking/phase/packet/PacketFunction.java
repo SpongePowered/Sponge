@@ -44,7 +44,6 @@ import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServerMulti;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -90,7 +89,7 @@ import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
-import org.spongepowered.common.util.LanguageUtil;
+import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.SkinUtil;
 import org.spongepowered.common.util.VecHelper;
 
@@ -910,7 +909,7 @@ public interface PacketFunction {
 
         PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Cause.of(NamedCause.source(player)),
                 (ChatVisibility) (Object) settings.getChatVisibility(), SkinUtil.fromFlags(settings.getModelPartFlags()),
-                LanguageUtil.LOCALE_CACHE.getUnchecked(settings.getLang()), (Player) player, settings.isColorsEnabled(), settings.view);
+                LocaleCache.getLocale(settings.getLang()), (Player) player, settings.isColorsEnabled(), settings.view);
         SpongeImpl.postEvent(event);
     });
     PacketFunction CLIENT_STATUS = ((packet, state, player, context) -> {

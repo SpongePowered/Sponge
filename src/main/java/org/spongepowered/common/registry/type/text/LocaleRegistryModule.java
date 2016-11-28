@@ -26,37 +26,21 @@ package org.spongepowered.common.registry.type.text;
 
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.text.translation.locale.Locales;
-import org.spongepowered.common.util.LanguageUtil;
+import org.spongepowered.common.util.LocaleCache;
 
 import java.lang.reflect.Field;
 import java.util.Locale;
 
 public class LocaleRegistryModule implements RegistryModule {
 
-    // TODO: Cleanup this mess
-
     @Override
     public void registerDefaults() {
-        Field[] locales = Locales.class.getFields();
-        for (Field field : locales) {
-            int pos = field.getName().indexOf('_');
-            if (pos < 0) {
-                continue;
-            }
-
-            char[] c = field.getName().toCharArray();
-            for (int i = 0; i < pos; i++) {
-                c[i] = Character.toLowerCase(c[i]);
-            }
-
-            String code = new String(c);
+        for (final Field field : Locales.class.getFields()) {
             try {
-                LanguageUtil.LOCALE_CACHE.put(code, (Locale) field.get(null));
-                LanguageUtil.LOCALE_CACHE.put(code.toLowerCase(), (Locale) field.get(null));
+                LocaleCache.preload((Locale) field.get(null));
             } catch (IllegalAccessException ignored) {
             }
         }
-
     }
 
 }

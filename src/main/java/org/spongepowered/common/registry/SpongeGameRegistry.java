@@ -69,7 +69,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.CatalogTypeTypeSerializer;
 import org.spongepowered.common.data.DataRegistrar;
 import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.network.status.SpongeFavicon;
@@ -80,7 +79,7 @@ import org.spongepowered.common.registry.util.RegistryModuleLoader;
 import org.spongepowered.common.text.selector.SpongeSelectorFactory;
 import org.spongepowered.common.text.serializer.SpongeTextSerializerFactory;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.common.util.LanguageUtil;
+import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.graph.DirectedGraph;
 import org.spongepowered.common.util.graph.TopologicalOrder;
 import org.spongepowered.common.world.extent.SpongeExtentBufferFactory;
@@ -415,7 +414,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Locale getLocale(String locale) {
-        return LanguageUtil.LOCALE_CACHE.getUnchecked(locale);
+        return LocaleCache.getLocale(locale);
     }
 
     private void registerModulePhase() {
