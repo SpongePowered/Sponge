@@ -38,8 +38,6 @@ import org.spongepowered.api.world.Location;
 
 public final class VecHelper {
 
-    public static final Vec3i VEC3_ORIGIN = new Vec3i(0, 0, 0);
-
     // === Flow Vector3d --> BlockPos ===
 
     public static BlockPos toBlockPos(Vector3d vector) {
@@ -100,7 +98,7 @@ public final class VecHelper {
 
     // === Flow Vector3i --> MC ChunkCoordIntPair ===
 
-    public static ChunkPos toChunkCoordIntPair(Vector3i vector) {
+    public static ChunkPos toChunkPos(Vector3i vector) {
         return new ChunkPos(vector.getX(), vector.getZ());
     }
 

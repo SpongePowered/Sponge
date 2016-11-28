@@ -27,6 +27,7 @@ package org.spongepowered.common.command;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.command.ICommandSender;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.world.Locatable;
@@ -118,7 +119,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
         if (sender instanceof WrapperICommandSender) {
             return ((WrapperICommandSender) sender).source;
         }
-        if (sender.getCommandSenderEntity() != null || !VecHelper.VEC3_ORIGIN.equals(sender.getPositionVector())) {
+        if (sender.getCommandSenderEntity() != null || !Vec3d.ZERO.equals(sender.getPositionVector())) {
             return new Located(sender);
         }
         return new WrapperCommandSource(sender);
