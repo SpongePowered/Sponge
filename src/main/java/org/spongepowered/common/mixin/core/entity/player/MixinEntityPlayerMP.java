@@ -501,7 +501,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public boolean closeInventory(Cause cause) throws IllegalArgumentException {
         ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
-        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, this.openContainer, this$, cursor, cursor).isCancelled();
+        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, this.openContainer, this.this$, cursor, cursor, false).isCancelled();
     }
 
     @Override
