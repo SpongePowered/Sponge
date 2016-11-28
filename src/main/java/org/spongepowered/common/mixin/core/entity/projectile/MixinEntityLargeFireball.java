@@ -100,7 +100,8 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
                 .sourceExplosive(this)
                 .radius(strength)
                 .canCauseFire(flaming && griefer)
-                .shouldPlaySmoke(smoking && griefer))
+                .shouldPlaySmoke(smoking && griefer)
+                .shouldBreakBlocks(strength > 0 && griefer))
                 .orElse(null);
     }
 
