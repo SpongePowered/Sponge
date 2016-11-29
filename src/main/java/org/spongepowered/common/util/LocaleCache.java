@@ -24,45 +24,45 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.LocaleUtils;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Locale;
+import java.util.Map;
+import java.util.function.Function;
 
 @NonnullByDefault
 public final class LocaleCache {
 
-    private static final LoadingCache<String, Locale> LOCALE_CACHE = CacheBuilder.newBuilder()
-        .build(new CacheLoader<String, Locale>() {
-            @Override
-            public Locale load(final String key) throws Exception {
+    private static final Map<String, Locale> LOCALE_CACHE = Maps.newHashMap();
+    private static final Function<String, Locale> LOCALE_FUNCTION = new Function<String, Locale>() {
+        @Override
+        public Locale apply(String key) {
+            try {
+                return LocaleUtils.toLocale(key);
+            } catch (final IllegalArgumentException ignored) {
+                // Ignore the first exception and try again, this time using a "fixed" key.
+                final String fixedKey = this.fixLocaleKey(key);
                 try {
-                    return LocaleUtils.toLocale(key);
-                } catch (final IllegalArgumentException ignored) {
-                    // Ignore the first exception and try again, this time using a "fixed" key.
-                    final String fixedKey = this.fixLocaleKey(key);
-                    try {
-                        return LocaleUtils.toLocale(fixedKey);
-                    } catch (final IllegalArgumentException e) {
-                        SpongeImpl.getLogger().error("Could not transform '{}' or '{}' into a Locale", key, fixedKey);
-                        throw e;
-                    }
+                    return LocaleUtils.toLocale(fixedKey);
+                } catch (final IllegalArgumentException e) {
+                    SpongeImpl.getLogger().error("Could not transform '{}' or '{}' into a Locale", key, fixedKey);
+                    throw e;
                 }
             }
+        }
 
-            private String fixLocaleKey(final String key) {
-                final String[] parts = key.split("_");
-                if (parts.length == 2) {
-                    return parts[0] + '_' + parts[1].toUpperCase();
-                } else {
-                    return key;
-                }
+        private String fixLocaleKey(final String key) {
+            final String[] parts = key.split("_");
+            if (parts.length == 2) {
+                return parts[0] + '_' + parts[1].toUpperCase();
+            } else {
+                return key;
             }
-        });
+        }
+    };
 
     private LocaleCache() {
     }
@@ -74,7 +74,7 @@ public final class LocaleCache {
      * @return The locale
      */
     public static Locale getLocale(final String tag) {
-        return LOCALE_CACHE.getUnchecked(tag);
+        return LOCALE_CACHE.computeIfAbsent(tag, LOCALE_FUNCTION);
     }
 
     /**
