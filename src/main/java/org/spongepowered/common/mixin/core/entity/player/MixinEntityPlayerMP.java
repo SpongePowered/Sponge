@@ -166,6 +166,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayerMP.class)
@@ -184,7 +185,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private int lastFoodLevel;
     @Shadow public boolean isChangingQuantityOnly;
 
-    @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
+    @Shadow public abstract Entity getSpectatingEntity();
+    @Shadow public abstract void setSpectatingEntity(Entity entity);
     @Shadow public abstract void sendPlayerAbilities();
     @Shadow @Override public abstract void takeStat(StatBase stat);
     @Shadow public abstract StatisticsManagerServer getStatFile();
@@ -860,4 +862,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             mixinContainer.getCapturedTransactions().clear();
         }
     }
+
+    @Override
+    public Optional<org.spongepowered.api.entity.Entity> getSpectatorTarget() {
+        // For the API, return empty if we're spectating ourself.
+        @Nonnull final Entity entity = this.getSpectatingEntity();
+        return entity == (Object) this ? Optional.empty() : Optional.of((org.spongepowered.api.entity.Entity) entity);
+    }
+
+    @Override
+    public void setSpectatorTarget(@Nullable org.spongepowered.api.entity.Entity entity) {
+        this.setSpectatingEntity((Entity) entity);
+    }
+
 }
