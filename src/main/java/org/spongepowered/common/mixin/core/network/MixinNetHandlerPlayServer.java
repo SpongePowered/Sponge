@@ -33,6 +33,7 @@ import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -47,6 +48,7 @@ import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
+import net.minecraft.network.play.server.SPacketConfirmTransaction;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.network.play.server.SPacketSetSlot;
@@ -78,7 +80,6 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
@@ -103,7 +104,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
@@ -115,6 +115,7 @@ import org.spongepowered.common.world.WorldManager;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -565,31 +566,82 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         return item;
     }
 
-    @Redirect(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;areItemStacksEqual(Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)Z"))
-    public boolean onProcessClickWindowItemValidate(ItemStack stackA, ItemStack stackB) {
-        boolean result = ItemStack.areItemsEqual(stackA, stackB);
-        // If the client sends an invalid inventory packet, detect changes only then restore and notify client.
-        if (!result) {
-            final CauseTracker causeTracker = ((IMixinWorldServer) this.playerEntity.worldObj).getCauseTracker();
-            ItemStackSnapshot cursor = causeTracker.getCurrentContext().firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class).orElse(null);
-            CPacketClickWindow packet = causeTracker.getCurrentContext().firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, CPacketClickWindow.class).orElse(null);
-            if (cursor == null || packet == null) {
-            	return result;
-            }
-            // Validate last packet came from same source otherwise ignore
-            if (packet.getActionNumber() != (SpongeCommonEventFactory.lastClickInventoryActionNumber+ 1)) {
-            	return result;
-            }
+    /**
+     * @author blood - April 5th, 2016
+     *
+     * @reason Due to all the changes we now do for this packet, it is much easier
+     * to read it all with an overwrite. Information detailing on why each change
+     * was made can be found in comments below.
+     *
+     * @param packetIn The entity use packet
+     */
+    @Overwrite
+    public void processClickWindow(CPacketClickWindow packetIn)
+    {
+        PacketThreadUtil.checkThreadAndEnqueue(packetIn, (NetHandlerPlayServer) (Object) this, this.playerEntity.getServerWorld());
 
-            IMixinContainer mixinContainer =(IMixinContainer) this.playerEntity.openContainer;
-            mixinContainer.detectAndSendChanges(true);
-            PacketPhaseUtil.handleSlotRestore(this.playerEntity, Lists.newArrayList(mixinContainer.getCapturedTransactions()), true, false);
-            // restore cursor
-            this.playerEntity.inventory.setItemStack((ItemStack) cursor.createStack());
-            mixinContainer.getCapturedTransactions().clear();
-            mixinContainer.setCaptureInventory(false);
+        this.playerEntity.markPlayerActive();
+
+        if (this.playerEntity.openContainer.windowId == packetIn.getWindowId() && this.playerEntity.openContainer.getCanCraft(this.playerEntity))
+        {
+            if (this.playerEntity.isSpectator())
+            {
+                List<ItemStack> list = Lists.<ItemStack>newArrayList();
+
+                for (int i = 0; i < this.playerEntity.openContainer.inventorySlots.size(); ++i)
+                {
+                    list.add(((Slot)this.playerEntity.openContainer.inventorySlots.get(i)).getStack());
+                }
+
+                this.playerEntity.updateCraftingInventory(this.playerEntity.openContainer, list);
+            }
+            else
+            {
+                // Sponge start - Always run click logic BEFORE validation if client is attempting to throw or swap an item.
+                // This is done before as we have no way of knowing what the item will be until click logic has been run.
+                ItemStack serverStack = null;
+                boolean slotClicked = false;
+                if (packetIn.getClickType() == ClickType.THROW || packetIn.getClickType() == ClickType.SWAP) {
+                    serverStack = this.playerEntity.openContainer.slotClick(packetIn.getSlotId(), packetIn.getUsedButton(), packetIn.getClickType(), this.playerEntity);
+                    slotClicked = true;
+                } else {
+                    // Client is attempting to click an item, check the server slot directly to avoid
+                    // making any changes before validation.
+                    Slot slot = packetIn.getSlotId() < 0 ? null : this.playerEntity.openContainer.getSlot(packetIn.getSlotId());
+                    serverStack = slot == null ? null : slot.getStack();
+                }
+
+                if (ItemStack.areItemStacksEqual(packetIn.getClickedItem(), serverStack))
+                {
+                    // If click logic has not been run and client item was validated, run server click logic
+                    if (!slotClicked) {
+                        this.playerEntity.openContainer.slotClick(packetIn.getSlotId(), packetIn.getUsedButton(), packetIn.getClickType(), this.playerEntity);
+                    }
+               // Sponge end
+                    this.playerEntity.connection.sendPacket(new SPacketConfirmTransaction(packetIn.getWindowId(), packetIn.getActionNumber(), true));
+                    this.playerEntity.isChangingQuantityOnly = true;
+                    this.playerEntity.openContainer.detectAndSendChanges();
+                    this.playerEntity.updateHeldItem();
+                    this.playerEntity.isChangingQuantityOnly = false;
+                }
+                else
+                {
+                    this.pendingTransactions.addKey(this.playerEntity.openContainer.windowId, Short.valueOf(packetIn.getActionNumber()));
+                    this.playerEntity.connection.sendPacket(new SPacketConfirmTransaction(packetIn.getWindowId(), packetIn.getActionNumber(), false));
+                    this.playerEntity.openContainer.setCanCraft(this.playerEntity, false);
+                    List<ItemStack> list1 = Lists.<ItemStack>newArrayList();
+
+                    for (int j = 0; j < this.playerEntity.openContainer.inventorySlots.size(); ++j)
+                    {
+                        ItemStack itemstack = ((Slot)this.playerEntity.openContainer.inventorySlots.get(j)).getStack();
+                        ItemStack itemstack1 = itemstack != null && itemstack.stackSize > 0 ? itemstack : null;
+                        list1.add(itemstack1);
+                    }
+
+                    this.playerEntity.updateCraftingInventory(this.playerEntity.openContainer, list1);
+                }
+            }
         }
-        return result;
     }
 
     /**
