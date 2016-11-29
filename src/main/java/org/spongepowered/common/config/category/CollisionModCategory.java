@@ -35,7 +35,7 @@ public class CollisionModCategory extends ConfigCategory {
 
     @Setting(value = "enabled", comment = "Set to false if you want mod to ignore entity collision rules.")
     private boolean isEnabled = true;
-    @Setting(value = "defaults", comment = "Default max collisions used for all entities/blocks unless overidden.")
+    @Setting(value = "defaults", comment = "Default max collisions used for all entities/blocks unless overridden.")
     private Map<String, Integer> defaultMaxCollisions = new HashMap<>();
     @Setting(value = "blocks")
     private Map<String, Integer> blockList = new HashMap<>();

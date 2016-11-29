@@ -136,7 +136,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
 
             Integer entityMaxCollision = null;
             if (this.mcEntity instanceof EntityItem) {
-                // check if all items are overidden
+                // check if all items are overridden
                 entityMaxCollision = collisionMod.getEntityList().get(this.spongeEntityType.getName());
             }
 

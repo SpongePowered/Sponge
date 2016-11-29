@@ -392,7 +392,7 @@ public class SpongeCommand {
                     final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F);
                     if (rayTraceResult.typeOfHit != RayTraceResult.Type.BLOCK) {
                         src.sendMessage(Text.of(TextColors.RED, TextStyles.ITALIC,
-                                "Failed to find an entity! Please execute the command when looking at an entity!"));
+                                "Failed to find a block! Please execute the command when looking at a block!"));
                         return CommandResult.empty();
                     }
                     final WorldServer worldServer = (WorldServer) entityPlayerMP.world;

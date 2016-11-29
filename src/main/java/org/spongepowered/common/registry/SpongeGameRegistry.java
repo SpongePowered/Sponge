@@ -48,6 +48,7 @@ import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.api.registry.RegistrationPhase;
 import org.spongepowered.api.registry.RegistryModule;
+import org.spongepowered.api.registry.RegistryModuleAlreadyRegisteredException;
 import org.spongepowered.api.registry.util.PluginProvidedRegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -102,6 +103,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 @SuppressWarnings("deprecation")
 @Singleton
 public class SpongeGameRegistry implements GameRegistry {
@@ -148,7 +151,11 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public <T extends CatalogType> SpongeGameRegistry registerModule(Class<T> catalogClass, CatalogRegistryModule<T> registryModule) {
-        checkArgument(!this.catalogRegistryMap.containsKey(catalogClass), "Already registered a registry module!");
+        @Nullable final CatalogRegistryModule<T> existingModule = (CatalogRegistryModule<T>) this.catalogRegistryMap.get(catalogClass);
+        if (existingModule != null) {
+            throw new RegistryModuleAlreadyRegisteredException("Already registered a registry module!", existingModule);
+        }
+
         this.catalogRegistryMap.put(catalogClass, registryModule);
         if (this.phase != RegistrationPhase.PRE_REGISTRY) {
             if (catalogClass.getName().contains("org.spongepowered.api") && catalogClass.getAnnotation(PluginProvidedRegistryModule.class) == null) {
