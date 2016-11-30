@@ -37,7 +37,7 @@ public class EntityDataUtil {
     public static Optional<ItemStackSnapshot> getRepresentedItemFrom(Entity entity) {
         if (entity instanceof EntityItemFrame) {
             final ItemStack itemStack = ((EntityItemFrame) entity).getDisplayedItem();
-            if (itemStack != null) {
+            if (!itemStack.isEmpty()) {
                 return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot());
             }
         } else if (entity instanceof EntityItem) {

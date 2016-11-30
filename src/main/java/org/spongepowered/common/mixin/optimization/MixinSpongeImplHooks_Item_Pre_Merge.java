@@ -44,7 +44,7 @@ public class MixinSpongeImplHooks_Item_Pre_Merge {
     @Overwrite
     public static void addItemStackToListForSpawning(Collection<ItemDropData> itemStacks, ItemDropData data) {
         final net.minecraft.item.ItemStack itemStack = data.getStack();
-        if (itemStack == null) {
+        if (itemStack.isEmpty()) {
             return;
         }
         boolean addToList = true;
@@ -57,7 +57,7 @@ public class MixinSpongeImplHooks_Item_Pre_Merge {
 
         for (ItemDropData existingData : itemStacks) {
             final net.minecraft.item.ItemStack existing = existingData.getStack();
-            if (existing == null) {
+            if (existing.isEmpty()) {
                 continue;
             }
             final boolean isExistingPlayer = existingData instanceof ItemDropData.Player;
@@ -82,7 +82,7 @@ public class MixinSpongeImplHooks_Item_Pre_Merge {
                 continue;
             } else if (existing.hasTagCompound() && !existing.getTagCompound().equals(itemStack.getTagCompound())) {
                 continue;
-            } else if (existing.getItem() == null) {
+            } else if (existing.isEmpty()) {
                 continue;
             } else if (existing.getItem().getHasSubtypes() && existing.getMetadata() != itemStack.getMetadata()) {
                 continue;
@@ -106,7 +106,7 @@ public class MixinSpongeImplHooks_Item_Pre_Merge {
             }
         }
         if (addToList) {
-            if (itemStack.getItem() != null || itemStack.getCount() > 0) {
+            if (!itemStack.isEmpty() || itemStack.getCount() > 0) {
                 itemStacks.add(data);
             }
         }
