@@ -152,10 +152,9 @@ public class SpongeCommonEventFactory {
         }
 
         if (pickupDelay <= 0 && slot != null) {
-            ItemStackSnapshot sourceSnapshot =
-                    slot.getStack() != null ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot()
-                                            : ItemStackSnapshot.NONE;
-            ItemStackSnapshot targetSnapshot = null;
+            ItemStackSnapshot sourceSnapshot = slot.getStack().isEmpty() ? ItemStackSnapshot.NONE
+                    : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
+            ItemStackSnapshot targetSnapshot;
             if (sourceSnapshot != ItemStackSnapshot.NONE) {
                 // combined slot
                 targetSnapshot = org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemStack).quantity(itemStack.getCount() + slot.getStack().getCount()).build().createSnapshot();
@@ -558,7 +557,7 @@ public class SpongeCommonEventFactory {
 
     public static boolean callInteractInventoryOpenEvent(Cause cause, EntityPlayerMP player) {
         ItemStackSnapshot newCursor =
-                player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
+                player.inventory.getItemStack().isEmpty() ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, newCursor);
         InteractInventoryEvent.Open event =

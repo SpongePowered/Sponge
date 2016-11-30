@@ -153,12 +153,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract Collection getActivePotionEffects();
     @Shadow @Nullable public abstract EntityLivingBase getLastAttacker(); // getLastAttacker
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
-    @Shadow @Nullable public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
+    @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow protected abstract void applyEntityAttributes();
     @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
     @Shadow protected abstract void damageShield(float p_184590_1_); // damageShield
     @Shadow public abstract void setActiveHand(EnumHand hand); // setActiveHand
-    @Shadow @Nullable public abstract ItemStack getHeldItem(EnumHand hand);
+    @Shadow public abstract ItemStack getHeldItem(EnumHand hand);
     @Shadow public abstract void setHeldItem(EnumHand hand, @Nullable ItemStack stack);
     @Shadow public abstract ItemStack getHeldItemMainhand();
     @Shadow public abstract boolean isHandActive();

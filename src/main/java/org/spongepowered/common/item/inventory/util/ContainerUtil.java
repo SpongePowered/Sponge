@@ -127,7 +127,7 @@ public final class ContainerUtil {
                 final Collection<EntityItem> itemStacks = multimap.get(pos);
                 for (int i = 0; i < inventory.getSizeInventory(); i++) {
                     final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(i);
-                    if (itemStack != null) {
+                    if (!itemStack.isEmpty()) {
                         float f = RANDOM.nextFloat() * 0.8F + 0.1F;
                         float f1 = RANDOM.nextFloat() * 0.8F + 0.1F;
                         float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
@@ -160,7 +160,7 @@ public final class ContainerUtil {
                 final Collection<ItemDropData> itemStacks = multimap.get(pos);
                 for (int i = 0; i < inventory.getSizeInventory(); i++) {
                     final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(i);
-                    if (itemStack != null) {
+                    if (!itemStack.isEmpty()) {
                         SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemDropData.item(itemStack)
                                 .position(VecHelper.toVector3d(pos))
                                 .build());
@@ -172,7 +172,7 @@ public final class ContainerUtil {
         // Finally, just default to spawning the entities normally, regardless of the case.
         for (int i = 0; i < inventory.getSizeInventory(); i++) {
             final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(i);
-            if (itemStack != null) {
+            if (!itemStack.isEmpty()) {
                 float f = RANDOM.nextFloat() * 0.8F + 0.1F;
                 float f1 = RANDOM.nextFloat() * 0.8F + 0.1F;
                 float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;

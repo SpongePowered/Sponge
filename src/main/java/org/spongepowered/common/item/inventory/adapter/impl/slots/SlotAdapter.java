@@ -97,12 +97,12 @@ public class SlotAdapter extends Adapter implements Slot {
 
     @Override
     public Optional<ItemStack> poll() {
-        ItemStack stack = ItemStackUtil.fromNative(this.inventory.getStack(this.ordinal));
-        if (stack == null) {
+        net.minecraft.item.ItemStack stack = this.inventory.getStack(this.ordinal);
+        if (stack.isEmpty()) {
             return Optional.<ItemStack>empty();
         }
         this.inventory.setStack(this.ordinal, null);
-        return Optional.<ItemStack>of(stack);
+        return Optional.<ItemStack>of(ItemStackUtil.fromNative(stack));
     }
 
     @Override
@@ -224,13 +224,13 @@ public class SlotAdapter extends Adapter implements Slot {
     @Override
     public boolean contains(ItemStack stack) {
         net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
-        return slotStack == null ? (stack == null) : ItemStackUtil.compare(slotStack, stack);
+        return slotStack.isEmpty() ? (stack == null) : ItemStackUtil.compare(slotStack, stack);
     }
 
     @Override
     public boolean contains(ItemType type) {
         net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
-        return slotStack == null ? (type == null) : slotStack.getItem().equals(type);
+        return slotStack.isEmpty() ? (type == null) : slotStack.getItem().equals(type);
     }
 
     @Override

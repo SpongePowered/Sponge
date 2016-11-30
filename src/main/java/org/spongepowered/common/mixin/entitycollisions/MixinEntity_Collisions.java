@@ -66,7 +66,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
             if (this.mcEntity instanceof EntityItem) {
                 EntityItem item = (EntityItem) this.mcEntity;
                 ItemStack itemstack = item.getEntityItem();
-                if (itemstack != null) {
+                if (!itemstack.isEmpty()) {
                     this.entityName = itemstack.getUnlocalizedName().replace("item.", "");
                 }
             } else {

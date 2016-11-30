@@ -58,7 +58,7 @@ public class MixinInventoryHelper {
             for (int i = 0; i < inventory.getSizeInventory(); ++i) {
                 ItemStack itemstack = inventory.getStackInSlot(i);
 
-                if (itemstack != null) {
+                if (!itemstack.isEmpty()) {
                     InventoryHelper.spawnItemStack(world, x, y, z, itemstack);
                 }
             }
