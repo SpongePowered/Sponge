@@ -601,12 +601,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 // This is done before as we have no way of knowing what the item will be until click logic has been run.
                 ItemStack serverStack = null;
                 boolean slotClicked = false;
-                if (packetIn.getClickType() == ClickType.THROW || packetIn.getClickType() == ClickType.SWAP) {
+                if (packetIn.getClickType() == ClickType.THROW || packetIn.getClickType() == ClickType.SWAP || packetIn.getClickType() == ClickType.PICKUP) {
                     serverStack = this.playerEntity.openContainer.slotClick(packetIn.getSlotId(), packetIn.getUsedButton(), packetIn.getClickType(), this.playerEntity);
                     slotClicked = true;
                 } else {
-                    // Client is attempting to click an item, check the server slot directly to avoid
-                    // making any changes before validation.
+                    // In all other cases, check the server slot directly to avoid making any changes before validation.
                     Slot slot = packetIn.getSlotId() < 0 ? null : this.playerEntity.openContainer.getSlot(packetIn.getSlotId());
                     serverStack = slot == null ? null : slot.getStack();
                 }
