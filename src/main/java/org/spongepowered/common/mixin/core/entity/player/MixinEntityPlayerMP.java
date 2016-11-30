@@ -275,7 +275,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                     this.mcServer.getPlayerList().sendMessageToTeamOrAllPlayers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
                 }
             } else {
-                this.mcServer.getPlayerList().sendChatMsg(this.getCombatTracker().getDeathMessage());
+                this.mcServer.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
             }
         }
 

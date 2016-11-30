@@ -38,6 +38,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableMoistureData;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -48,10 +49,13 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @Mixin(BlockFarmland.class)
 public abstract class MixinBlockFarmland extends MixinBlock {
 
-    private Entity currentGriefer;
+    @Nullable private Entity currentGriefer;
+    @Shadow private void turnToDirt(World world, BlockPos pos) {}
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
@@ -101,14 +105,10 @@ public abstract class MixinBlockFarmland extends MixinBlock {
         this.currentGriefer = null;
     }
 
-    @Redirect(method = "onFallenUpon", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean onCanGrief(GameRules gameRules, String rule) {
-        if (!gameRules.getBoolean(rule)) {
-            return false;
+    @Redirect(method = "onFallenUpon", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockFarmland;turnToDirt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
+    private void beforeTurnToDirt(BlockFarmland block, World world, BlockPos pos) {
+        if (this.currentGriefer instanceof IMixinGriefer && !((IMixinGriefer) this.currentGriefer).canGrief()) {
+            this.turnToDirt(world, pos);
         }
-        if (this.currentGriefer instanceof IMixinGriefer) {
-            return ((IMixinGriefer) currentGriefer).canGrief();
-        }
-        return true;
     }
 }

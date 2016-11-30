@@ -503,7 +503,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
 
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;sendChatMsg(Lnet/minecraft/util/text/ITextComponent;)V"))
+            target = "Lnet/minecraft/server/management/PlayerList;sendMessage(Lnet/minecraft/util/text/ITextComponent;)V"))
     public void onDisconnectHandler(PlayerList this$0, ITextComponent component) {
         final Player player = ((Player) this.playerEntity);
         final Text message = SpongeTexts.toText(component);
