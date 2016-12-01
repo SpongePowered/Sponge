@@ -472,10 +472,10 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         double d0 = 0.03125D;
         this.stoneNoise = this.noise4.getRegion(this.stoneNoise, x * 16, z * 16, 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
         Vector3i min = biomes.getBiomeMin();
-        for (int k = 0; k < 16; ++k) {
-            for (int l = 0; l < 16; ++l) {
-                BiomeType biomegenbase = biomes.getBiome(min.getX() + l, 0, min.getZ() + k);
-                generateBiomeTerrain(world, rand, chunk, x * 16 + k, z * 16 + l, this.stoneNoise[l + k * 16],
+        for (int x0 = 0; x0 < 16; ++x0) {
+            for (int z0 = 0; z0 < 16; ++z0) {
+                BiomeType biomegenbase = biomes.getBiome(min.getX() + x0, 0, min.getZ() + z0);
+                generateBiomeTerrain(world, rand, chunk, x * 16 + x0, z * 16 + z0, this.stoneNoise[x0 + z0 * 16],
                         getBiomeSettings(biomegenbase).getGroundCoverLayers());
             }
         }
@@ -488,57 +488,57 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         }
         int seaLevel = worldIn.getSeaLevel();
         IBlockState currentPlacement = null;
-        int k = -1;
+        int layerProgress = -1;
         int relativeX = x & 15;
         int relativeZ = z & 15;
-        int i = 0;
+        int layerDepth = 0;
         for (int currentY = 255; currentY >= 0; --currentY) {
-            IBlockState nextBlock = chunk.getBlockState(relativeZ, currentY, relativeX);
+            IBlockState nextBlock = chunk.getBlockState(relativeX, currentY, relativeZ);
             if (nextBlock.getMaterial() == Material.AIR) {
-                k = -1;
+                layerProgress = -1;
             } else if (nextBlock.getBlock() == Blocks.STONE) {
-                if (k == -1) {
+                if (layerProgress == -1) {
                     if (groundcover.isEmpty()) {
-                        k = 0;
+                        layerProgress = 0;
                         continue;
                     }
-                    i = 0;
-                    GroundCoverLayer layer = groundcover.get(i);
+                    layerDepth = 0;
+                    GroundCoverLayer layer = groundcover.get(layerDepth);
                     currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
-                    k = layer.getDepth().getFlooredAmount(rand, stoneNoise);
-                    if (k <= 0) {
+                    layerProgress = layer.getDepth().getFlooredAmount(rand, stoneNoise);
+                    if (layerProgress <= 0) {
                         continue;
                     }
 
                     if (currentY >= seaLevel - 1) {
-                        chunk.setBlockState(relativeZ, currentY, relativeX, currentPlacement);
-                        ++i;
-                        if (i < groundcover.size()) {
-                            layer = groundcover.get(i);
-                            k = layer.getDepth().getFlooredAmount(rand, stoneNoise);
+                        chunk.setBlockState(relativeX, currentY, relativeZ, currentPlacement);
+                        ++layerDepth;
+                        if (layerDepth < groundcover.size()) {
+                            layer = groundcover.get(layerDepth);
+                            layerProgress = layer.getDepth().getFlooredAmount(rand, stoneNoise);
                             currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
                         }
-                    } else if (currentY < seaLevel - 7 - k) {
-                        k = 0;
-                        chunk.setBlockState(relativeZ, currentY, relativeX, Blocks.GRAVEL.getDefaultState());
+                    } else if (currentY < seaLevel - 7 - layerProgress) {
+                        layerProgress = 0;
+                        chunk.setBlockState(relativeX, currentY, relativeZ, Blocks.GRAVEL.getDefaultState());
                     } else {
-                        ++i;
-                        if (i < groundcover.size()) {
-                            layer = groundcover.get(i);
-                            k = layer.getDepth().getFlooredAmount(rand, stoneNoise);
+                        ++layerDepth;
+                        if (layerDepth < groundcover.size()) {
+                            layer = groundcover.get(layerDepth);
+                            layerProgress = layer.getDepth().getFlooredAmount(rand, stoneNoise);
                             currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
-                            chunk.setBlockState(relativeZ, currentY, relativeX, currentPlacement);
+                            chunk.setBlockState(relativeX, currentY, relativeZ, currentPlacement);
                         }
                     }
-                } else if (k > 0) {
-                    --k;
-                    chunk.setBlockState(relativeZ, currentY, relativeX, currentPlacement);
+                } else if (layerProgress > 0) {
+                    --layerProgress;
+                    chunk.setBlockState(relativeX, currentY, relativeZ, currentPlacement);
 
-                    if (k == 0) {
-                        ++i;
-                        if (i < groundcover.size()) {
-                            GroundCoverLayer layer = groundcover.get(i);
-                            k = layer.getDepth().getFlooredAmount(rand, stoneNoise);
+                    if (layerProgress == 0) {
+                        ++layerDepth;
+                        if (layerDepth < groundcover.size()) {
+                            GroundCoverLayer layer = groundcover.get(layerDepth);
+                            layerProgress = layer.getDepth().getFlooredAmount(rand, stoneNoise);
                             currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
                         }
                     }
