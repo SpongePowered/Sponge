@@ -216,7 +216,7 @@ public class PacketUtil {
             }
 
             boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand(), Optional.empty(), BlockSnapshot.NONE).isCancelled();
-            SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(playerMP)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE, EnumHand.MAIN_HAND);
+            SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(playerMP)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE, packet.getHand());
             return isCancelled;
         } else if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
             CPacketPlayerTryUseItemOnBlock packet = (CPacketPlayerTryUseItemOnBlock) packetIn;
