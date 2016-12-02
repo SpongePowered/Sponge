@@ -39,7 +39,7 @@ public abstract class MixinBlockDynamicLiquid {
 
     @Inject(method = "canFlowInto", at = @At("HEAD"), cancellable = true)
     public void onCanFlowInto(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, CallbackInfoReturnable<Boolean> cir) {
-        if (!worldIn.isRemote && SpongeCommonEventFactory.handleChangeBlockEventPre((IMixinWorldServer) worldIn, pos)) {
+        if (!worldIn.isRemote && SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos).isCancelled()) {
             cir.setReturnValue(false);
         }
     }

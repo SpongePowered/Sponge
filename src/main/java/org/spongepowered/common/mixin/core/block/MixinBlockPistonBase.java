@@ -86,7 +86,7 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
             if (source == null) {
                 source = ((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(blockstate, blockstate, pos, 2);
             }
-            if (!worldIn.isRemote && SpongeCommonEventFactory.handleChangeBlockEventPre((IMixinWorldServer) worldIn, targetPos, source)) {
+            if (!worldIn.isRemote && SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, targetPos, source).isCancelled()) {
                 ci.setReturnValue(false);
                 return;
             }

@@ -51,6 +51,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.living.humanoid.AnimateHandEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -84,8 +85,12 @@ public class PacketUtil {
             EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
 
             // Fire packet events and return if cancelled
-            if (firePreEvents(packetIn, packetPlayer)) {
+            Tristate preState = firePreEvents(packetIn, packetPlayer);
+            boolean canCapture = true;
+            if (preState == Tristate.TRUE) {
                 return;
+            } else if (preState == Tristate.UNDEFINED) {
+                canCapture = false;
             }
             boolean ignoreCreative = false;
 
@@ -107,7 +112,7 @@ public class PacketUtil {
                 }
             }
 
-            if (!CauseTracker.ENABLED && (packetIn instanceof CPacketAnimation || packetIn instanceof CPacketClientSettings)) {
+            if (!CauseTracker.ENABLED || !canCapture) {
                 packetIn.processPacket(netHandler);
             } else {
                 final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
@@ -150,7 +155,7 @@ public class PacketUtil {
         return packetIn instanceof CPacketCreativeInventoryAction;
     }
 
-    private static boolean firePreEvents(Packet<?> packetIn, EntityPlayerMP playerMP) {
+    private static Tristate firePreEvents(Packet<?> packetIn, EntityPlayerMP playerMP) {
         if (packetIn instanceof CPacketAnimation) {
             CPacketAnimation packet = (CPacketAnimation) packetIn;
             SpongeCommonEventFactory.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
@@ -158,8 +163,11 @@ public class PacketUtil {
             HandType handType = packet.getHand() == EnumHand.MAIN_HAND ? HandTypes.MAIN_HAND : HandTypes.OFF_HAND;
             AnimateHandEvent event = SpongeEventFactory.createAnimateHandEvent(Cause.of(NamedCause.source(playerMP)), handType, (Humanoid) playerMP);
             if (SpongeImpl.postEvent(event)) {
-                return true;
+                return Tristate.TRUE;
             }
+            return Tristate.UNDEFINED;
+        } else if (packetIn instanceof CPacketClientSettings) {
+            return Tristate.UNDEFINED;
         } else if (packetIn instanceof CPacketPlayerDigging) {
             SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
             CPacketPlayerDigging packet = (CPacketPlayerDigging) packetIn;
@@ -171,7 +179,7 @@ public class PacketUtil {
                     if (stack != null && !playerMP.isSpectator()) {
                         ((IMixinEntityPlayerMP) playerMP).setPacketItem(stack.copy());
                     }
-                    return false;
+                    return Tristate.FALSE;
                 case START_DESTROY_BLOCK:
                 case ABORT_DESTROY_BLOCK:
                 case STOP_DESTROY_BLOCK:
@@ -179,7 +187,7 @@ public class PacketUtil {
                     BlockSnapshot blockSnapshot = new Location<>((World) playerMP.world, interactionPoint).createSnapshot();
                     if(SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, stack, EnumHand.MAIN_HAND, Optional.of(interactionPoint), blockSnapshot).isCancelled()) {
                         BlockUtil.sendClientBlockChange(playerMP, packet.getPosition());
-                        return true;
+                        return Tristate.TRUE;
                     }
 
                     BlockPos pos = packet.getPosition();
@@ -192,16 +200,22 @@ public class PacketUtil {
                     dist *= dist;
         
                     if (d3 > dist) {
-                        return true;
+                        return Tristate.TRUE;
                     } else if (pos.getY() >= SpongeImpl.getServer().getBuildLimit()) {
-                        return true;
+                        return Tristate.TRUE;
                     }
                     if (packet.getAction() == CPacketPlayerDigging.Action.START_DESTROY_BLOCK) {
                         if (SpongeCommonEventFactory.callInteractBlockEventPrimary(playerMP, blockSnapshot, EnumHand.MAIN_HAND, packet.getFacing()).isCancelled()) {
                             BlockUtil.sendClientBlockChange(playerMP, pos);
-                            return true;
+                            return Tristate.TRUE;
                         }
                     }
+
+                    if (SpongeImpl.isSpongeVanilla()) {
+                        return Tristate.FALSE;
+                    }
+
+                    return Tristate.UNDEFINED;
                 default:
                     break;
             }
@@ -212,12 +226,12 @@ public class PacketUtil {
             // If the time between packets is small enough, use the last result.
             if (packetDiff < 100) {
                 // Use previous result and avoid firing a second event
-                return lastTryBlockPacketItemResult;
+                return Tristate.fromBoolean(lastTryBlockPacketItemResult);
             }
 
             boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()), packet.getHand(), Optional.empty(), BlockSnapshot.NONE).isCancelled();
             SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(playerMP)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE, packet.getHand());
-            return isCancelled;
+            return Tristate.fromBoolean(isCancelled);
         } else if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
             CPacketPlayerTryUseItemOnBlock packet = (CPacketPlayerTryUseItemOnBlock) packetIn;
             lastTryBlockPacketTimeStamp = System.currentTimeMillis();
@@ -231,10 +245,10 @@ public class PacketUtil {
                 BlockPos pos = packet.getPos();
                 playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.world, pos));
                 playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.world, pos.offset(packet.getDirection())));
-                return true;
+                return Tristate.TRUE;
             }
         }
 
-        return false;
+        return Tristate.FALSE;
     }
 }

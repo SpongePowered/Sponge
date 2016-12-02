@@ -92,9 +92,11 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -130,6 +132,8 @@ public class SpongeCommonEventFactory {
     public static boolean playerInteractItemChanged = false;
     // Set if any of the events fired during interaction with a block (open inventory or interact block) were cancelled
     public static boolean interactBlockEventCancelled = false;
+    // Dummy ChangeBlockEvent.Pre
+    public static ChangeBlockEvent.Pre DUMMY_BLOCK_PRE_EVENT = null;
 
     // For animation packet
     public static int lastAnimationPacketTick = 0;
@@ -218,31 +222,62 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static boolean handleChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos) {
-        return handleChangeBlockEventPre(worldIn, pos, null);
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos) {
+        return callChangeBlockEventPre(worldIn, pos, null);
     }
 
-    public static boolean handleChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, BlockSnapshot source) {
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, Object source) {
         final CauseTracker causeTracker = worldIn.getCauseTracker();
-        PhaseData data = causeTracker.getCurrentPhaseData();
+        final PhaseData data = causeTracker.getCurrentPhaseData();
+        final IPhaseState phaseState = data.state;
         if (source == null) {
             source = data.context.getSource(BlockSnapshot.class).orElse(null);
             if (source == null) {
-                // safety measure
-                return false;
+                // safety measure, return a dummy event
+                if (DUMMY_BLOCK_PRE_EVENT == null) {
+                    DUMMY_BLOCK_PRE_EVENT = SpongeEventFactory.createChangeBlockEventPre(Cause.source(worldIn).build(), ImmutableList.of(),
+                        (World) worldIn);
+                }
+                return DUMMY_BLOCK_PRE_EVENT;
             }
         }
 
+        EntityPlayer player = null;
+        Cause.Builder builder = null;
+        User owner = data.context.getOwner().orElse(null);
+        User notifier = data.context.getNotifier().orElse(null);
+        // handle FakePlayer
+        if (source instanceof EntityPlayer) {
+            player = (EntityPlayer) source;
+            if (SpongeImplHooks.isFakePlayer(player)) {
+                if (owner != null) {
+                    builder = Cause.source(owner);
+                    builder.named("FakePlayer", player);
+                } else if (notifier != null) {
+                    builder = Cause.source(notifier);
+                    builder.named("FakePlayer", player);
+                } else {
+                    builder = Cause.builder().named("FakePlayer", player);
+                }
+            }
+        }
+        if (builder == null) {
+            builder = Cause.source(source);
+        }
+
+        if (owner != null) {
+            builder.owner(owner);
+        }
+        if (notifier != null) {
+            if (!(phaseState.getPhase().appendPreBlockProtectedCheck(builder, phaseState, data.context, causeTracker))) {
+                builder.notifier(notifier);
+            }
+        }
         Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
-        final Cause.Builder builder = Cause.source(source);
-        final Optional<User> notifier = causeTracker.getCurrentPhaseData()
-                .context
-                .firstNamed(NamedCause.NOTIFIER, User.class);
-        notifier.ifPresent(user -> builder.named(NamedCause.NOTIFIER, user));
         ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), ImmutableList.of(location),
                 (World) worldIn);
         SpongeImpl.postEvent(event);
-        return event.isCancelled();
+        return event;
     }
 
     @SuppressWarnings("rawtypes")
