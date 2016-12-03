@@ -479,6 +479,8 @@ public final class CauseTracker {
             }
         }
 
+        // TODO - Add Observer block change flag
+
         return true;
     }
 

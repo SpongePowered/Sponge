@@ -650,8 +650,9 @@ public final class TrackingUtil {
 
             if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
                 causeTracker.getMixinWorld().spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, oldBlockSnapshot.getUpdateFlag());
+            } else if ((minecraftChangeFlag & 16) == 0) {
+                causeTracker.getMinecraftWorld().updateObservingBlocksAt(pos, newState.getBlock());
             }
-
 
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             if (peek.state == GeneralPhase.Post.UNWINDING) {

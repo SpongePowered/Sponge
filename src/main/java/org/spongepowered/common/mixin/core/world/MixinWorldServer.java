@@ -1343,7 +1343,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void spongeNotifyNeighborsPostBlockChange(BlockPos pos, IBlockState oldState, IBlockState newState, int flags) {
         if ((flags & 1) != 0) {
-            this.notifyNeighborsRespectDebug(pos, newState.getBlock(), false);
+            this.notifyNeighborsRespectDebug(pos, newState.getBlock(), true);
 
             if (newState.hasComparatorInputOverride()) {
                 this.updateComparatorOutputLevel(pos, newState.getBlock());

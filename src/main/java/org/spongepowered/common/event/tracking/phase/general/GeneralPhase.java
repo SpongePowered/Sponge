@@ -276,7 +276,10 @@ public final class GeneralPhase extends TrackingPhase {
 
             if (changeFlag.updateNeighbors()) { // Notify neighbors only if the change flag allowed it.
                 causeTracker.getMixinWorld().spongeNotifyNeighborsPostBlockChange(pos, originalState, newState, oldBlockSnapshot.getUpdateFlag());
+            } else if ((updateFlag & 16) == 0) {
+                causeTracker.getMinecraftWorld().updateObservingBlocksAt(pos, newState.getBlock());
             }
+
             capturedBlockSupplier.ifPresentAndNotEmpty(blocks -> {
                 final List<BlockSnapshot> blockSnapshots = new ArrayList<>(blocks);
                 blocks.clear();
