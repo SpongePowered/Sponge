@@ -576,7 +576,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                     this.worldObj.removeTileEntity(pos);
                 }
             // } else if (currentBlock instanceof ITileEntityProvider) { // Sponge - remove since forge has a special hook we need to add here
-            } else if (SpongeImplHooks.blockHasTileEntity(currentBlock, currentState)) {
+            } else if (SpongeImplHooks.hasBlockTileEntity(currentBlock, currentState)) {
                 TileEntity tileEntity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
                 // Sponge - Add hook for refreshing, because again, forge hooks.
                 if (tileEntity != null && SpongeImplHooks.shouldRefresh(tileEntity, this.worldObj, pos, currentState, newState)) {
@@ -620,7 +620,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final boolean requiresCapturing = peek.state.getPhase().requiresBlockCapturing(peek.state);
-            if (!requiresCapturing || SpongeImplHooks.blockHasTileEntity(newBlock, newState)) {
+            if (!requiresCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.
                 if (newBlockSnapshot == null && flag.performBlockPhysics()) {
@@ -632,7 +632,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         // Sponge Start - Use SpongeImplHooks for forge compatibility
         // if (block instanceof ITileEntityProvider) { // Sponge
-        if (SpongeImplHooks.blockHasTileEntity(newBlock, newState)) {
+        if (SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
             // Sponge End
             TileEntity tileentity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
 

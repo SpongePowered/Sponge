@@ -86,7 +86,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     @Override
     public TileEntityArchetype.Builder state(BlockState state) {
         final IBlockState blockState = BlockUtil.toNative(state);
-        if (!SpongeImplHooks.blockHasTileEntity(blockState.getBlock(), blockState)) {
+        if (!SpongeImplHooks.hasBlockTileEntity(blockState.getBlock(), blockState)) {
             throw new IllegalArgumentException("BlockState does not provide TileEntities!");
         }
         if (this.blockState != state) {

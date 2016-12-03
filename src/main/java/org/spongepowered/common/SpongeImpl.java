@@ -211,11 +211,4 @@ public final class SpongeImpl {
         return getInstance().implementationCause;
     }
 
-    public static boolean isSpongeVanilla() {
-        if (Sponge.getPlatform().getImplementation().getName().equals("SpongeForge")) {
-            return false;
-        }
-
-        return true;
-    }
 }
