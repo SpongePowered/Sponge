@@ -280,7 +280,9 @@ public abstract class TrackingPhase {
                 entities, (World) minecraftWorld);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled() && event.getEntities().size() > 0) {
-            ((IMixinWorldServer) minecraftWorld).forceSpawnEntity(entity);
+            for (Entity item: event.getEntities()) {
+                causeTracker.getMixinWorld().forceSpawnEntity(item);
+            }
             return true;
         }
         return false;
