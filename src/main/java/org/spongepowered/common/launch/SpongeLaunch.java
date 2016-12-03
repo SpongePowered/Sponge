@@ -30,8 +30,8 @@ import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.Mixins;
 import org.spongepowered.common.launch.transformer.SpongeSuperclassRegistry;
 
+import java.io.File;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class SpongeLaunch {
 
@@ -40,10 +40,10 @@ public class SpongeLaunch {
 
     public static final String SUPERCLASS_TRANSFORMER = "org.spongepowered.common.launch.transformer.SpongeSuperclassTransformer";
 
-    private static final Path gameDir = Paths.get("");
-    private static final Path pluginsDir = gameDir.resolve("mods");
-    private static final Path configDir = gameDir.resolve("config");
-    private static final Path spongeConfigDir = configDir.resolve(ECOSYSTEM_ID);
+    private static Path gameDir;
+    private static Path pluginsDir;
+    private static Path configDir;
+    private static Path spongeConfigDir;
 
     public static Path getGameDir() {
         return gameDir;
@@ -59,6 +59,13 @@ public class SpongeLaunch {
 
     public static Path getSpongeConfigDir() {
         return spongeConfigDir;
+    }
+
+    public static void initPaths(File gameDirIn) {
+        gameDir = gameDirIn.toPath();
+        pluginsDir = gameDir.resolve("mods");
+        configDir = gameDir.resolve("config");
+        spongeConfigDir = configDir.resolve(ECOSYSTEM_ID);
     }
 
     public static void setupMixinEnvironment() {
