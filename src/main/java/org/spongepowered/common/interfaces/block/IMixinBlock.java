@@ -27,9 +27,6 @@ package org.spongepowered.common.interfaces.block;
 import co.aikar.timings.Timing;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockAccess;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -117,9 +114,6 @@ public interface IMixinBlock {
      * @return The default blockstate
      */
     BlockState getDefaultBlockState();
-
-    // Automatically implemented by forge due to identical signature
-    boolean isFlammable(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing);
 
     boolean isVanilla();
 

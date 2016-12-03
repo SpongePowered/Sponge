@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
+import net.minecraft.block.Block;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.property.block.FlammableProperty;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
@@ -46,9 +46,9 @@ public class FlammablePropertyStore extends AbstractSpongePropertyStore<Flammabl
     public Optional<FlammableProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
-        final IMixinBlock block = (IMixinBlock) world.getBlockState(pos).getBlock();
+        final Block block = world.getBlockState(pos).getBlock();
         for (EnumFacing facing : EnumFacing.values()) {
-            if (block.isFlammable(world, pos, facing)) {
+            if (SpongeImplHooks.isBlockFlammable(block, world, pos, facing)) {
                 return Optional.of(TRUE);
             }
         }
@@ -60,7 +60,7 @@ public class FlammablePropertyStore extends AbstractSpongePropertyStore<Flammabl
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
         final EnumFacing facing = toEnumFacing(direction);
         final BlockPos pos = ((IMixinLocation) (Object) location).getBlockPos();
-        final boolean flammable = ((IMixinBlock) world.getBlockState(pos).getBlock()).isFlammable(world, pos, facing);
+        final boolean flammable = SpongeImplHooks.isBlockFlammable(world.getBlockState(pos).getBlock(), world, pos, facing);
         return Optional.of(flammable ? TRUE : FALSE);
     }
 

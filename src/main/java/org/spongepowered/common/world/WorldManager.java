@@ -495,7 +495,7 @@ public final class WorldManager {
         } finally {
             worldByDimensionId.remove(dimensionId);
             weakWorldByWorld.remove(worldServer);
-            ((IMixinMinecraftServer) server).getWorldTickTimes().remove(dimensionId);
+            ((IMixinMinecraftServer) server).removeWorldTickTimes(dimensionId);
             SpongeImpl.getLogger().info("Unloading world [{}] (DIM{})", worldServer.getWorldInfo().getWorldName(), dimensionId);
             reorderWorldsVanillaFirst();
         }
@@ -804,7 +804,7 @@ public final class WorldManager {
         worldByDimensionId.put(dimensionId, worldServer);
         weakWorldByWorld.put(worldServer, worldServer);
 
-        ((IMixinMinecraftServer) SpongeImpl.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
+        ((IMixinMinecraftServer) SpongeImpl.getServer()).putWorldTickTimes(dimensionId, new long[100]);
 
         // Set the worlds on the Minecraft server
         reorderWorldsVanillaFirst();
@@ -824,7 +824,7 @@ public final class WorldManager {
         worldByDimensionId.put(dimensionId, worldServer);
         weakWorldByWorld.put(worldServer, worldServer);
 
-        ((IMixinMinecraftServer) SpongeImpl.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
+        ((IMixinMinecraftServer) SpongeImpl.getServer()).putWorldTickTimes(dimensionId, new long[100]);
     }
 
     public static void reorderWorldsVanillaFirst() {

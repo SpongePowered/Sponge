@@ -589,7 +589,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Cannot respawn in requested world, use the fallback dimension for
         // that world. (Usually overworld unless a mod says otherwise).
         if (!targetDimension.allowsPlayerRespawns()) {
-            targetDimensionId = ((IMixinWorldProvider) targetDimension).getRespawnDimension(playerIn);
+            targetDimensionId = SpongeImplHooks.getRespawnDimension(targetWorld.provider, playerIn);
             targetWorld = this.mcServer.worldServerForDimension(targetDimensionId);
         }
 

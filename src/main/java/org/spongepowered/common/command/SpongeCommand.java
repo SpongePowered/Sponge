@@ -654,7 +654,7 @@ public class SpongeCommand {
 
     private static void printWorldTickTime(CommandSource src, World world) {
         final long[] worldTickTimes = ((IMixinMinecraftServer) SpongeImpl.getServer()).
-                getWorldTickTimes().get(((IMixinWorldServer) world).getDimensionId());
+                getWorldTickTimes(((IMixinWorldServer) world).getDimensionId());
         final double worldMeanTickTime = mean(worldTickTimes) * 1.0e-6d;
         final double worldTps = Math.min(1000.0 / worldMeanTickTime, 20);
         src.sendMessage(Text.of("World [", TextColors.DARK_GREEN, world.getName(), TextColors.RESET, "] (DIM",

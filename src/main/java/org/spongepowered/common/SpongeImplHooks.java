@@ -32,7 +32,9 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -105,6 +107,12 @@ public final class SpongeImplHooks {
         return EntityList.REGISTRY.getIDForObject(entityClass);
     }
 
+    // Block
+
+    public static boolean isBlockFlammable(Block block, IBlockAccess world, BlockPos pos, EnumFacing face) {
+        return Blocks.FIRE.getFlammability(block) > 0;
+    }
+
     // Tile entity
 
     @Nullable
@@ -145,6 +153,10 @@ public final class SpongeImplHooks {
 
     public static boolean canDoRainSnowIce(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
         return true;
+    }
+
+    public static int getRespawnDimension(WorldProvider targetDimension, EntityPlayerMP player) {
+        return 0;
     }
 
     public static BlockPos getRandomizedSpawnPoint(WorldServer world) {

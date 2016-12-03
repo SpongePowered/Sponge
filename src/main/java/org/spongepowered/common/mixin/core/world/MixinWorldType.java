@@ -44,14 +44,12 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.util.persistence.JsonTranslator;
 
 @NonnullByDefault
 @Mixin(WorldType.class)
-public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
+public abstract class MixinWorldType implements GeneratorType {
 
     @Shadow @Final private String worldType;
     @Shadow @Final private int worldTypeId;

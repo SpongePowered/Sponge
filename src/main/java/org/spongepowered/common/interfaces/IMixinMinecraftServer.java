@@ -30,7 +30,9 @@ import java.util.Hashtable;
 
 public interface IMixinMinecraftServer {
 
-    Hashtable<Integer, long[]> getWorldTickTimes();
+    long[] getWorldTickTimes(int dimensionId);
+    void putWorldTickTimes(int dimensionId, long[] tickTimes);
+    void removeWorldTickTimes(int dimensionId);
 
     void prepareSpawnArea(WorldServer worldServer);
 
