@@ -36,6 +36,7 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.biome.GroundCoverLayer;
 import org.spongepowered.api.world.gen.populator.Forest;
 import org.spongepowered.api.world.gen.populator.Ore;
+import org.spongepowered.api.world.gen.populator.RandomBlock;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -72,12 +73,11 @@ public abstract class MixinBiomeHills extends MixinBiome {
         } , WorldGenConstants.GROUND_COVER_DEPTH));
 
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        Ore emerald = Ore.builder()
-                .ore((BlockState) Blocks.EMERALD_ORE.getDefaultState())
-                .placementCondition(WorldGenConstants.STONE)
+        RandomBlock emerald = RandomBlock.builder()
+                .block((BlockState) Blocks.EMERALD_ORE.getDefaultState())
+                .placementTarget(WorldGenConstants.STONE_LOCATION)
                 .perChunk(VariableAmount.baseWithRandomAddition(3, 6))
-                .height(VariableAmount.baseWithRandomAddition(0, 16))
-                .size(1)
+                .height(VariableAmount.baseWithRandomAddition(4, 28))
                 .build();
         gensettings.getPopulators().add(emerald);
 
