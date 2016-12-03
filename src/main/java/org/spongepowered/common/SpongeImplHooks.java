@@ -24,151 +24,120 @@
  */
 package org.spongepowered.common;
 
-
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EnumCreatureType;
-import net.minecraft.entity.monster.EntityMob;
-import net.minecraft.entity.monster.EntitySlime;
-import net.minecraft.entity.passive.EntityAmbientCreature;
-import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.api.entity.living.player.Player;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldProvider;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.message.MessageEvent;
-import org.spongepowered.api.event.network.ClientConnectionEvent;
-import org.spongepowered.api.event.world.LoadWorldEvent;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.world.World;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.common.event.tracking.ItemDropData;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 /**
- * Utility that fires events that normally Forge fires at (in spots). Typically
- * our penultimate goal is to not remove spots where events occur but sometimes
- * it happens (in @Overwrites typically). Normally events that are in Forge are
- * called themselves in SpongeVanilla but when it can't really occur, we fix
- * this issue with Sponge by overwriting this class
+ * Contains default Vanilla implementations for features that are only
+ * available in Forge. SpongeForge overwrites the methods in this class
+ * with calls to the Forge methods.
  */
 public final class SpongeImplHooks {
 
-    public static LoadWorldEvent createLoadWorldEvent(World world) {
-        return SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(SpongeImpl.getGame().getServer())), world);
-    }
-
-    public static ClientConnectionEvent.Join createClientConnectionEventJoin(Cause cause, MessageChannel originalChannel,
-            Optional<MessageChannel> channel, MessageEvent.MessageFormatter formatter, Player targetEntity, boolean messageCancelled) {
-        return SpongeEventFactory.createClientConnectionEventJoin(cause, originalChannel, channel, formatter, targetEntity, messageCancelled);
-    }
-
-    public static ClientConnectionEvent.Disconnect createClientConnectionEventDisconnect(Cause cause, MessageChannel originalChannel,
-            Optional<MessageChannel> channel, MessageEvent.MessageFormatter formatter, Player targetEntity, boolean messageCancelled) {
-        return SpongeEventFactory.createClientConnectionEventDisconnect(cause, originalChannel, channel, formatter, targetEntity, messageCancelled);
-    }
-
-    public static boolean blockHasTileEntity(Block block, IBlockState state) {
-        return block instanceof ITileEntityProvider;
-    }
-
-    public static int getBlockLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return state.getLightOpacity();
-    }
-
-    public static boolean shouldRefresh(TileEntity tile, net.minecraft.world.World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
-        return oldState.getBlock() != newState.getBlock();
-    }
-
-    public static TileEntity createTileEntity(Block block, net.minecraft.world.World world, IBlockState state) {
-        if (block instanceof ITileEntityProvider) {
-            return ((ITileEntityProvider)block).createNewTileEntity(world, block.getMetaFromState(state));
-        }
-        return null;
-    }
-
-    public static void addItemStackToListForSpawning(Collection<ItemDropData> itemStacks, @Nullable ItemDropData itemStack) {
-        // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
-        if (itemStack != null) {
-            itemStacks.add(itemStack);
-        }
-    }
-
-    /**
-     * A simple method to check attacks for the forge event factory.
-     *
-     * @param entityPlayer
-     * @param targetEntity
-     * @return
-     */
-    public static boolean checkAttackEntity(EntityPlayer entityPlayer, Entity targetEntity) {
-        final ItemStack item = entityPlayer.getHeldItemMainhand();
-        if (item != null) {
-            return true;
-        }
+    public static boolean isVanilla() {
         return true;
     }
 
-    public static boolean isCreatureOfType(Entity entity, EnumCreatureType type) {
-        if (entity instanceof EntityMob || entity instanceof EntitySlime) {
-            return type == EnumCreatureType.MONSTER;
-        } else if (entity instanceof EntityWaterMob) {
-            return type == EnumCreatureType.WATER_CREATURE;
-        } else if (entity instanceof EntityAmbientCreature) {
-            return type == EnumCreatureType.AMBIENT;
-        } else if (((entity instanceof EntityCreature))) {
-            return type == EnumCreatureType.CREATURE;
-        }
-
-        return false;
-    }
-
-    public static boolean isFakePlayer(Entity entity) {
-        return false;
+    public static boolean isDeobfuscatedEnvironment() {
+        return true;
     }
 
     public static String getModIdFromClass(Class<?> clazz) {
         return clazz.getName().startsWith("net.minecraft.") ? "minecraft" : "unknown";
     }
 
-    public static void registerPortalAgentType(@Nullable Teleporter teleporter) {
-        // plugins are required to register types
+    // Entity
+
+    public static boolean isCreatureOfType(Entity entity, EnumCreatureType type) {
+        return type.getCreatureClass().isAssignableFrom(entity.getClass());
     }
 
-    /**
-     * Targeted specifically for a mixin to throw a method for Forge events.
-     * @param playerIn
-     * @param fromWorld
-     * @param toWorld
-     */
-    public static void handlePostChangeDimensionEvent(EntityPlayerMP playerIn, WorldServer fromWorld, WorldServer toWorld) {
-
+    public static boolean isFakePlayer(Entity entity) {
+        return false;
     }
 
     public static void firePlayerJoinSpawnEvent(EntityPlayerMP playerMP) {
-        // Overwritten in Forge
+        // Overwritten in SpongeForge
     }
+
+    public static void handlePostChangeDimensionEvent(EntityPlayerMP playerIn, WorldServer fromWorld, WorldServer toWorld) {
+        // Overwritten in SpongeForge
+    }
+
+    public static boolean checkAttackEntity(EntityPlayer entityPlayer, Entity targetEntity) {
+        return true;
+    }
+
+    public static double getBlockReachDistance(EntityPlayerMP player) {
+        return 5.0d;
+    }
+
+    // Entity registry
+
+    @Nullable
+    public static Class<? extends Entity> getEntityClass(ResourceLocation name) {
+        return EntityList.REGISTRY.getObject(name);
+    }
+
+    public static int getEntityId(Class<? extends Entity> entityClass) {
+        return EntityList.REGISTRY.getIDForObject(entityClass);
+    }
+
+    // Tile entity
+
+    @Nullable
+    public static TileEntity createTileEntity(Block block, net.minecraft.world.World world, IBlockState state) {
+        if (block instanceof ITileEntityProvider) {
+            return ((ITileEntityProvider) block).createNewTileEntity(world, block.getMetaFromState(state));
+        }
+        return null;
+    }
+
+    public static boolean hasBlockTileEntity(Block block, IBlockState state) {
+        return block instanceof ITileEntityProvider;
+    }
+
+    public static boolean shouldRefresh(TileEntity tile, net.minecraft.world.World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
+        return oldState.getBlock() != newState.getBlock();
+    }
+
+    public static void onTileChunkUnload(TileEntity te) {
+        // Overwritten in SpongeForge
+    }
+
+    // World
+
+    public static Iterator<Chunk> getChunkIterator(WorldServer world) {
+        return world.getPlayerChunkMap().getChunkIterator();
+    }
+
+    public static void registerPortalAgentType(@Nullable Teleporter teleporter) {
+        // Overwritten in SpongeForge
+    }
+
+    // World provider
 
     public static boolean canDoLightning(WorldProvider provider, net.minecraft.world.chunk.Chunk chunk) {
         return true;
@@ -178,13 +147,25 @@ public final class SpongeImplHooks {
         return true;
     }
 
-    public static boolean isDeobfuscatedEnvironment() {
-        return true;
+    public static BlockPos getRandomizedSpawnPoint(WorldServer world) {
+        BlockPos ret = world.getSpawnPoint();
+
+        boolean isAdventure = world.getWorldInfo().getGameType() == GameType.ADVENTURE;
+        int spawnFuzz = Math.max(0, world.getMinecraftServer().getSpawnRadius(world));
+        int border = MathHelper.floor(world.getWorldBorder().getClosestDistance(ret.getX(), ret.getZ()));
+        if (border < spawnFuzz) spawnFuzz = border;
+
+        if (!world.provider.hasNoSky() && !isAdventure && spawnFuzz != 0)
+        {
+            if (spawnFuzz < 2) spawnFuzz = 2;
+            int spawnFuzzHalf = spawnFuzz / 2;
+            ret = world.getTopSolidOrLiquidBlock(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
+        }
+
+        return ret;
     }
 
-    public static Iterator<Chunk> getChunkIterator(WorldServer world) {
-        return world.getPlayerChunkMap().getChunkIterator();
-    }
+    // Light optimization
 
     public static int getChunkPosLight(IBlockState blockState, net.minecraft.world.World worldObj, BlockPos blockpos$mutableblockpos) {
         return blockState.getLightValue();
@@ -198,41 +179,17 @@ public final class SpongeImplHooks {
         return state.getLightOpacity();
     }
 
-    public static BlockPos getRandomizedSpawnPoint(WorldServer worldServer) {
-        BlockPos ret = worldServer.getSpawnPoint();
+    public static int getBlockLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
+        return state.getLightOpacity();
+    }
 
-        boolean isAdventure = worldServer.getWorldInfo().getGameType() == GameType.ADVENTURE;
-        int spawnFuzz = Math.max(0, worldServer.getMinecraftServer().getSpawnRadius(worldServer));
-        int border = MathHelper.floor(worldServer.getWorldBorder().getClosestDistance(ret.getX(), ret.getZ()));
-        if (border < spawnFuzz) spawnFuzz = border;
+    // Item stack merging
 
-        if (!worldServer.provider.hasNoSky() && !isAdventure && spawnFuzz != 0)
-        {
-            if (spawnFuzz < 2) spawnFuzz = 2;
-            int spawnFuzzHalf = spawnFuzz / 2;
-            ret = worldServer.getTopSolidOrLiquidBlock(ret.add(worldServer.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, worldServer.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
+    public static void addItemStackToListForSpawning(Collection<ItemDropData> itemStacks, @Nullable ItemDropData itemStack) {
+        // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
+        if (itemStack != null) {
+            itemStacks.add(itemStack);
         }
-
-        return ret;
-    }
-
-    public static double getBlockReachDistance(EntityPlayerMP player) {
-        return 5.0d;
-    }
-
-    public static void onTileChunkUnload(TileEntity te) {
-        // This is a forge only hook.
-    }
-
-    // Entity registry
-
-    @Nullable
-    public static Class<? extends Entity> getEntityClass(ResourceLocation name) {
-        return EntityList.REGISTRY.getObject(name);
-    }
-
-    public static int getEntityId(Class<? extends Entity> entityClass) {
-        return EntityList.REGISTRY.getIDForObject(entityClass);
     }
 
 }

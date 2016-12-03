@@ -252,7 +252,8 @@ public final class GeneralPhase extends TrackingPhase {
             final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
             final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = postContext.getCapturedBlockSupplier();
-            if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
+            if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.hasBlockTileEntity(newState.getBlock(),
+                    newState)) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
                 postContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
 

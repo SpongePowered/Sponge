@@ -67,7 +67,6 @@ import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -810,7 +809,8 @@ public final class WorldManager {
         // Set the worlds on the Minecraft server
         reorderWorldsVanillaFirst();
 
-        SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) worldServer));
+        SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(Sponge.getServer())),
+                (org.spongepowered.api.world.World) worldServer));
         ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
         return worldServer;
     }

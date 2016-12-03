@@ -211,7 +211,7 @@ public class PacketUtil {
                         }
                     }
 
-                    if (SpongeImpl.isSpongeVanilla()) {
+                    if (SpongeImplHooks.isVanilla()) {
                         return Tristate.FALSE;
                     }
 
