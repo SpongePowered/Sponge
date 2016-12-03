@@ -88,6 +88,10 @@ public final class WorldGenConstants {
         return input.getType().equals(BlockTypes.STONE);
     };
 
+    public static final Predicate<Location<World>> STONE_LOCATION = (input) -> {
+        return input.getBlock().getType().equals(BlockTypes.STONE);
+    };
+
     public static final Predicate<Location<World>> CAVE_LIQUIDS = (input) -> {
         if (input.getBlockY() <= 0 || input.getBlockY() >= 255) {
             return false;
