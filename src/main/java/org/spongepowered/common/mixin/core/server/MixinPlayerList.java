@@ -53,6 +53,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
@@ -117,11 +118,13 @@ import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketWorl
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.service.permission.SpongePermissionService;
+import org.spongepowered.common.service.whitelist.SpongeUserListWhitelist;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
+import java.io.File;
 import java.net.SocketAddress;
 import java.time.Instant;
 import java.util.List;
@@ -158,6 +161,16 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Nullable @Shadow public abstract String allowUserToConnect(SocketAddress address, GameProfile profile);
     @Shadow private void setPlayerGameTypeBasedOnOther(EntityPlayerMP playerIn, @Nullable EntityPlayerMP other, net.minecraft.world.World worldIn) {
         // Shadowed
+    }
+
+    /**
+     * @author Minecrell - December 4th, 2016
+     * @reason Redirect whitelist constructor and use our custom implementation
+     *     instead. Redirects all methods to the whitelist service.
+     */
+    @Redirect(method = "<init>", at = @At(value = "NEW", args = "class=net/minecraft/server/management/UserListWhitelist"))
+    private UserListWhitelist createWhitelist(File file) {
+        return new SpongeUserListWhitelist(file);
     }
 
     /**
