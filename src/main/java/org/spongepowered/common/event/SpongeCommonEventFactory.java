@@ -124,8 +124,6 @@ import javax.annotation.Nullable;
 
 public class SpongeCommonEventFactory {
 
-    public static boolean processingInternalForgeEvent = false;
-    // Set before firing an internal Forge BlockBreak event to handle extended blockstate
     public static boolean convertingMapFormat = false;
     // Set if the player's held item changes during InteractBlockEvent.Secondary
     public static boolean playerInteractItemChanged = false;
@@ -313,9 +311,7 @@ public class SpongeCommonEventFactory {
         peek.state.getPhase().populateCauseForNotifyNeighborEvent(peek.state, context, builder, causeTracker, mixinChunk, pos);
 
         NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(builder.build(), originalNeighbors, neighbors);
-        SpongeCommonEventFactory.processingInternalForgeEvent = true;
         SpongeImpl.postEvent(event);
-        SpongeCommonEventFactory.processingInternalForgeEvent = false;
         return event;
     }
 
