@@ -410,7 +410,6 @@
         "util.MixinPacketThreadUtil",
         "util.datafix.MixinDataFixer",
         "village.MixinVillage",
-        "whitelist.MixinUserListWhitelist",
         "world.MixinAnvilSaveHandler",
         "world.MixinBossInfo",
         "world.MixinBossInfoServer",
