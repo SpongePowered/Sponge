@@ -507,7 +507,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
         final ItemStack itemstack = this.getHeldItem(EnumHand.OFF_HAND);
 
-        if (!itemstack.isEmpty() && itemstack.getItem() == Items.TIPPED_ARROW) {
+        if (itemstack.getItem() == Items.TIPPED_ARROW) {
             entitytippedarrow.setPotionEffect(itemstack);
         }
 

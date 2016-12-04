@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.block.Block;
+import net.minecraft.item.ItemAir;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,7 +36,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Optional;
 
 @NonnullByDefault
-@Mixin(net.minecraft.item.ItemBlock.class)
+@Mixin(value = { net.minecraft.item.ItemBlock.class, net.minecraft.item.ItemAir.class })
+// Mixin into ItemAir too because ItemAir does not extend ItemBlock but has a Block
 public abstract class MixinItemBlock extends MixinItem {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
