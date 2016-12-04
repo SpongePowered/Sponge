@@ -42,6 +42,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
+import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.command.WrapperCommandSource;
 import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.service.permission.SpongePermissionService;
@@ -157,6 +158,8 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
      *
      * Purpose: Reroute MC command handling through Sponge
      * Reasoning: All commands should go through one system -- we need none of the MC handling code
+     *
+     * We redirect this method in MinecraftServer, to provide the real value of 'usingBlock'. This override is just for mods
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -165,6 +168,6 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         if (pos != null) {
             targetPos = new Location<>((org.spongepowered.api.world.World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
         }
-        return SpongeImpl.getGame().getCommandManager().getSuggestions((CommandSource) sender, input, targetPos);
+        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, targetPos, false);
     }
 }

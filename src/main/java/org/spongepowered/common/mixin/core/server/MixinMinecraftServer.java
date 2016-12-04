@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import co.aikar.timings.TimingsManager;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -67,6 +68,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ChunkTicketManager;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldArchetype;
@@ -89,6 +91,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -102,6 +105,7 @@ import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
@@ -115,6 +119,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+
+import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
@@ -520,9 +526,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return WorldManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.getScoreboard());
     }
 
-    private void onTabCompleteChat(ICommandSender sender, String input, CallbackInfoReturnable<List<String>> cir, List<String> completions) {
+    private void onTabCompleteChat(ICommandSender sender, String input, CallbackInfoReturnable<List<String>> cir, List<String> completions, @Nullable Location<World> target, boolean usingBlock) {
         TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.source(sender).build(),
-                ImmutableList.copyOf(completions), completions, input);
+                ImmutableList.copyOf(completions), completions, input, Optional.ofNullable(target), usingBlock);
         Sponge.getEventManager().post(event);
         if (event.isCancelled()) {
             cir.setReturnValue(new ArrayList<>());
@@ -532,15 +538,27 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Surrogate
-    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean p_184104_4_, CallbackInfoReturnable<List<String>> cir,
+    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean hasTargetBlock, CallbackInfoReturnable<List<String>> cir,
             List<String> list, boolean flag, boolean flag1, List<String> list1) {
-        onTabCompleteChat(sender, input, cir, list);
+        onTabCompleteChat(sender, input, cir, list, this.getTarget(sender, pos), hasTargetBlock);
     }
 
-    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean p_184104_4_, CallbackInfoReturnable<List<String>> cir,
-            List<String> list, String[] a, String b, String[] c, int d, int e) {
-        onTabCompleteChat(sender, input, cir, list);
+    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 0), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean hasTargetBlock, CallbackInfoReturnable<List<String>> cir,
+            List<String> list, boolean b, String[] s1, String s) {
+        onTabCompleteChat(sender, input, cir, list, this.getTarget(sender, pos), hasTargetBlock);
+    }
+
+    @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandManager;getTabCompletionOptions(Lnet/minecraft/command/ICommandSender;Ljava/lang/String;Lnet/minecraft/util/math/BlockPos;)Ljava/util/List;"))
+    public List<String> onGetTabCompletionOptions(ICommandManager manager, ICommandSender sender, String input, @Nullable BlockPos pos, ICommandSender sender_, String input_, BlockPos pos_, boolean hasTargetBlock) {
+        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, this.getTarget(sender, pos), hasTargetBlock);
+    }
+    private Location<World> getTarget(ICommandSender sender, BlockPos pos) {
+        @Nullable Location<World> targetPos = null;
+        if (pos != null) {
+            targetPos = new Location<>((World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
+        }
+        return targetPos;
     }
 
     @Override
@@ -591,7 +609,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                         return;
                     }
                 }
-    
+
                 SpongeCommonEventFactory.callInteractBlockEventPrimary(player, EnumHand.MAIN_HAND);
             }
         }
