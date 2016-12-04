@@ -158,11 +158,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Shadow public abstract void generateSkylightMap();
     @Shadow public abstract int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
-    @Shadow public abstract IBlockState getBlockState(final int p_186032_1_, final int p_186032_2_, final int p_186032_3_);
+    @Shadow public abstract IBlockState getBlockState(int x, int y, int z);
     @Shadow public abstract Biome getBiome(BlockPos pos, BiomeProvider chunkManager);
     @Shadow public abstract byte[] getBiomeArray();
     @Shadow public abstract void setBiomeArray(byte[] biomeArray);
-    @Shadow public abstract int getTopFilledSegment();
     @Shadow public abstract void checkLight();
     @Shadow public abstract <T extends Entity> void getEntitiesOfTypeWithinAAAB(Class <? extends T > entityClass, AxisAlignedBB aabb,
     List<T> listToFill, Predicate <? super T > p_177430_4_);
@@ -650,88 +649,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
         this.isModified = true;
         return currentState;
-    }
-
-    /**
-     * @author gabizou - July 25th, 2016
-     * @reason - Adds ignorance to blocks who do not perform any
-     * location checks for their light values based on location
-     *
-     * @param x The x position
-     * @param z The y position
-     * @return whatever vanilla said
-     */
-    @Overwrite
-    private boolean checkLight(int x, int z) {
-        int i = this.getTopFilledSegment();
-        boolean flag = false;
-        boolean flag1 = false;
-        BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos((this.xPosition << 4) + x, 0, (this.zPosition << 4) + z);
-
-        for (int j = i + 16 - 1; j > this.world.getSeaLevel() || j > 0 && !flag1; --j) {
-            blockpos$mutableblockpos.setPos(blockpos$mutableblockpos.getX(), j, blockpos$mutableblockpos.getZ());
-            int k = this.getBlockLightOpacity(blockpos$mutableblockpos);
-
-            if (k == 255 && blockpos$mutableblockpos.getY() < this.world.getSeaLevel()) {
-                flag1 = true;
-            }
-
-            if (!flag && k > 0) {
-                flag = true;
-            } else if (flag && k == 0 && !this.world.checkLight(blockpos$mutableblockpos)) {
-                return false;
-            }
-        }
-
-        for (int l = blockpos$mutableblockpos.getY(); l > 0; --l) {
-            blockpos$mutableblockpos.setPos(blockpos$mutableblockpos.getX(), l, blockpos$mutableblockpos.getZ());
-
-            // Sponge Start - Use SpongeImplHooks for forge optimization
-            // if (this.getBlockState(blockpos$mutableblockpos).getLightValue() > 0) // Vanilla
-            // if (this.getBlockState(blockpos$mutableblockpos).getLightValue(this.worldObj, blockpos$mutableblockpos) > 0) // Forge
-            if (SpongeImplHooks.getChunkPosLight(this.getBlockState(blockpos$mutableblockpos), this.world, blockpos$mutableblockpos) > 0) {
-                // Sponge End
-                this.world.checkLight(blockpos$mutableblockpos);
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * @author gabizou - July 25th, 2016
-     * @reason - Adds ignorance to blocks who do not perform any
-     * location checks for their light values based on location
-     *
-     * @param pos The block position
-     * @return whatever vanilla said
-     */
-    @Overwrite
-    public int getBlockLightOpacity(BlockPos pos) {
-        // Sponge Start - Rewrite to use SpongeImplHooks
-        // return this.getBlockState(pos).getLightOpacity(); // Vanilla
-        // return this.getBlockState(pos).getLightOpacity(this.worldObj, pos); // Forge
-        return SpongeImplHooks.getChunkBlockLightOpacity(this.getBlockState(pos), this.world, pos);
-    }
-
-    /**
-     * @author gabizou - July 25th, 2016
-     * @reason - Adds ignorance to blocks who do not perform any
-     * location checks for their light values based on location
-     *
-     * @param x The x position
-     * @param y The y position
-     * @param z The z position
-     * @return whatever vanilla said
-     */
-    @Overwrite
-    private int getBlockLightOpacity(int x, int y, int z) {
-        IBlockState state = this.getBlockState(x, y, z); //Forge: Can sometimes be called before we are added to the global world list. So use the less accurate one during that. It'll be recalculated later
-        // Sponge Start - Rewrite to use SpongeImplHooks because, again, unecessary block state retrieval.
-        // return this.getBlockState(x, y, z).getLightOpacity(); // Vanilla
-        // return this.unloaded ? state.getLightOpacity() : state.getLightOpacity(this.worldObj, new BlockPos(x, y, z)); // Forge
-        return this.unloaded ? state.getLightOpacity() : SpongeImplHooks.getChunkBlockLightOpacity(state, this.world, x, y, z);
-        // Sponge End
     }
 
     // These methods are enabled in MixinChunk_Tracker as a Mixin plugin

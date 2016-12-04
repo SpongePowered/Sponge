@@ -72,7 +72,6 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -256,8 +255,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
     @Shadow public abstract boolean canBlockFreezeNoWater(BlockPos pos);
     @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
-    @Shadow public abstract boolean canSeeSky(BlockPos pos);
-    @Shadow public abstract int getLightFor(EnumSkyBlock type, BlockPos pos);
     @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
 
     // @formatter:on
@@ -1085,74 +1082,19 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     /**
-     * @author gabizou - July 25th, 2016
-     * @reason Optimizes several blockstate lookups for getting raw light.
-     *
-     * @param pos The position to get the light for
-     * @param lightType The light type
-     * @return The raw light
+     * @reason Avoid loading chunk for getting raw light.
      */
-    @Overwrite
-    private int getRawLight(BlockPos pos, EnumSkyBlock lightType) {
-        if (lightType == EnumSkyBlock.SKY && this.canSeeSky(pos)) {
-            return 15;
+    @Inject(method = "getRawLight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState" +
+            "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"), cancellable = true)
+    private void onLightGetBlockState(BlockPos pos, EnumSkyBlock enumSkyBlock, CallbackInfoReturnable<Integer> cir) {
+        final net.minecraft.world.chunk.Chunk chunk;
+        if (!this.isRemote) {
+            chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         } else {
-            // Sponge Start - Optimize block light checks
-
-            // Vanilla
-
-            // Block block = this.getBlockState(pos).getBlock();
-            // int i = lightType == EnumSkyBlock.SKY ? 0 : block.getLightValue();
-
-            // Forge
-
-            // Block block = this.getBlockState(pos).getBlock();
-            // int blockLight = block.getLightValue(this, pos);
-            // Must check remote or not
-            final net.minecraft.world.chunk.Chunk chunk;
-            if (!this.isRemote) {
-                chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
-            } else {
-                chunk = this.getChunkFromBlockCoords(pos);
-            }
-            if (chunk == null || chunk.unloaded) {
-                return 0;
-            }
-
-            IBlockState blockState = this.getBlockState(pos);
-            int blockLight = SpongeImplHooks.getChunkPosLight(blockState, (net.minecraft.world.World) (Object) this, pos);
-            int i = lightType == EnumSkyBlock.SKY ? 0 : blockLight; // Changed by forge to use the local variable
-            int j = SpongeImplHooks.getBlockLightOpacity(blockState, (net.minecraft.world.World) (Object) this, pos);
-            // Sponge End
-
-            if (j >= 15 && blockLight > 0) {
-                j = 1;
-            }
-
-            if (j < 1) {
-                j = 1;
-            }
-
-            if (j >= 15) {
-                return 0;
-            } else if (i >= 14) {
-                return i;
-            } else {
-                for (EnumFacing enumfacing : EnumFacing.values()) {
-                    BlockPos blockpos = pos.offset(enumfacing);
-                    int k = this.getLightFor(lightType, blockpos) - j;
-
-                    if (k > i) {
-                        i = k;
-                    }
-
-                    if (i >= 14) {
-                        return i;
-                    }
-                }
-
-                return i;
-            }
+            chunk = this.getChunkFromBlockCoords(pos);
+        }
+        if (chunk == null || chunk.unloaded) {
+            cir.setReturnValue(0);
         }
     }
 

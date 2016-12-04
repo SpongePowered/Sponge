@@ -113,6 +113,10 @@ public final class SpongeImplHooks {
         return Blocks.FIRE.getFlammability(block) > 0;
     }
 
+    public static int getBlockLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
+        return state.getLightOpacity();
+    }
+
     // Tile entity
 
     @Nullable
@@ -175,24 +179,6 @@ public final class SpongeImplHooks {
         }
 
         return ret;
-    }
-
-    // Light optimization
-
-    public static int getChunkPosLight(IBlockState blockState, net.minecraft.world.World worldObj, BlockPos blockpos$mutableblockpos) {
-        return blockState.getLightValue();
-    }
-
-    public static int getChunkBlockLightOpacity(IBlockState blockState, net.minecraft.world.World worldObj, BlockPos pos) {
-        return blockState.getLightOpacity();
-    }
-
-    public static int getChunkBlockLightOpacity(IBlockState state, net.minecraft.world.World worldObj, int x, int y, int z) {
-        return state.getLightOpacity();
-    }
-
-    public static int getBlockLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
-        return state.getLightOpacity();
     }
 
     // Item stack merging

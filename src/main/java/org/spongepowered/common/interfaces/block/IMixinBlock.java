@@ -134,16 +134,4 @@ public interface IMixinBlock {
         return false;
     }
 
-    /**
-     * Used only in forge environments where lighting may be calculated based on locations.
-     *
-     * @return True if this block has explicit checks for whether position is affected for light checks
-     */
-    default boolean requiresLocationCheckForLightValue() {
-        return false;
-    }
-
-    default boolean requiresLocationCheckForOpacity() {
-        return false;
-    }
 }
