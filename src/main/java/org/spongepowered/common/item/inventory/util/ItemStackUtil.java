@@ -70,7 +70,7 @@ public abstract class ItemStackUtil {
     @Nullable
     public static net.minecraft.item.ItemStack cloneDefensiveNative(@Nullable net.minecraft.item.ItemStack stack, int newSize) {
         net.minecraft.item.ItemStack clone = stack.copy();
-        if (clone != null) {
+        if (!clone.isEmpty()) {
             clone.setCount(newSize);
         }
         return clone;
@@ -104,8 +104,11 @@ public abstract class ItemStackUtil {
         return Optional.<ItemStack>ofNullable(ItemStackUtil.cloneDefensive(stack));
     }
 
+    /**
+     * This ignores item stack size on purpose
+     */
     public static boolean compare(net.minecraft.item.ItemStack stack1, net.minecraft.item.ItemStack stack2) {
-        return net.minecraft.item.ItemStack.areItemStacksEqual(stack1, stack2);
+        return stack1.isItemEqual(stack2) && net.minecraft.item.ItemStack.areItemStackTagsEqual(stack1, stack2);
     }
 
     public static boolean compare(net.minecraft.item.ItemStack stack1, ItemStack stack2) {
