@@ -733,6 +733,58 @@ public interface PacketFunction {
                 .ifPresentAndNotEmpty(
                         originalBlocks -> TrackingUtil.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state, context));
 
+        context.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
+            final Cause spawnCause = Cause.source(
+                    EntitySpawnCause.builder()
+                            .entity((Entity) player)
+                            .type(InternalSpawnTypes.PLACEMENT)
+                            .build()
+            ).named(NamedCause.notifier(player))
+                    .build();
+            final List<Entity> entities = items
+                    .stream()
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
+            if (!entities.isEmpty()) {
+                DropItemEvent.Custom drop = SpongeEventFactory.createDropItemEventCustom(spawnCause, entities, (World) player.getServerWorld());
+                SpongeImpl.postEvent(drop);
+                if (!drop.isCancelled()) {
+                    for (Entity droppedItem : drop.getEntities()) {
+                        droppedItem.setCreator(player.getUniqueID());
+                        ((IMixinWorldServer) player.getServerWorld()).forceSpawnEntity(droppedItem);
+                    }
+                }
+            }
+        });
+        // Pre-merged items
+        context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(stacks -> {
+            final List<EntityItem> items = stacks.stream()
+                    .map(drop -> drop.create(player.getServerWorld()))
+                    .collect(Collectors.toList());
+            final Cause spawnCause = Cause.source(
+                    EntitySpawnCause.builder()
+                            .entity((Entity) player)
+                            .type(InternalSpawnTypes.PLACEMENT)
+                            .build()
+            ).named(NamedCause.notifier(player))
+                    .build();
+            final List<Entity> entities = items
+                    .stream()
+                    .map(EntityUtil::fromNative)
+                    .collect(Collectors.toList());
+            if (!entities.isEmpty()) {
+                DropItemEvent.Custom drop = SpongeEventFactory.createDropItemEventCustom(spawnCause, entities, (World) player.getServerWorld());
+                SpongeImpl.postEvent(drop);
+                if (!drop.isCancelled()) {
+                    for (Entity droppedItem : drop.getEntities()) {
+                        droppedItem.setCreator(player.getUniqueID());
+                        ((IMixinWorldServer) player.getServerWorld()).forceSpawnEntity(droppedItem);
+                    }
+                }
+            }
+
+        });
+
     });
     PacketFunction PLACE_BLOCK = (packet, state, player, context) -> {
         if (state == PacketPhase.General.INVALID) { // This basically is an out of world place, and nothing should occur here.

@@ -24,8 +24,14 @@
  */
 package org.spongepowered.common.config.category;
 
+import net.minecraft.launchwrapper.Launch;
+import net.minecraft.launchwrapper.LaunchClassLoader;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.common.SpongeImplHooks;
+
+import java.io.IOException;
 
 @ConfigSerializable
 public class OptimizationCategory extends ConfigCategory {
@@ -44,7 +50,7 @@ public class OptimizationCategory extends ConfigCategory {
     private boolean useCachedChunkMap = true;
 
     @Setting(value = "drops-pre-merge", comment = PRE_MERGE_COMMENT)
-    private boolean preItemDropMerge = true;
+    private boolean preItemDropMerge;
 
     @Setting(value = "cache-tameable-owners", comment = "Caches tameable entities owners to avoid constant lookups against data watchers. If mods cause issue, disable.")
     private boolean cacheTameableOwners = true;
@@ -55,6 +61,16 @@ public class OptimizationCategory extends ConfigCategory {
                                                                + "for such a simple check. This may however break mods that alter\n"
                                                                + "world heights and can thus be disabled in those cases.")
     private boolean inlineBlockPositionChecks = true;
+
+    public OptimizationCategory() {
+        try {
+            // Enabled ny default on SpongeVanilla, disabled by default on SpongeForge.
+            // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
+            this.preItemDropMerge = Launch.classLoader.getClassBytes("net.minecraftforge.common.ForgeVersion") == null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public boolean useIgnoreUloadedChunkLightingPatch() {
         return this.ignoreUnloadedChunkLighting;
