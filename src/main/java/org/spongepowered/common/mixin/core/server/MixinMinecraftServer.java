@@ -526,7 +526,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE",
-            target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;"))
+            target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;", remap = false))
     private ArrayList<String> onGetTabCompletionCreateList() {
         ArrayList<String> list = new ArrayList<>();
         this.currentTabCompletionOptions = list;
