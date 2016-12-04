@@ -86,10 +86,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -158,6 +156,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
     @Shadow public abstract boolean isDedicatedServer();
 
+    @Nullable private List<String> currentTabCompletionOptions;
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
     private GameProfileManager profileManager;
@@ -526,34 +525,38 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return WorldManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.getScoreboard());
     }
 
-    private void onTabCompleteChat(ICommandSender sender, String input, CallbackInfoReturnable<List<String>> cir, List<String> completions, @Nullable Location<World> target, boolean usingBlock) {
+    @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE",
+            target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;"))
+    private ArrayList<String> onGetTabCompletionCreateList() {
+        ArrayList<String> list = new ArrayList<>();
+        this.currentTabCompletionOptions = list;
+        return list;
+    }
+
+    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 0))
+    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean usingBlock,
+            CallbackInfoReturnable<List<String>> cir) {
+
+        List<String> completions = checkNotNull(this.currentTabCompletionOptions, "currentTabCompletionOptions");
+        this.currentTabCompletionOptions = null;
+
         TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.source(sender).build(),
-                ImmutableList.copyOf(completions), completions, input, Optional.ofNullable(target), usingBlock);
+                ImmutableList.copyOf(completions), completions, input, Optional.ofNullable(getTarget(sender, pos)), usingBlock);
         Sponge.getEventManager().post(event);
+
         if (event.isCancelled()) {
-            cir.setReturnValue(new ArrayList<>());
-        } else {
-            cir.setReturnValue(event.getTabCompletions());
+            completions.clear();
         }
     }
 
-    @Surrogate
-    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean hasTargetBlock, CallbackInfoReturnable<List<String>> cir,
-            List<String> list, boolean flag, boolean flag1, List<String> list1) {
-        onTabCompleteChat(sender, input, cir, list, this.getTarget(sender, pos), hasTargetBlock);
-    }
-
-    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 0), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean hasTargetBlock, CallbackInfoReturnable<List<String>> cir,
-            List<String> list, boolean b, String[] s1, String s) {
-        onTabCompleteChat(sender, input, cir, list, this.getTarget(sender, pos), hasTargetBlock);
-    }
-
-    @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandManager;getTabCompletionOptions(Lnet/minecraft/command/ICommandSender;Ljava/lang/String;Lnet/minecraft/util/math/BlockPos;)Ljava/util/List;"))
+    @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandManager;getTabCompletions"
+            + "(Lnet/minecraft/command/ICommandSender;Ljava/lang/String;Lnet/minecraft/util/math/BlockPos;)Ljava/util/List;"))
     public List<String> onGetTabCompletionOptions(ICommandManager manager, ICommandSender sender, String input, @Nullable BlockPos pos, ICommandSender sender_, String input_, BlockPos pos_, boolean hasTargetBlock) {
         return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, this.getTarget(sender, pos), hasTargetBlock);
     }
-    private Location<World> getTarget(ICommandSender sender, BlockPos pos) {
+
+    @Nullable
+    private static Location<World> getTarget(ICommandSender sender, @Nullable BlockPos pos) {
         @Nullable Location<World> targetPos = null;
         if (pos != null) {
             targetPos = new Location<>((World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
