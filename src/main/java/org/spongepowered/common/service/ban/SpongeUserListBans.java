@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.service.whitelist;
+package org.spongepowered.common.service.ban;
 
-import net.minecraft.server.management.UserListWhitelist;
-import net.minecraft.server.management.UserListWhitelistEntry;
+import net.minecraft.server.management.UserListBans;
+import net.minecraft.server.management.UserListBansEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.whitelist.WhitelistService;
+import org.spongepowered.api.service.ban.BanService;
+import org.spongepowered.api.util.ban.Ban;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,53 +38,58 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 /**
- * Redirects all calls to whitelist to the {@link WhitelistService}.
+ * Redirects all calls to the {@link BanService}.
  */
-public class SpongeUserListWhitelist extends UserListWhitelist {
+public class SpongeUserListBans extends UserListBans {
 
-    public SpongeUserListWhitelist(File file) {
-        super(file);
+    public SpongeUserListBans(File bansFile) {
+        super(bansFile);
     }
 
-    private static WhitelistService getService() {
-        return Sponge.getServiceManager().provideUnchecked(WhitelistService.class);
+    private static BanService getService() {
+        return Sponge.getServiceManager().provideUnchecked(BanService.class);
     }
 
     @Override
     protected boolean hasEntry(com.mojang.authlib.GameProfile entry) {
-        return getService().isWhitelisted((GameProfile) entry);
+        return getService().isBanned((GameProfile) entry);
+    }
+
+    @Override
+    public UserListBansEntry getEntry(com.mojang.authlib.GameProfile obj) {
+        return (UserListBansEntry) getService().getBanFor((GameProfile) obj).orElse(null);
     }
 
     @Override
     public String[] getKeys() {
         List<String> names = new ArrayList<>();
-        for (GameProfile profile : getService().getWhitelistedProfiles()) {
-            profile.getName().ifPresent(names::add);
+        for (Ban.Profile ban : getService().getProfileBans()) {
+            ban.getProfile().getName().ifPresent(names::add);
         }
         return names.toArray(new String[names.size()]);
     }
 
     @Override
-    public void addEntry(UserListWhitelistEntry entry) {
-        getService().addProfile(((GameProfile) entry.getValue()));
-    }
-
-    @Override
-    public void removeEntry(com.mojang.authlib.GameProfile entry) {
-        getService().removeProfile((GameProfile) entry);
+    public void addEntry(UserListBansEntry entry) {
+        getService().addBan((Ban) entry);
     }
 
     @Override
     public boolean isEmpty() {
-        return getService().getWhitelistedProfiles().isEmpty();
+        return getService().getProfileBans().isEmpty();
+    }
+
+    @Override
+    public void removeEntry(com.mojang.authlib.GameProfile entry) {
+        getService().pardon((GameProfile) entry);
     }
 
     @Override
     @Nullable
-    public com.mojang.authlib.GameProfile getByName(String profileName) {
-        for (GameProfile profile : Sponge.getServiceManager().provideUnchecked(WhitelistService.class).getWhitelistedProfiles()) {
-            if (profile.getName().isPresent() && profile.getName().get().equals(profileName)) {
-                return (com.mojang.authlib.GameProfile) profile;
+    public com.mojang.authlib.GameProfile getBannedProfile(String username) {
+        for (Ban.Profile ban : getService().getProfileBans()) {
+            if (ban.getProfile().getName().isPresent() && ban.getProfile().getName().get().equals(username)) {
+                return (com.mojang.authlib.GameProfile) ban.getProfile();
             }
         }
 

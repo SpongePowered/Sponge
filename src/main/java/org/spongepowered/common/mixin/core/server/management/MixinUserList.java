@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.ban;
+package org.spongepowered.common.mixin.core.server.management;
 
 import net.minecraft.server.management.UserList;
 import org.apache.logging.log4j.Logger;

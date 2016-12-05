@@ -53,6 +53,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
+import net.minecraft.server.management.UserListBans;
+import net.minecraft.server.management.UserListIPBans;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -85,7 +87,9 @@ import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -117,6 +121,8 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketWorldBorder;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.service.ban.SpongeIPBanList;
+import org.spongepowered.common.service.ban.SpongeUserListBans;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.service.whitelist.SpongeUserListWhitelist;
 import org.spongepowered.common.text.SpongeTexts;
@@ -164,9 +170,29 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     }
 
     /**
+     * @author Minecrell - December 5th, 2016
+     * @reason Redirect ban list constructor and use our custom implementation
+     *     instead. Redirects all methods to the {@link BanService}.
+     */
+    @Redirect(method = "<init>", at = @At(value = "NEW", args = "class=net/minecraft/server/management/UserListBans"))
+    private UserListBans createBanList(File file) {
+        return new SpongeUserListBans(file);
+    }
+
+    /**
+     * @author Minecrell - December 5th, 2016
+     * @reason Redirect IP ban list constructor and use our custom implementation
+     *     instead. Redirects all methods to the {@link BanService}.
+     */
+    @Redirect(method = "<init>", at = @At(value = "NEW", args = "class=net/minecraft/server/management/UserListIPBans"))
+    private UserListIPBans createIPBanList(File file) {
+        return new SpongeIPBanList(file);
+    }
+
+    /**
      * @author Minecrell - December 4th, 2016
      * @reason Redirect whitelist constructor and use our custom implementation
-     *     instead. Redirects all methods to the whitelist service.
+     *     instead. Redirects all methods to the {@link WhitelistService}.
      */
     @Redirect(method = "<init>", at = @At(value = "NEW", args = "class=net/minecraft/server/management/UserListWhitelist"))
     private UserListWhitelist createWhitelist(File file) {

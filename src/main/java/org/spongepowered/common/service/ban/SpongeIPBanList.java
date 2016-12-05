@@ -22,18 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.ban;
+package org.spongepowered.common.service.ban;
 
 import static org.spongepowered.common.util.NetworkUtil.LOCAL_ADDRESS;
 
-import net.minecraft.server.management.UserList;
 import net.minecraft.server.management.UserListIPBans;
 import net.minecraft.server.management.UserListIPBansEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.util.ban.Ban;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.util.NetworkUtil;
 
 import java.io.File;
@@ -44,47 +41,56 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(UserListIPBans.class) // This is a bad MCP name, it's really IPBanList
-public abstract class MixinIPBanList extends UserList<String, UserListIPBansEntry> {
+import javax.annotation.Nullable;
 
-    public MixinIPBanList(File saveFile) {
-        super(saveFile);
+/**
+ * Redirects all calls to the {@link BanService}.
+ */
+public class SpongeIPBanList extends UserListIPBans {
+
+    public SpongeIPBanList(File bansFile) {
+        super(bansFile);
+    }
+
+    private static BanService getService() {
+        return Sponge.getServiceManager().provideUnchecked(BanService.class);
     }
 
     @Override
-    public boolean hasEntry(String object) {
-        if (object.equals(LOCAL_ADDRESS)) { // Check for single player
+    protected boolean hasEntry(String entry) {
+        if (entry.equals(LOCAL_ADDRESS)) { // Check for single player
             return false;
         }
 
         try {
-            return Sponge.getServiceManager().provideUnchecked(BanService.class).isBanned(InetAddress.getByName(object));
+            return getService().isBanned(InetAddress.getByName(entry));
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
     }
 
     @Override
-    public UserListIPBansEntry getEntry(String object) {
-        if (object.equals(LOCAL_ADDRESS)) { // Check for single player
+    @Nullable
+    public UserListIPBansEntry getEntry(String obj) {
+        if (obj.equals(LOCAL_ADDRESS)) { // Check for single player
             return null;
         }
 
         try {
-            return (UserListIPBansEntry) Sponge.getServiceManager().provideUnchecked(BanService.class).getBanFor(InetAddress.getByName(object)).orElse(null);
+            return (UserListIPBansEntry) getService().getBanFor(InetAddress.getByName(obj)).orElse(null);
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
     }
 
     @Override
-    public void removeEntry(String object) {
-        if (object.equals(LOCAL_ADDRESS)) { // Check for single player
+    public void removeEntry(String entry) {
+        if (entry.equals(LOCAL_ADDRESS)) { // Check for single player
             return;
         }
 
         try {
-            Sponge.getServiceManager().provideUnchecked(BanService.class).pardon(InetAddress.getByName(object));
+            getService().pardon(InetAddress.getByName(entry));
         } catch (UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -93,7 +99,7 @@ public abstract class MixinIPBanList extends UserList<String, UserListIPBansEntr
     @Override
     public String[] getKeys() {
         List<String> ips = new ArrayList<>();
-        for (Ban.Ip ban: Sponge.getServiceManager().provideUnchecked(BanService.class).getIpBans()) {
+        for (Ban.Ip ban : getService().getIpBans()) {
             ips.add(this.addressToString(new InetSocketAddress(ban.getAddress(), 0)));
         }
         return ips.toArray(new String[ips.size()]);
@@ -101,12 +107,12 @@ public abstract class MixinIPBanList extends UserList<String, UserListIPBansEntr
 
     @Override
     public void addEntry(UserListIPBansEntry entry) {
-        Sponge.getServiceManager().provideUnchecked(BanService.class).addBan((Ban) entry);
+        getService().addBan((Ban) entry);
     }
 
     @Override
     public boolean isEmpty() {
-        return Sponge.getServiceManager().provideUnchecked(BanService.class).getIpBans().isEmpty();
+        return getService().getIpBans().isEmpty();
     }
 
     /**
@@ -114,7 +120,7 @@ public abstract class MixinIPBanList extends UserList<String, UserListIPBansEntr
      * @reason Use InetSocketAddress#getHostString() where possible (instead of
      *     inspecting SocketAddress#toString()) to support IPv6 addresses
      */
-    @Overwrite
+    @Override
     public String addressToString(SocketAddress address) {
         return NetworkUtil.getHostString(address);
     }
