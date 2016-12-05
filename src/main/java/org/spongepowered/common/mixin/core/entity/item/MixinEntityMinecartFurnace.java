@@ -27,15 +27,32 @@ package org.spongepowered.common.mixin.core.entity.item;
 import net.minecraft.entity.item.EntityMinecartFurnace;
 import org.spongepowered.api.entity.vehicle.minecart.FurnaceMinecart;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(EntityMinecartFurnace.class)
 public abstract class MixinEntityMinecartFurnace extends MixinEntityMinecart implements FurnaceMinecart {
 
-    // This overrides the field initializer since MinecartFurnaces use a different maximum speed
-    protected double maxSpeed = 0.2D;
-
     @Shadow private int fuel;
+
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    private void onInit(CallbackInfo ci) {
+        // This overrides the field initializer in EntityMinecart since MinecartFurnaces use a different maximum speed
+        setSwiftness(0.2D);
+    }
+
+    /**
+     * @author Minecrell - December 5th, 2016
+     * @reason Use our custom maximum speed for the Minecart.
+     */
+    @Overwrite
+    protected double getMaximumSpeed() {
+        // Return our custom value from EntityMinecart
+        return super.getMaximumSpeed();
+    }
 
     @Override
     public int getFuel() {
@@ -46,4 +63,5 @@ public abstract class MixinEntityMinecartFurnace extends MixinEntityMinecart imp
     public void setFuel(int fuel) {
         this.fuel = fuel;
     }
+
 }
