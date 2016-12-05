@@ -14,9 +14,7 @@
         "authlib.MixinPropertyMap",
         "ban.MixinBanEntry",
         "ban.MixinIPBanEntry",
-        "ban.MixinIPBanList",
         "ban.MixinUserBanEntry",
-        "ban.MixinUserListBans",
         "block.MixinBehaviorProjectileDispense",
         "block.MixinBlock",
         "block.MixinBlockAnvil",
@@ -372,6 +370,7 @@
         "server.management.MixinPlayerChunkMapEntry",
         "server.management.MixinPlayerProfileCache",
         "server.management.MixinPlayerProfileCacheEntry",
+        "server.management.MixinUserList",
         "server.network.MixinNetHandlerHandshakeTCP",
         "server.network.MixinNetHandlerLoginServer",
         "server.network.MixinNetHandlerLoginServerAnonThread",
@@ -504,7 +503,6 @@
         "world.storage.MixinSaveHandler"
     ],
     "server": [
-        "ban.MixinUserList",
         "network.rcon.MixinRConConsoleSource",
         "network.rcon.MixinRConThreadClient",
         "server.MixinDedicatedServer"
