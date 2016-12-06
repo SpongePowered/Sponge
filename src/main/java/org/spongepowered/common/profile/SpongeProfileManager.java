@@ -26,40 +26,59 @@ package org.spongepowered.common.profile;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.profile.property.ProfileProperty;
-import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.profile.query.GameProfileQuery;
 import org.spongepowered.common.profile.query.NameQuery;
 import org.spongepowered.common.profile.query.UniqueIdQuery;
-import org.spongepowered.common.profile.task.GameProfileQueryTask;
 import org.spongepowered.common.scheduler.SpongeScheduler;
+import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.util.Collection;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.annotation.Nullable;
 
 public final class SpongeProfileManager implements GameProfileManager {
 
+    private static final int LOOKUP_INTERVAL = SpongeImpl.getGlobalConfig().getConfig().getWorld().getGameProfileQueryTaskInterval();
     private final GameProfileCache defaultCache = (GameProfileCache) SpongeImpl.getServer().getPlayerProfileCache();
-    private final GameProfileQueryTask gameProfileQueryTask;
     private GameProfileCache cache = this.defaultCache;
-    private SpongeExecutorService gameLookupExecutorService;
+    private ExecutorService gameLookupExecutorService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Sponge - Async User Lookup Thread").build());
 
     public SpongeProfileManager() {
-        this.gameProfileQueryTask = new GameProfileQueryTask();
-        this.gameLookupExecutorService = SpongeScheduler.getInstance().createAsyncExecutor(SpongeImpl.getPlugin());
-        this.gameLookupExecutorService.execute(this.gameProfileQueryTask);
     }
 
-    public void queueUserLookup(UUID uuid) {
-        this.gameLookupExecutorService.execute(() -> { this.gameProfileQueryTask.queueUuid(uuid);});
+    public void lookupUserAsync(UUID uuid) {
+        this.gameLookupExecutorService.execute(() -> { 
+            if (SpongeUsernameCache.getLastKnownUsername(uuid) != null) {
+                return;
+            }
+
+            try {
+                Sponge.getServer().getGameProfileManager().get(checkNotNull(uuid, "uniqueId")).get();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                Thread.sleep(LOOKUP_INTERVAL * 1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override

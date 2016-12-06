@@ -197,7 +197,7 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         }
 
         // If we reach this point, queue UUID for async lookup and return empty
-        this.spongeProfileManager.queueUserLookup(uuid);
+        this.spongeProfileManager.lookupUserAsync(uuid);
         return Optional.empty();
     }
 
