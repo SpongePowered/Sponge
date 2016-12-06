@@ -115,7 +115,7 @@ public final class NbtDataUtil {
 
     public static final String CHUNK_DATA_LEVEL = "Level";
     public static final String CHUNK_DATA_SECTIONS = "Sections";
-    
+
     public static final String SPAWNABLE_ENTITY_TAG = "EntityTag";
 
     // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
@@ -374,27 +374,25 @@ public final class NbtDataUtil {
         } else {
             compound = itemStack.getTagCompound();
         }
-        final NBTTagList enchantments = compound.getTagList(NbtDataUtil.ITEM_ENCHANTMENT_LIST, NbtDataUtil.TAG_COMPOUND);
-        final Map<Enchantment, Integer> mergedMap = Maps.newLinkedHashMap(); // We need to retain insertion order.
-        if (enchantments.tagCount() != 0) {
-            for (int i = 0; i < enchantments.tagCount(); i++) { // we have to filter out the enchantments we're replacing...
-                final NBTTagCompound enchantmentCompound = enchantments.getCompoundTagAt(i);
-                final short enchantmentId = enchantmentCompound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
-                final short level = enchantmentCompound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
-                final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentByID(enchantmentId);
-                mergedMap.put(enchantment, (int) level);
-            }
+
+        if (value.isEmpty()) { // if there's no enchantments, remove the tag that says there's enchantments
+            compound.removeTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST);
+            return;
         }
-        for (ItemEnchantment enchantment : value) {
-            mergedMap.put(enchantment.getEnchantment(), enchantment.getLevel());
+
+        final Map<Enchantment, Integer> valueMap = Maps.newLinkedHashMap();
+        for (ItemEnchantment enchantment : value) { // convert ItemEnchantment to map
+            valueMap.put(enchantment.getEnchantment(), enchantment.getLevel());
         }
-        final NBTTagList newList = new NBTTagList(); // Reconstruct the newly merged enchantment list
-        for (Map.Entry<Enchantment, Integer> entry : mergedMap.entrySet()) {
+
+        final NBTTagList newList = new NBTTagList(); // construct the enchantment list
+        for (Map.Entry<Enchantment, Integer> entry : valueMap.entrySet()) {
             final NBTTagCompound enchantmentCompound = new NBTTagCompound();
             enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
             enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
             newList.appendTag(enchantmentCompound);
         }
+
         compound.setTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST, newList);
     }
 
