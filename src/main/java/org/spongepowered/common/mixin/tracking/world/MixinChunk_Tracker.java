@@ -264,7 +264,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         }
 
         // If we reach this point, queue UUID for async lookup and return empty
-        this.spongeProfileManager.queueUserLookup(uuid);
+        this.spongeProfileManager.lookupUserAsync(uuid);
         return Optional.empty();
     }
 
