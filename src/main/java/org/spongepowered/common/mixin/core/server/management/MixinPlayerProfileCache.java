@@ -259,6 +259,9 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
                 this.addEntry(profile, null);
                 result.put(uniqueId, Optional.of((GameProfile) profile));
             } else {
+                // create a dummy profile to avoid future lookups
+                // if actual user logs in, the profile will be updated during PlayerList#initializeConnectionToPlayer
+                this.addEntry(new com.mojang.authlib.GameProfile(uniqueId, "SPONGE_UNKNOWN"), null);
                 result.put(uniqueId, Optional.empty());
             }
         }

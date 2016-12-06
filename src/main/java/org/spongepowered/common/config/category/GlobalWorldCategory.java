@@ -52,11 +52,11 @@ public class GlobalWorldCategory extends WorldCategory {
     private int gameProfileLookupBatchSize = 1;
 
     @Setting(value = "gameprofile-lookup-task-interval", comment = 
-            "The interval, in seconds, used by the GameProfileQueryTask to process queued gameprofile requests. (Default: 2)"
+            "The interval, in seconds, used by the GameProfileQueryTask to process queued gameprofile requests. (Default: 4)"
             + "\nNote: This setting should be raised if you experience the following error:"
             + "\n\"The client has sent too many requests within a certain amount of time\"."
             + "\nFinally, if set to 0 or less, the default interval will be used.")
-    private int gameProfileQueryTaskInterval = 2;
+    private int gameProfileQueryTaskInterval = 4;
 
     @Setting(value = "invalid-lookup-uuids", comment = 
             "The list of uuid's that should never perform a lookup against Mojang's session server."
@@ -90,7 +90,7 @@ public class GlobalWorldCategory extends WorldCategory {
 
     public int getGameProfileQueryTaskInterval() {
         if (this.gameProfileQueryTaskInterval <= 0) {
-            this.gameProfileQueryTaskInterval = 1;
+            this.gameProfileQueryTaskInterval = 4;
         }
         return this.gameProfileQueryTaskInterval;
     }
