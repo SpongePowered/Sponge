@@ -359,7 +359,6 @@
         "server.management.MixinPlayerChunkMapEntry",
         "server.management.MixinPlayerProfileCache",
         "server.management.MixinPlayerProfileCacheEntry",
-        "server.management.MixinUserList",
         "server.network.MixinNetHandlerHandshakeTCP",
         "server.network.MixinNetHandlerLoginServer",
         "server.network.MixinNetHandlerLoginServerAnonThread",
@@ -493,7 +492,8 @@
     "server": [
         "network.rcon.MixinRConConsoleSource",
         "network.rcon.MixinRConThreadClient",
-        "server.MixinDedicatedServer"
+        "server.MixinDedicatedServer",
+        "server.management.MixinUserList"
     ],
     "injectors": {
         "defaultRequire": 1
