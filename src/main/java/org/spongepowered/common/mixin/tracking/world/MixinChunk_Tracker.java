@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.tracking.world;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectArrayMap;
-import it.unimi.dsi.fastutil.shorts.Short2ObjectOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -166,11 +165,11 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Override
     public Optional<User> getBlockOwner(BlockPos pos) {
         final int key = blockPosToInt(pos);
-        final PlayerTracker playerTracker = this.trackedIntBlockPositions.get(key);
-        if (playerTracker != null) {
-            Optional<UUID> uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(playerTracker.ownerIndex));
-            if (uuid.isPresent()) {
-                UUID userUniqueId = uuid.get();
+        final PlayerTracker intTracker = this.trackedIntBlockPositions.get(key);
+        if (intTracker != null) {
+            UUID uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(intTracker.ownerIndex)).orElse(null);
+            if (uuid != null) {
+                UUID userUniqueId = uuid;
                 // get player if online
                 EntityPlayer player = this.world.getPlayerEntityByUUID(userUniqueId);
                 if (player != null) {
@@ -208,30 +207,14 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         return Optional.empty();
     }
 
-    private Optional<User> getUserFromId(UUID uuid) {
-        // check username cache
-        String username = SpongeUsernameCache.getLastKnownUsername(uuid);
-        if (username == null) {
-            // check mojang cache
-            Optional<GameProfile> profile = this.spongeProfileManager.getCache().getById(uuid);
-            if (profile.isPresent()) {
-                return this.userStorageService.get(profile.get());
-            }
-
-            this.spongeProfileManager.getGameProfileQueryTask().queueUuid(uuid);
-        }
-
-        return this.userStorageService.get(GameProfile.of(uuid, username));
-    }
-
     @Override
     public Optional<User> getBlockNotifier(BlockPos pos) {
         final int intKey = blockPosToInt(pos);
         final PlayerTracker intTracker = this.trackedIntBlockPositions.get(intKey);
         if (intTracker != null) {
-            Optional<UUID> uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(intTracker.notifierIndex));
-            if (uuid.isPresent()) {
-                UUID userUniqueId = uuid.get();
+            UUID uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(intTracker.notifierIndex)).orElse(null);
+            if (uuid != null) {
+                UUID userUniqueId = uuid;
                 // get player if online
                 EntityPlayer player = this.world.getPlayerEntityByUUID(userUniqueId);
                 if (player != null) {
@@ -247,9 +230,9 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
             short blockPos = blockPosToShort(pos);
             PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPos);
-            Optional<UUID> uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(tracker.notifierIndex));
-            if (uuid.isPresent()) {
-                UUID userUniqueId = uuid.get();
+            UUID uuid = (((IMixinWorldInfo) this.world.getWorldInfo()).getUniqueIdForIndex(tracker.notifierIndex)).orElse(null);
+            if (uuid != null) {
+                UUID userUniqueId = uuid;
                 // get player if online
                 EntityPlayer player = this.world.getPlayerEntityByUUID(userUniqueId);
                 if (player != null) {
@@ -264,6 +247,24 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             }
         }
 
+        return Optional.empty();
+    }
+
+    private Optional<User> getUserFromId(UUID uuid) {
+        // check username cache
+        String username = SpongeUsernameCache.getLastKnownUsername(uuid);
+        if (username != null) {
+            return this.userStorageService.get(GameProfile.of(uuid, username));
+        }
+
+        // check mojang cache
+        GameProfile profile = this.spongeProfileManager.getCache().getById(uuid).orElse(null);
+        if (profile != null) {
+            return this.userStorageService.get(profile);
+        }
+
+        // If we reach this point, queue UUID for async lookup and return empty
+        this.spongeProfileManager.queueUserLookup(uuid);
         return Optional.empty();
     }
 

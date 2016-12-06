@@ -29,59 +29,52 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.util.SpongeUsernameCache;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 public class GameProfileQueryTask implements Runnable {
 
-    private List<CompletableFuture<GameProfile>> futureList = new ArrayList<>();
     private Set<UUID> queuedUuidList = new HashSet<>();
-    private static final int REQUEST_LIMIT = SpongeImpl.getGlobalConfig().getConfig().getWorld().getGameProfileLookupBatchSize();
+    private static final int LOOKUP_INTERVAL = SpongeImpl.getGlobalConfig().getConfig().getWorld().getGameProfileQueryTaskInterval();
 
-    public synchronized void queueUuid(UUID uuid) {
+    public void queueUuid(UUID uuid) {
         this.queuedUuidList.add(uuid);
-    }
-
-    public synchronized void removeFromQueue(UUID uuid) {
-        this.queuedUuidList.remove(uuid);
     }
 
     @Override
     public void run() {
-        Iterator<CompletableFuture<GameProfile>> futureIterator = this.futureList.iterator();
-        while (futureIterator.hasNext()) {
-            CompletableFuture<GameProfile> future = futureIterator.next();
-            if (future.isDone()) {
+        while (true) {
+            if (this.queuedUuidList.isEmpty()) {
+                continue;
+            }
+
+            Iterator<UUID> iterator = new HashSet<>(this.queuedUuidList).iterator();
+            while (iterator.hasNext()) {
+                UUID uuid = iterator.next();
+                if (SpongeUsernameCache.getLastKnownUsername(uuid) != null) {
+                    iterator.remove();
+                    continue;
+                }
                 try {
-                    GameProfile profile = future.get();
-                    this.removeFromQueue(profile.getUniqueId());
+                    GameProfile profile = Sponge.getServer().getGameProfileManager().get(checkNotNull(uuid, "uniqueId")).get();
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } catch (ExecutionException e) {
                     e.printStackTrace();
                 }
-                futureIterator.remove();
+                iterator.remove();
+                try {
+                    Thread.sleep(LOOKUP_INTERVAL * 1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-
-        if (this.queuedUuidList.isEmpty()) {
-            return;
-        }
-
-        Iterator<UUID> iterator = this.queuedUuidList.iterator();
-        int count = 0;
-        while (iterator.hasNext() && count < REQUEST_LIMIT) {
-            UUID uuid = iterator.next();
-            CompletableFuture<GameProfile> future = Sponge.getServer().getGameProfileManager().get(checkNotNull(uuid, "uniqueId"));
-            this.futureList.add(future);
-            count++;
+            this.queuedUuidList.clear();
         }
     }
 
