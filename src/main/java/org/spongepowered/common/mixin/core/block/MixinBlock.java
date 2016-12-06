@@ -118,7 +118,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
         // onEntityCollidedWithBlock
         try {
-            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityCollidedWithBlock" : "func_176199_a";
+            String mapping = SpongeImplHooks.isDeobfuscatedEnvironment() ? "onEntityWalk" : "func_176199_a";
             Class<?>[] argTypes = { net.minecraft.world.World.class, BlockPos.class, Entity.class };
             Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
             if (clazz.equals(Block.class)) {
