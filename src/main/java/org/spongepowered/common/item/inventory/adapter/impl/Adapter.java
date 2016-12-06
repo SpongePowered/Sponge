@@ -112,7 +112,7 @@ public class Adapter implements MinecraftInventoryAdapter {
         private static Optional<ItemStack> findStack(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, boolean remove) {
             for (int ord = 0; ord < lens.slotCount(); ord++) {
                 net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
-                if (stack == null || (remove && !lens.setStack(inv, ord, null))) {
+                if (stack.isEmpty() || (remove && !lens.setStack(inv, ord, net.minecraft.item.ItemStack.EMPTY))) {
                     continue;
                 }
                 return ItemStackUtil.cloneDefensiveOptional(stack);
@@ -126,7 +126,7 @@ public class Adapter implements MinecraftInventoryAdapter {
 
             for (int ord = 0; ord < lens.slotCount(); ord++) {
                 net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
-                if (stack == null || stack.getCount() < 1 || (result != null && !result.getItem().equals(stack.getItem()))) {
+                if (stack.isEmpty() || stack.getCount() < 1 || (result != null && !result.getItem().equals(stack.getItem()))) {
                     continue;
                 }
 
@@ -204,9 +204,9 @@ public class Adapter implements MinecraftInventoryAdapter {
             for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
                 net.minecraft.item.ItemStack old = lens.getStack(inv, ord);
                 int push = Math.min(remaining, maxStackSize);
-                if (old == null && lens.setStack(inv, ord, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
+                if (old.isEmpty() && lens.setStack(inv, ord, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
                     remaining -= push;
-                } else if (old != null && ItemStackUtil.compare(old, stack)) {
+                } else if (!old.isEmpty() && ItemStackUtil.compare(old, stack)) {
                     push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
                     old.setCount(old.getCount() + push);
                     remaining -= push;
@@ -231,7 +231,7 @@ public class Adapter implements MinecraftInventoryAdapter {
             int stacks = 0;
 
             for (int ord = 0; ord < lens.slotCount(); ord++) {
-                stacks += lens.getStack(inv, ord) != null ? 1 : 0;
+                stacks += !lens.getStack(inv, ord).isEmpty() ? 1 : 0;
             }
 
             return stacks;
@@ -246,7 +246,7 @@ public class Adapter implements MinecraftInventoryAdapter {
 
             for (int ord = 0; ord < lens.slotCount(); ord++) {
                 net.minecraft.item.ItemStack stack = lens.getStack(inv, ord);
-                items += stack != null ? stack.getCount() : 0;
+                items += !stack.isEmpty() ? stack.getCount() : 0;
             }
 
             return items;

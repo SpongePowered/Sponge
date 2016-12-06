@@ -162,9 +162,9 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
                 // Sponge start
                 if (this.captureInventory) {
-                    final ItemStackSnapshot originalItem = itemstack1 == null ? ItemStackSnapshot.NONE
+                    final ItemStackSnapshot originalItem = itemstack1.isEmpty() ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) itemstack1).createSnapshot();
-                    final ItemStackSnapshot newItem = itemstack == null ? ItemStackSnapshot.NONE
+                    final ItemStackSnapshot newItem = itemstack.isEmpty() ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
 
                     SlotAdapter adapter = this.adapters.get(i);
@@ -204,10 +204,10 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
             final Slot slot = getSlot(slotId);
             if (slot != null) {
-                ItemStackSnapshot originalItem = slot.getStack() == null ? ItemStackSnapshot.NONE
+                ItemStackSnapshot originalItem = slot.getStack().isEmpty() ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
                 ItemStackSnapshot newItem =
-                        itemstack == null ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
+                        itemstack.isEmpty() ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
 
                 SlotAdapter adapter = this.adapters.get(slotId);
 

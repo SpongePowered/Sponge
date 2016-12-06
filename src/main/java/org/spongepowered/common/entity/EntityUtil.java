@@ -993,7 +993,7 @@ public final class EntityUtil {
         ItemStack itemstack = dropItemAndGetStack(player, entityitem);
 
         if (traceItem) {
-            if (itemstack != null) {
+            if (!itemstack.isEmpty()) {
                 player.addStat(StatList.getDroppedObjectStats(itemstack.getItem()), droppedItem.getCount());
             }
 

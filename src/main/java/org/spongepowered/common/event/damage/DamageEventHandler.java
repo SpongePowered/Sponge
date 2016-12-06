@@ -115,7 +115,7 @@ public class DamageEventHandler {
 
             for (int index = 0; index < inventory.length; index++) {
                 net.minecraft.item.ItemStack itemStack = inventory[index];
-                if (itemStack == null) {
+                if (itemStack.isEmpty()) {
                     continue;
                 }
                 Item item = itemStack.getItem();
@@ -193,7 +193,7 @@ public class DamageEventHandler {
         if (property.isPresent()) {
             damage = Math.abs(damage) * 25;
             net.minecraft.item.ItemStack stack = Iterables.get(inventory, property.get().slot);
-            if (stack == null) {
+            if (stack.isEmpty()) {
                 throw new IllegalStateException("Invalid slot position " + property.get().slot);
             }
 
@@ -240,7 +240,7 @@ public class DamageEventHandler {
         boolean first = true;
         int totalModifier = 0;
         for (net.minecraft.item.ItemStack itemStack : inventory) {
-            if (itemStack == null) {
+            if (itemStack.isEmpty()) {
                 continue;
             }
             NBTTagList enchantmentList = itemStack.getEnchantmentTagList();

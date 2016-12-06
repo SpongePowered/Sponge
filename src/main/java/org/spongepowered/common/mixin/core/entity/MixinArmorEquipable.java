@@ -53,7 +53,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
 
     public Optional<ItemStack> equipable$getHelmet() {
         @Nullable final net.minecraft.item.ItemStack itemStack = this.getItemStackFromSlot(EntityEquipmentSlot.HEAD);
-        return Optional.ofNullable(itemStack == null ? null : (ItemStack) itemStack.copy());
+        return Optional.ofNullable(itemStack.isEmpty() ? null : (ItemStack) itemStack.copy());
     }
 
     public void equipable$setHelmet(ItemStack helmet) {
@@ -66,7 +66,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
 
     public Optional<ItemStack> equipable$getChestplate() {
         @Nullable final net.minecraft.item.ItemStack itemStack = this.getItemStackFromSlot(EntityEquipmentSlot.CHEST);
-        return Optional.ofNullable(itemStack == null ? null : ((ItemStack) itemStack.copy()));
+        return Optional.ofNullable(itemStack.isEmpty() ? null : ((ItemStack) itemStack.copy()));
     }
 
     public void equipable$setChestplate(ItemStack chestplate) {
@@ -79,7 +79,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
 
     public Optional<ItemStack> equipable$getLeggings() {
         @Nullable final net.minecraft.item.ItemStack itemStack = this.getItemStackFromSlot(EntityEquipmentSlot.LEGS);
-        return Optional.ofNullable(itemStack == null ? null : ((ItemStack) itemStack.copy()));
+        return Optional.ofNullable(itemStack.isEmpty() ? null : ((ItemStack) itemStack.copy()));
     }
 
     public void equipable$setLeggings(ItemStack leggings) {
@@ -92,7 +92,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
 
     public Optional<ItemStack> equipable$getBoots() {
         @Nullable final net.minecraft.item.ItemStack itemStack = this.getItemStackFromSlot(EntityEquipmentSlot.FEET);
-        return Optional.ofNullable(itemStack == null ? null : ((ItemStack) itemStack.copy()));
+        return Optional.ofNullable(itemStack.isEmpty() ? null : ((ItemStack) itemStack.copy()));
     }
 
     public void equipable$setBoots(ItemStack boots) {
@@ -106,7 +106,7 @@ public abstract class MixinArmorEquipable extends MixinEntityLivingBase {
     public Optional<ItemStack> equipable$getItemInHand(HandType handType) {
         checkNotNull(handType, "HandType cannot be null!");
         @Nullable final net.minecraft.item.ItemStack itemStack = this.getHeldItem((EnumHand) (Object) handType);
-        return Optional.ofNullable(itemStack == null ? null : ((ItemStack) itemStack.copy()));
+        return Optional.ofNullable(itemStack.isEmpty() ? null : ((ItemStack) itemStack.copy()));
     }
 
     public void equipable$setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {

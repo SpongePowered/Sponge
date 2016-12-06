@@ -774,7 +774,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // Our using item state is probably desynced from the client (e.g. from the initial air interaction of a bow being cancelled).
         // We need to re-send the player's inventory to overwrite any client-side inventory changes that may have occured as a result
         // of the client (but not the server) calling Item#onPlayerStoppedUsing (which in the case of a bow, removes one arrow from the inventory).
-        if (this.activeItemStack == null) {
+        if (this.activeItemStack.isEmpty()) {
             this$.sendContainerToPlayer(this$.inventoryContainer);
         }
         super.stopActiveHand();
