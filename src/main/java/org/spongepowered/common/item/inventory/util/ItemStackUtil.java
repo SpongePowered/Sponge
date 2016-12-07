@@ -46,7 +46,6 @@ public abstract class ItemStackUtil {
         return compound;
     }
 
-    @Nullable
     public static net.minecraft.item.ItemStack toNative(@Nullable ItemStack stack) {
         if (stack instanceof net.minecraft.item.ItemStack || stack == null) {
             return stack == null ? net.minecraft.item.ItemStack.EMPTY : (net.minecraft.item.ItemStack) stack;
@@ -54,7 +53,6 @@ public abstract class ItemStackUtil {
         throw new NativeStackException("The supplied item stack was not native to the current platform");
     }
 
-    @Nullable
     public static ItemStack fromNative(net.minecraft.item.ItemStack stack) {
         if (stack instanceof ItemStack) {
             return (ItemStack) stack;
@@ -62,62 +60,56 @@ public abstract class ItemStackUtil {
         throw new NativeStackException("The supplied native item stack was not compatible with the target environment");
     }
 
-    @Nullable
-    public static net.minecraft.item.ItemStack cloneDefensiveNative(@Nullable net.minecraft.item.ItemStack stack) {
+    public static net.minecraft.item.ItemStack cloneDefensiveNative(net.minecraft.item.ItemStack stack) {
         return stack.copy();
     }
 
-    @Nullable
-    public static net.minecraft.item.ItemStack cloneDefensiveNative(@Nullable net.minecraft.item.ItemStack stack, int newSize) {
+    public static net.minecraft.item.ItemStack cloneDefensiveNative(net.minecraft.item.ItemStack stack, int newSize) {
         net.minecraft.item.ItemStack clone = stack.copy();
-        if (clone != null) {
+        if (!clone.isEmpty()) {
             clone.setCount(newSize);
         }
         return clone;
     }
 
-    @Nullable
-    public static ItemStack cloneDefensive(@Nullable net.minecraft.item.ItemStack stack) {
+    public static ItemStack cloneDefensive(net.minecraft.item.ItemStack stack) {
         return (ItemStack) ItemStackUtil.cloneDefensiveNative(stack);
     }
 
-    @Nullable
     public static ItemStack cloneDefensive(@Nullable ItemStack stack) {
         return ItemStackUtil.cloneDefensive(ItemStackUtil.toNative(stack));
     }
 
-    @Nullable
     public static ItemStack cloneDefensive(net.minecraft.item.ItemStack stack, int newSize) {
         return (ItemStack) ItemStackUtil.cloneDefensiveNative(stack, newSize);
     }
 
-    @Nullable
     public static ItemStack cloneDefensive(@Nullable ItemStack stack, int newSize) {
         return ItemStackUtil.cloneDefensive(ItemStackUtil.toNative(stack), newSize);
     }
 
-    public static Optional<ItemStack> cloneDefensiveOptional(@Nullable net.minecraft.item.ItemStack stack) {
+    public static Optional<ItemStack> cloneDefensiveOptional(net.minecraft.item.ItemStack stack) {
         return Optional.<ItemStack>ofNullable(ItemStackUtil.cloneDefensive(stack));
     }
 
-    public static Optional<ItemStack> cloneDefensiveOptional(@Nullable net.minecraft.item.ItemStack stack, int withdraw) {
+    public static Optional<ItemStack> cloneDefensiveOptional(net.minecraft.item.ItemStack stack, int withdraw) {
         return Optional.<ItemStack>ofNullable(ItemStackUtil.cloneDefensive(stack));
     }
 
-    public static boolean compare(net.minecraft.item.ItemStack stack1, net.minecraft.item.ItemStack stack2) {
-        return net.minecraft.item.ItemStack.areItemStacksEqual(stack1, stack2);
+    public static boolean compareIgnoreQuantity(net.minecraft.item.ItemStack stack1, net.minecraft.item.ItemStack stack2) {
+        return stack1.isItemEqual(stack2) && net.minecraft.item.ItemStack.areItemStackTagsEqual(stack1, stack2);
     }
 
-    public static boolean compare(net.minecraft.item.ItemStack stack1, ItemStack stack2) {
-        return ItemStackUtil.compare(stack1, ItemStackUtil.toNative(stack2));
+    public static boolean compareIgnoreQuantity(net.minecraft.item.ItemStack stack1, ItemStack stack2) {
+        return ItemStackUtil.compareIgnoreQuantity(stack1, ItemStackUtil.toNative(stack2));
     }
 
-    public static boolean compare(ItemStack stack1, ItemStack stack2) {
-        return ItemStackUtil.compare(ItemStackUtil.toNative(stack1), ItemStackUtil.toNative(stack2));
+    public static boolean compareIgnoreQuantity(ItemStack stack1, ItemStack stack2) {
+        return ItemStackUtil.compareIgnoreQuantity(ItemStackUtil.toNative(stack1), ItemStackUtil.toNative(stack2));
     }
 
-    public static boolean compare(ItemStack stack1, net.minecraft.item.ItemStack stack2) {
-        return ItemStackUtil.compare(ItemStackUtil.toNative(stack1), stack2);
+    public static boolean compareIgnoreQuantity(ItemStack stack1, net.minecraft.item.ItemStack stack2) {
+        return ItemStackUtil.compareIgnoreQuantity(ItemStackUtil.toNative(stack1), stack2);
     }
 
     public static ItemStackSnapshot createSnapshot(net.minecraft.item.ItemStack item) {

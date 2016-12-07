@@ -206,7 +206,7 @@ public class Adapter implements MinecraftInventoryAdapter {
                 int push = Math.min(remaining, maxStackSize);
                 if (old.isEmpty() && lens.setStack(inv, ord, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
                     remaining -= push;
-                } else if (!old.isEmpty() && ItemStackUtil.compare(old, stack)) {
+                } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
                     push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
                     old.setCount(old.getCount() + push);
                     remaining -= push;
