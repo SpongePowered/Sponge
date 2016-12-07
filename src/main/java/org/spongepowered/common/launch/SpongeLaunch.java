@@ -28,10 +28,13 @@ import static org.spongepowered.common.SpongeImpl.ECOSYSTEM_ID;
 
 import org.spongepowered.asm.launch.MixinBootstrap;
 import org.spongepowered.asm.mixin.Mixins;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.launch.transformer.SpongeSuperclassRegistry;
+import org.spongepowered.common.util.PathTokens;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class SpongeLaunch {
 
@@ -44,6 +47,7 @@ public class SpongeLaunch {
     private static Path pluginsDir;
     private static Path configDir;
     private static Path spongeConfigDir;
+    private static Path pluginConfigDir;
 
     public static Path getGameDir() {
         return gameDir;
@@ -55,6 +59,13 @@ public class SpongeLaunch {
 
     public static Path getConfigDir() {
         return configDir;
+    }
+
+    public static Path getPluginConfigDir() {
+        if (pluginConfigDir == null) {
+            pluginConfigDir = Paths.get(PathTokens.replace(SpongeImpl.getGlobalConfig().getConfig().getGeneral().configDir()));
+        }
+        return pluginConfigDir;
     }
 
     public static Path getSpongeConfigDir() {
