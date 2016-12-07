@@ -76,8 +76,6 @@ public interface IMixinWorldInfo {
 
     void setSeed(long seed);
 
-    void setWorldName(String name);
-
     void setScoreboard(ServerScoreboard scoreboard);
 
     boolean isValid();
