@@ -219,11 +219,15 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos) {
-        return callChangeBlockEventPre(worldIn, pos, null);
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, NamedCause namedWorldCause) {
+        return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), namedWorldCause, null);
     }
 
-    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, Object source) {
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, NamedCause namedWorldCause, Object source) {
+        return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), namedWorldCause, source);
+    }
+
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, ImmutableList<Location<World>> locations, NamedCause namedWorldCause, Object source) {
         final CauseTracker causeTracker = worldIn.getCauseTracker();
         final PhaseData data = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = data.state;
@@ -249,12 +253,12 @@ public class SpongeCommonEventFactory {
             if (SpongeImplHooks.isFakePlayer(player)) {
                 if (owner != null) {
                     builder = Cause.source(owner);
-                    builder.named("FakePlayer", player);
+                    builder.named(NamedCause.FAKE_PLAYER, player);
                 } else if (notifier != null) {
                     builder = Cause.source(notifier);
-                    builder.named("FakePlayer", player);
+                    builder.named(NamedCause.FAKE_PLAYER, player);
                 } else {
-                    builder = Cause.builder().named("FakePlayer", player);
+                    builder = Cause.builder().named(NamedCause.FAKE_PLAYER, player);
                 }
             }
         }
@@ -270,9 +274,9 @@ public class SpongeCommonEventFactory {
                 builder.notifier(notifier);
             }
         }
-        Location<World> location = new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ());
-        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), ImmutableList.of(location),
-                (World) worldIn);
+        builder.named(namedWorldCause);
+
+        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), locations, (World) worldIn);
         SpongeImpl.postEvent(event);
         return event;
     }
