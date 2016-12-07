@@ -35,7 +35,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.common.interfaces.item.crafting.IMixinShapedRecipes;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -71,7 +70,7 @@ public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRe
     }
 
     @Override
-    public ShapedCraftingRecipe.Builder results(Collection<ItemStack> result) {
+    public ShapedCraftingRecipe.Builder results(Iterable<ItemStack> result) {
         this.results = Lists.newArrayList(result);
         return this;
     }
