@@ -86,6 +86,7 @@ import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegist
 import org.spongepowered.common.util.FunctionalUtil;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.persistence.JsonTranslator;
+import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -208,7 +209,18 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         MixinWorldInfo info = (MixinWorldInfo) (Object) worldInformation;
         this.portalAgentType = info.portalAgentType;
         this.dimensionType = info.dimensionType;
+    }
 
+    @Inject(method = "updateTagCompound", at = @At("HEAD"))
+    private void ensureLevelNameMatchesDirectory(NBTTagCompound compound, NBTTagCompound player, CallbackInfo ci) {
+        if (this.dimensionId == null) {
+            return;
+        }
+
+        final String name = WorldManager.getWorldFolderByDimensionId(this.dimensionId).orElse(null);
+        if (!this.levelName.equalsIgnoreCase(name)) {
+            this.levelName = name;
+        }
     }
 
     @Override
@@ -304,11 +316,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Intrinsic
     public String worldproperties$getWorldName() {
         return this.levelName;
-    }
-
-    @Override
-    public void setWorldName(String name) {
-        this.levelName = name;
     }
 
     @Intrinsic

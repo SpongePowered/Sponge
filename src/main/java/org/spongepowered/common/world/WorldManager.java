@@ -736,6 +736,11 @@ public final class WorldManager {
                 ((IMixinWorldInfo) worldInfo).setDimensionId(dimensionId);
             }
 
+            // Keep the LevelName in the LevelInfo up to date with the directory name
+            if (!worldInfo.getWorldName().equals(worldFolderName)) {
+                worldInfo.setWorldName(worldFolderName);
+            }
+
             // Step 5 - Load server resource pack from dimension 0
             if (dimensionId == 0) {
                 server.setResourcePackFromWorld(worldFolderName, saveHandler);
