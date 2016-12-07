@@ -170,8 +170,8 @@ public final class SpongeImpl {
         return SpongeLaunch.getGameDir();
     }
 
-    public static Path getConfigDir() {
-        return SpongeLaunch.getConfigDir();
+    public static Path getPluginConfigDir() {
+        return SpongeLaunch.getPluginConfigDir();
     }
 
     public static Path getPluginsDir() {
