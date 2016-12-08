@@ -619,6 +619,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
                 } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
                     hand = EnumHand.MAIN_HAND; // Will be null in the packet during ATTACK
+                    itemstack = this.playerEntity.getHeldItem(hand);
                     SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
                     if(SpongeCommonEventFactory.callInteractItemEventPrimary(this.playerEntity, itemstack, hand, Optional.empty(), entity).isCancelled()) {
                         return;
