@@ -157,7 +157,7 @@ public class SpongeGameRegistry implements GameRegistry {
         }
 
         this.catalogRegistryMap.put(catalogClass, registryModule);
-        if (this.phase != RegistrationPhase.PRE_REGISTRY) {
+        if (!this.orderedModules.isEmpty()) {
             if (catalogClass.getName().contains("org.spongepowered.api") && catalogClass.getAnnotation(PluginProvidedRegistryModule.class) == null) {
                 throw new UnsupportedOperationException("Cannot register a module for an API defined class! That's the implementation's job!");
             }
@@ -170,7 +170,7 @@ public class SpongeGameRegistry implements GameRegistry {
     public SpongeGameRegistry registerModule(RegistryModule module) {
         checkArgument(!this.registryModules.contains(module));
         this.registryModules.add(checkNotNull(module));
-        if (this.phase != RegistrationPhase.PRE_REGISTRY) {
+        if (!this.orderedModules.isEmpty()) {
             syncModules();
         }
         return this;
