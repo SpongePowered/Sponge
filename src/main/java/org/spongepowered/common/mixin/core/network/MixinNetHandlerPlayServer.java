@@ -619,6 +619,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         }
                     }
                 } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
+                    hand = EnumHand.MAIN_HAND; // Will be null in the packet during ATTACK
                     SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
                     if(SpongeCommonEventFactory.callInteractItemEventPrimary(this.playerEntity, itemstack, hand, Optional.empty(), entity).isCancelled()) {
                         return;
@@ -634,7 +635,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         return; // PVP is disabled, ignore
                     }
 
-                    if (SpongeCommonEventFactory.callInteractEntityEventPrimary(this.playerEntity, entity, packetIn.getHand(), packetIn.getHitVec()).isCancelled()) {
+                    if (SpongeCommonEventFactory.callInteractEntityEventPrimary(this.playerEntity, entity, hand, packetIn.getHitVec()).isCancelled()) {
                         ((IMixinEntityPlayerMP) this.playerEntity).restorePacketItem(hand);
                         return;
                     }
