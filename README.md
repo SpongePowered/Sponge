@@ -59,7 +59,7 @@ The following steps will update your clone with the official repo.
 
 ## Contributing
 Are you a talented programmer looking to contribute some code? We'd love the help!
-* Open a pull request with your changes, following our [guidelines](CONTRIBUTING.md).
+* Open a pull request with your changes, following our [guidelines](.github/CONTRIBUTING.md).
 * Please follow the above guidelines for your pull request(s) to be accepted.
 
 [Eclipse]: https://eclipse.org/
