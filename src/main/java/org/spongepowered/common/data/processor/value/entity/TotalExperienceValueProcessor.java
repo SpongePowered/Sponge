@@ -33,6 +33,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
 import java.util.Optional;
 
@@ -86,6 +87,7 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
         container.experience = (float)(value - experienceForCurrentLevel) / ExperienceHolderUtils.getExpBetweenLevels(level);
         container.experienceLevel = level;
         container.experienceTotal = value;
+        ((IMixinEntityPlayerMP) container).refreshExp();
         return true;
     }
 

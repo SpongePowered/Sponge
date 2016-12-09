@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -32,6 +33,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
 import java.util.Optional;
 
@@ -62,6 +64,7 @@ public class ExperienceSinceLevelValueProcessor extends AbstractSpongeValueProce
             value -= container.xpBarCap();
         }
         container.experience = (float) value / container.xpBarCap();
+        ((IMixinEntityPlayerMP) container).refreshExp();
         return true;
     }
 

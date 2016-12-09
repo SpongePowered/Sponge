@@ -58,4 +58,6 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     void restorePacketItem(EnumHand hand);
 
     void setPacketItem(ItemStack itemstack);
+
+    void refreshExp();
 }

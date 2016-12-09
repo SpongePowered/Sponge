@@ -28,6 +28,7 @@ import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -37,6 +38,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExperien
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExperienceHolderData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
 import java.util.Map;
 import java.util.Optional;
@@ -62,6 +64,7 @@ public class ExperienceHolderDataProcessor extends AbstractEntityDataProcessor<E
         entity.experienceLevel = (Integer) keyValues.get(Keys.EXPERIENCE_LEVEL);
         entity.experienceTotal = (Integer) keyValues.get(Keys.TOTAL_EXPERIENCE);
         entity.experience = (float) (Integer) keyValues.get(Keys.EXPERIENCE_SINCE_LEVEL) / entity.xpBarCap();
+        ((IMixinEntityPlayerMP) entity).refreshExp();
         return true;
     }
 

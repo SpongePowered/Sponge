@@ -470,6 +470,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    public void refreshExp() {
+        this.lastExperience = -1;
+    }
+
+    @Override
     public void restorePacketItem(EnumHand hand) {
         if (this.packetItem == null) {
             return;
