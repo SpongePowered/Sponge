@@ -33,6 +33,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
 import java.util.Optional;
 
@@ -55,6 +56,7 @@ public class ExperienceLevelValueProcessor extends AbstractSpongeValueProcessor<
             player.experienceTotal = totalExp;
             player.experience = 0;
             player.experienceLevel = value;
+            ((IMixinEntityPlayerMP) container).refreshExp();
             final ImmutableBoundedValue<Integer> oldImmutableValue = constructImmutableValue(oldValue);
             return DataTransactionResult.successReplaceResult(newValue, oldImmutableValue);
         }
