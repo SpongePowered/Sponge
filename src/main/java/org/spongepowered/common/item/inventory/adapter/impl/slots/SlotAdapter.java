@@ -26,7 +26,6 @@ package org.spongepowered.common.item.inventory.adapter.impl.slots;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.inventory.IInventory;
-import org.apache.commons.lang3.NotImplementedException;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -34,7 +33,6 @@ import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
-import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Builder;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.common.interfaces.inventory.IMixinSlot;
 import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
@@ -155,7 +153,7 @@ public class SlotAdapter extends Adapter implements Slot {
         int push = Math.min(remaining, maxStackSize);
         if (old == null && this.slot.setStack(this.inventory, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
             remaining -= push;
-        } else if (old != null && ItemStackUtil.compare(old, stack)) {
+        } else if (old != null && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
             push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
             old.setCount(old.getCount() + push);
             remaining -= push;
@@ -224,7 +222,7 @@ public class SlotAdapter extends Adapter implements Slot {
     @Override
     public boolean contains(ItemStack stack) {
         net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
-        return slotStack.isEmpty() ? (stack == null) : ItemStackUtil.compare(slotStack, stack);
+        return slotStack.isEmpty() ? (stack == null) : ItemStackUtil.compareIgnoreQuantity(slotStack, stack);
     }
 
     @Override

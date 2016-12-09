@@ -56,7 +56,7 @@ public class ItemStackStrategy<TInventory> extends QueryStrategy<TInventory, Ite
                 return false;
             }
             for (ItemStack candidate : this.stacks) {
-                if (ItemStackUtil.compare(stack, candidate)) {
+                if (ItemStackUtil.compareIgnoreQuantity(stack, candidate)) {
                     return true;
                 }
             }
