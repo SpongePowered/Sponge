@@ -77,8 +77,7 @@ public class SlotAdapter extends Adapter implements Slot {
 
     @Override
     public int getStackSize() {
-        net.minecraft.item.ItemStack stack = this.slot.getStack(this.inventory);
-        return stack != null ? stack.getCount() : 0;
+        return this.slot.getStack(this.inventory).getCount();
     }
 
     @SuppressWarnings("unchecked")
@@ -99,7 +98,7 @@ public class SlotAdapter extends Adapter implements Slot {
         if (stack.isEmpty()) {
             return Optional.<ItemStack>empty();
         }
-        this.inventory.setStack(this.ordinal, null);
+        this.inventory.setStack(this.ordinal, net.minecraft.item.ItemStack.EMPTY);
         return Optional.<ItemStack>of(ItemStackUtil.fromNative(stack));
     }
 
@@ -151,9 +150,9 @@ public class SlotAdapter extends Adapter implements Slot {
 
         net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
         int push = Math.min(remaining, maxStackSize);
-        if (old == null && this.slot.setStack(this.inventory, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
+        if (old.isEmpty() && this.slot.setStack(this.inventory, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
             remaining -= push;
-        } else if (old != null && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
+        } else if (!old.isEmpty() && ItemStackUtil.compareIgnoreQuantity(old, stack)) {
             push = Math.max(Math.min(maxStackSize - old.getCount(), remaining), 0); // max() accounts for oversized stacks
             old.setCount(old.getCount() + push);
             remaining -= push;
@@ -195,18 +194,17 @@ public class SlotAdapter extends Adapter implements Slot {
 
     @Override
     public void clear() {
-        this.slot.setStack(this.inventory, null);
+        this.slot.setStack(this.inventory, net.minecraft.item.ItemStack.EMPTY);
     }
 
     @Override
     public int size() {
-        return this.slot.getStack(this.inventory) != null ? 1 : 0;
+        return !this.slot.getStack(this.inventory).isEmpty()? 1 : 0;
     }
 
     @Override
     public int totalItems() {
-        net.minecraft.item.ItemStack stack = this.slot.getStack(this.inventory);
-        return stack != null ? stack.getCount() : 0;
+        return this.slot.getStack(this.inventory).getCount();
     }
 
     @Override
