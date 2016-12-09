@@ -64,6 +64,8 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.statistic.Statistic;
+import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Color;
@@ -540,6 +542,18 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     public static final TypeToken<Value<PickupRule>> PICKUP_VALUE_TOKEN = new TypeToken<Value<PickupRule>>() {
         private static final long serialVersionUID = -1;
     };
+    public static final TypeToken<Set<Achievement>> ACHIEVEMENT_SET_TOKEN = new TypeToken<Set<Achievement>>() {
+        private static final long serialVersionUID = -1;
+    };
+    public static final TypeToken<SetValue<Achievement>> ACHIEVEMENT_SET_VALUE_TOKEN = new TypeToken<SetValue<Achievement>>() {
+        private static final long serialVersionUID = -1;
+    };
+    public static final TypeToken<Map<Statistic, Long>> STATISTIC_MAP_TOKEN = new TypeToken<Map<Statistic, Long>>() {
+        private static final long serialVersionUID = -1;
+    };
+    public static final TypeToken<MapValue<Statistic, Long>> STATISTIC_MAP_VALUE_TOKEN = new TypeToken<MapValue<Statistic, Long>>() {
+        private static final long serialVersionUID = -1;
+    };
 
     public static final TypeToken<ZombieType> ZOMBIE_TYPE_TOKEN = new TypeToken<ZombieType>() {
         private static final long serialVersionUID = -1;
@@ -966,6 +980,10 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("has_gravity", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("HasGravity"), "sponge:has_gravity", "Has Gravity"));
 
         this.fieldMap.put("zombie_type", makeSingleKey(ZOMBIE_TYPE_TOKEN, ZOMBIE_TYPE_VALUE_TOKEN, of("ZombieType"), "sponge:zombie_type", "Zombie Type"));
+
+        this.fieldMap.put("achievements", makeSingleKey(ACHIEVEMENT_SET_TOKEN, ACHIEVEMENT_SET_VALUE_TOKEN, of("Achievements"), "sponge:achievements", "Achievements"));
+
+        this.fieldMap.put("statistics", makeSingleKey(STATISTIC_MAP_TOKEN, STATISTIC_MAP_VALUE_TOKEN, of("Statistics"), "sponge:statistics", "Statistics"));
 
         this.fieldMap.put("infinite_despawn_delay", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("InfiniteDespawnDelay"), "sponge:infinite_despawn_delay", "Infinite Despawn Delay"));
         this.fieldMap.put("infinite_pickup_delay", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("InfinitePickupDelay"), "sponge:infinite_pickup_delay", "Infinite Pickup Delay"));

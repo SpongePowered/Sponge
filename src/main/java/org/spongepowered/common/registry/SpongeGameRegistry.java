@@ -30,6 +30,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Singleton;
+import net.minecraft.block.Block;
+import net.minecraft.entity.EntityList;
+import net.minecraft.item.Item;
+import net.minecraft.stats.StatList;
+import net.minecraft.util.ResourceLocation;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
@@ -56,9 +61,8 @@ import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.statistic.BlockStatistic;
 import org.spongepowered.api.statistic.EntityStatistic;
 import org.spongepowered.api.statistic.ItemStatistic;
-import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.api.statistic.StatisticGroup;
-import org.spongepowered.api.statistic.TeamStatistic;
+import org.spongepowered.api.statistic.StatisticType;
+import org.spongepowered.api.statistic.StatisticTypes;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.serializer.TextSerializerFactory;
 import org.spongepowered.api.text.translation.Translation;
@@ -308,6 +312,48 @@ public class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
+    public Optional<EntityStatistic> getEntityStatistic(StatisticType statType, EntityType entityType) {
+        checkNotNull(statType, "null stat type");
+        checkNotNull(entityType, "null entity type");
+        EntityList.EntityEggInfo eggInfo = EntityList.ENTITY_EGGS.get(new ResourceLocation(entityType.getId()));
+        if (statType.equals(StatisticTypes.ENTITIES_KILLED)) {
+            return Optional.of((EntityStatistic) eggInfo.killEntityStat);
+        } else if (statType.equals(StatisticTypes.KILLED_BY_ENTITY)) {
+            return Optional.of((EntityStatistic) eggInfo.entityKilledByStat);
+        }
+        throw new IllegalArgumentException("invalid entity stat type");
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public Optional<ItemStatistic> getItemStatistic(StatisticType statType, ItemType itemType) {
+        checkNotNull(statType, "null stat type");
+        checkNotNull(itemType, "null item type");
+        Item item = (Item) itemType;
+        if (statType.equals(StatisticTypes.ITEMS_CRAFTED)) {
+            return Optional.of((ItemStatistic) StatList.getCraftStats(item));
+        } else if (statType.equals(StatisticTypes.ITEMS_USED)) {
+            return Optional.of((ItemStatistic) StatList.getObjectUseStats(item));
+        } else if (statType.equals(StatisticTypes.ITEMS_BROKEN)) {
+            return Optional.of((ItemStatistic) StatList.getObjectBreakStats(item));
+        } else if (statType.equals(StatisticTypes.ITEMS_PICKED_UP)) {
+            return Optional.of((ItemStatistic) StatList.getObjectsPickedUpStats(item));
+        } else if (statType.equals(StatisticTypes.ITEMS_DROPPED)) {
+            return Optional.of((ItemStatistic) StatList.getDroppedObjectStats(item));
+        }
+        throw new IllegalArgumentException("invalid item stat type");
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    public Optional<BlockStatistic> getBlockStatistic(StatisticType statType, BlockType blockType) {
+        if (!statType.equals(StatisticTypes.BLOCKS_BROKEN)) {
+            throw new IllegalArgumentException("invalid block stat type");
+        }
+        return Optional.of((BlockStatistic) StatList.getBlockStats((Block) blockType));
+    }
+
+    @Override
     public AITaskType registerAITaskType(Object plugin, String id, String name, Class<? extends AbstractAITask<? extends Agent>> aiClass) {
 
         return AITaskTypeModule.getInstance().createAITaskType(plugin, id, name, aiClass);
@@ -356,31 +402,6 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public Optional<Translation> getTranslationById(String id) {
         return Optional.of(new SpongeTranslation(id));
-    }
-
-    @Override
-    public Optional<EntityStatistic> getEntityStatistic(StatisticGroup statisticGroup, EntityType entityType) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
-    public Optional<ItemStatistic> getItemStatistic(StatisticGroup statisticGroup, ItemType itemType) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
-    public Optional<BlockStatistic> getBlockStatistic(StatisticGroup statisticGroup, BlockType blockType) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
-    public Optional<TeamStatistic> getTeamStatistic(StatisticGroup statisticGroup, TextColor teamColor) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
-    public Collection<Statistic> getStatistics(StatisticGroup statisticGroup) {
-        throw new UnsupportedOperationException(); // TODO
     }
 
     @Override
