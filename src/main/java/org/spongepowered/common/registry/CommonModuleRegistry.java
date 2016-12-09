@@ -74,6 +74,9 @@ import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
 import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
+import org.spongepowered.api.entity.attribute.AttributeModifier;
+import org.spongepowered.api.entity.attribute.operation.AttributeOperation;
+import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.event.cause.EventContextKey;
@@ -199,6 +202,7 @@ import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.ai.*;
 import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
+import org.spongepowered.common.entity.attribute.AttributeModifierBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.SpongeEventContextKeyBuilder;
 import org.spongepowered.common.event.damage.*;
@@ -457,6 +461,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(InventoryTransactionResult.Builder.class, InventoryTransactionResultImpl.Builder::new)
             .registerBuilderSupplier(CatalogKey.Builder.class, CatalogKeyBuilder::new)
             .registerBuilderSupplier(TextTemplate.Arg.Builder.class, TextTemplateImpl.ArgImpl.BuilderImpl::new)
+            .registerBuilderSupplier(AttributeModifier.Builder.class, AttributeModifierBuilder::new)
         ;
     }
 
@@ -589,6 +594,8 @@ public final class CommonModuleRegistry {
             .registerModule(new CriterionRegistryModule())
             .registerModule(((Class<DataRegistration<?, ?>>) (Class<?>) DataRegistration.class), SpongeManipulatorRegistry.getInstance())
             .registerModule(new ItemStackComparatorRegistryModule())
+            .registerModule(AttributeOperation.class, new AttributeOperationRegistryModule())
+            .registerModule(AttributeType.class, new AttributeTypeRegistryModule())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())

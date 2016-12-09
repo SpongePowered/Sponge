@@ -62,6 +62,8 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.attribute.Attribute;
+import org.spongepowered.api.entity.attribute.type.AttributeType;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.Cancellable;
@@ -1220,4 +1222,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         stopActiveHand();
     }
 
+    @Override
+    public Optional<Attribute> getAttribute(final AttributeType type) {
+        return Optional.ofNullable((Attribute) this.getEntityAttribute((IAttribute) type));
+    }
 }
