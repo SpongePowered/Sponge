@@ -1446,8 +1446,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     this.builder.add(manipulator);
                 }
                 NBTTagCompound nbt = new NBTTagCompound();
-                te.writeToNBT(nbt);
-                this.builder.unsafeNbt(nbt);
+                // Some mods like OpenComputers assert if attempting to save robot while moving
+                try {
+                    te.writeToNBT(nbt);
+                    this.builder.unsafeNbt(nbt);
+                }
+                catch(Throwable t) {
+                    // ignore
+                }
             }
         }
         return new SpongeBlockSnapshot(this.builder, BlockChangeFlag.ALL.setUpdateNeighbors((updateFlag & 1) != 0), updateFlag);
