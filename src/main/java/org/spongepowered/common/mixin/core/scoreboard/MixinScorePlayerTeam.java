@@ -204,8 +204,8 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
 
     public void team$addMember(Text member) {
         String legacyName = SpongeTexts.toLegacy(member);
-        if (legacyName.length() > 16) {
-            throw new IllegalArgumentException(String.format("Member is %s characters long! It must be at most 16.", legacyName.length()));
+        if (legacyName.length() > 40) {
+            throw new IllegalArgumentException(String.format("Member is %s characters long! It must be at most 40.", legacyName.length()));
         }
         if (this.theScoreboard != null) {
             this.theScoreboard.addPlayerToTeam(legacyName, this.registeredName);
