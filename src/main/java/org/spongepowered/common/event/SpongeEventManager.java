@@ -32,6 +32,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
@@ -81,10 +82,8 @@ public class SpongeEventManager implements EventManager {
     private final Object lock = new Object();
     protected final Logger logger;
     private final PluginManager pluginManager;
-    private final DefineableClassLoader classLoader = new DefineableClassLoader(getClass().getClassLoader());
-    private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
-            new FilterFactory("org.spongepowered.common.event.filters", this.classLoader), this.classLoader);
     private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent = HashMultimap.create();
+    private final Map<ClassLoader, AnnotatedEventListener.Factory> classLoaders = Maps.newHashMap();
     private final Set<Object> registeredListeners = Sets.newHashSet();
 
     public final ListenerChecker checker = new ListenerChecker(ShouldFire.class);
@@ -223,6 +222,16 @@ public class SpongeEventManager implements EventManager {
         Map<Method, String> methodErrors = new HashMap<>();
 
         Class<?> handle = listenerObject.getClass();
+        ClassLoader handleLoader = handle.getClassLoader();
+
+        AnnotatedEventListener.Factory handlerFactory = classLoaders.get(handleLoader);
+        if (handlerFactory == null) {
+            final DefineableClassLoader classLoader = new DefineableClassLoader(handleLoader);
+            handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
+                    new FilterFactory("org.spongepowered.common.event.filters", classLoader), classLoader);
+            classLoaders.put(handleLoader, handlerFactory);
+        }
+
         for (Method method : handle.getMethods()) {
             Listener listener = method.getAnnotation(Listener.class);
             if (listener != null) {
@@ -232,7 +241,7 @@ public class SpongeEventManager implements EventManager {
                     final TypeToken eventType = TypeToken.of(method.getGenericParameterTypes()[0]);
                     AnnotatedEventListener handler;
                     try {
-                        handler = this.handlerFactory.create(listenerObject, method);
+                        handler = handlerFactory.create(listenerObject, method);
                     } catch (Exception e) {
                         this.logger.error("Failed to create handler for {} on {}", method, handle, e);
                         continue;
