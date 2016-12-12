@@ -32,11 +32,15 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDoublePlantData;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePortionData;
 import org.spongepowered.api.data.type.DoublePlantType;
+import org.spongepowered.api.data.type.PortionType;
+import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDoublePlantData;
+import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePortionData;
 
 import java.util.Optional;
 
@@ -45,12 +49,13 @@ public abstract class MixinBlockDoublePlant extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDoublePlantTypeFor(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDoublePlantTypeFor(blockState),
+                getPortionData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableDoublePlantData.class.isAssignableFrom(immutable);
+        return ImmutableDoublePlantData.class.isAssignableFrom(immutable) || ImmutablePortionData.class.isAssignableFrom(immutable);
     }
 
     @Override
@@ -59,6 +64,9 @@ public abstract class MixinBlockDoublePlant extends MixinBlock {
             final BlockDoublePlant.EnumPlantType doublePlantType =
                     (BlockDoublePlant.EnumPlantType) (Object) ((ImmutableDoublePlantData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockDoublePlant.VARIANT, doublePlantType));
+        } else if (manipulator instanceof ImmutablePortionData) {
+            return Optional.of((BlockState) blockState.withProperty(BlockDoublePlant.HALF,
+                    convertPortionType(((ImmutablePortionData) manipulator).type().get())));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -69,11 +77,24 @@ public abstract class MixinBlockDoublePlant extends MixinBlock {
             final BlockDoublePlant.EnumPlantType doublePlantType = (BlockDoublePlant.EnumPlantType) value;
             return Optional.of((BlockState) blockState.withProperty(BlockDoublePlant.VARIANT, doublePlantType));
         }
+        if (key.equals(Keys.PORTION_TYPE)) {
+            return Optional.of((BlockState) blockState.withProperty(BlockDoublePlant.HALF, convertPortionType((PortionType) value)));
+        }
         return super.getStateWithValue(blockState, key, value);
+    }
+
+    private BlockDoublePlant.EnumBlockHalf convertPortionType(PortionType portionType) {
+        return portionType == PortionTypes.BOTTOM ? BlockDoublePlant.EnumBlockHalf.LOWER : BlockDoublePlant.EnumBlockHalf.UPPER;
     }
 
     private ImmutableDoublePlantData getDoublePlantTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDoublePlantData.class,
                 (DoublePlantType) (Object) blockState.getValue(BlockDoublePlant.VARIANT));
+    }
+
+    private ImmutablePortionData getPortionData(IBlockState blockState) {
+        BlockDoublePlant.EnumBlockHalf half = blockState.getValue(BlockDoublePlant.HALF);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class,
+                half == BlockDoublePlant.EnumBlockHalf.LOWER ? PortionTypes.BOTTOM : PortionTypes.TOP);
     }
 }
