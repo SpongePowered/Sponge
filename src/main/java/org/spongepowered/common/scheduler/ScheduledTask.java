@@ -25,6 +25,10 @@
 package org.spongepowered.common.scheduler;
 
 import com.google.common.base.Objects;
+
+import co.aikar.timings.SpongeTimings;
+import co.aikar.timings.Timing;
+
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 
@@ -49,6 +53,7 @@ public class ScheduledTask implements Task {
     private final String name;
     private final TaskSynchronicity syncType;
     private final String stringRepresentation;
+    private Timing taskTimer;
 
     // Internal Task state. Not for user-service use.
     public enum ScheduledTaskState {
@@ -194,4 +199,10 @@ public class ScheduledTask implements Task {
         ASYNCHRONOUS
     }
 
+    public Timing getTimingsHandler() {
+        if (this.taskTimer == null) {
+            this.taskTimer = SpongeTimings.getPluginSchedulerTimings(this.owner);
+        }
+        return this.taskTimer;
+    }
 }
