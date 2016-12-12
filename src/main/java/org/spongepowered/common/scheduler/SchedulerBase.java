@@ -26,6 +26,9 @@ package org.spongepowered.common.scheduler;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+
+import co.aikar.timings.TimingsManager;
+
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
@@ -100,12 +103,14 @@ abstract class SchedulerBase {
      */
     protected final void runTick() {
         this.preTick();
+        TimingsManager.PLUGIN_SCHEDULER_HANDLER.startTimingIfSync();
         try {
             this.taskMap.values().forEach(this::processTask);
             this.postTick();
         } finally {
             this.finallyPostTick();
         }
+        TimingsManager.PLUGIN_SCHEDULER_HANDLER.stopTimingIfSync();
     }
 
     /**
@@ -173,12 +178,14 @@ abstract class SchedulerBase {
     protected void startTask(final ScheduledTask task) {
         this.executeTaskRunnable(() -> {
             task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
+            task.getTimingsHandler().startTimingIfSync();
             try {
                 task.getConsumer().accept(task);
             } catch (Throwable t) {
                 SpongeImpl.getLogger().error("The Scheduler tried to run the task {} owned by {}, but an error occured.", task.getName(),
                                              task.getOwner(), t);
             }
+            task.getTimingsHandler().stopTimingIfSync();
         });
     }
 

@@ -126,6 +126,10 @@ public final class SpongeTimings {
         return SpongeTimingsFactory.ofSafe(plugin.getName(), context, TimingsManager.PLUGIN_EVENT_HANDLER);
     }
 
+    public static Timing getPluginSchedulerTimings(PluginContainer plugin) {
+        return SpongeTimingsFactory.ofSafe(plugin.getName(), TimingsManager.PLUGIN_SCHEDULER_HANDLER);
+    }
+
     public static Timing getCancelTasksTimer() {
         return SpongeTimingsFactory.ofSafe("Cancel Tasks");
     }
