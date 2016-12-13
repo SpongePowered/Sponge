@@ -402,7 +402,6 @@ public interface PacketFunction {
             context.getCapturedEntityDropSupplier()
                     .ifPresentAndNotEmpty(itemMapping -> {
 
-
                     });
         } else if (state == PacketPhase.Inventory.DROP_INVENTORY) {
 
@@ -430,10 +429,46 @@ public interface PacketFunction {
                     });
 
         } else if (state == PacketPhase.General.INTERACTION) {
-            context.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blocks ->
-                            TrackingUtil.processBlockCaptures(blocks, causeTracker, state, context)
-                    );
+            if (!context.getCapturedBlockSupplier().isEmpty()) {
+                TrackingUtil.processBlockCaptures(context.getCapturedBlockSupplier().get(), causeTracker, state, context);
+            } else {
+                context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
+                    final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
+                    if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
+                        final Cause cause = Cause.source(EntitySpawnCause.builder()
+                                .entity(spongePlayer)
+                                .type(InternalSpawnTypes.DROPPED_ITEM)
+                                .build())
+                                .build();
+                        for (BlockSnapshot blockChange : capturedBlocks) {
+                            final Location<World> location = blockChange.getLocation().get();
+                            final Vector3d position = location.getPosition();
+                            final BlockPos blockPos = VecHelper.toBlockPos(position);
+                            final Collection<EntityItem> entityItems = map.get(blockPos);
+                            if (!entityItems.isEmpty()) {
+                                final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                                final DropItemEvent.Destruct event =
+                                        SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld());
+                                SpongeImpl.postEvent(event);
+                                if (!event.isCancelled()) {
+                                    processSpawnedEntities(player, causeTracker, event);
+                                }
+                            }
+                        }
+                    } else {
+                        for (BlockSnapshot blockChange : capturedBlocks) {
+                            final Location<World> location = blockChange.getLocation().get();
+                            final Vector3d position = location.getPosition();
+                            final BlockPos blockPos = VecHelper.toBlockPos(position);
+                            final Collection<EntityItem> entityItems = map.get(blockPos);
+                            if (!entityItems.isEmpty()) {
+                                processEntities(player, causeTracker, (Collection<Entity>) (Collection<?>) entityItems);
+                            }
+                        }
+                    }
+                });
+
+            }
 
             context.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
@@ -529,9 +564,9 @@ public interface PacketFunction {
                     if (ShouldFire.DROP_ITEM_EVENT_DISPENSE) {
                         final Cause cause = Cause.source(
                                 EntitySpawnCause.builder()
-                                    .entity(spongePlayer)
-                                .type(InternalSpawnTypes.DROPPED_ITEM)
-                                .build())
+                                        .entity(spongePlayer)
+                                        .type(InternalSpawnTypes.DROPPED_ITEM)
+                                        .build())
                                 .owner(player)
                                 .build();
                         final DropItemEvent.Dispense dispense = SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld());
@@ -559,44 +594,9 @@ public interface PacketFunction {
                     }
                 }
             });
-
-            context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
-                final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
-                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
-                    final Cause cause = Cause.source(EntitySpawnCause.builder()
-                            .entity(spongePlayer)
-                            .type(InternalSpawnTypes.DROPPED_ITEM)
-                            .build())
-                            .build();
-                    for (BlockSnapshot blockChange : capturedBlocks) {
-                        final Location<World> location = blockChange.getLocation().get();
-                        final Vector3d position = location.getPosition();
-                        final BlockPos blockPos = VecHelper.toBlockPos(position);
-                        final Collection<EntityItem> entityItems = map.get(blockPos);
-                        if (!entityItems.isEmpty()) {
-                            final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
-                            final DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld());
-                            SpongeImpl.postEvent(event);
-                            if (!event.isCancelled()) {
-                                processSpawnedEntities(player, causeTracker, event);
-                            }
-                        }
-                    }
-                } else {
-                    for (BlockSnapshot blockChange : capturedBlocks) {
-                        final Location<World> location = blockChange.getLocation().get();
-                        final Vector3d position = location.getPosition();
-                        final BlockPos blockPos = VecHelper.toBlockPos(position);
-                        final Collection<EntityItem> entityItems = map.get(blockPos);
-                        if (!entityItems.isEmpty()) {
-                            processEntities(player, causeTracker, (Collection<Entity>) (Collection<?>) entityItems);
-                        }
-                    }
-                }
-            });
-
         }
     };
+
     static void processSpawnedEntities(EntityPlayerMP player, CauseTracker causeTracker, SpawnEntityEvent event) {
         List<Entity> entities = event.getEntities();
         processEntities(player, causeTracker, entities);
