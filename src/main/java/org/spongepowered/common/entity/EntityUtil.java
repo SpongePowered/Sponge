@@ -85,6 +85,7 @@ import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.World;
@@ -106,10 +107,12 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
@@ -610,6 +613,48 @@ public final class EntityUtil {
                     }
                     return false;
                 });
+    }
+
+    // A temporary variable to transfer the 'isBedSpawn' variable between
+    // getPlayerRespawnLocation and recreatePlayerEntity
+    public static boolean tempIsBedSpawn = false;
+
+    public static Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
+        final Location<World> location = ((World) playerIn.worldObj).getSpawnLocation();
+        tempIsBedSpawn = false;
+        if (targetWorld == null) { // Target world doesn't exist? Use global
+            return location;
+        }
+
+        final Dimension targetDimension = (Dimension) targetWorld.provider;
+        int targetDimensionId = ((IMixinWorldServer) targetWorld).getDimensionId();
+        // Cannot respawn in requested world, use the fallback dimension for
+        // that world. (Usually overworld unless a mod says otherwise).
+        if (!targetDimension.allowsPlayerRespawns()) {
+            targetDimensionId = ((IMixinWorldProvider) targetDimension).getRespawnDimension(playerIn);
+            targetWorld = targetWorld.getMinecraftServer().worldServerForDimension(targetDimensionId);
+        }
+
+        Vector3d targetSpawnVec = VecHelper.toVector3d(targetWorld.getSpawnPoint());
+        BlockPos bedPos = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimensionId);
+        if (bedPos != null) { // Player has a bed
+            boolean forceBedSpawn = ((IMixinEntityPlayer) playerIn).isSpawnForced(targetDimensionId);
+            BlockPos bedSpawnLoc = EntityPlayer.getBedSpawnLocation(targetWorld, bedPos, forceBedSpawn);
+            if (bedSpawnLoc != null) { // The bed exists and is not obstructed
+                tempIsBedSpawn = true;
+                targetSpawnVec = new Vector3d(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D);
+            } else { // Bed invalid
+                playerIn.connection.sendPacket(new SPacketChangeGameState(0, 0.0F));
+                // Vanilla behaviour - Delete the known bed location if invalid
+                bedPos = null; // null = remove location
+            }
+            // Set the new bed location for the new dimension
+            int prevDim = playerIn.dimension; // Temporarily for setSpawnPoint
+            playerIn.dimension = targetDimensionId;
+            playerIn.setSpawnPoint(bedPos, forceBedSpawn);
+            playerIn.dimension = prevDim;
+        }
+        return new Location<>((World) targetWorld, targetSpawnVec);
     }
 
     public static Entity toNative(org.spongepowered.api.entity.Entity tickingEntity) {

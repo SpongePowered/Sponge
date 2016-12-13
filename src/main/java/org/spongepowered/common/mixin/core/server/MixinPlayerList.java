@@ -121,6 +121,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketWorldBorder;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.mixin.core.entity.player.MixinEntityPlayer;
 import org.spongepowered.common.service.ban.SpongeIPBanList;
 import org.spongepowered.common.service.ban.SpongeUserListBans;
 import org.spongepowered.common.service.permission.SpongePermissionService;
@@ -445,10 +446,6 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Sponge end
     }
 
-    // A temporary variable to transfer the 'isBedSpawn' variable between
-    // getPlayerRespawnLocation and recreatePlayerEntity
-    private boolean tempIsBedSpawn = false;
-
     /**
      * @author Zidane - June 13th, 2015
      * @author simon816 - June 24th, 2015
@@ -485,7 +482,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         final Transform<World> fromTransform = player.getTransform();
         WorldServer worldServer = this.mcServer.worldServerForDimension(targetDimension);
         targetDimension = ((IMixinWorldServer) worldServer).getDimensionId();
-        Transform<World> toTransform = new Transform<>(this.getPlayerRespawnLocation(playerIn, worldServer), Vector3d.ZERO, Vector3d.ZERO);
+        Transform<World> toTransform = new Transform<>(EntityUtil.getPlayerRespawnLocation(playerIn, worldServer), Vector3d.ZERO, Vector3d.ZERO);
         Location<World> location = toTransform.getLocation();
 
         // If coming from end, fire a teleport event for plugins
@@ -535,19 +532,25 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         newPlayer.setCommandStats(playerIn);
         newPlayer.setPrimaryHand(playerIn.getPrimaryHand());
 
+        // Sponge - Vanilla does this before recreating the player entity. However, we need to determine the bed location
+        // before respawning the player, so we know what dimension to spawn them into. This means that the bed location must be copied
+        // over to the new player
+        newPlayer.setSpawnPoint(playerIn.getBedLocation(), playerIn.isSpawnForced());
+
         for (String s : playerIn.getTags()) {
             newPlayer.addTag(s);
         }
 
         this.setPlayerGameTypeBasedOnOther(newPlayer, playerIn, worldServer);
         newPlayer.setSneaking(false);
+
         // update to safe location
         toTransform = toTransform.setLocation(location);
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event = SpongeEventFactory.createRespawnPlayerEvent(Cause.of(NamedCause.source(newPlayer)), fromTransform,
-                toTransform, (Player) playerIn, (Player) newPlayer, this.tempIsBedSpawn, !conqueredEnd);
-        this.tempIsBedSpawn = false;
+                toTransform, (Player) playerIn, (Player) newPlayer, EntityUtil.tempIsBedSpawn, !conqueredEnd);
+        EntityUtil.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
         ((IMixinEntity) (Object) player).setLocationAndAngles(event.getToTransform());
         toTransform = event.getToTransform();
@@ -613,45 +616,6 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         return newPlayer;
-    }
-
-    // Internal. Note: Has side-effects
-    private Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
-        final Location<World> location = ((World) playerIn.world).getSpawnLocation();
-        this.tempIsBedSpawn = false;
-        if (targetWorld == null) { // Target world doesn't exist? Use global
-            return location;
-        }
-
-        final Dimension targetDimension = (Dimension) targetWorld.provider;
-        int targetDimensionId = ((IMixinWorldServer) targetWorld).getDimensionId();
-        // Cannot respawn in requested world, use the fallback dimension for
-        // that world. (Usually overworld unless a mod says otherwise).
-        if (!targetDimension.allowsPlayerRespawns()) {
-            targetDimensionId = SpongeImplHooks.getRespawnDimension(targetWorld.provider, playerIn);
-            targetWorld = this.mcServer.worldServerForDimension(targetDimensionId);
-        }
-
-        Vector3d targetSpawnVec = VecHelper.toVector3d(targetWorld.getSpawnPoint());
-        BlockPos bedPos = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimensionId);
-        if (bedPos != null) { // Player has a bed
-            boolean forceBedSpawn = ((IMixinEntityPlayer) playerIn).isSpawnForced(targetDimensionId);
-            BlockPos bedSpawnLoc = EntityPlayer.getBedSpawnLocation(targetWorld, bedPos, forceBedSpawn);
-            if (bedSpawnLoc != null) { // The bed exists and is not obstructed
-                this.tempIsBedSpawn = true;
-                targetSpawnVec = new Vector3d(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D);
-            } else { // Bed invalid
-                playerIn.connection.sendPacket(new SPacketChangeGameState(0, 0.0F));
-                // Vanilla behaviour - Delete the known bed location if invalid
-                bedPos = null; // null = remove location
-            }
-            // Set the new bed location for the new dimension
-            int prevDim = playerIn.dimension; // Temporarily for setSpawnPoint
-            playerIn.dimension = targetDimensionId;
-            playerIn.setSpawnPoint(bedPos, forceBedSpawn);
-            playerIn.dimension = prevDim;
-        }
-        return new Location<>((World) targetWorld, targetSpawnVec);
     }
 
     /**

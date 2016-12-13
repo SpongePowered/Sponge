@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.interfaces.entity.player;
 
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
@@ -42,4 +43,6 @@ public interface IMixinEntityPlayer extends IMixinEntity {
     void setAffectsSpawning(boolean affectsSpawning);
 
     UUID getCollidingEntityUuid();
+
+    void setSpawnLocations(EntityPlayer oldPlayer);
 }
