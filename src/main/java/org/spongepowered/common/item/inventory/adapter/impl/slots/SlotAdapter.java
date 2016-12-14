@@ -110,6 +110,9 @@ public class SlotAdapter extends Adapter implements Slot {
     @Override
     public Optional<ItemStack> peek() {
         net.minecraft.item.ItemStack stack = this.slot.getStack(this.inventory);
+        if (stack.isEmpty()) {
+            return Optional.empty();
+        }
         return ItemStackUtil.cloneDefensiveOptional(stack);
     }
 
