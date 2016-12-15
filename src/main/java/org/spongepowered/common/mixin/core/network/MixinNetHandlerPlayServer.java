@@ -40,14 +40,17 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketThreadUtil;
+import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
+import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
@@ -78,7 +81,6 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
-import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.Location;
@@ -103,7 +105,6 @@ import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
-import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -112,8 +113,8 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.Optional;
 import java.util.Set;
 
@@ -153,7 +154,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     private boolean justTeleported = false;
     @Nullable private Location<World> lastMoveLocation = null;
 
-    private final Map<String, ResourcePack> sentResourcePacks = new HashMap<>();
+    private final Deque<SPacketResourcePackSend> resourcePackRequests = new LinkedList<>();
 
     // Store the last block right-clicked
     private boolean allowClientLocationUpdate = true;
@@ -165,8 +166,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     }
 
     @Override
-    public Map<String, ResourcePack> getSentResourcePacks() {
-        return this.sentResourcePacks;
+    public Deque<SPacketResourcePackSend> getPendingResourcePackQueue() {
+        return this.resourcePackRequests;
     }
 
     @Override
@@ -241,7 +242,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         if (!this.allowClientLocationUpdate && packet instanceof SPacketPlayerPosLook) {
             return;
         }
-        manager.sendPacket(this.rewritePacket(packet));
+        packet = this.rewritePacket(packet);
+        if (packet != null) {
+            manager.sendPacket(packet);
+        }
     }
 
     /**
@@ -249,19 +253,30 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
      * such as rewriting data in the packet.
      *
      * @param packetIn The original packet to be sent
-     * @return The rewritten packet if we performed any changes, or the original
-     *     packet if we did not perform any changes
+     * @return The rewritten packet if we performed any changes, the original
+     *     packet if we did not perform any changes, or {@code null} to not
+     *     send anything
      * @author kashike
      */
+    @Nullable
     private Packet<?> rewritePacket(final Packet<?> packetIn) {
         // Update the tab list data
         if (packetIn instanceof SPacketPlayerListItem) {
             ((SpongeTabList) ((Player) this.player).getTabList()).updateEntriesOnSend((SPacketPlayerListItem) packetIn);
         }
         // Store the resource pack for use when processing resource pack statuses
-        else if (packetIn instanceof IMixinPacketResourcePackSend) {
-            IMixinPacketResourcePackSend packet = (IMixinPacketResourcePackSend) packetIn;
-            this.sentResourcePacks.put(packet.setFakeHash(), packet.getResourcePack());
+        else if (packetIn instanceof SPacketResourcePackSend) {
+            SPacketResourcePackSend packet = (SPacketResourcePackSend) packetIn;
+            if (this.resourcePackRequests.isEmpty()) {
+                this.resourcePackRequests.add(packet);
+                return packet;
+            }
+            if (this.resourcePackRequests.contains(packet)) {
+                // This must be a resend.
+                return packet;
+            }
+            this.resourcePackRequests.add(packet);
+            return null;
         }
 
         return packetIn;
@@ -485,6 +500,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 } else {
                     this.lastMoveLocation = event.getToTransform().getLocation();
                 }
+                this.resendLatestResourcePackRequest();
             }
         }
         return playerMP.playerConqueredTheEnd;
@@ -675,5 +691,21 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Override
     public void setLastMoveLocation(Location<World> location) {
         this.lastMoveLocation = location;
+    }
+
+    @Inject(method = "handleResourcePackStatus(Lnet/minecraft/network/play/client/CPacketResourcePackStatus;)V", at = @At("HEAD"))
+    private void onProcessResourcePackStatus(CPacketResourcePackStatus packet, CallbackInfo ci) {
+        // Propagate the packet to the main thread so the cause tracker picks
+        // it up. See MixinPacketThreadUtil.
+        PacketThreadUtil.checkThreadAndEnqueue(packet, (INetHandlerPlayServer) this, this.player.getServerWorld());
+    }
+
+    @Override
+    public void resendLatestResourcePackRequest() {
+        // The vanilla client doesn't send any resource pack status if the user presses Escape to close the prompt.
+        // If the user moves around, they must have closed the GUI, so resend it to get a real answer.
+        if (!this.resourcePackRequests.isEmpty()) {
+            this.sendPacket(this.resourcePackRequests.peek());
+        }
     }
 }

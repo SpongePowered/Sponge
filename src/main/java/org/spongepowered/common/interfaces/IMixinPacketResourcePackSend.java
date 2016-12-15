@@ -31,6 +31,4 @@ public interface IMixinPacketResourcePackSend {
     ResourcePack getResourcePack();
 
     void setResourcePack(ResourcePack pack);
-
-    String setFakeHash();
 }

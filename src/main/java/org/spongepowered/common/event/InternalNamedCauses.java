@@ -53,6 +53,7 @@ public final class InternalNamedCauses {
         public static final String PREVIOUS_HIGHLIGHTED_SLOT = "PreviousSlot";
         public static final String IGNORING_CREATIVE = "IgnoringCreative";
         public static final String HAND_USED = "HandUsed";
+        public static final String RESPONDED_RESOURCE_PACK = "OriginalResourcePack";
 
         private Packet() {}
     }
