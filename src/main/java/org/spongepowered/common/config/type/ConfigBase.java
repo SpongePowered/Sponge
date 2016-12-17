@@ -27,13 +27,13 @@ package org.spongepowered.common.config.type;
 import ninja.leaping.configurate.objectmapping.Setting;
 import org.spongepowered.common.config.category.BlockCapturingCategory;
 import org.spongepowered.common.config.category.BlockTrackingCategory;
-import org.spongepowered.common.config.category.CollisionModCategory;
 import org.spongepowered.common.config.category.DebugCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.config.category.EntityCategory;
 import org.spongepowered.common.config.category.EntityCollisionCategory;
 import org.spongepowered.common.config.category.GeneralCategory;
 import org.spongepowered.common.config.category.LoggingCategory;
+import org.spongepowered.common.config.category.TileEntityActivationCategory;
 import org.spongepowered.common.config.category.TimingsCategory;
 import org.spongepowered.common.config.category.WorldCategory;
 
@@ -57,6 +57,8 @@ public abstract class ConfigBase {
     private LoggingCategory logging = new LoggingCategory();
     @Setting
     protected WorldCategory world = new WorldCategory();
+    @Setting(value = "tileentity-activation")
+    private TileEntityActivationCategory tileEntityActivationCategory = new TileEntityActivationCategory();
     @Setting
     private TimingsCategory timings = new TimingsCategory();
 
@@ -101,6 +103,10 @@ public abstract class ConfigBase {
 
     public WorldCategory getWorld() {
         return this.world;
+    }
+
+    public TileEntityActivationCategory getTileEntityActivationRange() {
+        return this.tileEntityActivationCategory;
     }
 
     public TimingsCategory getTimings() {

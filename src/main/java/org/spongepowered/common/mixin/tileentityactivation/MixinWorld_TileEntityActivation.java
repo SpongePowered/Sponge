@@ -22,37 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin.entityactivation.interfaces;
+package org.spongepowered.common.mixin.tileentityactivation;
 
-public interface IModData_Activation {
+import net.minecraft.world.WorldServer;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 
-    // entity activation
-    void inactiveTick();
+@NonnullByDefault
+@Mixin(value = net.minecraft.world.World.class, priority = 1006)
+public abstract class MixinWorld_TileEntityActivation {
 
-    byte getActivationType();
+    private static final String PROFILER_ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
 
-    long getActivatedTick();
-
-    boolean getDefaultActivationState();
-
-    void setActivatedTick(long tick);
-
-    int getActivationRange();
-
-    void setActivationRange(int range);
-
-    void requiresActivationCacheRefresh(boolean flag);
-
-    boolean requiresActivationCacheRefresh();
-
-    void setDefaultActivationState(boolean defaultState);
-
-    int getTicksExisted();
-
-    void incrementTicksExisted();
-
-    int getTickRate();
-
-    void setTickRate(int tickRate);
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=blockEntities"))
+    private void onBeginUpdateTileEntities(CallbackInfo ci) {
+        TileEntityActivation.activateTileEntities((WorldServer)(Object) this);
+    }
 
 }

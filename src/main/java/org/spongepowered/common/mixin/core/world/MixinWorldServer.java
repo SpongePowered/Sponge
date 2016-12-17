@@ -1291,8 +1291,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     protected void onUpdateTileEntities(ITickable tile) {
+        this.updateTileEntity(tile);
+    }
+
+    // separated from onUpdateEntities for TileEntityActivation mixin
+    private void updateTileEntity(ITickable tile) {
         final CauseTracker causeTracker = this.getCauseTracker();
         final IPhaseState state = causeTracker.getCurrentState();
+
         if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingTileTicks(state)) {
             tile.update();
             return;
