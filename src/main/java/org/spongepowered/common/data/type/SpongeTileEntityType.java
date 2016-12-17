@@ -30,10 +30,12 @@ import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.SpongeImplHooks;
 
 public class SpongeTileEntityType extends SpongeCatalogType implements TileEntityType {
 
     private final String name;
+    private final String modId;
     private final Class<? extends TileEntity> clazz;
     private final boolean canTick;
 
@@ -42,11 +44,16 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
         this.name = checkNotNull(name, "name");
         this.clazz = checkNotNull(clazz, "clazz");
         this.canTick = canTick;
+        this.modId = SpongeImplHooks.getModIdFromClass(clazz);
     }
 
     @Override
     public String getName() {
         return this.name;
+    }
+
+    public String getModId() {
+        return this.modId;
     }
 
     public boolean canTick() {
