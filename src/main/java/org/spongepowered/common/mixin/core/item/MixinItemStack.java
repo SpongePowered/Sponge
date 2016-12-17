@@ -86,8 +86,8 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.item.ItemStack.class)
 public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMixinCustomDataHolder {
 
-    @Shadow public int stackSize;
-
+    @Shadow public abstract int getCount();
+    @Shadow public abstract void setCount(int size); // Do not use field directly as Minecraft tracks the empty state
     @Shadow public abstract void setItemDamage(int meta);
     @Shadow public abstract void setTagCompound(NBTTagCompound compound);
     @Shadow public abstract void setTagInfo(String key, NBTBase nbtBase);
@@ -98,6 +98,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Shadow public abstract NBTTagCompound getOrCreateSubCompound(String key);
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow @Nullable public abstract Item shadow$getItem();
+
 
     @Inject(method = "writeToNBT", at = @At(value = "HEAD"))
     private void onWrite(NBTTagCompound incoming, CallbackInfoReturnable<NBTTagCompound> info) {
@@ -158,7 +159,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
 
     @Override
     public int getQuantity() {
-        return this.stackSize;
+        return this.getCount();
     }
 
     @Override
@@ -166,7 +167,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
         if (quantity > this.getMaxStackQuantity()) {
             throw new IllegalArgumentException("Quantity (" + quantity + ") exceeded the maximum stack size (" + this.getMaxStackQuantity() + ")");
         } else {
-            this.stackSize = quantity;
+            this.setCount(quantity);
         }
     }
 

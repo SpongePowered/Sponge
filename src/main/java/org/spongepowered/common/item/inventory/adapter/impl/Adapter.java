@@ -143,7 +143,7 @@ public class Adapter implements MinecraftInventoryAdapter {
                 }
 
                 if (pull >= stack.getCount()) {
-                    lens.setStack(inv, ord, null);
+                    lens.setStack(inv, ord, net.minecraft.item.ItemStack.EMPTY);
                 } else {
                     stack.setCount(stack.getCount() - pull);
                 }
