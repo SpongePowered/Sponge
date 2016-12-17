@@ -25,11 +25,8 @@
 package org.spongepowered.common.config.category;
 
 import net.minecraft.launchwrapper.Launch;
-import net.minecraft.launchwrapper.LaunchClassLoader;
 import ninja.leaping.configurate.objectmapping.Setting;
 import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.common.SpongeImplHooks;
 
 import java.io.IOException;
 
@@ -62,6 +59,13 @@ public class OptimizationCategory extends ConfigCategory {
                                                                + "world heights and can thus be disabled in those cases.")
     private boolean inlineBlockPositionChecks = true;
 
+    @Setting(value = "structure-saving", comment = "Handles structures that are saved to disk. Certain structures\n"
+            + "are not neccessarily required to be saved to perform their proper\n"
+            + "function. As such, saving these structures may take unnecessary \n"
+            + "storage space, and/or time during world saves. By default, \n"
+            + "\"Mineshaft\" is \"false\".")
+    private StructureSaveCategory structureSaveCategory = new StructureSaveCategory();
+
     public OptimizationCategory() {
         try {
             // Enabled ny default on SpongeVanilla, disabled by default on SpongeForge.
@@ -70,6 +74,14 @@ public class OptimizationCategory extends ConfigCategory {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public StructureSaveCategory getStructureSaveCategory() {
+        return this.structureSaveCategory;
+    }
+
+    public boolean useStructureSave() {
+        return this.structureSaveCategory.isEnabled();
     }
 
     public boolean useIgnoreUloadedChunkLightingPatch() {

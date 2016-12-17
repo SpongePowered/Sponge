@@ -89,6 +89,8 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
             .put("org.spongepowered.common.mixin.optimization.world.gen.MixinChunkProviderServer_Chunk_Cache",
                     OptimizationCategory::isUseCachedChunkMap)
+            .put("org.spongepowered.common.mixin.optimization.world.gen.structure.MixinMapGenStructure_Structure_Saving",
+                    OptimizationCategory::useStructureSave)
             .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Chunk_Cache",
                     OptimizationCategory::isUseCachedChunkMap)
             .put("org.spongepowered.common.mixin.optimization.MixinSpongeImplHooks_Item_Pre_Merge",
