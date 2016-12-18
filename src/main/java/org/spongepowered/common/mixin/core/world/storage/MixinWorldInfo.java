@@ -217,7 +217,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             return;
         }
 
-        final String name = WorldManager.getWorldFolderByDimensionId(this.dimensionId).orElse(null);
+        final String name = WorldManager.getWorldFolderByDimensionId(this.dimensionId).orElse(this.levelName);
         if (!this.levelName.equalsIgnoreCase(name)) {
             this.levelName = name;
         }
