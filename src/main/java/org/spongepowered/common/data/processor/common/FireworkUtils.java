@@ -58,7 +58,7 @@ public class FireworkUtils {
 
     public static ItemStack getItem(EntityFireworkRocket firework) {
         ItemStack item = firework.getDataManager().get(EntityFireworkRocket.FIREWORK_ITEM);
-        if (item == null) {
+        if (item.isEmpty()) {
             item = (ItemStack) new SpongeItemStackBuilder().itemType(ItemTypes.FIREWORKS).build();
             firework.getDataManager().set(EntityFireworkRocket.FIREWORK_ITEM, item);
         }
@@ -136,14 +136,14 @@ public class FireworkUtils {
     }
 
     public static boolean setFireworkEffects(Object object, List<FireworkEffect> effects) {
-        ItemStack item = null;
+        ItemStack item = ItemStack.EMPTY;
         if(object instanceof ItemStack) {
             item = (ItemStack) object;
         }
         if(object instanceof EntityFireworkRocket) {
             item = getItem((EntityFireworkRocket) object);
         }
-        if(item == null) return false;
+        if(item.isEmpty()) return false;
 
         if(item.getItem() == Items.FIREWORK_CHARGE) {
             if(effects.size() != 0) {
@@ -164,14 +164,14 @@ public class FireworkUtils {
     }
 
     public static Optional<List<FireworkEffect>> getFireworkEffects(Object object) {
-        ItemStack item = null;
+        ItemStack item = ItemStack.EMPTY;
         if(object instanceof ItemStack) {
             item = (ItemStack) object;
         }
         if(object instanceof EntityFireworkRocket) {
             item = FireworkUtils.getItem((EntityFireworkRocket) object);
         }
-        if(item == null) return Optional.empty();
+        if(item.isEmpty()) return Optional.empty();
 
         List<FireworkEffect> effects;
         if(item.getItem() == Items.FIREWORKS) {
@@ -194,14 +194,14 @@ public class FireworkUtils {
     }
 
     public static boolean removeFireworkEffects(Object object) {
-        ItemStack item = null;
+        ItemStack item = ItemStack.EMPTY;
         if(object instanceof ItemStack) {
             item = (ItemStack) object;
         }
         if(object instanceof EntityFireworkRocket) {
             item = FireworkUtils.getItem((EntityFireworkRocket) object);
         }
-        if(item == null) return false;
+        if(item.isEmpty()) return false;
 
         if(item.getItem() == Items.FIREWORK_CHARGE) {
             NbtDataUtil.getOrCreateCompound(item).removeTag("Explosion");
