@@ -238,26 +238,6 @@ public class SlotAdapter extends Adapter implements Slot {
         return super.getMaxStackSize();
     }
 
-    @Override
-    public <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Inventory child, Class<T> property) {
-        return Collections.<T>emptyList();
-    }
-
-    @Override
-    public <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Class<T> property) {
-        return Collections.<T>emptyList();
-    }
-
-    @Override
-    public <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property, Object key) {
-        return Optional.<T>empty();
-    }
-
-    @Override
-    public <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Class<T> property, Object key) {
-        return Optional.<T>empty();
-    }
-
 //    @Override
 //    public Iterator<Inventory> iterator() {
 //        // TODO
