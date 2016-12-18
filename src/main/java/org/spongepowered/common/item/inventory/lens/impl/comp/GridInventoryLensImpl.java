@@ -73,13 +73,9 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
+        super.init(slots);
         this.rows = new ArrayList<>();
         this.cols = new ArrayList<>();
-
-        // Adds all slots in the grid ; Allows to query the entire grid by SlotIndex ; e.g. on a 3x3 Grid SlotIndex.of(4)
-        for (int slotIndex = this.base; slotIndex < this.base + this.height * this.width; slotIndex++) {
-            super.addSpanningChild(new SlotLensImpl(slotIndex), new SlotIndex(slotIndex));
-        }
 
         for (int y = 0, base = this.base; y < this.height; y++, base += this.stride) {
             InventoryRowLensImpl row = new InventoryRowLensImpl(base, this.width, this.xBase, this.yBase + y, slots);
