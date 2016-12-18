@@ -130,17 +130,28 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
 
     @Override
     default <T extends InventoryProperty<?, ?>> Collection<T> getProperties(Class<T> property) {
-        return Collections.emptyList();
+        if (this.parent() == this) {
+            return Collections.emptyList(); // TODO top level inventory properties
+        }
+        return this.parent().getProperties(this, property);
     }
 
     @Override
     default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property, Object key) {
-        return Optional.empty(); // TODO!
+        for (InventoryProperty<?, ?> prop : Adapter.Logic.getProperties(this, child, property)) {
+            if (key.equals(prop.getKey())) {
+                return Optional.of(((T) prop));
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
     default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Class<T> property, Object key) {
-        return Optional.empty(); // TODO!
+        if (this.parent() == this) {
+            return Optional.empty(); // TODO top level inventory properties
+        }
+        return this.parent().getProperty(this, property, key);
     }
 
     @Override
