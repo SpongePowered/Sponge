@@ -49,8 +49,7 @@ public abstract class MixinBlockDoublePlant extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDoublePlantTypeFor(blockState),
-                getPortionData(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDoublePlantTypeFor(blockState), getPortionData(blockState));
     }
 
     @Override
