@@ -65,7 +65,7 @@ public class CustomContainer extends Container {
 
     @Override
     public ItemStack transferStackInSlot(EntityPlayer playerIn, int index) {
-        ItemStack itemstack = null;
+        ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
 
         if (slot != null && slot.getHasStack())
@@ -77,12 +77,12 @@ public class CustomContainer extends Container {
             {
                 if (!this.mergeItemStack(itemstack1, inv.getSizeInventory(), this.inventorySlots.size(), true))
                 {
-                    return null;
+                    return ItemStack.EMPTY;
                 }
             }
             else if (!this.mergeItemStack(itemstack1, 0, inv.getSizeInventory(), false))
             {
-                return null;
+                return ItemStack.EMPTY;
             }
 
             if (itemstack1.getCount() == 0)
