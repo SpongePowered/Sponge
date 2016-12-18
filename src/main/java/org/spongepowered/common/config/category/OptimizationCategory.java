@@ -59,11 +59,10 @@ public class OptimizationCategory extends ConfigCategory {
                                                                + "world heights and can thus be disabled in those cases.")
     private boolean inlineBlockPositionChecks = true;
 
-    @Setting(value = "structure-saving", comment = "Handles structures that are saved to disk. Certain structures\n"
-            + "are not neccessarily required to be saved to perform their proper\n"
-            + "function. As such, saving these structures may take unnecessary \n"
-            + "storage space, and/or time during world saves. By default, \n"
-            + "\"Mineshaft\" is \"false\".")
+    @Setting(value = "structure-saving", comment = "Handles structures that are saved to disk. Certain structures can take up large amounts\n"
+            + "of disk space for very large maps and the data for these structures is only needed while the world\n"
+            + "around them is generating. Disabling saving of these structures can save disk space and time during\n"
+            + "saves if your world is already fully generated.")
     private StructureSaveCategory structureSaveCategory = new StructureSaveCategory();
 
     public OptimizationCategory() {
