@@ -59,21 +59,21 @@ public abstract class MixinMapGenStructure_Structure_Saving extends MapGenBase {
     public void onConstruction(CallbackInfo ci) {
         StructureSaveCategory structureSaveCategory = SpongeImpl.getGlobalConfig().getConfig().getOptimizations().getStructureSaveCategory();
         if (structureSaveCategory.isEnabled()) {
-        this.modId = SpongeImplHooks.getModIdFromClass(this.getClass());
-        String structureName = this.getStructureName().toLowerCase();
-        StructureModCategory structureMod = structureSaveCategory.getModList().get(this.modId);
-        if (structureMod == null) {
-            if (structureSaveCategory.autoPopulateData()) {
-                structureMod = new StructureModCategory();
-                structureSaveCategory.getModList().put(this.modId, structureMod);
+            this.modId = SpongeImplHooks.getModIdFromClass(this.getClass());
+            String structureName = this.getStructureName().toLowerCase();
+            StructureModCategory structureMod = structureSaveCategory.getModList().get(this.modId);
+            if (structureMod == null) {
+                if (structureSaveCategory.autoPopulateData()) {
+                    structureMod = new StructureModCategory();
+                    structureSaveCategory.getModList().put(this.modId, structureMod);
                     SpongeImpl.getGlobalConfig().save();
-            }
-        } else {
-            Boolean canSave = structureMod.getStructureList().get(structureName);
-            if (canSave != null) {
-                this.canSaveStructures = canSave;
-            } else if (structureSaveCategory.autoPopulateData()) {
-                structureMod.getStructureList().put(structureName, true);
+                }
+            } else {
+                Boolean canSave = structureMod.getStructureList().get(structureName);
+                if (canSave != null) {
+                    this.canSaveStructures = canSave;
+                } else if (structureSaveCategory.autoPopulateData()) {
+                    structureMod.getStructureList().put(structureName, true);
                     SpongeImpl.getGlobalConfig().save();
                 }
             }
