@@ -27,6 +27,7 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.GridInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -34,6 +35,7 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
+import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
 
 import java.util.ArrayList;
@@ -73,6 +75,11 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
         this.rows = new ArrayList<>();
         this.cols = new ArrayList<>();
+
+        // Adds all slots in the grid ; Allows to query the entire grid by SlotIndex ; e.g. on a 3x3 Grid SlotIndex.of(4)
+        for (int slotIndex = this.base; slotIndex < this.base + this.height * this.width; slotIndex++) {
+            super.addSpanningChild(new SlotLensImpl(slotIndex), new SlotIndex(slotIndex));
+        }
 
         for (int y = 0, base = this.base; y < this.height; y++, base += this.stride) {
             InventoryRowLensImpl row = new InventoryRowLensImpl(base, this.width, this.xBase, this.yBase + y, slots);
