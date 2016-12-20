@@ -72,6 +72,7 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
@@ -271,8 +272,14 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         }
 
         // Assemble chunk
-        Chunk chunk = new Chunk(this.world, chunkprimer, chunkX, chunkZ);
-        this.cachedBiomes.fill(chunk.getBiomeArray());
+        Chunk chunk;
+        if (this.baseGenerator instanceof SpongeGenerationPopulator && ((SpongeGenerationPopulator) this.baseGenerator).getCachedChunk() != null) {
+            chunk = ((SpongeGenerationPopulator) this.baseGenerator).getCachedChunk();
+            ((IMixinChunk) chunk).fill(chunkprimer);
+        } else {
+            chunk = new Chunk(this.world, chunkprimer, chunkX, chunkZ);
+            this.cachedBiomes.fill(chunk.getBiomeArray());
+        }
         chunk.generateSkylightMap();
         return chunk;
     }

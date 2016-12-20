@@ -35,6 +35,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
+import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Blocks;
@@ -52,6 +53,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
+import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -104,6 +106,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
+import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
@@ -1214,6 +1217,31 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         this.scheduledForUnload = scheduled;
     }
 
+    @Inject(method = "generateSkylightMap", at = @At("HEAD"), cancellable = true)
+    public void onGenerateSkylightMap(CallbackInfo ci) {
+        if (!WorldGenConstants.lightingEnabled) {
+            ci.cancel();
+        }
+    }
+
+    @Override
+    public void fill(ChunkPrimer primer) {
+        boolean flag = !this.worldObj.provider.getHasNoSky();
+        for (int x = 0; x < 16; ++x) {
+            for (int z = 0; z < 16; ++z) {
+                for (int y = 0; y < 256; ++y) {
+                    IBlockState block = primer.getBlockState(x, y, z);
+                    if (block.getMaterial() != Material.AIR) {
+                        int section = y >> 4;
+                        if (this.storageArrays[section] == net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE) {
+                            this.storageArrays[section] = new ExtendedBlockStorage(section << 4, flag);
+                        }
+                        this.storageArrays[section].set(x, y & 15, z, block);
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public String toString() {
