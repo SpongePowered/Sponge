@@ -223,6 +223,16 @@ public final class WorldGenConstants {
         return false;
     };
 
+    public static boolean lightingEnabled = true;
+
+    public static void disableLighting() {
+        lightingEnabled = false;
+    }
+
+    public static void enableLighting() {
+        lightingEnabled = true;
+    }
+
     private WorldGenConstants() {
 
     }
