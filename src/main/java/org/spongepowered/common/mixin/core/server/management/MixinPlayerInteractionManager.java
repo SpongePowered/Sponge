@@ -137,7 +137,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                     this.player.connection.sendPacket(new SPacketBlockChange(worldIn, pos.down()));
                 }
 
-            } else if (oldStack != null) {
+            } else if (!oldStack.isEmpty()) {
                 // Stopping the placement of a door or double plant causes artifacts (ghosts) on the top-side of the block. We need to remove it
                 final Item item = oldStack.getItem();
                 if (item instanceof ItemDoor || (item instanceof ItemBlock && ((ItemBlock) item).getBlock().equals(Blocks.DOUBLE_PLANT))) {

@@ -61,7 +61,7 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
         List<DataView> items = Lists.newArrayList();
         for (int i = 0; i < getSizeInventory(); i++) {
             ItemStack stack = getStackInSlot(i);
-            if (stack != null) {
+            if (!stack.isEmpty()) {
                 // todo make a helper object for this
                 DataContainer stackView = new MemoryDataContainer()
                     .set(Queries.CONTENT_VERSION, 1)

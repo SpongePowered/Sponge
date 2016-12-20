@@ -169,7 +169,7 @@ public class PacketUtil {
             switch (packet.getAction()) {
                 case DROP_ITEM:
                 case DROP_ALL_ITEMS:
-                    if (stack != null && !playerMP.isSpectator()) {
+                    if (!stack.isEmpty() && !playerMP.isSpectator()) {
                         ((IMixinEntityPlayerMP) playerMP).setPacketItem(stack.copy());
                     }
                     return false;
