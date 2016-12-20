@@ -58,7 +58,7 @@ public class FireworkUtils {
 
     public static ItemStack getItem(EntityFireworkRocket firework) {
         ItemStack item = firework.getDataManager().get(EntityFireworkRocket.FIREWORK_ITEM);
-        if (item == null) {
+        if (item.isEmpty()) {
             item = (ItemStack) new SpongeItemStackBuilder().itemType(ItemTypes.FIREWORKS).build();
             firework.getDataManager().set(EntityFireworkRocket.FIREWORK_ITEM, item);
         }
