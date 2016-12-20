@@ -77,7 +77,7 @@ public class ModuleCategory extends ConfigCategory {
     }
 
     public boolean usePluginTileEntityActivation() {
-        return this.pluginEntityActivation;
+        return this.pluginTileEntityActivation;
     }
 
     public boolean usesBlockCapturing() {
