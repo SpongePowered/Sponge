@@ -47,12 +47,12 @@ public interface IModData_Activation {
 
     void setDefaultActivationState(boolean defaultState);
 
-    int getTicksExisted();
+    int getSpongeTicksExisted();
 
-    void incrementTicksExisted();
+    void incrementSpongeTicksExisted();
 
-    int getTickRate();
+    int getSpongeTickRate();
 
-    void setTickRate(int tickRate);
+    void setSpongeTickRate(int tickRate);
 
 }

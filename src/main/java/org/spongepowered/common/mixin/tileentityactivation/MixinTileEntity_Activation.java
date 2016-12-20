@@ -39,12 +39,12 @@ public class MixinTileEntity_Activation implements IModData_Activation {
     private int tickRate = 1;
 
     @Override
-    public void incrementTicksExisted() {
+    public final void incrementSpongeTicksExisted() {
         this.ticksExisted++;
     }
 
     @Override
-    public int getTicksExisted() {
+    public int getSpongeTicksExisted() {
         return this.ticksExisted;
     }
 
@@ -78,12 +78,12 @@ public class MixinTileEntity_Activation implements IModData_Activation {
     }
 
     @Override
-    public int getTickRate() {
+    public int getSpongeTickRate() {
         return this.tickRate;
     }
 
     @Override
-    public void setTickRate(int tickRate) {
+    public void setSpongeTickRate(int tickRate) {
         this.tickRate = tickRate;
     }
 

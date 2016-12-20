@@ -182,7 +182,7 @@ public class TileEntityActivation {
             }
 
         // Add a little performance juice to active entities. Skip 1/4 if not immune.
-        } else if (!spongeTileEntity.getDefaultActivationState() && spongeTileEntity.getTicksExisted() % 4 == 0) {
+        } else if (!spongeTileEntity.getDefaultActivationState() && spongeTileEntity.getSpongeTicksExisted() % 4 == 0) {
             isActive = false;
         }
 
@@ -199,7 +199,7 @@ public class TileEntityActivation {
         }
 
         // check tick rate
-        if (isActive && world.getWorldInfo().getWorldTotalTime() % spongeTileEntity.getTickRate() != 0L) {
+        if (isActive && world.getWorldInfo().getWorldTotalTime() % spongeTileEntity.getSpongeTickRate() != 0L) {
             isActive = false;
         }
 

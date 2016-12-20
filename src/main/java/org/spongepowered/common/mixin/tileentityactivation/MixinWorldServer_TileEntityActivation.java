@@ -30,8 +30,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.mixin.core.world.MixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 
@@ -44,7 +42,7 @@ public abstract class MixinWorldServer_TileEntityActivation {
         final boolean canUpdate = TileEntityActivation.checkIfActive(tileEntity);
 
         if (!canUpdate) {
-            ((IModData_Activation) tileEntity).incrementTicksExisted();
+            ((IModData_Activation) tileEntity).incrementSpongeTicksExisted();
             ((IModData_Activation) tileEntity).inactiveTick();
             ci.cancel();
         }
