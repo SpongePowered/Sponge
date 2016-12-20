@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
@@ -285,7 +286,20 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
 
         public static boolean contains(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, ItemStack stack) {
-            // TODO contains
+            // TODO maybe add a queryAny and containsAny method OR query/contains with quantity to Inventory Interface
+            // because currently the logic for Inventory#query(ItemStack) and Inventory#contains(ItemStack) both ignore stack size
+            for (int ord = 0; ord < lens.slotCount(); ord++) {
+                net.minecraft.item.ItemStack slotStack = lens.getStack(inv, ord);
+                if (slotStack.isEmpty()) {
+                    if (ItemStackUtil.toNative(stack).isEmpty()) {
+                        return true; // Found an empty Slot
+                    }
+                } else {
+                    if (ItemStackUtil.compareIgnoreQuantity(slotStack, stack)) {
+                        return true; // Found a matching stack
+                    }
+                }
+            }
             return false;
         }
 
@@ -294,7 +308,18 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
 
         public static boolean contains(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, ItemType type) {
-            // TODO contains
+            for (int ord = 0; ord < lens.slotCount(); ord++) {
+                net.minecraft.item.ItemStack slotStack = lens.getStack(inv, ord);
+                if (slotStack.isEmpty()) {
+                    if (type == null || type == ItemTypes.NONE) {
+                        return true; // Found an empty Slot
+                    }
+                } else {
+                    if (slotStack.getItem() == type) {
+                        return true; // Found a matching stack
+                    }
+                }
+            }
             return false;
         }
     }
