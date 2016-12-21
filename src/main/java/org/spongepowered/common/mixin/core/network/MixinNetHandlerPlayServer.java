@@ -545,7 +545,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     public EntityItem onPlayerDropItem(EntityPlayerMP player, boolean dropAll) {
         EntityItem item = null;
         ItemStack stack = this.playerEntity.inventory.getCurrentItem();
-        if (stack != null) {
+        if (!stack.isEmpty()) {
             int size = stack.getCount();
             item = this.playerEntity.dropItem(dropAll);
             // force client itemstack update if drop event was cancelled

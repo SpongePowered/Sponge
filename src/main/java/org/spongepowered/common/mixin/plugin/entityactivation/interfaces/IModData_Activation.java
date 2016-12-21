@@ -45,4 +45,14 @@ public interface IModData_Activation {
 
     boolean requiresActivationCacheRefresh();
 
+    void setDefaultActivationState(boolean defaultState);
+
+    int getSpongeTicksExisted();
+
+    void incrementSpongeTicksExisted();
+
+    int getSpongeTickRate();
+
+    void setSpongeTickRate(int tickRate);
+
 }

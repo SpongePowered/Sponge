@@ -364,6 +364,12 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(SprintData.class, SpongeSprintData.class, ImmutableSprintData.class,
                 ImmutableSpongeSprintData.class, new SprintDataProcessor());
 
+        dataManager.registerDualProcessor(AchievementData.class, SpongeAchievementData.class,
+                ImmutableAchievementData.class, ImmutableSpongeAchievementData.class, new AchievementDataProcessor());
+
+        dataManager.registerDualProcessor(StatisticData.class, SpongeStatisticData.class, ImmutableStatisticData.class,
+                ImmutableSpongeStatisticData.class, new StatisticDataProcessor());
+
         dataManager.registerDualProcessor(StuckArrowsData.class, SpongeStuckArrowsData.class, ImmutableStuckArrowsData.class,
                 ImmutableSpongeStuckArrowsData.class, new StuckArrowsDataProcessor());
 

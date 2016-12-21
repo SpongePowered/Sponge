@@ -82,6 +82,8 @@ import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.InventoryArchetype;
+import org.spongepowered.api.item.inventory.InventoryArchetypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
@@ -106,6 +108,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -627,6 +630,13 @@ public class SpongeCommonEventFactory {
         net.minecraft.inventory.Container previousContainer = player.openContainer;
         net.minecraft.inventory.Container container = null;
 
+        if (inventory instanceof CustomInventory) {
+            if (!checkValidVanillaCustomInventory(((CustomInventory) inventory))) {
+                return null; // Invalid size for vanilla inventory ; This is to prevent crashing the client with invalid data
+            }
+            // else continue as normal
+        }
+
         if (inventory instanceof IInteractionObject) {
             final String guiId = ((IInteractionObject) inventory).getGuiID();
 
@@ -672,5 +682,49 @@ public class SpongeCommonEventFactory {
         }
 
         return container;
+    }
+
+    private static boolean checkValidVanillaCustomInventory(CustomInventory inventory) {
+        InventoryArchetype archetype = inventory.getArchetype();
+        if (InventoryArchetypes.CHEST.equals(archetype) || InventoryArchetypes.DOUBLE_CHEST.equals(archetype)) {
+            int size = inventory.getSizeInventory();
+            return size % 9 == 0 && size / 9 <= 6 && size != 0; // Divisible by 9 AND less than 6 rows of 9 slots
+        }
+        if (InventoryArchetypes.HOPPER.equals(archetype)) {
+            return inventory.getSizeInventory() == 5 * 1;
+        }
+        if (InventoryArchetypes.DISPENSER.equals(archetype)) {
+            return inventory.getSizeInventory() == 3 * 3;
+        }
+        if (InventoryArchetypes.WORKBENCH.equals(archetype)) {
+            return inventory.getSizeInventory() == 3 * 3 + 1;
+        }
+        if (InventoryArchetypes.FURNACE.equals(archetype)) {
+            return inventory.getSizeInventory() == 3;
+        }
+        if (InventoryArchetypes.ENCHANTING_TABLE.equals(archetype)) {
+            return inventory.getSizeInventory() == 2;
+        }
+        if (InventoryArchetypes.ANVIL.equals(archetype)) {
+            return inventory.getSizeInventory() == 3;
+        }
+        if (InventoryArchetypes.BREWING_STAND.equals(archetype)) {
+            return inventory.getSizeInventory() == 5;
+        }
+        if (InventoryArchetypes.BEACON.equals(archetype)) {
+            return inventory.getSizeInventory() == 1;
+        }
+        // TODO horse container are actually dependent on an horse entity
+        if (InventoryArchetypes.HORSE.equals(archetype)) {
+            return inventory.getSizeInventory() == 2;
+        }
+        if (InventoryArchetypes.HORSE_WITH_CHEST.equals(archetype)) {
+            return inventory.getSizeInventory() == 2 + 5 * 3;
+        }
+        if (InventoryArchetypes.VILLAGER.equals(archetype)) {
+            return inventory.getSizeInventory() == 3;
+        }
+        // else any other Archetype we cannot be sure which size is correct
+        return true;
     }
 }

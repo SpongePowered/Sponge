@@ -51,6 +51,8 @@ public class SpongeGenerationPopulator implements GenerationPopulator, IGenerati
     private final World world;
     private Timing timing;
     private final Cause populatorCause = Cause.source(this).build();
+    
+    private Chunk cachedChunk = null;
 
     /**
      * Gets the {@link GenerationPopulator} from the given
@@ -90,12 +92,21 @@ public class SpongeGenerationPopulator implements GenerationPopulator, IGenerati
         int minChunkZ = GenericMath.floor(min.getZ() / 16.0);
         int maxChunkX = GenericMath.floor(max.getX() / 16.0);
         int maxChunkZ = GenericMath.floor(max.getZ() / 16.0);
-        for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
-            for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
-                final Chunk generated = this.chunkGenerator.provideChunk(chunkX, chunkZ);
-                placeChunkInBuffer(generated, buffer, chunkX, chunkZ);
+
+        WorldGenConstants.disableLighting();
+        if (minChunkX == maxChunkX && minChunkZ == maxChunkZ) {
+            this.cachedChunk = this.chunkGenerator.provideChunk(minChunkX, minChunkZ);
+            placeChunkInBuffer(this.cachedChunk, buffer, minChunkX, minChunkZ);
+        } else {
+            for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
+                for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
+                    final Chunk generated = this.chunkGenerator.provideChunk(chunkX, chunkZ);
+                    placeChunkInBuffer(generated, buffer, chunkX, chunkZ);
+                }
             }
         }
+        WorldGenConstants.enableLighting();
+
         this.getTimingsHandler().stopTimingIfSync();
     }
 
@@ -131,6 +142,14 @@ public class SpongeGenerationPopulator implements GenerationPopulator, IGenerati
                 }
             }
         }
+    }
+
+    public Chunk getCachedChunk() {
+        return this.cachedChunk;
+    }
+
+    public void clearCachedChunk() {
+        this.cachedChunk = null;
     }
 
     /**

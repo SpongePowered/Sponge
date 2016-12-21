@@ -6,6 +6,9 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "mixins": [
+        "MixinSpongeImplHooks_Item_Pre_Merge",
+        "MixinWorldServer_Explosion",
+        "MixinExplosion_Explosion",
         "entity.MixinEntityTameable_Cached_Owner",
         "util.math.MixinMutableBlockPos_Inline_Valid_BlockPos",
         "util.math.MixinVec3i_Inline_Valid_BlockPos",
@@ -14,9 +17,7 @@
         "world.MixinWorld_Inline_Valid_BlockPos",
         "world.MixinWorldServer_Lighting",
         "world.MixinWorldServer_Lighting_Inline_Valid_BlockPos",
-        "MixinSpongeImplHooks_Item_Pre_Merge",
-        "MixinWorldServer_Explosion",
-        "MixinExplosion_Explosion"
+        "world.gen.structure.MixinMapGenStructure_Structure_Saving"
     ],
     "injectors": {
         "defaultRequire": 1

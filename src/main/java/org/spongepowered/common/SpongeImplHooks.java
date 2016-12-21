@@ -41,9 +41,11 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.Teleporter;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.storage.MapStorage;
 import org.spongepowered.common.event.tracking.ItemDropData;
 
 import java.util.Collection;
@@ -190,4 +192,7 @@ public final class SpongeImplHooks {
         }
     }
 
+    public static MapStorage getWorldMapStorage(World world) {
+        return world.getMapStorage();
+    }
 }
