@@ -58,6 +58,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.BookViewDataBuilder;
 import org.spongepowered.api.text.serializer.TextConfigSerializer;
 import org.spongepowered.api.util.weighted.VariableAmount;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -107,6 +108,7 @@ import org.spongepowered.common.data.property.store.entity.*;
 import org.spongepowered.common.data.property.store.item.*;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
+import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
 public class DataRegistrar {
@@ -135,6 +137,7 @@ public class DataRegistrar {
         dataManager.registerBuilder(Sign.class, new SpongeSignBuilder());
         dataManager.registerBuilder(Skull.class, new SpongeSkullBuilder());
         dataManager.registerBuilder(Beacon.class, new SpongeBeaconBuilder());
+        dataManager.registerBuilder(LocatableBlock.class, new SpongeLocatableBlockBuilder());
 
         // Block stuff
         dataManager.registerBuilder(BlockSnapshot.class, new SpongeBlockSnapshotBuilder());
