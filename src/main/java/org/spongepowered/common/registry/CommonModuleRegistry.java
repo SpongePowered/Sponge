@@ -143,6 +143,7 @@ import org.spongepowered.common.event.entity.teleport.SpongeTeleportCauseBuilder
 import org.spongepowered.common.event.spawn.SpongeBlockSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeBreedingSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeEntitySpawnCauseBuilder;
+import org.spongepowered.common.event.spawn.SpongeLocatableBlockSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeMobSpawnerSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeWeatherSpawnCauseBuilder;
@@ -318,6 +319,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Inventory.Builder.class, SpongeInventoryBuilder::new)
             .registerBuilderSupplier(SoundType.Builder.class, SpongeSoundBuilder::new)
             .registerBuilderSupplier(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)
+            .registerBuilderSupplier(LocatableBlockSpawnCause.Builder.class, SpongeLocatableBlockSpawnCauseBuilder::new)
         ;
     }
 
