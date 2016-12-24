@@ -282,21 +282,40 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
 
         public static boolean contains(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter, ItemStack stack) {
-            return Logic.contains(adapter.getInventory(), adapter.getRootLens(), stack);
+            return Logic.contains(adapter.getInventory(), adapter.getRootLens(), stack, stack.getQuantity());
         }
 
-        public static boolean contains(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, ItemStack stack) {
-            // TODO maybe add a queryAny and containsAny method OR query/contains with quantity to Inventory Interface
-            // because currently the logic for Inventory#query(ItemStack) and Inventory#contains(ItemStack) both ignore stack size
+        public static boolean contains(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter, ItemStack stack, int quantity) {
+            return Logic.contains(adapter.getInventory(), adapter.getRootLens(), stack, quantity);
+        }
+
+        /**
+         * Searches for at least <code>quantity</code> of given stack.
+         *
+         * @param inv The inventory to search in
+         * @param lens The lens to search with
+         * @param stack The stack to search with
+         * @param quantity The quantity to find
+         * @return true if at least <code>quantity</code> of given stack has been found in given inventory
+         */
+        public static boolean contains(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, ItemStack stack, int quantity) {
+            net.minecraft.item.ItemStack nonNullStack = ItemStackUtil.toNative(stack); // Handle null as empty
+            int found = 0;
             for (int ord = 0; ord < lens.slotCount(); ord++) {
                 net.minecraft.item.ItemStack slotStack = lens.getStack(inv, ord);
                 if (slotStack.isEmpty()) {
-                    if (ItemStackUtil.toNative(stack).isEmpty()) {
-                        return true; // Found an empty Slot
+                    if (nonNullStack.isEmpty()) {
+                        found++; // Found an empty Slot
+                        if (found >= quantity) {
+                            return true;
+                        }
                     }
                 } else {
                     if (ItemStackUtil.compareIgnoreQuantity(slotStack, stack)) {
-                        return true; // Found a matching stack
+                        found += slotStack.getCount(); // Found a matching stack
+                        if (found >= quantity) {
+                            return true;
+                        }
                     }
                 }
             }

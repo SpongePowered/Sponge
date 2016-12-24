@@ -138,6 +138,11 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
     }
 
     @Override
+    public boolean containsAny(ItemStack stack) {
+        return false;
+    }
+
+    @Override
     public boolean contains(ItemType type) {
         return false;
     }
@@ -186,6 +191,12 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Inventory> T query(ItemStack... types) {
+        return (T)this;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends Inventory> T queryAny(ItemStack... types) {
         return (T)this;
     }
 

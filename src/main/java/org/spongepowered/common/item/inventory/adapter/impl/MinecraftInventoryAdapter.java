@@ -108,6 +108,11 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     }
 
     @Override
+    default boolean containsAny(ItemStack stack) {
+        return Adapter.Logic.contains(this, stack, 1);
+    }
+
+    @Override
     default boolean contains(ItemType type) {
         return Adapter.Logic.contains(this, type);
     }
@@ -174,6 +179,12 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
     @SuppressWarnings("unchecked")
     @Override
     default <T extends Inventory> T query(ItemStack... types) {
+        return (T) Query.compileExact(this, types).execute();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    default <T extends Inventory> T queryAny(ItemStack... types) {
         return (T) Query.compile(this, types).execute();
     }
 
