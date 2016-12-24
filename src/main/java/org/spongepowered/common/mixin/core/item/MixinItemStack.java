@@ -164,11 +164,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
 
     @Override
     public void setQuantity(int quantity) throws IllegalArgumentException {
-        if (quantity > this.getMaxStackQuantity()) {
-            throw new IllegalArgumentException("Quantity (" + quantity + ") exceeded the maximum stack size (" + this.getMaxStackQuantity() + ")");
-        } else {
-            this.setCount(quantity);
-        }
+        this.setCount(quantity);
     }
 
     @Override
