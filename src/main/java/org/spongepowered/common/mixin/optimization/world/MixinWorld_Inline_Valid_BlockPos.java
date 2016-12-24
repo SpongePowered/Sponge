@@ -234,7 +234,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
                                 }
 
                                 IBlockState iblockstate = this.getBlockState(blockpos$pooledmutableblockpos);
-                                iblockstate.addCollisionBoxToList((World) (Object) this, blockpos$pooledmutableblockpos, bbox, list, (Entity) null);
+                                iblockstate.addCollisionBoxToList((World) (Object) this, blockpos$pooledmutableblockpos, bbox, list, (Entity) null, false);
 
                                 if (!list.isEmpty()) {
                                     boolean flag = true;

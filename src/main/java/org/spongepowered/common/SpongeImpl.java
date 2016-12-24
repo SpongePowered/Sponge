@@ -73,7 +73,7 @@ public final class SpongeImpl {
     public static final String ECOSYSTEM_NAME = "Sponge";
 
     // TODO: Keep up to date
-    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.11", 315);
+    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.11.2", 316);
 
     private static final Logger logger = LogManager.getLogger(ECOSYSTEM_NAME);
     private static final org.slf4j.Logger slf4jLogger = LoggerFactory.getLogger(ECOSYSTEM_NAME);
