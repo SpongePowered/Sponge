@@ -113,7 +113,7 @@ public final class MapColorRegistryModule implements CatalogRegistryModule<org.s
         id = id & 255;
         int baseId = id / 4;
         int shade = id & 3;
-        MapColor baseColor = MapColor.mapColorArray[baseId];
+        MapColor baseColor = MapColor.COLORS[baseId];
         if (baseColor == null) {
             return Optional.empty();
         } else {
