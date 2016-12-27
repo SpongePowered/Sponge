@@ -36,6 +36,10 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.block.material.IMixinMapColor;
 import org.spongepowered.common.map.SpongeMapColor;
 
@@ -51,21 +55,26 @@ public class MixinMapColor implements MapColor.Base, IMixinMapColor {
 
     private Map<MapShade, MapColor> cachedShadings = new HashMap<>();
     private String id;
+    private Color color;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstruct(CallbackInfo callbackInfo) {
+        color = Color.ofRgb(colorValue);
+    }
 
     @Override
     public Color getColor() {
-        return Color.ofRgb(colorValue);
+        return color;
     }
 
     @Override
     public MapColor shade(MapShade newShading) {
-        if (cachedShadings.containsKey(newShading)) {
-            return cachedShadings.get(newShading);
-        } else {
-            MapColor shaded = new SpongeMapColor(this, newShading);
+        MapColor shaded = cachedShadings.get(newShading);
+        if (shaded == null) {
+            shaded = new SpongeMapColor(this, newShading);
             cachedShadings.put(newShading, shaded);
-            return shaded;
         }
+        return shaded;
     }
 
     @Override
@@ -77,7 +86,7 @@ public class MixinMapColor implements MapColor.Base, IMixinMapColor {
     public DataContainer toContainer() {
         final DataContainer container = new MemoryDataContainer();
         container.set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQuery.of("ColorIndex"), this.colorIndex);
+                .set(DataQueries.MAP_COLOR_INDEX, this.colorIndex);
         return container;
     }
 
@@ -101,11 +110,9 @@ public class MixinMapColor implements MapColor.Base, IMixinMapColor {
         if (obj == null) {
             return false;
         }
-
         if (obj instanceof MapColor) {
             return ((MapColor) obj).getColor().getRgb() == this.colorValue;
         }
-
         return false;
     }
 
@@ -122,7 +129,8 @@ public class MixinMapColor implements MapColor.Base, IMixinMapColor {
                 .add("colorIndex", this.colorIndex);
     }
 
-    @Override public void setId(String id) {
+    @Override
+    public void setId(String id) {
         this.id = id;
     }
 }

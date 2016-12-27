@@ -61,11 +61,13 @@ public abstract class MixinMapData extends WorldSavedData implements MapView {
         super(name);
     }
 
-    @Override public Vector2i getSize() {
+    @Override
+    public Vector2i getSize() {
         return Vector2i.from(128, 128);
     }
 
-    @Override public BufferedImage toImage() {
+    @Override
+    public BufferedImage toImage() {
         BufferedImage image = new BufferedImage(128, 128, BufferedImage.TYPE_INT_ARGB);
         int[] data = ((DataBufferInt) image.getRaster().getDataBuffer()).getData();
         for (int i = 0; i < 128; i++) {
@@ -76,7 +78,8 @@ public abstract class MixinMapData extends WorldSavedData implements MapView {
         return image;
     }
 
-    @Override public void drawImage(int x, int y, BufferedImage image) {
+    @Override
+    public void drawImage(int x, int y, BufferedImage image) {
         checkNotNull(image, "image");
         checkArgument(x >= 0 && x < 128, "x >= 0 && x < 128");
         checkArgument(y >= 0 && y < 128, "y >= 0 && y < 128");

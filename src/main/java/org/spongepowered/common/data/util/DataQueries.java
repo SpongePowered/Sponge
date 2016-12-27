@@ -153,6 +153,11 @@ public final class DataQueries {
     public static final DataQuery FIREWORK_TRAILS = of("Trails");
     public static final DataQuery FIREWORK_FLICKERS = of("Flickers");
 
+    // Maps
+    public static final DataQuery MAP_BASE_COLOR = of("BaseColor");
+    public static final DataQuery MAP_SHADE = of("Shade");
+    public static final DataQuery MAP_COLOR_INDEX = of("ColorIndex");
+
     // Particle Effects
     public static final DataQuery PARTICLE_TYPE = of("Type");
     public static final DataQuery PARTICLE_OPTIONS = of("Options");

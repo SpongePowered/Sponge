@@ -25,14 +25,16 @@
 package org.spongepowered.common.map;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.common.data.util.DataQueries;
 
 import javax.annotation.Nonnull;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class SpongeMapColor implements MapColor {
 
@@ -42,39 +44,48 @@ public class SpongeMapColor implements MapColor {
     private Color shadedColor = null;
 
     public SpongeMapColor(Base baseColor, MapShade shade) {
+        checkNotNull(baseColor, "baseColor cannot be null");
+        checkNotNull(shade, "shade cannot be null");
+
         this.baseColor = baseColor;
         this.shade = shade;
     }
 
-    @Override public Color getColor() {
+    @Override
+    public Color getColor() {
         // lazy initialize
         if (this.shadedColor == null) {
-            this.shadedColor = shadeColor(((net.minecraft.block.material.MapColor)baseColor).colorValue, shade);
+            this.shadedColor = shadeColor(((net.minecraft.block.material.MapColor) baseColor).colorValue, shade);
         }
         return this.shadedColor;
     }
 
-    @Override public MapColor shade(MapShade newShading) {
+    @Override
+    public MapColor shade(MapShade newShading) {
         return this.baseColor.shade(newShading);
     }
 
-    @Override public MapShade getShade() {
+    @Override
+    public MapShade getShade() {
         return this.shade;
     }
 
-    @Override public Base base() {
+    @Override
+    public Base base() {
         return this.baseColor;
     }
 
-    @Override public int getContentVersion() {
+    @Override
+    public int getContentVersion() {
         return 1;
     }
 
-    @Override public DataContainer toContainer() {
+    @Override
+    public DataContainer toContainer() {
         final DataContainer container = new MemoryDataContainer();
         container.set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(DataQuery.of("BaseColor"), this.baseColor.toContainer())
-                .set(DataQuery.of("Shade"), this.shade.getId());
+                .set(DataQueries.MAP_BASE_COLOR, this.baseColor)
+                .set(DataQueries.MAP_SHADE, this.shade.getId());
         return container;
     }
 

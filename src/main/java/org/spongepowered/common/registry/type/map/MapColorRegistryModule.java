@@ -35,10 +35,7 @@ import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.interfaces.block.material.IMixinMapColor;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public final class MapColorRegistryModule implements CatalogRegistryModule<org.spongepowered.api.map.color.MapColor.Base> {
 
@@ -47,21 +44,24 @@ public final class MapColorRegistryModule implements CatalogRegistryModule<org.s
     }
 
     @RegisterCatalog(value = MapColors.class, ignoredFields = "factory")
-    private final Map<String, org.spongepowered.api.map.color.MapColor.Base> mapColorMappings = Maps.newHashMap();
+    private final Map<String, org.spongepowered.api.map.color.MapColor.Base> mapColorMappings = new HashMap<>();
 
-    @Override public Optional<org.spongepowered.api.map.color.MapColor.Base> getById(String id) {
+    @Override
+    public Optional<org.spongepowered.api.map.color.MapColor.Base> getById(String id) {
         checkNotNull(id, "id");
         return Optional.ofNullable(this.mapColorMappings.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
-    @Override public Collection<org.spongepowered.api.map.color.MapColor.Base> getAll() {
+    @Override
+    public Collection<org.spongepowered.api.map.color.MapColor.Base> getAll() {
         return ImmutableList.copyOf(this.mapColorMappings.values());
     }
 
     // If we need more than these we will have to be tricky, theoretically maps
     // like all other items are modifiable by plugins with client work, however
     // because we don't get a listing of base names to colors we cannot handle this
-    @Override public void registerDefaults() {
+    @Override
+    public void registerDefaults() {
         registerColor("adobe", MapColor.adobeColor);
         registerColor("air", MapColor.airColor);
         registerColor("black", MapColor.blackColor);

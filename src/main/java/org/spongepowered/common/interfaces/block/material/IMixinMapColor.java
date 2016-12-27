@@ -25,5 +25,7 @@
 package org.spongepowered.common.interfaces.block.material;
 
 public interface IMixinMapColor {
+
     void setId(String id);
+
 }
