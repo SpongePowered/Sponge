@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.storage;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.world.WorldSavedData;
@@ -47,6 +45,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 @NonnullByDefault
 @Mixin(MapStorage.class)
@@ -78,6 +78,9 @@ public abstract class MixinMapStorage implements MapViewStorage {
 
     @Override
     public CompletableFuture<Collection<String>> getStoredMaps() {
+        // XXX: This isn't quite the best way, but afaik it's the only way to do this
+        // due to no common index of maps
+        // TODO: Evaluate effectiveness of creating an index file for map data
         return SpongeScheduler.getInstance().submitAsyncTask(() -> {
             File mapDataDir = new File(saveHandler.getWorldDirectory(), "data");
             String[] filenameListing = mapDataDir.list((dir, name) -> name.startsWith("map_") && name.endsWith(".dat"));
@@ -89,9 +92,13 @@ public abstract class MixinMapStorage implements MapViewStorage {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public ImmutableCollection<MapView> getLoadedMaps() {
-        return ImmutableList.copyOf((List<MapView>) (Object) loadedDataList);
+        ImmutableList.Builder<MapView> builder = ImmutableList.builder();
+        loadedDataList.forEach(entry -> {
+            if (entry instanceof MapView) {
+                builder.add((MapView) entry);
+            }
+        });
     }
 
     @Override
