@@ -99,6 +99,7 @@ public abstract class MixinMapStorage implements MapViewStorage {
                 builder.add((MapView) entry);
             }
         });
+        return builder.build();
     }
 
     @Override
