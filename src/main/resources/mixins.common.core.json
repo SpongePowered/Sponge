@@ -530,6 +530,7 @@
         "world.storage.MixinThreadedFileIOBase",
         "world.storage.MixinWorldInfo"
         "world.storage.MixinMapStorage"
+        "world.storage.MixinMapData"
     ],
     "server": [
         "network.rcon.MixinRConConsoleSource",
