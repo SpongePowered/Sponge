@@ -48,7 +48,8 @@ public class MapShadeRegistryModule implements CatalogRegistryModule<MapShade> {
     @RegisterCatalog(MapShades.class)
     public static final Map<String, MapShade> mapShadeMappings = Maps.newHashMap();
 
-    @Override public void registerDefaults() {
+    @Override
+    public void registerDefaults() {
         registerMapping("darker", 0, 180);
         registerMapping("dark", 1, 220);
         registerMapping("base", 2, 255);
@@ -59,12 +60,14 @@ public class MapShadeRegistryModule implements CatalogRegistryModule<MapShade> {
         mapShadeMappings.put(id, new SpongeMapShade(id, index, mulFactor));
     }
 
-    @Override public Optional<MapShade> getById(String id) {
+    @Override
+    public Optional<MapShade> getById(String id) {
         checkNotNull(id, "id");
         return Optional.ofNullable(mapShadeMappings.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
-    @Override public Collection<MapShade> getAll() {
+    @Override
+    public Collection<MapShade> getAll() {
         return ImmutableList.copyOf(mapShadeMappings.values());
     }
 
