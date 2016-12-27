@@ -54,7 +54,7 @@ public abstract class MixinMapStorage implements MapViewStorage {
 
     @Shadow private ISaveHandler saveHandler;
     @Shadow private List<WorldSavedData> loadedDataList;
-    @Shadow public abstract WorldSavedData loadData(Class<? extends WorldSavedData> clazz, String dataIdentifier);
+    @Shadow public abstract WorldSavedData getOrLoadData(Class<? extends WorldSavedData> clazz, String dataIdentifier);
     @Shadow public abstract int getUniqueDataId(String key);
 
     @Override
@@ -72,7 +72,7 @@ public abstract class MixinMapStorage implements MapViewStorage {
     @Override
     public Optional<MapView> getMap(String mapId) {
         checkNotNull(mapId, "mapId");
-        MapView possibleMapView = (MapView) loadData(MapData.class, mapId);
+        MapView possibleMapView = (MapView) getOrLoadData(MapData.class, mapId);
         return Optional.ofNullable(possibleMapView);
     }
 
