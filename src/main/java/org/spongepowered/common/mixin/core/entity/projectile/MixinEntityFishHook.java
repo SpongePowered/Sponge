@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFishHook;
+import net.minecraft.init.Items;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.stats.StatList;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.LootContext;
@@ -61,11 +63,12 @@ import javax.annotation.Nullable;
 @Mixin(EntityFishHook.class)
 public abstract class MixinEntityFishHook extends MixinEntity implements FishHook {
 
-    @Shadow private EntityPlayer angler;
-    @Shadow public net.minecraft.entity.Entity caughtEntity;
+    @Shadow @Nullable private EntityPlayer angler;
+    @Shadow @Nullable public net.minecraft.entity.Entity caughtEntity;
     @Shadow private int ticksCatchable;
     @Shadow private boolean inGround;
     @Shadow protected abstract void bringInHookedEntity();
+    @Shadow private int field_191518_aw;
 
     @Nullable
     public ProjectileSource projectileSource;
@@ -105,61 +108,68 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
     /**
      * @author Aaron1011 - February 6th, 2015
-     * @reason This needs to handle for both cases where a fish and/or an entity is being caught.
-     * There's no real good way to do this with an injection.
+     * @author Minecrell - December 24th, 2016 (Updated to Minecraft 1.11.2)
+     * @reason This needs to handle for both cases where a fish and/or an entity is being caught. There's no real good way to do this with
+     * an injection.
      */
     @Overwrite
     public int handleHookRetraction() {
-        if (this.world.isRemote) {
-            return 0;
-        }
-        int i = 0;
+        if (!this.world.isRemote && this.angler != null) {
+            int i = 0;
 
-        if (this.caughtEntity != null) {
-            this.bringInHookedEntity();
-            this.world.setEntityState((EntityFishHook) (Object) this, (byte)31);
-            i = this.caughtEntity instanceof EntityItem ? 3 : 5;
+            if (this.caughtEntity != null) {
+                this.bringInHookedEntity();
+                this.world.setEntityState((EntityFishHook) (Object) this, (byte) 31);
+                i = this.caughtEntity instanceof EntityItem ? 3 : 5;
+            } else if (this.ticksCatchable > 0) {
+                LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer) this.world);
+                lootcontext$builder.withLuck((float) this.field_191518_aw + this.angler.getLuck());
 
-        } else if (this.ticksCatchable > 0) {
-            LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.world);
-            lootcontext$builder.withLuck((float) EnchantmentHelper.getLuckOfSeaModifier(this.angler) + this.angler.getLuck());
+                // Sponge start
+                // TODO 1.9: Figure out how we want experience to work here
+                List<net.minecraft.item.ItemStack> itemstacks = this.world.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING).generateLootForPools(this.rand, lootcontext$builder.build());
+                FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.angler)), 0, 0,
+                        this.createSnapshot(), this, itemstacks.stream().map(s -> {
+                            ItemStackSnapshot snapshot = ((ItemStack) s).createSnapshot();
+                            return new Transaction<>(snapshot, snapshot);
+                        }).collect(Collectors.toList()), (Player) this.angler);
 
-            // Sponge start
-            // TODO 1.9: Figure out how we want experience to work here
-            List<net.minecraft.item.ItemStack> itemstacks = this.world.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING).generateLootForPools(this.rand, lootcontext$builder.build());
-            FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.angler)), 0, 0,
-                    this.createSnapshot(), this, itemstacks.stream().map(s -> {
-                        ItemStackSnapshot snapshot = ((ItemStack) s).createSnapshot();
-                        return new Transaction<>(snapshot, snapshot);
-                    }).collect(Collectors.toList()), (Player) this.angler);
 
-            if (!SpongeImpl.postEvent(event)) {
-                for (net.minecraft.item.ItemStack itemstack : event.getItemStackTransaction().stream().filter(Transaction::isValid).map(t -> (net.minecraft.item.ItemStack) t.getFinal().createStack()).collect(Collectors.toList())) {
-                    EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack);
-                    double d0 = this.angler.posX - this.posX;
-                    double d1 = this.angler.posY - this.posY;
-                    double d2 = this.angler.posZ - this.posZ;
-                    double d3 = (double)MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
-                    double d4 = 0.1D;
-                    entityitem.motionX = d0 * d4;
-                    entityitem.motionY = d1 * d4 + (double)MathHelper.sqrt(d3) * 0.08D;
-                    entityitem.motionZ = d2 * d4;
-                    this.world.spawnEntity(entityitem);
-                    this.angler.world.spawnEntity(new EntityXPOrb(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D, this.rand.nextInt(6) + 1));
-                } // Sponge end
+                if (!SpongeImpl.postEvent(event)) {
+                    for (net.minecraft.item.ItemStack itemstack : event.getItemStackTransaction().stream().filter(Transaction::isValid).map(t -> (net.minecraft.item.ItemStack) t.getFinal().createStack()).collect(Collectors.toList())) {
+                        // Sponge end
+                        EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack);
+                        double d0 = this.angler.posX - this.posX;
+                        double d1 = this.angler.posY - this.posY;
+                        double d2 = this.angler.posZ - this.posZ;
+                        double d3 = (double) MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                        double d4 = 0.1D;
+                        entityitem.motionX = d0 * 0.1D;
+                        entityitem.motionY = d1 * 0.1D + (double) MathHelper.sqrt(d3) * 0.08D;
+                        entityitem.motionZ = d2 * 0.1D;
+                        this.world.spawnEntity(entityitem);
+                        this.angler.world.spawnEntity(new EntityXPOrb(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D, this.rand.nextInt(6) + 1));
+                        Item item = itemstack.getItem();
+
+                        if (item == Items.FISH || item == Items.COOKED_FISH) {
+                            this.angler.addStat(StatList.FISH_CAUGHT, 1);
+                        }
+                    }
+                }
+
+
+                i = 1;
             }
 
-            i = 1;
-        }
+            if (this.inGround) {
+                i = 2;
+            }
 
-        if (this.inGround)
-        {
-            i = 2;
+            this.setDead();
+            return i;
+        } else {
+            return 0;
         }
-
-        this.setDead();
-        this.angler.fishEntity = null;
-        return i;
     }
 
     @Override
