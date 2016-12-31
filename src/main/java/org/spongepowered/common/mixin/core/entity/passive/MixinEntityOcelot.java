@@ -28,6 +28,7 @@ import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
@@ -35,9 +36,6 @@ import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.TameEntityEvent;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,6 +43,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCauseStackManager.CauseStackFrame;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
@@ -59,7 +58,8 @@ import java.util.Random;
 @Mixin(EntityOcelot.class)
 public abstract class MixinEntityOcelot extends MixinEntityTameable implements Ocelot {
 
-    @Shadow public abstract int getTameSkin();
+    @Shadow
+    public abstract int getTameSkin();
 
     @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand) {
@@ -67,15 +67,13 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
         int random = rand.nextInt(bound);
         if (random == 0) {
             stack.setCount(stack.getCount() + 1);
-            if (!SpongeImpl
-                    .postEvent(SpongeEventFactory.createTameEntityEvent(Cause.of(NamedCause.source(player),
-                            NamedCause.of(TameEntityEvent.USED_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot())),
-                            this))) {
-
-                stack.setCount(stack.getCount() - 1);
-                return random;
+            try (CauseStackFrame frame = (CauseStackFrame) Sponge.getCauseStackManager().createCauseFrame()) {
+                Sponge.getCauseStackManager().pushCause(player);
+                if (!SpongeImpl.postEvent(SpongeEventFactory.createTameEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this))) {
+                    stack.setCount(stack.getCount() - 1);
+                    return random;
+                }
             }
-
         }
         return 1;
     }
@@ -89,7 +87,6 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
     }
 
     // Data delegated methods
-
 
     @Override
     public OcelotData getOcelotData() {

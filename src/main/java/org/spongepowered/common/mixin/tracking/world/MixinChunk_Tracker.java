@@ -36,7 +36,6 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.world.Chunk;
@@ -343,7 +342,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     private void startLoad(CallbackInfo callbackInfo) {
         if (CauseTracker.ENABLED && !this.world.isRemote) {
             CauseTracker.getInstance().switchToPhase(GenerationPhase.State.CHUNK_LOADING, PhaseContext.start()
-                .add(NamedCause.source(this))
+                .source(this)
                 .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, this.world))
                 .addCaptures()
                 .complete());

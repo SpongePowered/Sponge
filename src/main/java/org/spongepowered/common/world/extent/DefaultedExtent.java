@@ -29,7 +29,6 @@ import com.google.common.collect.Maps;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.extent.ArchetypeVolume;
@@ -45,7 +44,6 @@ import org.spongepowered.api.world.extent.UnmodifiableBiomeVolume;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.util.gen.ArrayImmutableBlockBuffer;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
 import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
@@ -149,8 +147,8 @@ public interface DefaultedExtent extends Extent {
     }
 
     @Override
-    default MutableBlockVolumeWorker<? extends Extent> getBlockWorker(Cause cause) {
-        return new SpongeMutableBlockVolumeWorker<>(this, cause);
+    default MutableBlockVolumeWorker<? extends Extent> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
     @Override
@@ -160,14 +158,18 @@ public interface DefaultedExtent extends Extent {
         min = tmin;
         max = tmax;
         Extent volume = getExtentView(min, max);
+        BimapPalette palette = new BimapPalette();
+        volume.getBlockWorker().iterate((v, x, y, z) -> {
+            palette.getOrAssign(v.getBlock(x, y, z));
+        });
         int ox = origin.getX();
         int oy = origin.getY();
         int oz = origin.getZ();
         final MutableBlockVolume backing = new ArrayMutableBlockBuffer(min.sub(origin), max.sub(min).add(1, 1, 1));
         Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
-        volume.getBlockWorker(SpongeImpl.getImplementationCause()).iterate((extent, x, y, z) -> {
+        volume.getBlockWorker().iterate((extent, x, y, z) -> {
             BlockState state = extent.getBlock(x, y, z);
-            backing.setBlock(x - ox, y - oy, z - oz, state, SpongeImpl.getImplementationCause());
+            backing.setBlock(x - ox, y - oy, z - oz, state);
             Optional<TileEntity> tile = extent.getTileEntity(x, y, z);
             if (tile.isPresent()) {
                 tiles.put(new Vector3i(x - ox, y - oy, z - oz), tile.get().createArchetype());

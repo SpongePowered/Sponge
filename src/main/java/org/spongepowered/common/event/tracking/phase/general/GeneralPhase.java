@@ -36,7 +36,6 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -156,9 +155,8 @@ public final class GeneralPhase extends TrackingPhase {
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
         // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
         // case in point for WorldTick event listeners since the players are captured non-deterministically
-        final Cause.Builder builder = Cause.source(unwinding.getSource(Object.class).get());
         // Creates the block events accordingly to the transaction arrays
-        TrackingUtil.iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder);
+        TrackingUtil.iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents);
         // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
         final ChangeBlockEvent.Post
                 postEvent =
@@ -213,11 +211,11 @@ public final class GeneralPhase extends TrackingPhase {
             }
             invalidTransactions.clear();
         }
-        performPostBlockAdditions(postContext, postEvent.getTransactions(), builder, unwindingState, unwinding);
+        performPostBlockAdditions(postContext, postEvent.getTransactions(), unwindingState, unwinding);
     }
 
-    private static void performPostBlockAdditions(PhaseContext postContext, List<Transaction<BlockSnapshot>> transactions,
-        Cause.Builder builder, IPhaseState unwindingState, PhaseContext unwindingPhaseContext) {
+    private static void performPostBlockAdditions( PhaseContext postContext, List<Transaction<BlockSnapshot>> transactions,
+             IPhaseState unwindingState, PhaseContext unwindingPhaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(transactions);
@@ -246,7 +244,7 @@ public final class GeneralPhase extends TrackingPhase {
                         unwindingPhaseContext, unwindingState));
 
             final WorldServer worldServer = mixinWorldServer.asMinecraftWorld();
-            SpongeHooks.logBlockAction(builder, worldServer, oldBlockSnapshot.blockChange, transaction);
+            SpongeHooks.logBlockAction(worldServer, oldBlockSnapshot.blockChange, transaction);
             final BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
             final int updateFlag = oldBlockSnapshot.getUpdateFlag();
             final IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
@@ -334,10 +332,8 @@ public final class GeneralPhase extends TrackingPhase {
     public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
             WorldServer minecraftWorld, PlayerTracker.Type notifier) {
         if (state == Post.UNWINDING) {
-            final IPhaseState unwindingState = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class)
-                    .orElseThrow(TrackingUtil.throwWithContext("Intended to be unwinding a phase but no phase unwinding found!", context));
-            final PhaseContext unwindingContext = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class)
-                    .orElseThrow(TrackingUtil.throwWithContext("Intended to be unwinding a phase with a context, but no context found!", context));
+            final IPhaseState unwindingState = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class);
+            final PhaseContext unwindingContext = context.getRequiredExtra(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class);
             unwindingState.getPhase()
                     .associateNeighborStateNotifier(unwindingState, unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
         } else if (state == State.COMMAND) {

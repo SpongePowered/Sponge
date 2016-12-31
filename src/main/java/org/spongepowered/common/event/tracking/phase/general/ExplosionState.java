@@ -32,17 +32,15 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -52,7 +50,6 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.world.IMixinExplosion;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
@@ -61,7 +58,6 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 final class ExplosionState extends GeneralState {
     @Override
@@ -86,47 +82,17 @@ final class ExplosionState extends GeneralState {
 
     @Override
     void unwind(PhaseContext context) {
-        final Optional<Explosion> explosion = context.getCaptureExplosion().getExplosion();
-        if (!explosion.isPresent()) { // More than likely never will happen
-            return;
-        }
-        final Cause cause = ((IMixinExplosion) explosion.get()).getCreatedCause();
+        final Explosion explosion = context.getRequiredExtra("Explosion", Explosion.class);
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        context.addNotifierAndOwnerToCauseStack();
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.TNT_IGNITE);
+        Sponge.getCauseStackManager().pushCause(explosion);
         context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blocks -> processBlockCaptures(blocks, explosion.get(), cause, context));
+                .ifPresentAndNotEmpty(blocks -> processBlockCaptures(blocks, explosion, context));
         context.getCapturedEntitySupplier()
                 .ifPresentAndNotEmpty(entities -> {
-                    final Cause.Builder builder = Cause.builder();
-                    final Object root = cause.root();
-                    if (root instanceof Entity) {
-                        builder.named(NamedCause.source(EntitySpawnCause
-                                .builder()
-                                .entity((Entity) root)
-                                .type(InternalSpawnTypes.TNT_IGNITE)
-                                .build()
-                                )
-                        );
-                    } else if (root instanceof BlockSnapshot) {
-                        builder.named(NamedCause.source(BlockSpawnCause
-                                .builder()
-                                .block((BlockSnapshot) root)
-                                .type(InternalSpawnTypes.TNT_IGNITE)
-                                .build()
-                                )
-                        );
-                    } else {
-                        builder.named(NamedCause.source(SpawnCause
-                                .builder()
-                                .type(InternalSpawnTypes.TNT_IGNITE)
-                                .build()
-                                )
-                        );
-                    }
-
-                    context.getNotifier().ifPresent(builder::notifier);
-                    context.getOwner().ifPresent(builder::owner);
-                    builder.named(NamedCause.of("Explosion", explosion.get()));
                     final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
-                    final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities);
+                    final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
                     SpongeImpl.postEvent(event);
                     if (!event.isCancelled()) {
                         for (Entity entity : event.getEntities()) {
@@ -134,17 +100,14 @@ final class ExplosionState extends GeneralState {
                                 EntityUtil.toMixin(entity).setCreator(user.getUniqueId());
                             }
                             EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
-
                         }
                     }
-
-
                 });
-
+        Sponge.getCauseStackManager().popCauseFrame(frame);
     }
 
     @SuppressWarnings({"unchecked"})
-    private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, Cause cause, PhaseContext context) {
+    private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, PhaseContext context) {
         if (snapshots.isEmpty()) {
             return;
         }
@@ -167,36 +130,30 @@ final class ExplosionState extends GeneralState {
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
         // This likely needs to delegate to the phase in the event we don't use the source object as the main object causing the block changes
         // case in point for WorldTick event listeners since the players are captured non-deterministically
-        final Cause.Builder builder = Cause.source(context.getSource(Object.class)
-                .orElseThrow(TrackingUtil.throwWithContext("There was no root source object for this phase!", context))
-        );
-        context.getNotifier().ifPresent(builder::notifier);
-        context.getOwner().ifPresent(builder::owner);
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
         try {
-            this.getPhase().associateAdditionalCauses(this, context, builder);
+            this.getPhase().associateAdditionalCauses(this, context);
         } catch (Exception e) {
             // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
             // try catch to avoid bombing on performing block changes.
         }
         // Creates the block events accordingly to the transaction arrays
-        iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder); // Needs to throw events
+        iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents); // Needs to throw events
         // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
 
         // Copied from TrackingUtil#throwMultiEventsAndCreatePost
         for (BlockChange blockChange : BlockChange.values()) {
             final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
-            if (mainEvent != null) {
-                blockChange.suggestNamed(builder, mainEvent);
-            }
+            Sponge.getCauseStackManager().pushCause(mainEvent);
         }
         final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[TrackingUtil.MULTI_CHANGE_INDEX];
 
-        final ExplosionEvent.Post postEvent = SpongeEventFactory.createExplosionEventPost(cause, explosion, transactions);
+        final ExplosionEvent.Post postEvent = SpongeEventFactory.createExplosionEventPost(Sponge.getCauseStackManager().getCurrentCause(), explosion, transactions);
         if (postEvent == null) { // Means that we have had no actual block changes apparently?
             return;
         }
         SpongeImpl.postEvent(postEvent);
-
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         final List<Transaction<BlockSnapshot>> invalid = new ArrayList<>();
 
         boolean noCancelledTransactions = true;
@@ -269,7 +226,7 @@ final class ExplosionState extends GeneralState {
                 }
             }
         }
-        TrackingUtil.performBlockAdditions(postEvent.getTransactions(), builder, this, context, noCancelledTransactions);
+        TrackingUtil.performBlockAdditions(postEvent.getTransactions(), this, context, noCancelledTransactions);
     }
 
     @Override

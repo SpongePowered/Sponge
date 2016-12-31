@@ -24,62 +24,53 @@
  */
 package org.spongepowered.common.mixin.core.stats;
 
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.stats.StatBase;
-import net.minecraft.stats.StatisticsManager;
-import net.minecraft.util.TupleIntJsonSerializable;
+import net.minecraft.stats.StatisticsManagerServer;
+import net.minecraft.util.text.TextComponentTranslation;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.statistic.ChangeStatisticEvent;
-import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.event.achievement.GrantAchievementEvent;
+import org.spongepowered.api.event.message.MessageEvent;
+import org.spongepowered.api.statistic.achievement.Achievement;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.statistic.IMixinStatisticsManager;
+import org.spongepowered.common.text.SpongeTexts;
 
-import java.util.Map;
+import java.util.Optional;
 
-@Mixin(StatisticsManager.class)
-public abstract class MixinStatisticsManager implements IMixinStatisticsManager {
+@Mixin(StatisticsManagerServer.class)
+public abstract class MixinStatisticsManagerServer {
 
-    @Shadow public abstract int readStat(StatBase stat);
-    @Shadow public abstract void increaseStat(EntityPlayer player, StatBase stat, int amount);
+    private static final String TRANSLATION_ID = "chat.type.achievement";
 
-    @Shadow @Final protected Map<StatBase, TupleIntJsonSerializable> statsData;
-
-    private boolean statCaptured = false;
-
-    @Inject(method = "increaseStat(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/stats/StatBase;I)V",
+    @Inject(method = "unlockAchievement(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/stats/StatBase;I)V",
             at = @At("HEAD"), cancellable = true)
-    public void onStatChange(EntityPlayer player, StatBase stat, int amount, CallbackInfo ci) {
-        if (this.statCaptured) {
+    public void onUnlockAchievement(EntityPlayer player, StatBase stat, int i, CallbackInfo ci) {
+        if (!stat.isAchievement()) {
             return;
         }
 
-        int prev = readStat(stat);
+        MessageChannel channel = MessageChannel.TO_ALL;
+        Achievement achievement = (Achievement) stat;
+        Text message = SpongeTexts.toText(new TextComponentTranslation(
+            TRANSLATION_ID, player.getDisplayName(), stat.createChatComponent()));
+
         // TODO: Better cause here?
         Sponge.getCauseStackManager().pushCause(player);
-        ChangeStatisticEvent.TargetPlayer event = SpongeEventFactory.createChangeStatisticEventTargetPlayer(
-                Sponge.getCauseStackManager().getCurrentCause(), prev, prev + amount, (Statistic) stat, (Player) player);
-        boolean cancelled = Sponge.getEventManager().post(event);
-        Sponge.getCauseStackManager().popCause();
-        this.statCaptured = true;
-        ci.cancel();
+        GrantAchievementEvent event = SpongeEventFactory.createGrantAchievementEventTargetPlayer(
+                Sponge.getCauseStackManager().getCurrentCause(), channel, Optional.of(channel), achievement,
+            new MessageEvent.MessageFormatter(message), (Player) player, false);
 
-        if (!cancelled) {
-            increaseStat(player, stat, (int) (event.getValue() - prev));
-            this.statCaptured = false;
+        if (Sponge.getEventManager().post(event)) {
+            ci.cancel();
         }
-    }
-
-    @Override
-    public Map<StatBase, TupleIntJsonSerializable> getStatsData() {
-        return ImmutableMap.copyOf(this.statsData);
+        Sponge.getCauseStackManager().popCause();
     }
 
 }

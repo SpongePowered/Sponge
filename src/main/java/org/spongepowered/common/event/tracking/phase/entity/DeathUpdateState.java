@@ -25,12 +25,13 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import net.minecraft.entity.item.EntityItem;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -60,27 +61,25 @@ final class DeathUpdateState extends EntityPhaseState {
                 .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
         context.getCapturedItemsSupplier()
                 .ifPresentAndNotEmpty(items -> {
-                    final DamageSource damageSource = context.firstNamed(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class).get();
-                    final Cause cause = Cause.source(
-                            EntitySpawnCause.builder()
-                                    .entity(dyingEntity)
-                                    .type(InternalSpawnTypes.DROPPED_ITEM)
-                                    .build())
-                            .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
-                            .build();
+                    final DamageSource damageSource = context.getRequiredExtra(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class);
+                    Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+                    Sponge.getCauseStackManager().pushCause(dyingEntity);
+                    Sponge.getCauseStackManager().pushCause(damageSource);
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
                     final ArrayList<Entity> entities = new ArrayList<>();
                     for (EntityItem item : items) {
                         entities.add(EntityUtil.fromNative(item));
                     }
                     final DropItemEvent.Destruct
                             destruct =
-                            SpongeEventFactory.createDropItemEventDestruct(cause, entities);
+                            SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), entities);
                     SpongeImpl.postEvent(destruct);
                     if (!destruct.isCancelled()) {
                         for (Entity entity : destruct.getEntities()) {
                             EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                         }
                     }
+                    Sponge.getCauseStackManager().popCauseFrame(frame);
                 });
         context.getCapturedEntitySupplier()
                 .ifPresentAndNotEmpty(entities -> {
@@ -88,42 +87,38 @@ final class DeathUpdateState extends EntityPhaseState {
                                     .filter(entity -> entity instanceof ExperienceOrb)
                                     .collect(Collectors.toList());
                             if (!experience.isEmpty()) {
-                                final Cause cause = Cause.source(
-                                        EntitySpawnCause.builder()
-                                                .entity(dyingEntity)
-                                                .type(InternalSpawnTypes.EXPERIENCE)
-                                                .build())
-                                        .build();
+                                Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+                                Sponge.getCauseStackManager().pushCause(dyingEntity);
+                                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
                                 final SpawnEntityEvent
                                         event =
-                                        SpongeEventFactory.createSpawnEntityEvent(cause, experience);
+                                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), experience);
                                 SpongeImpl.postEvent(event);
                                 if (!event.isCancelled()) {
                                     for (Entity entity : event.getEntities()) {
                                         EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                                     }
                                 }
+                                Sponge.getCauseStackManager().popCauseFrame(frame);
                             }
 
                             final List<Entity> other = entities.stream()
                                     .filter(entity -> !(entity instanceof ExperienceOrb))
                                     .collect(Collectors.toList());
                             if (!other.isEmpty()) {
-                                final Cause cause = Cause.source(
-                                        EntitySpawnCause.builder()
-                                                .entity(dyingEntity)
-                                                .type(InternalSpawnTypes.ENTITY_DEATH)
-                                                .build())
-                                        .build();
+                                Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+                                Sponge.getCauseStackManager().pushCause(dyingEntity);
+                                Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.ENTITY_DEATH);
                                 final SpawnEntityEvent
                                         event1 =
-                                        SpongeEventFactory.createSpawnEntityEvent(cause, other);
+                                        SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), other);
                                 SpongeImpl.postEvent(event1);
                                 if (!event1.isCancelled()) {
                                     for (Entity entity : event1.getEntities()) {
                                         EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                                     }
                                 }
+                                Sponge.getCauseStackManager().popCauseFrame(frame);
                             }
 
                         }

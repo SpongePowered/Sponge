@@ -24,11 +24,8 @@
  */
 package org.spongepowered.common.registry.type.event;
 
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.common.data.type.SpongeSpawnType;
-import org.spongepowered.common.event.spawn.SpongeSpawnCauseBuilder;
 
 public final class InternalSpawnTypes {
 
@@ -52,27 +49,6 @@ public final class InternalSpawnTypes {
     public static final SpawnType PLUGIN = new SpongeSpawnType("Plugin");
     public static final SpawnType FORCED = new SpongeSpawnType("FORCED");
     public static final SpawnType ENTITY_DEATH = new SpongeSpawnType("EntityDeath");
-
-    public static final class CauseImpl {
-        public static final Cause WORLD_SPAWNER = Cause.source(of(InternalSpawnTypes.WORLD_SPAWNER)).build();
-        public static final Cause CUSTOM = Cause.source(of(InternalSpawnTypes.CUSTOM)).build();
-    }
-
-    public static final class SpawnCauses {
-
-        public static final SpawnCause UNKNOWN_DISPENSE_SPAWN_CAUSE = of(InternalSpawnTypes.DISPENSE);
-        public static final SpawnCause STRUCTURE_SPAWNING = of(InternalSpawnTypes.STRUCTURE);
-        public static final SpawnCause WORLD_SPAWNER_CAUSE = of(InternalSpawnTypes.WORLD_SPAWNER);
-        public static final SpawnCause FORCED_SPAWN = of(InternalSpawnTypes.FORCED);
-        public static final SpawnCause CUSTOM_SPAWN = of(InternalSpawnTypes.CUSTOM);
-        public static final SpawnCause PLACED = of(InternalSpawnTypes.PLACEMENT);
-    }
-
-    public static final Cause UNKNOWN_CAUSE = Cause.source(SpawnCauses.CUSTOM_SPAWN).build();
-
-    static SpawnCause of(SpawnType spawnType) {
-        return new SpongeSpawnCauseBuilder().type(spawnType).build();
-    }
 
     private InternalSpawnTypes() {
     }

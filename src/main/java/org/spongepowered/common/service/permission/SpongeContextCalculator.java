@@ -31,8 +31,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.RemoteSource;
-import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
+import org.spongepowered.api.service.context.ServiceContext;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.World;
@@ -49,25 +49,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A context calculator handling world contexts.
  */
 public class SpongeContextCalculator implements ContextCalculator<Subject> {
-    private final LoadingCache<RemoteSource, Set<Context>> remoteIpCache = buildAddressCache(Context.REMOTE_IP_KEY,
+    private final LoadingCache<RemoteSource, Set<ServiceContext>> remoteIpCache = buildAddressCache(ServiceContext.REMOTE_IP_KEY,
                                                                                              input -> input.getConnection().getAddress().getAddress());
 
-    private final LoadingCache<RemoteSource, Set<Context>> localIpCache = buildAddressCache(Context.LOCAL_IP_KEY,
+    private final LoadingCache<RemoteSource, Set<ServiceContext>> localIpCache = buildAddressCache(ServiceContext.LOCAL_IP_KEY,
                                                                                             input -> input.getConnection().getVirtualHost().getAddress());
 
-    private LoadingCache<RemoteSource, Set<Context>> buildAddressCache(final String contextKey, final Function<RemoteSource, InetAddress> function) {
+    private LoadingCache<RemoteSource, Set<ServiceContext>> buildAddressCache(final String contextKey, final Function<RemoteSource, InetAddress> function) {
         return CacheBuilder.newBuilder()
             .weakKeys()
-            .build(new CacheLoader<RemoteSource, Set<Context>>() {
+            .build(new CacheLoader<RemoteSource, Set<ServiceContext>>() {
                 @Override
-                public Set<Context> load(RemoteSource key) throws Exception {
-                    ImmutableSet.Builder<Context> builder = ImmutableSet.builder();
+                public Set<ServiceContext> load(RemoteSource key) throws Exception {
+                    ImmutableSet.Builder<ServiceContext> builder = ImmutableSet.builder();
                     final InetAddress addr = checkNotNull(function.apply(key), "addr");
-                    builder.add(new Context(contextKey, addr.getHostAddress()));
+                    builder.add(new ServiceContext(contextKey, addr.getHostAddress()));
                     for (String set : Maps.filterValues(SpongeImpl.getGlobalConfig().getConfig().getIpSets(), input -> {
                         return input.apply(addr);
                     }).keySet()) {
-                        builder.add(new Context(contextKey, set));
+                        builder.add(new ServiceContext(contextKey, set));
                     }
                     return builder.build();
                 }
@@ -75,7 +75,7 @@ public class SpongeContextCalculator implements ContextCalculator<Subject> {
     }
 
     @Override
-    public void accumulateContexts(Subject subject, Set<Context> accumulator) {
+    public void accumulateContexts(Subject subject, Set<ServiceContext> accumulator) {
         Optional<CommandSource> subjSource = subject.getCommandSource();
         if (subjSource.isPresent()) {
             CommandSource source = subjSource.get();
@@ -88,35 +88,35 @@ public class SpongeContextCalculator implements ContextCalculator<Subject> {
                 RemoteSource rem = (RemoteSource) source;
                 accumulator.addAll(this.remoteIpCache.getUnchecked(rem));
                 accumulator.addAll(this.localIpCache.getUnchecked(rem));
-                accumulator.add(new Context(Context.LOCAL_PORT_KEY, String.valueOf(rem.getConnection().getVirtualHost().getPort())));
-                accumulator.add(new Context(Context.LOCAL_HOST_KEY, rem.getConnection().getVirtualHost().getHostName()));
+                accumulator.add(new ServiceContext(ServiceContext.LOCAL_PORT_KEY, String.valueOf(rem.getConnection().getVirtualHost().getPort())));
+                accumulator.add(new ServiceContext(ServiceContext.LOCAL_HOST_KEY, rem.getConnection().getVirtualHost().getHostName()));
             }
         }
 
     }
 
     @Override
-    public boolean matches(Context context, Subject subject) {
+    public boolean matches(ServiceContext context, Subject subject) {
         Optional<CommandSource> subjSource = subject.getCommandSource();
         if (subjSource.isPresent()) {
             CommandSource source = subjSource.get();
-            if (source instanceof Locatable && context.getType().equals(Context.WORLD_KEY)) {
+            if (source instanceof Locatable && context.getType().equals(ServiceContext.WORLD_KEY)) {
                 Locatable located = (Locatable) source;
-                if (context.getType().equals(Context.WORLD_KEY)) {
+                if (context.getType().equals(ServiceContext.WORLD_KEY)) {
                     return located.getWorld().getContext().equals(context);
-                } else if (context.getType().equals(Context.DIMENSION_KEY)) {
+                } else if (context.getType().equals(ServiceContext.DIMENSION_KEY)) {
                     return located.getWorld().getDimension().getContext().equals(context);
                 }
             }
             if (source instanceof RemoteSource) {
                 RemoteSource remote = (RemoteSource) source;
-                if (context.getType().equals(Context.LOCAL_HOST_KEY)) {
+                if (context.getType().equals(ServiceContext.LOCAL_HOST_KEY)) {
                     return context.getValue().equals(remote.getConnection().getVirtualHost().getHostName());
-                } else if (context.getType().equals(Context.LOCAL_PORT_KEY)) {
+                } else if (context.getType().equals(ServiceContext.LOCAL_PORT_KEY)) {
                     return context.getValue().equals(String.valueOf(remote.getConnection().getVirtualHost().getPort()));
-                } else if (context.getType().equals(Context.LOCAL_IP_KEY)) {
+                } else if (context.getType().equals(ServiceContext.LOCAL_IP_KEY)) {
                     return this.localIpCache.getUnchecked(remote).contains(context);
-                } else if (context.getType().equals(Context.REMOTE_IP_KEY)) {
+                } else if (context.getType().equals(ServiceContext.REMOTE_IP_KEY)) {
                     return this.remoteIpCache.getUnchecked(remote).contains(context);
                 }
             }

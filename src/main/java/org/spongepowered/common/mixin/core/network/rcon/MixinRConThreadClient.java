@@ -28,12 +28,11 @@ import net.minecraft.network.rcon.IServer;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.network.rcon.RConThreadBase;
 import net.minecraft.network.rcon.RConThreadClient;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.network.rcon.RconConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
-import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -97,9 +96,11 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
         if (this.source == null) {
             initSource();
         }
-        RconConnectionEvent.Login event = SpongeEventFactory.createRconConnectionEventLogin(Cause.of(NamedCause.source(this.source)),
+        Sponge.getCauseStackManager().pushCause(this.source);
+        RconConnectionEvent.Login event = SpongeEventFactory.createRconConnectionEventLogin(Sponge.getCauseStackManager().getCurrentCause(),
             (RconSource) this.source);
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCause();
         if (event.isCancelled()) {
             this.loggedIn = false;
             throw new IOException("Cancelled login");
@@ -112,8 +113,10 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
             initSource();
         }
         if (this.loggedIn) {
-            SpongeImpl.postEvent(SpongeEventFactory.createRconConnectionEventDisconnect(Cause.of(NamedCause.source(this.source)),
+            Sponge.getCauseStackManager().pushCause(this.source);
+            SpongeImpl.postEvent(SpongeEventFactory.createRconConnectionEventDisconnect(Sponge.getCauseStackManager().getCurrentCause(),
                 (RconSource) this.source));
+            Sponge.getCauseStackManager().popCause();
         }
     }
 }

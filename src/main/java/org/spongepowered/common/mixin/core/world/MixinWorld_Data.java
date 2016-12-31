@@ -208,47 +208,31 @@ public abstract class MixinWorld_Data implements World {
 
     @Override
     public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends BaseValue<E>> key, E value) {
+        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
+        if (blockState.supports(key)) {
+            ImmutableValue<E> old = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
+            setBlock(x, y, z, blockState.with(key, value).get());
+            ImmutableValue<E> newVal = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
+            return DataTransactionResult.successReplaceResult(newVal, old);
+        }
         return getTileEntity(x, y, z)
                 .map(tileEntity ->  tileEntity.offer(key, value))
                 .orElseGet(DataTransactionResult::failNoData);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends BaseValue<E>> key, E value, Cause cause) {
-        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
-        if (blockState.supports(key)) {
-            ImmutableValue<E> old = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
-            setBlock(x, y, z, blockState.with(key, value).get(), cause);
-            ImmutableValue<E> newVal = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
-            return DataTransactionResult.successReplaceResult(newVal, old);
-        }
-        return getTileEntity(x, y, z)
-                .map(tileEntity ->  tileEntity.offer(key, value, cause))
-                .orElseGet(DataTransactionResult::failNoData);
-    }
-
     @Override
     public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function) {
-        return getTileEntity(x, y, z)
-                .map(tileEntity -> tileEntity.offer(manipulator, function))
-                .orElseGet(() -> DataTransactionResult.failResult(manipulator.getValues()));
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function, Cause cause) {
         final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<>(this, x, y, z));
         final ImmutableDataManipulator<?, ?> immutableDataManipulator = manipulator.asImmutable();
         if (blockState.supports((Class) immutableDataManipulator.getClass())) {
             final List<ImmutableValue<?>> old = new ArrayList<>(blockState.getValues());
             final BlockState newState = blockState.with(immutableDataManipulator).get();
             old.removeAll(newState.getValues());
-            setBlock(x, y, z, newState, cause);
+            setBlock(x, y, z, newState);
             return DataTransactionResult.successReplaceResult(old, manipulator.getValues());
         }
         return getTileEntity(x, y, z)
-                .map(tileEntity -> tileEntity.offer(manipulator, function, cause))
+                .map(tileEntity -> tileEntity.offer(manipulator, function))
                 .orElseGet(() -> DataTransactionResult.failResult(manipulator.getValues()));
     }
 

@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.World;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -63,13 +62,6 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
     @Nullable private Cause detonationCause;
     private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
     private int explosionRadius = DEFAULT_EXPLOSION_RADIUS;
-
-    private Cause getDetonationCause() {
-        if (this.detonationCause != null) {
-            return this.detonationCause;
-        }
-        return Cause.of(NamedCause.of(NamedCause.THROWER, getShooter()));
-    }
 
     @Override
     public ProjectileSource getShooter() {
@@ -101,24 +93,23 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
     // FusedExplosive Impl
 
     @Override
-    public void detonate(Cause cause) {
-        this.detonationCause = checkNotNull(cause, "cause");
+    public void detonate() {
         this.fireworkAge = this.lifetime + 1;
     }
 
     @Override
-    public void prime(Cause cause) {
+    public void prime() {
         checkState(!isPrimed(), "already primed");
         checkState(this.isDead, "firework about to be primed");
-        getWorld().spawnEntity(this, checkNotNull(cause, "cause"));
+        getWorld().spawnEntity(this);
     }
 
     @Override
-    public void defuse(Cause cause) {
+    public void defuse() {
         checkState(isPrimed(), "not primed");
-        if (shouldDefuse(checkNotNull(cause, "cause"))) {
+        if (shouldDefuse()) {
             setDead();
-            postDefuse(cause);
+            postDefuse();
         }
     }
 
@@ -163,17 +154,19 @@ public abstract class MixinEntityFireworkRocket extends MixinEntity implements F
         // Fireworks don't typically explode like other explosives, but we'll
         // post an event regardless and if the radius is zero the explosion
         // won't be triggered (the default behavior).
-        detonate(getDetonationCause(), Explosion.builder()
+        Sponge.getCauseStackManager().pushCause(getShooter());
+        detonate(Explosion.builder()
                 .sourceExplosive(this)
                 .location(getLocation())
                 .radius(this.explosionRadius))
                 .ifPresent(explosion -> world.setEntityState(self, state));
+        Sponge.getCauseStackManager().popCause();
     }
 
     @Inject(method = "onUpdate", at = @At("RETURN"))
     protected void onUpdate(CallbackInfo ci) {
         if (this.fireworkAge == 1) {
-            postPrime(Cause.of(NamedCause.of(NamedCause.THROWER, getShooter())));
+            postPrime();
         }
     }
 }

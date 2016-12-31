@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.util.DamageSource;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EnderCrystal;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -54,7 +52,7 @@ public abstract class MixinEntityEnderCrystal extends MixinEntity implements End
             + "(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;";
     private static final int DEFAULT_EXPLOSION_STRENGTH = 6;
 
-    private Cause detonationCause;
+    @Nullable private Object detonationCause;
     private int explosionStrength = DEFAULT_EXPLOSION_STRENGTH;
 
     // Explosive Impl
@@ -70,25 +68,28 @@ public abstract class MixinEntityEnderCrystal extends MixinEntity implements End
     }
 
     @Override
-    public void detonate(Cause cause) {
-        this.detonationCause = checkNotNull(cause, "cause");
+    public void detonate() {
         setDead();
+        this.detonationCause = null;
         onExplode(this.world, null, this.posX, this.posY, this.posZ, this.explosionStrength, true);
     }
 
     @Inject(method = "attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z", at = @At(value = "INVOKE"))
     protected void onAttack(DamageSource damageSource, float amount, CallbackInfoReturnable<Boolean> ci) {
-        this.detonationCause = Cause.source(damageSource).build();
+        this.detonationCause = damageSource;
     }
 
     @Redirect(method = "attackEntityFrom", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
     protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World world, @Nullable Entity nil, double x,
                                                     double y, double z, float strength, boolean smoking) {
-        return detonate(this.detonationCause, Explosion.builder()
+        if (this.detonationCause != null) Sponge.getCauseStackManager().pushCause(this.detonationCause);
+        net.minecraft.world.Explosion ex = detonate(Explosion.builder()
                 .location(new Location<>((World) world, new Vector3d(x, y, z)))
                 .radius(this.explosionStrength)
                 .shouldPlaySmoke(smoking))
                 .orElse(null);
+        if (this.detonationCause != null) Sponge.getCauseStackManager().popCause();
+        return ex;
     }
 
 }

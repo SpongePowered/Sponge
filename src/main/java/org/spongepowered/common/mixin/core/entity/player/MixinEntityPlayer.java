@@ -65,9 +65,9 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.ModifierFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
@@ -326,9 +326,11 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     public boolean onIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
             if (!this.world.isRemote) {
+                Sponge.getCauseStackManager().pushCause(this);
                 SpongeImpl.postEvent(SpongeEventFactory.
-                        createSleepingEventTick(Cause.of(NamedCause.source(this)),
+                        createSleepingEventTick(Sponge.getCauseStackManager().getCurrentCause(),
                                                 this.getWorld().createSnapshot(VecHelper.toVector3i(this.bedLocation)), this));
+                Sponge.getCauseStackManager().popCause();
             }
             return true;
         }
@@ -612,10 +614,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                     // Sponge Start - Create the event and throw it
                     final DamageSource damageSource = DamageSource.causePlayerDamage((EntityPlayer) (Object) this);
-                    final Cause cause = Cause.source(damageSource).build();
-                    final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(cause, originalFunctions, EntityUtil.fromNative(targetEntity), knockbackModifier, originalBaseDamage);
+                    Sponge.getCauseStackManager().pushCause(damageSource);
+                    final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), originalFunctions, EntityUtil.fromNative(targetEntity), knockbackModifier, originalBaseDamage);
                     SpongeImpl.postEvent(event);
-
+                    Sponge.getCauseStackManager().popCause();
                     if (event.isCancelled()) {
                         return;
                     }
@@ -667,10 +669,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                     // entitylivingbase.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                                     // entitylivingbase.attackEntityFrom(DamageSource.causePlayerDamage(this), 1.0F);
                                     final EntityDamageSource sweepingAttackSource = EntityDamageSource.builder().entity(this).type(DamageTypes.SWEEPING_ATTACK).build();
+                                    Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+                                    Sponge.getCauseStackManager().pushCause(sweepingAttackSource);
+                                    Sponge.getCauseStackManager().addContext(EventContextKeys.WEAPON, ItemStackUtil.snapshotOf(this.getHeldItem(EnumHand.MAIN_HAND)));
                                     final ItemStackSnapshot heldSnapshot = ItemStackUtil.snapshotOf(heldItem);
-                                    final Cause sweapingCause = Cause.source(sweepingAttackSource)
-                                            .named("Weapon", heldSnapshot)
-                                            .build();
                                     final DamageFunction sweapingFunction = DamageFunction.of(DamageModifier.builder()
                                                     .cause(sweapingCause)
                                                     .item(heldSnapshot)
@@ -679,7 +681,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                             (incoming) -> EnchantmentHelper.getSweepingDamageRatio((EntityPlayer) (Object) this) * attackDamage);
                                     final List<DamageFunction> sweapingFunctions = new ArrayList<>();
                                     sweapingFunctions.add(sweapingFunction);
-                                    AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(sweapingCause,
+                                    AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(Sponge.getCauseStackManager().getCurrentCause(),
                                             sweapingFunctions, EntityUtil.fromNative(entitylivingbase), 1, 1.0D);
                                     SpongeImpl.postEvent(sweepingAttackEvent);
                                     if (!sweepingAttackEvent.isCancelled()) {
@@ -688,6 +690,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                                 (double) (-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                                         entitylivingbase.attackEntityFrom(DamageSource.causePlayerDamage((EntityPlayer) (Object) this), (float) sweepingAttackEvent.getFinalOutputDamage());
                                     }
+                                    Sponge.getCauseStackManager().popCauseFrame(frame);
                                     // Sponge End
                                 }
                             }

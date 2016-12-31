@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.extent;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
@@ -50,7 +49,6 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Functional;
@@ -184,9 +182,9 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
+    public boolean setBlock(int x, int y, int z, BlockState block) {
         checkBlockRange(x, y, z);
-        return this.extent.setBlock(x, y, z, block, cause);
+        return this.extent.setBlock(x, y, z, block);
     }
 
     @Override
@@ -200,9 +198,8 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState blockState, BlockChangeFlag flag, Cause cause) {
-        checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
-        return this.extent.setBlock(x, y, z, blockState, flag, cause);
+    public boolean setBlock(int x, int y, int z, BlockState blockState, BlockChangeFlag flag) {
+        return this.extent.setBlock(x, y, z, blockState, flag);
     }
 
     @Override
@@ -212,16 +209,16 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
+    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
         final Vector3i position = snapshot.getPosition();
         checkBlockRange(position.getX(), position.getY(), position.getZ());
-        return this.extent.restoreSnapshot(snapshot, force, flag, cause);
+        return this.extent.restoreSnapshot(snapshot, force, flag);
     }
 
     @Override
-    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
+    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
         checkBlockRange(x, y, z);
-        return this.extent.restoreSnapshot(x, y, z, snapshot, force, flag, cause);
+        return this.extent.restoreSnapshot(x, y, z, snapshot, force, flag);
     }
 
     @Override
@@ -321,21 +318,9 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends BaseValue<E>> key, E value, Cause cause) {
-        checkBlockRange(x, y, z);
-        return this.extent.offer(x, y, z, key, value, cause);
-    }
-
-    @Override
     public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function) {
         checkBlockRange(x, y, z);
         return this.extent.offer(x, y, z, manipulator, function);
-    }
-
-    @Override
-    public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function, Cause cause) {
-        checkBlockRange(x, y, z);
-        return this.extent.offer(x, y, z, manipulator, function, cause);
     }
 
     @Override
@@ -421,14 +406,14 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public boolean spawnEntity(Entity entity, Cause cause) {
+    public boolean spawnEntity(Entity entity) {
         final Location<World> location = entity.getLocation();
         checkBlockRange(location.getX(), location.getY(), location.getZ());
-        return this.extent.spawnEntity(entity, cause);
+        return this.extent.spawnEntity(entity);
     }
 
-    @Override public boolean spawnEntities(Iterable<? extends Entity> entities, Cause cause) {
-        return this.extent.spawnEntities(entities, cause);
+    @Override public boolean spawnEntities(Iterable<? extends Entity> entities) {
+        return this.extent.spawnEntities(entities);
     }
 
     @Override

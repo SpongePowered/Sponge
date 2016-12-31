@@ -27,13 +27,13 @@ package org.spongepowered.common.event.tracking.phase.entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.common.SpongeImpl;
@@ -66,14 +66,10 @@ final class DeathPhase extends EntityPhaseState {
         final Entity dyingEntity =
                 context.getSource(Entity.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
-        final DamageSource damageSource = context.firstNamed(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class).get();
-        final Cause cause = Cause.source(
-                EntitySpawnCause.builder()
-                        .entity(dyingEntity)
-                        .type(InternalSpawnTypes.DROPPED_ITEM)
-                        .build())
-                .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
-                .build();
+        final DamageSource damageSource = context.getRequiredExtra(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class);
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().pushCause(damageSource);
+        Sponge.getCauseStackManager().pushCause(dyingEntity);
         final boolean isPlayer = dyingEntity instanceof EntityPlayer;
         final EntityPlayer entityPlayer = isPlayer ? (EntityPlayer) dyingEntity : null;
         final Optional<User> notifier = context.getNotifier();
@@ -86,16 +82,11 @@ final class DeathPhase extends EntityPhaseState {
                             .filter(entity -> entity instanceof ExperienceOrb)
                             .collect(Collectors.toList());
                     if (!experience.isEmpty()) {
-                        final Cause experienceCause = Cause.source(
-                                EntitySpawnCause.builder()
-                                        .entity(dyingEntity)
-                                        .type(InternalSpawnTypes.EXPERIENCE)
-                                        .build())
-                                .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
-                                .build();
+                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.EXPERIENCE);
+
                         final SpawnEntityEvent
                                 spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(experienceCause, experience);
+                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), experience);
                         SpongeImpl.postEvent(spawnEntityEvent);
                         if (!spawnEntityEvent.isCancelled()) {
                             for (Entity entity : spawnEntityEvent.getEntities()) {
@@ -109,16 +100,10 @@ final class DeathPhase extends EntityPhaseState {
                             .filter(entity -> !(entity instanceof ExperienceOrb))
                             .collect(Collectors.toList());
                     if (!other.isEmpty()) {
-                        final Cause otherCause = Cause.source(
-                                EntitySpawnCause.builder()
-                                        .entity(dyingEntity)
-                                        .type(InternalSpawnTypes.ENTITY_DEATH)
-                                        .build())
-                                .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
-                                .build();
+                        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.ENTITY_DEATH);
                         final SpawnEntityEvent
                                 spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(otherCause, experience);
+                                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), experience);
                         SpongeImpl.postEvent(spawnEntityEvent);
                         if (!spawnEntityEvent.isCancelled()) {
                             for (Entity entity : spawnEntityEvent.getEntities()) {
@@ -127,11 +112,13 @@ final class DeathPhase extends EntityPhaseState {
                         }
                     }
                 });
+
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
         // Forge always fires a living drop event even if nothing was captured
         // This allows mods such as Draconic Evolution to add items to the drop list
         if (context.getCapturedEntityItemDropSupplier().isEmpty() && context.getCapturedEntityDropSupplier().isEmpty()) {
             final ArrayList<Entity> entities = new ArrayList<>();
-            final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(cause, entities);
+            final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), entities);
             SpongeImpl.postEvent(destruct);
             if (!destruct.isCancelled()) {
                 for (Entity entity : destruct.getEntities()) {
@@ -155,7 +142,7 @@ final class DeathPhase extends EntityPhaseState {
 
             final DropItemEvent.Destruct
                     destruct =
-                    SpongeEventFactory.createDropItemEventDestruct(cause, entities);
+                    SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), entities);
             SpongeImpl.postEvent(destruct);
             if (!destruct.isCancelled()) {
                 for (Entity entity : destruct.getEntities()) {
@@ -190,7 +177,7 @@ final class DeathPhase extends EntityPhaseState {
 
                 final DropItemEvent.Destruct
                         destruct =
-                        SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities);
+                        SpongeEventFactory.createDropItemEventDestruct(Sponge.getCauseStackManager().getCurrentCause(), itemEntities);
                 SpongeImpl.postEvent(destruct);
                 if (!destruct.isCancelled()) {
                     for (Entity entity : destruct.getEntities()) {
@@ -206,6 +193,6 @@ final class DeathPhase extends EntityPhaseState {
             }
 
         });
-
+        Sponge.getCauseStackManager().popCauseFrame(frame);
     }
 }

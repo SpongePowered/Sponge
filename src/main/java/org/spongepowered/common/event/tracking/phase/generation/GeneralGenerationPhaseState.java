@@ -27,9 +27,11 @@ package org.spongepowered.common.event.tracking.phase.generation;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -40,7 +42,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.HashSet;
 import java.util.List;
@@ -91,24 +92,19 @@ class GeneralGenerationPhaseState implements IPhaseState {
         return true;
     }
 
-
-    Cause provideSpawnCause(PhaseContext context) {
-        return Cause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE)
-            .named("World", context
-                .firstNamed(InternalNamedCauses.WorldGeneration.WORLD, World.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected a world during generation!", context)))
-            .build();
-    }
-
     public final void unwind(PhaseContext context) {
         final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
         if (spawnedEntities.isEmpty()) {
             return;
         }
-        final Cause cause = provideSpawnCause(context);
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
 
-        final SpawnEntityEvent.Spawner event = SpongeEventFactory.createSpawnEntityEventSpawner(cause, spawnedEntities);
+        final SpawnEntityEvent.Spawner
+                event =
+                SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(), spawnedEntities);
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         if (!event.isCancelled()) {
             for (Entity entity : event.getEntities()) {
                 EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);

@@ -26,6 +26,7 @@ package org.spongepowered.common.world;
 
 
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -45,7 +46,7 @@ public enum BlockChange {
 
         @Override
         public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-            builder.suggestNamed("BreakEvent", mainEvent);
+            Sponge.getCauseStackManager().addContext("BreakEvent", mainEvent);
         }
 
         @Override
@@ -68,7 +69,7 @@ public enum BlockChange {
 
         @Override
         public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-            builder.suggestNamed("ModifyEvent", mainEvent);
+            Sponge.getCauseStackManager().addContext("ModifyEvent", mainEvent);
         }
 
         @Override
@@ -84,7 +85,7 @@ public enum BlockChange {
 
         @Override
         public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-            builder.suggestNamed("PlaceEvent", mainEvent);
+            Sponge.getCauseStackManager().addContext("PlaceEvent", mainEvent);
         }
 
         @Override
@@ -131,6 +132,6 @@ public enum BlockChange {
     }
 
     public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-
+        
     }
 }

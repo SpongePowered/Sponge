@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
 
 import com.flowpowered.math.vector.Vector3d;
@@ -56,6 +55,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -71,9 +71,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
@@ -102,7 +100,6 @@ import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase.State;
@@ -141,7 +138,8 @@ public class SpongeCommonEventFactory {
     public static boolean convertingMapFormat = false;
     // Set if the player's held item changes during InteractBlockEvent.Secondary
     public static boolean playerInteractItemChanged = false;
-    // Set if any of the events fired during interaction with a block (open inventory or interact block) were cancelled
+    // Set if any of the events fired during interaction with a block (open
+    // inventory or interact block) were cancelled
     public static boolean interactBlockEventCancelled = false;
     // Dummy ChangeBlockEvent.Pre
     public static ChangeBlockEvent.Pre DUMMY_BLOCK_PRE_EVENT = null;
@@ -170,7 +168,9 @@ public class SpongeCommonEventFactory {
             ItemStackSnapshot targetSnapshot;
             if (sourceSnapshot != ItemStackSnapshot.NONE) {
                 // combined slot
-                targetSnapshot = org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemStack).quantity(itemStack.getCount() + slot.getStack().getCount()).build().createSnapshot();
+                targetSnapshot =
+                        org.spongepowered.api.item.inventory.ItemStack.builder().from((org.spongepowered.api.item.inventory.ItemStack) itemStack)
+                                .quantity(itemStack.getCount() + slot.getStack().getCount()).build().createSnapshot();
             } else {
                 // empty slot
                 targetSnapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot();
@@ -181,11 +181,13 @@ public class SpongeCommonEventFactory {
                     new SlotTransaction(new SlotAdapter(slot), sourceSnapshot, targetSnapshot);
             ImmutableList<SlotTransaction> transactions =
                     new ImmutableList.Builder<SlotTransaction>().add(slotTransaction).build();
-            ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(Cause.of(NamedCause.source(player)),
+            Sponge.getCauseStackManager().pushCause(player);
+            ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(Sponge.getCauseStackManager().getCurrentCause(),
                     (Item) itemToPickup, (Inventory) player.inventoryContainer, transactions);
             if (SpongeImpl.postEvent(event)) {
                 return false;
             }
+            Sponge.getCauseStackManager().popCause();
         }
 
         return true;
@@ -197,99 +199,95 @@ public class SpongeCommonEventFactory {
             List<net.minecraft.entity.Entity> entities) {
 
         CauseTracker causeTracker = CauseTracker.getInstance();
-        Cause.Builder builder = null;
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
         if (sourceEntity != null) {
-            builder = Cause.source(sourceEntity);
+            Sponge.getCauseStackManager().pushCause(sourceEntity);
         } else {
             PhaseContext context = causeTracker.getCurrentContext();
 
             final Optional<LocatableBlock> currentTickingBlock = context.getSource(LocatableBlock.class);
-            final Optional<TileEntity> currentTickingTileEntity = context.getSource(TileEntity.class);
-            final Optional<Entity> currentTickingEntity = context.getSource(Entity.class);
             if (currentTickingBlock.isPresent()) {
-                builder = Cause.source(currentTickingBlock.get());
-            } else if (currentTickingTileEntity.isPresent()) {
-                builder = Cause.source(currentTickingTileEntity.get());
-            } else if (currentTickingEntity.isPresent()) {
-                builder = Cause.source(currentTickingEntity.get());
-            }
-
-            if (builder == null) {
-                return null;
+                Sponge.getCauseStackManager().pushCause(currentTickingBlock.get());
+            } else {
+                final Optional<TileEntity> currentTickingTileEntity = context.getSource(TileEntity.class);
+                if (currentTickingTileEntity.isPresent()) {
+                    Sponge.getCauseStackManager().pushCause(currentTickingTileEntity.get());
+                } else {
+                    final Optional<Entity> currentTickingEntity = context.getSource(Entity.class);
+                    if (currentTickingEntity.isPresent()) {
+                        Sponge.getCauseStackManager().pushCause(currentTickingEntity.get());
+                    } else {
+                        Sponge.getCauseStackManager().popCauseFrame(frame);
+                        return null;
+                    }
+                }
             }
         }
-        final Optional<User> owner = causeTracker.getCurrentPhaseData()
-                .context
-                .firstNamed(NamedCause.OWNER, User.class);
-        if (owner.isPresent()) {
-            builder.named(NamedCause.OWNER, owner.get());
-        }
+        causeTracker.getCurrentPhaseData().context.addNotifierAndOwnerToCauseStack();
 
         List<Entity> spEntities = (List<Entity>) (List<?>) entities;
-        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(builder.build(), spEntities);
+        CollideEntityEvent event =
+                SpongeEventFactory.createCollideEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), spEntities);
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return event;
     }
 
-    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, NamedCause namedWorldCause) {
-        return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), namedWorldCause, null);
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos) {
+        return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
     }
 
-    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, NamedCause namedWorldCause, Object source) {
-        return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), namedWorldCause, source);
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, Object source) {
+        return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
     }
 
-    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, ImmutableList<Location<World>> locations, NamedCause namedWorldCause, Object source) {
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, ImmutableList<Location<World>> locations, Object source) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData data = causeTracker.getCurrentPhaseData();
-        final IPhaseState phaseState = data.state;
         if (source == null) {
             source = data.context.getSource(LocatableBlock.class).orElse(null);
             if (source == null) {
                 // safety measure, return a dummy event
                 if (DUMMY_BLOCK_PRE_EVENT == null) {
-                    DUMMY_BLOCK_PRE_EVENT = SpongeEventFactory.createChangeBlockEventPre(Cause.source(worldIn).build(), ImmutableList.of());
+                    DUMMY_BLOCK_PRE_EVENT = SpongeEventFactory.createChangeBlockEventPre(Sponge.getCauseStackManager().getCurrentCause(), ImmutableList.of());
                 }
                 return DUMMY_BLOCK_PRE_EVENT;
             }
         }
 
         EntityPlayer player = null;
-        Cause.Builder builder = null;
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
         User owner = data.context.getOwner().orElse(null);
         User notifier = data.context.getNotifier().orElse(null);
         // handle FakePlayer
+        boolean isFake = false;
         if (source instanceof EntityPlayer) {
             player = (EntityPlayer) source;
             if (SpongeImplHooks.isFakePlayer(player)) {
-                if (owner != null) {
-                    builder = Cause.source(owner);
-                    builder.named(NamedCause.FAKE_PLAYER, player);
-                } else if (notifier != null) {
-                    builder = Cause.source(notifier);
-                    builder.named(NamedCause.FAKE_PLAYER, player);
-                } else {
-                    builder = Cause.builder().named(NamedCause.FAKE_PLAYER, player);
-                }
+                isFake = true;
             }
-        }
-        if (builder == null) {
-            builder = Cause.source(source);
+        } else {
+
         }
 
-        if (owner != null) {
-            builder.owner(owner);
-        }
+        Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner);
         if (notifier != null) {
-            if (!(phaseState.getPhase().appendPreBlockProtectedCheck(builder, phaseState, data.context, causeTracker))) {
-                builder.notifier(notifier);
+            Optional<Player> oplayer = data.context.getSource(Player.class);
+            if (oplayer.isPresent()) {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, oplayer.get());
+            } else {
+                Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier);
             }
         }
+        Sponge.getCauseStackManager().pushCause(source);
+        if(isFake) {
+            Sponge.getCauseStackManager().pushCause(owner);
+        }
 
-        builder.named(namedWorldCause);
-
-        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), locations);
+        ChangeBlockEvent.Pre event =
+                SpongeEventFactory.createChangeBlockEventPre(Sponge.getCauseStackManager().getCurrentCause(), locations);
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return event;
     }
 
@@ -361,10 +359,13 @@ public class SpongeCommonEventFactory {
 
 
     /**
-     * This simulates the blocks a piston moves and calls the event for saner debugging.
+     * This simulates the blocks a piston moves and calls the event for saner
+     * debugging.
+     *
      * @return if the event was cancelled
      */
-    public static boolean handlePistonEvent(IMixinWorldServer world, WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
+    public static boolean handlePistonEvent(IMixinWorldServer world, WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn,
+            int eventId, int eventParam) {
         boolean extending = (eventId == 0);
         final IBlockState blockstate = ((net.minecraft.world.World) world).getBlockState(pos);
         EnumFacing direction = blockstate.getValue(BlockDirectional.FACING);
@@ -381,8 +382,10 @@ public class SpongeCommonEventFactory {
         movedBlocks.canMove(); // calculates blocks to be moved
 
         Stream.concat(movedBlocks.getBlocksToMove().stream(), movedBlocks.getBlocksToDestroy().stream())
-            .map(block -> new Location<>((World) world, block.getX(), block.getY(), block.getZ()))
-            .collect(Collectors.toCollection(() -> locations)); // SUPER efficient code!
+                .map(block -> new Location<>((World) world, block.getX(), block.getY(), block.getZ()))
+                .collect(Collectors.toCollection(() -> locations)); // SUPER
+                                                                    // efficient
+                                                                    // code!
 
         // If the piston is extending and there are no blocks to destroy, add the offset location for protection purposes
         if (extending && movedBlocks.getBlocksToDestroy().isEmpty()) {
@@ -398,8 +401,9 @@ public class SpongeCommonEventFactory {
             locations.add(new Location<>((World) world, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()));
         }
 
-        String namedCause = extending ? NamedCause.PISTON_EXTEND : NamedCause.PISTON_RETRACT;
-        return SpongeCommonEventFactory.callChangeBlockEventPre(world, ImmutableList.copyOf(locations), NamedCause.of(namedCause, world), locatable).isCancelled();
+        // String namedCause = extending ? NamedCause.PISTON_EXTEND : NamedCause.PISTON_RETRACT;
+        return SpongeCommonEventFactory.callChangeBlockEventPre(world, ImmutableList.copyOf(locations), locatable)
+                .isCancelled();
     }
 
     @SuppressWarnings("rawtypes")
@@ -411,31 +415,20 @@ public class SpongeCommonEventFactory {
         if (peek.state.getPhase().isWorldGeneration(peek.state) || peek.state == State.RESTORING_BLOCKS) {
             return null;
         }
-
-        User user = context.first(User.class).orElse(null);
-        Object rootCause = context.first(Object.class).orElse(null);
-        Cause.Builder builder;
-
-        if (rootCause instanceof PhaseContext) {
-            PhaseContext phaseContext = (PhaseContext) rootCause;
-            rootCause = phaseContext.first(Object.class).orElse(null);
-        }
-
-        final BlockState blockstate = (BlockState)((net.minecraft.world.World) world).getBlockState(sourcePos);
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        final BlockState blockstate = (BlockState) ((net.minecraft.world.World) world).getBlockState(sourcePos);
         final LocatableBlock locatable = LocatableBlock.builder()
-                .location(new Location<>(world, sourcePos.getX(), sourcePos.getY(), sourcePos.getZ()))
+                .location(new Location<World>(world, sourcePos.getX(), sourcePos.getY(), sourcePos.getZ()))
                 .state(blockstate)
                 .build();
-        builder = Cause.source(locatable);
-        if (rootCause instanceof User) {
-            builder.named(NamedCause.notifier(rootCause));
+        Sponge.getCauseStackManager().pushCause(locatable);
+        if (context.getNotifier().isPresent()) {
+            context.addNotifierAndOwnerToCauseStack();
         } else {
-            if (user != null) {
-                builder.named(NamedCause.notifier(user));
-            } else {
-                final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) world).getChunkFromBlockCoords(sourcePos);
-                peek.state.getPhase().populateCauseForNotifyNeighborEvent(peek.state, context, builder, causeTracker, mixinChunk, sourcePos);
-            }
+
+            final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) world).getChunkFromBlockCoords(sourcePos);
+            mixinChunk.getBlockNotifier(sourcePos).ifPresent(user -> Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, user));
+            mixinChunk.getBlockOwner(sourcePos).ifPresent(owner -> Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner));
         }
 
         final Map<Direction, BlockState> neighbors = new HashMap<>();
@@ -450,95 +443,137 @@ public class SpongeCommonEventFactory {
             }
         }
 
-        //ImmutableMap<Direction, BlockState> originalNeighbors = ImmutableMap.copyOf(neighbors);
+        // ImmutableMap<Direction, BlockState> originalNeighbors =
+        // ImmutableMap.copyOf(neighbors);
 
-        NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(builder.build(), neighbors, neighbors);
+        NotifyNeighborBlockEvent event =
+                SpongeEventFactory.createNotifyNeighborBlockEvent(Sponge.getCauseStackManager().getCurrentCause(), neighbors, neighbors);
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return event;
     }
 
-    public static InteractEntityEvent.Primary callInteractEntityEventPrimary(EntityPlayerMP player, net.minecraft.entity.Entity entity, EnumHand hand, Vec3d hitVec) {
+    public static InteractEntityEvent.Primary callInteractEntityEventPrimary(EntityPlayerMP player, net.minecraft.entity.Entity entity, EnumHand hand,
+            Vec3d hitVec) {
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().pushCause(player);
         InteractEntityEvent.Primary event;
         Optional<Vector3d> hitVector = hitVec == null ? Optional.empty() : Optional.of(VecHelper.toVector3d(hitVec));
         if (hand == EnumHand.MAIN_HAND) {
             event = SpongeEventFactory.createInteractEntityEventPrimaryMainHand(
-                    Cause.of(NamedCause.source(player)), HandTypes.MAIN_HAND, hitVector, EntityUtil.fromNative(entity));
+                    Sponge.getCauseStackManager().getCurrentCause(), HandTypes.MAIN_HAND, hitVector, EntityUtil.fromNative(entity));
         } else {
             event = SpongeEventFactory.createInteractEntityEventPrimaryOffHand(
-                    Cause.of(NamedCause.source(player)), HandTypes.OFF_HAND, hitVector, EntityUtil.fromNative(entity));
+                    Sponge.getCauseStackManager().getCurrentCause(), HandTypes.OFF_HAND, hitVector, EntityUtil.fromNative(entity));
         }
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return event;
     }
 
-    public static InteractEntityEvent.Secondary callInteractEntityEventSecondary(EntityPlayerMP player, net.minecraft.entity.Entity entity, EnumHand hand, Optional<Vector3d> interactionPoint) {
+    public static InteractEntityEvent.Secondary callInteractEntityEventSecondary(EntityPlayerMP player, net.minecraft.entity.Entity entity,
+            EnumHand hand, Optional<Vector3d> interactionPoint) {
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().pushCause(player);
         InteractEntityEvent.Secondary event;
         if (hand == EnumHand.MAIN_HAND) {
             event = SpongeEventFactory.createInteractEntityEventSecondaryMainHand(
-                    Cause.of(NamedCause.source(player)), HandTypes.MAIN_HAND, interactionPoint, EntityUtil.fromNative(entity));
+                    Sponge.getCauseStackManager().getCurrentCause(), HandTypes.MAIN_HAND, interactionPoint, EntityUtil.fromNative(entity));
         } else {
             event = SpongeEventFactory.createInteractEntityEventSecondaryOffHand(
-                    Cause.of(NamedCause.source(player)), HandTypes.OFF_HAND, interactionPoint, EntityUtil.fromNative(entity));
+                    Sponge.getCauseStackManager().getCurrentCause(), HandTypes.OFF_HAND, interactionPoint, EntityUtil.fromNative(entity));
         }
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return event;
     }
 
-    public static InteractItemEvent callInteractItemEventPrimary(EntityPlayer player, ItemStack stack, EnumHand hand, Optional<Vector3d> interactionPoint, Object hitTarget) {
+    public static InteractItemEvent callInteractItemEventPrimary(EntityPlayer player, ItemStack stack, EnumHand hand,
+            Optional<Vector3d> interactionPoint, Object hitTarget) {
+        Object frame = Sponge.getCauseStackManager();
+        Sponge.getCauseStackManager().pushCause(hitTarget);
+        Sponge.getCauseStackManager().pushCause(player);
         InteractItemEvent.Primary event;
         if (hand == EnumHand.MAIN_HAND) {
-            event = SpongeEventFactory.createInteractItemEventPrimaryMainHand(Cause.of(NamedCause.source(player), NamedCause.hitTarget(hitTarget)), HandTypes.MAIN_HAND, interactionPoint, ItemStackUtil.snapshotOf(stack));
+            event = SpongeEventFactory.createInteractItemEventPrimaryMainHand(Sponge.getCauseStackManager().getCurrentCause(),
+                    HandTypes.MAIN_HAND, interactionPoint, ItemStackUtil.snapshotOf(stack));
         } else {
-            event = SpongeEventFactory.createInteractItemEventPrimaryOffHand(Cause.of(NamedCause.source(player), NamedCause.hitTarget(hitTarget)), HandTypes.OFF_HAND, interactionPoint, ItemStackUtil.snapshotOf(stack));
+            event = SpongeEventFactory.createInteractItemEventPrimaryOffHand(Sponge.getCauseStackManager().getCurrentCause(),
+                    HandTypes.OFF_HAND, interactionPoint, ItemStackUtil.snapshotOf(stack));
         }
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return event;
     }
 
-    public static InteractItemEvent callInteractItemEventSecondary(EntityPlayer player, ItemStack stack, EnumHand hand, Optional<Vector3d> interactionPoint, Object hitTarget) {
+    public static InteractItemEvent callInteractItemEventSecondary(EntityPlayer player, ItemStack stack, EnumHand hand,
+            Optional<Vector3d> interactionPoint, Object hitTarget) {
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().pushCause(hitTarget);
+        Sponge.getCauseStackManager().pushCause(player);
         InteractItemEvent.Secondary event;
         if (hand == EnumHand.MAIN_HAND) {
-            event = SpongeEventFactory.createInteractItemEventSecondaryMainHand(Cause.of(NamedCause.source(player), NamedCause.hitTarget(hitTarget)), HandTypes.MAIN_HAND, interactionPoint, ItemStackUtil.snapshotOf(stack));
+            event = SpongeEventFactory.createInteractItemEventSecondaryMainHand(Sponge.getCauseStackManager().getCurrentCause(),
+                    HandTypes.MAIN_HAND, interactionPoint, ItemStackUtil.snapshotOf(stack));
         } else {
-            event = SpongeEventFactory.createInteractItemEventSecondaryOffHand(Cause.of(NamedCause.source(player), NamedCause.hitTarget(hitTarget)), HandTypes.OFF_HAND, interactionPoint, ItemStackUtil.snapshotOf(stack));
+            event = SpongeEventFactory.createInteractItemEventSecondaryOffHand(Sponge.getCauseStackManager().getCurrentCause(),
+                    HandTypes.OFF_HAND, interactionPoint, ItemStackUtil.snapshotOf(stack));
         }
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return event;
     }
 
     public static InteractBlockEvent.Primary callInteractBlockEventPrimary(EntityPlayer player, EnumHand hand) {
         InteractBlockEvent.Primary event;
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().pushCause(player);
         if (hand == EnumHand.MAIN_HAND) {
-            event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Cause.of(NamedCause.source(player)), HandTypes.MAIN_HAND, Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
+            event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Sponge.getCauseStackManager().getCurrentCause(), HandTypes.MAIN_HAND,
+                    Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
         } else {
-            event = SpongeEventFactory.createInteractBlockEventPrimaryOffHand(Cause.of(NamedCause.source(player)), HandTypes.OFF_HAND, Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
+            event = SpongeEventFactory.createInteractBlockEventPrimaryOffHand(Sponge.getCauseStackManager().getCurrentCause(), HandTypes.OFF_HAND, Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
         }
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return event;
     }
 
-    public static InteractBlockEvent.Primary callInteractBlockEventPrimary(EntityPlayer player, BlockSnapshot blockSnapshot, EnumHand hand, EnumFacing side) {
+    public static InteractBlockEvent.Primary callInteractBlockEventPrimary(EntityPlayer player, BlockSnapshot blockSnapshot, EnumHand hand,
+            EnumFacing side) {
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().pushCause(player);
         InteractBlockEvent.Primary event;
         Direction direction = DirectionFacingProvider.getInstance().getKey(side).get();
         if (hand == EnumHand.MAIN_HAND) {
-            event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Cause.of(NamedCause.source(player)), HandTypes.MAIN_HAND, Optional.empty(), blockSnapshot, direction);
+            event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Sponge.getCauseStackManager().getCurrentCause(), HandTypes.MAIN_HAND,
+                    Optional.empty(), blockSnapshot, direction);
         } else {
-            event = SpongeEventFactory.createInteractBlockEventPrimaryOffHand(Cause.of(NamedCause.source(player)), HandTypes.OFF_HAND, Optional.empty(), blockSnapshot, direction);
+            event = SpongeEventFactory.createInteractBlockEventPrimaryOffHand(Sponge.getCauseStackManager().getCurrentCause(), HandTypes.OFF_HAND, Optional.empty(), blockSnapshot, direction);
         }
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return event;
     }
 
-    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(Cause cause, Optional<Vector3d> interactionPoint, BlockSnapshot targetBlock, Direction targetSide, EnumHand hand) {
-        return callInteractBlockEventSecondary(cause, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, interactionPoint, targetBlock, targetSide, hand);
+    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(Optional<Vector3d> interactionPoint,
+            BlockSnapshot targetBlock, Direction targetSide, EnumHand hand) {
+        return callInteractBlockEventSecondary(Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED,
+                interactionPoint, targetBlock, targetSide, hand);
     }
 
-    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(Cause cause, Tristate originalUseBlockResult, Tristate useBlockResult, Tristate originalUseItemResult, Tristate useItemResult, Optional<Vector3d> interactionPoint, BlockSnapshot targetBlock, Direction targetSide, EnumHand hand) {
+    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(Tristate originalUseBlockResult, Tristate useBlockResult,
+            Tristate originalUseItemResult, Tristate useItemResult, Optional<Vector3d> interactionPoint, BlockSnapshot targetBlock,
+            Direction targetSide, EnumHand hand) {
         InteractBlockEvent.Secondary event;
         if (hand == EnumHand.MAIN_HAND) {
-            event = SpongeEventFactory.createInteractBlockEventSecondaryMainHand(cause, originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, HandTypes.MAIN_HAND, interactionPoint, targetBlock, targetSide);
+            event = SpongeEventFactory.createInteractBlockEventSecondaryMainHand(Sponge.getCauseStackManager().getCurrentCause(),
+                    originalUseBlockResult, useBlockResult, originalUseItemResult,
+                    useItemResult, HandTypes.MAIN_HAND, interactionPoint, targetBlock, targetSide);
         } else {
-            event = SpongeEventFactory.createInteractBlockEventSecondaryOffHand(cause, originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, HandTypes.OFF_HAND, interactionPoint, targetBlock, targetSide);
+            event = SpongeEventFactory.createInteractBlockEventSecondaryOffHand(Sponge.getCauseStackManager().getCurrentCause(),
+                    originalUseBlockResult, useBlockResult, originalUseItemResult,
+                    useItemResult, HandTypes.OFF_HAND, interactionPoint, targetBlock, targetSide);
         }
         SpongeImpl.postEvent(event);
         return event;
@@ -568,19 +603,21 @@ public class SpongeCommonEventFactory {
 
         originalMessage = SpongeTexts.toText(entity.getCombatTracker().getDeathMessage());
         formatter.getBody().add(new MessageEvent.DefaultBodyApplier(originalMessage));
-        List<NamedCause> causes = new ArrayList<>();
-        causes.add(NamedCause.of("Attacker", source));
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().pushCause(source);
         if (sourceCreator.isPresent()) {
-            causes.add(NamedCause.owner(sourceCreator.get()));
+            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, sourceCreator.get());
         }
 
-        Cause cause = Cause.of(causes);
-        DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause, originalChannel, Optional.of(channel), formatter, (Living) entity, messageCancelled);
+        DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(Sponge.getCauseStackManager().getCurrentCause(),
+                originalChannel, Optional.of(channel), formatter,
+                (Living) entity, messageCancelled);
         SpongeImpl.postEvent(event);
         Text message = event.getMessage();
         if (!event.isMessageCancelled() && !message.isEmpty()) {
             event.getChannel().ifPresent(eventChannel -> eventChannel.send(entity, event.getMessage()));
         }
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return true;
     }
 
@@ -589,34 +626,35 @@ public class SpongeCommonEventFactory {
             return false;
         }
 
+
         final CauseTracker causeTracker = CauseTracker.getInstance();
-        final Cause.Builder builder = Cause.source(entity);
-        builder.named(NamedCause.of(NamedCause.PHYSICAL, entity));
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().pushCause( entity);
 
         if (!(entity instanceof EntityPlayer)) {
             IMixinEntity spongeEntity = (IMixinEntity) entity;
             Optional<User> user = spongeEntity.getCreatorUser();
             if (user.isPresent()) {
-                builder.named(NamedCause.owner(user.get()));
+                Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, user.get());
             }
         }
 
         // TODO: Add target side support
-        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(builder.build(), (BlockState) state,
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(Sponge.getCauseStackManager().getCurrentCause(), (BlockState) state,
                 new Location<>((World) world, VecHelper.toVector3d(pos)), direction);
         boolean cancelled = SpongeImpl.postEvent(event);
         if (!cancelled) {
             IMixinEntity spongeEntity = (IMixinEntity) entity;
             if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
                 final PhaseData peek = causeTracker.getCurrentPhaseData();
-                final Optional<User> notifier = peek.context.firstNamed(NamedCause.NOTIFIER, User.class);
+                final Optional<User> notifier = peek.context.getNotifier();
                 if (notifier.isPresent()) {
                     IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
                     spongeChunk.addTrackedBlockPosition(block, pos, notifier.get(), PlayerTracker.Type.NOTIFIER);
                 }
             }
         }
-
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return cancelled;
     }
 
@@ -624,13 +662,13 @@ public class SpongeCommonEventFactory {
             RayTraceResult movingObjectPosition) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         RayTraceResult.Type movingObjectType = movingObjectPosition.typeOfHit;
-        final Cause.Builder builder = Cause.source(projectile).named("ProjectileSource", projectileSource == null
-                                                                                         ? ProjectileSource.UNKNOWN
-                                                                                         : projectileSource);
-        final Optional<User> owner = causeTracker.getCurrentPhaseData()
-                .context
-                .firstNamed(NamedCause.OWNER, User.class);
-        owner.ifPresent(user -> builder.named(NamedCause.OWNER, user));
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().pushCause(projectile);
+        Sponge.getCauseStackManager().addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
+                ? ProjectileSource.UNKNOWN
+                : projectileSource);
+        final Optional<User> owner = causeTracker.getCurrentPhaseData().context.getOwner();
+        owner.ifPresent(user -> Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, user));
 
         Location<World> impactPoint = new Location<>((World) projectile.world, VecHelper.toVector3d(movingObjectPosition.hitVec));
         boolean cancelled = false;
@@ -647,7 +685,8 @@ public class SpongeCommonEventFactory {
                 side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.sideHit).get();
             }
 
-            CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(builder.build(), impactPoint, targetBlock.getState(),
+            CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(Sponge.getCauseStackManager().getCurrentCause(),
+                    impactPoint, targetBlock.getState(),
                     targetBlock.getLocation().get(), side);
             cancelled = SpongeImpl.postEvent(event);
             // Track impact block if event is not cancelled
@@ -659,9 +698,10 @@ public class SpongeCommonEventFactory {
         } else if (movingObjectPosition.entityHit != null) { // entity
             ArrayList<Entity> entityList = new ArrayList<>();
             entityList.add((Entity) movingObjectPosition.entityHit);
-            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(builder.build(), entityList, impactPoint);
-            cancelled = SpongeImpl.postEvent(event);
+            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(Sponge.getCauseStackManager().getCurrentCause(), entityList, impactPoint);
+                    cancelled = SpongeImpl.postEvent(event);
         }
+        Sponge.getCauseStackManager().popCauseFrame(frame);
 
         if (cancelled) {
             // Entities such as EnderPearls call setDead during onImpact. However, if the event is cancelled
@@ -671,22 +711,14 @@ public class SpongeCommonEventFactory {
         return cancelled;
     }
 
-
-    public static void checkSpawnEvent(Entity entity, Cause cause) {
-        checkArgument(cause.root() instanceof SpawnCause, "The cause does not have a SpawnCause! It has instead: {}", cause.root().toString());
-        checkArgument(cause.containsNamed(NamedCause.SOURCE), "The cause does not have a \"Source\" named object!");
-        checkArgument(cause.get(NamedCause.SOURCE, SpawnCause.class).isPresent(), "The SpawnCause is not the \"Source\" of the cause!");
-
-    }
-
-
     public static ClickInventoryEvent.Creative callCreativeClickInventoryEvent(EntityPlayerMP player, CPacketCreativeInventoryAction packetIn) {
-        Cause cause = Cause.of(NamedCause.owner(player));
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().pushCause(player);
         // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
         // Due to this, we can only send the original item that was clicked in slot
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
         if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0
-            && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
+                && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
             Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
             if (slot != null) {
                 ItemStackSnapshot clickedItem = slot.getStack() == null ? ItemStackSnapshot.NONE
@@ -696,45 +728,48 @@ public class SpongeCommonEventFactory {
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
             }
         }
-        ClickInventoryEvent.Creative event = SpongeEventFactory.createClickInventoryEventCreative(cause, cursorTransaction,
-                (org.spongepowered.api.item.inventory.Container) player.openContainer,
-                ((IMixinContainer) player.openContainer).getCapturedTransactions());
+        ClickInventoryEvent.Creative event =
+                SpongeEventFactory.createClickInventoryEventCreative(Sponge.getCauseStackManager().getCurrentCause(), cursorTransaction,
+                        (org.spongepowered.api.item.inventory.Container) player.openContainer,
+                        ((IMixinContainer) player.openContainer).getCapturedTransactions());
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return event;
     }
 
-    public static boolean callInteractInventoryOpenEvent(Cause cause, EntityPlayerMP player) {
+    public static boolean callInteractInventoryOpenEvent(EntityPlayerMP player) {
         ItemStackSnapshot newCursor =
                 player.inventory.getItemStack().isEmpty() ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, newCursor);
         InteractInventoryEvent.Open event =
-                SpongeEventFactory.createInteractInventoryEventOpen(cause, cursorTransaction,
+                SpongeEventFactory.createInteractInventoryEventOpen(Sponge.getCauseStackManager().getCurrentCause(), cursorTransaction,
                         (org.spongepowered.api.item.inventory.Container) player.openContainer);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             player.closeScreen();
             return false;
         }
-
-        // Handle cursor
-        if (!event.getCursorTransaction().isValid()) {
-            handleCustomCursor(player, event.getCursorTransaction().getOriginal());
-        } else if (event.getCursorTransaction().getCustom().isPresent()) {
+        // TODO - determine if/how we want to fire inventory events outside of click packet handlers
+        //((IMixinContainer) player.openContainer).setCaptureInventory(true);
+        // Custom cursor
+        if (event.getCursorTransaction().getCustom().isPresent()) {
             handleCustomCursor(player, event.getCursorTransaction().getFinal());
         }
         return true;
     }
 
-    public static InteractInventoryEvent.Close callInteractInventoryCloseEvent(Cause cause, Container container, EntityPlayerMP player, ItemStackSnapshot lastCursor, ItemStackSnapshot newCursor, boolean clientSource) {
+    public static InteractInventoryEvent.Close callInteractInventoryCloseEvent(Container container, EntityPlayerMP player,
+            ItemStackSnapshot lastCursor, ItemStackSnapshot newCursor, boolean clientSource) {
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-        final InteractInventoryEvent.Close event
-                = SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction, ContainerUtil.fromNative(container));
+        final InteractInventoryEvent.Close event =
+                SpongeEventFactory.createInteractInventoryEventClose(Sponge.getCauseStackManager().getCurrentCause(), cursorTransaction, ContainerUtil.fromNative(container));
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             if (clientSource && container.getSlot(0) != null) {
                 if (!(container instanceof ContainerPlayer)) {
-                    // Inventory closed by client, reopen window and send container
+                    // Inventory closed by client, reopen window and send
+                    // container
                     player.openContainer = container;
                     final String guiId;
                     final Slot slot = container.getSlot(0);
@@ -742,16 +777,19 @@ public class SpongeCommonEventFactory {
                     if (slotInventory instanceof IInteractionObject) {
                         guiId = ((IInteractionObject) slotInventory).getGuiID();
                     } else {
-                        guiId = "minecraft:container"; // expected fallback for unknown types
+                        // expected fallback for unknown types
+                        guiId = "minecraft:container";
                     }
                     slotInventory.openInventory(player);
                     player.connection.sendPacket(new SPacketOpenWindow(container.windowId, guiId, slotInventory
-                        .getDisplayName(), slotInventory.getSizeInventory()));
+                            .getDisplayName(), slotInventory.getSizeInventory()));
                     // resync data to client
                     player.sendContainerToPlayer(container);
                 } else {
-                    // TODO: Maybe print a warning or throw an exception here? The player gui cannot be opened from the
-                    // server so allowing this event to be cancellable when the GUI has been closed already would result
+                    // TODO: Maybe print a warning or throw an exception here?
+                    // The player gui cannot be opened from the
+                    // server so allowing this event to be cancellable when the
+                    // GUI has been closed already would result
                     // in opening the wrong GUI window.
                 }
             }
@@ -778,13 +816,14 @@ public class SpongeCommonEventFactory {
     }
 
     @Nullable
-    public static Container displayContainer(Cause cause, EntityPlayerMP player, Inventory inventory) {
+    public static Container displayContainer(EntityPlayerMP player, Inventory inventory) {
         net.minecraft.inventory.Container previousContainer = player.openContainer;
         net.minecraft.inventory.Container container = null;
 
         if (inventory instanceof CustomInventory) {
             if (!checkValidVanillaCustomInventory(((CustomInventory) inventory))) {
-                return null; // Invalid size for vanilla inventory ; This is to prevent crashing the client with invalid data
+                return null; // Invalid size for vanilla inventory ; This is to
+                             // prevent crashing the client with invalid data
             }
             // else continue as normal
         }
@@ -796,9 +835,9 @@ public class SpongeCommonEventFactory {
                 case "EntityHorse":
                     // If Carrier is Horse open Inventory
                     if (inventory instanceof CarriedInventory) {
-                        if (((CarriedInventory<?>) inventory).getCarrier().isPresent()
-                                && ((CarriedInventory<?>) inventory).getCarrier().get() instanceof EntityHorse) {
-                            player.openGuiHorseInventory(((EntityHorse) ((CarriedInventory<?>) inventory).getCarrier().get()), (IInventory) inventory);
+                        CarriedInventory<?> cinventory = (CarriedInventory<?>) inventory;
+                        if (cinventory.getCarrier().isPresent() && cinventory.getCarrier().get() instanceof EntityHorse) {
+                            player.openGuiHorseInventory(((EntityHorse) cinventory.getCarrier().get()), (IInventory) inventory);
                             container = player.openContainer;
                         }
                     }
@@ -829,13 +868,18 @@ public class SpongeCommonEventFactory {
             return null;
         }
 
-        if (!callInteractInventoryOpenEvent(cause, player)) {
+        if (!callInteractInventoryOpenEvent(player)) {
             return null;
         }
         if (container instanceof IMixinContainer) {
-            // This overwrites the normal container behaviour and allows viewing inventories that are more than 8 blocks away
-            // This currently actually only works for the Containers mixed into by MixinContainerCanInteract ; but throws no errors for other containers
-            ((IMixinContainer) container).setCanInteractWith(p -> !p.isDead); // Allow viewing inventory ; except when dead
+            // This overwrites the normal container behaviour and allows viewing
+            // inventories that are more than 8 blocks away
+            // This currently actually only works for the Containers mixed into
+            // by MixinContainerCanInteract ; but throws no errors for other
+            // containers
+
+            // Allow viewing inventory; except when dead
+            ((IMixinContainer) container).setCanInteractWith(p -> !p.isDead);
         }
         return container;
     }
@@ -843,8 +887,9 @@ public class SpongeCommonEventFactory {
     private static boolean checkValidVanillaCustomInventory(CustomInventory inventory) {
         InventoryArchetype archetype = inventory.getArchetype();
         if (InventoryArchetypes.CHEST.equals(archetype) || InventoryArchetypes.DOUBLE_CHEST.equals(archetype)) {
-            int size = inventory.getSizeInventory();
-            return size % 9 == 0 && size / 9 <= 6 && size != 0; // Divisible by 9 AND less than 6 rows of 9 slots
+            int size = inventory.getSizeInventory(); // Divisible by
+            // 9 AND less than 6 rows of 9 slots
+            return size % 9 == 0 && size / 9 <= 6 && size != 0;
         }
         if (InventoryArchetypes.HOPPER.equals(archetype)) {
             return inventory.getSizeInventory() == 5 * 1;

@@ -22,21 +22,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.spawn;
+package org.spongepowered.common.data.type;
 
-import static com.google.common.base.Preconditions.checkState;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 
-import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.common.AbstractBlockSpawnCauseBuilder;
+import java.util.Locale;
 
-public class SpongeBlockSpawnCauseBuilder extends AbstractBlockSpawnCauseBuilder<BlockSpawnCause, BlockSpawnCause.Builder>
-        implements BlockSpawnCause.Builder {
+public class SpongeTeleportType implements TeleportType {
 
-    @Override
-    public BlockSpawnCause build() {
-        checkState(this.spawnType != null, "SpawnType cannot be null!");
-        checkState(this.blockSnapshot != null, "BlockSnapshot cannot be null!");
-        return new SpongeBlockSpawnCause(this);
+    private String name;
+    private String id;
+
+    public SpongeTeleportType(String id, String name) {
+        this.name = name;
+        this.id = id.toLowerCase(Locale.ENGLISH);
     }
 
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeTeleportType other = (SpongeTeleportType) obj;
+        return this.id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.id, this.name);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                .add("id", this.id)
+                .add("name", this.name)
+                .toString();
+    }
 }

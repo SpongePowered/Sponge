@@ -90,8 +90,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.service.context.ServiceContext;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
@@ -177,7 +176,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             GET_ENTITIES_WITHIN_AABB =
             "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;";
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-    @Nullable private Context worldContext;
+
+    @Nullable private ServiceContext worldContext;
     protected boolean processingExplosion = false;
     protected boolean isDefinitelyFake = false;
     protected boolean hasChecked = false;
@@ -400,8 +400,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
-        return setBlock(x, y, z, block, BlockChangeFlag.ALL, cause);
+    public boolean setBlock(int x, int y, int z, BlockState block) {
+        return setBlock(x, y, z, block, BlockChangeFlag.ALL);
     }
 
 
@@ -580,7 +580,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public Context getContext() {
+    public ServiceContext getContext() {
         if (this.worldContext == null) {
             WorldInfo worldInfo = getWorldInfo();
             if (worldInfo == null) {
@@ -588,7 +588,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 // override getWorldInfo with a null, or submit a null value.
                 worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT), "sponge$dummy_World");
             }
-            this.worldContext = new Context(Context.WORLD_KEY, worldInfo.getWorldName());
+            this.worldContext = new ServiceContext(ServiceContext.WORLD_KEY, worldInfo.getWorldName());
         }
         return this.worldContext;
     }
@@ -697,7 +697,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public void triggerExplosion(Explosion explosion, Cause cause) {
+    public void triggerExplosion(Explosion explosion) {
         checkNotNull(explosion, "explosion");
         Location<World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
@@ -720,8 +720,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public MutableBlockVolumeWorker<World> getBlockWorker(Cause cause) {
-        return new SpongeMutableBlockVolumeWorker<>(this, cause);
+    public MutableBlockVolumeWorker<World> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
     @Override
@@ -757,12 +757,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
+    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
         return snapshot.restore(force, flag);
     }
 
     @Override
-    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
+    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
         snapshot = snapshot.withLocation(new Location<>(this, new Vector3i(x, y, z)));
         return snapshot.restore(force, flag);
     }

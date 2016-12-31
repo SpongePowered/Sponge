@@ -42,8 +42,6 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
@@ -123,11 +121,6 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
                 .orElseGet(DataTransactionResult::failNoData);
     }
 
-    @Override
-    public <R> DataTransactionResult offer(Key<? extends BaseValue<R>> key, R value, Cause cause) {
-        return offer(key, value);
-    }
-
     @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
@@ -147,11 +140,6 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
 
                 })
                 .orElseGet(() -> CustomDataNbtUtil.apply(this.data, valueContainer));
-    }
-
-    @Override
-    public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function, Cause cause) {
-        return offer(valueContainer, function);
     }
 
     @Override

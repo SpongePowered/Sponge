@@ -37,6 +37,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
@@ -76,7 +77,7 @@ public class SnapshotGenerationTest extends InjectedTest {
         PluginContainer container = Mockito.mock(PluginContainer.class);
         Mockito.when(manager.fromInstance(this.plugin)).thenReturn(Optional.of(container));
 
-        Cause cause = Cause.source(this).build();
+        Cause cause = Cause.of(EventContext.empty(), this);
         this.entity = Mockito.mock(Entity.class, withSettings().defaultAnswer(Mockito.RETURNS_MOCKS));
 
         this.event = SpongeEventFactory.createSpawnEntityEvent(cause, Lists.newArrayList(this.entity));

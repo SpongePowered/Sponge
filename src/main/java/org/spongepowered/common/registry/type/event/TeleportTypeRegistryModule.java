@@ -33,7 +33,7 @@ import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.event.entity.teleport.SpongeTeleportType;
+import org.spongepowered.common.data.type.SpongeTeleportType;
 
 import java.util.Collection;
 import java.util.HashMap;

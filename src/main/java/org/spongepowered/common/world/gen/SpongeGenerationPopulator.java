@@ -35,7 +35,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
@@ -50,7 +49,6 @@ public class SpongeGenerationPopulator implements GenerationPopulator, IGenerati
     private final IChunkGenerator chunkGenerator;
     private final World world;
     private Timing timing;
-    private final Cause populatorCause = Cause.source(this).build();
     
     private Chunk cachedChunk = null;
 
@@ -137,7 +135,7 @@ public class SpongeGenerationPopulator implements GenerationPopulator, IGenerati
                 for (int yInChunk = yInChunkStart; yInChunk <= yInChunkEnd; yInChunk++) {
                     for (int zInChunk = zInChunkStart; zInChunk <= zInChunkEnd; zInChunk++) {
                         buffer.setBlock(xOffset + xInChunk, yOffset + yInChunk, zOffset + zInChunk,
-                                (BlockState) miniChunk.get(xInChunk, yInChunk, zInChunk), this.populatorCause);
+                                (BlockState) miniChunk.get(xInChunk, yInChunk, zInChunk));
                     }
                 }
             }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.service.permission.base;
 
-import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.service.context.ServiceContext;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.service.permission.OpLevelCollection;
@@ -50,13 +50,13 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
     }
 
     @Override
-    public List<SubjectReference> getParents(Set<Context> contexts) {
+    public List<SubjectReference> getParents(Set<ServiceContext> contexts) {
         final SubjectReference parent = getParent();
         return contexts.isEmpty() && parent != null ? Collections.singletonList(parent) : Collections.emptyList();
     }
 
     @Override
-    public CompletableFuture<Boolean> addParent(Set<Context> contexts, SubjectReference parent) {
+    public CompletableFuture<Boolean> addParent(Set<ServiceContext> contexts, SubjectReference parent) {
         if (!(parent instanceof OpLevelCollection.OpLevelSubject)) {
             return CompletableFuture.completedFuture(false);
         }
@@ -69,7 +69,7 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> removeParent(Set<Context> contexts, SubjectReference parent) {
+    public CompletableFuture<Boolean> removeParent(Set<ServiceContext> contexts, SubjectReference parent) {
         if (parent == this.parent) {
             setParent(null);
             return CompletableFuture.completedFuture(true);
@@ -84,7 +84,7 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> clearParents(Set<Context> contexts) {
+    public CompletableFuture<Boolean> clearParents(Set<ServiceContext> contexts) {
         if (!contexts.isEmpty()) {
             return CompletableFuture.completedFuture(false);
         }

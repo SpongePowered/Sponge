@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
@@ -35,7 +34,7 @@ final class CloseWindowState extends BasicPacketState {
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
         context
-                .add(NamedCause.of(InternalNamedCauses.Packet.OPEN_CONTAINER, playerMP.openContainer))
+                .addExtra(InternalNamedCauses.Packet.OPEN_CONTAINER, playerMP.openContainer)
                 .addBlockCaptures()
                 .addEntityCaptures()
                 .addEntityDropCaptures();

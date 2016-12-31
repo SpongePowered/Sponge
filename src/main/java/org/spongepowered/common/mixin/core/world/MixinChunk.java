@@ -291,7 +291,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     public double getRegionalDifficultyFactor() {
         final boolean flag = this.world.getDifficulty() == EnumDifficulty.HARD;
         float moon = this.world.getCurrentMoonPhaseFactor();
-        float f2 = MathHelper.clamp((this.world.getWorldTime() + -72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
+        float f2 = MathHelper.clamp((this.world.getWorldTime() - 72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
         float f3 = 0.0F;
         f3 += MathHelper.clamp(this.inhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
         f3 += MathHelper.clamp(moon * 0.25F, 0.0F, f2);
@@ -346,13 +346,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
+    public boolean setBlock(int x, int y, int z, BlockState block) {
         checkBlockBounds(x, y, z);
         return BlockUtil.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, x, y, z, block, false);
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState block, BlockChangeFlag flag, Cause cause) {
+    public boolean setBlock(int x, int y, int z, BlockState block, BlockChangeFlag flag) {
         return BlockUtil.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, (this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15),
                 block, flag.updateNeighbors());
     }
@@ -369,12 +369,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
-        return this.sponge_world.restoreSnapshot(snapshot, force, flag, cause);
+    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
+        return this.sponge_world.restoreSnapshot(snapshot, force, flag);
     }
 
     @Override
-    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
+    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
         return this.sponge_world.restoreSnapshot((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), snapshot, force, flag, cause);
     }
 
@@ -452,8 +452,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public MutableBlockVolumeWorker<Chunk> getBlockWorker(Cause cause) {
-        return new SpongeMutableBlockVolumeWorker<>(this, cause);
+    public MutableBlockVolumeWorker<Chunk> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
@@ -739,8 +739,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public boolean spawnEntity(org.spongepowered.api.entity.Entity entity, Cause cause) {
-        return this.sponge_world.spawnEntity(entity, cause);
+    public boolean spawnEntity(org.spongepowered.api.entity.Entity entity) {
+        return this.sponge_world.spawnEntity(entity);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -1096,14 +1096,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
-        if (neighbor != null) {
-            if (secondary != Direction.NONE) {
-                return neighbor.getNeighbor(secondary, shouldLoad);
-            }
-            return Optional.of(neighbor);
+        if (neighbor != null && secondary != Direction.NONE) {
+            return neighbor.getNeighbor(secondary, shouldLoad);
         }
 
-        return Optional.empty();
+        return Optional.ofNullable(neighbor);
     }
 
     private static int directionToIndex(Direction direction) {

@@ -27,9 +27,10 @@ package org.spongepowered.common.world.extent.worker;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3i;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.extent.BlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
@@ -50,11 +51,9 @@ import java.util.function.BiFunction;
 public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolumeWorker<V> {
 
     protected final V volume;
-    protected final Cause cause;
 
-    public SpongeBlockVolumeWorker(V volume, Cause cause) {
+    public SpongeBlockVolumeWorker(V volume) {
         this.volume = volume;
-        this.cause = cause;
     }
 
     @Override
@@ -78,7 +77,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         // a single go, requiring only one event
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
-                .add(NamedCause.source(this))
+                .source(this)
                 .addCaptures()
                 .complete());
         }
@@ -87,7 +86,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
                 for (int x = xMin; x <= xMax; x++) {
                     final BlockState block = mapper.map(unmodifiableVolume, x, y, z);
 
-                    destination.setBlock(x + xOffset, y + yOffset, z + zOffset, block, this.cause);
+                    destination.setBlock(x + xOffset, y + yOffset, z + zOffset, block);
                 }
             }
         }
@@ -114,20 +113,17 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int yMax = firstUnmodifiableVolume.getBlockMax().getY();
         final int zMax = firstUnmodifiableVolume.getBlockMax().getZ();
         final UnmodifiableBlockVolume secondUnmodifiableVolume = second.getUnmodifiableBlockView();
-        // TODO integrate with the cause tracker to handle the block sets in
-        // a single go, requiring only one event
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
-                .add(NamedCause.source(this))
-                .addCaptures()
-                .complete());
+                    .source(this)
+                    .complete());
         }
         for (int z = zMin; z <= zMax; z++) {
             for (int y = yMin; y <= yMax; y++) {
                 for (int x = xMin; x <= xMax; x++) {
                     final BlockState block = merger.merge(firstUnmodifiableVolume, x, y, z,
                         secondUnmodifiableVolume, x + xOffsetSecond, y + yOffsetSecond, z + zOffsetSecond);
-                    destination.setBlock(x + xOffsetDestination, y + yOffsetDestination, z + zOffsetDestination, block, this.cause);
+                    destination.setBlock(x + xOffsetDestination, y + yOffsetDestination, z + zOffsetDestination, block);
                 }
             }
         }
@@ -146,7 +142,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int zMax = this.volume.getBlockMax().getZ();
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
-                .add(NamedCause.source(this))
+                .source(this)
                 .addCaptures()
                 .complete());
         }
@@ -160,6 +156,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().completePhase(PluginPhase.State.BLOCK_WORKER);
         }
+        Sponge.getCauseStackManager().popCauseFrame(frame);
     }
 
     @Override

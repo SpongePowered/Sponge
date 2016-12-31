@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -46,7 +45,7 @@ final class InteractionPacketState extends BasicPacketState {
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
         if (stack != null) {
-            context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
+            context.addExtra(InternalNamedCauses.Packet.ITEM_USED, stack);
         }
         context.addEntityDropCaptures()
                 .addEntityCaptures()

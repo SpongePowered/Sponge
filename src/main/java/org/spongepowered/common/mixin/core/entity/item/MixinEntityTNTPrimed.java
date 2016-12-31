@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
@@ -32,13 +31,14 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityTNTPrimed;
+import org.spongepowered.api.Sponge;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -70,7 +70,6 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     @Shadow private void explode() { }
 
     @Nullable private EntityLivingBase detonator;
-    private Cause detonationCause;
     private int explosionRadius = DEFAULT_EXPLOSION_RADIUS;
     private int fuseDuration = 80;
     private boolean detonationCancelled;
@@ -87,23 +86,17 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
 
     // FusedExplosive Impl
 
-    @Nullable
-    private Cause getCause(@Nullable Cause type) {
-        if (type != null) {
-            return type;
-        } else if (this.detonator != null) {
-            return Cause.of(NamedCause.of(NamedCause.IGNITER, this.detonator));
-        } else if (this.tntPlacedBy != null) {
-            return Cause.source(this.tntPlacedBy).build();
+    @Override
+    public void defuse() {
+        checkState(isPrimed(), "not primed");
+        if (shouldDefuse()) {
+            setDead();
+            // Place a TNT block at the Entity's position
+            Sponge.getCauseStackManager().pushCause(this);
+            getWorld().setBlock((int) this.posX, (int) this.posY, (int) this.posZ, BlockState.builder().blockType(BLOCK_TYPE).build(), BlockChangeFlag.ALL);
+            Sponge.getCauseStackManager().popCause();
+            postDefuse();
         }
-        return null;
-    }
-
-    private void defuse() {
-        setDead();
-        // Place a TNT block at the Entity's position
-        ((IMixinWorldServer) this.world).setBlockState(new BlockPos(this.posX, this.posY, this.posZ),
-                (IBlockState) BLOCK_TYPE.getDefaultState(), BlockChangeFlag.ALL);
     }
 
     @Override
@@ -137,20 +130,10 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     }
 
     @Override
-    public void prime(Cause cause) {
+    public void prime() {
         checkState(!isPrimed(), "already primed");
         checkState(this.isDead, "tnt about to be primed");
-        getWorld().spawnEntity(this, checkNotNull(cause, "cause"));
-    }
-
-    @Override
-    public void defuse(Cause cause) {
-        checkState(isPrimed(), "not primed");
-        checkNotNull(cause, "cause");
-        if (shouldDefuse(checkNotNull(cause, "cause"))) {
-            defuse();
-            postDefuse(cause);
-        }
+        getWorld().spawnEntity(this);
     }
 
     @Override
@@ -159,8 +142,7 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     }
 
     @Override
-    public void detonate(Cause cause) {
-        this.detonationCause = checkNotNull(cause, "cause");
+    public void detonate() {
         setDead();
         explode();
     }
@@ -168,7 +150,7 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
     protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
                                                       double y, double z, float strength, boolean smoking) {
-        return detonate(getCause(this.detonationCause), Explosion.builder()
+        return detonate(Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(this)
                 .radius(this.explosionRadius)
@@ -191,7 +173,7 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     @Inject(method = "onUpdate", at = @At("RETURN"))
     protected void onUpdate(CallbackInfo ci) {
         if (this.fuse == this.fuseDuration - 1) {
-            postPrime(getCause(null));
+            postPrime();
         }
     }
 

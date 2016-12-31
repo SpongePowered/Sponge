@@ -88,7 +88,7 @@ public class BasicInventoryPacketState extends BasicPacketState {
 
     @Nullable
     public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton) {
         return null;
     }
 

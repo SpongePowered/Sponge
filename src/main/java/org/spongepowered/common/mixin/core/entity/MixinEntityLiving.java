@@ -44,8 +44,6 @@ import org.spongepowered.api.entity.ai.GoalTypes;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
@@ -120,7 +118,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         Iterator<EntityAITasks.EntityAITaskEntry> taskItr = tasks.getTasksUnsafe().iterator();
         while (taskItr.hasNext()) {
             EntityAITasks.EntityAITaskEntry task = taskItr.next();
-            final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.of(NamedCause.source(Sponge.getGame())),
+            final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Sponge.getCauseStackManager().getCurrentCause(),
                     task.priority, task.priority, (Goal<? extends Agent>) tasks, this, (AITask<?>) task.action);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
@@ -133,8 +131,10 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Inject(method = "processInitialInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
     public void callLeashEvent(EntityPlayer playerIn, EnumHand hand, CallbackInfoReturnable<Boolean> ci) {
         if (!playerIn.world.isRemote) {
-            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Cause.of(NamedCause.source(playerIn)), this);
+            Sponge.getCauseStackManager().pushCause(playerIn);
+            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this);
             SpongeImpl.postEvent(event);
+            Sponge.getCauseStackManager().popCause();
             if(event.isCancelled()) {
                 ci.setReturnValue(false);
             }
@@ -145,9 +145,14 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
         net.minecraft.entity.Entity entity = getLeashedToEntity();
         if (!this.world.isRemote) {
-            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(entity == null ? Cause.of(NamedCause.of("Self", this))
-                : Cause.of(NamedCause.source(entity)), this);
+            if(entity == null) {
+                Sponge.getCauseStackManager().pushCause(this);
+            } else {
+                Sponge.getCauseStackManager().pushCause(entity);
+            }
+            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), this);
             SpongeImpl.postEvent(event);
+            Sponge.getCauseStackManager().popCause();
             if(event.isCancelled()) {
                 ci.cancel();
             }

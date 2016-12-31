@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.command.ICommandSender;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ProxySource;
-import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.service.context.ServiceContext;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectData;
@@ -78,7 +78,7 @@ public class SpongeProxySource implements ProxySource, IMixinCommandSourceName {
     }
 
     @Override
-    public Set<Context> getActiveContexts() {
+    public Set<ServiceContext> getActiveContexts() {
         return this.subjectDelegate.getActiveContexts();
     }
 
@@ -135,7 +135,7 @@ public class SpongeProxySource implements ProxySource, IMixinCommandSourceName {
     }
 
     @Override
-    public boolean hasPermission(Set<Context> contexts, String permission) {
+    public boolean hasPermission(Set<ServiceContext> contexts, String permission) {
         return this.subjectDelegate.hasPermission(contexts, permission);
     }
 
@@ -145,7 +145,7 @@ public class SpongeProxySource implements ProxySource, IMixinCommandSourceName {
     }
 
     @Override
-    public Tristate getPermissionValue(Set<Context> contexts, String permission) {
+    public Tristate getPermissionValue(Set<ServiceContext> contexts, String permission) {
         return this.subjectDelegate.getPermissionValue(contexts, permission);
     }
 
@@ -155,7 +155,7 @@ public class SpongeProxySource implements ProxySource, IMixinCommandSourceName {
     }
 
     @Override
-    public boolean isChildOf(Set<Context> contexts, SubjectReference parent) {
+    public boolean isChildOf(Set<ServiceContext> contexts, SubjectReference parent) {
         return this.subjectDelegate.isChildOf(contexts, parent);
     }
 
@@ -165,7 +165,7 @@ public class SpongeProxySource implements ProxySource, IMixinCommandSourceName {
     }
 
     @Override
-    public List<SubjectReference> getParents(Set<Context> contexts) {
+    public List<SubjectReference> getParents(Set<ServiceContext> contexts) {
         return this.subjectDelegate.getParents(contexts);
     }
 

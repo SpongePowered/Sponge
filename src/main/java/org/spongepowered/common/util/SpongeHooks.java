@@ -42,6 +42,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
@@ -169,18 +170,17 @@ public class SpongeHooks {
         }
     }
 
-    public static void logBlockAction(Cause.Builder builder, World world, @Nullable BlockChange type, Transaction<BlockSnapshot> transaction) {
+    public static void logBlockAction(World world, @Nullable BlockChange type, Transaction<BlockSnapshot> transaction) {
         if (world.isRemote) {
             return;
         }
 
         SpongeConfig<?> config = getActiveConfig((WorldServer) world);
-        Cause cause = builder.build();
-        Optional<User> user = cause.first(User.class);
+        Optional<User> user = Sponge.getCauseStackManager().getCurrentCause().first(User.class);
         LoggingCategory logging = config.getConfig().getLogging();
         if (type != null && type.allowsLogging(logging)) {
             logInfo("Block " + type.name() + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}][OriginalState: {4}][NewState: {5}]",
-                    getFriendlyCauseName(cause),
+                    getFriendlyCauseName(Sponge.getCauseStackManager().getCurrentCause()),
                     user.isPresent() ? user.get().getName() : "None",
                     world.getWorldInfo().getWorldName(),
                     ((IMixinWorldServer) world).getDimensionId(),

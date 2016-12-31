@@ -37,13 +37,15 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTableList;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.action.FishingEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -145,8 +147,9 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             } else {
                 transactions = new ArrayList<>();
             }
+            Sponge.getCauseStackManager().pushCause(this.angler);
 
-            if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.angler)), this, transactions))) {
+            if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStop(Sponge.getCauseStackManager().getCurrentCause(), this, transactions))) {
                 // Event is cancelled
                 return -1;
             }
@@ -188,6 +191,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                         this.angler.addStat(StatList.FISH_CAUGHT, 1);
                     }
                 }
+                Sponge.getCauseStackManager().popCause();
 
                 i = Math.max(i, 1); // Sponge: Don't lower damage if we've also caught an entity
             }

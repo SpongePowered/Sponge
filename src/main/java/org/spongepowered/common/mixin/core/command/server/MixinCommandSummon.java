@@ -37,16 +37,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
-import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -84,8 +80,11 @@ public abstract class MixinCommandSummon extends CommandBase {
         }
 
         Transform<org.spongepowered.api.world.World> transform = new Transform<>(((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
-        SpawnCause cause = getSpawnCause(sender);
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), type, transform);
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
+        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(), type, transform);
+        SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         return event.isCancelled() ? null : AnvilChunkLoader.readWorldEntityPos(nbt, world, x, y, z, b);
     }
 
@@ -93,30 +92,14 @@ public abstract class MixinCommandSummon extends CommandBase {
             locals = LocalCapture.CAPTURE_FAILHARD)
     private void onProcess(MinecraftServer server, ICommandSender sender, String args[], CallbackInfo ci, String s, BlockPos blockpos, Vec3d vec3d, double x, double y, double z, World world) {
         Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, new Vector3d(x, y, z));
-
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(getSpawnCause(sender))),
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PLACEMENT);
+        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Sponge.getCauseStackManager().getCurrentCause(),
                 EntityTypes.LIGHTNING, transform);
         SpongeImpl.postEvent(event);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         if (event.isCancelled()) {
             ci.cancel();
-        }
-    }
-
-    private static SpawnCause getSpawnCause(ICommandSender commandSender) {
-        if (commandSender instanceof Entity) {
-            return EntitySpawnCause.builder()
-                    .entity((org.spongepowered.api.entity.Entity) commandSender)
-                    .type(InternalSpawnTypes.PLACEMENT)
-                    .build();
-        } else if (commandSender instanceof TileEntity) {
-            return BlockSpawnCause.builder()
-                    .block(((TileEntity) commandSender).getLocation().createSnapshot())
-                    .type(InternalSpawnTypes.PLACEMENT)
-                    .build();
-        } else {
-            return SpawnCause.builder()
-                    .type(InternalSpawnTypes.PLACEMENT)
-                    .build();
         }
     }
 }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.interfaces.world;
 
-import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.service.context.ServiceContext;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 
@@ -34,7 +34,7 @@ public interface IMixinDimensionType {
 
     SpongeConfig<DimensionConfig> getDimensionConfig();
 
-    Context getContext();
+    ServiceContext getContext();
 
     String getEnumName();
 

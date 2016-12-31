@@ -45,15 +45,16 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
+import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
-import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -96,7 +97,7 @@ public class DamageEventHandler {
         if ((damageSource instanceof FallingBlockDamageSource) && !entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD).isEmpty()) {
             DamageModifier modifier = DamageModifier.builder()
                 .cause(
-                    Cause.of(NamedCause.of(DamageEntityEvent.HARD_HAT_ARMOR, ((ItemStack) entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD)).createSnapshot())))
+                    Cause.of(EventContext.empty(), ((ItemStack) entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD)).createSnapshot()))
                 .type(DamageModifierTypes.HARD_HAT)
                 .build();
             return Optional.of(new DamageFunction(modifier, HARD_HAT_FUNCTION));
@@ -159,10 +160,9 @@ public class DamageEventHandler {
                 ratio += prop.ratio;
 
                 DamageModifier modifier = DamageModifier.builder()
-                    .cause(Cause.of(NamedCause.of(DamageEntityEvent.GENERAL_ARMOR + ":" + type.getId(),
-                                                  ((org.spongepowered.api.item.inventory.ItemStack) inventory[prop.slot]).createSnapshot()),
-                                    NamedCause.of("ArmorProperty", prop), // We need this property to refer to the slot.
-                                    NamedCause.of("0xDEADBEEF", object))) // We need this object later on.
+                    .cause(Cause.of(EventContext.empty(), ((org.spongepowered.api.item.inventory.ItemStack) inventory[prop.slot]).createSnapshot(),
+                                    prop, // We need this property to refer to the slot.
+                                    object)) // We need this object later on.
                     .type(DamageModifierTypes.ARMOR)
                     .build();
                 modifiers.add(new DamageFunction(modifier, function));
@@ -220,7 +220,7 @@ public class DamageEventHandler {
         if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(MobEffects.RESISTANCE) && damageSource != DamageSource.OUT_OF_WORLD) {
             PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(MobEffects.RESISTANCE));
             return Optional.of(new DamageFunction(DamageModifier.builder()
-                                               .cause(Cause.of(NamedCause.of(DamageEntityEvent.RESISTANCE, effect)))
+                                               .cause(Cause.of(EventContext.empty(), effect))
                                                .type(DamageModifierTypes.DEFENSIVE_POTION_EFFECT)
                                                .build(), createResistanceFunction(effect.getAmplifier())));
         }
@@ -291,9 +291,7 @@ public class DamageEventHandler {
                         }
 
                         DamageModifier enchantmentModifier = DamageModifier.builder()
-                            .cause(Cause.of(NamedCause.of("ArmorEnchantment", enchantment),
-                                            NamedCause.of("ItemStack", snapshot),
-                                            NamedCause.source(entityLivingBase)))
+                            .cause(Cause.of(EventContext.empty(), enchantment, snapshot, entityLivingBase))
                             .type(DamageModifierTypes.ARMOR_ENCHANTMENT)
                             .build();
                         modifiers.add(new DamageFunction(enchantmentModifier, enchantmentFunction));
@@ -314,8 +312,7 @@ public class DamageEventHandler {
             DoubleUnaryOperator function = damage ->
                 -(Math.max(damage - Math.max(damage - absorptionAmount, 0.0F), 0.0F));
             DamageModifier modifier = DamageModifier.builder()
-                .cause(Cause.of(NamedCause.of(DamageEntityEvent.ABSORPTION, entityLivingBase),
-                                NamedCause.of(DamageEntityEvent.CREATOR, entityLivingBase)))
+                .cause(Cause.of(EventContext.empty(), entityLivingBase))
                 .type(DamageModifierTypes.ABSORPTION)
                 .build();
             return Optional.of(new DamageFunction(modifier, function));
@@ -350,41 +347,29 @@ public class DamageEventHandler {
         return ((org.spongepowered.api.entity.Entity) entity).getLocation();
     }
 
-    public static Cause generateCauseFor(DamageSource damageSource) {
+    public static void generateCauseFor(DamageSource damageSource) {
         if (damageSource instanceof EntityDamageSourceIndirect) {
-            net.minecraft.entity.Entity source = damageSource.getTrueSource();
-            List<NamedCause> causeObjects = new ArrayList<>();
-            causeObjects.add(NamedCause.source(damageSource));
+            net.minecraft.entity.Entity source = damageSource.getEntity();
             if (!(source instanceof EntityPlayer) && source != null) {
                 final IMixinEntity mixinEntity = EntityUtil.toMixin(source);
-                mixinEntity.getNotifierUser().ifPresent(notifier -> causeObjects.add(NamedCause.notifier(notifier)));
-                mixinEntity.getCreatorUser().ifPresent(owner -> causeObjects.add(NamedCause.owner(owner)));
-
+                mixinEntity.getNotifierUser().ifPresent(notifier -> Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier));
+                mixinEntity.getCreatorUser().ifPresent(owner -> Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner));
             }
-            return Cause.builder().addAll(causeObjects).build();
         } else if (damageSource instanceof EntityDamageSource) {
-            net.minecraft.entity.Entity source = damageSource.getTrueSource();
-            List<NamedCause> causeObjects = new ArrayList<>();
-            causeObjects.add(NamedCause.source(damageSource));
+            net.minecraft.entity.Entity source = damageSource.getEntity();
             if (!(source instanceof EntityPlayer) && source != null) {
-
                 final IMixinEntity mixinEntity = EntityUtil.toMixin(source);
-                mixinEntity.getNotifier().ifPresent(notifier -> causeObjects.add(NamedCause.notifier(notifier)));
-                mixinEntity.getCreator().ifPresent(creator -> causeObjects.add(NamedCause.of(DamageEntityEvent.CREATOR, creator)));
+                mixinEntity.getNotifier().ifPresent(notifier -> Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier));
+                mixinEntity.getCreator().ifPresent(creator -> Sponge.getCauseStackManager().addContext(EventContextKeys.CREATOR, creator));
             }
-            return Cause.builder().addAll(causeObjects).build();
         } else if (damageSource instanceof BlockDamageSource) {
-            final Cause.Builder builder = Cause.source(damageSource);
             Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
             BlockPos blockPos = ((IMixinLocation) (Object) location).getBlockPos();
-            final IMixinChunk mixinChunk = (IMixinChunk) ((net.minecraft.world.World) location.getExtent())
-                    .getChunkFromBlockCoords(blockPos);
-            mixinChunk.getBlockNotifier(blockPos).ifPresent(notifier -> builder.named(NamedCause.notifier(notifier)));
-            mixinChunk.getBlockOwner(blockPos).ifPresent(owner -> builder.named(NamedCause.of(DamageEntityEvent.CREATOR, owner)));
-            return builder.build();
-        } else {
-            return Cause.of(NamedCause.source(damageSource));
+            final IMixinChunk mixinChunk = (IMixinChunk) ((net.minecraft.world.World) location.getExtent()).getChunkFromBlockCoords(blockPos);
+            mixinChunk.getBlockNotifier(blockPos).ifPresent(notifier -> Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier));
+            mixinChunk.getBlockOwner(blockPos).ifPresent(owner -> Sponge.getCauseStackManager().addContext(EventContextKeys.CREATOR, owner));
         }
+        Sponge.getCauseStackManager().pushCause(damageSource);
     }
 
     public static List<DamageFunction> createAttackEnchamntmentFunction(
@@ -412,10 +397,7 @@ public class DamageEventHandler {
                     if (enchantment != null) {
                         final DamageModifier enchantmentModifier = DamageModifier.builder()
                                 .type(DamageModifierTypes.WEAPON_ENCHANTMENT)
-                                .cause(Cause.builder()
-                                        .named("Weapon", supplier.get())
-                                        .named("Enchantment", enchantment)
-                                        .build())
+                                .cause(Cause.of(EventContext.empty(), supplier.get(), enchantment))
                                 .build();
                         DoubleUnaryOperator enchantmentFunction = (damage) ->
                                 (double) enchantment.calcDamageByCreature(enchantmentLevel, creatureAttribute) * attackStrength;
@@ -430,7 +412,7 @@ public class DamageEventHandler {
 
     public static DamageFunction provideCriticalAttackTuple(EntityPlayer player) {
         final DamageModifier modifier = DamageModifier.builder()
-                .cause(Cause.source(player).build())
+                .cause(Cause.of(EventContext.empty(), player))
                 .type(DamageModifierTypes.CRITICAL_HIT)
                 .build();
         DoubleUnaryOperator function = (damage) -> damage * 1.5F;
@@ -452,7 +434,7 @@ public class DamageEventHandler {
     public static DamageFunction provideCooldownAttackStrengthFunction(EntityPlayer player,
             float attackStrength) {
         final DamageModifier modifier = DamageModifier.builder()
-                .cause(Cause.source(player).build())
+                .cause(Cause.of(EventContext.empty(), player))
                 .type(DamageModifierTypes.ATTACK_COOLDOWN)
                 .build();
         // The formula is as follows:
@@ -464,9 +446,7 @@ public class DamageEventHandler {
     public static Optional<DamageFunction> createShieldFunction(EntityLivingBase entity, DamageSource source, float amount) {
         if (entity.isActiveItemStackBlocking() && amount > 0.0 && entity.canBlockDamageSource(source)) {
             final DamageModifier modifier = DamageModifier.builder()
-                    .cause(Cause.source(entity)
-                            .named(NamedCause.of(DamageEntityEvent.SHIELD, ((ItemStack) entity.getActiveItemStack()).createSnapshot()))
-                            .build())
+                    .cause(Cause.of(EventContext.empty(), entity, ((ItemStack) entity.getActiveItemStack()).createSnapshot()))
                     .type(DamageModifierTypes.SHIELD)
                     .build();
             return Optional.of(new DamageFunction(modifier, (damage) -> -damage));

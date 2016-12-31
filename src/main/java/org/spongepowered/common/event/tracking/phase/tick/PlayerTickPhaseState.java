@@ -26,12 +26,11 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
@@ -57,25 +56,21 @@ class PlayerTickPhaseState extends TickPhaseState {
     public void processPostTick(PhaseContext phaseContext) {
         final Player player = phaseContext.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", phaseContext));
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().pushCause(player);
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PASSIVE);
         phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
-            final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
-                    .entity(player)
-                    .type(InternalSpawnTypes.PASSIVE)
-                    .build());
             final SpawnEntityEvent
                     spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities);
+                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
             SpongeImpl.postEvent(spawnEntityEvent);
             for (Entity entity : spawnEntityEvent.getEntities()) {
                 EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
                 EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
             }
         });
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
         phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
-            final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
-                    .entity(player)
-                    .type(InternalSpawnTypes.DROPPED_ITEM)
-                    .build());
             final ArrayList<Entity> capturedEntities = new ArrayList<>();
             for (EntityItem entity : entities) {
                 capturedEntities.add(EntityUtil.fromNative(entity));
@@ -83,7 +78,7 @@ class PlayerTickPhaseState extends TickPhaseState {
 
             final SpawnEntityEvent
                     spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(builder.build(), capturedEntities);
+                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), capturedEntities);
             SpongeImpl.postEvent(spawnEntityEvent);
             for (Entity entity : spawnEntityEvent.getEntities()) {
                 EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
@@ -93,6 +88,7 @@ class PlayerTickPhaseState extends TickPhaseState {
         phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
             TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
         });
+        Sponge.getCauseStackManager().popCauseFrame(frame);
     }
 
     @Override
@@ -106,23 +102,23 @@ class PlayerTickPhaseState extends TickPhaseState {
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
         explosionContext.owner(player);
         explosionContext.notifier(player);
-        explosionContext.add(NamedCause.source(player));
+        explosionContext.source(player);
     }
 
     @Override
     public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final Player player = context.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", context));
-        final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
-                .entity(player)
-                .type(InternalSpawnTypes.PASSIVE)
-                .build());
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
+        Sponge.getCauseStackManager().pushCause(player);
+        Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PASSIVE);
         final List<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         final SpawnEntityEvent
                 spawnEntityEvent =
-                SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities);
+                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
         SpongeImpl.postEvent(spawnEntityEvent);
+        Sponge.getCauseStackManager().popCauseFrame(frame);
         if (!spawnEntityEvent.isCancelled()) {
             for (Entity anEntity : spawnEntityEvent.getEntities()) {
                 EntityUtil.toMixin(anEntity).setCreator(player.getUniqueId());

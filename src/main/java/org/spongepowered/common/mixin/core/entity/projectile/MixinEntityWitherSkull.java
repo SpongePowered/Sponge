@@ -32,7 +32,6 @@ import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -101,14 +100,6 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     }
 
     // Explosive Impl
-
-    public Cause getDetonationCause() {
-        if (this.detonationCause != null) {
-            return this.detonationCause;
-        }
-        return Cause.of(NamedCause.of(NamedCause.THROWER, getShooter()));
-    }
-
     @Override
     public Optional<Integer> getExplosionRadius() {
         return Optional.of(this.explosionRadius);
@@ -120,8 +111,7 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     }
 
     @Override
-    public void detonate(Cause cause) {
-        this.detonationCause = checkNotNull(cause, "cause");
+    public void detonate() {
         onExplode(this.world, (Entity) (Object) this, this.posX, this.posY, this.posZ, 0, false, true);
         setDead();
     }
@@ -131,7 +121,7 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
                                                       double y, double z, float strength, boolean flaming,
                                                       boolean smoking) {
         boolean griefer = ((IMixinGriefer) this).canGrief();
-        return detonate(getDetonationCause(), Explosion.builder()
+        return detonate(Explosion.builder()
                 .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
                 .sourceExplosive(this)
                 .radius(this.explosionRadius)

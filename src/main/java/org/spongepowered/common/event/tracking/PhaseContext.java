@@ -27,10 +27,13 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.Maps;
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.Sponge;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
@@ -38,9 +41,11 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -48,25 +53,22 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 /**
- * Similar to {@link Cause} except it can be built continuously
- * and retains no real side effects. Strictly speaking this object
- * exists to avoid confusion between what is suggested to be a
- * {@link Cause} for an {@link Event} versus the context of which
- * a {@link IPhaseState} is being completed with.
+ * Similar to {@link Cause} except it can be built continuously and retains no
+ * real side effects. Strictly speaking this object exists to avoid confusion
+ * between what is suggested to be a {@link Cause} for an {@link Event} versus
+ * the context of which a {@link IPhaseState} is being completed with.
  */
 public class PhaseContext {
 
     private boolean isCompleted = false;
-    private final ArrayList<NamedCause> contextObjects = new ArrayList<>(10);
-    @Nullable private Cause cause = null;
 
     @Nullable private CapturedBlocksSupplier blocksSupplier;
     @Nullable private BlockItemDropsSupplier blockItemDropsSupplier;
@@ -78,8 +80,11 @@ public class PhaseContext {
     @Nullable private EntityItemEntityDropsSupplier entityItemEntityDropsSupplier;
     @Nullable private CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> blockEntitySpawnSupplier;
     @Nullable private CaptureBlockPos captureBlockPos;
+    @Nullable private CapturePlayer capturePlayer;
     @Nullable protected User owner;
     @Nullable protected User notifier;
+    protected final Map<String, Object> extraContext = Maps.newHashMap();
+    protected boolean processImmediately;
     @Nullable protected PluginContainer activeContainer;
 
     private Object source;
@@ -88,15 +93,41 @@ public class PhaseContext {
         return new PhaseContext();
     }
 
-    public PhaseContext add(@Nullable NamedCause namedCause) {
-        if (namedCause == null) {
-            return this;
+    public PhaseContext addExtra(String key, Object val) {
+        this.extraContext.put(key, val);
+        return this;
+    }
+
+    public Object getExtra(String key) {
+        return this.extraContext.get(key);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getExtra(String key, Class<T> type) {
+        Object o = this.extraContext.get(key);
+        if (type.isInstance(o)) {
+            return (T) o;
         }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T getRequiredExtra(String key, Class<T> type) {
+        Object o = this.extraContext.get(key);
+        if (type.isInstance(o)) {
+            return (T) o;
+        }
+        throw TrackingUtil.throwWithContext("Extra context value " + key + " with type " + type.getName()
+                + " was requested but was not present in the phase context.", this).get();
+    }
+
+    public Map<String, Object> getExtraContext() {
+        return this.extraContext;
+    }
+
+    public PhaseContext source(Object owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(namedCause);
-        if (namedCause.getName().equals(NamedCause.SOURCE)) {
-            this.source = namedCause.getCauseObject();
-        }
+        this.source = owner;
         return this;
     }
 
@@ -106,7 +137,6 @@ public class PhaseContext {
             throw new IllegalStateException("Owner for this phase context is already set!");
         }
         this.owner = checkNotNull(owner, "Owner cannot be null!");
-        this.contextObjects.add(NamedCause.owner(owner));
         return this;
     }
 
@@ -116,7 +146,6 @@ public class PhaseContext {
             throw new IllegalStateException("Notifier for this phase context is already set!");
         }
         this.notifier = checkNotNull(notifier, "Notifier cannot be null!");
-        this.contextObjects.add(NamedCause.notifier(notifier));
         return this;
     }
 
@@ -133,24 +162,15 @@ public class PhaseContext {
         this.checkBlockSuppliers();
 
         CapturedBlocksSupplier blocksSupplier = new CapturedBlocksSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, blocksSupplier));
         this.blocksSupplier = blocksSupplier;
         BlockItemEntityDropsSupplier blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, blockItemEntityDropsSupplier));
         this.blockItemEntityDropsSupplier = blockItemEntityDropsSupplier;
         BlockItemDropsSupplier blockItemDropsSupplier = new BlockItemDropsSupplier();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, blockItemDropsSupplier));
         this.blockItemDropsSupplier = blockItemDropsSupplier;
         CapturedBlockEntitySpawnSupplier capturedBlockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ENTITY_SPAWNS, capturedBlockEntitySpawnSupplier));
         this.blockEntitySpawnSupplier = capturedBlockEntitySpawnSupplier;
 
         CaptureBlockPos blockPos = new CaptureBlockPos();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause
         this.captureBlockPos = blockPos;
         return this;
     }
@@ -163,31 +183,19 @@ public class PhaseContext {
         checkState(this.capturedItemStackSupplier == null, "CapturedItemStackSupplier is already set!");
 
         CapturedBlocksSupplier blocksSupplier = new CapturedBlocksSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, blocksSupplier));
         this.blocksSupplier = blocksSupplier;
         BlockItemEntityDropsSupplier blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, blockItemEntityDropsSupplier));
         this.blockItemEntityDropsSupplier = blockItemEntityDropsSupplier;
         BlockItemDropsSupplier blockItemDropsSupplier = new BlockItemDropsSupplier();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, blockItemDropsSupplier));
         this.blockItemDropsSupplier = blockItemDropsSupplier;
         CapturedItemsSupplier capturedItemsSupplier = new CapturedItemsSupplier();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, capturedItemsSupplier));
         this.capturedItemsSupplier = capturedItemsSupplier;
         CapturedEntitiesSupplier capturedEntitiesSupplier = new CapturedEntitiesSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, capturedEntitiesSupplier));
         this.capturedEntitiesSupplier = capturedEntitiesSupplier;
         CapturedItemStackSupplier capturedItemStackSupplier = new CapturedItemStackSupplier();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, capturedItemStackSupplier));
         this.capturedItemStackSupplier = capturedItemStackSupplier;
 
         CapturedBlockEntitySpawnSupplier capturedBlockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ENTITY_SPAWNS, capturedBlockEntitySpawnSupplier));
         this.blockEntitySpawnSupplier = capturedBlockEntitySpawnSupplier;
         return this;
     }
@@ -199,15 +207,10 @@ public class PhaseContext {
         checkState(this.capturedItemStackSupplier == null, "CapturedItemStackSupplier is already set!");
 
         CapturedItemsSupplier capturedItemsSupplier = new CapturedItemsSupplier();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, capturedItemsSupplier));
         this.capturedItemsSupplier = capturedItemsSupplier;
         CapturedEntitiesSupplier capturedEntitiesSupplier = new CapturedEntitiesSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, capturedEntitiesSupplier));
         this.capturedEntitiesSupplier = capturedEntitiesSupplier;
         CapturedItemStackSupplier capturedItemStackSupplier = new CapturedItemStackSupplier();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, capturedItemStackSupplier));
         this.capturedItemStackSupplier = capturedItemStackSupplier;
         return this;
     }
@@ -218,59 +221,10 @@ public class PhaseContext {
         checkState(this.entityItemEntityDropsSupplier == null, "EntityItemEntityDropsSupplier is already set!");
 
         EntityItemDropsSupplier entityItemDropsSupplier = new EntityItemDropsSupplier();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, entityItemDropsSupplier));
         this.entityItemDropsSupplier = entityItemDropsSupplier;
         EntityItemEntityDropsSupplier entityItemEntityDropsSupplier = new EntityItemEntityDropsSupplier();
-        // unused, to be removed and re-located when phase context is cleaned up
-        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_ITEM_DROPS, entityItemEntityDropsSupplier));
         this.entityItemEntityDropsSupplier = entityItemEntityDropsSupplier;
         return this;
-    }
-
-    public PhaseContext player() {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_PLAYER, new CapturePlayer()));
-        return this;
-    }
-
-    public PhaseContext player(@Nullable Player player) {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_PLAYER, new CapturePlayer(player)));
-        return this;
-    }
-
-    public PhaseContext explosion() {
-        checkState(!this.isCompleted, "CAnnot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_EXPLOSION, new CaptureExplosion()));
-        return this;
-    }
-
-    public PhaseContext explosion(@Nullable Explosion explosion) {
-        checkState(!this.isCompleted, "CAnnot add a new object to the context if it's already marked as completed!");
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_EXPLOSION, new CaptureExplosion(explosion)));
-        return this;
-    }
-
-    public CaptureExplosion getCaptureExplosion() {
-        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_EXPLOSION, CaptureExplosion.class)
-                .orElseThrow(
-                        TrackingUtil.throwWithContext("Expected to be capturing an Explosion, but we're not capturing them!", this));
-    }
-
-    public Optional<Explosion> getExplosion() {
-        return getCaptureExplosion().getExplosion();
-    }
-
-    // This section is added to be able to pinpoint active containers when and wherever they're being used
-    // for various systems. Including when custom Data is being registered.
-    public PhaseContext activeContainer(@Nullable PluginContainer container) {
-        this.activeContainer = container;
-        return this;
-    }
-
-    public Optional<PluginContainer> getActiveContainer() {
-        return Optional.ofNullable(this.activeContainer);
     }
 
     public PhaseContext complete() {
@@ -282,45 +236,12 @@ public class PhaseContext {
         return this.isCompleted;
     }
 
-    @Nullable private Class<?> cachedClass;
-    @Nullable private Object cachedObject;
-    @Nullable private String cachedName;
-
-    @SuppressWarnings("unchecked")
-    public <T> Optional<T> first(Class<T> tClass) {
-        if (this.cachedClass != null && this.cachedClass == tClass) {
-            if (this.cachedObject != null) {
-                return Optional.of((T) this.cachedObject);
-            }
-        }
-        for (NamedCause cause : this.contextObjects) {
-            if (tClass.isInstance(cause.getCauseObject())) {
-                Object causeObject = cause.getCauseObject();
-                this.cachedClass = tClass;
-                this.cachedObject = causeObject;
-                this.cachedName = cause.getName();
-                return Optional.of((T) causeObject);
-            }
-        }
-        return Optional.empty();
+    public boolean shouldProcessImmediately() {
+        return this.processImmediately;
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> Optional<T> firstNamed(String name, Class<T> tClass) {
-        if (name.equals(this.cachedName) && tClass == this.cachedClass) {
-            if (this.cachedObject != null) {
-                return Optional.of((T) this.cachedObject);
-            }
-        }
-        for (NamedCause cause : this.contextObjects) {
-            if (cause.getName().equalsIgnoreCase(name) && tClass.isInstance(cause.getCauseObject())) {
-                this.cachedObject = cause.getCauseObject();
-                this.cachedClass = tClass;
-                this.cachedName = name;
-                return Optional.of((T) cause.getCauseObject());
-            }
-        }
-        return Optional.empty();
+    public void setProcessImmediately(boolean state) {
+        this.processImmediately = state;
     }
 
     @SuppressWarnings("unchecked")
@@ -342,10 +263,19 @@ public class PhaseContext {
         return Optional.ofNullable(this.notifier);
     }
 
+    // This section is added to be able to pinpoint active containers when and wherever they're being used
+    // for various systems. Including when custom Data is being registered.
+    public PhaseContext activeContainer(@Nullable PluginContainer container) {
+        this.activeContainer = container;
+        return this;
+    }
+
+    public Optional<PluginContainer> getActiveContainer() {
+        return Optional.ofNullable(this.activeContainer);
+    }
+
     public List<Entity> getCapturedEntities() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, CapturedEntitiesSupplier.class)
-                .map(CapturedEntitiesSupplier::get)
-                .orElseThrow(TrackingUtil.throwWithContext("Intended to capture entity spawns!", this));
+        return this.capturedEntitiesSupplier.get();
     }
 
     public CapturedSupplier<Entity> getCapturedEntitySupplier() throws IllegalStateException {
@@ -370,9 +300,7 @@ public class PhaseContext {
     }
 
     public List<BlockSnapshot> getCapturedBlocks() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, CapturedBlocksSupplier.class)
-                .map(CapturedBlocksSupplier::get)
-                .orElseThrow(TrackingUtil.throwWithContext("Intended to capture block changes, but there is no list available!", this));
+        return this.blocksSupplier.get();
     }
 
     public CapturedSupplier<BlockSnapshot> getCapturedBlockSupplier() throws IllegalStateException {
@@ -444,20 +372,24 @@ public class PhaseContext {
     }
 
     public CapturePlayer getCapturedPlayerSupplier() throws IllegalStateException {
-        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_PLAYER, CapturePlayer.class)
-                .orElseThrow(
-                        TrackingUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this));
+        if (this.capturePlayer == null) {
+            throw TrackingUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this)
+                    .get();
+        }
+        return this.capturePlayer;
     }
 
     public Optional<Player> getCapturedPlayer() throws IllegalStateException {
-        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_PLAYER, CapturePlayer.class)
-                .orElseThrow(
-                        TrackingUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this))
-                .getPlayer();
+        return getCapturedPlayerSupplier().getPlayer();
     }
 
-    public void forEach(Consumer<NamedCause> consumer) {
-        this.contextObjects.forEach(consumer);
+    public void addNotifierAndOwnerToCauseStack() {
+        if (this.owner != null) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, this.owner);
+        }
+        if (this.notifier != null) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, this.notifier);
+        }
     }
 
     PhaseContext() {
@@ -465,7 +397,7 @@ public class PhaseContext {
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.isCompleted, this.contextObjects, this.cause);
+        return Objects.hash(this.isCompleted);
     }
 
     @Override
@@ -477,17 +409,13 @@ public class PhaseContext {
             return false;
         }
         final PhaseContext other = (PhaseContext) obj;
-        return Objects.equals(this.isCompleted, other.isCompleted)
-               && Objects.equals(this.contextObjects, other.contextObjects)
-               && Objects.equals(this.cause, other.cause);
+        return Objects.equals(this.isCompleted, other.isCompleted);
     }
 
     @Override
     public String toString() {
         return com.google.common.base.MoreObjects.toStringHelper(this)
                 .add("isCompleted", this.isCompleted)
-                .add("contextObjects", this.contextObjects)
-                .add("cause", this.cause)
                 .toString();
     }
 
@@ -535,11 +463,13 @@ public class PhaseContext {
     }
 
     static final class BlockItemEntityDropsSupplier extends CapturedMultiMapSupplier<BlockPos, EntityItem> {
+
         BlockItemEntityDropsSupplier() {
         }
     }
 
     static final class CapturedBlockEntitySpawnSupplier extends CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> {
+
         CapturedBlockEntitySpawnSupplier() {
         }
     }
@@ -634,45 +564,8 @@ public class PhaseContext {
         }
     }
 
-    public static final class CaptureFlag {
-
-        @Nullable private BlockChangeFlag flag;
-
-        public CaptureFlag() {
-
-        }
-
-        public CaptureFlag(@Nullable BlockChangeFlag flag) {
-            this.flag = flag;
-        }
-
-        public Optional<BlockChangeFlag> getFlag() {
-            return Optional.ofNullable(this.flag);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            CaptureFlag that = (CaptureFlag) o;
-            return this.flag == that.flag;
-        }
-
-        @Override
-        public int hashCode() {
-            return com.google.common.base.Objects.hashCode(this.flag);
-        }
-
-        public void addFlag(BlockChangeFlag flag) {
-            this.flag = flag;
-        }
-    }
-
     public static final class CaptureBlockPos {
+
         @Nullable private BlockPos pos;
         @Nullable private WeakReference<IMixinWorldServer> mixinWorldReference;
 
