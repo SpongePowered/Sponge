@@ -96,7 +96,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
 
     @Override
     public void registerDefaults() {
-        ItemTypeRegistryModule.NONE_ITEM = net.minecraft.item.ItemStack.EMPTY.getItem();
+        ItemTypeRegistryModule.NONE_ITEM = net.minecraft.item.ItemStack.EMPTY.getItem();;
         ItemTypeRegistryModule.NONE = (ItemStack) net.minecraft.item.ItemStack.EMPTY;
         ItemTypeRegistryModule.NONE_SNAPSHOT = NONE.createSnapshot();
 

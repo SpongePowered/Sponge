@@ -52,6 +52,9 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -84,6 +87,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.item.ItemStack.class)
+@Implements(@Interface(iface = ItemStack.class, prefix = "itemstack$"))
 public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMixinCustomDataHolder {
 
     @Shadow public abstract int getCount();
@@ -94,6 +98,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Shadow public abstract int getItemDamage();
     @Shadow public abstract int getMaxStackSize();
     @Shadow public abstract boolean hasTagCompound();
+    @Shadow public abstract boolean shadow$isEmpty();
     @Shadow public abstract NBTTagCompound getTagCompound();
     @Shadow public abstract NBTTagCompound getOrCreateSubCompound(String key);
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
@@ -154,7 +159,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Override
     public ItemType getItem() {
         final Item item = shadow$getItem();
-        return item == null ? (ItemType) ItemTypeRegistryModule.NONE_ITEM : (ItemType) item;
+        return item == null || shadow$isEmpty() ? (ItemType) ItemTypeRegistryModule.NONE_ITEM : (ItemType) item;
     }
 
     @Override
@@ -236,6 +241,11 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
                 (net.minecraft.item.ItemStack) (Object) this,
                 (net.minecraft.item.ItemStack) that
         );
+    }
+
+    @Intrinsic
+    public boolean itemstack$isEmpty() {
+        return this.shadow$isEmpty();
     }
 
     @Override
