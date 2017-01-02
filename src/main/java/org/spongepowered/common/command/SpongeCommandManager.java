@@ -144,7 +144,10 @@ public class SpongeCommandManager implements CommandManager {
                 final Collection<CommandMapping> ownedCommands = this.owners.get(container);
                 for (CommandMapping mapping : this.dispatcher.getAll(alias)) {
                     if (ownedCommands.contains(mapping)) {
-                        throw new IllegalArgumentException("A plugin may not register multiple commands for the same alias ('" + alias + "')!");
+                        boolean isWrapper = callable instanceof MinecraftCommandWrapper;
+                        if (!(isWrapper && ((MinecraftCommandWrapper) callable).suppressDuplicateAlias(alias))) {
+                            throw new IllegalArgumentException("A plugin may not register multiple commands for the same alias ('" + alias + "')!");
+                        }
                     }
                 }
 
