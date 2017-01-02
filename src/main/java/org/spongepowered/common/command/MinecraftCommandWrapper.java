@@ -240,4 +240,8 @@ public class MinecraftCommandWrapper implements CommandCallable {
             commandErrors.get().push(error);
         }
     }
+
+    public boolean suppressDuplicateAlias(String alias) {
+        return false;
+    }
 }
