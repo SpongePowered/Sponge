@@ -52,6 +52,8 @@ final class DispensePhaseState extends BlockPhaseState {
     void unwind(CauseTracker causeTracker, PhaseContext phaseContext) {
         final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dispensing items!", phaseContext));
+        phaseContext.getCapturedBlockSupplier()
+                .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
         phaseContext.getCapturedItemsSupplier()
                 .ifPresentAndNotEmpty(items -> {
                     final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
