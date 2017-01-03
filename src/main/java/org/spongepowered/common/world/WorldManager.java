@@ -594,12 +594,12 @@ public final class WorldManager {
                 return Optional.empty();
             }
         }
-        registerWorldProperties(properties);
 
         if (((IMixinWorldInfo) properties).getDimensionId() == null || ((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
             ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
         }
         setUuidOnProperties(getCurrentSavesDirectory().get(), properties);
+        registerWorldProperties(properties);
 
         final WorldInfo worldInfo = (WorldInfo) properties;
         ((IMixinWorldInfo) worldInfo).createWorldConfig();
