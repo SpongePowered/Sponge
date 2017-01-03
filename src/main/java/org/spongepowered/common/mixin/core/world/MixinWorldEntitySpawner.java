@@ -82,8 +82,6 @@ public abstract class MixinWorldEntitySpawner {
         + "Lnet/minecraft/util/WeightedRandom$Item;";
     @Nullable
     private static EntityType spawnerEntityType;
-    @Nullable
-    private static Class<? extends Entity> spawnerEntityClass;
 
     @ModifyConstant(method = "findChunksForSpawning", constant = @Constant(intValue = 8))
     public int adjustCheckRadiusForServerView(int originalValue, WorldServer worldServerIn, boolean spawnHostileMobs, boolean spawnPeacefulMobs,
@@ -126,7 +124,6 @@ public abstract class MixinWorldEntitySpawner {
             CauseTracker causeTracker = spongeWorld.getCauseTracker();
             causeTracker.completePhase();
         }
-        spawnerEntityClass = null;
         spawnerEntityType = null;
         spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
 
@@ -151,7 +148,6 @@ public abstract class MixinWorldEntitySpawner {
             final CauseTracker causeTracker = spongeWorld.getCauseTracker();
             causeTracker.completePhase();
         }
-        spawnerEntityClass = null;
         spawnerEntityType = null;
     }
 
@@ -210,14 +206,8 @@ public abstract class MixinWorldEntitySpawner {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static void setEntityType(Class entityclass) {
-        spawnerEntityClass = entityclass;
-        Optional<EntityType> entityType = EntityTypeRegistryModule.getInstance().getEntity(spawnerEntityClass);
-        if (!entityType.isPresent()) {
-            SpongeImpl.getLogger().warn("There's an unknown Entity class that isn't registered with Sponge!" + spawnerEntityClass);
-        } else {
-            spawnerEntityType = entityType.get();
-        }
+    private static void setEntityType(Class<? extends net.minecraft.entity.Entity> entityclass) {
+        spawnerEntityType = EntityTypeRegistryModule.getInstance().getForClass(entityclass);
     }
 
     private static boolean check(BlockPos pos, World world) {
