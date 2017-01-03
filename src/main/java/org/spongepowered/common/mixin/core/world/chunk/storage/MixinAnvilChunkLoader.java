@@ -180,6 +180,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
         Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, position, rotation);
         SpawnCause cause = SpawnCause.builder().type(SpawnTypes.CHUNK_LOAD).build();
         ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), type, transform);
+        SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             return null;
         }

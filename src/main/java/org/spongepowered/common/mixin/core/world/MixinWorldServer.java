@@ -1041,12 +1041,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         List<NamedCause> causes = new ArrayList<>();
         causes.add(NamedCause.source(cause));
         causes.add(NamedCause.of("World", this));
-        SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, this);
+        SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), Lists.newArrayList(entityList), this);
         SpongeImpl.postEvent(chunkLoad);
         if (!chunkLoad.isCancelled() && chunkLoad.getEntities().size() > 0) {
             for (Entity successful : chunkLoad.getEntities()) {
                 this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
                 this.onEntityAdded((net.minecraft.entity.Entity) successful);
+            }
+        }
+        // Remove entities from chunk/world that were filtered in event
+        // This prevents invisible entities from loading into the world and blocking the position.
+        for (Entity entity : entityList) {
+            if (!chunkLoad.getEntities().contains(entity)) {
+                ((net.minecraft.world.World)(Object) this).removeEntityDangerously((net.minecraft.entity.Entity) entity);
             }
         }
         callbackInfo.cancel();
