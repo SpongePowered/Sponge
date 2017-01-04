@@ -33,7 +33,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -46,6 +49,8 @@ public abstract class MixinPlayerChunkMap implements IMixinPlayerChunkMap {
     @Shadow @Final private WorldServer theWorldServer;
 
     @Shadow @Nullable public abstract PlayerChunkMapEntry getEntry(int chunkX, int chunkZ);
+
+    private boolean isUpdatingInstances = false;
 
     @Override
     public boolean isChunkInUse(int x, int z) {
@@ -68,6 +73,33 @@ public abstract class MixinPlayerChunkMap implements IMixinPlayerChunkMap {
             chunkProvider.unload(chunk);
         } else {
             ((IMixinChunk) chunk).setScheduledForUnload(System.currentTimeMillis());
+        }
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Set;iterator()Ljava/util/Iterator;", ordinal = 0))
+    public void onStartUpdateLoop(CallbackInfo ci) {
+        this.isUpdatingInstances = true;
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Set;clear()V"))
+    public void onEndUpdateLoop(CallbackInfo ci) {
+        this.isUpdatingInstances = false;
+    }
+
+    @Inject(method = "addEntry", at = @At("HEAD"))
+    public void onAddEntry(PlayerChunkMapEntry entry, CallbackInfo ci) {
+        this.checkConcurrentModification(entry);
+    }
+
+    @Inject(method = "removeEntry", at = @At("HEAD"))
+    public void onRemoveEntry(PlayerChunkMapEntry entry, CallbackInfo ci) {
+        this.checkConcurrentModification(entry);
+    }
+
+    private void checkConcurrentModification(PlayerChunkMapEntry entry) {
+        if (this.isUpdatingInstances) {
+            SpongeImpl.getLogger().error("Attempting to concurrently modify PlayerChunkMapEntry for chunk {}", entry.getPos());
+            Thread.dumpStack();
         }
     }
 
