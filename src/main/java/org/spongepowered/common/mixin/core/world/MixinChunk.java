@@ -341,7 +341,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public boolean setBlock(int x, int y, int z, BlockState block, BlockChangeFlag flag, Cause cause) {
-        return BlockUtil.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15),
+        return BlockUtil.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, (this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15),
                 block, flag.updateNeighbors());
     }
 
@@ -353,7 +353,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public BlockSnapshot createSnapshot(int x, int y, int z) {
-        return this.world.createSnapshot(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15));
+        return this.world.createSnapshot((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15));
     }
 
     @Override
@@ -363,7 +363,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
-        return this.world.restoreSnapshot(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), snapshot, force, flag, cause);
+        return this.world.restoreSnapshot((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), snapshot, force, flag, cause);
     }
 
     @Override
@@ -851,7 +851,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public Optional<org.spongepowered.api.block.tileentity.TileEntity> getTileEntity(int x, int y, int z) {
         return Optional.ofNullable((org.spongepowered.api.block.tileentity.TileEntity) this.getTileEntity(
-                new BlockPos(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15)), EnumCreateEntityType.CHECK));
+                new BlockPos((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15)), EnumCreateEntityType.CHECK));
     }
 
     @Override
@@ -861,52 +861,52 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public Collection<ScheduledBlockUpdate> getScheduledUpdates(int x, int y, int z) {
-        return this.world.getScheduledUpdates(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15));
+        return this.world.getScheduledUpdates((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15));
     }
 
     @Override
     public ScheduledBlockUpdate addScheduledUpdate(int x, int y, int z, int priority, int ticks) {
-        return this.world.addScheduledUpdate(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), priority, ticks);
+        return this.world.addScheduledUpdate((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), priority, ticks);
     }
 
     @Override
     public void removeScheduledUpdate(int x, int y, int z, ScheduledBlockUpdate update) {
-        this.world.removeScheduledUpdate(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), update);
+        this.world.removeScheduledUpdate((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), update);
     }
 
     @Override
     public boolean hitBlock(int x, int y, int z, Direction side, Cause cause) {
-        return this.world.hitBlock(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), side, cause);
+        return this.world.hitBlock((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), side, cause);
     }
 
     @Override
     public boolean interactBlock(int x, int y, int z, Direction side, Cause cause) {
-        return this.world.interactBlock(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), side, cause);
+        return this.world.interactBlock((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), side, cause);
     }
 
     @Override
     public boolean placeBlock(int x, int y, int z, BlockState block, Direction side, Cause cause) {
-        return this.world.placeBlock(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), block, side, cause);
+        return this.world.placeBlock((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), block, side, cause);
     }
 
     @Override
     public boolean interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side, Cause cause) {
-        return this.world.interactBlockWith(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), itemStack, side, cause);
+        return this.world.interactBlockWith((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), itemStack, side, cause);
     }
 
     @Override
     public boolean digBlock(int x, int y, int z, Cause cause) {
-        return this.world.digBlock(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), cause);
+        return this.world.digBlock((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), cause);
     }
 
     @Override
     public boolean digBlockWith(int x, int y, int z, ItemStack itemStack, Cause cause) {
-        return this.world.digBlockWith(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), itemStack, cause);
+        return this.world.digBlockWith((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), itemStack, cause);
     }
 
     @Override
     public int getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack, Cause cause) {
-        return this.world.getBlockDigTimeWith(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), itemStack, cause);
+        return this.world.getBlockDigTimeWith((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), itemStack, cause);
     }
 
     @Redirect(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;getLoadedChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
@@ -936,7 +936,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public Optional<AABB> getBlockSelectionBox(int x, int y, int z) {
         checkBlockBounds(x, y, z);
-        return this.world.getBlockSelectionBox(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15));
+        return this.world.getBlockSelectionBox((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15));
     }
 
     @Override
