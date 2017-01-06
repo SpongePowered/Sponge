@@ -30,9 +30,10 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.LocatableBlockSpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
@@ -60,12 +61,12 @@ final class PistonMovingPhaseState extends BlockPhaseState {
                     .map(wrapper -> ((MutableWrapper<CallbackInfoReturnable<Boolean>>) wrapper).getObj())
                     .ifPresent(callback -> callback.setReturnValue(false));
         }
-        final BlockSnapshot blockSnapshot = phaseContext.getSource(BlockSnapshot.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Could not find a piston!", phaseContext));
+        final LocatableBlock locatable = phaseContext.getSource(LocatableBlock.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Could not find a piston locatable block!", phaseContext));
         phaseContext.getCapturedItemsSupplier()
                 .ifPresentAndNotEmpty(items -> {
-                    final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
-                            .block(blockSnapshot)
+                    final Cause.Builder builder = Cause.source(LocatableBlockSpawnCause.builder()
+                            .locatableBlock(locatable)
                             .type(InternalSpawnTypes.PLACEMENT)
                             .build());
                     phaseContext.getNotifier()
@@ -91,8 +92,8 @@ final class PistonMovingPhaseState extends BlockPhaseState {
                 });
         phaseContext.getCapturedEntitySupplier()
                 .ifPresentAndNotEmpty(entities -> {
-                    final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
-                            .block(blockSnapshot)
+                    final Cause.Builder builder = Cause.source(LocatableBlockSpawnCause.builder()
+                            .locatableBlock(locatable)
                             .type(InternalSpawnTypes.PLACEMENT)
                             .build());
                     phaseContext.getNotifier()

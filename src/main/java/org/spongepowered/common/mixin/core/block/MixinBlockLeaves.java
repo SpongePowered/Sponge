@@ -31,7 +31,6 @@ import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -43,6 +42,9 @@ import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
@@ -81,10 +83,13 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         final boolean isBlockAlready = CauseTracker.ENABLED && causeTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
         final IPhaseState currentState = causeTracker.getCurrentPhaseData().state;
         final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
-        final IBlockState actualState = state.getActualState(worldIn, pos);
         if (isBlockAlready && !isWorldGen) {
+            final LocatableBlock locatable = LocatableBlock.builder()
+                    .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
+                    .state((BlockState) state)
+                    .build();
             causeTracker.switchToPhase(BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
-                    .add(NamedCause.source(spongeWorld.createSpongeBlockSnapshot(state, actualState, pos, 3)))
+                    .add(NamedCause.source(locatable))
                     .addCaptures()
                     .complete());
         }
@@ -108,8 +113,8 @@ public abstract class MixinBlockLeaves extends MixinBlock {
      * @param pos The position
      */
     @Overwrite
-    private void destroy(World worldIn, BlockPos pos) {
-        final IBlockState blockState = worldIn.getBlockState(pos);
+    private void destroy(net.minecraft.world.World worldIn, BlockPos pos) {
+        final IBlockState state = worldIn.getBlockState(pos);
         // Sponge Start - Cause tracking
         if (CauseTracker.ENABLED && !worldIn.isRemote) {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldIn;
@@ -118,14 +123,17 @@ public abstract class MixinBlockLeaves extends MixinBlock {
             final IPhaseState currentState = peek.state;
             final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
             final boolean isBlockAlready = causeTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
-            final IBlockState actualState = blockState.getActualState(worldIn, pos);
             if (isBlockAlready && !isWorldGen) {
+                final LocatableBlock locatable = LocatableBlock.builder()
+                        .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
+                        .state((BlockState) state)
+                        .build();
                 causeTracker.switchToPhase(BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
-                        .add(NamedCause.source(mixinWorldServer.createSpongeBlockSnapshot(blockState, actualState, pos, 3)))
+                        .add(NamedCause.source(locatable))
                         .addCaptures()
                         .complete());
             }
-            this.dropBlockAsItem(worldIn, pos, blockState, 0);
+            this.dropBlockAsItem(worldIn, pos, state, 0);
             worldIn.setBlockToAir(pos);
             if (isBlockAlready && !isWorldGen) {
                 causeTracker.completePhase();
@@ -133,7 +141,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
             return;
         }
         // Sponge End
-        this.dropBlockAsItem(worldIn, pos, blockState , 0);
+        this.dropBlockAsItem(worldIn, pos, state , 0);
         worldIn.setBlockToAir(pos);
 
     }

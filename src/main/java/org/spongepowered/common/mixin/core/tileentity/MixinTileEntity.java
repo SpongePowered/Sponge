@@ -47,6 +47,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Implements;
@@ -84,6 +85,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     // uses different name to not clash with SpongeForge
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
     private Timing timing;
+    private LocatableBlock locatableBlock;
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World worldObj;
@@ -287,7 +289,19 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @Override
-    public  TileEntityArchetype createArchetype() {
+    public TileEntityArchetype createArchetype() {
         return new SpongeTileEntityArchetypeBuilder().tile(this).build();
+    }
+
+    @Override
+    public LocatableBlock getLocatableBlock() {
+        if (this.locatableBlock == null) {
+            this.locatableBlock = LocatableBlock.builder()
+                    .location(new Location<World>((World) this.worldObj, pos.getX(), pos.getY(), pos.getZ()))
+                    .state((BlockState) this.getBlock())
+                    .build();
+        }
+
+        return this.locatableBlock;
     }
 }

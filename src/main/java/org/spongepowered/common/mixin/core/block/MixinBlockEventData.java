@@ -27,9 +27,9 @@ package org.spongepowered.common.mixin.core.block;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
@@ -41,7 +41,7 @@ import javax.annotation.Nullable;
 @Mixin(BlockEventData.class)
 public abstract class MixinBlockEventData implements IMixinBlockEventData {
 
-    @Nullable private BlockSnapshot tickBlock = null;
+    @Nullable private LocatableBlock tickBlock = null;
     @Nullable private TileEntity tickTileEntity = null;
     @Nullable private User sourceUser = null;
 
@@ -71,38 +71,23 @@ public abstract class MixinBlockEventData implements IMixinBlockEventData {
     }
 
     @Override
-    public boolean hasTickingBlock() {
-        return this.tickBlock != null;
-    }
-
-    @Override
-    public Optional<BlockSnapshot> getCurrentTickBlock() {
+    public Optional<LocatableBlock> getTickBlock() {
         return Optional.ofNullable(this.tickBlock);
     }
 
     @Override
-    public void setCurrentTickBlock(@Nullable BlockSnapshot tickBlock) {
+    public void setTickBlock(@Nullable LocatableBlock tickBlock) {
         this.tickBlock = tickBlock;
     }
 
     @Override
-    public boolean hasTickingTileEntity() {
-        return this.tickTileEntity != null;
-    }
-
-    @Override
-    public Optional<TileEntity> getCurrentTickTileEntity() {
+    public Optional<TileEntity> getTickTileEntity() {
         return Optional.ofNullable(this.tickTileEntity);
     }
 
     @Override
-    public void setCurrentTickTileEntity(@Nullable TileEntity tickTileEntity) {
+    public void setTickTileEntity(@Nullable TileEntity tickTileEntity) {
         this.tickTileEntity = tickTileEntity;
-    }
-
-    @Override
-    public boolean hasSourceUser() {
-        return this.sourceUser != null;
     }
 
     @Override

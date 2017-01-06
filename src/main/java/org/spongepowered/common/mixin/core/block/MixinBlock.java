@@ -30,6 +30,10 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockGrass;
+import net.minecraft.block.BlockLeaves;
+import net.minecraft.block.BlockLiquid;
+import net.minecraft.block.BlockLog;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -95,6 +99,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private boolean hasCollideWithStateLogic;
     private boolean requiresLocationCheckForLight;
     private boolean requiresLocationCheckForOpacity;
+    // Only needed for blocks that do not fire ChangeBlockEvent.Pre
+    private boolean requiresBlockCapture = true;
     private Timing timing;
 
     @Shadow private boolean needsRandomTick;
@@ -160,6 +166,11 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             }
         } catch (Throwable throwable) {
             // Ignore
+        }
+
+        Block block = (Block)(Object) this;
+        if (block instanceof BlockLeaves || block instanceof BlockLog || block instanceof BlockGrass || block instanceof BlockLiquid) {
+            this.requiresBlockCapture = false;
         }
     }
 
@@ -323,6 +334,11 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public boolean requiresLocationCheckForOpacity() {
         return this.requiresLocationCheckForOpacity;
+    }
+
+    @Override
+    public boolean requiresBlockCapture() {
+        return this.requiresBlockCapture;
     }
 
     @Override

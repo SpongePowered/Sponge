@@ -69,6 +69,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -110,6 +111,7 @@ import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
@@ -210,6 +212,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
     private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1);
+
+    private static final EnumSet<EnumFacing> NOTIFY_DIRECTIONS = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
 
     private final CauseTracker causeTracker = new CauseTracker((WorldServer) (Object) this);
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
@@ -648,8 +652,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 spongeBlock.getTimingsHandler().startTiming();
                                 final PhaseData currentTuple = causeTracker.getCurrentPhaseData();
                                 final IPhaseState phaseState = currentTuple.state;
-                                if (!CauseTracker.ENABLED || phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.context)) {
+                                if (!spongeBlock.requiresBlockCapture() || !CauseTracker.ENABLED || phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.context)) {
+                                    if (!spongeBlock.requiresBlockCapture()) {
+                                        final LocatableBlock locatable = LocatableBlock.builder()
+                                                .location(new Location<org.spongepowered.api.world.World>(this, pos.getX(), pos.getY(), pos.getZ()))
+                                                .state((BlockState) iblockstate)
+                                                .build();
+                                        SpongeCommonEventFactory.locatableSource = locatable;
+                                    }
                                     block.randomTick((WorldServer) (Object) this, pos, iblockstate, this.rand);
+                                    SpongeCommonEventFactory.locatableSource = null;
                                 } else {
                                     TrackingUtil.randomTickBlock(causeTracker, block, pos, iblockstate, this.rand);
                                 }
@@ -725,12 +737,22 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final CauseTracker causeTracker = this.getCauseTracker();
         final PhaseData phaseData = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = phaseData.state;
-        if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, phaseData.context) || phaseState.getPhase().ignoresBlockUpdateTick(phaseData)) {
+        IMixinBlock spongeBlock = (IMixinBlock) block;
+        if (!spongeBlock.requiresBlockCapture() || phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, phaseData.context) || phaseState.getPhase().ignoresBlockUpdateTick(phaseData)) {
+            if (!spongeBlock.requiresBlockCapture()) {
+                final LocatableBlock locatable = LocatableBlock.builder()
+                        .location(new Location<org.spongepowered.api.world.World>(this, pos.getX(), pos.getY(), pos.getZ()))
+                        .state((BlockState) state)
+                        .build();
+                SpongeCommonEventFactory.locatableSource = locatable;
+            }
+            spongeBlock.getTimingsHandler().startTiming();
             block.updateTick(worldIn, pos, state, rand);
+            spongeBlock.getTimingsHandler().stopTiming();
+            SpongeCommonEventFactory.locatableSource = null;
             return;
         }
 
-        IMixinBlock spongeBlock = (IMixinBlock) block;
         spongeBlock.getTimingsHandler().startTiming();
         TrackingUtil.updateTickBlock(causeTracker, block, pos, state, rand);
         spongeBlock.getTimingsHandler().stopTiming();
@@ -1202,8 +1224,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.scheduledUpdatesAreImmediate = true;
         // Sponge start - Cause tracking
         final PhaseData peek = this.causeTracker.getCurrentPhaseData();
-        if (!CauseTracker.ENABLED || peek.state.getPhase().ignoresBlockUpdateTick(peek)) {
+        IMixinBlock spongeBlock = (IMixinBlock) state.getBlock();
+        if (!spongeBlock.requiresBlockCapture() || !CauseTracker.ENABLED || peek.state.getPhase().ignoresBlockUpdateTick(peek)) {
+            if (!spongeBlock.requiresBlockCapture()) {
+                final LocatableBlock locatable = LocatableBlock.builder()
+                        .location(new Location<org.spongepowered.api.world.World>(this, pos.getX(), pos.getY(), pos.getZ()))
+                        .state((BlockState) state)
+                        .build();
+                SpongeCommonEventFactory.locatableSource = locatable;
+            }
+            spongeBlock.getTimingsHandler().startTiming();
             state.getBlock().updateTick((WorldServer) (Object) this, pos, state, random);
+            spongeBlock.getTimingsHandler().stopTiming();
+            SpongeCommonEventFactory.locatableSource = null;
             // THIS NEEDS TO BE SET BACK TO FALSE OR ELSE ALL HELL BREAKS LOOSE!
             // No seriously, if this is not set back to false, all future updates are processed immediately
             // and various things get caught under the Unwinding Phase.
@@ -1236,7 +1269,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        EnumSet<EnumFacing> directions = EnumSet.allOf(EnumFacing.class);
+        EnumSet<EnumFacing> directions = EnumSet.copyOf(NOTIFY_DIRECTIONS);
         directions.remove(skipSide);
         final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
         if (event == null || !event.isCancelled()) {
@@ -1265,7 +1298,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, EnumSet.allOf(EnumFacing.class));
+        final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, NOTIFY_DIRECTIONS);
         if (event == null || !event.isCancelled()) {
             final CauseTracker causeTracker = this.getCauseTracker();
             for (EnumFacing facing : EnumFacing.values()) {

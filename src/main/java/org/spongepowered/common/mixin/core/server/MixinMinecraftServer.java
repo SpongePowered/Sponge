@@ -617,6 +617,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             }
         }
         SpongeCommonEventFactory.lastAnimationPacketTick = 0;
+        SpongeCommonEventFactory.locatableSource = null;
         TimingsManager.FULL_SERVER_TICK.stopTiming();
     }
 

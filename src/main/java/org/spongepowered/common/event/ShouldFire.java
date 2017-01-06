@@ -59,4 +59,5 @@ public class ShouldFire {
     public static boolean DEFUSE_EXPLOSIVE_EVENT_PRE = false;
     public static boolean DEFUSE_EXPLOSIVE_EVENT_POST = false;
 
+    public static boolean TICK_BLOCK_EVENT = false;
 }

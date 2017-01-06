@@ -152,4 +152,6 @@ public interface IMixinBlock {
     default boolean requiresLocationCheckForOpacity() {
         return false;
     }
+
+    boolean requiresBlockCapture();
 }
