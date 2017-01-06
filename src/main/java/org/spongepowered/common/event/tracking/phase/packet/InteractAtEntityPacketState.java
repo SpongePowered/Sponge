@@ -59,8 +59,9 @@ final class InteractAtEntityPacketState extends BasicPacketState {
         }
         final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.world);
         if (entity != null) {
-            context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
-            context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
+            // unused, to be removed and re-located when phase context is cleaned up
+            //context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
+            //context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
         }
         context.addEntityDropCaptures()
                 .addEntityCaptures()

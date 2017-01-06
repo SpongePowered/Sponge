@@ -285,7 +285,8 @@ public class SpongeCommandManager implements CommandManager {
                         final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
                         mixinWorld.getCauseTracker().switchToPhase(GeneralPhase.State.COMMAND, PhaseContext.start()
                                 .add(NamedCause.source(source))
-                                .add(NamedCause.of(InternalNamedCauses.General.COMMAND, commandUsed))
+                                // unused, to be removed and re-located when phase context is cleaned up
+                                //.add(NamedCause.of(InternalNamedCauses.General.COMMAND, commandUsed))
                                 .addCaptures()
                                 .addEntityDropCaptures()
                                 .complete());

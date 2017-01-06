@@ -132,10 +132,12 @@ public class PhaseContext {
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, blocksSupplier));
         this.blocksSupplier = blocksSupplier;
         BlockItemEntityDropsSupplier blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, blockItemEntityDropsSupplier));
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, blockItemEntityDropsSupplier));
         this.blockItemEntityDropsSupplier = blockItemEntityDropsSupplier;
         BlockItemDropsSupplier blockItemDropsSupplier = new BlockItemDropsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, blockItemDropsSupplier));
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, blockItemDropsSupplier));
         this.blockItemDropsSupplier = blockItemDropsSupplier;
         return this;
     }
@@ -151,19 +153,23 @@ public class PhaseContext {
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, blocksSupplier));
         this.blocksSupplier = blocksSupplier;
         BlockItemEntityDropsSupplier blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, blockItemEntityDropsSupplier));
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ITEM_DROPS, blockItemEntityDropsSupplier));
         this.blockItemEntityDropsSupplier = blockItemEntityDropsSupplier;
         BlockItemDropsSupplier blockItemDropsSupplier = new BlockItemDropsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, blockItemDropsSupplier));
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, blockItemDropsSupplier));
         this.blockItemDropsSupplier = blockItemDropsSupplier;
         CapturedItemsSupplier capturedItemsSupplier = new CapturedItemsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, capturedItemsSupplier));
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, capturedItemsSupplier));
         this.capturedItemsSupplier = capturedItemsSupplier;
         CapturedEntitiesSupplier capturedEntitiesSupplier = new CapturedEntitiesSupplier();
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, capturedEntitiesSupplier));
         this.capturedEntitiesSupplier = capturedEntitiesSupplier;
         CapturedItemStackSupplier capturedItemStackSupplier = new CapturedItemStackSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, capturedItemStackSupplier));
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, capturedItemStackSupplier));
         this.capturedItemStackSupplier = capturedItemStackSupplier;
         return this;
     }
@@ -175,13 +181,15 @@ public class PhaseContext {
         checkState(this.capturedItemStackSupplier == null, "CapturedItemStackSupplier is already set!");
 
         CapturedItemsSupplier capturedItemsSupplier = new CapturedItemsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, capturedItemsSupplier));
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, capturedItemsSupplier));
         this.capturedItemsSupplier = capturedItemsSupplier;
         CapturedEntitiesSupplier capturedEntitiesSupplier = new CapturedEntitiesSupplier();
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, capturedEntitiesSupplier));
         this.capturedEntitiesSupplier = capturedEntitiesSupplier;
         CapturedItemStackSupplier capturedItemStackSupplier = new CapturedItemStackSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, capturedItemStackSupplier));
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, capturedItemStackSupplier));
         this.capturedItemStackSupplier = capturedItemStackSupplier;
         return this;
     }
@@ -192,10 +200,12 @@ public class PhaseContext {
         checkState(this.entityItemEntityDropsSupplier == null, "EntityItemEntityDropsSupplier is already set!");
 
         EntityItemDropsSupplier entityItemDropsSupplier = new EntityItemDropsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, entityItemDropsSupplier));
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_STACK_DROPS, entityItemDropsSupplier));
         this.entityItemDropsSupplier = entityItemDropsSupplier;
         EntityItemEntityDropsSupplier entityItemEntityDropsSupplier = new EntityItemEntityDropsSupplier();
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_ITEM_DROPS, entityItemEntityDropsSupplier));
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_ITEM_DROPS, entityItemEntityDropsSupplier));
         this.entityItemEntityDropsSupplier = entityItemEntityDropsSupplier;
         return this;
     }

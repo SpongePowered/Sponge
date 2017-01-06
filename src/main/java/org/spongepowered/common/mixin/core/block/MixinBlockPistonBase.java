@@ -95,8 +95,9 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
             final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunkFromBlockCoords(pos);
             final PhaseContext phaseContext = PhaseContext.start()
                     .add(NamedCause.source(source))
-                    .add(NamedCause.of(InternalNamedCauses.Piston.POSITION, pos))
-                    .add(NamedCause.of(InternalNamedCauses.Piston.DIRECTION, direction))
+                    // unused, to be removed and re-located when phase context is cleaned up
+                    //.add(NamedCause.of(InternalNamedCauses.Piston.POSITION, pos))
+                    //.add(NamedCause.of(InternalNamedCauses.Piston.DIRECTION, direction))
                     .add(NamedCause.of(InternalNamedCauses.Piston.DUMMY_CALLBACK, new MutableWrapper<CallbackInfoReturnable<Boolean>>(null)))
                     .addCaptures();
             mixinChunk.getBlockNotifier(pos).ifPresent(phaseContext::notifier);

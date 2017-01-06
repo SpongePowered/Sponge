@@ -324,9 +324,10 @@ public final class TrackingUtil {
             PhaseContext context = PhaseContext.start()
                     .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
                     .addBlockCaptures()
-                    .addEntityCaptures()
-                    .add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_FORTUNE, fortune))
-                    .add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_POSITION, pos));
+                    .addEntityCaptures();
+                    // unused, to be removed and re-located when phase context is cleaned up
+                    //.add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_FORTUNE, fortune))
+                    //.add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_POSITION, pos));
             // use current notifier and owner if available
             context.notifier = causeTracker.getCurrentContext().notifier;
             context.owner = causeTracker.getCurrentContext().owner;

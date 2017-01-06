@@ -35,7 +35,7 @@ public class SpongeBlockSpawnCauseBuilder extends AbstractBlockSpawnCauseBuilder
     @Override
     public BlockSpawnCause build() {
         checkState(this.spawnType != null, "SpawnType cannot be null!");
-        checkState(this.blockSnapshot != null, "EntitySnapshot cannot be null!");
+        checkState(this.blockSnapshot != null, "BlockSnapshot cannot be null!");
         return new SpongeBlockSpawnCause(this);
     }
 

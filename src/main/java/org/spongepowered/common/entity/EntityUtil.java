@@ -356,10 +356,11 @@ public final class EntityUtil {
 
         final PhaseContext context = PhaseContext.start();
         context.add(NamedCause.source(mixinEntity))
-                .add(NamedCause.of(InternalNamedCauses.Teleporting.FROM_WORLD, fromWorld))
+                // unused, to be removed and re-located when phase context is cleaned up
+                //.add(NamedCause.of(InternalNamedCauses.Teleporting.FROM_WORLD, fromWorld))
+                //.add(NamedCause.of(InternalNamedCauses.Teleporting.TARGET_TELEPORTER, teleporter))
+                //.add(NamedCause.of(InternalNamedCauses.Teleporting.FROM_TRANSFORM, fromTransform))
                 .add(NamedCause.of(InternalNamedCauses.Teleporting.TARGET_WORLD, toWorld))
-                .add(NamedCause.of(InternalNamedCauses.Teleporting.TARGET_TELEPORTER, teleporter))
-                .add(NamedCause.of(InternalNamedCauses.Teleporting.FROM_TRANSFORM, fromTransform))
                 .addBlockCaptures()
                 .addEntityCaptures();
         final Cause teleportCause = Cause.of(NamedCause.source(PortalTeleportCause.builder()
