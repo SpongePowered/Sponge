@@ -30,9 +30,8 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.world.World;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,9 +43,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 @Mixin(net.minecraft.world.chunk.Chunk.class)
 public class MixinChunk_Collisions {
@@ -91,31 +87,28 @@ public class MixinChunk_Collisions {
             }
 
             final PhaseContext phaseContext = spongeWorld.getCauseTracker().getCurrentContext();
+            LocatableBlock locatable = phaseContext.getSource(LocatableBlock.class).orElse(null);
+            if (locatable != null) {
+                BlockType blockType =locatable.getLocation().getBlockType();
+                IModData_Collisions spongeBlock = (IModData_Collisions) blockType;
+                if (spongeBlock.requiresCollisionsCacheRefresh()) {
+                    spongeBlock.initializeCollisionState(this.world);
+                    spongeBlock.requiresCollisionsCacheRefresh(false);
+                }
+    
+                return !((spongeBlock.getMaxCollisions() >= 0) && (listToFill.size() >= spongeBlock.getMaxCollisions()));
+            } else {
+                IModData_Collisions spongeEntity = phaseContext.getSource(IModData_Collisions.class).orElse(null);
+                if (spongeEntity != null) {
+                    if (spongeEntity.requiresCollisionsCacheRefresh()) {
+                        spongeEntity.initializeCollisionState(this.world);
+                        spongeEntity.requiresCollisionsCacheRefresh(false);
+                    }
 
-            return Stream.<Supplier<Optional<Boolean>>>of(
-                    () -> phaseContext.getSource(BlockSnapshot.class).map(tickBlock -> {
-                        BlockType blockType = tickBlock.getState().getType();
-                        IModData_Collisions spongeBlock = (IModData_Collisions) blockType;
-                        if (spongeBlock.requiresCollisionsCacheRefresh()) {
-                            spongeBlock.initializeCollisionState(this.world);
-                            spongeBlock.requiresCollisionsCacheRefresh(false);
-                        }
-
-                        return !((spongeBlock.getMaxCollisions() >= 0) && (listToFill.size() >= spongeBlock.getMaxCollisions()));
-                    }),
-                    () -> phaseContext.getSource(IModData_Collisions.class).map(spongeEntity -> {
-                            if (spongeEntity.requiresCollisionsCacheRefresh()) {
-                                spongeEntity.initializeCollisionState(this.world);
-                                spongeEntity.requiresCollisionsCacheRefresh(false);
-                            }
-
-                            return !((spongeEntity.getMaxCollisions() >= 0) && (listToFill.size() >= spongeEntity.getMaxCollisions()));
-                    })
-            ).map(Supplier::get)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .findFirst()
-            .orElse(true);
+                    return !((spongeEntity.getMaxCollisions() >= 0) && (listToFill.size() >= spongeEntity.getMaxCollisions()));
+                }
+                return true;
+            }
         }
 
         return true;

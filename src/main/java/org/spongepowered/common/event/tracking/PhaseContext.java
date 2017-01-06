@@ -35,6 +35,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -42,6 +43,9 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -76,7 +80,6 @@ public class PhaseContext {
     @Nullable private CapturedItemStackSupplier capturedItemStackSupplier;
     @Nullable private EntityItemDropsSupplier entityItemDropsSupplier;
     @Nullable private EntityItemEntityDropsSupplier entityItemEntityDropsSupplier;
-    @Nullable private CaptureBlockSnapshotForTile captureBlockSnapshotForTile;
     @Nullable protected User owner;
     @Nullable protected User notifier;
 
@@ -419,24 +422,6 @@ public class PhaseContext {
                 .getPlayer();
     }
 
-    public PhaseContext addTileSnapshotCapture(TileEntity tileEntity, WorldServer worldServer) {
-        this.captureBlockSnapshotForTile = new CaptureBlockSnapshotForTile(tileEntity, worldServer);
-        this.add(NamedCause.of(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, this.captureBlockSnapshotForTile));
-        return this;
-    }
-
-    public CaptureBlockSnapshotForTile getTileSnapshot() throws IllegalStateException {
-        if (this.captureBlockSnapshotForTile == null) {
-            final CaptureBlockSnapshotForTile
-                    capture =
-                    this.firstNamed(InternalNamedCauses.Tracker.TILE_BLOCK_SNAPSHOT, CaptureBlockSnapshotForTile.class)
-                            .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a TileEntity's block snapshot!", this));
-            this.captureBlockSnapshotForTile = capture;
-            return capture;
-        }
-        return this.captureBlockSnapshotForTile;
-    }
-
     public void forEach(Consumer<NamedCause> consumer) {
         this.contextObjects.forEach(consumer);
     }
@@ -645,60 +630,6 @@ public class PhaseContext {
 
         public void addFlag(BlockChangeFlag flag) {
             this.flag = flag;
-        }
-    }
-
-    public static final class CaptureBlockSnapshotForTile {
-
-        @Nullable private BlockSnapshot snapshot;
-        private IBlockState tileState;
-        private BlockPos tilePosition;
-        private TileEntity owningEntity;
-        private WorldServer worldServer;
-
-        public CaptureBlockSnapshotForTile(TileEntity tileEntity, WorldServer worldServer) {
-            this.owningEntity = tileEntity;
-            this.worldServer = worldServer;
-            this.tilePosition = tileEntity.getPos();
-            this.tileState = worldServer.getBlockState(tileEntity.getPos());
-        }
-
-        public BlockSnapshot getSnapshot() {
-            if (this.snapshot == null) {
-                this.snapshot = ((IMixinWorldServer) this.worldServer).createSpongeBlockSnapshot(this.tileState, this.tileState, this.tilePosition, 0);
-            }
-            return this.snapshot;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            CaptureBlockSnapshotForTile that = (CaptureBlockSnapshotForTile) o;
-            return com.google.common.base.Objects.equal(this.snapshot, that.snapshot) &&
-                   com.google.common.base.Objects.equal(this.tileState, that.tileState) &&
-                   com.google.common.base.Objects.equal(this.tilePosition, that.tilePosition) &&
-                   com.google.common.base.Objects.equal(this.owningEntity, that.owningEntity) &&
-                   com.google.common.base.Objects.equal(this.worldServer, that.worldServer);
-        }
-
-        @Override
-        public int hashCode() {
-            return com.google.common.base.Objects.hashCode(this.snapshot, this.tileState, this.tilePosition, this.owningEntity, this.worldServer);
-        }
-
-        @Override
-        public String toString() {
-            return com.google.common.base.Objects.toStringHelper(this)
-                    .add("tileState", this.tileState)
-                    .add("tilePosition", this.tilePosition)
-                    .add("owningEntity", this.owningEntity)
-                    .add("worldServer", this.worldServer)
-                    .toString();
         }
     }
 }

@@ -91,6 +91,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -101,8 +102,10 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -136,6 +139,9 @@ public class SpongeCommonEventFactory {
     // Dummy ChangeBlockEvent.Pre
     public static ChangeBlockEvent.Pre DUMMY_BLOCK_PRE_EVENT = null;
 
+    // For change block pre
+    // TODO: this needs to be moved to its own phase with ability to ignore captures
+    public static LocatableBlock locatableSource;
     // For animation packet
     public static int lastAnimationPacketTick = 0;
     public static int lastSecondaryPacketTick = 0;
@@ -194,7 +200,7 @@ public class SpongeCommonEventFactory {
         } else {
             PhaseContext context = causeTracker.getCurrentContext();
 
-            final Optional<BlockSnapshot> currentTickingBlock = context.getSource(BlockSnapshot.class);
+            final Optional<LocatableBlock> currentTickingBlock = context.getSource(LocatableBlock.class);
             final Optional<TileEntity> currentTickingTileEntity = context.getSource(TileEntity.class);
             final Optional<Entity> currentTickingEntity = context.getSource(Entity.class);
             if (currentTickingBlock.isPresent()) {
@@ -223,7 +229,7 @@ public class SpongeCommonEventFactory {
     }
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, NamedCause namedWorldCause) {
-        return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), namedWorldCause, null);
+        return callChangeBlockEventPre(worldIn, ImmutableList.of(new Location<>((World) worldIn, pos.getX(), pos.getY(), pos.getZ())), namedWorldCause, locatableSource);
     }
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, BlockPos pos, NamedCause namedWorldCause, Object source) {
@@ -235,7 +241,7 @@ public class SpongeCommonEventFactory {
         final PhaseData data = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = data.state;
         if (source == null) {
-            source = data.context.getSource(BlockSnapshot.class).orElse(null);
+            source = data.context.getSource(LocatableBlock.class).orElse(null);
             if (source == null) {
                 // safety measure, return a dummy event
                 if (DUMMY_BLOCK_PRE_EVENT == null) {
@@ -248,20 +254,32 @@ public class SpongeCommonEventFactory {
 
         EntityPlayer player = null;
         Cause.Builder builder = null;
-        User owner = data.context.getOwner().orElse(null);
-        User notifier = data.context.getNotifier().orElse(null);
-        // handle FakePlayer
-        if (source instanceof EntityPlayer) {
-            player = (EntityPlayer) source;
-            if (SpongeImplHooks.isFakePlayer(player)) {
-                if (owner != null) {
-                    builder = Cause.source(owner);
-                    builder.named(NamedCause.FAKE_PLAYER, player);
-                } else if (notifier != null) {
-                    builder = Cause.source(notifier);
-                    builder.named(NamedCause.FAKE_PLAYER, player);
-                } else {
-                    builder = Cause.builder().named(NamedCause.FAKE_PLAYER, player);
+        User user = null;
+        IMixinBlock spongeBlock = null;
+        if (source instanceof LocatableBlock) {
+            LocatableBlock locatable = (LocatableBlock) source;
+            spongeBlock = (IMixinBlock) locatable.getBlockState().getType();
+            if (!spongeBlock.requiresBlockCapture()) {
+                user = TrackingUtil.getNotifierOrOwnerFromBlock(locatable.getLocation());
+            }
+        }
+
+        if (user == null) {
+            user = data.context.getNotifier().orElse(null);
+            if (user == null) {
+                user = data.context.getOwner().orElse(null);
+            }
+
+            // handle FakePlayer
+            if (source instanceof EntityPlayer) {
+                player = (EntityPlayer) source;
+                if (SpongeImplHooks.isFakePlayer(player)) {
+                    if (user != null) {
+                        builder = Cause.source(user);
+                        builder.named(NamedCause.FAKE_PLAYER, player);
+                    } else {
+                        builder = Cause.builder().named(NamedCause.FAKE_PLAYER, player);
+                    }
                 }
             }
         }
@@ -269,14 +287,10 @@ public class SpongeCommonEventFactory {
             builder = Cause.source(source);
         }
 
-        if (owner != null) {
-            builder.owner(owner);
+        if (user != null) {
+            builder.notifier(user);
         }
-        if (notifier != null) {
-            if (!(phaseState.getPhase().appendPreBlockProtectedCheck(builder, phaseState, data.context, causeTracker))) {
-                builder.notifier(notifier);
-            }
-        }
+
         builder.named(namedWorldCause);
 
         ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), locations, (World) worldIn);
@@ -294,15 +308,29 @@ public class SpongeCommonEventFactory {
         }
 
         final PhaseContext context = peek.context;
-        final BlockSnapshot snapshot = world.createSnapshot(pos.getX(), pos.getY(), pos.getZ());
+        User user = context.first(User.class).orElse(null);
+        final LocatableBlock locatableBlock = context.first(LocatableBlock.class).orElse(null);
+        final TileEntity tileEntity = context.first(TileEntity.class).orElse(null);
+        Object rootCause = null;
+        if (locatableBlock != null) {
+            rootCause = locatableBlock;
+        } else if (tileEntity != null) {
+            rootCause = tileEntity;
+        } else { 
+            // TODO: is this still needed?
+            // No block source, most likely GeneralPhase during unwinding
+            rootCause = LocatableBlock.builder()
+                    .location(new Location<World>(world, pos.getX(), pos.getY(), pos.getZ()))
+                    .state(world.getBlock(pos.getX(), pos.getY(), pos.getZ()))
+                    .build();
+        }
+
         final Map<Direction, BlockState> neighbors = new HashMap<>();
 
         for (Object obj : notifiedSides) {
             EnumFacing notifiedSide = (EnumFacing) obj;
             BlockPos offset = pos.offset(notifiedSide);
-            if (!causeTracker.getMinecraftWorld().isBlockLoaded(offset)) {
-                continue;
-            }
+
             Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
             Location<World> location = new Location<>(world, VecHelper.toVector3i(offset));
             if (location.getBlockY() >= 0 && location.getBlockY() <= 255) {
@@ -310,14 +338,14 @@ public class SpongeCommonEventFactory {
             }
         }
 
-        ImmutableMap<Direction, BlockState> originalNeighbors = ImmutableMap.copyOf(neighbors);
+        //ImmutableMap<Direction, BlockState> originalNeighbors = ImmutableMap.copyOf(neighbors);
         // Determine cause
-        final Cause.Builder builder = Cause.source(snapshot);
-        final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(pos);
+        final Cause.Builder builder = Cause.source(rootCause);
+        if (user != null) {
+            builder.notifier(user);
+        }
 
-        peek.state.getPhase().populateCauseForNotifyNeighborEvent(peek.state, context, builder, causeTracker, mixinChunk, pos);
-
-        NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(builder.build(), originalNeighbors, neighbors);
+        NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(builder.build(), neighbors, neighbors);
         SpongeImpl.postEvent(event);
         return event;
     }

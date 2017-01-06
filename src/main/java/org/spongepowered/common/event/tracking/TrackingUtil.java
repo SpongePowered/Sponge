@@ -47,6 +47,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -60,12 +61,15 @@ import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -183,8 +187,8 @@ public final class TrackingUtil {
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
         final WorldServer worldServer = causeTracker.getMinecraftWorld();
-        final BlockPos tilePosition = tileEntity.getPos();
-        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) worldServer.getChunkProvider()).getLoadedChunkWithoutMarkingActive(tilePosition.getX() >> 4,  tilePosition.getZ() >> 4);
+        final BlockPos pos = tileEntity.getPos();
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) worldServer.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4,  pos.getZ() >> 4);
         if (chunk == null || (chunk.unloaded && !((IMixinChunk) chunk).isPersistedChunk())) {
             // Don't tick TE's in chunks queued for unload
             return;
@@ -196,15 +200,14 @@ public final class TrackingUtil {
 
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         // Add notifier and owner so we don't have to perform lookups during the phases and other processing
-        mixinChunk.getBlockNotifier(tilePosition)
+        mixinChunk.getBlockNotifier(pos)
                 .ifPresent(phaseContext::notifier);
-        mixinChunk.getBlockOwner(tilePosition)
+        mixinChunk.getBlockOwner(pos)
                 .ifPresent(phaseContext::owner);
 
         final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tile;
         // Add the block snapshot of the tile entity for caches to avoid creating multiple snapshots during processing
         // This is a lazy evaluating snapshot to avoid the overhead of snapshot creation
-        phaseContext.addTileSnapshotCapture(tileEntity, worldServer);
         causeTracker.switchToPhase(TickPhase.Tick.TILE_ENTITY, phaseContext
                 .complete());
         mixinTileEntity.getTimingsHandler().startTiming();
@@ -217,15 +220,21 @@ public final class TrackingUtil {
     public static void updateTickBlock(CauseTracker causeTracker, Block block, BlockPos pos, IBlockState state, Random random) {
         final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
-        BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state.getActualState(minecraftWorld, pos), pos, 0);
-        final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Cause.of(NamedCause.source(minecraftWorld)), snapshot);
-        SpongeImpl.postEvent(event);
-        if(event.isCancelled()) {
-            return;
+        final LocatableBlock locatable = LocatableBlock.builder()
+                .location(new Location<World>((World) minecraftWorld, pos.getX(), pos.getY(), pos.getZ()))
+                .state((BlockState) state)
+                .build();
+        if (ShouldFire.TICK_BLOCK_EVENT) {
+            BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, 0);
+            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Cause.of(NamedCause.source(minecraftWorld)), snapshot);
+            SpongeImpl.postEvent(event);
+            if(event.isCancelled()) {
+                return;
+            }
         }
 
         final PhaseContext phaseContext = PhaseContext.start()
-                .add(NamedCause.source(snapshot))
+                .add(NamedCause.source(locatable))
                 .addBlockCaptures()
                 .addEntityCaptures();
 
@@ -244,14 +253,20 @@ public final class TrackingUtil {
     public static void randomTickBlock(CauseTracker causeTracker, Block block, BlockPos pos, IBlockState state, Random random) {
         final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
-        final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state.getActualState(minecraftWorld, pos), pos, 0);
-        final TickBlockEvent event = SpongeEventFactory.createTickBlockEventRandom(Cause.of(NamedCause.source(minecraftWorld)), currentTickBlock);
-        SpongeImpl.postEvent(event);
-        if(event.isCancelled()) {
-            return;
+        final LocatableBlock locatable = LocatableBlock.builder()
+                .location(new Location<World>((World) minecraftWorld, pos.getX(), pos.getY(), pos.getZ()))
+                .state((BlockState) state)
+                .build();
+        if (ShouldFire.TICK_BLOCK_EVENT) {
+            final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, 0);
+            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventRandom(Cause.of(NamedCause.source(minecraftWorld)), currentTickBlock);
+            SpongeImpl.postEvent(event);
+            if(event.isCancelled()) {
+                return;
+            }
         }
         final PhaseContext phaseContext = PhaseContext.start()
-                .add(NamedCause.source(currentTickBlock))
+                .add(NamedCause.source(locatable))
                 .addEntityCaptures()
                 .addBlockCaptures();
 
@@ -300,7 +315,7 @@ public final class TrackingUtil {
                 .addBlockCaptures()
                 .addEntityCaptures();
 
-        Stream.<Supplier<Optional<?>>>of(blockEvent::getCurrentTickBlock, blockEvent::getCurrentTickTileEntity, () -> Optional.of(blockEvent))
+        Stream.<Supplier<Optional<?>>>of(blockEvent::getTickBlock, blockEvent::getTickTileEntity, () -> Optional.of(blockEvent))
                 .map(Supplier::get)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -355,8 +370,8 @@ public final class TrackingUtil {
         final SpongeBlockSnapshot originalBlockSnapshot;
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         if (phaseState.shouldCaptureBlockChangeOrSkip(phaseContext, pos)) {
-            final IBlockState actualState = currentState.getActualState(minecraftWorld, pos);
-            originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
+            //final IBlockState actualState = currentState.getActualState(minecraftWorld, pos);
+            originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, currentState, pos, flags);
             final List<BlockSnapshot> capturedSnapshots = phaseContext.getCapturedBlocks();
             final Block newBlock = newState.getBlock();
 
@@ -423,15 +438,17 @@ public final class TrackingUtil {
     private TrackingUtil() {
     }
 
-    public static Optional<User> getNotifierOrOwnerFromBlock(Location<org.spongepowered.api.world.World> location) {
+    public static User getNotifierOrOwnerFromBlock(Location<org.spongepowered.api.world.World> location) {
         final Vector3d position = location.getPosition();
         final BlockPos blockPos = VecHelper.toBlockPos(position);
         final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(blockPos);
-        return Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
-                .map(Supplier::get)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst();
+        User notifier = mixinChunk.getBlockNotifier(blockPos).orElse(null);
+        if (notifier != null) {
+            return notifier;
+        }
+
+        User owner = mixinChunk.getBlockOwner(blockPos).orElse(null);
+        return owner;
     }
 
     public static Supplier<IllegalStateException> throwWithContext(String s, PhaseContext phaseContext) {

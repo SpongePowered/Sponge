@@ -134,4 +134,5 @@ public interface IMixinBlock {
         return false;
     }
 
+    boolean requiresBlockCapture();
 }

@@ -72,7 +72,6 @@ public final class InternalNamedCauses {
         public static final String CAPTURED_BLOCK_ITEM_DROPS = "CapturedBlockITemDrops";
         public static final String CAPTURED_PLAYER = "CapturedPlayer";
         public static final String TICK_EVENT = "CapturedWorldTickEvent";
-        public static final String TILE_BLOCK_SNAPSHOT = "TileBlockSnapshot";
         public static final String CAPTURED_EXPLOSION = "CapturedExplosion";
         public static final String PROCESS_IMMEDIATELY = "ProcessImmediately";
 

@@ -30,7 +30,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -38,7 +37,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.Locatable;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -48,7 +47,6 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -56,8 +54,6 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -68,15 +64,16 @@ class BlockEventTickPhaseState extends TickPhaseState {
 
     @Override
     public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
-            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        context.getSource(BlockSnapshot.class).ifPresent(snapshot -> {
-            final Location<World> location = snapshot.getLocation().get();
-            TrackingUtil.getNotifierOrOwnerFromBlock(location)
-                    .ifPresent(user -> {
-                        final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos);
-                        mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
-                    });
-        });
+        WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+        LocatableBlock locatable = context.getSource(LocatableBlock.class).orElse(null);
+        if (locatable != null) {
+            final Location<World> location = locatable.getLocation();
+            final User user = TrackingUtil.getNotifierOrOwnerFromBlock(location);
+            if (user != null) {
+                final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos);
+                mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
+            }
+        }
     }
 
     @Override
@@ -107,28 +104,15 @@ class BlockEventTickPhaseState extends TickPhaseState {
 
     @Override
     public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
-        final Location<World> location = Stream.<Supplier<Optional<Location<World>>>>
-                of(
-                () -> context.getSource(BlockSnapshot.class).map(snapshot -> snapshot.getLocation().get()),
-                () -> context.getSource(TileEntity.class).map(Locatable::getLocation),
-                () -> context.getSource(IMixinBlockEventData.class).map(data ->
-                        new Location<>((World) minecraftWorld, VecHelper.toVector3d(data.getEventBlockPosition())))
-        )
-                .map(Supplier::get)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .findFirst()
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be throwing a block event for a tile entity or a snapshot but got none!",
-                        context));
-        final Vector3d position = location.getPosition();
-        final BlockPos sourcePos = VecHelper.toBlockPos(position);
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
         final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
         final Vector3d changedPosition = changedLocation.getPosition();
         final BlockPos changedBlockPos = VecHelper.toBlockPos(changedPosition);
         final IMixinChunk changedMixinChunk = (IMixinChunk) ((WorldServer) changedLocation.getExtent()).getChunkFromBlockCoords(changedBlockPos);
-        TrackingUtil.getNotifierOrOwnerFromBlock(changedLocation)
-                .ifPresent(user -> changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER));
+        final User user = TrackingUtil.getNotifierOrOwnerFromBlock(changedLocation);
+        if (user != null) {
+            changedMixinChunk.addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
+        }
     }
 
     @Override
@@ -161,14 +145,9 @@ class BlockEventTickPhaseState extends TickPhaseState {
 
     @Override
     public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
-        final Optional<BlockSnapshot> blockSnapshot = context.getSource(BlockSnapshot.class);
-        final Optional<TileEntity> tileEntity = context.getSource(TileEntity.class);
-        if (blockSnapshot.isPresent()) {
-            builder.named(NamedCause.notifier(blockSnapshot.get()));
-        } else if (tileEntity.isPresent()) {
-            builder.named(NamedCause.notifier(tileEntity.get()));
-        }
-
+        LocatableBlock locatable =  context.getSource(LocatableBlock.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
+        builder.named(NamedCause.notifier(locatable));
     }
 
     @Override

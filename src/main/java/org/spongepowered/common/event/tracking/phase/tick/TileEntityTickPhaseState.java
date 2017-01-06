@@ -29,19 +29,20 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.LocatableBlockSpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -68,10 +69,16 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
     }
 
     @Override
+    LocatableBlock getLocatableBlockSourceFromContext(PhaseContext context) {
+        return context.getSource(TileEntity.class)
+                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over a TileEntity!", context))
+                .getLocatableBlock();
+    }
+
+    @Override
     public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
         final TileEntity tickingTile = phaseContext.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
-        final PhaseContext.CaptureBlockSnapshotForTile capturedSnapshot = phaseContext.getTileSnapshot();
         final Optional<User> notifier = phaseContext.getNotifier();
         final Optional<User> owner = phaseContext.getOwner();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
@@ -84,8 +91,8 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
                     });
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(entities -> {
-                        final Cause cause = Cause.source(BlockSpawnCause.builder()
-                                .block(capturedSnapshot.getSnapshot())
+                        final Cause cause = Cause.source(LocatableBlockSpawnCause.builder()
+                                .locatableBlock(tickingTile.getLocatableBlock())
                                 .type(InternalSpawnTypes.BLOCK_SPAWNING)
                                 .build())
                                 .build();
@@ -122,7 +129,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
     public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
         final TileEntity tickingTile = context.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
-        blockEvent.setCurrentTickTileEntity(tickingTile);
+        blockEvent.setTickTileEntity(tickingTile);
         final Location<World> blockLocation = tickingTile.getLocation();
         final WorldServer worldServer = (WorldServer) blockLocation.getExtent();
         final Vector3d blockPosition = blockLocation.getPosition();
@@ -145,7 +152,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
     public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final TileEntity tickingTile = context.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
-        final PhaseContext.CaptureBlockSnapshotForTile capturedSnapshot = context.getTileSnapshot();
         final Optional<User> notifier = context.getNotifier();
         final Optional<User> owner = context.getOwner();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
@@ -154,11 +160,11 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         if (entity instanceof EntityXPOrb) {
             final Cause.Builder builder = Cause.builder();
             builder.named(NamedCause.source(
-                    BlockSpawnCause.builder()
-                            .block(capturedSnapshot.getSnapshot())
-                            .type(InternalSpawnTypes.EXPERIENCE)
-                            .build()
-                    )
+                LocatableBlockSpawnCause.builder()
+                        .locatableBlock(tickingTile.getLocatableBlock())
+                        .type(InternalSpawnTypes.EXPERIENCE)
+                        .build()
+                )
             );
             notifier.ifPresent(builder::notifier);
             owner.ifPresent(builder::owner);
@@ -181,8 +187,8 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         final List<Entity> nonExpEntities = new ArrayList<>(1);
         nonExpEntities.add(entity);
 
-        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
-                .block(capturedSnapshot.getSnapshot())
+        final Cause.Builder builder = Cause.source(LocatableBlockSpawnCause.builder()
+                .locatableBlock(tickingTile.getLocatableBlock())
                 .type(mixinTileEntity.getTickedSpawnType())
                 .build());
         notifier.ifPresent(builder::notifier);
