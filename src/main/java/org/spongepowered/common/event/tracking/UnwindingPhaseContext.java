@@ -81,4 +81,15 @@ final class UnwindingPhaseContext extends PhaseContext {
 
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> Optional<T> getSource(Class<T> sourceClass) {
+        if (PhaseContext.class == sourceClass) {
+            return Optional.of((T) this.unwindingContext);
+        }
+        if (IPhaseState.class == sourceClass) {
+            return Optional.of((T) this.unwindingState);
+        }
+        return Optional.ofNullable(super.getSource(sourceClass).orElseGet(() -> this.unwindingContext.getSource(sourceClass).orElse(null)));
+    }
 }
