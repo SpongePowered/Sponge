@@ -34,6 +34,7 @@ import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.client.CPacketClientStatus;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
@@ -107,7 +108,17 @@ public class PacketUtil {
                 }
             }
 
-            if (!CauseTracker.ENABLED || (packetIn instanceof CPacketClientSettings)) {
+            // Don't process movement capture logic if player hasn't moved
+            boolean ignoreMovementCapture = false;
+            if (packetIn instanceof CPacketPlayer) {
+                CPacketPlayer movingPacket = ((CPacketPlayer) packetIn);
+                if (movingPacket instanceof CPacketPlayer.Rotation) {
+                    ignoreMovementCapture = true;
+                } else if (packetPlayer.posX == movingPacket.x && packetPlayer.posY == movingPacket.y && packetPlayer.posZ == movingPacket.z) {
+                    ignoreMovementCapture = true;
+                }
+            }
+            if (!CauseTracker.ENABLED || ignoreMovementCapture || (packetIn instanceof CPacketClientSettings)) {
                 packetIn.processPacket(netHandler);
             } else {
                 final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
