@@ -185,7 +185,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         if (!currentState.tracksBlockRestores()) {
             causeTracker.switchToPhase(BlockPhase.State.RESTORING_BLOCKS,
                     PhaseContext.start()
-                            .add(NamedCause.of(InternalNamedCauses.General.RESTORING_BLOCK, this))
+                            // unused, to be removed and re-located when phase context is cleaned up
+                            //.add(NamedCause.of(InternalNamedCauses.General.RESTORING_BLOCK, this))
                             .complete());
         }
 

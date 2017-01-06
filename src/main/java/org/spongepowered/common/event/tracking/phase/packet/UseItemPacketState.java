@@ -47,7 +47,8 @@ final class UseItemPacketState extends BasicPacketState {
         final net.minecraft.item.ItemStack usedItem = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);
         if (itemstack != null) {
-            context.add(NamedCause.of(InternalNamedCauses.Packet.HAND_USED, placeBlock.getHand()));
+            // unused, to be removed and re-located when phase context is cleaned up
+            //context.add(NamedCause.of(InternalNamedCauses.Packet.HAND_USED, placeBlock.getHand()));
             context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, itemstack));
         }
 
