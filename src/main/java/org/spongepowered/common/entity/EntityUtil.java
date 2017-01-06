@@ -620,7 +620,7 @@ public final class EntityUtil {
     public static boolean tempIsBedSpawn = false;
 
     public static Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
-        final Location<World> location = ((World) playerIn.worldObj).getSpawnLocation();
+        final Location<World> location = ((World) playerIn.world).getSpawnLocation();
         tempIsBedSpawn = false;
         if (targetWorld == null) { // Target world doesn't exist? Use global
             return location;
