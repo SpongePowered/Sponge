@@ -505,6 +505,11 @@ public class SpongeHooks {
                     ((IModData_Collisions) entity).requiresCollisionsCacheRefresh(true);
                 }
             }
+            for (TileEntity tileEntity : world.loadedTileEntityList) {
+                if (tileEntity instanceof IModData_Activation) {
+                    ((IModData_Activation) tileEntity).requiresActivationCacheRefresh(true);
+                }
+            }
         }
         for (BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
             if (blockType instanceof IModData_Collisions) {
