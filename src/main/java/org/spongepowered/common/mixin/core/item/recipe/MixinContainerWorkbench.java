@@ -24,30 +24,42 @@
  */
 package org.spongepowered.common.mixin.core.item.recipe;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Container;
+import net.minecraft.inventory.ContainerWorkbench;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.ShapelessRecipes;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.network.play.server.SPacketSetSlot;
+import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
-import java.util.List;
-import java.util.stream.Collectors;
+@Mixin(ContainerWorkbench.class)
+public abstract class MixinContainerWorkbench extends Container {
 
-@Mixin(ShapelessRecipes.class)
-public abstract class MixinShapelessRecipes implements ShapelessCraftingRecipe {
+    @Shadow public IInventory craftResult;
+    @Shadow public InventoryCrafting craftMatrix;
+    @Shadow @Final private World world;
 
-    @Shadow @Final private ItemStack recipeOutput;
-    @Shadow @Final private List<ItemStack> recipeItems;
+    /**
+     * @author Maxqia
+     * Overwrite to send custom recipes to player.
+     */
+    @Overwrite
+    public void onCraftMatrixChanged(IInventory inventoryIn) {
+        ItemStack result = CraftingManager.getInstance().findMatchingRecipe(this.craftMatrix, this.world);
+        this.craftResult.setInventorySlotContents(0, result);
 
-    @Override
-    public ImmutableCollection<ItemStackSnapshot> getIngredients() {
-        return recipeItems.stream().map(stack -> ItemStackUtil.snapshotOf(stack)).collect(
-                Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf));
+        if (super.listeners.size() < 1) {
+            return;
+        }
+
+        EntityPlayerMP player = ((EntityPlayerMP) super.listeners.get(0));
+        player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, 0, result));
     }
 
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.item.recipe.smelting;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
@@ -59,8 +60,8 @@ public class SpongeSmeltingRecipe implements SmeltingRecipe, SmeltingRecipe.Buil
     }
 
     @Override
-    public Builder ingredient(ItemStackSnapshot ingredient) {
-        this.ingredient = ingredient;
+    public Builder ingredient(ItemStack ingredient) {
+        this.ingredient = ingredient.createSnapshot();
         return this;
     }
 
@@ -71,8 +72,8 @@ public class SpongeSmeltingRecipe implements SmeltingRecipe, SmeltingRecipe.Buil
     }
 
     @Override
-    public Builder result(ItemStackSnapshot result) {
-        this.result = result;
+    public Builder result(ItemStack result) {
+        this.result = result.createSnapshot();
         return this;
     }
 

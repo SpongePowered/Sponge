@@ -28,24 +28,30 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.item.crafting.ShapedRecipes;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.common.interfaces.item.crafting.IMixinShapedRecipes;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRecipe.Builder {
 
     private final List<String> shape = Lists.newArrayList();
-    private Map<Character, ItemStackSnapshot> ingredientMap = Maps.newHashMap();
-    @Nullable private List<ItemStackSnapshot> results;
+    private Map<Character, ItemStack> ingredientMap = Maps.newHashMap();
+    @Nullable private List<ItemStack> results;
 
     @Override
     public ShapedCraftingRecipe.Builder shape(String... shape) {
@@ -57,20 +63,20 @@ public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRe
     }
 
     @Override
-    public ShapedCraftingRecipe.Builder where(char symbol, @Nullable ItemStackSnapshot ingredient) throws IllegalArgumentException {
+    public ShapedCraftingRecipe.Builder where(char symbol, @Nullable ItemStack ingredient) throws IllegalArgumentException {
         checkState(!this.shape.isEmpty(), "shape must be set before setting shape symbols");
         this.ingredientMap.put(symbol, ingredient);
         return this;
     }
 
     @Override
-    public ShapedCraftingRecipe.Builder results(ItemStackSnapshot... results) {
+    public ShapedCraftingRecipe.Builder results(ItemStack... results) {
         this.results = Lists.newArrayList(checkNotNull(results, "results"));
         return this;
     }
 
     @Override
-    public ShapedCraftingRecipe.Builder results(Iterable<ItemStackSnapshot> result) {
+    public ShapedCraftingRecipe.Builder results(Iterable<ItemStack> result) {
         this.results = Lists.newArrayList(result);
         return this;
     }
@@ -82,7 +88,7 @@ public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRe
         checkState(!this.ingredientMap.isEmpty(), "no ingredients set");
         checkState(this.results != null && !this.results.isEmpty(), "no results set");
 
-        net.minecraft.item.ItemStack stack = null;
+        net.minecraft.item.ItemStack stack = ItemStackUtil.cloneDefensiveToNative(results.get(0));
         String shape = "";
         int width = 0;
         int height = 0;
@@ -107,7 +113,7 @@ public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRe
         }
 
         ShapedRecipes shapedrecipes = new ShapedRecipes(width, height, ingredients, stack);
-        ((IMixinShapedRecipes) shapedrecipes).setIngredientMap(ingredientMap);
+        ((IMixinShapedRecipes) shapedrecipes).setIngredientMap(mapItemStackSnapshot(this.ingredientMap));
         return (ShapedCraftingRecipe) shapedrecipes;
     }
 
@@ -115,8 +121,8 @@ public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRe
     public ShapedCraftingRecipe.Builder from(ShapedCraftingRecipe value) {
         this.shape.clear();
         this.shape.addAll(value.getShape());
-        this.ingredientMap = Maps.newHashMap(value.getIngredients());
-        this.results = Lists.newArrayList(value.getResults());
+        this.ingredientMap = mapItemStack(value.getIngredients());
+        this.results = value.getResults().stream().map(object -> object.createStack()).collect(Collectors.toList());
         return this;
     }
 
@@ -126,6 +132,22 @@ public final class SpongeShapedCraftingRecipeBuilder implements ShapedCraftingRe
         this.ingredientMap.clear();
         this.results = null;
         return this;
+    }
+
+    public static <T> Map<T, ItemStack> mapItemStack(ImmutableMap<T, ItemStackSnapshot> map) {
+        HashMap<T, ItemStack> returnVal = new HashMap<>();
+        for (Entry<T,ItemStackSnapshot> entry : map.entrySet()) {
+            returnVal.put(entry.getKey(), entry.getValue().createStack());
+        }
+        return returnVal;
+    }
+
+    public static <T> ImmutableMap<T, ItemStackSnapshot> mapItemStackSnapshot(Map<T, ItemStack> map) {
+        ImmutableMap.Builder<T, ItemStackSnapshot> returnVal = ImmutableMap.builder();
+        for (Entry<T,ItemStack> entry : map.entrySet()) {
+            returnVal.put(entry.getKey(), entry.getValue().createSnapshot());
+        }
+        return returnVal.build();
     }
 
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item.recipe;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.FurnaceRecipes;
@@ -36,7 +37,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -86,11 +86,11 @@ public abstract class MixinFurnaceRecipes implements SmeltingRegistry {
     }
 
     @Override
-    public Collection<SmeltingRecipe> getRecipes() {
+    public ImmutableCollection<SmeltingRecipe> getRecipes() {
         ImmutableSet.Builder<SmeltingRecipe> recipes = ImmutableSet.builder();
         for (Entry<ItemStack, ItemStack> set : this.smeltingList.entrySet()) {
-            recipes.add(SmeltingRecipe.builder().ingredient(ItemStackUtil.snapshotOf(set.getKey()))
-                .result(ItemStackUtil.snapshotOf(set.getValue()))
+            recipes.add(SmeltingRecipe.builder().ingredient(ItemStackUtil.cloneDefensive(set.getKey()))
+                .result(ItemStackUtil.cloneDefensive(set.getValue()))
                 .experience(this.experienceList.get(set.getValue())).build());
         }
         return recipes.build();

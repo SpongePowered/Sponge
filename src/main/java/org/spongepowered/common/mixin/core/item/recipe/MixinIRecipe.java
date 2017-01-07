@@ -26,28 +26,28 @@ package org.spongepowered.common.mixin.core.item.recipe;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.item.crafting.IRecipe;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.item.recipe.RecipeRegistry;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.SpongeImpl;
 
-import java.util.List;
-import java.util.stream.Collectors;
+@Mixin(IRecipe.class)
+public interface MixinIRecipe extends CraftingRecipe {
 
-@Mixin(ShapelessRecipes.class)
-public abstract class MixinShapelessRecipes implements ShapelessCraftingRecipe {
-
-    @Shadow @Final private ItemStack recipeOutput;
-    @Shadow @Final private List<ItemStack> recipeItems;
+    @Shadow net.minecraft.item.ItemStack getRecipeOutput();
 
     @Override
-    public ImmutableCollection<ItemStackSnapshot> getIngredients() {
-        return recipeItems.stream().map(stack -> ItemStackUtil.snapshotOf(stack)).collect(
-                Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf));
+    default ImmutableCollection<ItemStackSnapshot> getResults() {
+        return ImmutableList.of(((ItemStack) this.getRecipeOutput()).createSnapshot());
+    }
+
+    @Override
+    default RecipeRegistry<?> getRegistry() {
+        return SpongeImpl.getGame().getRegistry().getCraftingRegistry();
     }
 
 }

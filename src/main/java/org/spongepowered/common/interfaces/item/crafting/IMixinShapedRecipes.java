@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.interfaces.item.crafting;
 
-import net.minecraft.item.ItemStack;
+import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
 import java.util.List;
-import java.util.Map;
 
 public interface IMixinShapedRecipes {
 
-    void setShape(List<String> aisle);
+    void setShape(List<String> shape);
 
-    void setIngredientMap(Map<Character, ItemStack> map);
+    void setIngredientMap(ImmutableMap<Character, ItemStackSnapshot> map);
 
 }

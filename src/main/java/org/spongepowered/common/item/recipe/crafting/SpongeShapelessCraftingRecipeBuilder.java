@@ -27,8 +27,10 @@ package org.spongepowered.common.item.recipe.crafting;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Lists;
 import net.minecraft.item.crafting.ShapelessRecipes;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -41,29 +43,29 @@ import javax.annotation.Nullable;
 
 public final class SpongeShapelessCraftingRecipeBuilder implements ShapelessCraftingRecipe.Builder {
 
-    private List<ItemStackSnapshot> ingredients = Lists.newArrayList();
-    @Nullable private List<ItemStackSnapshot> results;
+    private List<ItemStack> ingredients = Lists.newArrayList();
+    @Nullable private List<ItemStack> results;
 
     @Override
-    public ShapelessCraftingRecipe.Builder ingredients(ItemStackSnapshot... ingredients) {
+    public ShapelessCraftingRecipe.Builder ingredients(ItemStack... ingredients) {
         this.ingredients = Lists.newArrayList(checkNotNull(ingredients, "ingredients"));
         return this;
     }
 
     @Override
-    public ShapelessCraftingRecipe.Builder ingredients(Collection<ItemStackSnapshot> ingredients) {
+    public ShapelessCraftingRecipe.Builder ingredients(Collection<ItemStack> ingredients) {
         this.ingredients = Lists.newArrayList(checkNotNull(ingredients, "ingredients"));
         return this;
     }
 
     @Override
-    public ShapelessCraftingRecipe.Builder results(ItemStackSnapshot... results) {
+    public ShapelessCraftingRecipe.Builder results(ItemStack... results) {
         this.results = Lists.newArrayList(checkNotNull(results, "results"));
         return this;
     }
 
     @Override
-    public ShapelessCraftingRecipe.Builder results(Collection<ItemStackSnapshot> result) {
+    public ShapelessCraftingRecipe.Builder results(Collection<ItemStack> result) {
         this.results = Lists.newArrayList(checkNotNull(results, "results"));
         return this;
     }
@@ -72,14 +74,14 @@ public final class SpongeShapelessCraftingRecipeBuilder implements ShapelessCraf
     public ShapelessCraftingRecipe build() {
         checkState(!this.ingredients.isEmpty(), "no ingredients set");
         checkState(this.results != null && !this.results.isEmpty(), "no results set");
-        return (ShapelessCraftingRecipe) new ShapelessRecipes(ItemStackUtil.fromSnapshotToNative(results.get(0)),
-                ingredients.stream().map(stack -> ItemStackUtil.fromSnapshotToNative(stack)).collect(Collectors.toList()));
+        return (ShapelessCraftingRecipe) new ShapelessRecipes(ItemStackUtil.cloneDefensiveToNative(results.get(0)),
+                ingredients.stream().map(stack -> ItemStackUtil.cloneDefensiveToNative(stack)).collect(Collectors.toList()));
     }
 
     @Override
     public ShapelessCraftingRecipe.Builder from(ShapelessCraftingRecipe value) {
-        this.ingredients = Lists.newArrayList(value.getIngredients());
-        this.results = Lists.newArrayList(value.getResults());
+        this.ingredients = convertList(value.getIngredients());
+        this.results = convertList(value.getResults());
         return this;
     }
 
@@ -88,6 +90,10 @@ public final class SpongeShapelessCraftingRecipeBuilder implements ShapelessCraf
         this.ingredients.clear();
         this.results = null;
         return this;
+    }
+
+    private static List<ItemStack> convertList(ImmutableCollection<ItemStackSnapshot> list) {
+        return list.stream().map(object -> object.createStack()).collect(Collectors.toList());
     }
 
 }

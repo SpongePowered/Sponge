@@ -27,32 +27,26 @@ package org.spongepowered.common.mixin.core.item.recipe;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.crafting.ShapedRecipes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.item.crafting.IMixinShapedRecipes;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 
 @Mixin(ShapedRecipes.class)
-public class MixinShapedRecipes implements ShapedCraftingRecipe, IMixinShapedRecipes {
+public abstract class MixinShapedRecipes implements ShapedCraftingRecipe, IMixinShapedRecipes {
 
     @Shadow @Final private int recipeWidth;
     @Shadow @Final private int recipeHeight;
     @Shadow @Final private net.minecraft.item.ItemStack[] recipeItems;
     @Shadow @Final private net.minecraft.item.ItemStack recipeOutput;
     private ImmutableList<String> shape;
-    private Map<Character, net.minecraft.item.ItemStack> ingredientMap;
+    private ImmutableMap<Character, ItemStackSnapshot> ingredientMap;
 
     @Override
     public ImmutableCollection<String> getShape() {
@@ -61,11 +55,7 @@ public class MixinShapedRecipes implements ShapedCraftingRecipe, IMixinShapedRec
 
     @Override
     public ImmutableMap<Character, ItemStackSnapshot> getIngredients() {
-        ImmutableMap.Builder<Character, ItemStackSnapshot> builder = ImmutableMap.builder();
-        for (Entry<Character, net.minecraft.item.ItemStack> entry : ingredientMap.entrySet()) {
-            builder.put(entry.getKey(), ItemStackUtil.snapshotOf(entry.getValue()));
-        }
-        return builder.build();
+        return ingredientMap;
     }
 
     @Override
@@ -80,12 +70,7 @@ public class MixinShapedRecipes implements ShapedCraftingRecipe, IMixinShapedRec
 
     @Override
     public Optional<ItemStackSnapshot> getIngredient(char symbol) {
-        return Optional.ofNullable(ItemStackUtil.snapshotOf(this.ingredientMap.get(symbol)));
-    }
-
-    @Override
-    public ImmutableCollection<ItemStackSnapshot> getResults() {
-        return ImmutableSet.of(ItemStackUtil.snapshotOf(recipeOutput));
+        return Optional.ofNullable(this.ingredientMap.get(symbol));
     }
 
     @Override
@@ -94,13 +79,8 @@ public class MixinShapedRecipes implements ShapedCraftingRecipe, IMixinShapedRec
     }
 
     @Override
-    public void setIngredientMap(Map<Character, net.minecraft.item.ItemStack> map) {
+    public void setIngredientMap(ImmutableMap<Character, ItemStackSnapshot> map) {
         this.ingredientMap = map;
-    }
-
-    @Override
-    public RecipeRegistry<?> getRegistry() {
-        return SpongeImpl.getRegistry().getCraftingRegistry();
     }
 
 }
