@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -75,9 +76,9 @@ public abstract class MixinCraftingManager implements CraftingRegistry {
     }
 
     @Override
-    public boolean remove(CraftingRecipe recipe) {
-        // Yes, recipes are very suspicious... you better watch them closely, silly IDE.
-        return this.recipes.remove(checkNotNull(recipe, "recipe"));
+    @SuppressWarnings("unchecked")
+    public boolean remove(Predicate<? super CraftingRecipe> predicate) {
+        return ((List<CraftingRecipe>) (Object) this.recipes).removeIf(predicate);
     }
 
     @Override

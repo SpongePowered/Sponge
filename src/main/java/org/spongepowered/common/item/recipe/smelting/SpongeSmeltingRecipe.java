@@ -47,7 +47,7 @@ public class SpongeSmeltingRecipe implements SmeltingRecipe, SmeltingRecipe.Buil
     public Builder reset() {
         ingredient = null;
         result = null;
-        experience = 0;
+        experience = 0.0f;
         return this;
     }
 
@@ -78,7 +78,7 @@ public class SpongeSmeltingRecipe implements SmeltingRecipe, SmeltingRecipe.Buil
     }
 
     @Override
-    public Builder experience(float exp) {
+    public Builder experience(double exp) {
         this.experience = exp;
         return this;
     }

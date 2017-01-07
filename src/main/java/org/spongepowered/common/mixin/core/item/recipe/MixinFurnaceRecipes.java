@@ -41,6 +41,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @Mixin(FurnaceRecipes.class)
 public abstract class MixinFurnaceRecipes implements SmeltingRegistry {
@@ -59,12 +60,11 @@ public abstract class MixinFurnaceRecipes implements SmeltingRegistry {
     }
 
     @Override
-    public boolean remove(SmeltingRecipe recipe) throws IllegalArgumentException {
-        ItemStack ingredient = ItemStackUtil.fromSnapshotToNative(recipe.getIngredient());
+    public boolean remove(Predicate<? super SmeltingRecipe> predicate) throws IllegalArgumentException {
         Iterator<Entry<ItemStack, ItemStack>> iter = this.smeltingList.entrySet().iterator();
         while (iter.hasNext()) {
             Entry<ItemStack, ItemStack> entry = iter.next();
-            if (this.compareItemStacks(ingredient, entry.getKey())) {
+            if (predicate.test(convert(entry))) {
                 iter.remove();
                 if (this.experienceList.remove(entry.getValue()) != null) {
                     return true;
@@ -89,11 +89,14 @@ public abstract class MixinFurnaceRecipes implements SmeltingRegistry {
     public ImmutableCollection<SmeltingRecipe> getRecipes() {
         ImmutableSet.Builder<SmeltingRecipe> recipes = ImmutableSet.builder();
         for (Entry<ItemStack, ItemStack> set : this.smeltingList.entrySet()) {
-            recipes.add(SmeltingRecipe.builder().ingredient(ItemStackUtil.cloneDefensive(set.getKey()))
-                .result(ItemStackUtil.cloneDefensive(set.getValue()))
-                .experience(this.experienceList.get(set.getValue())).build());
+            recipes.add(convert(set));
         }
         return recipes.build();
     }
 
+    private SmeltingRecipe convert(Entry<ItemStack, ItemStack> set) {
+        return SmeltingRecipe.builder().ingredient(ItemStackUtil.cloneDefensive(set.getKey()))
+                .result(ItemStackUtil.cloneDefensive(set.getValue()))
+                .experience(this.experienceList.get(set.getValue())).build();
+    }
 }
