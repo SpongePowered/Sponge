@@ -30,20 +30,17 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
-import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
+import javax.annotation.Nullable;
+
 public class SpongeObjectiveBuilder implements Objective.Builder {
 
-    private String name;
-    private Text displayName;
-    private Criterion criterion;
-    private ObjectiveDisplayMode objectiveDisplayMode;
-
-    public SpongeObjectiveBuilder() {
-        reset();
-    }
+    @Nullable private String name;
+    @Nullable private Text displayName;
+    @Nullable private Criterion criterion;
+    @Nullable private ObjectiveDisplayMode objectiveDisplayMode;
 
     @Override
     public Objective.Builder name(String name) {
@@ -75,10 +72,10 @@ public class SpongeObjectiveBuilder implements Objective.Builder {
 
     @Override
     public Objective.Builder from(Objective value) {
-        name(value.getName())
-            .criterion(value.getCriterion())
-            .displayName(value.getDisplayName())
-            .objectiveDisplayMode(value.getDisplayMode());
+        this.name = value.getName();
+        this.displayName = value.getDisplayName();
+        this.criterion = value.getCriterion();
+        this.objectiveDisplayMode = value.getDisplayMode();
         return this;
     }
 
@@ -87,19 +84,25 @@ public class SpongeObjectiveBuilder implements Objective.Builder {
         this.name = null;
         this.displayName = null;
         this.criterion = null;
-        this.objectiveDisplayMode = ObjectiveDisplayModes.INTEGER;
+        this.objectiveDisplayMode = null;
         return this;
     }
 
     @Override
     public Objective build() throws IllegalStateException {
         checkState(this.name != null, "Name cannot be null");
-        checkState(this.displayName != null, "DisplayName cannot be null");
         checkState(this.criterion != null, "Criterion cannot be null");
 
         SpongeObjective objective = new SpongeObjective(this.name, this.criterion);
-        objective.setDisplayName(this.displayName);
-        objective.setDisplayMode(this.objectiveDisplayMode);
+
+        if (this.displayName != null) {
+            objective.setDisplayName(this.displayName);
+        }
+
+        if (this.objectiveDisplayMode != null) {
+            objective.setDisplayMode(this.objectiveDisplayMode);
+        }
+
         return objective;
     }
 }
