@@ -36,6 +36,7 @@ import net.minecraft.world.gen.ChunkProviderSettings;
 import net.minecraft.world.gen.FlatGeneratorInfo;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.World;
@@ -45,7 +46,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.util.persistence.JsonTranslator;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 @NonnullByDefault
 @Mixin(WorldType.class)
@@ -77,8 +80,8 @@ public abstract class MixinWorldType implements GeneratorType {
             // They easiest way to go from ChunkProviderSettings to DataContainer is via json and NBT
             try {
                 String jsonString = ChunkProviderSettings.Factory.jsonToFactory("").toString();
-                return JsonTranslator.translateFrom(new JsonParser().parse(jsonString).getAsJsonObject());
-            } catch (JsonParseException | IllegalStateException e) {
+                return DataFormats.JSON.readFrom(new ByteArrayInputStream(jsonString.getBytes()));
+            } catch (IOException e) {
                 AssertionError error = new AssertionError("Failed to parse default settings of CUSTOMIZED world type");
                 error.initCause(e);
                 throw error;
