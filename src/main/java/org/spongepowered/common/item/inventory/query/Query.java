@@ -43,6 +43,7 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.MutableLens
 import org.spongepowered.common.item.inventory.query.result.MinecraftResultAdapterProvider;
 import org.spongepowered.common.item.inventory.query.result.QueryResult;
 import org.spongepowered.common.item.inventory.query.strategy.ClassStrategy;
+import org.spongepowered.common.item.inventory.query.strategy.ExactItemStackStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.GenericStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.ItemStackStrategy;
 import org.spongepowered.common.item.inventory.query.strategy.ItemTypeStrategy;
@@ -56,11 +57,12 @@ import java.util.Map;
 
 public class Query<TInventory, TStack> {
 
-    public static enum Type {
+    public enum Type {
 
         CLASS("class", ClassStrategy.class),
         TYPE("type", ItemTypeStrategy.class),
         STACK("stack", ItemStackStrategy.class),
+        EXACT_STACK("exact_stack", ExactItemStackStrategy.class),
         PROPERTIES("property", PropertyStrategy.class),
         NAME("name", NameStrategy.class),
         EXPRESSION("expr", ExpressionStrategy.class),
@@ -71,7 +73,7 @@ public class Query<TInventory, TStack> {
         private final Class<? extends QueryStrategy<?, ?, ?>> defaultStrategyClass;
 
         @SuppressWarnings({ "rawtypes", "unchecked" })
-        private Type(String key, Class<? extends QueryStrategy> defaultStrategyClass) {
+        Type(String key, Class<? extends QueryStrategy> defaultStrategyClass) {
             this.key = key;
             this.defaultStrategyClass = (Class<? extends QueryStrategy<?, ?, ?>>) defaultStrategyClass;
         }
@@ -86,9 +88,9 @@ public class Query<TInventory, TStack> {
 
     }
 
-    public abstract interface ResultAdapterProvider<TInventory, TStack> {
+    public interface ResultAdapterProvider<TInventory, TStack> {
 
-        public abstract QueryResult<TInventory, TStack> getResultAdapter(Fabric<TInventory> inventory, MutableLensSet<TInventory, TStack> matches);
+        QueryResult<TInventory, TStack> getResultAdapter(Fabric<TInventory> inventory, MutableLensSet<TInventory, TStack> matches);
 
     }
 
@@ -217,6 +219,11 @@ public class Query<TInventory, TStack> {
 
     public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, ItemStack... types) {
         QueryStrategy<TInventory, TStack, ItemStack> strategy = Query.<TInventory, TStack, ItemStack>getStrategy(Type.STACK).with(types);
+        return new Query<TInventory, TStack>(adapter, strategy);
+    }
+
+    public static <TInventory, TStack> Query<TInventory, TStack> compileExact(InventoryAdapter<TInventory, TStack>  adapter, ItemStack... types) {
+        QueryStrategy<TInventory, TStack, ItemStack> strategy = Query.<TInventory, TStack, ItemStack>getStrategy(Type.EXACT_STACK).with(types);
         return new Query<TInventory, TStack>(adapter, strategy);
     }
 

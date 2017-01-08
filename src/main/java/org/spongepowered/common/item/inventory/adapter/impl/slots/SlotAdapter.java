@@ -223,13 +223,20 @@ public class SlotAdapter extends Adapter implements Slot {
     @Override
     public boolean contains(ItemStack stack) {
         net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
-        return slotStack.isEmpty() ? (stack == null) : ItemStackUtil.compareIgnoreQuantity(slotStack, stack);
+        return slotStack.isEmpty() ? ItemStackUtil.toNative(stack).isEmpty() :
+                ItemStackUtil.compareIgnoreQuantity(slotStack, stack) && slotStack.getCount() >= stack.getQuantity();
+    }
+
+    @Override
+    public boolean containsAny(ItemStack stack) {
+        net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
+        return slotStack.isEmpty() ? ItemStackUtil.toNative(stack).isEmpty() : ItemStackUtil.compareIgnoreQuantity(slotStack, stack);
     }
 
     @Override
     public boolean contains(ItemType type) {
         net.minecraft.item.ItemStack slotStack = this.slot.getStack(this.inventory);
-        return slotStack.isEmpty() ? (type == null) : slotStack.getItem().equals(type);
+        return slotStack.isEmpty() ? (type == null || type == ItemTypes.AIR) : slotStack.getItem().equals(type);
     }
 
     @Override
