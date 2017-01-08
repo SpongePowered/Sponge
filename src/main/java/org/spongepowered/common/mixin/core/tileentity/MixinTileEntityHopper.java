@@ -33,15 +33,12 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityHopper;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.tileentity.carrier.Hopper;
-import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
-import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -57,7 +54,7 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 
 import java.util.List;
@@ -65,8 +62,7 @@ import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(TileEntityHopper.class)
-@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
-        @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
+@Implements(@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
 public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot implements Hopper, IMixinCustomNameable {
 
     @Shadow private int transferCooldown;
@@ -79,7 +75,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(5).build();
-        this.lens = new OrderedInventoryLensImpl(0, 5, 1, this.slots);
+        this.lens = new GridInventoryLensImpl(0, 5, 1, 5, this.slots);
     }
 
     @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"))
@@ -115,17 +111,6 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
         ((TileEntityHopper) (Object) this).setCustomName(customName);
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public TileEntityInventory<TileEntityCarrier> getInventory() {
-        return (TileEntityInventory<TileEntityCarrier>) this;
-    }
-
-    @Intrinsic
-    public void tilentityinventory$markDirty() {
-        this.markDirty();
-    }
-
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
         return this.slots;
     }
@@ -136,13 +121,5 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
 
     public Fabric<IInventory> inventory$getInventory() {
         return this.fabric;
-    }
-
-    public Optional<Hopper> tileentityinventory$getTileEntity() {
-        return Optional.of(this);
-    }
-
-    public Optional<Hopper> tileentityinventory$getCarrier() {
-        return Optional.of(this);
     }
 }

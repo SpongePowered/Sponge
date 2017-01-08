@@ -31,7 +31,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.block.tileentity.carrier.Beacon;
-import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -51,18 +50,14 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
-import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
 import java.util.List;
-import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(TileEntityBeacon.class)
-@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
-        @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
+@Implements(@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
 public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable implements Beacon {
 
     @Shadow private Potion primaryEffect;
@@ -124,16 +119,6 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
         manipulators.add(getBeaconData());
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public TileEntityInventory<TileEntityCarrier> getInventory() {
-        return (TileEntityInventory<TileEntityCarrier>) this;
-    }
-
-    public void tilentityinventory$markDirty() {
-        ((IInventory) (Object) this).markDirty();
-    }
-
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
         return this.slots;
     }
@@ -144,13 +129,5 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
 
     public Fabric<IInventory> inventory$getInventory() {
         return this.fabric;
-    }
-
-    public Optional<Beacon> tileentityinventory$getTileEntity() {
-        return Optional.of(this);
-    }
-
-    public Optional<Beacon> tileentityinventory$getCarrier() {
-        return Optional.of(this);
     }
 }

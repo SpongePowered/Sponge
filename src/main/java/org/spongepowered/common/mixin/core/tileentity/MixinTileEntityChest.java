@@ -36,7 +36,6 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
-import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -44,7 +43,6 @@ import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -64,8 +62,7 @@ import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(TileEntityChest.class)
-@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
-        @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
+@Implements(@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
 public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot implements Chest, IMixinCustomNameable, ILockableContainer {
 
     @Shadow public float lidAngle;
@@ -181,17 +178,6 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
         ((TileEntityChest) (Object) this).setCustomName(customName);
     }
 
-    @SuppressWarnings({"RedundantCast", "unchecked"})
-    @Override
-    public TileEntityInventory<TileEntityCarrier> getInventory() {
-        return (TileEntityInventory<TileEntityCarrier>) (Object) this;
-    }
-
-    @Intrinsic
-    public void tilentityinventory$markDirty() {
-        this.markDirty();
-    }
-
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
         return this.slots;
     }
@@ -202,14 +188,6 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     public Fabric<IInventory> inventory$getInventory() {
         return this.fabric;
-    }
-
-    public Optional<Chest> tileentityinventory$getTileEntity() {
-        return Optional.of(this);
-    }
-
-    public Optional<Chest> tileentityinventory$getCarrier() {
-        return Optional.of(this);
     }
 
     @Override

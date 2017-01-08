@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.FilteringSlotAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
@@ -50,6 +51,7 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.FilteringSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 
@@ -57,8 +59,7 @@ import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(TileEntityBrewingStand.class)
-@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
-        @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
+@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
 public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockable implements BrewingStand, IMixinCustomNameable {
 
     @Shadow private String customName;
@@ -82,7 +83,7 @@ public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockabl
                 .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s), t
                         -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
                 .build();
-        this.lens = new OrderedInventoryLensImpl(0, 5, 1, this.slots);
+        this.lens = new BrewingStandInventoryLens((InventoryAdapter<IInventory, ItemStack>) this, this.slots);
     }
 
     @Override
@@ -98,11 +99,6 @@ public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockabl
         ((TileEntityBrewingStand) (Object) this).setName(customName);
     }
 
-    @Intrinsic
-    public void tilentityinventory$markDirty() {
-        this.markDirty();
-    }
-
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
         return this.slots;
     }
@@ -113,13 +109,5 @@ public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockabl
 
     public Fabric<IInventory> inventory$getInventory() {
         return this.fabric;
-    }
-
-    public Optional<BrewingStand> tileentityinventory$getTileEntity() {
-        return Optional.of(this);
-    }
-
-    public Optional<BrewingStand> tileentityinventory$getCarrier() {
-        return Optional.of(this);
     }
 }

@@ -38,7 +38,10 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.InventoryItemData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
+import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.util.DataQueries;
@@ -48,6 +51,7 @@ import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(TileEntityLockable.class)
+@Implements({@Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
 public abstract class MixinTileEntityLockable extends MixinTileEntity implements TileEntityCarrier, IInventory {
 
     @Shadow private LockCode code;
@@ -90,4 +94,16 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
         }
     }
 
+    @Override
+    public TileEntityInventory<TileEntityCarrier> getInventory() {
+        return (TileEntityInventory<TileEntityCarrier>) this;
+    }
+
+    public Optional<? extends TileEntityCarrier> tileentityinventory$getTileEntity() {
+        return Optional.of(this);
+    }
+
+    public Optional<? extends TileEntityCarrier> tileentityinventory$getCarrier() {
+        return Optional.of(this);
+    }
 }
