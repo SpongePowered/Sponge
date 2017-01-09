@@ -774,7 +774,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public void removePassenger(Entity entity) {
         checkNotNull(entity);
-        if (entity.getPassengers().contains(this)) {
+        if (!entity.getPassengers().contains(this)) {
             throw new IllegalArgumentException(String.format("Cannot remove entity %s, because it is not a passenger of %s ", entity, this));
         }
 
