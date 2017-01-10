@@ -63,8 +63,14 @@ import org.spongepowered.api.statistic.EntityStatistic;
 import org.spongepowered.api.statistic.ItemStatistic;
 import org.spongepowered.api.statistic.StatisticType;
 import org.spongepowered.api.statistic.StatisticTypes;
+import org.spongepowered.api.text.BookView;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextTemplate;
 import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.serializer.BookViewDataBuilder;
+import org.spongepowered.api.text.serializer.TextConfigSerializer;
 import org.spongepowered.api.text.serializer.TextSerializerFactory;
+import org.spongepowered.api.text.serializer.TextTemplateConfigSerializer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.util.rotation.Rotation;
@@ -115,6 +121,9 @@ public class SpongeGameRegistry implements GameRegistry {
 
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(Text.class), new TextConfigSerializer());
+        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(BookView.class), new BookViewDataBuilder());
+        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(TextTemplate.class), new TextTemplateConfigSerializer());
     }
 
     public final RegistrationPhase getPhase() {
