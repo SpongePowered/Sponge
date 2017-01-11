@@ -48,6 +48,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -66,6 +67,14 @@ class BlockEventTickPhaseState extends TickPhaseState {
     @Override
     public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
         WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+        if (sourcePos == null) {
+            LocatableBlock locatableBlock =  context.getSource(LocatableBlock.class).orElse(null);
+            if (locatableBlock == null) {
+                TileEntity tileEntity = context.getSource(TileEntity.class).orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a TileEntity!", context));
+                locatableBlock = tileEntity.getLocatableBlock();
+            }
+            sourcePos = ((IMixinLocation)(Object) locatableBlock.getLocation()).getBlockPos();
+        }
         final User user = context.getNotifier().orElse(TrackingUtil.getNotifierOrOwnerFromBlock(minecraftWorld, sourcePos));
         if (user != null) {
             final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos);
