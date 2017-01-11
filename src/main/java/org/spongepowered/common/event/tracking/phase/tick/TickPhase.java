@@ -45,6 +45,7 @@ public final class TickPhase extends TrackingPhase {
 
     public static final class Tick {
 
+        public static final IPhaseState NO_CAPTURE_BLOCK = new NoCaptureBlockTickPhaseState("NoCaptureBlockTickPhase");
         public static final IPhaseState BLOCK = new BlockTickPhaseState("BlockTickPhase");
 
         public static final IPhaseState RANDOM_BLOCK = new BlockTickPhaseState("RandomBlockTickPhase");
@@ -92,6 +93,9 @@ public final class TickPhase extends TrackingPhase {
 
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
+        if (currentState == Tick.NO_CAPTURE_BLOCK) {
+            return false;
+        }
         return true;
     }
 

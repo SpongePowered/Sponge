@@ -296,7 +296,7 @@ public final class GeneralPhase extends TrackingPhase {
 
     @Override
     public boolean ignoresBlockEvent(IPhaseState phaseState) {
-        return phaseState == Post.UNWINDING;
+        return false;
     }
 
     @Override

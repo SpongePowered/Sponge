@@ -30,8 +30,6 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.LocatableBlock;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
 
 public interface IMixinBlockEventData {
@@ -44,11 +42,11 @@ public interface IMixinBlockEventData {
 
     int getEventBlockParameter();
 
-    Optional<LocatableBlock> getTickBlock();
+    @Nullable LocatableBlock getTickBlock();
 
-    Optional<TileEntity> getTickTileEntity();
+    @Nullable TileEntity getTickTileEntity();
 
-    Optional<User> getSourceUser();
+    @Nullable User getSourceUser();
 
     void setTickBlock(@Nullable LocatableBlock tickBlock);
 

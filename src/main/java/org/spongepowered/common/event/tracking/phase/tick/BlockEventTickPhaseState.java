@@ -30,6 +30,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
@@ -65,14 +66,10 @@ class BlockEventTickPhaseState extends TickPhaseState {
     @Override
     public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
         WorldServer minecraftWorld, PlayerTracker.Type notifier) {
-        LocatableBlock locatable = context.getSource(LocatableBlock.class).orElse(null);
-        if (locatable != null) {
-            final Location<World> location = locatable.getLocation();
-            final User user = TrackingUtil.getNotifierOrOwnerFromBlock(location);
-            if (user != null) {
-                final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos);
-                mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
-            }
+        final User user = context.getNotifier().orElse(TrackingUtil.getNotifierOrOwnerFromBlock(minecraftWorld, sourcePos));
+        if (user != null) {
+            final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos);
+            mixinChunk.addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
         }
     }
 
@@ -145,8 +142,11 @@ class BlockEventTickPhaseState extends TickPhaseState {
 
     @Override
     public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
-        LocatableBlock locatable =  context.getSource(LocatableBlock.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
+        LocatableBlock locatable =  context.getSource(LocatableBlock.class).orElse(null);
+        if (locatable == null) {
+            TileEntity tileEntity = context.getSource(TileEntity.class).orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a TileEntity!", context));
+            locatable = tileEntity.getLocatableBlock();
+        }
         builder.named(NamedCause.notifier(locatable));
     }
 

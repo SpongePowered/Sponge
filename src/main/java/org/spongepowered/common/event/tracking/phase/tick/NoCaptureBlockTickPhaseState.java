@@ -22,33 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.packet;
+package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 
-public class BasicPacketState implements IPhaseState, IPacketState {
+class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
 
-    BasicPacketState() {
-
+    NoCaptureBlockTickPhaseState(String name) {
+        super(name);
     }
 
     @Override
-    public final TrackingPhase getPhase() {
-        return TrackingPhases.PACKET;
-    }
-
-    @Override
-    public boolean matches(int packetState) {
+    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext, BlockPos pos) {
         return false;
-    }
-
-    public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
-
     }
 }
