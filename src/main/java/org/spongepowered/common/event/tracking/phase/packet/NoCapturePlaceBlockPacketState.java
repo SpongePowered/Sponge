@@ -25,30 +25,12 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 
-public class BasicPacketState implements IPhaseState, IPacketState {
-
-    BasicPacketState() {
-
-    }
+final class NoCapturePlaceBlockPacketState extends PlaceBlockPacketState {
 
     @Override
-    public final TrackingPhase getPhase() {
-        return TrackingPhases.PACKET;
-    }
-
-    @Override
-    public boolean matches(int packetState) {
+    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext, BlockPos pos) {
         return false;
-    }
-
-    public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
-
     }
 }

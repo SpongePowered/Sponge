@@ -26,6 +26,7 @@ package org.spongepowered.common.network;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemBucket;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -124,7 +125,15 @@ public class PacketUtil {
                 final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
                 final IMixinWorldServer world = (IMixinWorldServer) packetPlayer.worldObj;
                 final CauseTracker causeTracker = world.getCauseTracker();
-                final IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
+                IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
+                if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
+                    if (packetPlayer.getHeldItemMainhand() != null) {
+                        // Don't capture liquids
+                        if (packetPlayer.getHeldItemMainhand().getItem() instanceof ItemBucket) {
+                            packetState = PacketPhase.General.NO_CAPTURE_PLACE_BLOCK;
+                        }
+                    }
+                }
                 if (packetState == null) {
                     throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
                 }

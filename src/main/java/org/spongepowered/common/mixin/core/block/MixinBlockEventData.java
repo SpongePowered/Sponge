@@ -34,8 +34,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
 
 @Mixin(BlockEventData.class)
@@ -70,9 +68,10 @@ public abstract class MixinBlockEventData implements IMixinBlockEventData {
         return getBlock();
     }
 
+    @Nullable
     @Override
-    public Optional<LocatableBlock> getTickBlock() {
-        return Optional.ofNullable(this.tickBlock);
+    public LocatableBlock getTickBlock() {
+        return this.tickBlock;
     }
 
     @Override
@@ -80,9 +79,10 @@ public abstract class MixinBlockEventData implements IMixinBlockEventData {
         this.tickBlock = tickBlock;
     }
 
+    @Nullable
     @Override
-    public Optional<TileEntity> getTickTileEntity() {
-        return Optional.ofNullable(this.tickTileEntity);
+    public TileEntity getTickTileEntity() {
+        return this.tickTileEntity;
     }
 
     @Override
@@ -90,9 +90,10 @@ public abstract class MixinBlockEventData implements IMixinBlockEventData {
         this.tickTileEntity = tickTileEntity;
     }
 
+    @Nullable
     @Override
-    public Optional<User> getSourceUser() {
-        return Optional.ofNullable(this.sourceUser);
+    public User getSourceUser() {
+        return this.sourceUser;
     }
 
     @Override

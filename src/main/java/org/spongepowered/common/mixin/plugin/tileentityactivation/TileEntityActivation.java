@@ -180,10 +180,6 @@ public class TileEntityActivation {
                 // Has not come across a player
                 return false;
             }
-
-        // Add a little performance juice to active entities. Skip 1/4 if not immune.
-        } else if (!spongeTileEntity.getDefaultActivationState() && spongeTileEntity.getSpongeTicksExisted() % 4 == 0) {
-            isActive = false;
         }
 
         // Make sure not on edge of unloaded chunk

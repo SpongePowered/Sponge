@@ -79,6 +79,7 @@ import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventorySt
 import org.spongepowered.common.event.tracking.phase.packet.drag.PrimaryDragInventoryStopState;
 import org.spongepowered.common.event.tracking.phase.packet.drag.SecondaryDragInventoryStopState;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -101,6 +102,7 @@ public final class PacketPhase extends TrackingPhase {
         public static final IPacketState INTERACT_AT_ENTITY = new InteractAtEntityPacketState();
         public static final IPacketState CHAT = new ChatPacketState();
         public static final IPacketState CREATIVE_INVENTORY = new CreativeInventoryPacketState();
+        public static final IPacketState NO_CAPTURE_PLACE_BLOCK = new NoCapturePlaceBlockPacketState();
         public static final IPacketState PLACE_BLOCK = new PlaceBlockPacketState();
         public static final IPacketState OPEN_INVENTORY = new BasicPacketState();
         public static final IPacketState REQUEST_RESPAWN = new BasicPacketState();
@@ -342,6 +344,11 @@ public final class PacketPhase extends TrackingPhase {
     @Override
     public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
         ((IPacketState) currentPhaseData.state).appendContextPreExplosion(phaseContext, currentPhaseData);
+    }
+
+    @Override
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+        ((BasicPacketState) phaseState).associateBlockEventNotifier(context, causeTracker, pos, blockEvent);
     }
 
     // Inventory packet specific methods
