@@ -1917,7 +1917,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (event.isCancelled()) {
                 this.setWeather(this.prevWeather);
             } else {
-                this.setWeather(event.getWeather(), event.getDuration());
+                // TODO: Rewrite this correctly so it doesn't rain 24/7
+                //this.setWeather(event.getWeather(), event.getDuration());
                 this.prevWeather = event.getWeather();
                 this.weatherStartTime = this.worldInfo.getWorldTotalTime();
             }
