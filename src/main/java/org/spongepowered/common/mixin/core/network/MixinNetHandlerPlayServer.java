@@ -354,7 +354,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     ClickInventoryEvent.Creative clickEvent = SpongeCommonEventFactory.callCreativeClickInventoryEvent(this.playerEntity, packetIn);
                     if (clickEvent.isCancelled()) {
                         // Reset slot on client
-                        if (packetIn.getSlotId() >= 0) {
+                        if (packetIn.getSlotId() >= 0 && packetIn.getSlotId() < this.playerEntity.inventoryContainer.inventorySlots.size()) {
                             this.playerEntity.connection.sendPacket(
                                     new SPacketSetSlot(this.playerEntity.inventoryContainer.windowId, packetIn.getSlotId(),
                                             this.playerEntity.inventoryContainer.getSlot(packetIn.getSlotId()).getStack()));

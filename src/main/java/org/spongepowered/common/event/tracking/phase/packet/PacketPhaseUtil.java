@@ -86,7 +86,7 @@ public final class PacketPhaseUtil {
     }
 
     public static void validateCapturedTransactions(int slotId, Container openContainer, List<SlotTransaction> capturedTransactions) {
-        if (capturedTransactions.size() == 0 && slotId >= 0) {
+        if (capturedTransactions.size() == 0 && slotId >= 0 && slotId < openContainer.inventorySlots.size()) {
             final Slot slot = openContainer.getSlot(slotId);
             if (slot != null) {
                 ItemStackSnapshot snapshot = slot.getHasStack() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
