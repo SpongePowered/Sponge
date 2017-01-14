@@ -100,6 +100,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase.State;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -289,12 +290,12 @@ public class SpongeCommonEventFactory {
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos sourcePos, EnumSet notifiedSides) {
         final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
-        // Don't fire notify events during world gen
-        if (peek.state.getPhase().isWorldGeneration(peek.state)) {
+        final PhaseContext context = peek.context;
+        // Don't fire notify events during world gen or while restoring
+        if (peek.state.getPhase().isWorldGeneration(peek.state) || peek.state == State.RESTORING_BLOCKS) {
             return null;
         }
 
-        final PhaseContext context = peek.context;
         User user = context.first(User.class).orElse(null);
         Object rootCause = context.first(Object.class).orElse(null);
 

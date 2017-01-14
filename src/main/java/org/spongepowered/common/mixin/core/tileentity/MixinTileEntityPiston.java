@@ -52,7 +52,7 @@ public abstract class MixinTileEntityPiston extends MixinTileEntity implements P
         }
 
         NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent((World) this.worldObj, this.pos, java.util.EnumSet.of(this.pistonFacing.getOpposite()));
-        if (!event.isCancelled() && !event.getNeighbors().isEmpty()) {
+        if (event == null || !event.isCancelled() && !event.getNeighbors().isEmpty()) {
             this.worldObj.notifyBlockOfStateChange(this.pos, this.pistonState.getBlock());
         }
         // We cancel here to avoid Forge event call in SF
@@ -68,7 +68,7 @@ public abstract class MixinTileEntityPiston extends MixinTileEntity implements P
         }
 
         NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent((World) this.worldObj, this.pos, java.util.EnumSet.of(this.pistonFacing.getOpposite()));
-        if (!event.isCancelled() && !event.getNeighbors().isEmpty()) {
+        if (event == null || !event.isCancelled() && !event.getNeighbors().isEmpty()) {
             this.worldObj.notifyBlockOfStateChange(this.pos, this.pistonState.getBlock());
         }
         // We cancel here to avoid Forge event call in SF
