@@ -501,6 +501,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/PlayerList;sendMessage(Lnet/minecraft/util/text/ITextComponent;)V"))
     public void onDisconnectHandler(PlayerList this$0, ITextComponent component) {
+        // If this happens, the connection has not been fully established yet so we've kicked them during ClientConnectionEvent.Login,
+        // but FML has created this handler earlier to send their handshake. No message should be sent, no disconnection event should
+        // be fired either.
+        if (this.playerEntity.connection == null) {
+            return;
+        }
         final Player player = ((Player) this.playerEntity);
         final Text message = SpongeTexts.toText(component);
         final MessageChannel originalChannel = player.getMessageChannel();
