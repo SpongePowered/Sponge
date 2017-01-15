@@ -50,7 +50,6 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeExtendedData;
 import org.spongepowered.common.data.util.DirectionResolver;
 import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -80,15 +79,12 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
         if (!worldIn.isRemote && CauseTracker.ENABLED) {
             final CauseTracker causeTracker = ((IMixinWorldServer) worldIn).getCauseTracker();
             final IBlockState state = worldIn.getBlockState(pos);
-            final LocatableBlock locatable = LocatableBlock.builder()
-                    .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
-                    .state((BlockState) state)
-                    .build();
-            BlockPos targetPos = pos.offset(direction);
-            String namedCause = extending ? NamedCause.PISTON_EXTEND : NamedCause.PISTON_RETRACT;
-            if (!worldIn.isRemote && SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, targetPos, NamedCause.of(namedCause, worldIn), locatable).isCancelled()) {
-                ci.setReturnValue(false);
-                return;
+            LocatableBlock locatable = causeTracker.getCurrentPhaseData().context.getSource(LocatableBlock.class).orElse(null);
+            if (locatable == null) {
+                locatable = LocatableBlock.builder()
+                        .location(new Location<World>((World) worldIn, pos.getX(), pos.getY(), pos.getZ()))
+                        .state((BlockState) state)
+                        .build();
             }
 
             final IMixinChunk mixinChunk = (IMixinChunk) worldIn.getChunkFromBlockCoords(pos);
