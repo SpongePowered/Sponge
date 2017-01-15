@@ -37,6 +37,7 @@ import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
+import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
@@ -739,6 +740,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
     public boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
+        // We fire a Pre event to make sure our captures do not get stuck in a loop.
+        // This is very common with pistons as they add block events while blocks are being notified.
+        if ((blockIn instanceof BlockPistonBase && SpongeCommonEventFactory.handlePistonEvent(this, list, obj, pos, blockIn, eventId, eventParam))
+                    || SpongeCommonEventFactory.callChangeBlockEventPre(this, pos, NamedCause.of(NamedCause.BLOCK_EVENT, this)).isCancelled()) {
+            return false;
+        }
+
         if (CauseTracker.ENABLED) {
             final CauseTracker causeTracker = this.getCauseTracker();
             final PhaseData currentPhase = causeTracker.getCurrentPhaseData();
@@ -833,15 +841,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPost(Cause.of(NamedCause.source(SpongeImpl.getServer())), this));
         // The chunk GC handles all queuing for chunk unloads so we cancel here to avoid it during a save.
         if (this.chunkGCTickInterval > 0) {
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "addBlockEvent", at = @At("HEAD"), cancellable = true)
-    public void addBlockEvent(BlockPos pos, Block blockIn, int eventID, int eventParam, CallbackInfo ci) {
-        // We fire a Pre event to make sure our captures do not get stuck in a loop.
-        // This is very common with pistons as they add block events while blocks are being notified.
-        if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos, NamedCause.of(NamedCause.BLOCK_EVENT, this)).isCancelled()) {
             ci.cancel();
         }
     }

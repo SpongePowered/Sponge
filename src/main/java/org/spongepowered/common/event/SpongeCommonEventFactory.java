@@ -29,8 +29,9 @@ import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUt
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockDirectional;
+import net.minecraft.block.state.BlockPistonStructureHelper;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
@@ -102,11 +103,9 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase.State;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -123,10 +122,13 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -287,6 +289,34 @@ public class SpongeCommonEventFactory {
         ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), locations, (World) worldIn);
         SpongeImpl.postEvent(event);
         return event;
+    }
+
+    /**
+     * This simulates the blocks a piston moves and calls the event for saner debugging.
+     * @return if the event was cancelled
+     */
+    public static boolean handlePistonEvent(IMixinWorldServer world, WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
+        boolean extending = (eventId == 0);
+        final IBlockState blockstate = ((net.minecraft.world.World) world).getBlockState(pos);
+        EnumFacing direction = (EnumFacing) blockstate.getValue(BlockDirectional.FACING);
+        final LocatableBlock locatable = LocatableBlock.builder()
+                .location(new Location<World>((World) world, pos.getX(), pos.getY(), pos.getZ()))
+                .state((BlockState) blockstate)
+                .build();
+
+        // Sets toss out duplicate values (even though there shouldn't be any)
+        HashSet<Location<org.spongepowered.api.world.World>> locations = new HashSet<>();
+        locations.add(new Location<>((World) world, pos.getX(), pos.getY(), pos.getZ()));
+
+        BlockPistonStructureHelper movedBlocks = new BlockPistonStructureHelper((WorldServer) (Object) world, pos, direction, extending);
+        movedBlocks.canMove(); // calculates blocks to be moved
+
+        Stream.concat(movedBlocks.getBlocksToMove().stream(), movedBlocks.getBlocksToDestroy().stream())
+            .map(block -> new Location<>((World) world, block.getX(), block.getY(), block.getZ()))
+            .collect(Collectors.toCollection(() -> locations)); // SUPER efficient code!
+
+        String namedCause = extending ? NamedCause.PISTON_EXTEND : NamedCause.PISTON_RETRACT;
+        return SpongeCommonEventFactory.callChangeBlockEventPre(world, ImmutableList.copyOf(locations), NamedCause.of(namedCause, world), locatable).isCancelled();
     }
 
     @SuppressWarnings("rawtypes")
