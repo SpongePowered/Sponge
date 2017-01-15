@@ -744,8 +744,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
         // We fire a Pre event to make sure our captures do not get stuck in a loop.
         // This is very common with pistons as they add block events while blocks are being notified.
-        if ((blockIn instanceof BlockPistonBase && SpongeCommonEventFactory.handlePistonEvent(this, list, obj, pos, blockIn, eventId, eventParam))
-                    || SpongeCommonEventFactory.callChangeBlockEventPre(this, pos, NamedCause.of(NamedCause.BLOCK_EVENT, this)).isCancelled()) {
+        if (blockIn instanceof BlockPistonBase) {
+            // We only fire pre events for pistons
+            if (SpongeCommonEventFactory.handlePistonEvent(this, list, obj, pos, blockIn, eventId, eventParam)) {
+                return false;
+            }
+            return list.add((BlockEventData) obj);
+        } else if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos, NamedCause.of(NamedCause.BLOCK_EVENT, this)).isCancelled()) {
             return false;
         }
 
