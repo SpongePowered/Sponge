@@ -336,7 +336,11 @@ public final class TrackingUtil {
             phaseContext.add(NamedCause.notifier(blockEvent.getSourceUser()));
         }
 
-        causeTracker.switchToPhase(TickPhase.Tick.BLOCK_EVENT, phaseContext.complete());
+        if (blockEvent.getCaptureBlocks()) {
+            causeTracker.switchToPhase(TickPhase.Tick.BLOCK_EVENT, phaseContext.complete());
+        } else {
+            causeTracker.switchToPhase(TickPhase.Tick.NO_CAPTURE_BLOCK, phaseContext.complete());
+        }
         boolean result = currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         causeTracker.completePhase();
         return result;

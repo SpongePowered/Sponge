@@ -328,10 +328,29 @@ public class SpongeCommonEventFactory {
 
         User user = context.first(User.class).orElse(null);
         Object rootCause = context.first(Object.class).orElse(null);
+        Cause.Builder builder;
 
         if (rootCause instanceof PhaseContext) {
             PhaseContext phaseContext = (PhaseContext) rootCause;
             rootCause = phaseContext.first(Object.class).orElse(null);
+        }
+
+        if (rootCause instanceof User) {
+            final BlockState blockstate = (BlockState)((net.minecraft.world.World) world).getBlockState(sourcePos);
+            final LocatableBlock locatable = LocatableBlock.builder()
+                    .location(new Location<World>((World) world, sourcePos.getX(), sourcePos.getY(), sourcePos.getZ()))
+                    .state(blockstate)
+                    .build();
+            builder = Cause.source(locatable);
+            builder.named(NamedCause.notifier(rootCause));
+        } else {
+            builder = Cause.source(rootCause);
+            if (user != null) {
+                builder.named(NamedCause.notifier(user));
+            } else {
+                final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(sourcePos);
+                peek.state.getPhase().populateCauseForNotifyNeighborEvent(peek.state, context, builder, causeTracker, mixinChunk, sourcePos);
+            }
         }
 
         final Map<Direction, BlockState> neighbors = new HashMap<>();
@@ -347,14 +366,6 @@ public class SpongeCommonEventFactory {
         }
 
         //ImmutableMap<Direction, BlockState> originalNeighbors = ImmutableMap.copyOf(neighbors);
-        // Determine cause
-        final Cause.Builder builder = Cause.source(rootCause);
-        if (user != null) {
-           builder.notifier(user);
-        } else {
-            final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(sourcePos);
-            peek.state.getPhase().populateCauseForNotifyNeighborEvent(peek.state, context, builder, causeTracker, mixinChunk, sourcePos);
-        }
 
         NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(builder.build(), neighbors, neighbors);
         SpongeImpl.postEvent(event);

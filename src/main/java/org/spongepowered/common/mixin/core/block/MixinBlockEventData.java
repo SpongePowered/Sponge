@@ -39,6 +39,7 @@ import javax.annotation.Nullable;
 @Mixin(BlockEventData.class)
 public abstract class MixinBlockEventData implements IMixinBlockEventData {
 
+    private boolean captureBlocks = true;
     @Nullable private LocatableBlock tickBlock = null;
     @Nullable private TileEntity tickTileEntity = null;
     @Nullable private User sourceUser = null;
@@ -51,6 +52,11 @@ public abstract class MixinBlockEventData implements IMixinBlockEventData {
     @Override
     public BlockPos getEventBlockPosition() {
         return getPosition();
+    }
+
+    @Override
+    public boolean getCaptureBlocks() {
+        return this.captureBlocks;
     }
 
     @Override
@@ -101,4 +107,8 @@ public abstract class MixinBlockEventData implements IMixinBlockEventData {
         this.sourceUser = user;
     }
 
+    @Override
+    public void setCaptureBlocks(boolean capture) {
+        this.captureBlocks = capture;
+    }
 }
