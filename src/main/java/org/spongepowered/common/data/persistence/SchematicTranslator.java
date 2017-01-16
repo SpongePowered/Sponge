@@ -49,7 +49,6 @@ import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
-import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.BackingDataType;
 import org.spongepowered.common.world.schematic.BimapPalette;
 import org.spongepowered.common.world.schematic.GlobalPalette;
 import org.spongepowered.common.world.schematic.SpongeSchematic;
@@ -132,16 +131,8 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             palette = GlobalPalette.instance;
         }
 
-        BackingDataType dataType;
-        if (palette_max <= 0xFF) {
-            dataType = BackingDataType.BYTE;
-        } else if (palette_max <= 0xFF) {
-            dataType = BackingDataType.CHAR;
-        } else {
-            dataType = BackingDataType.INT;
-        }
         MutableBlockVolume buffer =
-                new ArrayMutableBlockBuffer(palette, new Vector3i(-offset[0], -offset[1], -offset[2]), new Vector3i(width, height, length), dataType);
+                new ArrayMutableBlockBuffer(palette, new Vector3i(-offset[0], -offset[1], -offset[2]), new Vector3i(width, height, length));
 
         byte[] blockdata = (byte[]) view.get(DataQueries.Schematic.BLOCK_DATA).get();
         int index = 0;
