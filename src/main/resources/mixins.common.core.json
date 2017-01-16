@@ -309,6 +309,7 @@
         "entity.projectile.MixinEntityFireball",
         "entity.projectile.MixinEntityFishHook",
         "entity.projectile.MixinEntityLargeFireball",
+        "entity.projectile.MixinEntityLlamaSpit",
         "entity.projectile.MixinEntityPotion",
         "entity.projectile.MixinEntityProjectileSource",
         "entity.projectile.MixinEntitySmallFireball",

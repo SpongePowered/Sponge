@@ -28,11 +28,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.monster.EntityBlaze;
 import net.minecraft.entity.monster.EntityGhast;
 import net.minecraft.entity.monster.EntitySkeleton;
 import net.minecraft.entity.monster.EntityWitch;
+import net.minecraft.entity.passive.EntityLlama;
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -42,7 +44,8 @@ import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 
 import java.util.Optional;
 
-@Mixin({EntityBlaze.class, EntityGhast.class, EntityHuman.class, EntityPlayerMP.class, EntitySkeleton.class, EntityWitch.class, EntityWither.class})
+@Mixin({EntityBlaze.class, EntityGhast.class, EntityHuman.class, EntityPlayerMP.class, EntitySkeleton.class, EntityWitch.class, EntityWither.class,
+        EntityLlama.class, EntityDragon.class})
 public abstract class MixinEntityProjectileSource extends EntityLivingBase implements ProjectileSource {
 
     public MixinEntityProjectileSource() {
