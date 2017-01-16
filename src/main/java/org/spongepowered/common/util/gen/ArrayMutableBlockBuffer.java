@@ -93,8 +93,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     @Override
     public BlockState getBlock(int x, int y, int z) {
         checkRange(x, y, z);
-        BlockState block = this.palette.get(this.data.get(getIndex(x, y, z))).get();
-        return block == null ? AIR : block;
+        return this.palette.get(this.data.get(getIndex(x, y, z))).orElse(AIR);
     }
 
     @Override
@@ -192,12 +191,12 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
 
         @Override
         public int get(int index) {
-            return this.data[index];
+            return this.data[index] & 0xFF;
         }
 
         @Override
         public void set(int index, int val) {
-            this.data[index] = (byte) (val & 0xFF);
+            this.data[index] = (byte) val;
         }
 
         @Override
@@ -225,12 +224,12 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
 
         @Override
         public int get(int index) {
-            return this.data[index];
+            return this.data[index] & 0xFFFF;
         }
 
         @Override
         public void set(int index, int val) {
-            this.data[index] = (char) (val & 0xFFFF);
+            this.data[index] = (char) val;
         }
 
         @Override
