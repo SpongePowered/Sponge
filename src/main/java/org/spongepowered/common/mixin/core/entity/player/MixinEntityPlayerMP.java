@@ -95,8 +95,8 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
@@ -535,14 +535,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Optional<Container> openInventory(Inventory inventory, Cause cause) throws IllegalArgumentException {
-        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer(cause, this$,
+        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer(cause, this.this$,
                 inventory));
     }
 
     @Override
     public boolean closeInventory(Cause cause) throws IllegalArgumentException {
         ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
-        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, this.openContainer, this$, cursor, cursor).isCancelled();
+        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, this.openContainer, this.this$, cursor, cursor).isCancelled();
     }
 
     @Override
@@ -825,7 +825,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // We need to re-send the player's inventory to overwrite any client-side inventory changes that may have occured as a result
         // of the client (but not the server) calling Item#onPlayerStoppedUsing (which in the case of a bow, removes one arrow from the inventory).
         if (this.activeItemStack == null) {
-            this$.sendContainerToPlayer(this$.inventoryContainer);
+            this.this$.sendContainerToPlayer(this.this$.inventoryContainer);
         }
         super.stopActiveHand();
     }
@@ -840,7 +840,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (this.getHealth() > 0.0F) {
             return false;
         }
-        this.mcServer.getPlayerList().recreatePlayerEntity(this$, this$.dimension, false);
+        this.connection.playerEntity = this.mcServer.getPlayerList().recreatePlayerEntity(this.this$, this.this$.dimension, false);
         return true;
     }
 
