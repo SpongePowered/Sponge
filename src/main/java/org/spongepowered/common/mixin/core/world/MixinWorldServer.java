@@ -740,6 +740,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
     public boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
+        final BlockEventData blockEventData = (BlockEventData) obj;
+        IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
         // We fire a Pre event to make sure our captures do not get stuck in a loop.
         // This is very common with pistons as they add block events while blocks are being notified.
         if (blockIn instanceof BlockPistonBase) {
@@ -747,7 +749,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (SpongeCommonEventFactory.handlePistonEvent(this, list, obj, pos, blockIn, eventId, eventParam)) {
                 return false;
             }
-            return list.add((BlockEventData) obj);
+
+            blockEvent.setCaptureBlocks(false);
         } else if (SpongeCommonEventFactory.callChangeBlockEventPre(this, pos, NamedCause.of(NamedCause.BLOCK_EVENT, this)).isCancelled()) {
             return false;
         }
@@ -759,10 +762,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
                 return list.add((BlockEventData) obj);
             }
-            final BlockEventData blockEventData = (BlockEventData) obj;
             final PhaseContext context = currentPhase.context;
 
-            IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
             final LocatableBlock locatable = LocatableBlock.builder()
                     .location(new Location<org.spongepowered.api.world.World>(this, pos.getX(), pos.getY(), pos.getZ()))
                     .state(this.getBlock(pos.getX(), pos.getY(), pos.getZ()))

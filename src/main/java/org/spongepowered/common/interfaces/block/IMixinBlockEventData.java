@@ -42,6 +42,8 @@ public interface IMixinBlockEventData {
 
     int getEventBlockParameter();
 
+    boolean getCaptureBlocks();
+
     @Nullable LocatableBlock getTickBlock();
 
     @Nullable TileEntity getTickTileEntity();
@@ -53,4 +55,6 @@ public interface IMixinBlockEventData {
     void setTickTileEntity(@Nullable TileEntity tickTileEntity);
 
     void setSourceUser(User user);
+
+    void setCaptureBlocks(boolean capture);
 }
