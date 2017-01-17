@@ -61,7 +61,16 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     public ArrayMutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size) {
         super(start, size);
         this.palette = palette;
-        this.data = new PackedBackingData(size.getX() * size.getY() * size.getZ(), palette.getHighestId());
+        int dataSize = size.getX() * size.getY() * size.getZ();
+        this.data = new PackedBackingData(dataSize, palette.getHighestId());
+
+        // all blocks default to air
+        int airId = this.palette.getOrAssign(AIR);
+        if (airId != 0) {
+            for (int i = 0; i < dataSize; i++) {
+                data.set(i, airId);
+            }
+        }
     }
 
     public ArrayMutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, char[] blocks) {
