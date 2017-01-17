@@ -90,6 +90,7 @@ public abstract class AbstractBlockViewDownsize<V extends BlockVolume> implement
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
+                // TODO: Optimize and use a local palette
                 char[] data = ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size);
                 return new ArrayMutableBlockBuffer(GlobalPalette.instance, this.min, this.size, data);
             case THREAD_SAFE:

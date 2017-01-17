@@ -25,6 +25,7 @@
 package org.spongepowered.common.util.gen;
 
 import com.flowpowered.math.vector.Vector3i;
+import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.event.cause.Cause;
@@ -39,8 +40,12 @@ import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
+import org.spongepowered.common.world.schematic.BimapPalette;
+import org.spongepowered.common.world.schematic.GlobalPalette;
 
 public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
+
+    private static final int LOCAL_PALETTE_THRESHOLD = 256;
 
     @SuppressWarnings("ConstantConditions")
     private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
@@ -48,16 +53,15 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     private final BlockPalette palette;
     private final BackingData data;
 
-    public ArrayMutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, BackingDataType type) {
-        super(start, size);
-        this.palette = palette;
-        this.data = type.create(size);
+    public ArrayMutableBlockBuffer(Vector3i start, Vector3i size) {
+        this(size.getX() * size.getY() * size.getZ() > LOCAL_PALETTE_THRESHOLD ?
+                new BimapPalette() : GlobalPalette.instance, start, size);
     }
 
-    public ArrayMutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, byte[] blocks) {
+    public ArrayMutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size) {
         super(start, size);
         this.palette = palette;
-        this.data = new ByteBackingData(blocks);
+        this.data = new PackedBackingData(size.getX() * size.getY() * size.getZ(), palette.getHighestId());
     }
 
     public ArrayMutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, char[] blocks) {
@@ -66,16 +70,10 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         this.data = new CharBackingData(blocks);
     }
 
-    public ArrayMutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, int[] blocks) {
-        super(start, size);
-        this.palette = palette;
-        this.data = new IntBackingData(blocks);
-    }
-
     ArrayMutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, BackingData blocks) {
         super(start, size);
         this.palette = palette;
-        this.data = blocks.copyOf();
+        this.data = blocks;
     }
 
     @Override
@@ -122,7 +120,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new ArrayMutableBlockBuffer(this.palette, this.start, this.size, this.data);
+                return new ArrayMutableBlockBuffer(this.palette, this.start, this.size, this.data.copyOf());
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -134,75 +132,28 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         return new ArrayImmutableBlockBuffer(this.palette, this.start, this.size, this.data);
     }
 
-    public static enum BackingDataType {
-        BYTE {
+    /**
+     * Basically a fixed length list of numbers/ids.
+     * It may be a good idea to optimize for lower numbers/ids,
+     * however up to Block.BLOCK_STATE_IDS.size() must be supported.
+     */
+    interface BackingData {
 
-            @Override
-            public BackingData create(Vector3i size) {
-                return new ByteBackingData(size.getX() * size.getY() * size.getZ());
-            }
-        },
-        CHAR {
-
-            @Override
-            public BackingData create(Vector3i size) {
-                return new CharBackingData(size.getX() * size.getY() * size.getZ());
-            }
-        },
-        INT {
-
-            @Override
-            public BackingData create(Vector3i size) {
-                return new IntBackingData(size.getX() * size.getY() * size.getZ());
-            }
-        };
-
-        public abstract BackingData create(Vector3i size);
-    }
-
-    static interface BackingData {
-
-        Object getBacking();
-
+        /**
+         * Gets the id at an index.
+         */
         int get(int index);
 
+        /**
+         * Sets the id at an index. The id must not be negative.
+         */
         void set(int index, int val);
 
+        /**
+         * Creates a copy of this BackingData
+         */
         BackingData copyOf();
 
-    }
-
-    static class ByteBackingData implements BackingData {
-
-        private final byte[] data;
-
-        public ByteBackingData(byte[] data) {
-            this.data = data;
-        }
-
-        public ByteBackingData(int len) {
-            this.data = new byte[len];
-        }
-
-        @Override
-        public Object getBacking() {
-            return this.data;
-        }
-
-        @Override
-        public int get(int index) {
-            return this.data[index] & 0xFF;
-        }
-
-        @Override
-        public void set(int index, int val) {
-            this.data[index] = (byte) val;
-        }
-
-        @Override
-        public BackingData copyOf() {
-            return new ByteBackingData(this.data.clone());
-        }
     }
 
     static class CharBackingData implements BackingData {
@@ -211,15 +162,6 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
 
         public CharBackingData(char[] data) {
             this.data = data;
-        }
-
-        public CharBackingData(int len) {
-            this.data = new char[len];
-        }
-
-        @Override
-        public Object getBacking() {
-            return this.data;
         }
 
         @Override
@@ -238,36 +180,119 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         }
     }
 
-    static class IntBackingData implements BackingData {
+    static class PackedBackingData implements BackingData {
+        /** A long array used to store the packed values */
+        private long[] longArray;
+        /** Number of bits a single entry takes up */
+        private int bits;
+        /**
+         * The maximum value for a single entry. This also asks as a bitmask for a single entry.
+         * For instance, if bits were 5, this value would be 31 (ie, {@code 0b00011111}).
+         */
+        private long maxValue;
+        /** Number of entries in this array (<b>not</b> the length of the long array that internally backs this array) */
+        private final int arraySize;
 
-        private final int[] data;
-
-        public IntBackingData(int[] data) {
-            this.data = data;
+        /**
+         * @param size The number of elements
+         */
+        public PackedBackingData(int size) {
+            this(size, 0);
         }
 
-        public IntBackingData(int len) {
-            this.data = new int[len];
+        /**
+         * Creates a new PackedBackingData starting out with enough bits to store values of {@code highestValue}.
+         *
+         * @param size The number of elements
+         * @param highestValue The highest value to prepare for
+         */
+        public PackedBackingData(int size, int highestValue) {
+            this.arraySize = size;
+            for (bits = 0; 1 << bits <= highestValue; bits++);
+
+            this.maxValue = (1 << bits) - 1;
+            this.longArray = new long[MathHelper.roundUp(size * bits, Long.SIZE) / Long.SIZE];
+        }
+
+        private PackedBackingData(int size, int bits, long[] array) {
+            this.arraySize = size;
+            this.bits = bits;
+            this.maxValue = (1 << bits) - 1;
+            this.longArray = array;
         }
 
         @Override
-        public Object getBacking() {
-            return this.data;
+        public void set(int index, int value) {
+            if (value > maxValue) {
+                remax(value);
+            }
+
+            int bitIndex = index * bits;
+            int longIndex = bitIndex / Long.SIZE;
+            int bitOffset = bitIndex % Long.SIZE;
+
+            longArray[longIndex] = longArray[longIndex] & ~(maxValue << bitOffset) | (long) value << bitOffset;
+
+            if (bitOffset + bits > Long.SIZE) {
+                // The entry is split between two longs (lets call them left long, and right long)
+                int bitsInLeft = Long.SIZE - bitOffset;
+                int bitsInRight = bits - bitsInLeft;
+                longIndex++;
+                longArray[longIndex] = longArray[longIndex] >>> bitsInRight << bitsInRight | (long) value >> bitsInLeft;
+            }
+        }
+
+        /**
+         * Increases the maximum value by adding more bits to each value.
+         */
+        private void remax(int highestValue) {
+            int newBits;
+            for (newBits = bits; 1 << newBits <= highestValue; newBits++);
+
+            long newMaxValue = (1 << newBits) - 1;
+            long[] newLongArray = new long[MathHelper.roundUp(arraySize * newBits, Long.SIZE) / Long.SIZE];
+
+            for (int i = 0; i < arraySize; i++) {
+                int value = get(i);
+
+                int bitIndex = i * newBits;
+                int longIndex = bitIndex / Long.SIZE;
+                int bitOffset = bitIndex % Long.SIZE;
+
+                newLongArray[longIndex] = newLongArray[longIndex] & ~(newMaxValue << bitOffset) | (long) value << bitOffset;
+
+                if (bitOffset + newBits > Long.SIZE) {
+                    // The entry is split between two longs (lets call them left long, and right long)
+                    int bitsInLeft = Long.SIZE - bitOffset;
+                    int bitsInRight = newBits - bitsInLeft;
+                    longIndex++;
+                    newLongArray[longIndex] = newLongArray[longIndex] >>> bitsInRight << bitsInRight | (long) value >> bitsInLeft;
+                }
+            }
+            bits = newBits;
+            maxValue = newMaxValue;
+            longArray = newLongArray;
         }
 
         @Override
         public int get(int index) {
-            return this.data[index];
+            int bitIndex = index * bits;
+            int longIndex = bitIndex / Long.SIZE;
+            int rightLongIndex = (bitIndex + bits - 1) / 64;
+            int bitOffset = bitIndex % 64;
+
+            if (bitOffset + bits > Long.SIZE) {
+                // The entry is split between two longs
+                int bitsInLeft = Long.SIZE - bitOffset;
+                return (int) ((longArray[longIndex] >>> bitOffset | longArray[rightLongIndex] << bitsInLeft) & maxValue);
+            } else {
+                return (int) (longArray[longIndex] >>> bitOffset & maxValue);
+            }
         }
 
         @Override
-        public void set(int index, int val) {
-            this.data[index] = val;
-        }
-
-        @Override
-        public BackingData copyOf() {
-            return new IntBackingData(this.data.clone());
+        public PackedBackingData copyOf() {
+            return new PackedBackingData(arraySize, bits, longArray.clone());
         }
     }
 }
