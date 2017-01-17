@@ -552,6 +552,15 @@ public final class EntityUtil {
     }
     @SuppressWarnings("unchecked")
     public static boolean refreshPainting(EntityPainting painting, EntityPainting.EnumArt art) {
+        EntityPainting.EnumArt oldArt = painting.art;
+        painting.art = art;
+        painting.updateFacingWithBoundingBox(painting.facingDirection);
+        if (!painting.onValidSurface()) {
+            painting.art = oldArt;
+            painting.updateFacingWithBoundingBox(painting.facingDirection);
+            return false;
+        }
+
         final EntityTracker paintingTracker = ((WorldServer) painting.world).getEntityTracker();
         EntityTrackerEntry paintingEntry = paintingTracker.trackedEntityHashTable.lookup(painting.getEntityId());
         List<EntityPlayerMP> playerMPs = new ArrayList<>();
@@ -560,8 +569,6 @@ public final class EntityUtil {
             player.connection.sendPacket(packet);
             playerMPs.add(player);
         }
-        painting.art = art;
-        painting.updateFacingWithBoundingBox(painting.facingDirection);
         for (EntityPlayerMP playerMP : playerMPs) {
             SpongeImpl.getGame().getScheduler().createTaskBuilder()
                     .delayTicks(SpongeImpl.getGlobalConfig().getConfig().getEntity().getPaintingRespawnDelaly())
