@@ -52,7 +52,7 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPa
     @Override
     protected boolean set(EntityPainting entity, Art value) {
         if (!entity.worldObj.isRemote) {
-            EntityUtil.refreshPainting(entity, (EntityPainting.EnumArt) (Object) value);
+            return EntityUtil.refreshPainting(entity, (EntityPainting.EnumArt) (Object) value);
         }
         return true;
     }
