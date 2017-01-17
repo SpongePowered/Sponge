@@ -107,7 +107,6 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -620,6 +619,7 @@ public final class EntityUtil {
     // getPlayerRespawnLocation and recreatePlayerEntity
     public static boolean tempIsBedSpawn = false;
 
+    // Internal to MixinPlayerList. has side effects
     public static Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
         final Location<World> location = ((World) playerIn.world).getSpawnLocation();
         tempIsBedSpawn = false;
@@ -632,7 +632,7 @@ public final class EntityUtil {
         // Cannot respawn in requested world, use the fallback dimension for
         // that world. (Usually overworld unless a mod says otherwise).
         if (!targetDimension.allowsPlayerRespawns()) {
-            targetDimensionId = ((IMixinWorldProvider) targetDimension).getRespawnDimension(playerIn);
+            targetDimensionId = SpongeImplHooks.getRespawnDimension((WorldProvider) targetDimension, playerIn);
             targetWorld = targetWorld.getMinecraftServer().worldServerForDimension(targetDimensionId);
         }
 

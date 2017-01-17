@@ -171,11 +171,15 @@ public final class SpongeImplHooks {
         boolean isAdventure = world.getWorldInfo().getGameType() == GameType.ADVENTURE;
         int spawnFuzz = Math.max(0, world.getMinecraftServer().getSpawnRadius(world));
         int border = MathHelper.floor(world.getWorldBorder().getClosestDistance(ret.getX(), ret.getZ()));
-        if (border < spawnFuzz) spawnFuzz = border;
+        if (border < spawnFuzz) {
+            spawnFuzz = border;
+        }
 
         if (!world.provider.hasNoSky() && !isAdventure && spawnFuzz != 0)
         {
-            if (spawnFuzz < 2) spawnFuzz = 2;
+            if (spawnFuzz < 2) {
+                spawnFuzz = 2;
+            }
             int spawnFuzzHalf = spawnFuzz / 2;
             ret = world.getTopSolidOrLiquidBlock(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
         }
