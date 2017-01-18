@@ -135,7 +135,7 @@ public class SkullUtils {
             try {
                 return future.get();
             } catch (InterruptedException | ExecutionException e) {
-                SpongeImpl.getLogger().debug("Exception while trying to fill GameProfile: ", e);
+                SpongeImpl.getLogger().debug("Exception while trying to fill skull GameProfile for '"+ profile + "'", e);
                 return profile;
             }
         }
