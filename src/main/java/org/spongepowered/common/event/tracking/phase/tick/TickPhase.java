@@ -134,7 +134,7 @@ public final class TickPhase extends TrackingPhase {
 
     @Override
     public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
-        return true;
+        return currentState != Tick.NO_CAPTURE_BLOCK;
     }
 
     @Override
