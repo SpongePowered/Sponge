@@ -45,7 +45,12 @@ import org.spongepowered.common.world.schematic.GlobalPalette;
 
 public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
 
-    private static final int LOCAL_PALETTE_THRESHOLD = 256;
+    /**
+     * If the area is lower than this amount, a global palette will be used.<br/>
+     * Example: If its only a 4 block area why allocate a local palette that
+     * by its self will take up more space in memory than it saves.
+     */
+    private static final int SMALL_AREA_THRESHOLD = 256;
 
     @SuppressWarnings("ConstantConditions")
     private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
@@ -54,7 +59,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     private BackingData data;
 
     public ArrayMutableBlockBuffer(Vector3i start, Vector3i size) {
-        this(size.getX() * size.getY() * size.getZ() > LOCAL_PALETTE_THRESHOLD ?
+        this(size.getX() * size.getY() * size.getZ() > SMALL_AREA_THRESHOLD ?
                 new BimapPalette() : GlobalPalette.instance, start, size);
     }
 
