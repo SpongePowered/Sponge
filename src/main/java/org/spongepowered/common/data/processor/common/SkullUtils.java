@@ -126,26 +126,17 @@ public class SkullUtils {
         if (profile == null) {
             return null;
         }
-        // Skulls need a name in order to properly display -> resolve if no name is contained in the given profile
-        final GameProfileManager resolver = Sponge.getGame().getServer().getGameProfileManager();
-        if (!profile.getName().isPresent() || profile.getName().get().isEmpty()) {
-            final CompletableFuture<GameProfile> future = resolver.get(profile.getUniqueId());
-            try {
-                return future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                SpongeImpl.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
-                return null;
-            }
-        } else if (profile.getUniqueId() == null) {
-            final CompletableFuture<GameProfile> future = resolver.get(profile.getName().get());
-            try {
-                return future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                SpongeImpl.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
-                return null;
-            }
-        } else {
+        if (profile.getPropertyMap().containsKey("textures")) {
             return profile;
+        } else {
+            // Skulls need a name in order to properly display -> resolve if no name is contained in the given profile
+            final CompletableFuture<GameProfile> future = Sponge.getGame().getServer().getGameProfileManager().fill(profile);
+            try {
+                return future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                SpongeImpl.getLogger().debug("Exception while trying to fill skull GameProfile for '" + profile + "'", e);
+                return profile;
+            }
         }
     }
 
