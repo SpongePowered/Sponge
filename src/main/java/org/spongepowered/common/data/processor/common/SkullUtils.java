@@ -130,24 +130,14 @@ public class SkullUtils {
         final GameProfileManager resolver = Sponge.getGame().getServer().getGameProfileManager();
         if (profile.getPropertyMap().containsKey("textures")) {
             return profile;
-        } else if (profile.getUniqueId() != null) {
-            final CompletableFuture<GameProfile> future = resolver.get(profile.getUniqueId());
-            try {
-                return future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                SpongeImpl.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
-                return null;
-            }
-        } else if (profile.getName().isPresent()) {
-            final CompletableFuture<GameProfile> future = resolver.get(profile.getName().get());
-            try {
-                return future.get();
-            } catch (InterruptedException | ExecutionException e) {
-                SpongeImpl.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
-                return null;
-            }
         } else {
-            return profile;
+            final CompletableFuture<GameProfile> future = resolver.fill(profile);
+            try {
+                return future.get();
+            } catch (InterruptedException | ExecutionException e) {
+                SpongeImpl.getLogger().debug("Exception while trying to fill GameProfile: ", e);
+                return profile;
+            }
         }
     }
 
