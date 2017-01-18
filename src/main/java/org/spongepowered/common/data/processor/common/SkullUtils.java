@@ -128,7 +128,9 @@ public class SkullUtils {
         }
         // Skulls need a name in order to properly display -> resolve if no name is contained in the given profile
         final GameProfileManager resolver = Sponge.getGame().getServer().getGameProfileManager();
-        if (!profile.getName().isPresent() || profile.getName().get().isEmpty()) {
+        if (profile.getPropertyMap().containsKey("textures")) {
+            return profile;
+        } else if (profile.getUniqueId() != null) {
             final CompletableFuture<GameProfile> future = resolver.get(profile.getUniqueId());
             try {
                 return future.get();
@@ -136,7 +138,7 @@ public class SkullUtils {
                 SpongeImpl.getLogger().debug("Exception while trying to resolve GameProfile: ", e);
                 return null;
             }
-        } else if (profile.getUniqueId() == null) {
+        } else if (profile.getName().isPresent()) {
             final CompletableFuture<GameProfile> future = resolver.get(profile.getName().get());
             try {
                 return future.get();
