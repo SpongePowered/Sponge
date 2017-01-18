@@ -161,21 +161,21 @@ public class PaginationCalculator {
                     .getBold();
 
             Integer cp;
-            boolean new_line = false;
+            boolean newLine = false;
             while(i_it.hasNext()){
                 cp = i_it.next();
                 if (cp == '\n') {
                     // if the previous character is a '\n'
-                    if (new_line) {
+                    if (newLine) {
                         total += LINE_WIDTH;
                     } else {
                         total = ((int) Math.ceil((double) total / LINE_WIDTH)) * LINE_WIDTH;
-                        new_line = true;
+                        newLine = true;
                     }
                 } else {
                     int width = getWidth(cp, bold);
                     total += width;
-                    new_line = false;
+                    newLine = false;
                 }
             }
         }
