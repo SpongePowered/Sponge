@@ -53,8 +53,10 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
@@ -76,7 +78,6 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
@@ -224,16 +225,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return getDefaultBlockState().getTrait(blockTrait);
     }
 
-    @Redirect(method = "dropBlockAsItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;dropBlockAsItemWithChance(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;FI)V"))
-    private void onDropItemWithFortuneChances(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, float chance, int fortune) {
-        if (world instanceof IMixinWorldServer && CauseTracker.ENABLED) {
-            TrackingUtil.performBlockDrop(block, (IMixinWorldServer) world, pos, state, chance, fortune);
-            return;
-        }
-        block.dropBlockAsItemWithChance(world, pos, state, chance, fortune);
-
-    }
-
     @Inject(method = "spawnAsEntity", at = @At(value = "NEW", args = {"class=net/minecraft/entity/item/EntityItem"}), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     private static void checkSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack, CallbackInfo callbackInfo, float chance, double x, double y, double z) {
         Transform<World> position = new Transform<>((World) worldIn, new Vector3d(x, y, z));
@@ -246,10 +237,54 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         }
     }
 
+    // This method can be called directly by pistons, mods, etc. so the hook must go here
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)
-    public void onDropBlockAsItemWithChance(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
-        if (!worldIn.isRemote && ((IMixinWorldServer) worldIn).getCauseTracker().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
-            ci.cancel();
+    public void onDropBlockAsItemWithChanceHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
+        if (!worldIn.isRemote && worldIn instanceof IMixinWorldServer) {
+            if (((IMixinWorldServer) worldIn).getCauseTracker().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
+                ci.cancel();
+                return;
+            }
+
+            final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
+            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
+            final IPhaseState currentState = causeTracker.getCurrentState();
+            final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState);
+            if (shouldEnterBlockDropPhase) {
+                // TODO: Change source to LocatableBlock
+                PhaseContext context = PhaseContext.start()
+                        .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
+                        .addBlockCaptures()
+                        .addEntityCaptures();
+
+                // unused, to be removed and re-located when phase context is cleaned up
+                //.add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_FORTUNE, fortune))
+                //.add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_POSITION, pos));
+                // use current notifier and owner if available
+                User notifier = causeTracker.getCurrentContext().getNotifier().orElse(null);
+                User owner = causeTracker.getCurrentContext().getOwner().orElse(null);
+                if (notifier != null) {
+                    context.notifier(notifier);
+                }
+                if (owner != null) {
+                    context.owner(owner);
+                }
+                context.complete();
+                causeTracker.switchToPhase(BlockPhase.State.BLOCK_DROP_ITEMS, context);
+            }
+        }
+    }
+
+    @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "RETURN"), cancellable = true)
+    public void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
+        if (!worldIn.isRemote && worldIn instanceof IMixinWorldServer) {
+            final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
+            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
+            final IPhaseState currentState = causeTracker.getCurrentState();
+            final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState);
+            if (shouldEnterBlockDropPhase) {
+                causeTracker.completePhase();
+            }
         }
     }
 
