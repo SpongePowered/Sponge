@@ -44,6 +44,7 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
@@ -91,6 +92,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
+import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -152,6 +154,7 @@ import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
+import org.spongepowered.common.util.SkinUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -351,6 +354,22 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public User getUserObject() {
         return this.user;
+    }
+
+    // Post before the player values are updated
+    @Inject(method = "handleClientSettings", at = @At("HEAD"))
+    public void postClientSettingsEvent(CPacketClientSettings packet, CallbackInfo ci) {
+        // TODO: add HandPreference to PlayerChangeClientSettingsEvent once DominantHandData is implemented
+        final PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Cause.of(NamedCause.source(this)),
+                (ChatVisibility) (Object) packet.getChatVisibility(), SkinUtil.fromFlags(packet.getModelPartFlags()),
+                LocaleCache.getLocale(packet.getLang()), this, packet.isColorsEnabled(), packet.view);
+        SpongeImpl.postEvent(event);
+    }
+
+    @Inject(method = "handleClientSettings", at = @At("RETURN"))
+    public void captureClientSettings(CPacketClientSettings packet, CallbackInfo ci) {
+        this.skinParts = SkinUtil.fromFlags(packet.getModelPartFlags()); // Returned set is immutable
+        this.viewDistance = packet.view;
     }
 
     @Override

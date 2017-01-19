@@ -36,7 +36,6 @@ import net.minecraft.inventory.Slot;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketClickWindow;
-import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
@@ -55,7 +54,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
@@ -67,7 +65,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -89,8 +86,6 @@ import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
-import org.spongepowered.common.util.LocaleCache;
-import org.spongepowered.common.util.SkinUtil;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
@@ -902,15 +897,6 @@ public interface PacketFunction {
         }
     });
     PacketFunction ENCHANTMENT = ((packet, state, player, context) -> {
-    });
-    PacketFunction CLIENT_SETTINGS = ((packet, state, player, context) -> {
-        final CPacketClientSettings settings = (CPacketClientSettings) packet;
-        // TODO 1.11: The client is sending 'en_us' instead of 'en_US' as the locale.
-
-        PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Cause.of(NamedCause.source(player)),
-                (ChatVisibility) (Object) settings.getChatVisibility(), SkinUtil.fromFlags(settings.getModelPartFlags()),
-                LocaleCache.getLocale(settings.getLang()), (Player) player, settings.isColorsEnabled(), settings.view);
-        SpongeImpl.postEvent(event);
     });
     PacketFunction CLIENT_STATUS = ((packet, state, player, context) -> {
         if (state == PacketPhase.Inventory.OPEN_INVENTORY) {

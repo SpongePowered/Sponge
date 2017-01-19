@@ -36,7 +36,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketChatMessage;
 import net.minecraft.network.play.client.CPacketClickWindow;
-import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.client.CPacketClientStatus;
 import net.minecraft.network.play.client.CPacketCloseWindow;
 import net.minecraft.network.play.client.CPacketConfirmTransaction;
@@ -419,7 +418,6 @@ public final class PacketPhase extends TrackingPhase {
         this.packetUnwindMap.put(CPacketUpdateSign.class, PacketFunction.HANDLED_EXTERNALLY);
         this.packetUnwindMap.put(CPacketPlayerAbilities.class, PacketFunction.IGNORED);
         this.packetUnwindMap.put(CPacketTabComplete.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(CPacketClientSettings.class, PacketFunction.CLIENT_SETTINGS);
         this.packetUnwindMap.put(CPacketClientStatus.class, PacketFunction.CLIENT_STATUS);
         this.packetUnwindMap.put(CPacketCustomPayload.class, PacketFunction.HANDLED_EXTERNALLY);
         this.packetUnwindMap.put(CPacketSpectate.class, PacketFunction.IGNORED);
@@ -482,7 +480,6 @@ public final class PacketPhase extends TrackingPhase {
         this.packetTranslationMap.put(CPacketUpdateSign.class, packet -> General.UPDATE_SIGN);
         this.packetTranslationMap.put(CPacketPlayerAbilities.class, packet -> General.IGNORED);
         this.packetTranslationMap.put(CPacketTabComplete.class, packet -> General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(CPacketClientSettings.class, packet -> General.CLIENT_SETTINGS);
         this.packetTranslationMap.put(CPacketClientStatus.class, packet -> {
             final CPacketClientStatus clientStatus = (CPacketClientStatus) packet;
             final CPacketClientStatus.State status = clientStatus.getStatus();
