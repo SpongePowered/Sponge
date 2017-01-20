@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.IRangedAttackMob;
@@ -40,14 +40,12 @@ import net.minecraft.entity.item.EntityEnderCrystal;
 import net.minecraft.entity.item.EntityFallingBlock;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.entity.item.EntityTNTPrimed;
-import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntitySheep;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -57,6 +55,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.explosive.FusedExplosive;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
@@ -64,7 +64,6 @@ import org.spongepowered.common.config.category.EntityActivationModCategory;
 import org.spongepowered.common.config.category.EntityActivationRangeCategory;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.entity.projectile.IMixinEntityArrow;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
@@ -72,7 +71,7 @@ import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModDat
 import java.util.HashMap;
 import java.util.Map;
 
-public class ActivationRange {
+public class EntityActivationRange {
 
     private static final ImmutableMap<Byte, String> activationTypeMappings = new ImmutableMap.Builder<Byte, String>()
             .put((byte) 1, "monster")
@@ -88,6 +87,7 @@ public class ActivationRange {
     static AxisAlignedBB monsterBB = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
     static AxisAlignedBB aquaticBB = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
     static AxisAlignedBB ambientBB = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
+    static AxisAlignedBB tileEntityBB = new AxisAlignedBB(0, 0, 0, 0, 0, 0);
     @SuppressWarnings("serial") static Map<Byte, Integer> maxActivationRanges = new HashMap<Byte, Integer>() {
 
         {
@@ -146,11 +146,8 @@ public class ActivationRange {
             || entity instanceof EntityTNTPrimed
             || entity instanceof EntityEnderCrystal
             || entity instanceof EntityFireworkRocket
-            || entity instanceof EntityFallingBlock // Always tick falling blocks
-            // force ticks for entities with superclass of Entity and not a creature/monster
-            || (entity.getClass().getSuperclass() == Entity.class && !SpongeImplHooks.isCreatureOfType(entity, EnumCreatureType.CREATURE)
-            && !SpongeImplHooks.isCreatureOfType(entity, EnumCreatureType.AMBIENT) && !SpongeImplHooks.isCreatureOfType(entity, EnumCreatureType.MONSTER)
-            && !SpongeImplHooks.isCreatureOfType(entity, EnumCreatureType.WATER_CREATURE))) {
+            || entity instanceof EntityFallingBlock) // Always tick falling blocks
+        {
             return true;
         }
 
@@ -232,7 +229,7 @@ public class ActivationRange {
             }
 
             maxRange = Math.min((SpongeImpl.getServer().getPlayerList().getViewDistance() << 4) - 8, maxRange);
-            ((IModData_Activation) player).setActivatedTick(world.getWorldInfo().getWorldTotalTime());
+            ((IModData_Activation) player).setActivatedTick(SpongeImpl.getServer().getTickCounter());
             growBb(maxBB, player.getEntityBoundingBox(), maxRange, 256, maxRange);
 
             int i = MathHelper.floor_double(maxBB.minX / 16.0D);
@@ -262,13 +259,13 @@ public class ActivationRange {
 
             for (Object o : chunk.getEntityLists()[i]) {
                 Entity entity = (Entity) o;
-                SpongeConfig<?> config = ((IMixinWorldServer) entity.worldObj).getActiveConfig();
                 EntityType type = ((org.spongepowered.api.entity.Entity) entity).getType();
-                if (config == null || type == EntityTypes.UNKNOWN) {
+                long currentTick = SpongeImpl.getServer().getTickCounter();
+                if (type == EntityTypes.UNKNOWN) {
+                    ((IModData_Activation) entity).setActivatedTick(currentTick);
                     continue;
                 }
 
-                long currentTick = entity.worldObj.getWorldInfo().getWorldTotalTime();
                 if (currentTick > ((IModData_Activation) entity).getActivatedTick()) {
                     if (((IModData_Activation) entity).getDefaultActivationState()) {
                         ((IModData_Activation) entity).setActivatedTick(currentTick);
@@ -278,7 +275,7 @@ public class ActivationRange {
                     IModData_Activation spongeEntity = (IModData_Activation) entity;
                     // check if activation cache needs to be updated
                     if (spongeEntity.requiresActivationCacheRefresh()) {
-                        ActivationRange.initializeEntityActivationState(entity);
+                        EntityActivationRange.initializeEntityActivationState(entity);
                         spongeEntity.requiresActivationCacheRefresh(false);
                     }
                     // check for entity type overrides
@@ -338,14 +335,14 @@ public class ActivationRange {
      */
     public static boolean checkEntityImmunities(Entity entity) {
         // quick checks.
-        if (entity.isInWater() || entity.fire > 0) {
+        if (entity.fire > 0) {
             return true;
         }
-        if (!(entity instanceof EntityArrow)) {
+        if (!(entity instanceof Projectile)) {
             if (!entity.getPassengers().isEmpty() || entity.ridingEntity != null) {
                 return true;
             }
-        } else if (!((IMixinEntityArrow) entity).isInGround()) {
+        } else if (!((Projectile) entity).isOnGround()) {
             return true;
         }
         // special cases.
@@ -354,7 +351,7 @@ public class ActivationRange {
             if (living.hurtTime > 0 || living.getActivePotionEffects().size() > 0) {
                 return true;
             }
-            if (entity instanceof EntityCreature && ((EntityCreature) entity).getAITarget() != null) {
+            if (((EntityLiving) entity).getAITarget() != null || ((EntityLiving) entity).getAttackTarget() != null) {
                 return true;
             }
             if (entity instanceof EntityVillager && ((EntityVillager) entity).isMating()) {
@@ -369,7 +366,7 @@ public class ActivationRange {
                     return true;
                 }
             }
-            if (entity instanceof EntityCreeper && ((EntityCreeper) entity).hasIgnited()) {
+            if (entity instanceof FusedExplosive && ((FusedExplosive) entity).isPrimed()) {
                 return true;
             }
         }
@@ -388,10 +385,9 @@ public class ActivationRange {
             return true;
         }
 
-        long currentTick = entity.worldObj.getWorldInfo().getWorldTotalTime();
+        long currentTick = SpongeImpl.getServer().getTickCounter();
         IModData_Activation spongeEntity = (IModData_Activation) entity;
-        boolean isActive =
-                spongeEntity.getActivatedTick() >= currentTick || spongeEntity.getDefaultActivationState();
+        boolean isActive = spongeEntity.getActivatedTick() >= currentTick || spongeEntity.getDefaultActivationState();
 
         // Should this entity tick?
         if (!isActive) {
@@ -411,9 +407,13 @@ public class ActivationRange {
         // Make sure not on edge of unloaded chunk
         int x = MathHelper.floor_double(entity.posX);
         int z = MathHelper.floor_double(entity.posZ);
-        Chunk chunk = isActive ? ((IMixinChunkProviderServer) entity.worldObj.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
-        if (isActive && !(chunk != null && ((IMixinChunk) chunk).areNeighborsLoaded())) {
+        IMixinChunk spongeChunk = isActive ? (IMixinChunk)((IMixinChunkProviderServer) entity.worldObj.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
+        if (isActive && (spongeChunk == null || !spongeChunk.areNeighborsLoaded())) {
             isActive = false;
+        }
+
+        if (!isActive && spongeChunk != null && spongeChunk.isPersistedChunk()) {
+            isActive = true;
         }
 
         return isActive;
@@ -429,7 +429,7 @@ public class ActivationRange {
         }
 
         String entityType = "misc";
-        entityType = ActivationRange.activationTypeMappings.get(activationType);
+        entityType = EntityActivationRange.activationTypeMappings.get(activationType);
         boolean requiresSave = false;
         EntityActivationRangeCategory activationCategory = config.getConfig().getEntityActivationRange();
         EntityActivationModCategory entityMod = activationCategory.getModList().get(type.getModId());

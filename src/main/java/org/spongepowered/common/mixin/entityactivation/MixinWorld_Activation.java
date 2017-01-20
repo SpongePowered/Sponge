@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.mixin.plugin.entityactivation.ActivationRange;
+import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRange;
 
 @NonnullByDefault
 @Mixin(value = net.minecraft.world.World.class, priority = 1005)
@@ -39,7 +39,7 @@ public abstract class MixinWorld_Activation {
             target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = {"ldc=regular"}, shift = At.Shift.BY, by = -2))
     private void onInvokeProfiler(CallbackInfo ci) {
         if (!((net.minecraft.world.World) (Object) this).isRemote) {
-            ActivationRange.activateEntities(((net.minecraft.world.World) (Object) this));
+            EntityActivationRange.activateEntities(((net.minecraft.world.World) (Object) this));
         }
     }
 
