@@ -47,7 +47,7 @@ public final class GameModeRegistryModule implements CatalogRegistryModule<GameM
 
     @Override
     public Optional<GameMode> getById(String id) {
-        return Optional.of(this.gameModeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+        return Optional.ofNullable(this.gameModeMappings.get(checkNotNull(id, "id").toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

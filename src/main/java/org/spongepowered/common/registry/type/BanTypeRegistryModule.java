@@ -47,7 +47,7 @@ public class BanTypeRegistryModule implements CatalogRegistryModule<BanType> {
 
     @Override
     public Optional<BanType> getById(String id) {
-        return Optional.of(this.banTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+        return Optional.ofNullable(this.banTypeMappings.get(checkNotNull(id, "id").toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
