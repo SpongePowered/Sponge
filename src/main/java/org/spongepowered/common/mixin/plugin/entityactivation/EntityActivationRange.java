@@ -351,7 +351,7 @@ public class EntityActivationRange {
             if (living.hurtTime > 0 || living.getActivePotionEffects().size() > 0) {
                 return true;
             }
-            if (entity instanceof EntityLiving && ((EntityLiving) entity).getAITarget() != null || ((EntityLiving) entity).getAttackTarget() != null) {
+            if (entity instanceof EntityLiving && (((EntityLiving) entity).getAITarget() != null || ((EntityLiving) entity).getAttackTarget() != null)) {
                 return true;
             }
             if (entity instanceof EntityVillager && ((EntityVillager) entity).isMating()) {
