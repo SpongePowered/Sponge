@@ -405,8 +405,8 @@ public class EntityActivationRange {
         }
 
         // Make sure not on edge of unloaded chunk
-        int x = MathHelper.floor_double(entity.posX);
-        int z = MathHelper.floor_double(entity.posZ);
+        int x = MathHelper.floor(entity.posX);
+        int z = MathHelper.floor(entity.posZ);
         IMixinChunk spongeChunk = isActive ? (IMixinChunk)((IMixinChunkProviderServer) entity.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
         if (isActive && (spongeChunk == null || !spongeChunk.areNeighborsLoaded())) {
             isActive = false;
