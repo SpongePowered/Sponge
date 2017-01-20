@@ -347,11 +347,17 @@ public class EntityActivationRange {
         }
         // special cases.
         if (entity instanceof EntityLivingBase) {
-            EntityLivingBase living = (EntityLivingBase) entity;
-            if (living.hurtTime > 0 || living.getActivePotionEffects().size() > 0) {
+            EntityLivingBase livingBase = (EntityLivingBase) entity;
+            if (livingBase.getAITarget() != null) {
                 return true;
             }
-            if (((EntityLiving) entity).getAITarget() != null || ((EntityLiving) entity).getAttackTarget() != null) {
+            if (entity instanceof EntityLiving) {
+                EntityLiving living = (EntityLiving) entity;
+                if (living.getAttackTarget() != null) {
+                    return true;
+                }
+            }
+            if (livingBase.hurtTime > 0 || livingBase.getActivePotionEffects().size() > 0) {
                 return true;
             }
             if (entity instanceof EntityVillager && ((EntityVillager) entity).isMating()) {
