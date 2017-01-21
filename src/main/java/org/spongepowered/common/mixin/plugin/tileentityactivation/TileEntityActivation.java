@@ -31,6 +31,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -58,7 +59,7 @@ public class TileEntityActivation {
      * @return boolean If it should always tick.
      */
     public static boolean initializeTileEntityActivationState(TileEntity tileEntity) {
-        if (tileEntity.getWorld() == null || tileEntity.getWorld().isRemote) {
+        if (tileEntity.getWorld() == null || tileEntity.getWorld().isRemote || !(tileEntity instanceof ITickable)) {
             return true;
         }
 
@@ -130,7 +131,7 @@ public class TileEntityActivation {
         final long currentTick = SpongeImpl.getServer().getTickCounter();
         for (Map.Entry<BlockPos, TileEntity> mapEntry : chunk.getTileEntityMap().entrySet()) {
             final TileEntity tileEntity = mapEntry.getValue();
-            if (((IModData_Activation) tileEntity).getActivatedTick() == currentTick) {
+            if (!(tileEntity instanceof ITickable) || ((IModData_Activation) tileEntity).getActivatedTick() == currentTick) {
                 // already activated
                 continue;
             }
@@ -165,7 +166,7 @@ public class TileEntityActivation {
      * @return Whether the given tileentity should be active
      */
     public static boolean checkIfActive(TileEntity tileEntity) {
-        if (tileEntity.getWorld() == null || tileEntity.getWorld().isRemote) {
+        if (tileEntity.getWorld() == null || tileEntity.getWorld().isRemote || !(tileEntity instanceof ITickable)) {
             return true;
         }
 

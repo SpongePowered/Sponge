@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.tileentityactivation;
 
+import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -49,6 +50,10 @@ public class MixinChunk_TileEntityActivation {
         if (tileEntityIn.getWorld() == null) {
             tileEntityIn.setWorldObj(this.worldObj);
         }
+        if (!(tileEntityIn instanceof ITickable)) {
+            return;
+        }
+
         if (((IMixinWorldInfo) this.worldObj.getWorldInfo()).isValid()) {
             IModData_Activation spongeTile = (IModData_Activation) tileEntityIn;
             spongeTile.setDefaultActivationState(TileEntityActivation.initializeTileEntityActivationState(tileEntityIn));
