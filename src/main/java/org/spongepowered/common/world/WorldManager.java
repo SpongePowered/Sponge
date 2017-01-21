@@ -1023,7 +1023,7 @@ public final class WorldManager {
     public static Optional<WorldProperties> renameWorld(WorldProperties worldProperties, String newName) {
         checkNotNull(worldProperties);
         checkNotNull(newName);
-        checkState(worldByDimensionId.containsKey(((IMixinWorldInfo) worldProperties).getDimensionId()), "World is still loaded!");
+        checkState(!worldByDimensionId.containsKey(((IMixinWorldInfo) worldProperties).getDimensionId()), "World is still loaded!");
 
         final Path oldWorldFolder = getCurrentSavesDirectory().get().resolve(worldProperties.getWorldName());
         final Path newWorldFolder = oldWorldFolder.resolveSibling(newName);
