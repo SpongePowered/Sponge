@@ -106,7 +106,6 @@ import java.util.Queue;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -258,9 +257,11 @@ public final class WorldManager {
         return dimensionTypeByTypeId.values();
     }
 
-    public static Integer[] getRegisteredDimensionIdsFor(DimensionType type) {
-        return (Integer[]) dimensionTypeByDimensionId.entrySet().stream().filter(entry -> entry.getValue().equals(type))
-                .map(Map.Entry::getKey).collect(Collectors.toList()).toArray();
+    public static int[] getRegisteredDimensionIdsFor(DimensionType type) {
+        return dimensionTypeByDimensionId.int2ObjectEntrySet().stream()
+                .filter(entry -> entry.getValue().equals(type))
+                .mapToInt(Int2ObjectMap.Entry::getIntKey)
+                .toArray();
     }
 
     public static int[] getRegisteredDimensionIds() {
