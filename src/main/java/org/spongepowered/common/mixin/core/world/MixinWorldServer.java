@@ -32,6 +32,7 @@ import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigRenderOptions;
@@ -62,6 +63,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.MinecraftException;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.World;
@@ -187,6 +189,7 @@ import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.type.SpongeWorldType;
 
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -832,6 +835,21 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             chunkProviderServer.unload(chunk);
             SpongeHooks.logChunkGCQueueUnload(chunkProviderServer.worldObj, chunk);
         }
+    }
+
+    @Override
+    public boolean save() throws IOException {
+        if (!getChunkProvider().canSave()) {
+            return false;
+        }
+
+        // TODO: Expose flush parameter in SpongeAPI?
+        try {
+            WorldManager.saveWorld((WorldServer) (Object) this, true);
+        } catch (MinecraftException e) {
+            throw Throwables.propagate(e);
+        }
+        return true;
     }
 
     @Redirect(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;canSave()Z"))
