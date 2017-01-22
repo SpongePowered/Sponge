@@ -221,6 +221,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract net.minecraft.entity.Entity getLowestRidingEntity();
     @Shadow public abstract net.minecraft.entity.Entity getRidingEntity();
     @Shadow public abstract void dismountRidingEntity();
+    @Shadow public abstract void removePassengers();
     @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
     @Shadow public abstract boolean isSprinting();
@@ -232,6 +233,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract boolean hasNoGravity();
     @Shadow public abstract void setNoGravity(boolean noGravity);
     @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
+    @Shadow protected abstract void removePassenger(net.minecraft.entity.Entity passenger);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow protected abstract void setSize(float width, float height);
     @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
@@ -754,42 +756,46 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
-    public DataTransactionResult addPassenger(Entity entity) {
+    public boolean hasPassenger(Entity entity) {
+        checkNotNull(entity);
+        return entity.getPassengers().contains(this);
+    }
+
+    @Override
+    public boolean addPassenger(Entity entity) {
         checkNotNull(entity);
         if (entity.getPassengers().contains(this)) {
             throw new IllegalArgumentException(String.format("Cannot add entity %s as a passenger of %s, because the former already has the latter as a passenger!", entity, this));
         }
 
-        final ImmutableList.Builder<EntitySnapshot> passengerSnapshotsBuilder = ImmutableList.builder();
-        passengerSnapshotsBuilder.addAll(getPassengers().stream().map(Entity::createSnapshot).collect(Collectors.toList()));
-
-        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        if (!((net.minecraft.entity.Entity) entity).startRiding((net.minecraft.entity.Entity) (Object) this, true)) {
-            return builder.result(DataTransactionResult.Type.FAILURE).reject(new ImmutableSpongeListValue<>(Keys.PASSENGERS, ImmutableList.of(entity
-                    .createSnapshot()))).build();
-        }
-
-        passengerSnapshotsBuilder.add(entity.createSnapshot());
-
-        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerSnapshotsBuilder
-                .build())).build();
+        return ((net.minecraft.entity.Entity) entity).startRiding((net.minecraft.entity.Entity) (Object) this, true);
     }
 
     @Override
-    public DataTransactionResult setVehicle(@Nullable Entity entity) {
+    public void removePassenger(Entity entity) {
+        checkNotNull(entity);
+        if (!entity.getPassengers().contains(this)) {
+            throw new IllegalArgumentException(String.format("Cannot remove entity %s, because it is not a passenger of %s ", entity, this));
+        }
+
+        ((net.minecraft.entity.Entity) entity).dismountRidingEntity();
+    }
+
+    @Override
+    public void clearPassengers() {
+        this.removePassengers();
+    }
+
+    @Override
+    public boolean setVehicle(@Nullable Entity entity) {
         if (getRidingEntity() == null && entity == null) {
-            return DataTransactionResult.successNoData();
+            return false;
         }
-        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
         if (getRidingEntity() != null) {
-            final EntitySnapshot previousVehicleSnapshot = ((Entity) getRidingEntity()).createSnapshot();
             dismountRidingEntity();
-            builder.replace(new ImmutableSpongeValue<>(Keys.VEHICLE, previousVehicleSnapshot));
+            return true;
         }
-        if (entity != null) {
-            builder.from(entity.addPassenger(this));
-        }
-        return builder.result(DataTransactionResult.Type.SUCCESS).build();
+        return entity != null && entity.addPassenger(this);
     }
 
 
