@@ -54,7 +54,7 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
 
     @Override
     protected boolean set(net.minecraft.entity.Entity entity, Map<Key<?>, Object> keyValues) {
-        return ((Entity) entity).setVehicle(((EntitySnapshot) keyValues.get(Keys.VEHICLE)).restore().orElse(null)).isSuccessful();
+        return ((Entity) entity).setVehicle(((EntitySnapshot) keyValues.get(Keys.VEHICLE)).restore().orElse(null));
 
     }
 
