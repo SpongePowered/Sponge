@@ -29,6 +29,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,7 +49,10 @@ import java.net.InetSocketAddress;
 import java.util.Optional;
 
 @Mixin(DedicatedServer.class)
-public abstract class MixinDedicatedServer extends MinecraftServer {
+public abstract class MixinDedicatedServer extends MinecraftServer implements Server {
+
+    @Shadow public abstract String getHostname();
+    @Shadow public abstract int getPort();
 
     @Shadow private boolean guiIsEnabled;
 
@@ -56,8 +60,13 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
         super(null, null, null, null, null, null, null);
     }
 
+    @Override
     public Optional<InetSocketAddress> getBoundAddress() {
-        return Optional.of(new InetSocketAddress(getServerHostname(), getServerPort()));
+        //noinspection ConstantConditions
+        if (getHostname() == null) {
+            return Optional.empty();
+        }
+        return Optional.of(new InetSocketAddress(this.getHostname(), this.getPort()));
     }
 
     /**
