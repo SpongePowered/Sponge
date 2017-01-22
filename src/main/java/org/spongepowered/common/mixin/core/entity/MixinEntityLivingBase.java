@@ -55,6 +55,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
+import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -135,10 +136,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     @Shadow protected abstract void setBeenAttacked();
-    @Shadow protected abstract SoundEvent getDeathSound();
     @Shadow protected abstract float getSoundVolume();
     @Shadow protected abstract float getSoundPitch();
-    @Shadow protected abstract SoundEvent getHurtSound();
+    @Shadow @Nullable protected abstract SoundEvent shadow$getDeathSound();
+    @Shadow @Nullable protected abstract SoundEvent shadow$getHurtSound();
+    @Shadow protected abstract SoundEvent shadow$getFallSound(int heightIn);
     @Shadow public abstract void setHealth(float health);
     @Shadow public abstract void addPotionEffect(net.minecraft.potion.PotionEffect potionEffect);
     @Shadow protected abstract void markPotionsDirty(); // markPotionsDirty
@@ -179,6 +181,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow private boolean canBlockDamageSource(DamageSource p_184583_1_) { // canBlockDamageSource
         return false; // Shadowed
     }
+
 
     @Override
     public Vector3d getHeadRotation() {
@@ -489,7 +492,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                 if (this.getHealth() <= 0.0F) {
                     if (!this.checkTotemDeathProtection(source)) {
-                        SoundEvent soundevent = this.getDeathSound();
+                        SoundEvent soundevent = this.shadow$getDeathSound();
 
                         if (flag1 && soundevent != null) {
                             this.playSound(soundevent, this.getSoundVolume(), this.getSoundPitch());
@@ -872,5 +875,30 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getHealthData());
+    }
+
+    @Override
+    public double getVolume() {
+        return this.getSoundVolume();
+    }
+
+    @Override
+    public double getPitch() {
+        return this.getSoundPitch();
+    }
+
+    @Override
+    public SoundType getHurtSound() {
+        return (SoundType) this.shadow$getHurtSound();
+    }
+
+    @Override
+    public SoundType getDeathSound() {
+        return (SoundType) this.shadow$getDeathSound();
+    }
+
+    @Override
+    public SoundType getFallSound(int distance) {
+        return (SoundType) this.shadow$getFallSound(distance);
     }
 }

@@ -71,6 +71,7 @@ import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -232,6 +233,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract boolean hasNoGravity();
     @Shadow public abstract void setNoGravity(boolean noGravity);
     @Shadow public abstract void setPositionAndUpdate(double x, double y, double z);
+    @Shadow protected abstract SoundEvent shadow$getSwimSound();
+    @Shadow protected abstract SoundEvent shadow$getSplashSound();
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow protected abstract void setSize(float width, float height);
     @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
@@ -1270,5 +1273,15 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public Value<Boolean> gravity() {
         return this.getValue(Keys.HAS_GRAVITY).get();
+    }
+
+    @Override
+    public SoundType getSwimSound() {
+        return (SoundType) this.shadow$getSwimSound();
+    }
+
+    @Override
+    public SoundType getSplashSound() {
+        return (SoundType) this.shadow$getSplashSound();
     }
 }
