@@ -23,4 +23,4 @@
  * THE SOFTWARE.
  */
 @org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.mixin.core.tileentity;
+package org.spongepowered.common.registry.type.tileentity;

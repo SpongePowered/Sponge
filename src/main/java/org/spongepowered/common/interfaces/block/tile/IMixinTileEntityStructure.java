@@ -22,5 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.mixin.core.tileentity;
+package org.spongepowered.common.interfaces.block.tile;
+
+import com.flowpowered.math.vector.Vector3i;
+import org.spongepowered.api.data.type.StructureMode;
+
+public interface IMixinTileEntityStructure {
+
+    String getAuthor();
+
+    void setAuthor(String author);
+
+    boolean shouldIgnoreEntities();
+
+    float getIntegrity();
+
+    StructureMode getMode();
+
+    void setMode(StructureMode mode);
+
+    Vector3i getPosition();
+
+    void setPosition(Vector3i position);
+
+    boolean shouldShowAir();
+
+    boolean shouldShowBoundingBox();
+
+    Vector3i getSize();
+
+    void setSize(Vector3i size);
+
+}

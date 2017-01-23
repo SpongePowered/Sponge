@@ -673,6 +673,12 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(BeaconData.class, SpongeBeaconData.class,
                 ImmutableBeaconData.class, ImmutableSpongeBeaconData.class, new BeaconDataProcessor());
 
+        dataManager.registerDataProcessorAndImpl(EndGatewayData.class, SpongeEndGatewayData.class,
+            ImmutableEndGatewayData.class, ImmutableSpongeEndGatewayData.class, new EndGatewayDataProcessor());
+
+        dataManager.registerDataProcessorAndImpl(StructureData.class, SpongeStructureData.class,
+            ImmutableStructureData.class, ImmutableSpongeStructureData.class, new StructureDataProcessor());
+
         // Values
 
         dataManager.registerValueProcessor(Keys.FUSE_DURATION, new FuseDurationValueProcessor());

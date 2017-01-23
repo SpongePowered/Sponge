@@ -35,6 +35,7 @@ import static org.spongepowered.api.data.key.KeyFactory.makeSetKey;
 import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.MapMaker;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.block.BlockState;
@@ -113,6 +114,9 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     public static final TypeToken<Vector3d> VECTOR_3D_TOKEN = new TypeToken<Vector3d>() {
         private static final long serialVersionUID = -1;
     };
+    public static final TypeToken<Vector3i> VECTOR_3I_TOKEN = new TypeToken<Vector3i>() {
+        private static final long serialVersionUID = -1;
+    };
     public static final TypeToken<Text> TEXT_TOKEN = new TypeToken<Text>() {
         private static final long serialVersionUID = -1;
     };
@@ -132,6 +136,9 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         private static final long serialVersionUID = -1;
     };
     public static final TypeToken<Value<Vector3d>> VECTOR_3D_VALUE_TOKEN = new TypeToken<Value<Vector3d>>() {
+        private static final long serialVersionUID = -1;
+    };
+    public static final TypeToken<Value<Vector3i>> VECTOR_3I_VALUE_TOKEN = new TypeToken<Value<Vector3i>>() {
         private static final long serialVersionUID = -1;
     };
     public static final TypeToken<Color> COLOR_TOKEN = new TypeToken<Color>() {
@@ -443,6 +450,12 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     public static final TypeToken<MutableBoundedValue<Float>> FLOAT_VALUE_TOKEN = new TypeToken<MutableBoundedValue<Float>>() {
         private static final long serialVersionUID = -1;
     };
+    public static final TypeToken<Long> LONG_TOKEN = new TypeToken<Long>() {
+        private static final long serialVersionUID = -1;
+    };
+    public static final TypeToken<Value<Long>> LONG_VALUE_TOKEN = new TypeToken<Value<Long>>() {
+        private static final long serialVersionUID = -1;
+    };
     public static final TypeToken<NotePitch> NOTE_TOKEN = new TypeToken<NotePitch>() {
         private static final long serialVersionUID = -1;
     };
@@ -552,6 +565,12 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         private static final long serialVersionUID = -1;
     };
     public static final TypeToken<MapValue<Statistic, Long>> STATISTIC_MAP_VALUE_TOKEN = new TypeToken<MapValue<Statistic, Long>>() {
+        private static final long serialVersionUID = -1;
+    };
+    public static final TypeToken<StructureMode> STRUCTURE_MODE_TOKEN = new TypeToken<StructureMode>() {
+        private static final long serialVersionUID = -1;
+    };
+    public static final TypeToken<Value<StructureMode>> STRUCTURE_MODE_VALUE_TOKEN = new TypeToken<Value<StructureMode>>() {
         private static final long serialVersionUID = -1;
     };
 
@@ -989,6 +1008,21 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("infinite_pickup_delay", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("InfinitePickupDelay"), "sponge:infinite_pickup_delay", "Infinite Pickup Delay"));
         this.fieldMap.put("despawn_delay", makeSingleKey(INTEGER_TOKEN, BOUNDED_INTEGER_VALUE_TOKEN, of("DespawnDelay"), "sponge:despawn_delay", "Despawn Delay"));
         this.fieldMap.put("pickup_delay", makeSingleKey(INTEGER_TOKEN, BOUNDED_INTEGER_VALUE_TOKEN, of("PickupDelay"), "sponge:pickup_delay", "Pickup Delay"));
+
+        this.fieldMap.put("end_gateway_age", makeSingleKey(LONG_TOKEN, LONG_VALUE_TOKEN, of("EndGatewayAge"), "sponge:end_gateway_age", "End Gateway Age"));
+        this.fieldMap.put("end_gateway_teleport_cooldown", makeSingleKey(INTEGER_TOKEN, INTEGER_VALUE_TOKEN, of("EndGatewayTeleportCooldown"), "sponge:end_gateway_teleport_cooldown", "End Gateway Teleport Cooldown"));
+        this.fieldMap.put("exit_position", makeSingleKey(VECTOR_3I_TOKEN, VECTOR_3I_VALUE_TOKEN, of("ExitPosition"), "sponge:exit_position", "Exit Position"));
+        this.fieldMap.put("exact_teleport", makeSingleKey(VECTOR_3I_TOKEN, VECTOR_3I_VALUE_TOKEN, of("ExactTeleport"), "sponge:exact_teleport", "Exact Teleport"));
+        this.fieldMap.put("structure_author", makeSingleKey(STRING_TOKEN, STRING_VALUE_TOKEN, of("StructureAuthor"), "sponge:structure_author", "Structure Author"));
+        this.fieldMap.put("structure_ignore_entities", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("StructureIgnoreEntities"), "sponge:structure_ignore_entities", "Structure Ignore Entities"));
+        this.fieldMap.put("structure_integrity", makeSingleKey(FLOAT_TOKEN, FLOAT_VALUE_TOKEN, of("StructureIntegrity"), "sponge:structure_integrity", "Structure Integrity"));
+        this.fieldMap.put("structure_mode", makeSingleKey(STRUCTURE_MODE_TOKEN, STRUCTURE_MODE_VALUE_TOKEN, of("StructureMode"), "sponge:structure_mode", "Structure Mode"));
+        this.fieldMap.put("structure_position", makeSingleKey(STRING_TOKEN, STRING_VALUE_TOKEN, of("StructurePosition"), "sponge:structure_position", "Structure Position"));
+        this.fieldMap.put("structure_powered", makeSingleKey(STRING_TOKEN, STRING_VALUE_TOKEN, of("StructurePowered"), "sponge:structure_powered", "Structure Powered"));
+        this.fieldMap.put("structure_seed", makeSingleKey(LONG_TOKEN, LONG_VALUE_TOKEN, of("StructureSeed"), "sponge:structure_seed", "Structure Seed"));
+        this.fieldMap.put("structure_show_air", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("StructureShowAir"), "sponge:structure_show_air", "Structure Show Air"));
+        this.fieldMap.put("structure_show_bounding_box", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("StructureShowBoundingBox"), "sponge:structure_show_bounding_box", "Structure Show Bounding Box"));
+        this.fieldMap.put("structure_size", makeSingleKey(VECTOR_3I_TOKEN, VECTOR_3I_VALUE_TOKEN, of("StructureSize"), "sponge:structure_size", "Structure Size"));
 
         for (Key<?> key : this.fieldMap.values()) {
             this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
