@@ -50,7 +50,7 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 import java.util.ArrayList;
 import java.util.List;
 
-@Mixin({
+@Mixin(value = {
         net.minecraft.inventory.Slot.class,
         InventoryPlayer.class,
         TileEntityChest.class,
@@ -61,7 +61,7 @@ import java.util.List;
         InventoryLargeChest.class,
         InventoryEnderChest.class,
         CustomInventory.class
-})
+}, priority = 999)
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
 public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter {
 
