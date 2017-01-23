@@ -65,6 +65,7 @@ public final class InternalSpawnTypes {
         public static final SpawnCause WORLD_SPAWNER_CAUSE = of(InternalSpawnTypes.WORLD_SPAWNER);
         public static final SpawnCause FORCED_SPAWN = of(InternalSpawnTypes.FORCED);
         public static final SpawnCause CUSTOM_SPAWN = of(InternalSpawnTypes.CUSTOM);
+        public static final SpawnCause PLACED = of(InternalSpawnTypes.PLACEMENT);
     }
 
     public static final Cause UNKNOWN_CAUSE = Cause.source(SpawnCauses.CUSTOM_SPAWN).build();
