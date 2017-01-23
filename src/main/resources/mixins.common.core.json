@@ -463,6 +463,7 @@
         "world.biome.MixinBiomeSwamp",
         "world.biome.MixinBiomeProvider",
         "world.chunk.storage.MixinAnvilChunkLoader",
+        "world.end.MixinDragonFightManager",
         "world.extent.MixinExtent",
         "world.gen.MixinChunkProviderEnd",
         "world.gen.MixinChunkProviderFlat",
