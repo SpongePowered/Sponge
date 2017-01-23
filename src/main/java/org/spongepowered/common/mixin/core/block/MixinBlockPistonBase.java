@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -36,6 +38,8 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableExtendedD
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeExtendedData;
@@ -78,6 +82,15 @@ public abstract class MixinBlockPistonBase extends MixinBlock {
             return Optional.of((BlockState) blockState.withProperty(BlockPistonBase.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithValue(blockState, key, value);
+    }
+
+    // Backported fix from Vanilla 1.11.2
+    // This prevents neighbor block from being notified while the move is still happening (setBlockToAir uses a flag of 3),
+    // which results in yet-to-be-moved blocks seeing an incorrect view of the world
+    // See https://github.com/SpongePowered/SpongeForge/issues/1210
+    @Redirect(method = "doMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z", ordinal = 1))
+    public boolean onSetBlockToAir(net.minecraft.world.World world, BlockPos pos) {
+        return world.setBlockState(pos, Blocks.AIR.getDefaultState(), 4);
     }
 
     private ImmutableExtendedData getIsExtendedFor(IBlockState blockState) {
