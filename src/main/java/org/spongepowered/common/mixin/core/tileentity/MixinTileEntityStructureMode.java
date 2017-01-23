@@ -28,6 +28,9 @@ import net.minecraft.tileentity.TileEntityStructure;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,13 +38,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TileEntityStructure.Mode.class)
-public class MixinTileEntityStructureMode implements StructureMode {
+@Implements(@Interface(iface = StructureMode.class, prefix = "structure$", unique = true))
+public abstract class MixinTileEntityStructureMode implements StructureMode {
 
     @Shadow @Final private String modeName;
     private String friendlyName;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void construct(String name, int id, CallbackInfo ci) {
+    private void construct(String name, int id, String enumName, int ordinal, CallbackInfo ci) {
         this.friendlyName = StringUtils.capitalize(name);
     }
 
@@ -50,8 +54,8 @@ public class MixinTileEntityStructureMode implements StructureMode {
         return this.modeName;
     }
 
-    @Override
-    public String getName() {
+    @Intrinsic
+    public String structure$getName() {
         return this.friendlyName;
     }
 
