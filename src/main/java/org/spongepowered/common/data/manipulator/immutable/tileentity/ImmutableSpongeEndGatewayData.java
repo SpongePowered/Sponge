@@ -55,6 +55,7 @@ public final class ImmutableSpongeEndGatewayData extends AbstractImmutableData<I
         this.ageValue = new ImmutableSpongeValue<>(Keys.END_GATEWAY_AGE, 0L, this.age);
         this.teleportCooldown = teleportCooldown;
         this.teleportCooldownValue = new ImmutableSpongeValue<>(Keys.END_GATEWAY_TELEPORT_COOLDOWN, 0, this.teleportCooldown);
+        registerGetters();
     }
 
     @Override

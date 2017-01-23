@@ -34,8 +34,10 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeStructureData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+@ImplementationRequiredForTest
 public final class SpongeStructureData extends AbstractData<StructureData, ImmutableStructureData> implements StructureData {
 
     private String author;
