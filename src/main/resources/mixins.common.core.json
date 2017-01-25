@@ -199,6 +199,7 @@
         "entity.ai.MixinEntityAIHarvestFarmland",
         "entity.ai.MixinEntityAILookIdle",
         "entity.ai.MixinEntityAIMate",
+        "entity.ai.MixinEntityAIMoveToBlock",
         "entity.ai.MixinEntityAINearestAttackableTarget",
         "entity.ai.MixinEntityAITasks",
         "entity.ai.MixinEntityAIRunAroundLikeCrazy",

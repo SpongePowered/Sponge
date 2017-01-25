@@ -37,6 +37,7 @@ import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
 import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
+import org.spongepowered.api.entity.ai.task.builtin.creature.location.MoveToBlockAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -103,6 +104,7 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskTy
         createAITaskType("minecraft:watch_closest", "Watch Closest", WatchClosestAITask.class);
         createAITaskType("minecraft:find_nearest_attackable_target", "Find Nearest Attackable Target", FindNearestAttackableTargetAITask.class);
         createAITaskType("minecraft:attack_living", "Attack Living", AttackLivingAITask.class);
+        createAITaskType("minecraft:move_to_block", "Move to Block", MoveToBlockAITask.class);
     }
 
     private AITaskType createAITaskType(String combinedId, String name, Class<? extends AITask<? extends Agent>> aiClass) {
