@@ -301,7 +301,7 @@ public final class GeneralPhase extends TrackingPhase {
 
     @Override
     public boolean alreadyCapturingEntitySpawns(IPhaseState state) {
-        return state == Post.UNWINDING;
+        return state == Post.UNWINDING || state == State.EXPLOSION;
     }
 
     @Override
@@ -316,7 +316,7 @@ public final class GeneralPhase extends TrackingPhase {
 
     @Override
     public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
-        return currentState == Post.UNWINDING;
+        return currentState == Post.UNWINDING || currentState == State.EXPLOSION;
     }
 
     @Override
