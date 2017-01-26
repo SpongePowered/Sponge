@@ -37,6 +37,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -376,8 +377,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Entity createEntity(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
-        checkArgument(type != null, "The entity type cannot be null!");
-        checkArgument(position != null, "The position cannot be null!");
+        return this.createEntity(type, position, false);
+    }
+
+    @Override
+    public Entity createEntityNaturally(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
+        return this.createEntity(type, position, true);
+    }
+
+    private Entity createEntity(EntityType type, Vector3d position, boolean naturally) throws IllegalArgumentException, IllegalStateException {
+        checkNotNull(type, "The entity type cannot be null!");
+        checkNotNull(position, "The position cannot be null!");
 
         Entity entity = null;
 
@@ -433,6 +443,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 return Optional.empty();
             }
         }*/
+
+        if (naturally && entity instanceof EntityLiving) {
+            // Adding the default equipment
+            ((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos(x, y, z)), null);
+        }
 
         if (entity instanceof EntityPainting) {
             // This is default when art is null when reading from NBT, could

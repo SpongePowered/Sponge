@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.extent;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -494,8 +495,14 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
 
     @Override
     public Entity createEntity(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
-        checkBlockRange(position.getX(), position.getY(), position.getZ());
+        checkNotNull(position, "The position cannot be null!");
         return this.extent.createEntity(type, position);
+    }
+
+    @Override
+    public Entity createEntityNaturally(EntityType type, Vector3d position) throws IllegalArgumentException, IllegalStateException {
+        checkNotNull(position, "The position cannot be null!");
+        return this.extent.createEntityNaturally(type, position);
     }
 
     @Override
@@ -507,13 +514,13 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
 
     @Override
     public Optional<Entity> createEntity(DataContainer entityContainer, Vector3d position) {
-        checkBlockRange(position.getX(), position.getY(), position.getZ());
+        checkNotNull(position, "The position cannot be null!");
         return this.extent.createEntity(entityContainer, position);
     }
 
     @Override
     public Optional<Entity> restoreSnapshot(EntitySnapshot snapshot, Vector3d position) {
-        checkBlockRange(position.getX(), position.getY(), position.getZ());
+        checkNotNull(position, "The position cannot be null!");
         return this.extent.restoreSnapshot(snapshot, position);
     }
 
