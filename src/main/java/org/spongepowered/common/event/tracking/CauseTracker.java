@@ -472,7 +472,7 @@ public final class CauseTracker {
         }
 
         if (flag.updateNeighbors()) { // Sponge - remove the isRemote check
-            minecraftWorld.updateObservingBlocksAt(pos, iblockstate.getBlock());
+            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock(), true);
 
             if (newState.hasComparatorInputOverride()) {
                 minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
