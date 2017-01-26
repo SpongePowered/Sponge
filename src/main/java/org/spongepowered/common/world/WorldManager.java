@@ -56,6 +56,7 @@ import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.GameState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -1173,7 +1174,7 @@ public final class WorldManager {
 
         if (optWorldServer.isPresent()) {
             return Optional.of(optWorldServer.get().getSaveHandler().getWorldDirectory().toPath());
-        } else if (SpongeImpl.getServer() != null) {
+        } else if (SpongeImpl.getGame().getState().ordinal() >= GameState.SERVER_ABOUT_TO_START.ordinal()) {
             SaveHandler saveHandler = (SaveHandler) SpongeImpl.getServer().getActiveAnvilConverter().getSaveLoader(SpongeImpl.getServer().getFolderName(), false);
             return Optional.of(saveHandler.getWorldDirectory().toPath());
         }
