@@ -59,6 +59,7 @@ public class CollisionModCategory extends ConfigCategory {
             this.entityList.put("thrownpotion", -1);
         } else if (modId.equals("botania")) {
             this.entityList.put("botaniaspark", -1);
+            this.entityList.put("botaniacorporeaspark", -1);
         }
     }
 
