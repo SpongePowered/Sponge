@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
+import com.google.common.collect.Lists;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -130,17 +131,26 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             int i = 0;
 
             if (this.caughtEntity != null) {
-                this.bringInHookedEntity();
-                this.worldObj.setEntityState((EntityFishHook) (Object) this, (byte)31);
-                i = this.caughtEntity instanceof EntityItem ? 3 : 5;
+                // Sponge start - fire event
+                if (!SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.angler)), 0, 0,
+                        this.createSnapshot(), this, Lists.newArrayList(new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE)), (Player) this.angler))) {
+                    this.bringInHookedEntity();
+                    this.worldObj.setEntityState((EntityFishHook) (Object) this, (byte)31);
+                    i = this.caughtEntity instanceof EntityItem ? 3 : 5;
+                } else {
+                    return 0;
+                }
+                // Sponge end
 
             } else if (this.ticksCatchable > 0) {
-                LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.worldObj);
+                LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer) this.worldObj);
                 lootcontext$builder.withLuck((float) EnchantmentHelper.getLuckOfSeaModifier(this.angler) + this.angler.getLuck());
 
                 // Sponge start
                 // TODO 1.9: Figure out how we want experience to work here
-                List<net.minecraft.item.ItemStack> itemstacks = this.worldObj.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING).generateLootForPools(this.rand, lootcontext$builder.build());
+                List<net.minecraft.item.ItemStack> itemstacks =
+                        this.worldObj.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING)
+                                .generateLootForPools(this.rand, lootcontext$builder.build());
                 FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.angler)), 0, 0,
                         this.createSnapshot(), this, itemstacks.stream().map(s -> {
                             ItemStackSnapshot snapshot = ((ItemStack) s).createSnapshot();
@@ -148,27 +158,34 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                         }).collect(Collectors.toList()), (Player) this.angler);
 
                 if (!SpongeImpl.postEvent(event)) {
-                    for (net.minecraft.item.ItemStack itemstack : event.getItemStackTransaction().stream().filter(Transaction::isValid).map(t -> (net.minecraft.item.ItemStack) t.getFinal().createStack()).collect(Collectors.toList())) {
+                    for (net.minecraft.item.ItemStack itemstack : event.getItemStackTransaction().stream().filter(Transaction::isValid)
+                            .map(t -> (net.minecraft.item.ItemStack) t.getFinal().createStack()).collect(Collectors.toList())) {
                         EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, itemstack);
                         double d0 = this.angler.posX - this.posX;
                         double d1 = this.angler.posY - this.posY;
                         double d2 = this.angler.posZ - this.posZ;
-                        double d3 = (double)MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
+                        double d3 = (double) MathHelper.sqrt_double(d0 * d0 + d1 * d1 + d2 * d2);
                         double d4 = 0.1D;
                         entityitem.motionX = d0 * d4;
-                        entityitem.motionY = d1 * d4 + (double)MathHelper.sqrt_double(d3) * 0.08D;
+                        entityitem.motionY = d1 * d4 + (double) MathHelper.sqrt_double(d3) * 0.08D;
                         entityitem.motionZ = d2 * d4;
                         this.worldObj.spawnEntityInWorld(entityitem);
-                        this.angler.worldObj.spawnEntityInWorld(new EntityXPOrb(this.angler.worldObj, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D, this.rand.nextInt(6) + 1));
-                    } // Sponge end
+                        this.angler.worldObj.spawnEntityInWorld(
+                                new EntityXPOrb(this.angler.worldObj, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D,
+                                        this.rand.nextInt(6) + 1));
+                    }
+                } else {
+                    return 0;
                 }
-
                 i = 1;
-            }
 
-            if (this.inGround)
-            {
-                i = 2;
+                if (this.inGround) {
+                    i = 2;
+                }
+                // Sponge start - fire event for normal retraction
+            } else if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.angler)), 0, 0,
+                    this.createSnapshot(), this, Lists.newArrayList(), (Player) this.angler))) {
+                return 0; // Event cancelled
             }
 
             this.setDead();
