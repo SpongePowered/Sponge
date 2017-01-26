@@ -48,6 +48,7 @@ public abstract class MixinEntityMinecartFurnace extends MixinEntityMinecart imp
      * @author Minecrell - December 5th, 2016
      * @reason Use our custom maximum speed for the Minecart.
      */
+    @Override
     @Overwrite
     protected double getMaximumSpeed() {
         // Return our custom value from EntityMinecart
