@@ -45,6 +45,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.Packet;
+import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
@@ -236,6 +237,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow protected abstract void setSize(float width, float height);
     @Shadow protected abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
+    @Shadow public void notifyDataManagerChange(DataParameter<?> p) {};
 
     // @formatter:on
 

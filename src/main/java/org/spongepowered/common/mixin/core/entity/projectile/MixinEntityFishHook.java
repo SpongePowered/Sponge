@@ -30,6 +30,7 @@ import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.LootContext;
@@ -48,6 +49,9 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -91,6 +95,15 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             this.angler = null;
         }
         this.projectileSource = shooter;
+    }
+
+    // Fix MC-99427 - this method is useless on the server
+    @Inject(method = "notifyDataManagerChange", at = @At("HEAD"), cancellable = true)
+    public void onDataChange(DataParameter<?> param, CallbackInfo ci) {
+        if (!this.worldObj.isRemote) {
+            super.notifyDataManagerChange(param);
+            ci.cancel();
+        }
     }
 
     @Override
