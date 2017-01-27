@@ -372,16 +372,6 @@ public final class TrackingUtil {
 
     static boolean trackBlockChange(CauseTracker causeTracker, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos, int flags,
             PhaseContext phaseContext, IPhaseState phaseState) {
-        if (pos.getX() == 802 && pos.getY() == 86 && pos.getZ() == -148) {
-            new PrettyPrinter(100).add("Position changing!").centre().hr()
-                    .add("The position: 802, 86, -148 is changing!!! Here is some debugging information:")
-                    .addWrapped(100, " %s : %s", "Original State", currentState)
-                    .addWrapped(100, " %s : %s", "New State", newState)
-                    .hr()
-                    .add("Exception")
-                    .add(new Exception())
-                    .trace();
-        }
         final SpongeBlockSnapshot originalBlockSnapshot;
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         if (phaseState.shouldCaptureBlockChangeOrSkip(phaseContext, pos)) {
