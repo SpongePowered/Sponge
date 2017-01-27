@@ -626,6 +626,13 @@ public interface PacketFunction {
                 });
     };
 
+    PacketFunction ENTITY_ACTION = (packet, state, player, context) -> {
+        context.getCapturedBlockSupplier()
+                .ifPresentAndNotEmpty(
+                        originalBlocks -> TrackingUtil.processBlockCaptures(originalBlocks, ((IMixinWorldServer) player.worldObj).getCauseTracker(), state, context));
+
+    };
+
     PacketFunction INVENTORY = (packet, state, player, context) -> {
         // The server will disable the player's crafting after receiving a client packet
         // that did not pass validation (server click item != packet click item)
