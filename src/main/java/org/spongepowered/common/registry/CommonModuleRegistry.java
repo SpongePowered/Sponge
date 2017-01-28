@@ -60,6 +60,7 @@ import org.spongepowered.api.entity.ai.task.builtin.creature.RangeAgentAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
 import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
+import org.spongepowered.api.entity.ai.task.builtin.creature.location.MoveToBlockAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
@@ -147,6 +148,7 @@ import org.spongepowered.common.effect.sound.SpongeSoundBuilder;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.ai.*;
+import org.spongepowered.common.entity.ai.location.SpongeMoveToBlockAIBuilder;
 import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.damage.*;
@@ -278,6 +280,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(RunAroundLikeCrazyAITask.Builder.class, SpongeRunAroundLikeCrazyAIBuilder::new)
             .registerBuilderSupplier(SwimmingAITask.Builder.class, SpongeSwimmingAIBuilder::new)
             .registerBuilderSupplier(WatchClosestAITask.Builder.class, SpongeWatchClosestAIBuilder::new)
+            .registerBuilderSupplier(MoveToBlockAITask.Builder.class, SpongeMoveToBlockAIBuilder::new)
             .registerBuilderSupplier(FindNearestAttackableTargetAITask.Builder.class, SpongeFindNearestAttackableTargetAIBuilder::new)
             .registerBuilderSupplier(AttackLivingAITask.Builder.class, SpongeAttackLivingAIBuilder::new)
             .registerBuilderSupplier(RangeAgentAITask.Builder.class, SpongeRangeAgentAIBuilder::new)
