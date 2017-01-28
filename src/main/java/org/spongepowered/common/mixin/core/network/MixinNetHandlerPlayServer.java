@@ -608,7 +608,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 //    this.playerEntity.interactWith(entity);
                 // } else
                 EnumHand hand = packetIn.getHand();
-                ItemStack itemstack = hand != null ? this.playerEntity.getHeldItem(hand) : null;
+                ItemStack itemstack = hand != null ? this.playerEntity.getHeldItem(hand) : ItemStack.EMPTY;
                 if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT_AT) {
                     SpongeCommonEventFactory.lastSecondaryPacketTick = SpongeImpl.getServer().getTickCounter();
                     Vec3d hitVec = packetIn.getHitVec();

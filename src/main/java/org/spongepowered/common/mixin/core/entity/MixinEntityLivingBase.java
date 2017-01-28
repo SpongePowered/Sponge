@@ -392,7 +392,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 //                }
                 // Sponge End
 
-                boolean flag = false;
+                // Sponge - set the 'shield blocking ran' flag to the proper value, since
+                // we comment out the logic below
+                boolean flag = amount > 0.0F && this.canBlockDamageSource(source);
+
+                // Sponge start - this is handled in our damageEntityHook
+                /*boolean flag = false;
 
                 if (amount > 0.0F && this.canBlockDamageSource(source)) {
                     this.damageShield(amount);
@@ -408,13 +413,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     }
 
                     flag = true;
-                }
+                }*/
+                // Sponge end
 
                 this.limbSwingAmount = 1.5F;
                 boolean flag1 = true;
 
                 if ((float) this.hurtResistantTime > (float) this.maxHurtResistantTime / 2.0F) {
-                    if (amount <= this.lastDamage) {
+                    if (amount <= this.lastDamage) { // Technically, this is wrong since 'amount' won't be 0 if a shield is used. However, we need damageEntityHook so that we process the shield, so we leave it as-is
                         return false;
                     }
 
@@ -468,7 +474,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         this.world.setEntityState((EntityLivingBase) (Object) this, (byte) 2);
                     }
 
-                    if (source != DamageSource.DROWN && (!flag || amount > 0.0F)) {
+
+                    if (source != DamageSource.DROWN && !flag) { // Sponge - remove 'amount > 0.0F' - it's redundant in Vanilla, and breaks our handling of shields
                         this.setBeenAttacked();
                     }
 
@@ -520,13 +527,13 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }
 
 
-                if (!flag || amount > 0.0F)
+                if (!flag) // Sponge - remove 'amount > 0.0F'
                 {
                     this.lastDamageSource = source;
                     this.lastDamageStamp = this.world.getTotalWorldTime();
                 }
 
-                return !flag || amount > 0.0F;
+                return !flag; // Sponge - remove 'amount > 0.0F'
             }
         }
     }
@@ -565,9 +572,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 DamageEventHandler.createEnchantmentModifiers((EntityLivingBase) (Object) this, damageSource);
             Optional<Tuple<DamageModifier, Function<? super Double, Double>>> absorptionFunction =
                 DamageEventHandler.createAbsorptionModifier((EntityLivingBase) (Object) this, damageSource);
+            Optional<Tuple<DamageModifier, Function<? super Double, Double>>> shieldFunction =
+                DamageEventHandler.createShieldFunction((EntityLivingBase) (Object) this, damageSource, damage);
 
             if (hardHatFunction.isPresent()) {
                 originalFunctions.add(hardHatFunction.get());
+            }
+
+            if (shieldFunction.isPresent()) {
+                originalFunctions.add(shieldFunction.get());
             }
 
             if (armorFunction.isPresent()) {
@@ -601,6 +614,18 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             final ItemStack mainHandItem = this.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
             if ((damageSource instanceof FallingBlockDamageSource) && mainHandItem != null) {
                 mainHandItem.damageItem((int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (EntityLivingBase) (Object) this);
+            }
+
+            // Shield
+            if (shieldFunction.isPresent()) {
+                this.damageShield((float) event.getBaseDamage()); // TODO gabizou: Should this be in the API?
+                if (!damageSource.isProjectile()) {
+                    Entity entity = damageSource.getSourceOfDamage();
+
+                    if (entity instanceof EntityLivingBase) {
+                        this.blockUsingShield((EntityLivingBase) entity);
+                    }
+                }
             }
 
             // Armor

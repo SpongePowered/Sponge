@@ -460,4 +460,17 @@ public class DamageEventHandler {
         Function<? super Double, Double> function = (damage) -> - damage + (damage * (0.2F + attackStrength * attackStrength * 0.8F));
         return new Tuple<>(modifier, function);
     }
+
+    public static Optional<Tuple<DamageModifier, Function<? super Double, Double>>> createShieldFunction(EntityLivingBase entity, DamageSource source, float amount) {
+        if (entity.isActiveItemStackBlocking() && amount > 0.0 && entity.canBlockDamageSource(source)) {
+            final DamageModifier modifier = DamageModifier.builder()
+                    .cause(Cause.source(entity)
+                            .named(NamedCause.of(DamageEntityEvent.SHIELD, ((ItemStack) entity.getActiveItemStack()).createSnapshot()))
+                            .build())
+                    .type(DamageModifierTypes.SHIELD)
+                    .build();
+            return Optional.of(new Tuple<>(modifier, (damage) -> -damage));
+        }
+        return Optional.empty();
+    }
 }

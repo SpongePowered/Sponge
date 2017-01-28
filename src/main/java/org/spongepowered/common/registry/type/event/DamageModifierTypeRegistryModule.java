@@ -62,7 +62,8 @@ public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<D
         this.modifierTypeMap.put("defensive_potion_effect", new SpongeDamageModifierType("Defensive PotionEffect", "defensive_potion_effect"));
         this.modifierTypeMap.put("negative_potion_effect", new SpongeDamageModifierType("Negative PotionEffect", "negative_potion_effect"));
         this.modifierTypeMap.put("hard_hat", new SpongeDamageModifierType("Hard Hat", "hard_hat"));
-        this.modifierTypeMap.put("blocking", new SpongeDamageModifierType("Blocking", "blocking"));
+        this.modifierTypeMap.put("shield", new SpongeDamageModifierType("Shield", "shield"));
+        this.modifierTypeMap.put("blocking", this.modifierTypeMap.get("shield"));
         this.modifierTypeMap.put("armor", new SpongeDamageModifierType("Armor", "armor"));
         this.modifierTypeMap.put("armor_enchantment", new SpongeDamageModifierType("Armor Enchantment", "armor_enchantment"));
         this.modifierTypeMap.put("magic", new SpongeDamageModifierType("Magic", "magic"));
