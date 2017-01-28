@@ -37,6 +37,9 @@ public abstract class MixinEntityAIMoveToBlock extends MixinEntityAIBase impleme
 
     @Final @Shadow private int searchLength;
     @Final @Shadow private double movementSpeed;
+    @Shadow private int timeoutCounter;
+
+    @Shadow public abstract void updateTask();
 
     @Shadow protected BlockPos destinationBlock;
 
@@ -58,6 +61,8 @@ public abstract class MixinEntityAIMoveToBlock extends MixinEntityAIBase impleme
     @Override
     public MoveToBlockAITask setDestination(Vector3i destination) {
         this.destinationBlock = new BlockPos(destination.getX(), destination.getY(), destination.getZ());
+        this.timeoutCounter = 39;
+        this.updateTask();
         return this;
     }
 }
