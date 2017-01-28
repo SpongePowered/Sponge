@@ -627,9 +627,12 @@ public interface PacketFunction {
     };
 
     PacketFunction ENTITY_ACTION = (packet, state, player, context) -> {
-        context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(
-                        originalBlocks -> TrackingUtil.processBlockCaptures(originalBlocks, ((IMixinWorldServer) player.worldObj).getCauseTracker(), state, context));
+        if (state == PacketPhase.General.STOP_SLEEPING) {
+            context.getCapturedBlockSupplier()
+                    .ifPresentAndNotEmpty(
+                            originalBlocks -> TrackingUtil
+                                    .processBlockCaptures(originalBlocks, ((IMixinWorldServer) player.worldObj).getCauseTracker(), state, context));
+        }
 
     };
 
