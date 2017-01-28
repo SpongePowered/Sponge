@@ -40,6 +40,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketThreadUtil;
+import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketUpdateSign;
@@ -100,6 +101,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
@@ -126,7 +128,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow @Final public NetworkManager netManager;
     @Shadow @Final private MinecraftServer serverController;
     @Shadow @Final private IntHashMap<Short> pendingTransactions;
-    @Shadow public EntityPlayerMP playerEntity;
+    @Shadow
+    public EntityPlayerMP playerEntity;
     @Shadow private int itemDropThreshold;
     @Shadow private double firstGoodX;
     @Shadow private double firstGoodY;
@@ -384,6 +387,15 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             }
             // Sponge end
         }
+    }
+
+    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/IntHashMap;addKey(ILjava/lang/Object;)V"))
+    public void onInvalidClick(CPacketClickWindow packet, CallbackInfo ci) {
+        // We want to treat an 'invalid' click just like a regular click - we still fire events, do restores, etc.
+
+        // Vanilla doesn't call detectAndSendChanges for 'invalid' clicks, since it restores the entire inventory
+        // Passing 'captureOnly' as 'true' allows capturing to happen for event firing, but doesn't send any pointless packets
+        ((IMixinContainer) this.playerEntity.openContainer).detectAndSendChanges(true);
     }
 
     @Redirect(method = "processChatMessage", at = @At(value = "INVOKE", target = "Lorg/apache/commons/lang3/StringUtils;normalizeSpace(Ljava/lang/String;)Ljava/lang/String;", remap = false))
