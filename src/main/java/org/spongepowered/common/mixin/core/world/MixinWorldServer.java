@@ -526,23 +526,23 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         int i = this.shadow$getGameRules().getInt("randomTickSpeed");
         boolean flag = this.isRaining();
         boolean flag1 = this.isThundering();
-        this.theProfiler.startSection("pollingChunks");
+        // this.theProfiler.startSection("pollingChunks"); // Sponge - Don't use the profiler
 
         final CauseTracker causeTracker = CauseTracker.getInstance(); // Sponge - get the cause tracker
 
         // Sponge: Use SpongeImplHooks for Forge
         for (Iterator<net.minecraft.world.chunk.Chunk> iterator =
-             SpongeImplHooks.getChunkIterator((WorldServer) (Object) this); iterator.hasNext(); this.theProfiler.endSection())
+             SpongeImplHooks.getChunkIterator((WorldServer) (Object) this); iterator.hasNext(); ) // this.theProfiler.endSection()) // Sponge - don't use the profiler
         {
-            this.theProfiler.startSection("getChunk");
+            // this.theProfiler.startSection("getChunk"); // Sponge - Don't use the profiler
             net.minecraft.world.chunk.Chunk chunk = iterator.next();
             int j = chunk.xPosition * 16;
             int k = chunk.zPosition * 16;
-            this.theProfiler.endStartSection("checkNextLight");
+            // this.theProfiler.endStartSection("checkNextLight"); // Sponge - Don't use the profiler
             this.timings.updateBlocksCheckNextLight.startTiming(); // Sponge - Timings
             chunk.enqueueRelightChecks();
             this.timings.updateBlocksCheckNextLight.stopTiming(); // Sponge - Timings
-            this.theProfiler.endStartSection("tickChunk");
+            // this.theProfiler.endStartSection("tickChunk"); // Sponge - Don't use the profiler
             this.timings.updateBlocksChunkTick.startTiming(); // Sponge - Timings
             chunk.onTick(false);
             this.timings.updateBlocksChunkTick.stopTiming(); // Sponge - Timings
@@ -551,7 +551,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 continue;
             }
             // Sponge end
-            this.theProfiler.endStartSection("thunder");
+            // this.theProfiler.endStartSection("thunder"); // Sponge - Don't use the profiler
             // Sponge start
             this.timings.updateBlocksThunder.startTiming();
 
@@ -625,7 +625,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
             this.timings.updateBlocksThunder.stopTiming(); // Sponge - Stop thunder timing
             this.timings.updateBlocksIceAndSnow.startTiming(); // Sponge - Start thunder timing
-            this.theProfiler.endStartSection("iceandsnow");
+            // this.theProfiler.endStartSection("iceandsnow"); // Sponge - don't use the profiler
 
             // if (this.rand.nextInt(16) == 0) // Sponge - Rewrite to use our boolean, and forge hook
             if (this.weatherIceAndSnowEnabled && SpongeImplHooks.canDoRainSnowIce(this.provider, chunk) && this.rand.nextInt(16) == 0)
@@ -660,7 +660,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
             this.timings.updateBlocksIceAndSnow.stopTiming(); // Sponge - Stop ice and snow timing
             this.timings.updateBlocksRandomTick.startTiming(); // Sponge - Start random block tick timing
-            this.theProfiler.endStartSection("tickBlocks");
+            // this.theProfiler.endStartSection("tickBlocks"); // Sponge - Don't use the profiler
 
             if (i > 0)
             {
@@ -677,7 +677,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                             int i2 = j1 >> 16 & 15;
                             IBlockState iblockstate = extendedblockstorage.get(k1, i2, l1);
                             Block block = iblockstate.getBlock();
-                            this.theProfiler.startSection("randomTick");
+                            // this.theProfiler.startSection("randomTick"); // Sponge - Don't use the profiler
 
                             if (block.getTickRandomly())
                             {
@@ -699,7 +699,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 // Sponge end
                             }
 
-                            this.theProfiler.endSection();
+                            // this.theProfiler.endSection(); // Sponge - Don't use the profiler
                         }
                     }
                 }
@@ -707,7 +707,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         this.timings.updateBlocksRandomTick.stopTiming(); // Sponge - Stop random block timing
-        this.theProfiler.endSection();
+        // this.theProfiler.endSection(); // Sponge - Don't use the profiler
         // } // Sponge- Remove unecessary else
     }
 

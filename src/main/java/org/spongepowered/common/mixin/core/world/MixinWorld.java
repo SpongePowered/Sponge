@@ -1395,8 +1395,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void updateEntities() {
-        this.theProfiler.startSection("entities");
-        this.theProfiler.startSection("global");
+        //this.theProfiler.startSection("entities"); // Sponge - Don't use the profiler
+        //this.theProfiler.startSection("global"); // Sponge - Don't use the profiler
         this.startEntityGlobalTimings(); // Sponge
 
 
@@ -1426,7 +1426,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.stopEntityTickTimingStartEntityRemovalTiming(); // Sponge
-        this.theProfiler.endStartSection("remove");
+        // this.theProfiler.endStartSection("remove"); // Sponge - Don't use the profiler
         this.loadedEntityList.removeAll(this.unloadedEntityList);
 
         for (int k = 0; k < this.unloadedEntityList.size(); ++k) {
@@ -1446,7 +1446,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.unloadedEntityList.clear();
         this.stopEntityRemovalTiming(); // Sponge
         this.tickPlayers();
-        this.theProfiler.endStartSection("regular");
+        // this.theProfiler.endStartSection("regular"); // Sponge - Don't use the profiler
+        this.entityActivationCheck();
 
         for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1) {
             net.minecraft.entity.Entity entity2 = this.loadedEntityList.get(i1);
@@ -1460,7 +1461,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 entity2.dismountRidingEntity();
             }
 
-            this.theProfiler.startSection("tick");
+            // this.theProfiler.startSection("tick"); // Sponge - Don't use the profiler
             this.startEntityTickTiming(); // Sponge
 
             if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
@@ -1476,8 +1477,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             this.stopEntityTickSectionBeforeRemove(); // Sponge
-            this.theProfiler.endSection();
-            this.theProfiler.startSection("remove");
+            // this.theProfiler.endSection(); // Sponge - Don't use the profiler
+            // this.theProfiler.startSection("remove"); // Sponge - Don't use the profiler
             this.startEntityRemovalTick(); // Sponge
 
             if (entity2.isDead) {
@@ -1493,10 +1494,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             this.stopEntityRemovalTiming(); // Sponge
-            this.theProfiler.endSection();
+            // this.theProfiler.endSection(); // Sponge - Don't use the profiler
         }
 
-        this.theProfiler.endStartSection("blockEntities");
+        // this.theProfiler.endStartSection("blockEntities"); // Sponge - Don't use the profiler
         this.processingLoadedTiles = true;
         Iterator<net.minecraft.tileentity.TileEntity> iterator = this.tickableTileEntities.iterator();
 
@@ -1557,7 +1558,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.tileEntitiesToBeRemoved.clear();
         }
 
-        this.theProfiler.endStartSection("pendingBlockEntities");
+        // this.theProfiler.endStartSection("pendingBlockEntities"); // Sponge - Don't use the profiler
 
         if (!this.addedTileEntityList.isEmpty()) {
             for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1) {
@@ -1581,8 +1582,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.endPendingTileEntities(); // Sponge
-        this.theProfiler.endSection();
-        this.theProfiler.endSection();
+        // this.theProfiler.endSection(); // Sponge - Don't use the profiler
+        // this.theProfiler.endSection(); // Sponge - Don't use the profiler
+    }
+
+    protected void entityActivationCheck() {
+        // Overridden in MixinWorldServer_Activation
     }
 
     /**
