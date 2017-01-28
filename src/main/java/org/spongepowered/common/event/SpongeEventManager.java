@@ -297,7 +297,6 @@ public class SpongeEventManager implements EventManager {
 
     @SuppressWarnings("unchecked")
     protected static boolean post(Event event, List<RegisteredListener<?>> handlers) {
-        TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
             try {
                 handler.getTimingsHandler().startTimingIfSync();
@@ -309,7 +308,6 @@ public class SpongeEventManager implements EventManager {
                 SpongeImpl.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
             }
         }
-        TimingsManager.PLUGIN_EVENT_HANDLER.stopTimingIfSync();
         ((AbstractEvent) event).currentOrder = null;
 
         return event instanceof Cancellable && ((Cancellable) event).isCancelled();

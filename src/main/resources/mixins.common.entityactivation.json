@@ -12,7 +12,7 @@
         "MixinEntityFireworkRocket_Activation",
         "MixinEntityItem_Activation",
         "MixinEntityLivingBase_Activation",
-        "MixinWorld_Activation"
+        "MixinWorldServer_Activation"
     ],
     "injectors": {
         "defaultRequire": 1
