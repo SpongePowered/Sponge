@@ -668,7 +668,7 @@ public interface PacketFunction {
             capturedItems.add(EntityUtil.fromNative(entityItem));
         }
         final Cause cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", openContainer));
-        final InteractInventoryEvent inventoryEvent;
+        final ClickInventoryEvent inventoryEvent;
         if (state instanceof BasicInventoryPacketState) {
             inventoryEvent =
                     ((BasicInventoryPacketState) state)
@@ -682,7 +682,7 @@ public interface PacketFunction {
             // The client sends several packets all at once for drag events - we only care about the last one.
             // Therefore, we never add any 'fake' transactions, as the final packet has everything we want.
             if (!(inventoryEvent instanceof ClickInventoryEvent.Drag)) {
-                PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, slotTransactions);
+                PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, inventoryEvent.getTransactions());
             }
 
             SpongeImpl.postEvent(inventoryEvent);
