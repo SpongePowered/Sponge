@@ -715,6 +715,7 @@ public interface PacketFunction {
             }
         }
         slotTransactions.clear();
+        mixinContainer.setCaptureInventory(false);
     };
     PacketFunction USE_ITEM = ((packet, state, player, context) -> {
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.worldObj;
