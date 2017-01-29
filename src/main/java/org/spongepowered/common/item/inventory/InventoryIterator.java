@@ -38,7 +38,7 @@ public class InventoryIterator<TInventory, TStack> implements Iterator<Inventory
     
     protected final Fabric<TInventory> inventory;
     
-    protected final Inventory context;
+    protected final Inventory parent;
 
     protected int next = 0;
 
@@ -46,10 +46,10 @@ public class InventoryIterator<TInventory, TStack> implements Iterator<Inventory
         this(lens, inventory, null);
     }
     
-    public InventoryIterator(Lens<TInventory, TStack> lens, Fabric<TInventory> inventory, Inventory context) {
-        this.children = lens.getChildren();
+    public InventoryIterator(Lens<TInventory, TStack> lens, Fabric<TInventory> inventory, Inventory parent) {
+        this.children = lens.getSpanningChildren();
         this.inventory = inventory;
-        this.context = context;
+        this.parent = parent;
     }
 
     @Override
@@ -60,7 +60,7 @@ public class InventoryIterator<TInventory, TStack> implements Iterator<Inventory
     @Override
     public Inventory next() {
         try {
-            return this.children.get(this.next++).getAdapter(this.inventory, this.context);
+            return this.children.get(this.next++).getAdapter(this.inventory, this.parent);
         } catch (IndexOutOfBoundsException e) {
             throw new NoSuchElementException();
         }

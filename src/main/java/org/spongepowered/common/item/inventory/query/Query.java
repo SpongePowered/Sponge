@@ -90,7 +90,7 @@ public class Query<TInventory, TStack> {
 
     public interface ResultAdapterProvider<TInventory, TStack> {
 
-        QueryResult<TInventory, TStack> getResultAdapter(Fabric<TInventory> inventory, MutableLensSet<TInventory, TStack> matches);
+        QueryResult<TInventory, TStack> getResultAdapter(Fabric<TInventory> inventory, MutableLensSet<TInventory, TStack> matches, Inventory parent);
 
     }
 
@@ -138,15 +138,15 @@ public class Query<TInventory, TStack> {
             return new EmptyInventoryImpl(this.adapter);
         }
         if (matches.size() == 1) {
-            InventoryAdapter<TInventory, TStack> ada = matches.getLens(0).getAdapter(this.inventory, null);
+            InventoryAdapter<TInventory, TStack> ada = matches.getLens(0).getAdapter(this.inventory, this.adapter);
             return ada;
         }
 
         if (resultProvider != null) {
-            return resultProvider.getResultAdapter(this.inventory, matches);
+            return resultProvider.getResultAdapter(this.inventory, matches, this.adapter);
         }
 
-        return ((ResultAdapterProvider<TInventory, TStack>)Query.defaultResultProvider).getResultAdapter(this.inventory, matches);
+        return ((ResultAdapterProvider<TInventory, TStack>)Query.defaultResultProvider).getResultAdapter(this.inventory, matches, this.adapter);
     }
 
     private MutableLensSet<TInventory, TStack> depthFirstSearch(Lens<TInventory, TStack> lens) {

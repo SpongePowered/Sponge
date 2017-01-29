@@ -343,26 +343,6 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
     }
 
-    public static class Iter extends InventoryIterator<IInventory, net.minecraft.item.ItemStack> {
-
-        private final InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter;
-
-        public Iter(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter) {
-            super(adapter.getRootLens(), adapter.getInventory());
-            this.adapter = adapter;
-        }
-
-        @Override
-        public Inventory next() {
-            try {
-                return this.adapter.getChild(this.next++);
-            } catch (IndexOutOfBoundsException e) {
-                throw new NoSuchElementException();
-            }
-        }
-
-    }
-
     public static final Translation DEFAULT_NAME = new SpongeTranslation("inventory.default.title");
 
     /**
@@ -422,7 +402,7 @@ public class Adapter implements MinecraftInventoryAdapter {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Inventory> T next() {
-        return (T) this.emptyInventory();
+        return (T) this.emptyInventory(); // TODO implement me
     }
 
 //    protected Inventory generateParent(Lens<IInventory, net.minecraft.item.ItemStack> root) {
