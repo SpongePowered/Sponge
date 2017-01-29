@@ -85,7 +85,7 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Inventory> T next() {
-        return (T) this.emptyInventory();
+        return (T) this.emptyInventory(); // TODO implement me
     }
 
     @Override
@@ -108,6 +108,8 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
         }
         return child;
     }
+
+    // TODO getChild with lens not implemented
 
     protected final EmptyInventory emptyInventory() {
         if (this.empty == null) {

@@ -33,6 +33,7 @@ import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.item.inventory.InventoryIterator;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.query.Query;
 
@@ -156,7 +157,7 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
 
     @Override
     default Iterator<Inventory> iterator() {
-        return new Adapter.Iter(this);
+        return new InventoryIterator<>(this.getRootLens(), this.getInventory(), this);
     }
 
     @SuppressWarnings("unchecked")

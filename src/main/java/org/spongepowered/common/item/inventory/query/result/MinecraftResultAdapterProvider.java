@@ -74,8 +74,8 @@ public class MinecraftResultAdapterProvider implements ResultAdapterProvider<IIn
             }
         }
 
-        public MinecraftQueryResultAdapter(Fabric<IInventory> inventory) {
-            super(inventory, null);
+        public MinecraftQueryResultAdapter(Fabric<IInventory> inventory, Inventory parent) {
+            super(inventory, null, parent); // null root lens calls initRootLens();
         }
         
         @Override
@@ -87,9 +87,9 @@ public class MinecraftResultAdapterProvider implements ResultAdapterProvider<IIn
     private MutableLensSet<IInventory, ItemStack> resultSet;
 
     @Override
-    public QueryResult<IInventory, ItemStack> getResultAdapter(Fabric<IInventory> inventory, MutableLensSet<IInventory, ItemStack> matches) {
+    public QueryResult<IInventory, ItemStack> getResultAdapter(Fabric<IInventory> inventory, MutableLensSet<IInventory, ItemStack> matches, Inventory parent) {
         this.resultSet = matches;
-        return new MinecraftQueryResultAdapter(inventory);
+        return new MinecraftQueryResultAdapter(inventory, parent);
     }
     
     protected MutableLensSet<IInventory, ItemStack> getResultSet() {
