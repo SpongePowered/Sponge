@@ -352,9 +352,7 @@ public final class GeneralPhase extends TrackingPhase {
     @Override
     public boolean spawnEntityOrCapture(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
             int chunkZ) {
-        return phaseState != State.COMPLETE
-               ? context.getCapturedEntities().add(entity)
-               : super.spawnEntityOrCapture(causeTracker, phaseState, context, entity, chunkX, chunkZ);
+        return ((GeneralState) phaseState).spawnEntityOrCapture(causeTracker, context, entity, chunkX, chunkZ);
     }
 
     @Override

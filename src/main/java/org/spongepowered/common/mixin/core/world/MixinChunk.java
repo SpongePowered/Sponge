@@ -179,8 +179,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         this.chunkPos = new Vector3i(x, 0, z);
         this.blockMin = SpongeChunkLayout.instance.toWorld(this.chunkPos).get();
         this.blockMax = this.blockMin.add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
-        this.biomeMin = new Vector3i(blockMin.getX(), 0, blockMin.getZ());
-        this.biomeMax = new Vector3i(blockMax.getX(), 0, blockMax.getZ());
+        this.biomeMin = new Vector3i(this.blockMin.getX(), 0, this.blockMin.getZ());
+        this.biomeMax = new Vector3i(this.blockMax.getX(), 0, this.blockMax.getZ());
         this.world = (org.spongepowered.api.world.World) world;
         if (this.world.getUniqueId() != null) { // Client worlds have no UUID
             this.uuid = new UUID(this.world.getUniqueId().getMostSignificantBits() ^ (x * 2 + 1),
@@ -570,7 +570,18 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             if (!this.worldObj.isRemote) {
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
                 if (currentState.getBlock() != newState.getBlock()) {
+                    final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+                    final PhaseData peek = causeTracker.getCurrentPhaseData();
+                    // We need to capture this block position if necessary
+                    // TODO - make sure that this is not always necessary
+                    if (peek.state.requiresBlockPosTracking()) {
+                        peek.context.getCaptureBlockPos().setPos(pos);
+                    }
                     currentBlock.breakBlock(this.worldObj, pos, currentState);
+                    // And then un-set the captured block position
+                    if (peek.state.requiresBlockPosTracking()) {
+                        peek.context.getCaptureBlockPos().setPos(null);
+                    }
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
                 // still work by themselves in vanilla.

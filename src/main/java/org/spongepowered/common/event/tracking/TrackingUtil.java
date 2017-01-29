@@ -565,9 +565,22 @@ public final class TrackingUtil {
             if (!transaction.isValid()) {
                 invalid.add(transaction);
                 // Cancel any block drops performed, avoids any item drops, regardless
+                final BlockPos blockPos = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
+
                 context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
-                    final BlockPos blockPos = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
-                    map.get(blockPos).clear();
+                    if (map.containsKey(blockPos)) {
+                        map.get(blockPos).clear();
+                    }
+                });
+                context.getBlockEntitySpawnSupplier().ifPresentAndNotEmpty(map -> {
+                    if (map.containsKey(blockPos)) {
+                        map.get(blockPos).clear();
+                    }
+                });
+                context.getBlockEntitySpawnSupplier().ifPresentAndNotEmpty(blockPosEntityMultimap -> {
+                    if (blockPosEntityMultimap.containsKey(blockPos)) {
+                        blockPosEntityMultimap.get(blockPos).clear();
+                    }
                 });
             }
         }

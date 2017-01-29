@@ -138,4 +138,9 @@ final class CommandState extends GeneralState {
                     }
                 });
     }
+
+    @Override
+    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        return context.getCapturedEntities().add(entity);
+    }
 }

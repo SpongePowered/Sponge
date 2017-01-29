@@ -110,4 +110,7 @@ public interface IPhaseState {
     }
 
 
+    default boolean requiresBlockPosTracking() {
+        return false;
+    }
 }

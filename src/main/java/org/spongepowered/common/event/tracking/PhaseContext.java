@@ -80,6 +80,8 @@ public class PhaseContext {
     @Nullable private CapturedItemStackSupplier capturedItemStackSupplier;
     @Nullable private EntityItemDropsSupplier entityItemDropsSupplier;
     @Nullable private EntityItemEntityDropsSupplier entityItemEntityDropsSupplier;
+    @Nullable private CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> blockEntitySpawnSupplier;
+    @Nullable private CaptureBlockPos captureBlockPos;
     @Nullable protected User owner;
     @Nullable protected User notifier;
 
@@ -125,6 +127,8 @@ public class PhaseContext {
         checkState(this.blocksSupplier == null, "BlocksSuppler is already set!");
         checkState(this.blockItemEntityDropsSupplier == null, "BlockItemEntityDropsSupplier is already set!");
         checkState(this.blockItemDropsSupplier == null, "BlockItemDropsSupplier is already set!");
+        checkState(this.blockEntitySpawnSupplier == null, "BlockEntitySpawnSupplier is already set!");
+        checkState(this.captureBlockPos == null, "CaptureBlockPos is already set!");
     }
 
     public PhaseContext addBlockCaptures() {
@@ -142,6 +146,15 @@ public class PhaseContext {
         // unused, to be removed and re-located when phase context is cleaned up
         //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, blockItemDropsSupplier));
         this.blockItemDropsSupplier = blockItemDropsSupplier;
+        CapturedBlockEntitySpawnSupplier capturedBlockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ENTITY_SPAWNS, capturedBlockEntitySpawnSupplier));
+        this.blockEntitySpawnSupplier = capturedBlockEntitySpawnSupplier;
+
+        CaptureBlockPos blockPos = new CaptureBlockPos();
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause
+        this.captureBlockPos = blockPos;
         return this;
     }
 
@@ -174,6 +187,11 @@ public class PhaseContext {
         // unused, to be removed and re-located when phase context is cleaned up
         //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEM_STACKS, capturedItemStackSupplier));
         this.capturedItemStackSupplier = capturedItemStackSupplier;
+
+        CapturedBlockEntitySpawnSupplier capturedBlockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
+        // unused, to be removed and re-located when phase context is cleaned up
+        //this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_ENTITY_SPAWNS, capturedBlockEntitySpawnSupplier));
+        this.blockEntitySpawnSupplier = capturedBlockEntitySpawnSupplier;
         return this;
     }
 
@@ -409,6 +427,25 @@ public class PhaseContext {
         return this.capturedItemStackSupplier;
     }
 
+    public CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> getBlockEntitySpawnSupplier() throws IllegalStateException {
+        if (this.blockEntitySpawnSupplier == null) {
+            throw TrackingUtil.throwWithContext("Intended to track block entity spawns!", this).get();
+        }
+        return this.blockEntitySpawnSupplier;
+    }
+
+    public CaptureBlockPos getCaptureBlockPos() throws IllegalStateException {
+        if (this.captureBlockPos == null) {
+            throw TrackingUtil.throwWithContext("Intended to capture a block position!", this).get();
+        }
+        return this.captureBlockPos;
+    }
+
+    public Optional<BlockPos> getBlockPosition() {
+        return getCaptureBlockPos()
+                .getPos();
+    }
+
     public CapturePlayer getCapturedPlayerSupplier() throws IllegalStateException {
         return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_PLAYER, CapturePlayer.class)
                 .orElseThrow(
@@ -502,6 +539,11 @@ public class PhaseContext {
 
     static final class BlockItemEntityDropsSupplier extends CapturedMultiMapSupplier<BlockPos, EntityItem> {
         BlockItemEntityDropsSupplier() {
+        }
+    }
+
+    static final class CapturedBlockEntitySpawnSupplier extends CapturedMultiMapSupplier<BlockPos, net.minecraft.entity.Entity> {
+        CapturedBlockEntitySpawnSupplier() {
         }
     }
 
@@ -604,7 +646,7 @@ public class PhaseContext {
         }
 
         public CaptureFlag(@Nullable BlockChangeFlag flag) {
-
+            this.flag = flag;
         }
 
         public Optional<BlockChangeFlag> getFlag() {
@@ -630,6 +672,42 @@ public class PhaseContext {
 
         public void addFlag(BlockChangeFlag flag) {
             this.flag = flag;
+        }
+    }
+
+    public static final class CaptureBlockPos {
+        @Nullable private BlockPos pos;
+
+        public CaptureBlockPos() {
+        }
+
+        public CaptureBlockPos(@Nullable BlockPos pos) {
+            this.pos = pos;
+        }
+
+        public Optional<BlockPos> getPos() {
+            return Optional.ofNullable(this.pos);
+        }
+
+        public void setPos(@Nullable BlockPos pos) {
+            this.pos = pos;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            CaptureBlockPos that = (CaptureBlockPos) o;
+            return com.google.common.base.Objects.equal(this.pos, that.pos);
+        }
+
+        @Override
+        public int hashCode() {
+            return com.google.common.base.Objects.hashCode(this.pos);
         }
     }
 }
