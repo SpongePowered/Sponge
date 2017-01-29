@@ -356,4 +356,8 @@ public abstract class TrackingPhase {
     public void appendExplosionCause(PhaseData phaseData) {
 
     }
+
+    public boolean canPhaseDenyChunkRequest(IPhaseState currentState) {
+        return false;
+    }
 }

@@ -135,6 +135,11 @@ class PlayerTickPhaseState extends TickPhaseState {
     }
 
     @Override
+    public boolean shouldStateAllowChunkRequest() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "PlayerTickPhase";
     }

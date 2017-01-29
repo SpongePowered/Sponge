@@ -22,15 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.entity;
+package org.spongepowered.common.event.tracking.phase.generation;
 
-final class LeavingDimensionState extends EntityPhaseState {
+class WorldSpawnerSpawningPhaseState extends GeneralGenerationPhaseState {
 
-    LeavingDimensionState() {
+    WorldSpawnerSpawningPhaseState() {
+        super("WORLD_SPAWNER_SPAWNING");
     }
 
     @Override
-    public boolean shouldStateAllowChunkRequest() {
+    public boolean doesStateDenyChunkRequests() {
         return true;
     }
 }

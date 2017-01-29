@@ -138,6 +138,11 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
+    public boolean canPhaseDenyChunkRequest(IPhaseState currentState) {
+        return true;
+    }
+
+    @Override
     public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
         ((TickPhaseState) currentPhaseData.state).appendExplosionContext(phaseContext, currentPhaseData.context);
     }

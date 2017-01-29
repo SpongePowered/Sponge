@@ -110,4 +110,11 @@ public interface IPhaseState {
     }
 
 
+    default boolean shouldStateAllowChunkRequest() {
+        return false;
+    }
+
+    default boolean doesStateDenyChunkRequests() {
+        return false;
+    }
 }

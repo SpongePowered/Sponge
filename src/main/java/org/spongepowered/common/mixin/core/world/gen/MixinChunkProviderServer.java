@@ -197,23 +197,35 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             final CauseTracker causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
             final IPhaseState currentState = causeTracker.getCurrentState();
             // States that cannot deny chunks
-            if (currentState == TickPhase.Tick.PLAYER
-                    || currentState == TickPhase.Tick.DIMENSION
-                    || currentState == EntityPhase.State.CHANGING_TO_DIMENSION
-                    || currentState == EntityPhase.State.LEAVING_DIMENSION) {
+            /*
+            The current set of states that cannot deny chunks are as follows:
+            TickPhase.Tick.PLAYER
+            TickPhase.Tick.DIMENSION
+            EntityPhase.State.CHANGING_TO_DIMENSION
+            EntityPhase.State.LEAVING_DIMENSION
+             */
+            if (currentState.shouldStateAllowChunkRequest()) {
                 return false;
             }
 
             // States that can deny chunks
-            if (currentState == GenerationPhase.State.WORLD_SPAWNER_SPAWNING
-                    || currentState == PluginPhase.Listener.PRE_WORLD_TICK_LISTENER) {
+            /*
+            The current set of states that can deny chunk requests are as follows:
+            GenerationPhase.State.WORLD_SPAWNER_SPAWNING
+            PluginPhase.Listener.PRE_WORLD_TICK_LISTENER
+             */
+            if (currentState.doesStateDenyChunkRequests()) {
                 return true;
             }
 
             // Phases that can deny chunks
-            if (currentState.getPhase() == TrackingPhases.BLOCK
-                    || currentState.getPhase() == TrackingPhases.ENTITY
-                    || currentState.getPhase() == TrackingPhases.TICK) {
+            /*
+            The current set of phases that can deny chunk requests are as follows:
+            TrackingPhases.BLOCK
+            TrackingPhases.ENTITY
+            TrackingPhases.TICK
+             */
+            if (currentState.getPhase().canPhaseDenyChunkRequest(currentState)) {
                 return true;
             }
         }

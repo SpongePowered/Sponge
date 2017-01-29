@@ -155,4 +155,10 @@ final class ChangingToDimensionState extends EntityPhaseState {
         teleportingEntity.world.theProfiler.endSection();
         return teleportingEntity;
     }
+
+    @Override
+    public boolean shouldStateAllowChunkRequest() {
+        return true;
+    }
+
 }
