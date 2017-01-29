@@ -361,9 +361,12 @@ public class SpongeCommandManager implements CommandManager {
             } else {
                 return ImmutableList.copyOf(event.getTabCompletions());
             }
-        } catch (CommandException e) {
-            src.sendMessage(error(t("Error getting suggestions: %s", e.getText())));
-            return Collections.emptyList();
+        } catch (Exception e) {
+            if (e instanceof CommandException) {
+                src.sendMessage(error(t("Error getting suggestions: %s", ((CommandException) e).getText())));
+                return Collections.emptyList();
+            }
+            throw new RuntimeException(String.format("Error occured while tab completing '%s'", arguments), e);
         }
     }
 
