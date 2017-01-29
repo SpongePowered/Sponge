@@ -101,6 +101,7 @@ import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.ChunkPreGenerate;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -134,10 +135,10 @@ import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.SpongeChunkPreGenerate;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeVolumeWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
+import org.spongepowered.common.world.pregen.SpongeChunkPreGenerateTask;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
@@ -482,8 +483,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public WorldBorder.ChunkPreGenerate newChunkPreGenerate(Vector3d center, double diameter) {
-        return new SpongeChunkPreGenerate(this, center, diameter);
+    public ChunkPreGenerate.Builder newChunkPreGenerate(Vector3d center, double diameter) {
+        return new SpongeChunkPreGenerateTask.Builder(this, center, diameter);
     }
 
 
