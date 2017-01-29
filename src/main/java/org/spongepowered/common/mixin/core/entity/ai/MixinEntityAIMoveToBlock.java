@@ -28,20 +28,34 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.entity.ai.EntityAIMoveToBlock;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.entity.ai.task.builtin.creature.location.MoveToBlockAITask;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.ai.IMixinMoveToBlock;
+
+import java.util.function.Predicate;
 
 @Mixin(EntityAIMoveToBlock.class)
-public abstract class MixinEntityAIMoveToBlock extends MixinEntityAIBase implements MoveToBlockAITask {
+public abstract class MixinEntityAIMoveToBlock extends MixinEntityAIBase implements MoveToBlockAITask, IMixinMoveToBlock {
 
     @Shadow public int searchLength;
     @Shadow public double movementSpeed;
     @Shadow private int timeoutCounter;
 
     @Shadow public abstract void updateTask();
+    @Shadow protected abstract boolean shouldMoveTo(net.minecraft.world.World worldIn, BlockPos pos);
 
     @Shadow protected BlockPos destinationBlock;
+
+    private Predicate<Location<World>> destinationPredicate;
+    private boolean vanillaTask = false;
+
+    @Override
+    public boolean isVanillaTask() {
+        return this.vanillaTask;
+    }
 
     @Override
     public double getSpeed() {
@@ -63,6 +77,22 @@ public abstract class MixinEntityAIMoveToBlock extends MixinEntityAIBase impleme
     public MoveToBlockAITask setSearchRange(int searchRange) {
         this.searchLength = searchRange;
         return this;
+    }
+
+    @Override
+    public Predicate<Location<World>> getDestinationPredicate() {
+        if (this.destinationPredicate == null) {
+            this.vanillaTask = true;
+            this.destinationPredicate = worldLocation ->
+                    shouldMoveTo((net.minecraft.world.World) worldLocation.getExtent(),
+                        new BlockPos(worldLocation.getX(), worldLocation.getY(), worldLocation.getZ()));
+        }
+        return this.destinationPredicate;
+    }
+
+    @Override
+    public void setDestinationPredicate(Predicate<Location<World>> destinationPredicate) {
+        this.destinationPredicate = destinationPredicate;
     }
 
     @Override
