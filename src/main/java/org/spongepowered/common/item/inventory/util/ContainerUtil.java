@@ -66,6 +66,7 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
+import org.spongepowered.common.item.inventory.custom.CustomContainer;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.ContainerChestInventoryLens;
@@ -268,15 +269,17 @@ public final class ContainerUtil {
     }
 
     public static Carrier getCarrier(Container container) {
-        if (container instanceof ContainerChest) {
+        if (container instanceof CustomContainer) {
+            return ((CustomContainer) container).inv.getCarrier();
+        } else if (container instanceof ContainerChest) {
             IInventory inventory = ((ContainerChest) container).getLowerChestInventory();
             if (inventory instanceof TileEntityChest) {
                 return (Carrier) inventory;
             } else if (inventory instanceof InventoryLargeChest) {
                 return null;
-                // TODO: Decide what the carrire should be
+                // TODO: Decide what the carrier should be (wrapper of 2 Block-based carriers including info which block is the upper inventory)
             } else {
-                return null;
+                return inventory instanceof Carrier ? ((Carrier) inventory) : null;
             }
         } else if (container instanceof ContainerHopper) {
             return carrierOrNull(((ContainerHopper) container).hopperInventory);

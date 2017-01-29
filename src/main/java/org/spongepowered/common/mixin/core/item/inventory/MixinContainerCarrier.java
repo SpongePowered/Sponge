@@ -35,9 +35,11 @@ import net.minecraft.inventory.ContainerHorseInventory;
 import net.minecraft.inventory.ContainerMerchant;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.ContainerRepair;
+import net.minecraft.inventory.ContainerWorkbench;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.item.inventory.custom.CustomContainer;
 
 import java.util.Optional;
 
@@ -52,7 +54,9 @@ import java.util.Optional;
         ContainerBeacon.class,
         ContainerHorseInventory.class,
         ContainerMerchant.class,
-        ContainerPlayer.class
+        ContainerPlayer.class,
+        ContainerWorkbench.class,
+        CustomContainer.class
 }, priority = 1001)
 public abstract class MixinContainerCarrier extends MixinContainer implements CarriedInventory<Carrier> {
 

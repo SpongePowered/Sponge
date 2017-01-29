@@ -272,4 +272,8 @@ public class CustomInventory implements IInventory, IInteractionObject {
     public Map<String, InventoryProperty> getProperties() {
         return this.properties;
     }
+
+    public Carrier getCarrier() {
+        return carrier;
+    }
 }
