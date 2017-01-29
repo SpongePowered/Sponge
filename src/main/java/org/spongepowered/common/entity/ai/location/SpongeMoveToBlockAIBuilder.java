@@ -86,4 +86,5 @@ public class SpongeMoveToBlockAIBuilder implements MoveToBlockAITask.Builder {
         this.destinationPredicate = destinationPredicate;
         return this;
     }
+
 }

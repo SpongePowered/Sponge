@@ -35,8 +35,8 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(EntityAIMoveToBlock.class)
 public abstract class MixinEntityAIMoveToBlock extends MixinEntityAIBase implements MoveToBlockAITask {
 
-    @Final @Shadow private int searchLength;
-    @Final @Shadow private double movementSpeed;
+    @Shadow public int searchLength;
+    @Shadow public double movementSpeed;
     @Shadow private int timeoutCounter;
 
     @Shadow public abstract void updateTask();
@@ -49,8 +49,20 @@ public abstract class MixinEntityAIMoveToBlock extends MixinEntityAIBase impleme
     }
 
     @Override
+    public MoveToBlockAITask setSpeed(double speed) {
+        this.movementSpeed = speed;
+        return this;
+    }
+
+    @Override
     public int getSearchRange() {
         return this.searchLength;
+    }
+
+    @Override
+    public MoveToBlockAITask setSearchRange(int searchRange) {
+        this.searchLength = searchRange;
+        return this;
     }
 
     @Override
