@@ -29,6 +29,9 @@ import static org.spongepowered.common.event.tracking.TrackingUtil.iterateChange
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -76,6 +79,11 @@ final class ExplosionState extends GeneralState {
 
     @Override
     public boolean tracksBlockSpecificDrops() {
+        return true;
+    }
+
+    @Override
+    public boolean requiresBlockPosTracking() {
         return true;
     }
 
@@ -224,10 +232,23 @@ final class ExplosionState extends GeneralState {
         for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
             if (!transaction.isValid()) {
                 invalid.add(transaction);
+                final BlockPos blockPos = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
+
                 // Cancel any block drops performed, avoids any item drops, regardless
                 context.getBlockItemDropSupplier().ifPresentAndNotEmpty(map -> {
-                    final BlockPos blockPos = ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos();
-                    map.get(blockPos).clear();
+                    if (map.containsKey(blockPos)) {
+                        map.get(blockPos).clear();
+                    }
+                });
+                context.getBlockEntitySpawnSupplier().ifPresentAndNotEmpty(map -> {
+                    if (map.containsKey(blockPos)) {
+                        map.get(blockPos).clear();
+                    }
+                });
+                context.getBlockEntitySpawnSupplier().ifPresentAndNotEmpty(blockPosEntityMultimap -> {
+                    if (blockPosEntityMultimap.containsKey(blockPos)) {
+                        blockPosEntityMultimap.get(blockPos).clear();
+                    }
                 });
             }
         }
@@ -267,5 +288,19 @@ final class ExplosionState extends GeneralState {
             }
         }
         return !match;
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        final BlockPos blockPos = context.getBlockPosition()
+                .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a block position during an explosion!", context));
+        final Multimap<BlockPos, net.minecraft.entity.Entity> blockPosEntityMultimap = context.getBlockEntitySpawnSupplier().get();
+        final Multimap<BlockPos, EntityItem> blockPosEntityItemMultimap = context.getBlockItemDropSupplier().get();
+        if (entity instanceof EntityItem) {
+            blockPosEntityItemMultimap.put(blockPos, (EntityItem) entity);
+        } else {
+            blockPosEntityMultimap.put(blockPos, (net.minecraft.entity.Entity) entity);
+        }
+        return true;
     }
 }

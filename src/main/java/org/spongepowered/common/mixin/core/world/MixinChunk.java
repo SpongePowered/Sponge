@@ -568,7 +568,18 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             if (!this.world.isRemote) {
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
                 if (currentState.getBlock() != newState.getBlock()) {
+                    final CauseTracker causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
+                    final PhaseData peek = causeTracker.getCurrentPhaseData();
+                    // We need to capture this block position if necessary
+                    // TODO - make sure that this is not always necessary
+                    if (peek.state.requiresBlockPosTracking()) {
+                        peek.context.getCaptureBlockPos().setPos(pos);
+                    }
                     currentBlock.breakBlock(this.world, pos, currentState);
+                    // And then un-set the captured block position
+                    if (peek.state.requiresBlockPosTracking()) {
+                        peek.context.getCaptureBlockPos().setPos(null);
+                    }
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
                 // still work by themselves in vanilla.

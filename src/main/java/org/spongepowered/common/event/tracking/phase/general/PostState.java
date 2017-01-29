@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -61,5 +62,10 @@ final class PostState extends GeneralState {
         final PhaseData phaseData = new PhaseData(unwinding, phaseState);
         phaseState.getPhase().appendContextPreExplosion(phaseContext, phaseData);
 
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        return context.getCapturedEntities().add(entity);
     }
 }
