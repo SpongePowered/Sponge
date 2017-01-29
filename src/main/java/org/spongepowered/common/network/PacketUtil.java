@@ -137,8 +137,9 @@ public class PacketUtil {
                 if (packetState == null) {
                     throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
                 }
+                PhaseContext context = EMPTY_INVALID;
                 if (!TrackingPhases.PACKET.isPacketInvalid(packetIn, packetPlayer, packetState)) {
-                    PhaseContext context = PhaseContext.start()
+                    context = PhaseContext.start()
                             .add(NamedCause.source(packetPlayer))
                             .add(NamedCause.of(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer))
                             .add(NamedCause.of(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn))
@@ -149,16 +150,18 @@ public class PacketUtil {
                     context.owner((Player) packetPlayer);
                     context.notifier((Player) packetPlayer);
                     context.complete();
-                    causeTracker.switchToPhase(packetState, context);
                 } else {
-                    causeTracker.switchToPhase(PacketPhase.General.INVALID, EMPTY_INVALID);
+                    packetState = PacketPhase.General.INVALID;
                 }
-                packetIn.processPacket(netHandler);
+                causeTracker.switchToPhase(packetState, context, () -> {
+                    packetIn.processPacket(netHandler);
+                    return null;
+                });
+
                 if (packetIn instanceof CPacketClientStatus) {
                     // update the reference of player
                     packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
                 }
-                causeTracker.completePhase();
                 ((IMixinEntityPlayerMP) packetPlayer).setPacketItem(null);
             }
         } else { // client
@@ -208,10 +211,10 @@ public class PacketUtil {
                     double d1 = playerMP.posY - ((double)pos.getY() + 0.5D) + 1.5D;
                     double d2 = playerMP.posZ - ((double)pos.getZ() + 0.5D);
                     double d3 = d0 * d0 + d1 * d1 + d2 * d2;
-        
+
                     double dist = SpongeImplHooks.getBlockReachDistance(playerMP)+ 1;
                     dist *= dist;
-        
+
                     if (d3 > dist) {
                         return true;
                     } else if (pos.getY() >= SpongeImpl.getServer().getBuildLimit()) {
