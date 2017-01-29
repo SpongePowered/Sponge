@@ -64,6 +64,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
@@ -136,6 +137,42 @@ public final class CauseTracker {
         }
 
         this.stack.push(state, phaseContext);
+    }
+
+    /**
+     * This method pushes a new phase onto the stack, runs phaseBody,
+     * and calls completePhase afterwards.
+     *
+     * <p>This method ensures that the necessary cleanup is performed if
+     * an exception is thrown by phaseBody - i.e. logging a message,
+     * and calling completePhase</p>
+     * @param state
+     * @param context
+     * @param phaseBody
+     */
+    public void switchToPhase(IPhaseState state, PhaseContext context, Callable<Void> phaseBody) {
+        this.switchToPhase(state, context);
+        try {
+            phaseBody.call();
+        } catch (Exception e) {
+            this.abortCurrentPhase(e);
+            return;
+        }
+        this.completePhase();
+    }
+
+    /**
+     * Used when exception occurs during the main body of a phase.
+     * Avoids running the normal unwinding code
+     */
+    public void abortCurrentPhase(Exception e) {
+        PhaseData data = this.stack.peek();
+        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", data.state, data.context, e);
+
+        // Since an exception occured during the main phase code, we don't know what state we're in.
+        // Therefore, we skip running the normal unwind functions that completePhase calls,
+        // and simply op the phase from the stack.
+        stack.pop();
     }
 
     public void completePhase() {
