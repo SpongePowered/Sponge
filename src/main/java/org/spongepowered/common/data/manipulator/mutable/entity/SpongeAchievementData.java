@@ -37,7 +37,6 @@ import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 import java.util.Set;
 
-@ImplementationRequiredForTest
 public class SpongeAchievementData extends AbstractSingleSetData<Achievement, AchievementData, ImmutableAchievementData> implements AchievementData {
 
     public SpongeAchievementData(Set<Achievement> value) {

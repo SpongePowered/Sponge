@@ -33,7 +33,6 @@ import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeF
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongeFishData extends AbstractSingleCatalogData<Fish, FishData, ImmutableFishData> implements FishData {
 
     public SpongeFishData() {

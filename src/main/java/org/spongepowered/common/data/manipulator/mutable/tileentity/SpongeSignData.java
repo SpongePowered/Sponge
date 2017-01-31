@@ -39,8 +39,6 @@ import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@ImplementationRequiredForTest
-@NonnullByDefault
 public class SpongeSignData extends AbstractListData<Text, SignData, ImmutableSignData> implements SignData {
 
     public SpongeSignData() {

@@ -41,7 +41,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 
-@ImplementationRequiredForTest
 public class SpongeStatisticData extends AbstractMappedData<Statistic, Long, StatisticData, ImmutableStatisticData> implements StatisticData {
 
     public SpongeStatisticData(Map<Statistic, Long> value) {

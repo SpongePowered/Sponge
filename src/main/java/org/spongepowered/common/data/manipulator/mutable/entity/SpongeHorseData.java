@@ -46,7 +46,6 @@ import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 @SuppressWarnings("deprecation")
-@ImplementationRequiredForTest
 public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData> implements HorseData {
 
     private HorseColor horseColor;

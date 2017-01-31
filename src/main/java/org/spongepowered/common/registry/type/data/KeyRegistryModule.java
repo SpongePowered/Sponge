@@ -910,7 +910,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("generation", makeSingleKey(INTEGER_TOKEN, BOUNDED_INTEGER_VALUE_TOKEN, of("Generation"), "sponge:generation", "Generation"));
 
-        this.fieldMap.put("passenger", makeSingleKey(ENTITY_TOKEN, ENTITY_VALUE_TOKEN, of("PassengerSnapshot"), "sponge:passenger_snapshot", "Passenger Snapshot"));
+        this.fieldMap.put("passengers", makeSingleKey(ENTITY_TOKEN, ENTITY_VALUE_TOKEN, of("PassengerSnapshot"), "sponge:passenger_snapshot", "Passenger Snapshot"));
 
         this.fieldMap.put("knockback_strength", makeSingleKey(INTEGER_TOKEN, BOUNDED_INTEGER_VALUE_TOKEN, of("KnockbackStrength"), "sponge:knockback_strength", "Knockback Strength"));
 

@@ -36,7 +36,6 @@ import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleDa
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-@ImplementationRequiredForTest
 public class SpongeDisplayNameData extends AbstractSingleData<Text, DisplayNameData, ImmutableDisplayNameData> implements DisplayNameData {
 
     public SpongeDisplayNameData() {

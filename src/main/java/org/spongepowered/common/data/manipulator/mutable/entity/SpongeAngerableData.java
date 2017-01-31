@@ -36,8 +36,12 @@ import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
-@ImplementationRequiredForTest
 public class SpongeAngerableData extends AbstractIntData<AngerableData, ImmutableAngerableData> implements AngerableData {
+
+    /* Non-Javadoc Required for tests */
+    public SpongeAngerableData(int value, int lowerBound, int upperBound, int defaultValue) {
+        this(value);
+    }
 
     public SpongeAngerableData(int value) {
         super(AngerableData.class, value, Keys.ANGER);

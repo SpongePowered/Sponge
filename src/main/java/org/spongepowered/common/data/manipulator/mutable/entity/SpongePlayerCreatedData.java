@@ -32,10 +32,9 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongePlayerCreatedData extends AbstractBooleanData<PlayerCreatedData, ImmutablePlayerCreatedData> implements PlayerCreatedData {
 
-    protected SpongePlayerCreatedData(Boolean value) {
+    public SpongePlayerCreatedData(boolean value) {
         super(PlayerCreatedData.class, value, Keys.PLAYER_CREATED, ImmutableSpongePlayerCreatedData.class, false);
     }
 

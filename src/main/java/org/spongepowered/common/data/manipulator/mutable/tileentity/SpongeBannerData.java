@@ -47,7 +47,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@ImplementationRequiredForTest
 public class SpongeBannerData extends AbstractData<BannerData, ImmutableBannerData> implements BannerData {
 
     private DyeColor base;

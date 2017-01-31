@@ -42,6 +42,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongePlatform;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 
@@ -97,7 +98,7 @@ final class DataTestUtil {
 
     private static boolean isValidForTesting(Class<?> clazz) {
         return !Modifier.isInterface(clazz.getModifiers()) && !Modifier.isAbstract(clazz.getModifiers())
-               /*&& clazz.getAnnotation(ImplementationRequiredForTest.class) == null*/;
+               && clazz.getAnnotation(ImplementationRequiredForTest.class) == null;
     }
 
     @SuppressWarnings("unchecked")

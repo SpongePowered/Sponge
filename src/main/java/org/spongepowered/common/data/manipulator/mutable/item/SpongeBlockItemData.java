@@ -36,7 +36,6 @@ import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-@ImplementationRequiredForTest
 public class SpongeBlockItemData extends AbstractSingleData<BlockState, BlockItemData, ImmutableBlockItemData> implements BlockItemData {
 
     public SpongeBlockItemData(BlockState value) {

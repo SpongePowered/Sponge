@@ -50,7 +50,6 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Map;
 
-@ImplementationRequiredForTest
 public class SpongeBodyPartRotationalData extends AbstractData<BodyPartRotationalData, ImmutableBodyPartRotationalData>
         implements BodyPartRotationalData {
 

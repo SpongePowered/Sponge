@@ -48,7 +48,6 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@ImplementationRequiredForTest
 public class SpongeCommandData extends AbstractData<CommandData, ImmutableCommandData> implements CommandData {
 
     private String command;
@@ -58,6 +57,7 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
 
     public SpongeCommandData() {
         super(CommandData.class);
+        this.command = "";
         registerGettersAndSetters();
     }
 
@@ -143,7 +143,11 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
         return Optional.ofNullable(this.lastOutput);
     }
 
-    public SpongeCommandData setLastOutput(Text message) {
+    public SpongeCommandData setLastOutput(@Nullable Text message) {
+        if (message == null) {
+            this.lastOutput = null;
+            return this;
+        }
         if (checkNotNull(message, "message").isEmpty()) {
             this.lastOutput = null;
         } else {

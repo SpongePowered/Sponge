@@ -34,7 +34,6 @@ import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCa
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 @SuppressWarnings("deprecation")
-@ImplementationRequiredForTest
 public class SpongeSkeletonData extends AbstractSingleCatalogData<SkeletonType, SkeletonData, ImmutableSkeletonData> implements SkeletonData {
 
     public SpongeSkeletonData(SkeletonType value) {

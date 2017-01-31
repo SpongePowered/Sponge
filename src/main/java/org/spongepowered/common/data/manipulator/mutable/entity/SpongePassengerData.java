@@ -37,7 +37,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@ImplementationRequiredForTest
 public class SpongePassengerData extends AbstractListData<UUID, PassengerData, ImmutablePassengerData> implements PassengerData {
 
     public SpongePassengerData() {

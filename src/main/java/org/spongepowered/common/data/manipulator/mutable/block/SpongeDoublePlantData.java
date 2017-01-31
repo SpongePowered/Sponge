@@ -35,7 +35,6 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongeDoublePlantData extends AbstractSingleCatalogData<DoublePlantType, DoublePlantData, ImmutableDoublePlantData> implements DoublePlantData {
 
     public SpongeDoublePlantData(DoublePlantType plantType) {

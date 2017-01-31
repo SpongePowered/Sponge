@@ -33,7 +33,6 @@ import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeSkullD
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongeSkullData extends AbstractSingleCatalogData<SkullType, SkullData, ImmutableSkullData> implements SkullData {
 
     public SpongeSkullData() {

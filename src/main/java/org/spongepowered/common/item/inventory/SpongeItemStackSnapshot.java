@@ -362,4 +362,25 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             this.creatorUniqueId = Optional.of(uuid);
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SpongeItemStackSnapshot that = (SpongeItemStackSnapshot) o;
+        return count == that.count &&
+               damageValue == that.damageValue &&
+               Objects.equal(itemType, that.itemType) &&
+               Objects.equal(compound, that.compound) &&
+               Objects.equal(creatorUniqueId, that.creatorUniqueId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(itemType, count, damageValue, compound, creatorUniqueId);
+    }
 }

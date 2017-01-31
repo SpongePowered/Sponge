@@ -41,7 +41,6 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Map;
 
-@ImplementationRequiredForTest
 public class SpongeMinecartBlockData extends AbstractData<MinecartBlockData, ImmutableMinecartBlockData> implements MinecartBlockData {
 
     private BlockState block;

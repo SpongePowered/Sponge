@@ -45,7 +45,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@ImplementationRequiredForTest
 public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEntityFurnace, FurnaceData, ImmutableFurnaceData> {
 
     public FurnaceDataProcessor() {

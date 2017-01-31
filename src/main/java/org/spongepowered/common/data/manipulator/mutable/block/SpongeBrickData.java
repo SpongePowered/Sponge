@@ -35,7 +35,6 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongeBrickData extends AbstractSingleCatalogData<BrickType, BrickData, ImmutableBrickData> implements BrickData {
 
     public SpongeBrickData(BrickType brickType) {

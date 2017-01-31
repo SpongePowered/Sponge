@@ -42,7 +42,6 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 
 @SuppressWarnings("deprecation")
-@ImplementationRequiredForTest
 public class SpongeZombieData extends AbstractData<ZombieData, ImmutableZombieData> implements ZombieData {
 
     private ZombieType type;

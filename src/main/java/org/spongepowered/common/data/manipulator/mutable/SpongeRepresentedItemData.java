@@ -38,7 +38,6 @@ import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleDa
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-@ImplementationRequiredForTest
 public class SpongeRepresentedItemData extends AbstractSingleData<ItemStackSnapshot, RepresentedItemData, ImmutableRepresentedItemData> implements RepresentedItemData {
 
     public SpongeRepresentedItemData() {

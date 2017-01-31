@@ -40,7 +40,6 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@ImplementationRequiredForTest
 public class SpongeBeaconData extends AbstractData<BeaconData, ImmutableBeaconData> implements BeaconData {
 
     @Nullable

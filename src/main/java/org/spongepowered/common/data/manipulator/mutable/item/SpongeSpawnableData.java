@@ -33,7 +33,6 @@ import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeS
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-@ImplementationRequiredForTest
 public class SpongeSpawnableData extends AbstractSingleCatalogData<EntityType, SpawnableData, ImmutableSpawnableData> implements SpawnableData {
 
     public SpongeSpawnableData(EntityType type) {

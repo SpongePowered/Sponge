@@ -42,19 +42,21 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableCommandData, CommandData> implements ImmutableCommandData {
 
     private final String storedCommand;
     private final int success;
     private final boolean tracks;
-    private final Text lastOutput;
+    @Nullable private final Text lastOutput;
 
     private final ImmutableValue<String> storedValue;
     private final ImmutableBoundedValue<Integer> successValue;
     private final ImmutableValue<Boolean> tracksValue;
     private final ImmutableOptionalValue<Text> lastOutputValue;
 
-    public ImmutableSpongeCommandData(String storedCommand, int success, boolean tracks, Text lastOutput) {
+    public ImmutableSpongeCommandData(String storedCommand, int success, boolean tracks, @Nullable Text lastOutput) {
         super(ImmutableCommandData.class);
         this.storedCommand = storedCommand;
         this.success = success;
@@ -125,8 +127,8 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
         return this.tracks;
     }
 
-    public Text getLastOutput() {
-        return this.lastOutput;
+    public Optional<Text> getLastOutput() {
+        return Optional.ofNullable(this.lastOutput);
     }
 
     @Override

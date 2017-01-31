@@ -36,6 +36,7 @@ import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.BlockLog;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Items;
@@ -62,6 +63,7 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -104,6 +106,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Shadow private boolean needsRandomTick;
     @Shadow protected SoundType blockSoundType;
+    @Shadow @Final protected BlockStateContainer blockState;
 
     @Shadow public abstract String getUnlocalizedName();
     @Shadow public abstract Material getMaterial(IBlockState state);
@@ -167,6 +170,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public BlockState getDefaultState() {
         return (BlockState) shadow$getDefaultState();
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<BlockState> getAllBlockStates() {
+        return (Collection<BlockState>) (Collection<?>) this.blockState.getValidStates();
     }
 
     @Override
