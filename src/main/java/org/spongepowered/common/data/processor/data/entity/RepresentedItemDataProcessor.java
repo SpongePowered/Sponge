@@ -87,9 +87,9 @@ public class RepresentedItemDataProcessor extends
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof EntityItemFrame) {
             EntityItemFrame frame = (EntityItemFrame) container;
-            if (frame.getDisplayedItem() != null) {
+            if (!frame.getDisplayedItem().isEmpty()) {
                 final ImmutableValue<ItemStackSnapshot> old = constructImmutableValue(getVal(frame).get());
-                frame.setDisplayedItem(null);
+                frame.setDisplayedItem(ItemStack.EMPTY);
                 return DataTransactionResult.successRemove(old);
             }
             return DataTransactionResult.successNoData();
