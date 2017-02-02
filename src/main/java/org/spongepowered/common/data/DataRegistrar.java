@@ -339,6 +339,9 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(GameModeData.class, SpongeGameModeData.class, ImmutableGameModeData.class,
                 ImmutableSpongeGameModeData.class, new GameModeDataProcessor());
 
+        dataManager.registerDualProcessor(AbsorptionData.class, SpongeAbsorptionData.class, ImmutableAbsorptionData.class,
+                ImmutableSpongeAbsorptionData.class, new AbsorptionDataProcessor());
+
         dataManager.registerDualProcessor(AggressiveData.class, SpongeAggressiveData.class, ImmutableAggressiveData.class,
                 ImmutableSpongeAggressiveData.class, new AggressiveDataProcessor());
 
