@@ -26,6 +26,7 @@ package org.spongepowered.common.world.storage;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
+import com.google.inject.Inject;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.WorldServer;
@@ -50,13 +51,15 @@ import java.util.concurrent.CompletableFuture;
 
 public class WorldStorageUtil {
 
+    @Inject private static SpongeScheduler scheduler;
+
     public static CompletableFuture<Boolean> doesChunkExist(WorldServer world, IChunkLoader chunkLoader, Vector3i chunkCoords) {
         int x = chunkCoords.getX();
         int z = chunkCoords.getZ();
         if (!(chunkLoader instanceof IMixinAnvilChunkLoader) || !SpongeChunkLayout.instance.isValidChunk(x, chunkCoords.getY(), z)) {
             return CompletableFuture.completedFuture(false);
         }
-        return SpongeScheduler.getInstance().submitAsyncTask(() -> ((IMixinAnvilChunkLoader) chunkLoader).chunkExists(world, x, z));
+        return scheduler.submitAsyncTask(() -> ((IMixinAnvilChunkLoader) chunkLoader).chunkExists(world, x, z));
     }
 
     public static CompletableFuture<Optional<DataContainer>> getChunkData(WorldServer world, IChunkLoader chunkLoader, Vector3i chunkCoords) {
@@ -67,7 +70,7 @@ public class WorldStorageUtil {
             return CompletableFuture.completedFuture(Optional.empty());
         }
         File worldDir = ((IMixinAnvilChunkLoader) chunkLoader).getWorldDir().toFile();
-        return SpongeScheduler.getInstance().submitAsyncTask(() -> {
+        return scheduler.submitAsyncTask(() -> {
             DataInputStream stream = RegionFileCache.getChunkInputStream(worldDir, x, z);
             return Optional.ofNullable(readDataFromRegion(stream));
         });

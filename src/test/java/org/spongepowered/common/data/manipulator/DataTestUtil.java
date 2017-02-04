@@ -28,7 +28,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.google.inject.Injector;
 import net.minecraft.init.Bootstrap;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
@@ -76,7 +75,7 @@ final class DataTestUtil {
         Platform platform = new SpongePlatform(manager, SpongeImpl.MINECRAFT_VERSION);
         when(game.getPlatform()).thenReturn(platform);
 
-        new SpongeImpl(mock(Injector.class), game, manager);
+        new SpongeImpl(game, manager);
 
         registry.preRegistryInit();
         registry.preInit();

@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.inject.Inject;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 
@@ -36,6 +37,7 @@ import java.util.function.Consumer;
 
 public class SpongeTaskBuilder implements Task.Builder {
 
+    @Inject private static SpongeScheduler scheduler;
     private Consumer<Task> consumer;
     private ScheduledTask.TaskSynchronicity syncType;
     private String name;
@@ -101,11 +103,11 @@ public class SpongeTaskBuilder implements Task.Builder {
 
     @Override
     public Task submit(Object plugin) {
-        PluginContainer pluginContainer = SpongeScheduler.checkPluginInstance(plugin);
+        PluginContainer pluginContainer = scheduler.checkPluginInstance(plugin);
         checkState(this.consumer != null, "Runnable task not set");
         String name;
         if (this.name == null) {
-            name = SpongeScheduler.getInstance().getNameFor(pluginContainer, this.syncType);
+            name = scheduler.getNameFor(pluginContainer, this.syncType);
         } else {
             name = this.name;
         }
@@ -119,7 +121,7 @@ public class SpongeTaskBuilder implements Task.Builder {
             delayIsTicks = intervalIsTicks = false;
         }
         ScheduledTask task = new ScheduledTask(this.syncType, this.consumer, name, delay, delayIsTicks, interval, intervalIsTicks, pluginContainer);
-        SpongeScheduler.getInstance().submit(task);
+        scheduler.submit(task);
         return task;
     }
 

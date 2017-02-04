@@ -35,6 +35,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
@@ -44,7 +45,6 @@ import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.impl.AbstractEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
 
@@ -66,7 +66,7 @@ import javax.inject.Singleton;
 public class SpongeEventManager implements EventManager {
 
     private final Object lock = new Object();
-
+    protected final Logger logger;
     private final PluginManager pluginManager;
     private final DefineableClassLoader classLoader = new DefineableClassLoader(getClass().getClassLoader());
     private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
@@ -85,7 +85,8 @@ public class SpongeEventManager implements EventManager {
             Caffeine.newBuilder().initialCapacity(150).build((eventClass) -> bakeHandlers(eventClass));
 
     @Inject
-    public SpongeEventManager(PluginManager pluginManager) {
+    public SpongeEventManager(Logger logger, PluginManager pluginManager) {
+        this.logger = logger;
         this.pluginManager = checkNotNull(pluginManager, "pluginManager");
 
         // Caffeine offers no control over the concurrency level of the
@@ -107,8 +108,8 @@ public class SpongeEventManager implements EventManager {
             ConcurrentHashMap<Class<? extends Event>, RegisteredListener.Cache> newBackingData = new ConcurrentHashMap<>(150, 0.75f, 1);
             cacheData.set(innerCacheValue, newBackingData);
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            SpongeImpl.getLogger().warn("Failed to set event cache backing array, type was " + this.handlersCache.getClass().getName());
-            SpongeImpl.getLogger().warn("  Caused by: " + e.getClass().getName() + ": " + e.getMessage());
+            this.logger.warn("Failed to set event cache backing array, type was " + this.handlersCache.getClass().getName());
+            this.logger.warn("  Caused by: " + e.getClass().getName() + ": " + e.getMessage());
         }
     }
 
@@ -186,7 +187,7 @@ public class SpongeEventManager implements EventManager {
         checkNotNull(listenerObject, "listener");
 
         if (this.registeredListeners.contains(listenerObject)) {
-            SpongeImpl.getLogger().warn("Plugin {} attempted to register an already registered listener ({})", plugin.getId(),
+            this.logger.warn("Plugin {} attempted to register an already registered listener ({})", plugin.getId(),
                     listenerObject.getClass().getName());
             Thread.dumpStack();
             return;
@@ -205,13 +206,13 @@ public class SpongeEventManager implements EventManager {
                     try {
                         handler = this.handlerFactory.create(listenerObject, method);
                     } catch (Exception e) {
-                        SpongeImpl.getLogger().error("Failed to create handler for {} on {}", method, handle, e);
+                        this.logger.error("Failed to create handler for {} on {}", method, handle, e);
                         continue;
                     }
 
                     handlers.add(createRegistration(plugin, eventClass, listener, handler));
                 } else {
-                    SpongeImpl.getLogger().warn("The method {} on {} has @{} but has the wrong signature", method, handle.getName(),
+                    this.logger.warn("The method {} on {} has @{} but has the wrong signature", method, handle.getName(),
                             Listener.class.getName());
                 }
             }
@@ -296,7 +297,7 @@ public class SpongeEventManager implements EventManager {
     }
 
     @SuppressWarnings("unchecked")
-    protected static boolean post(Event event, List<RegisteredListener<?>> handlers) {
+    protected boolean post(Event event, List<RegisteredListener<?>> handlers) {
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
             try {
                 handler.getTimingsHandler().startTimingIfSync();
@@ -305,7 +306,7 @@ public class SpongeEventManager implements EventManager {
                 handler.getTimingsHandler().stopTimingIfSync();
             } catch (Throwable e) {
                 handler.getTimingsHandler().stopTimingIfSync();
-                SpongeImpl.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
+                this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
             }
         }
         ((AbstractEvent) event).currentOrder = null;

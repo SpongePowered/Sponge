@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common;
 
+import com.google.inject.Inject;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -52,6 +55,9 @@ import org.spongepowered.common.util.SpongeUsernameCache;
 @NonnullByDefault
 public final class SpongeBootstrap {
 
+    @Inject private static ServiceManager serviceManager;
+    @Inject private static CommandManager commandManager;
+
     public static void initializeServices() {
         registerService(SqlService.class, new SqlServiceImpl());
         registerService(PaginationService.class, new SpongePaginationService());
@@ -66,12 +72,12 @@ public final class SpongeBootstrap {
     }
 
     public static void initializeCommands() {
-        Sponge.getCommandManager().register(SpongeImpl.getPlugin(), SpongeCommand.getCommand(), "sponge", "sp");
-        Sponge.getCommandManager().register(SpongeImpl.getPlugin(), SpongeHelpCommand.create(), "help", "?");
-        Sponge.getCommandManager().register(SpongeImpl.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
+        commandManager.register(SpongeImpl.getPlugin(), SpongeCommand.getCommand(), "sponge", "sp");
+        commandManager.register(SpongeImpl.getPlugin(), SpongeHelpCommand.create(), "help", "?");
+        commandManager.register(SpongeImpl.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
     }
 
     private static <T> void registerService(Class<T> serviceClass, T serviceImpl) {
-        SpongeImpl.getGame().getServiceManager().setProvider(SpongeImpl.getPlugin(), serviceClass, serviceImpl);
+        serviceManager.setProvider(SpongeImpl.getPlugin(), serviceClass, serviceImpl);
     }
 }

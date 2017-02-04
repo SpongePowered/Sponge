@@ -27,6 +27,7 @@ package org.spongepowered.common.profile;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import com.google.inject.Inject;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
@@ -55,6 +56,7 @@ public final class SpongeProfileManager implements GameProfileManager {
     private final GameProfileCache defaultCache = (GameProfileCache) SpongeImpl.getServer().getPlayerProfileCache();
     private GameProfileCache cache = this.defaultCache;
     private ExecutorService gameLookupExecutorService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder().setNameFormat("Sponge - Async User Lookup Thread").build());
+    @Inject private static SpongeScheduler scheduler;
 
     public SpongeProfileManager() {
     }
@@ -133,7 +135,7 @@ public final class SpongeProfileManager implements GameProfileManager {
     }
 
     private <T> CompletableFuture<T> submitTask(Callable<T> callable) {
-        return SpongeScheduler.getInstance().submitAsyncTask(callable);
+        return scheduler.submitAsyncTask(callable);
     }
 
 }

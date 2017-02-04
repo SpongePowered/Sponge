@@ -29,7 +29,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.Platform.Component.IMPLEMENTATION;
 import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
 
-import com.google.inject.Injector;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,8 +43,6 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.state.GameStateEvent;
-import org.spongepowered.api.event.game.state.GameStoppedEvent;
-import org.spongepowered.api.event.game.state.GameStoppingEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.config.SpongeConfig;
@@ -56,12 +55,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.function.BiFunction;
-import java.util.function.Function;
 
 import javax.annotation.Nullable;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 @Singleton
 public final class SpongeImpl {
@@ -80,6 +75,7 @@ public final class SpongeImpl {
     private static final Logger logger = LogManager.getLogger(ECOSYSTEM_NAME);
     private static final org.slf4j.Logger slf4jLogger = LoggerFactory.getLogger(ECOSYSTEM_NAME);
 
+    @Inject
     @Nullable
     private static SpongeImpl instance;
 
@@ -87,21 +83,16 @@ public final class SpongeImpl {
 
     @Nullable private static PluginContainer minecraftPlugin;
 
-
     public static final Random random = new Random();
 
-    private final Injector injector;
     private final Game game;
     private final Cause implementationCause;
 
     private final List<PluginContainer> internalPlugins = new ArrayList<>();
 
     @Inject
-    public SpongeImpl(Injector injector, Game game, PluginManager manager) {
+    public SpongeImpl(Game game, PluginManager manager) {
         checkState(instance == null, "SpongeImpl was already initialized");
-        instance = this;
-
-        this.injector = checkNotNull(injector, "injector");
         this.game = checkNotNull(game, "game");
 
         Platform platform = game.getPlatform();
@@ -124,10 +115,6 @@ public final class SpongeImpl {
 
     public static boolean isInitialized() {
         return instance != null;
-    }
-
-    public static Injector getInjector() {
-        return getInstance().injector;
     }
 
     public static SpongeGame getGame() {

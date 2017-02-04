@@ -28,14 +28,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Functional;
-import org.spongepowered.common.SpongeImpl;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -43,28 +43,22 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Singleton
 public class SpongeScheduler implements Scheduler {
 
-    private static final SpongeScheduler INSTANCE = new SpongeScheduler();
     public static final int TICK_DURATION_MS = 50;
     public static final long TICK_DURATION_NS = TimeUnit.NANOSECONDS.convert(TICK_DURATION_MS, TimeUnit.MILLISECONDS);
+    private final AsyncScheduler asyncScheduler = new AsyncScheduler();
+    private final SyncScheduler syncScheduler = new SyncScheduler();
+    private final PluginManager pluginManager;
 
-    private final AsyncScheduler asyncScheduler;
-    private final SyncScheduler syncScheduler;
-
-    private SpongeScheduler() {
-        this.asyncScheduler = new AsyncScheduler();
-        this.syncScheduler = new SyncScheduler();
-    }
-
-    public static SpongeScheduler getInstance() {
-        return INSTANCE;
+    @Inject
+    private SpongeScheduler(PluginManager pluginManager) {
+        this.pluginManager = pluginManager;
     }
 
     @Override
@@ -154,8 +148,8 @@ public class SpongeScheduler implements Scheduler {
      * @throws NullPointerException If the passed in plugin instance is null
      * @throws IllegalArgumentException If the object is not a plugin instance
      */
-    static PluginContainer checkPluginInstance(Object plugin) {
-        Optional<PluginContainer> optPlugin = SpongeImpl.getGame().getPluginManager().fromInstance(checkNotNull(plugin, "plugin"));
+    PluginContainer checkPluginInstance(Object plugin) {
+        Optional<PluginContainer> optPlugin = this.pluginManager.fromInstance(checkNotNull(plugin, "plugin"));
         checkArgument(optPlugin.isPresent(), "Provided object is not a plugin instance");
         return optPlugin.get();
     }

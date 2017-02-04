@@ -22,55 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.guice;
+package org.spongepowered.common.inject.provider;
 
-import com.google.common.base.Objects;
-import org.spongepowered.api.config.ConfigDir;
+import com.google.inject.Provider;
 
-import java.lang.annotation.Annotation;
+import java.io.File;
+import java.nio.file.Path;
 
-// This is strange, but required for Guice and annotations with values.
-public class ConfigDirAnnotation implements ConfigDir {
+public abstract class PathAsFileProvider implements Provider<File> {
 
-    private final boolean shared;
-
-    public ConfigDirAnnotation(boolean shared) {
-        this.shared = shared;
-    }
+    protected Path path;
 
     @Override
-    public boolean sharedRoot() {
-        return this.shared;
+    public File get() {
+        return this.path.toFile();
     }
-
-    @Override
-    public Class<? extends Annotation> annotationType() {
-        return ConfigDir.class;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof ConfigDir)) {
-            return false;
-        }
-
-        ConfigDir that = (ConfigDir) o;
-        return sharedRoot() == that.sharedRoot();
-    }
-
-    @Override
-    public int hashCode() {
-        return (127 * "sharedRoot".hashCode()) ^ Boolean.valueOf(sharedRoot()).hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return Objects.toStringHelper('@' + getClass().getName())
-                .add("shared", this.shared)
-                .toString();
-    }
-
 }

@@ -32,6 +32,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
@@ -84,6 +85,7 @@ import javax.inject.Inject;
  * A simple implementation of {@link CommandManager}.
  * This service calls the appropriate events for a command.
  */
+@Singleton
 public class SpongeCommandManager implements CommandManager {
     private final Logger log;
     private final SimpleDispatcher dispatcher;

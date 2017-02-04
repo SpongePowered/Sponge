@@ -27,6 +27,7 @@ package org.spongepowered.common.asset;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.inject.Singleton;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.asset.AssetManager;
@@ -39,6 +40,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
+@Singleton
 public final class SpongeAssetManager implements AssetManager {
 
     public static final String DEFAULT_ASSET_DIR = "assets/";

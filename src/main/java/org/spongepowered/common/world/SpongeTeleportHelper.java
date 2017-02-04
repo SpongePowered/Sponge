@@ -26,6 +26,7 @@ package org.spongepowered.common.world;
 
 import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.inject.Singleton;
 import net.minecraft.block.material.Material;
 import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.api.world.Location;
@@ -44,6 +45,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+@Singleton
 public class SpongeTeleportHelper implements TeleportHelper {
 
     @Override

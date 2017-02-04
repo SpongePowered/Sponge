@@ -41,13 +41,14 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.InjectedTest;
 import org.spongepowered.common.event.listener.NonPreListener;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Optional;
 
-public class SnapshotGenerationTest {
+public class SnapshotGenerationTest extends InjectedTest {
 
     private Entity entity;
     private SpawnEntityEvent event;
@@ -57,7 +58,7 @@ public class SnapshotGenerationTest {
     @Before
     public void init() {
         PluginManager manager = Mockito.mock(PluginManager.class);
-        this.eventManager = new SpongeEventManager(manager);
+        this.eventManager = new SpongeEventManager(this.logger, manager);
 
         try {
             Field field = Timings.class.getDeclaredField("factory");

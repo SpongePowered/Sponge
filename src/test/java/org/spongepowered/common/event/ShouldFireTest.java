@@ -33,12 +33,13 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.common.InjectedTest;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Optional;
 
-public class ShouldFireTest {
+public class ShouldFireTest extends InjectedTest {
 
     private EventManager eventManager;
     private Object plugin;
@@ -47,7 +48,7 @@ public class ShouldFireTest {
     @Before
     public void init() throws Exception {
         PluginManager manager = Mockito.mock(PluginManager.class);
-        this.eventManager = new SpongeEventManager(manager);
+        this.eventManager = new SpongeEventManager(this.logger, manager);
 
         this.plugin = new Object();
         this.container = Mockito.mock(PluginContainer.class);

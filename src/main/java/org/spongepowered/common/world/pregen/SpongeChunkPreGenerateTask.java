@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import com.google.inject.Inject;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -60,6 +61,7 @@ import javax.annotation.Nullable;
 
 public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Task> {
 
+    @Inject private static SpongeScheduler scheduler;
     private static final int DEFAULT_TICK_INTERVAL = 4;
     private static final float DEFAULT_TICK_PERCENT = 0.8f;
 
@@ -103,7 +105,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
             World world, Vector3d center, double diameter, int chunkCount, float tickPercent, int tickInterval, Cause cause,
             List<Consumer<ChunkPreGenerationEvent>> eventListeners) {
 
-        int preferredTickInterval = SpongeScheduler.getInstance().getPreferredTickInterval();
+        int preferredTickInterval = scheduler.getPreferredTickInterval();
 
         this.plugin = plugin;
         this.world = world;
@@ -139,7 +141,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
 
         this.totalChunksToGenerate = (int) Math.pow(this.chunkRadius * 2 + 1, 2);
 
-        this.spongeTask = SpongeScheduler.getInstance()
+        this.spongeTask = scheduler
                 .createTaskBuilder()
                 .intervalTicks(preferredTickInterval)
                 .execute(this)
@@ -190,7 +192,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
 
         // It's possible we haven't cancelled the task here, so we just make sure of it, and perform
         // some cleanup.
-        if (!SpongeScheduler.getInstance().getTaskById(this.spongeTask.getUniqueId()).isPresent()) {
+        if (!scheduler.getTaskById(this.spongeTask.getUniqueId()).isPresent()) {
             cancel();
         }
 
@@ -306,7 +308,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
 
     private void cancelTask(Task task) {
         // Don't fire multiple instances.
-        if (SpongeScheduler.getInstance().getTaskById(task.getUniqueId()).isPresent()) {
+        if (scheduler.getTaskById(task.getUniqueId()).isPresent()) {
             Sponge.getEventManager().post(SpongeEventFactory.createChunkPreGenerationEventCancelled(
                     this.cause,
                     this,

@@ -22,54 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.guice;
+package org.spongepowered.common.inject;
 
-import com.google.common.base.Objects;
-import org.spongepowered.api.config.DefaultConfig;
+import com.google.inject.AbstractModule;
+import com.google.inject.Inject;
+import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.inject.config.ConfigDirAnnotation;
+import org.spongepowered.common.inject.provider.PathAsFileProvider;
 
-import java.lang.annotation.Annotation;
+import java.io.File;
+import java.nio.file.Path;
 
-public class ConfigFileAnnotation implements DefaultConfig {
-
-    private final boolean shared;
-
-    public ConfigFileAnnotation(boolean shared) {
-        this.shared = shared;
-    }
-
-    @Override
-    public boolean sharedRoot() {
-        return this.shared;
-    }
+public class SpongeModule extends AbstractModule {
 
     @Override
-    public Class<? extends Annotation> annotationType() {
-        return DefaultConfig.class;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof DefaultConfig)) {
-            return false;
-        }
-
-        DefaultConfig that = (DefaultConfig) o;
-        return sharedRoot() == that.sharedRoot();
-    }
-
-    @Override
-    public int hashCode() {
-        return (127 * "sharedRoot".hashCode()) ^ Boolean.valueOf(sharedRoot()).hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return Objects.toStringHelper('@' + getClass().getName())
-                .add("shared", this.shared)
-                .toString();
+    protected void configure() {
+        this.bind(Path.class).annotatedWith(ConfigDirAnnotation.SHARED).toInstance(SpongeImpl.getPluginConfigDir());
+        this.bind(File.class).annotatedWith(ConfigDirAnnotation.SHARED).toProvider(new PathAsFileProvider() {
+            @Inject
+            void init(@ConfigDir(sharedRoot = true) Path path) {
+                this.path = path;
+            }
+        });
     }
 
 }
