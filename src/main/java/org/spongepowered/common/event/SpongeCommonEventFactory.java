@@ -338,16 +338,15 @@ public class SpongeCommonEventFactory {
             rootCause = phaseContext.first(Object.class).orElse(null);
         }
 
+        final BlockState blockstate = (BlockState)((net.minecraft.world.World) world).getBlockState(sourcePos);
+        final LocatableBlock locatable = LocatableBlock.builder()
+                .location(new Location<World>((World) world, sourcePos.getX(), sourcePos.getY(), sourcePos.getZ()))
+                .state(blockstate)
+                .build();
+        builder = Cause.source(locatable);
         if (rootCause instanceof User) {
-            final BlockState blockstate = (BlockState)((net.minecraft.world.World) world).getBlockState(sourcePos);
-            final LocatableBlock locatable = LocatableBlock.builder()
-                    .location(new Location<World>((World) world, sourcePos.getX(), sourcePos.getY(), sourcePos.getZ()))
-                    .state(blockstate)
-                    .build();
-            builder = Cause.source(locatable);
             builder.named(NamedCause.notifier(rootCause));
         } else {
-            builder = Cause.source(rootCause);
             if (user != null) {
                 builder.named(NamedCause.notifier(user));
             } else {
