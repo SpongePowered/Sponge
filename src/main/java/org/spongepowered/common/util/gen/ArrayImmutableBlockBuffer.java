@@ -36,15 +36,11 @@ import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
 import org.spongepowered.api.world.schematic.BlockPalette;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.BackingData;
-import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.ByteBackingData;
 import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.CharBackingData;
-import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer.IntBackingData;
 import org.spongepowered.common.world.extent.ImmutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBlockViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
-
-import java.util.Arrays;
 
 public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements ImmutableBlockVolume {
 
@@ -74,21 +70,9 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
         this.palette = palette;
     }
 
-    public ArrayImmutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, byte[] blocks) {
-        super(start, size);
-        this.data = new ByteBackingData(Arrays.copyOf(blocks, blocks.length));
-        this.palette = palette;
-    }
-
     public ArrayImmutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, char[] blocks) {
         super(start, size);
-        this.data = new CharBackingData(Arrays.copyOf(blocks, blocks.length));
-        this.palette = palette;
-    }
-
-    public ArrayImmutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size, int[] blocks) {
-        super(start, size);
-        this.data = new IntBackingData(Arrays.copyOf(blocks, blocks.length));
+        this.data = new CharBackingData(blocks.clone());
         this.palette = palette;
     }
 
@@ -129,7 +113,7 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new ArrayMutableBlockBuffer(this.palette, this.start, this.size, this.data);
+                return new ArrayMutableBlockBuffer(this.palette, this.start, this.size, this.data.copyOf());
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -145,33 +129,7 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
      * @param size The size of the volume
      * @return A new buffer using the same array reference
      */
-    public static ImmutableBlockVolume newWithoutArrayClone(BlockPalette palette, Vector3i start, Vector3i size, byte[] blocks) {
-        return new ArrayImmutableBlockBuffer(palette, new ByteBackingData(blocks), start, size);
-    }
-
-    /**
-     * This method doesn't clone the array passed into it. INTERNAL USE ONLY.
-     * Make sure your code doesn't leak the reference if you're using it.
-     *
-     * @param blocks The blocks to store
-     * @param start The start of the volume
-     * @param size The size of the volume
-     * @return A new buffer using the same array reference
-     */
     public static ImmutableBlockVolume newWithoutArrayClone(BlockPalette palette, Vector3i start, Vector3i size, char[] blocks) {
         return new ArrayImmutableBlockBuffer(palette, new CharBackingData(blocks), start, size);
-    }
-
-    /**
-     * This method doesn't clone the array passed into it. INTERNAL USE ONLY.
-     * Make sure your code doesn't leak the reference if you're using it.
-     *
-     * @param blocks The blocks to store
-     * @param start The start of the volume
-     * @param size The size of the volume
-     * @return A new buffer using the same array reference
-     */
-    public static ImmutableBlockVolume newWithoutArrayClone(BlockPalette palette, Vector3i start, Vector3i size, int[] blocks) {
-        return new ArrayImmutableBlockBuffer(palette, new IntBackingData(blocks), start, size);
     }
 }
