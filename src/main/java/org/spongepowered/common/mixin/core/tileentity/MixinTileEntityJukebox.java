@@ -44,19 +44,21 @@ import java.util.Optional;
 @Mixin(BlockJukebox.TileEntityJukebox.class)
 public abstract class MixinTileEntityJukebox extends MixinTileEntity implements Jukebox {
 
+    private static final int PLAY_RECORD_EVENT = 1010;
+
     @Shadow public abstract net.minecraft.item.ItemStack getRecord();
     @Shadow public abstract void setRecord(net.minecraft.item.ItemStack recordStack);
 
     @Override
     public void playRecord() {
         if (!getRecord().isEmpty()) {
-            this.world.playEvent(null, 1010, this.pos, Item.getIdFromItem(getRecord().getItem()));
+            this.world.playEvent(null, PLAY_RECORD_EVENT, this.pos, Item.getIdFromItem(getRecord().getItem()));
         }
     }
 
     @Override
     public void stopRecord() {
-        this.world.playEvent(1010, pos, 0);
+        this.world.playEvent(PLAY_RECORD_EVENT, pos, 0);
         this.world.playRecord(pos, null);
     }
 
