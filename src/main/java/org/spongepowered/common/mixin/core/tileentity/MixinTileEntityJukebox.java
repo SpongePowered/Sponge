@@ -49,9 +49,15 @@ public abstract class MixinTileEntityJukebox extends MixinTileEntity implements 
 
     @Override
     public void playRecord() {
-        if (getRecord() != null) {
-            this.world.playEvent(null, 1005, this.pos, Item.getIdFromItem(getRecord().getItem()));
+        if (!getRecord().isEmpty()) {
+            this.world.playEvent(null, 1010, this.pos, Item.getIdFromItem(getRecord().getItem()));
         }
+    }
+
+    @Override
+    public void stopRecord() {
+        this.world.playEvent(1010, pos, 0);
+        this.world.playRecord(pos, null);
     }
 
     @Override
