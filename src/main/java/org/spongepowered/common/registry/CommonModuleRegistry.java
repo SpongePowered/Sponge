@@ -105,6 +105,9 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticType;
+import org.spongepowered.api.text.action.ClickAction;
+import org.spongepowered.api.text.action.HoverAction;
+import org.spongepowered.api.text.action.ShiftClickAction;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextStyle;
@@ -214,6 +217,9 @@ import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryMod
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
+import org.spongepowered.common.text.action.SpongeClickTextAction;
+import org.spongepowered.common.text.action.SpongeHoverTextAction;
+import org.spongepowered.common.text.action.SpongeShiftClickTextAction;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
@@ -347,6 +353,16 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(ShapedCraftingRecipe.Builder.class, SpongeShapedCraftingRecipeBuilder::new)
             .registerBuilderSupplier(ShapelessCraftingRecipe.Builder.class, SpongeShapelessCraftingRecipeBuilder::new)
             .registerBuilderSupplier(SmeltingRecipe.Builder.class, SpongeSmeltingRecipeBuilder::new)
+            .registerBuilderSupplier(ClickAction.OpenUrl.Builder.class, SpongeClickTextAction.SpongeOpenUrl.Builder::new)
+            .registerBuilderSupplier(ClickAction.RunCommand.Builder.class, SpongeClickTextAction.SpongeRunCommand.Builder::new)
+            .registerBuilderSupplier(ClickAction.ChangePage.Builder.class, SpongeClickTextAction.SpongeChangePage.Builder::new)
+            .registerBuilderSupplier(ClickAction.SuggestCommand.Builder.class, SpongeClickTextAction.SpongeSuggestCommand.Builder::new)
+            .registerBuilderSupplier(ClickAction.ExecuteCallback.Builder.class, SpongeClickTextAction.SpongeExecuteCallback.Builder::new)
+            .registerBuilderSupplier(HoverAction.ShowText.Builder.class, SpongeHoverTextAction.SpongeShowText.Builder::new)
+            .registerBuilderSupplier(HoverAction.ShowItem.Builder.class, SpongeHoverTextAction.SpongeShowItem.Builder::new)
+            .registerBuilderSupplier(HoverAction.ShowEntity.Builder.class, SpongeHoverTextAction.SpongeShowEntity.Builder::new)
+            .registerBuilderSupplier(HoverAction.ShowEntity.Ref.Builder.class, SpongeHoverTextAction.SpongeShowEntity.Ref.Builder::new)
+            .registerBuilderSupplier(ShiftClickAction.InsertText.Builder.class, SpongeShiftClickTextAction.SpongeInsertText.Builder::new)
         ;
     }
 
