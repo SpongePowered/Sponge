@@ -469,7 +469,7 @@ public class DamageEventHandler {
                             .build())
                     .type(DamageModifierTypes.SHIELD)
                     .build();
-            return Optional.of(new Tuple<>(modifier, (damage) -> -damage));
+            return Optional.of(new Tuple<DamageModifier, Function<? super Double, Double>>(modifier, (damage) -> -damage));
         }
         return Optional.empty();
     }
