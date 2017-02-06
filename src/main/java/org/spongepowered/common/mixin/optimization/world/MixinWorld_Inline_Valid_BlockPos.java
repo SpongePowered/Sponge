@@ -34,14 +34,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 import java.util.List;
 
@@ -60,10 +58,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
     @Shadow public abstract int getSkylightSubtracted();
     @Shadow public abstract int getLight(BlockPos pos);
     @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
-
-    @Shadow @Nullable private TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) { // getPendingTileEntityAt
-        return null; // Shadowed
-    }
+    @Shadow @Nullable public abstract TileEntity getPendingTileEntityAt(BlockPos p_189508_1_);
 
     /**
      * @author gabizou - August 4th, 2016
@@ -102,12 +97,6 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
             return null;
         } else {
             TileEntity tileentity = null;
-
-            // Sponge start - don't allow loading chunks here
-            if (!this.isBlockLoaded(pos)) {
-                return null;
-            }
-            // Sponge end
 
             if (this.processingLoadedTiles) {
                 tileentity = this.getPendingTileEntityAt(pos);

@@ -50,13 +50,13 @@ public class WorldCategory extends ConfigCategory {
     protected boolean worldEnabled = true;
 
     @Setting(value = "load-on-startup", comment = "Enable if this world should be loaded on startup.")
-    protected boolean loadOnStartup = true;
+    protected Boolean loadOnStartup;
 
     @Setting(value = "generate-spawn-on-load", comment = "Enable if you want the world to generate spawn the moment its loaded.")
-    protected boolean generateSpawnOnLoad = true;
+    protected Boolean generateSpawnOnLoad;
 
     @Setting(value = "keep-spawn-loaded", comment = "Enable if this world's spawn should remain loaded with no players.")
-    protected boolean keepSpawnLoaded = true;
+    protected Boolean keepSpawnLoaded;
 
     @Setting(value = "pvp-enabled", comment = "Enable if this world allows PVP combat.")
     protected boolean pvpEnabled = true;
@@ -145,19 +145,19 @@ public class WorldCategory extends ConfigCategory {
         this.chunkUnloadDelay = delay;
     }
 
-    public boolean loadOnStartup() {
+    public Boolean loadOnStartup() {
         return this.loadOnStartup;
     }
 
-    public void setLoadOnStartup(boolean state) {
+    public void setLoadOnStartup(Boolean state) {
         this.loadOnStartup = state;
     }
 
-    public boolean getKeepSpawnLoaded() {
+    public Boolean getKeepSpawnLoaded() {
         return this.keepSpawnLoaded;
     }
 
-    public void setKeepSpawnLoaded(boolean loaded) {
+    public void setKeepSpawnLoaded(Boolean loaded) {
         this.keepSpawnLoaded = loaded;
     }
 
@@ -169,11 +169,11 @@ public class WorldCategory extends ConfigCategory {
         this.pvpEnabled = allow;
     }
 
-    public boolean getGenerateSpawnOnLoad() {
+    public Boolean getGenerateSpawnOnLoad() {
         return this.generateSpawnOnLoad;
     }
 
-    public void setGenerateSpawnOnLoad(boolean allow) {
+    public void setGenerateSpawnOnLoad(Boolean allow) {
         this.generateSpawnOnLoad = allow;
     }
 
