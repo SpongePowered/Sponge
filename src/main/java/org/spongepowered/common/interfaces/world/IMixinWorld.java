@@ -34,6 +34,8 @@ public interface IMixinWorld {
 
     void setWeatherStartTime(long weatherStartTime);
 
+    void setCallingWorldEvent(boolean flag);
+
     @Nullable
     EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double d1tance);
 

@@ -57,9 +57,7 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
     @Shadow public abstract void notifyLightSet(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
 
-    @Shadow @Nullable private TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) {
-        return null; // Shadowed
-    }
+    @Shadow @Nullable public abstract TileEntity getPendingTileEntityAt(BlockPos p_189508_1_);
 
     /**
      * @author gabizou - August 4th, 2016
@@ -98,12 +96,6 @@ public abstract class MixinWorld_Inline_Valid_BlockPos {
             return null;
         } else {
             TileEntity tileentity = null;
-
-            // Sponge start - don't allow loading chunks here
-            if (!this.isBlockLoaded(pos)) {
-                return null;
-            }
-            // Sponge end
 
             if (this.processingLoadedTiles) {
                 tileentity = this.getPendingTileEntityAt(pos);

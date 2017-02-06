@@ -48,7 +48,6 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.ISaveHandler;
-import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -329,7 +328,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         WorldManager.loadAllWorlds(worldName, seed, type, generatorOptions);
 
-        this.getPlayerList().setPlayerManager(new WorldServer[]{WorldManager.getWorldByDimensionId(0).get()});
+        this.getPlayerList().setPlayerManager(this.worldServers);
         this.setDifficultyForAllWorlds(this.getDifficulty());
         this.initialWorldChunkLoad();
     }
@@ -569,16 +568,31 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return getClass().getSimpleName();
     }
 
-    @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getWorldInfo()Lnet/minecraft/world/storage/WorldInfo;"))
-    public WorldInfo onUpdateTimeLightAndEntitiesGetWorld(WorldServer worldServer) {
-        // ChunkGC needs to be processed before a world tick in order to guarantee any chunk  queued for unload
-        // can still be marked active and avoid unload if accessed during the same tick.
-        // Note: This injection must come before Forge's pre world tick event or it will cause issues with mods.
-        IMixinWorldServer spongeWorld = (IMixinWorldServer) worldServer;
-        if (spongeWorld.getChunkGCTickInterval() > 0) {
-            spongeWorld.doChunkGC();
+    // All chunk unload queuing needs to be processed BEFORE the future tasks are run as mods/plugins may have tasks that request chunks.
+    // This prevents a situation where a chunk is requested to load then unloads at end of tick.
+    @Inject(method = "updateTimeLightAndEntities", at = @At("HEAD"))
+    public void onUpdateTimeLightAndEntitiesHead(CallbackInfo ci) {
+        for (int i = 0; i < this.worldServers.length; ++i)
+        {
+            WorldServer worldServer = this.worldServers[i];
+            // ChunkGC needs to be processed before a world tick in order to guarantee any chunk  queued for unload
+            // can still be marked active and avoid unload if accessed during the same tick.
+            // Note: This injection must come before Forge's pre world tick event or it will cause issues with mods.
+            IMixinWorldServer spongeWorld = (IMixinWorldServer) worldServer;
+            if (spongeWorld.getChunkGCTickInterval() > 0) {
+                spongeWorld.doChunkGC();
+            }
+            // Moved from PlayerChunkMap to avoid chunks from unloading after being requested in same tick
+            if (worldServer.getPlayerChunkMap().players.isEmpty())
+            {
+                WorldProvider worldprovider = worldServer.provider;
+    
+                if (!worldprovider.canRespawnHere())
+                {
+                    worldServer.getChunkProvider().unloadAllChunks();
+                }
+            }
         }
-        return worldServer.getWorldInfo();
     }
 
     @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getEntityTracker()Lnet/minecraft/entity/EntityTracker;"))

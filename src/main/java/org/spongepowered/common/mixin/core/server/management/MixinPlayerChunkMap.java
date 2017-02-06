@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.management;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.server.management.PlayerChunkMap;
 import net.minecraft.server.management.PlayerChunkMapEntry;
 import net.minecraft.world.WorldServer;
@@ -40,6 +41,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMap;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -74,6 +77,13 @@ public abstract class MixinPlayerChunkMap implements IMixinPlayerChunkMap {
         } else {
             ((IMixinChunk) chunk).setScheduledForUnload(System.currentTimeMillis());
         }
+    }
+
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/List;isEmpty()Z", ordinal = 2))
+    private boolean onChunkUnloadCheck(List<EntityPlayerMP> playerList) {
+        // Queuing all chunks for unload when there are no players has been moved to start of tick in MixinMinecraftServer.
+        // This avoids chunks from reloading when any request to load a chunk is done before this call such as a mod requesting a TE.
+        return false;
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Ljava/util/Set;iterator()Ljava/util/Iterator;", ordinal = 0))
