@@ -675,7 +675,13 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public Collection<WorldGeneratorModifier> getGeneratorModifiers() {
-        return WorldGeneratorModifierRegistryModule.getInstance().toModifiers(this.worldConfig.getConfig().getWorldGenModifiers());
+        return WorldGeneratorModifierRegistryModule
+            .getInstance()
+            .toModifiers(
+                this.worldConfig
+                .getConfig()
+                .getWorldGenModifiers()
+            );
     }
 
     @Override
