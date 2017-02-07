@@ -78,7 +78,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.world.storage.WorldServerMultiAdapterWorldInfo;
 
 import java.io.DataInputStream;
 import java.io.IOException;
@@ -441,6 +440,7 @@ public final class WorldManager {
             new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, SpongeImpl.getServer()
                     .getDataFixer()).saveWorldInfo((WorldInfo) properties);
         }
+        ((IMixinWorldInfo) properties).getWorldConfig().save();
         // No return values or exceptions so can only assume true.
         return true;
     }
@@ -785,13 +785,7 @@ public final class WorldManager {
     public static WorldServer createWorldFromProperties(int dimensionId, ISaveHandler saveHandler, WorldInfo worldInfo, @Nullable WorldSettings
             worldSettings) {
         final MinecraftServer server = SpongeImpl.getServer();
-        final WorldServer worldServer;
-        if (dimensionId == 0) {
-            worldServer = new WorldServer(server, saveHandler, worldInfo, dimensionId, server.theProfiler);
-        } else {
-            final WorldServerMultiAdapterWorldInfo info = new WorldServerMultiAdapterWorldInfo(saveHandler, worldInfo);
-            worldServer = new WorldServerMulti(server, info, dimensionId, worldByDimensionId.get(0), server.theProfiler);
-        }
+        final WorldServer worldServer = new WorldServer(server, saveHandler, worldInfo, dimensionId, server.theProfiler);
         worldServer.init();
 
         // WorldSettings is only non-null here if this is a newly generated WorldInfo and therefore we need to initialize to calculate spawn.

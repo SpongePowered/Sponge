@@ -31,6 +31,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderOverworld;
 import net.minecraft.world.gen.ChunkProviderSettings;
@@ -97,12 +98,14 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
 
     private Cause cause = SpongeImpl.getImplementationCause();
     private BiomeGenerator biomegen;
+    private boolean isVanilla = true;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(net.minecraft.world.World worldIn, long p_i45636_2_, boolean p_i45636_4_, String p_i45636_5_, CallbackInfo ci) {
         if (this.settings == null) {
             this.settings = new ChunkProviderSettings.Factory().build();
         }
+        this.isVanilla = WorldGenConstants.isValid((IChunkGenerator)(Object) this, GenerationPopulator.class);
     }
 
     @Override
@@ -246,13 +249,19 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
 
     /**
      * @author gabizou - February 1st, 2016
+     * @author blood - February 6th, 2017 - Only redirect if vanilla generator. 
+     *   This fixes the FuturePack mod as it extends the ChunkProviderOverworld generator.
      *
      * Redirects this method call to just simply return the current biomes, as
      * necessitated by @Deamon's changes. This avoids an overwrite entirely.
      */
     @Redirect(method = "setBlocksInChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/biome/BiomeProvider;getBiomesForGeneration([Lnet/minecraft/world/biome/Biome;IIII)[Lnet/minecraft/world/biome/Biome;"))
     private Biome[] onSetBlocksGetBiomesIgnore(BiomeProvider manager, Biome[] biomes, int x, int z, int width, int height) {
-        return biomes;
+        if (this.isVanilla) {
+            return biomes;
+        } else {
+            return this.worldObj.getBiomeProvider().getBiomesForGeneration(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
+        }
     }
 
 }

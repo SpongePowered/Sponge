@@ -77,6 +77,7 @@ import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldInfo;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.apache.logging.log4j.Level;
@@ -230,6 +231,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private long chunkUnloadDelay = 30000;
     private boolean weatherThunderEnabled = true;
     private boolean weatherIceAndSnowEnabled = true;
+    private int dimensionId;
 
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
@@ -251,8 +253,20 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return false; // Shadowed
     }
 
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;registerWorld(Lnet/minecraft/world/World;)V"))
+    public void onRegisterWorld(WorldProvider worldProvider, World worldIn) {
+        // Guarantees no mod has changed our worldInfo.
+        // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
+        // This change is not needed as all worlds in Sponge use separate save handlers.
+        WorldInfo originalWorldInfo = worldIn.getWorldInfo();
+        worldProvider.registerWorld(worldIn);
+        this.worldInfo = originalWorldInfo;
+    }
+
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, CallbackInfo callbackInfo) {
+        this.worldInfo = info;
+        this.dimensionId = dimensionId;
         this.prevWeather = getWeather();
         this.weatherStartTime = this.worldInfo.getWorldTotalTime();
         ((World) (Object) this).getWorldBorder().addListener(new PlayerBorderListener(this.getMinecraftServer(), dimensionId));
@@ -275,6 +289,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.weatherIceAndSnowEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherIceAndSnow();
         this.weatherThunderEnabled = this.getActiveConfig().getConfig().getWorld().getWeatherThunder();
         this.updateEntityTick = 0;
+    }
+
+    @Redirect(method = "init", at = @At(value = "NEW", target = "net/minecraft/world/storage/MapStorage"))
+    public MapStorage onCreateMapStorage(ISaveHandler saveHandler) {
+        WorldServer overWorld = WorldManager.getWorldByDimensionId(0).orElse(null);
+        // if overworld has loaded, use its mapstorage
+        if (this.dimensionId != 0 && overWorld != null) {
+            return overWorld.getMapStorage();
+        }
+
+        // if we are loading overworld, create a new mapstorage
+        return new MapStorage(saveHandler);
     }
 
     @Inject(method = "createBonusChest", at = @At(value = "HEAD"))
@@ -848,6 +874,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             throw Throwables.propagate(e);
         }
         return true;
+    }
+
+    @Inject(method = "saveLevel", at = @At("HEAD"))
+    public void onSaveLevel(CallbackInfo ci) {
+        // Always call the provider's onWorldSave method as we do not use WorldServerMulti
+        for (WorldServer worldServer : this.mcServer.worldServers) {
+            worldServer.provider.onWorldSave();
+        }
     }
 
     @Redirect(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;canSave()Z"))
