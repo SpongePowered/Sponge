@@ -37,4 +37,6 @@ public interface IMixinContainer {
     void setCaptureInventory(boolean flag);
 
     void detectAndSendChanges(boolean captureOnly);
+
+    void setSpectatorChest(boolean spectatorChest);
 }

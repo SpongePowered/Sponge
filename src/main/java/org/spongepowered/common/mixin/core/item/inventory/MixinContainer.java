@@ -67,6 +67,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Shadow public List<ItemStack> inventoryItemStacks;
     @Shadow public int windowId;
     @Shadow protected List<IContainerListener> listeners;
+    private boolean spectatorChest;
 
     @SuppressWarnings("rawtypes")
     @Shadow
@@ -91,7 +92,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         this.initialized = true;
         this.fabric = MinecraftFabric.of(this.this$);
         this.slots = ContainerUtil.countSlots(this.this$);
-        this.lens = ContainerUtil.getLens(this.this$, this.slots);
+        this.lens = this.spectatorChest ? null : ContainerUtil.getLens(this.this$, this.slots); // TODO - use a fallback lens for spectactor ContainerChest
         this.archetype = ContainerUtil.getArchetype(this$);
         this.carrier = Optional.ofNullable(ContainerUtil.getCarrier(this));
 
@@ -230,6 +231,11 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Override
     public void setCaptureInventory(boolean flag) {
         this.captureInventory = flag;
+    }
+
+    @Override
+    public void setSpectatorChest(boolean spectatorChest) {
+        this.spectatorChest = spectatorChest;
     }
 
     @Override
