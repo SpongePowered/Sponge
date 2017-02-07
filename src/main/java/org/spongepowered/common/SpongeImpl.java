@@ -55,6 +55,7 @@ import org.spongepowered.common.scheduler.SpongeScheduler;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import javax.annotation.Nullable;
@@ -210,4 +211,22 @@ public final class SpongeImpl {
         postState(GameState.GAME_STOPPED, SpongeEventFactory.createGameStoppedEvent(Cause.source(game).build()));
     }
 
+    // TODO this code is used a BUNCH of times
+    /**
+     * Gets the {@link PluginContainer} for given plugin object.
+     *
+     * @param plugin The Plugin Object
+     * @return The associated plugin container
+     * @throws IllegalArgumentException when the argument has no associated plugin container (usually because it is not a plugin)
+     */
+    public static PluginContainer getPluginContainer(Object plugin) throws IllegalArgumentException {
+        Optional<PluginContainer> containerOptional = Sponge.getGame().getPluginManager().fromInstance(plugin);
+        if (!containerOptional.isPresent()) {
+            throw new IllegalArgumentException(
+                    "The provided plugin object does not have an associated plugin container "
+                            + "(in other words, is 'plugin' actually your plugin object?");
+        }
+
+        return containerOptional.get();
+    }
 }

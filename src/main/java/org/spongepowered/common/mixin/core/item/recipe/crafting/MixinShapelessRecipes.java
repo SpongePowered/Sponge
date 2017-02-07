@@ -22,19 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.comp;
+package org.spongepowered.common.mixin.core.item.recipe.crafting;
 
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.ShapelessRecipes;
+import net.minecraft.util.NonNullList;
+import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface CraftingInventoryLens<TInventory, TStack> extends GridInventoryLens<TInventory, TStack> {
+import java.util.List;
+import java.util.stream.Collectors;
 
-    CraftingGridInventoryLens<TInventory, TStack> getCraftingGrid();
+import javax.annotation.Nonnull;
 
-    CraftingOutputSlotLens<TInventory, TStack> getOutputSlot();
+@Mixin(ShapelessRecipes.class)
+public abstract class MixinShapelessRecipes implements IRecipe, ShapelessCraftingRecipe {
 
-    TStack getOutputStack(Fabric<TInventory> inv);
+    @Shadow @Final private NonNullList<Ingredient> recipeItems;
 
-    boolean setOutputStack(Fabric<TInventory> inv, TStack stack);
+    @Override
+    @Nonnull
+    public List<org.spongepowered.api.item.recipe.crafting.Ingredient> getIngredientPredicates() {
+        return this.recipeItems.stream()
+                .map(org.spongepowered.api.item.recipe.crafting.Ingredient.class::cast) // TODO wrap if not Ingredient
+                .collect(Collectors.toList());
+    }
 
 }

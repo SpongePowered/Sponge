@@ -22,19 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.comp;
+package org.spongepowered.common.item.recipe.crafting;
 
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.item.crafting.ShapedRecipes;
+import net.minecraft.util.NonNullList;
+import org.spongepowered.api.CatalogType;
 
-public interface CraftingInventoryLens<TInventory, TStack> extends GridInventoryLens<TInventory, TStack> {
+public class SpongeShapedRecipe extends ShapedRecipes implements CatalogType {
 
-    CraftingGridInventoryLens<TInventory, TStack> getCraftingGrid();
+    private final String id;
 
-    CraftingOutputSlotLens<TInventory, TStack> getOutputSlot();
+    public SpongeShapedRecipe(String id, String groupName, int width, int height, NonNullList<Ingredient> ingredients, ItemStack itemStack) {
+        super(groupName, width, height, ingredients, itemStack);
+        this.id = id;
+    }
 
-    TStack getOutputStack(Fabric<TInventory> inv);
+    @Override
+    public String getId() {
+        return this.id;
+    }
 
-    boolean setOutputStack(Fabric<TInventory> inv, TStack stack);
+    @Override
+    public String getName() {
+        return this.getId();
+    }
 
+    @Override
+    public boolean isHidden() {
+        return true; // For RecipeBook
+    }
 }
