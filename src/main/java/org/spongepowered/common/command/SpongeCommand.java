@@ -45,7 +45,6 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandCallable;
@@ -182,7 +181,7 @@ public class SpongeCommand {
                     if (!world.isPresent() && this.requireWorldLoaded) {
                         throw new CommandException(Text.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
                     }
-                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorldInfo) properties).getWorldConfig(),
+                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorldInfo) properties).getOrCreateWorldConfig(),
                             world.orElse(null), src, args)));
                     ++successes;
                 }

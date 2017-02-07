@@ -353,7 +353,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public SpongeConfig<WorldConfig> getWorldConfig() {
-        return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
+        return ((IMixinWorldInfo) this.worldInfo).getOrCreateWorldConfig();
     }
 
 

@@ -59,6 +59,8 @@ public interface IMixinWorldInfo {
 
     void setIsMod(boolean isMod);
 
+    SpongeConfig<WorldConfig> getOrCreateWorldConfig();
+
     SpongeConfig<WorldConfig> getWorldConfig();
 
     /**
