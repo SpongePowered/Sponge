@@ -27,6 +27,7 @@ package org.spongepowered.common;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
@@ -40,6 +41,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.Util;
+import net.minecraft.util.ReportedException;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
@@ -248,5 +251,13 @@ public final class SpongeImplHooks {
             ((IMixinWorldServer) worldServer).getCauseTracker().completePhase(PluginPhase.State.SCHEDULED_TASK);
         }
         return value;
+    }
+
+    public static void onEntityError(Entity entity, CrashReport crashReport) {
+        throw new ReportedException(crashReport);
+    }
+
+    public static void onTileEntityError(TileEntity tileEntity, CrashReport crashReport) {
+        throw new ReportedException(crashReport);
     }
 }
