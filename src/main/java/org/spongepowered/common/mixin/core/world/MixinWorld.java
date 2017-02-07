@@ -208,6 +208,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         throw new RuntimeException("Bad things have happened");
     }
 
+    @Shadow public abstract WorldInfo getWorldInfo();
     @Shadow public abstract boolean checkLight(BlockPos pos);
     @Shadow protected abstract boolean isValid(BlockPos pos);
     @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
@@ -217,9 +218,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
-    @Shadow public boolean addWeatherEffect(net.minecraft.entity.Entity entityIn) {
-        return false; // Note this is not actually going to return false, it's just a target
-    };
+    @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract Biome getBiome(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
     @Shadow public abstract BiomeProvider getBiomeProvider();
@@ -285,7 +284,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT),
                     "sponge$dummy_world");
         }
-        this.worldContext = new Context(Context.WORLD_KEY, this.worldInfo.getWorldName());
+        // Checks to make sure no mod has changed our worldInfo and if so, reverts back to original.
+        // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
+        // This change is not needed as all worlds use separate save handlers.
+        this.worldInfo = info;
+        this.worldContext = new Context(Context.WORLD_KEY, this.getWorldInfo().getWorldName());
     }
 
     @SuppressWarnings("rawtypes")
