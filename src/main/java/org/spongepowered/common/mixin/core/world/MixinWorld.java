@@ -1189,7 +1189,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     entity.addEntityCrashInfo(crashreportcategory);
                 }
 
-                throw new ReportedException(crashreport);
+                SpongeImplHooks.onEntityError(entity, crashreport);
             }
 
             if (entity.isDead) {
@@ -1243,7 +1243,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
                     CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Entity being ticked");
                     entity2.addEntityCrashInfo(crashreportcategory1);
-                    throw new ReportedException(crashreport1);
+                    SpongeImplHooks.onEntityError(entity2, crashreport1);
                 }
             }
 
@@ -1289,7 +1289,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
                         CrashReportCategory crashreportcategory2 = crashreport2.makeCategory("Block entity being ticked");
                         tileentity.addInfoToCrashReport(crashreportcategory2);
-                        throw new ReportedException(crashreport2);
+                        SpongeImplHooks.onTileEntityError(tileentity, crashreport2);
                     }
                 }
             }

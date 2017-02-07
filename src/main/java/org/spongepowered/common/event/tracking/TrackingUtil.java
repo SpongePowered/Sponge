@@ -149,9 +149,14 @@ public final class TrackingUtil {
                 .complete());
         final Timing entityTiming = mixinEntity.getTimingsHandler();
         entityTiming.startTiming();
-        entityIn.onUpdate();
-        entityTiming.stopTiming();
-        causeTracker.completePhase();
+        try {
+            entityIn.onUpdate();
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            entityTiming.stopTiming();
+            causeTracker.completePhase();
+        }
     }
 
     public static void tickRidingEntity(CauseTracker causeTracker, net.minecraft.entity.Entity entity) {
@@ -209,10 +214,14 @@ public final class TrackingUtil {
         causeTracker.switchToPhase(TickPhase.Tick.TILE_ENTITY, phaseContext
                 .complete());
         mixinTileEntity.getTimingsHandler().startTiming();
-        tile.update();
-        mixinTileEntity.getTimingsHandler().stopTiming();
-        causeTracker.completePhase();
-
+        try {
+            tile.update();
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            mixinTileEntity.getTimingsHandler().stopTiming();
+            causeTracker.completePhase();
+        }
     }
 
     public static void updateTickBlock(CauseTracker causeTracker, Block block, BlockPos pos, IBlockState state, Random random) {
