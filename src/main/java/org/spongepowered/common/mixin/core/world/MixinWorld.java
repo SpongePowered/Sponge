@@ -282,9 +282,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT),
                     "sponge$dummy_world");
         }
-        // Checks to make sure no mod has changed our worldInfo and if so, reverts back to original.
-        // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
-        // This change is not needed as all worlds use separate save handlers.
         this.worldInfo = info;
         this.worldContext = new Context(Context.WORLD_KEY, this.getWorldInfo().getWorldName());
     }

@@ -260,7 +260,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
         if (this.isVanilla) {
             return biomes;
         } else {
-            return this.worldObj.getBiomeProvider().getBiomesForGeneration(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
+            return this.world.getBiomeProvider().getBiomesForGeneration(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
         }
     }
 

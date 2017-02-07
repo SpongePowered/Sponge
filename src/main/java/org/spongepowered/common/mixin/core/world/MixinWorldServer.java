@@ -253,13 +253,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return false; // Shadowed
     }
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;registerWorld(Lnet/minecraft/world/World;)V"))
-    public void onRegisterWorld(WorldProvider worldProvider, World worldIn) {
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;setWorld(Lnet/minecraft/world/World;)V"))
+    public void onSetWorld(WorldProvider worldProvider, World worldIn) {
         // Guarantees no mod has changed our worldInfo.
         // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
         // This change is not needed as all worlds in Sponge use separate save handlers.
         WorldInfo originalWorldInfo = worldIn.getWorldInfo();
-        worldProvider.registerWorld(worldIn);
+        worldProvider.setWorld(worldIn);
         this.worldInfo = originalWorldInfo;
     }
 
@@ -879,7 +879,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "saveLevel", at = @At("HEAD"))
     public void onSaveLevel(CallbackInfo ci) {
         // Always call the provider's onWorldSave method as we do not use WorldServerMulti
-        for (WorldServer worldServer : this.mcServer.worldServers) {
+        for (WorldServer worldServer : this.mcServer.worlds) {
             worldServer.provider.onWorldSave();
         }
     }
