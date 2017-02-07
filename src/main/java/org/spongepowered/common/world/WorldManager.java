@@ -47,7 +47,6 @@ import net.minecraft.world.ServerWorldEventHandler;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
@@ -416,7 +415,7 @@ public final class WorldManager {
             ((IMixinWorldInfo) worldInfo).setDimensionId(WorldManager.getNextFreeDimensionId());
         }
         ((WorldProperties) worldInfo).setGeneratorType(archetype.getGeneratorType());
-        ((IMixinWorldInfo) worldInfo).getWorldConfig().save();
+        ((IMixinWorldInfo) worldInfo).getOrCreateWorldConfig().save();
         registerWorldProperties((WorldProperties) worldInfo);
 
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(Sponge.getServer())), archetype,
@@ -440,7 +439,7 @@ public final class WorldManager {
             new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, SpongeImpl.getServer()
                     .getDataFixer()).saveWorldInfo((WorldInfo) properties);
         }
-        ((IMixinWorldInfo) properties).getWorldConfig().save();
+        ((IMixinWorldInfo) properties).getOrCreateWorldConfig().save();
         // No return values or exceptions so can only assume true.
         return true;
     }
