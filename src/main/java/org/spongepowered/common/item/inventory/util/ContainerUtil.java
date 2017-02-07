@@ -94,7 +94,7 @@ public final class ContainerUtil {
     }
 
     // Note, this really cannot be guaranteed to work
-    public static net.minecraft.inventory.Container toNative(Container container) {
+    public static net.minecraft.inventory.Container toNative(Container container) {i
         return (net.minecraft.inventory.Container) container;
     }
 

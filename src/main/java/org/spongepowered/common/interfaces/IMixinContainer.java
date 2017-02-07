@@ -43,4 +43,6 @@ public interface IMixinContainer {
     void detectAndSendChanges(boolean captureOnly);
 
     void setCanInteractWith(@Nullable Predicate<EntityPlayer> predicate);
+    
+    void setSpectatorChest(boolean spectatorChest);
 }
