@@ -22,37 +22,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl.minecraft;
+package org.spongepowered.common.item.inventory.lens.impl.minecraft.container;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.EquipmentInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
-public class ContainerPlayerInventoryLens extends MinecraftLens {
+import java.util.Arrays;
+
+public class ContainerPlayerInventoryLens extends ContainerLens {
+
+    private static final int CRAFTING_OUTPUT = 1;
+    private static final int CRAFTING_GRID = 2;
+    private static final int EQUIPMENT = 4;
+    private static final int INVENTORY_WIDTH = 9;
+    private static final int MAIN_INVENTORY_HEIGHT = 3;
+    private static final int HOTBAR = 1;
+    private static final int OFFHAND = 1;
 
     public ContainerPlayerInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super(0, adapter.getInventory().getSize(), adapter, slots);
+        super(adapter, slots);
+        this.init(slots);
     }
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
-        final CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl(0, 1, 2, 2, 2, slots);
-        final OrderedInventoryLensImpl armor = new OrderedInventoryLensImpl((1 + 4), 4, 1, slots);
-        final GridInventoryLensImpl main = new GridInventoryLensImpl(((1 + 4) + 4), 9, 3, 9, slots);
-        final HotbarLensImpl hotbar = new HotbarLensImpl((((1 + 4) + 4) + 27), 9, slots);
-        final SlotLensImpl offHand = new SlotLensImpl(((((1 + 4) + 4) + 27) + 9));
+        int base = CRAFTING_OUTPUT; // 1
+        final CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl(0, base, CRAFTING_GRID, CRAFTING_GRID, CRAFTING_GRID, slots);
+        base += CRAFTING_GRID * CRAFTING_GRID; // 4
+        // TODO pass player for carrier to EquipmentInventory
+        final EquipmentInventoryLensImpl armor = new EquipmentInventoryLensImpl(null, base, EQUIPMENT, 1, slots);
+        base += EQUIPMENT; // 4
+        final GridInventoryLensImpl main = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
+        base += MAIN_INVENTORY_HEIGHT * INVENTORY_WIDTH; // 27
+        final HotbarLensImpl hotbar = new HotbarLensImpl(base, INVENTORY_WIDTH, slots);
+        base += HOTBAR * INVENTORY_WIDTH; // 9
+        final OrderedInventoryLensImpl offHand = new OrderedInventoryLensImpl(base, OFFHAND, 1, slots);
 
-        this.addSpanningChild(hotbar);
-        this.addSpanningChild(main);
-        this.addSpanningChild(armor);
-        this.addSpanningChild(crafting);
-        this.addSpanningChild(offHand);
+        // TODO actual Container order is:
+        // CraftingOutput (1) -> Crafting (4) -> ArmorSlots (4) -> MainInventory (27) -> Hotbar (9) -> Offhand (1)
+        // how to handle issues like in #939? ; e.g. Inventory#offer using a different insertion order
+        this.viewedInventories = Arrays.asList(hotbar, main, armor, crafting, offHand);
+        super.init(slots);
     }
 }

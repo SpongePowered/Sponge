@@ -32,6 +32,6 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
  */
 public interface LensProvider<TInventory, TStack> {
 
-    public abstract Lens<TInventory, TStack> getRootLens(TInventory inv, InventoryAdapter<TInventory, TStack> adapter);
+    Lens<TInventory, TStack> getRootLens(Fabric<TInventory> fabric, InventoryAdapter<TInventory, TStack> adapter);
     
 }

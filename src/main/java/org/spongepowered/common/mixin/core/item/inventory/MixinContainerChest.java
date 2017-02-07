@@ -22,41 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.custom;
+package org.spongepowered.common.mixin.core.item.inventory;
 
+import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
-import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.LensProvider;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerChestInventoryLens;
 
-public class CustomContainerLens extends MinecraftLens {
-
-    private CustomLens customLens;
-    private GridInventoryLensImpl mainInventory;
-    private HotbarLensImpl hotbar;
-
-    public CustomContainerLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots, CustomLens lens) {
-        super(0, adapter.getInventory().getSize(), adapter, slots);
-        this.customLens = lens;
-        this.init(slots);
-    }
+@Mixin(ContainerChest.class)
+public abstract class MixinContainerChest extends MixinContainer implements LensProvider<IInventory, ItemStack> {
 
     @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
-        int size = this.customLens.getAdapter(adapter.getInventory(), null).capacity();
-        this.mainInventory = new GridInventoryLensImpl(size, 9, 3, 9, slots);
-        this.hotbar = new HotbarLensImpl(size + 9 * 3, 9, slots);
-
-        this.addSpanningChild(this.customLens);
-        this.addSpanningChild(this.mainInventory);
-        this.addSpanningChild(this.hotbar);
-    }
-
-    @Override
-    protected boolean isDelayedInit() {
-        return true;
+    public Lens<IInventory, ItemStack> getRootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+        return new ContainerChestInventoryLens(adapter, inventory$getSlotProvider(), ((ContainerChest) (Object)this).numRows);
     }
 }
