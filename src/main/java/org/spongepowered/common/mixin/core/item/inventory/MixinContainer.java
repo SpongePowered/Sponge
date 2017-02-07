@@ -81,8 +81,6 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Shadow
     public abstract Slot getSlot(int slotId);
 
-    private Container this$ = (Container) (Object) this;
-
     private boolean captureInventory = false;
     private List<SlotTransaction> capturedSlotTransactions = new ArrayList<>();
     private Fabric<IInventory> fabric;
@@ -96,10 +94,10 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     private void init() {
         this.initialized = true;
-        this.fabric = MinecraftFabric.of(this.this$);
-        this.slots = ContainerUtil.countSlots(this.this$);
-        this.lens = this.spectatorChest ? null : ContainerUtil.getLens(this.this$, this.slots); // TODO - use a fallback lens for spectactor ContainerChest
-        this.archetype = ContainerUtil.getArchetype(this$);
+        this.fabric = MinecraftFabric.of(this);
+        this.slots = ContainerUtil.countSlots((Container) (Object) this);
+        this.lens = this.spectatorChest ? null : ContainerUtil.getLens(this.fabric, (Container) (Object) this, this.slots); // TODO handle spectator
+        this.archetype = ContainerUtil.getArchetype((Container) (Object) this);
         this.carrier = Optional.ofNullable(ContainerUtil.getCarrier(this));
 
         // If we know the lens, we can cache the adapters now

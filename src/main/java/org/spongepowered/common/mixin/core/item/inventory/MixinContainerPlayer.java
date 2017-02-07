@@ -22,46 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl;
+package org.spongepowered.common.mixin.core.item.inventory;
 
+import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.LensProvider;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerPlayerInventoryLens;
 
-import java.lang.reflect.Constructor;
-
-public abstract class MinecraftLens extends AbstractLens<IInventory, ItemStack> {
-
-    public MinecraftLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
-        super(base, size, adapterType, slots);
-    }
-
-    public MinecraftLens(int base, int size, InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super(base, size, adapter, slots);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected Constructor<InventoryAdapter<IInventory, ItemStack>> getAdapterCtor() throws NoSuchMethodException {
-        try {
-            return (Constructor<InventoryAdapter<IInventory, ItemStack>>) this.adapterType.getConstructor(Fabric.class, this.getClass(), Inventory.class);
-        } catch (Exception ex1) {
-            return (Constructor<InventoryAdapter<IInventory, ItemStack>>) this.adapterType.getConstructor(Fabric.class, Lens.class, Inventory.class);
-        }
-    }
+@Mixin(ContainerPlayer.class)
+public abstract class MixinContainerPlayer extends MixinContainer implements LensProvider<IInventory, ItemStack> {
 
     @Override
-    public int getMaxStackSize(Fabric<IInventory> inv) {
-        return inv.getMaxStackSize();
-    }
-
-    @Override
-    public void invalidate(Fabric<IInventory> inv) {
-        super.invalidate(inv);
-//        inv.markDirty();    // Adapter can decide
+    public Lens<IInventory, ItemStack> getRootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+        return new ContainerPlayerInventoryLens(adapter, inventory$getSlotProvider());
     }
 }

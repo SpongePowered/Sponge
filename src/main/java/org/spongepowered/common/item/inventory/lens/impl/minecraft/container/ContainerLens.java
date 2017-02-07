@@ -22,50 +22,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.impl.minecraft;
+package org.spongepowered.common.item.inventory.lens.impl.minecraft.container;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.block.tileentity.carrier.Chest;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
-import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
 
-/**
- * A {@link Lens} comprising of when a Minecraft-like {@link Chest} is opened.
- */
-public class ContainerChestInventoryLens extends MinecraftLens {
+import java.util.List;
 
-    private GridInventoryLensImpl playerInventory, chestInventory;
+public class ContainerLens extends MinecraftLens {
 
-    private HotbarLensImpl hotbarInventory;
-    private int numRows;
+    // The viewed inventories
+    protected List<Lens<IInventory, ItemStack>> viewedInventories;
 
-    public ContainerChestInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots, int numRows) {
-        super(0, adapter.getInventory().getSize(), adapter, slots);
-        this.numRows = numRows;
+    public ContainerLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots,
+            List<Lens<IInventory, ItemStack>> lenses) {
+        this(adapter, slots);
+        this.viewedInventories = lenses;
         this.init(slots);
+    }
+
+    /**
+     * Do not forget to call init when using this constructor!
+     */
+    public ContainerLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+        super(0, adapter.getInventory().getSize(), adapter, slots);
+    }
+
+    @Override
+    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+
+        // Adding slots
+        for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
+            this.addChild(slots.getSlot(slot), new SlotIndex(ord));
+        }
+
+        // Adding spanning children
+        for (Lens<IInventory, ItemStack> lens : viewedInventories) {
+            this.addSpanningChild(lens);
+        }
     }
 
     @Override
     protected boolean isDelayedInit() {
         return true;
-    }
-
-    @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
-        // These use chest container ids (distinct from normal slot ids)
-        this.chestInventory = new GridInventoryLensImpl(0, 9, this.numRows, 9, slots);
-        // (9 * numRows) lots after the chest slots
-        this.playerInventory = new GridInventoryLensImpl(9 * this.numRows, 9, 3, 9, slots);
-        // Add an additional 27 slots, for the player inventory
-        this.hotbarInventory = new HotbarLensImpl((9 * numRows) + 27, 9, slots);
-
-        this.addSpanningChild(this.chestInventory);
-        this.addSpanningChild(this.playerInventory);
-        this.addSpanningChild(this.hotbarInventory);
     }
 }
