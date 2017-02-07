@@ -26,21 +26,17 @@ package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
-import org.spongepowered.api.item.inventory.type.GridInventory;
-import org.spongepowered.api.item.recipe.Recipe;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.comp.CraftingInventoryLens;
-import org.spongepowered.common.item.inventory.util.RecipeUtil;
-
-import java.util.Optional;
 
 public class CraftingInventoryAdapter extends GridInventoryAdapter implements CraftingInventory {
 
     protected final CraftingInventoryLens<IInventory, net.minecraft.item.ItemStack> craftingLens;
     
-    private GridInventory craftingGrid;
+    private CraftingGridInventory craftingGrid;
     private CraftingOutput result;
     
     public CraftingInventoryAdapter(Fabric<IInventory> inventory, CraftingInventoryLens<IInventory, net.minecraft.item.ItemStack> root) {
@@ -53,9 +49,9 @@ public class CraftingInventoryAdapter extends GridInventoryAdapter implements Cr
     }
 
     @Override
-    public GridInventory getCraftingGrid() {
+    public CraftingGridInventory getCraftingGrid() {
         if (this.craftingGrid == null) {
-            this.craftingGrid = (GridInventory) this.craftingLens.getCraftingGrid().getAdapter(this.inventory, this);
+            this.craftingGrid = (CraftingGridInventory) this.craftingLens.getCraftingGrid().getAdapter(this.inventory, this);
         }
         return this.craftingGrid;
     }
@@ -67,10 +63,4 @@ public class CraftingInventoryAdapter extends GridInventoryAdapter implements Cr
         }
         return this.result;
     }
-
-    @Override
-    public Optional<Recipe> getRecipe() {
-        return RecipeUtil.findMatchingRecipe(this.inventory, this.craftingLens.getCraftingGrid(), this.craftingLens.getOutputSlot());
-    }
-
 }

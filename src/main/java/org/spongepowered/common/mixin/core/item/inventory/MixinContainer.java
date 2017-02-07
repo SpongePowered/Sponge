@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
@@ -81,6 +82,11 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     @Shadow
     public abstract Slot getSlot(int slotId);
+
+    @Shadow
+    public ItemStack slotClick(int slotId, int dragType, ClickType clickTypeIn, EntityPlayer player) {
+        throw new IllegalStateException("Shadowed.");
+    }
 
     private boolean captureInventory = false;
     private List<SlotTransaction> capturedSlotTransactions = new ArrayList<>();

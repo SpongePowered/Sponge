@@ -22,19 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.comp;
+package org.spongepowered.common.item.inventory.lens.impl.comp;
 
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.comp.CraftingGridInventoryLens;
 
-public interface CraftingInventoryLens<TInventory, TStack> extends GridInventoryLens<TInventory, TStack> {
 
-    CraftingGridInventoryLens<TInventory, TStack> getCraftingGrid();
+public class CraftingGridInventoryLensImpl extends GridInventoryLensImpl implements CraftingGridInventoryLens<IInventory, ItemStack> {
 
-    CraftingOutputSlotLens<TInventory, TStack> getOutputSlot();
+    public CraftingGridInventoryLensImpl(int base, int width, int height, int stride, SlotProvider<IInventory, ItemStack> slots) {
+        super(base, width, height, stride, slots);
+    }
 
-    TStack getOutputStack(Fabric<TInventory> inv);
-
-    boolean setOutputStack(Fabric<TInventory> inv, TStack stack);
-
+    @Override
+    public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
+        return new CraftingGridInventoryAdapter(inv, this, parent);
+    }
 }

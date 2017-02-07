@@ -28,7 +28,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -60,11 +63,41 @@ public abstract class ItemStackUtil {
         throw new NativeStackException("The supplied item stack was not native to the current platform");
     }
 
+    /**
+     * Converts a List of SpongeAPI ItemStacks to an Array of native ItemStacks
+     *
+     * @param items the list of items
+     * @return the array of native items
+     */
+    public static net.minecraft.item.ItemStack[] toNative(List<ItemStack> items) {
+        return items.stream().map(ItemStackUtil::toNative).toArray(net.minecraft.item.ItemStack[]::new);
+    }
+
+    /**
+     * Converts a List of SpongeAPI ItemStacks to an Array of native ItemStacks
+     *
+     * @param items the list of items
+     * @return the array of native items
+     */
+    public static net.minecraft.item.ItemStack[] fromSnapshotToNative(List<ItemStackSnapshot> items) {
+        return items.stream().map(ItemStackUtil::fromSnapshotToNative).toArray(net.minecraft.item.ItemStack[]::new);
+    }
+
     public static ItemStack fromNative(net.minecraft.item.ItemStack stack) {
         if (stack instanceof ItemStack) {
             return (ItemStack) stack;
         }
         throw new NativeStackException("The supplied native item stack was not compatible with the target environment");
+    }
+
+    /**
+     * Converts an Array of native ItemStacks to a List of SpongeAPI ItemStacks
+     *
+     * @param items the array of native items
+     * @return the list of items
+     */
+    public static List<ItemStack> fromNative(net.minecraft.item.ItemStack[] items) {
+        return Arrays.stream(items).map(ItemStackUtil::fromNative).collect(Collectors.toList());
     }
 
     public static net.minecraft.item.ItemStack cloneDefensiveNative(net.minecraft.item.ItemStack stack) {

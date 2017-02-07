@@ -22,19 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens.comp;
+package org.spongepowered.common.item.recipe.crafting;
 
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.Ingredient;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
-public interface CraftingInventoryLens<TInventory, TStack> extends GridInventoryLens<TInventory, TStack> {
+import javax.annotation.Nullable;
 
-    CraftingGridInventoryLens<TInventory, TStack> getCraftingGrid();
+/**
+ * Delegates a custom implemented {@link org.spongepowered.api.item.recipe.crafting.Ingredient}
+ */
+public class DelegateIngredient extends Ingredient {
 
-    CraftingOutputSlotLens<TInventory, TStack> getOutputSlot();
+    private org.spongepowered.api.item.recipe.crafting.Ingredient delegate;
 
-    TStack getOutputStack(Fabric<TInventory> inv);
+    private DelegateIngredient(org.spongepowered.api.item.recipe.crafting.Ingredient delegate) {
+        super(ItemStackUtil.fromSnapshotToNative(delegate.displayedItems()));
+        this.delegate = delegate;
+    }
 
-    boolean setOutputStack(Fabric<TInventory> inv, TStack stack);
+    @Override
+    public boolean apply(@Nullable ItemStack item) {
+        return this.delegate.test(ItemStackUtil.fromNative(item));
+    }
 
+    public static Ingredient of(org.spongepowered.api.item.recipe.crafting.Ingredient delegate) {
+        if ((Object) delegate instanceof Ingredient) {
+            return ((Ingredient) (Object) delegate);
+        }
+        return new DelegateIngredient(delegate);
+    }
 }
