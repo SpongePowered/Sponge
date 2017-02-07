@@ -25,6 +25,7 @@
 package org.spongepowered.common.util.persistence.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 import net.minecraft.nbt.NBTTagCompound;
 import org.junit.Test;
@@ -45,7 +46,7 @@ public class NBTTranslationTest {
     public void testContainerToNBT() {
         DataManager service = Mockito.mock(DataManager.class);
         DataBuilder<FakeSerializable> builder = new FakeBuilder();
-        Mockito.stub(service.getBuilder(FakeSerializable.class)).toReturn(Optional.of(builder));
+        when(service.getBuilder(FakeSerializable.class)).thenReturn(Optional.of(builder));
         DataContainer container = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
         container.set(DataQuery.of("foo"), "bar");
         FakeSerializable temp = new FakeSerializable("bar", 7, 10.0D, "nested");
