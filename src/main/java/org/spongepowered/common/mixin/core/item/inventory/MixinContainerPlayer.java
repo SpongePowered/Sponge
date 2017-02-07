@@ -22,52 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory;
+package org.spongepowered.common.mixin.core.item.inventory;
 
-import org.spongepowered.api.item.inventory.Inventory;
+import net.minecraft.inventory.ContainerPlayer;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.LensProvider;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerPlayerInventoryLens;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
-
-public class InventoryIterator<TInventory, TStack> implements Iterator<Inventory> {
-    
-    protected final List<Lens<TInventory, TStack>> children;
-    
-    protected final Fabric<TInventory> inventory;
-    
-    protected final Inventory parent;
-
-    protected int next = 0;
-
-    public InventoryIterator(Lens<TInventory, TStack> lens, Fabric<TInventory> inventory) {
-        this(lens, inventory, null);
-    }
-    
-    public InventoryIterator(Lens<TInventory, TStack> lens, Fabric<TInventory> inventory, Inventory parent) {
-        this.children = lens.getSpanningChildren();
-        this.inventory = inventory;
-        this.parent = parent;
-    }
+@Mixin(ContainerPlayer.class)
+public abstract class MixinContainerPlayer extends MixinContainer implements LensProvider<IInventory, ItemStack> {
 
     @Override
-    public boolean hasNext() {
-        return this.next < this.children.size();
-    }
-
-    @Override
-    public Inventory next() {
-        try {
-            return this.children.get(this.next++).getAdapter(this.inventory, this.parent);
-        } catch (IndexOutOfBoundsException e) {
-            throw new NoSuchElementException();
-        }
-    }
-
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException();
+    public Lens<IInventory, ItemStack> getRootLens(Fabric<IInventory> fabric, InventoryAdapter<IInventory, ItemStack> adapter) {
+        return new ContainerPlayerInventoryLens(adapter, inventory$getSlotProvider());
     }
 }

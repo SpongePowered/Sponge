@@ -43,6 +43,11 @@ import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 public class PlayerInventoryLens extends MinecraftLens {
 
+    private static final int EQUIPMENT = 4;
+    private static final int INVENTORY_WIDTH = 9;
+    private static final int MAIN_INVENTORY_HEIGHT = 3;
+    private static final int HOTBAR = 1;
+
     private final EntityPlayerMP player;
 
     private HotbarLensImpl hotbar;
@@ -53,19 +58,29 @@ public class PlayerInventoryLens extends MinecraftLens {
     public PlayerInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
         super(0, adapter.getInventory().getSize(), adapter, slots);
         this.player = (EntityPlayerMP) ((InventoryPlayer) adapter).player;
+        this.init(slots);
     }
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
-        this.hotbar = new HotbarLensImpl(0, InventoryPlayer.getHotbarSize(), slots);
-        this.main = new GridInventoryLensImpl(9, 9, 3, 9, slots);
-        this.equipment = new EquipmentInventoryLensImpl((ArmorEquipable) this.player, 36, 4, 1, slots);
-        this.offhand = new SlotLensImpl(37);
+        int base = 0;
+        this.hotbar = new HotbarLensImpl(base, InventoryPlayer.getHotbarSize(), slots);
+        base += INVENTORY_WIDTH * HOTBAR;
+        this.main = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
+        base += INVENTORY_WIDTH * MAIN_INVENTORY_HEIGHT;
+        this.equipment = new EquipmentInventoryLensImpl((ArmorEquipable) player, base, EQUIPMENT, 1, slots);
+        this.offhand = new SlotLensImpl(base + EQUIPMENT);
 
+        // TODO Hotbar in Vanilla is part of the main inventory (first 9 slots) ; maybe wrap it in a Lens?
         this.addSpanningChild(this.hotbar);
         this.addSpanningChild(this.main);
         this.addSpanningChild(this.equipment);
         this.addSpanningChild(this.offhand);
+    }
+
+    @Override
+    protected boolean isDelayedInit() {
+        return true; // player is needed for EquipmentInventoryLensImpl
     }
 
     public HotbarLens<IInventory, net.minecraft.item.ItemStack> getHotbarLens() {

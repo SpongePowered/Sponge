@@ -27,7 +27,6 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.GridInventoryAdapter;
@@ -77,7 +76,7 @@ public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements 
     }
 
     private void initOther(SlotProvider<IInventory, ItemStack> slots) {
-        this.addSpanningChild(this.craftingGrid, new InventoryDimension(this.width, this.height));
+        // TODO spanning children already added in GridLens this.addSpanningChild(this.craftingGrid, new InventoryDimension(this.width, this.height));
         this.addSpanningChild(this.outputSlot);
     }
 

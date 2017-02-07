@@ -24,21 +24,13 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
-import net.minecraft.inventory.ContainerChest;
-import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
-import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.ContainerChestInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.ContainerPlayerInventoryLens;
 
 import java.lang.reflect.Constructor;
 
@@ -71,15 +63,5 @@ public abstract class MinecraftLens extends AbstractLens<IInventory, ItemStack> 
     public void invalidate(Fabric<IInventory> inv) {
         super.invalidate(inv);
 //        inv.markDirty();    // Adapter can decide
-    }
-
-    @SuppressWarnings("unchecked")
-    public static MinecraftLens of(Container container, SlotCollection collection) {
-        if (container instanceof ContainerChest) {
-            return new ContainerChestInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection, ((ContainerChest) container).numRows);
-        } else if (container instanceof ContainerPlayer) {
-            return new ContainerPlayerInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection);
-        }
-        return new OrderedInventoryLensImpl(0, ((MinecraftInventoryAdapter) container).getInventory().getSize(), 1, collection);
     }
 }

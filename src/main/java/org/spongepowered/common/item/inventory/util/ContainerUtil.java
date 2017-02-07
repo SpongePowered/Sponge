@@ -42,6 +42,8 @@ import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryCraftResult;
+import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.inventory.Slot;
@@ -63,19 +65,39 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
+import org.spongepowered.common.item.inventory.custom.CustomContainer;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.LensProvider;
+import org.spongepowered.common.item.inventory.lens.comp.CraftingInventoryLens;
+import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
+import org.spongepowered.common.item.inventory.lens.comp.Inventory2DLens;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.ContainerChestInventoryLens;
-import org.spongepowered.common.item.inventory.lens.impl.minecraft.ContainerPlayerInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.comp.CraftingInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.Inventory2DLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.mixin.core.inventory.MixinInventoryHelper;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -171,22 +193,122 @@ public final class ContainerUtil {
         }
     }
 
-    // TODO Inventory - Container lens
-    // TODO Inventory - Add a fallback Container lens
     @SuppressWarnings("unchecked")
     @Nullable
-    public static MinecraftLens getLens(net.minecraft.inventory.Container container, SlotCollection collection) {
-        if (container instanceof ContainerChest) {
-            int size = ((ContainerChest) container).getLowerChestInventory().getSizeInventory();
-            if (size % 9 != 0) {
-                SpongeImpl.getLogger().warn("Invalid slot count of {} for container {} with inventory {} - most API inventory methods will not be supported", size, container, ((ContainerChest) container).getLowerChestInventory());
-                return null;
+    public static Lens<IInventory, ItemStack> getLens(Fabric<IInventory> fabric, net.minecraft.inventory.Container container, SlotCollection slots) {
+        // Container is Adapter?
+        if (container instanceof InventoryAdapter) {
+            Lens lens = ((InventoryAdapter) container).getRootLens();
+            if (lens != null) {
+                return lens;
             }
-            return new ContainerChestInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection, ((ContainerChest) container).numRows);
-        } else if (container instanceof ContainerPlayer) {
-            return new ContainerPlayerInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection);
+            // else lens is null: Adapter is probably getting initialized
         }
 
+        // Container provides Lens?
+        if (container instanceof LensProvider) {
+            // TODO LensProviders for all Vanilla Containers
+            InventoryAdapter<IInventory, ItemStack> adapter;
+            if (container instanceof InventoryAdapter) {
+                adapter = ((InventoryAdapter) container);
+            } else {
+                adapter = new Adapter(MinecraftFabric.of(container));
+            }
+            return ((LensProvider) container).getRootLens(fabric, adapter);
+        }
+
+        // For those Sheep-Crafting inventories
+        if (container.getInventory().size() == 0) {
+            return null; // Empty Container
+        }
+
+        // Unknown Container - try to get Lenses for Sub-Inventories and wrap them in a ContainerLens
+        return generateLens(container, slots);
+    }
+
+    /**
+     * Generates a fallback lens for given Container
+     *
+     * @param container The Container to generate a lens for
+     * @param slots The slots of the Container
+     * @return The generated fallback lens
+     */
+    private static Lens<IInventory, ItemStack> generateLens(net.minecraft.inventory.Container container, SlotCollection slots) {
+        // Get all inventories viewed in the Container & count slots & retain order
+        Map<IInventory, List<Slot>> viewed = container.inventorySlots.stream()
+                .collect(Collectors.groupingBy(i -> i.inventory, LinkedHashMap::new, Collectors.toList()));
+        int index = 0; // Count the index
+        List<Lens<IInventory, ItemStack>> lenses = new ArrayList<>();
+        for (Map.Entry<IInventory, List<Slot>> entry : viewed.entrySet()) {
+            int slotCount = entry.getValue().size();
+            Lens<IInventory, ItemStack> lens = null;
+            boolean playerLens = false;
+            if (entry.getKey() instanceof InventoryAdapter) { // Check if sub-inventory is Adapter
+                // TODO the lenses in "slots" are not used in this lens and thus cannot be found later
+                Lens<IInventory, ItemStack> adapterLens = ((InventoryAdapter) entry.getKey()).getRootLens();
+                if (adapterLens != null) {
+                    lens = copyLens(index, adapterLens, slots);
+                    if (adapterLens instanceof PlayerInventoryLens) {
+                        playerLens = true;
+                    }
+                }
+            }
+            if (lens == null && entry.getKey() instanceof LensProvider) // Check if sub-inventory is LensProvider
+            {
+                Fabric<IInventory> keyFabric = MinecraftFabric.of(entry.getKey());
+                lens = ((LensProvider) entry.getKey()).getRootLens(keyFabric, new Adapter(keyFabric));
+            }
+            if (lens == null // Unknown Inventory or
+                    || lens.slotCount() != slotCount) { // Inventory size <> Lens size
+                if (entry.getKey() instanceof InventoryCraftResult) { // InventoryCraftResult is a Slot
+                    Slot slot = entry.getValue().get(0);
+                    lens = new CraftingOutputSlotLensImpl(index, item -> slot.isItemValid(((ItemStack) item)),
+                            itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
+                } else if (entry.getKey() instanceof InventoryCrafting) { // InventoryCrafting has width and height
+                    InventoryCrafting craftGrid = (InventoryCrafting) entry.getKey();
+                    lens = new GridInventoryLensImpl(index, craftGrid.getWidth(), craftGrid.getHeight(), craftGrid.getWidth(), slots);
+                } else if (slotCount == 1) { // Unknown - A single Slot
+                    lens = new SlotLensImpl(index);
+                } else if ((lens instanceof PlayerInventoryLens || playerLens) && slotCount == 36) { // Player
+                    // Player Inventory + Hotbar
+                    lenses.add(new GridInventoryLensImpl(index, 9, 3, 9, slots));
+                    lenses.add(new HotbarLensImpl(index + 27, 9, slots));
+                    lens = null;
+                } else { // Unknown - fallback to OrderedInventory
+                    lens = new OrderedInventoryLensImpl(index, slotCount, 1, slots);
+                }
+            }
+            if (lens != null) {
+                lenses.add(lens);
+            }
+            index += slotCount;
+        }
+        // Lens containing/delegating to other lenses
+        return new ContainerLens((InventoryAdapter<IInventory, ItemStack>) container, slots, lenses);
+    }
+
+    private static Lens<IInventory, ItemStack> copyLens(int base, Lens<IInventory, ItemStack> lens, SlotCollection slots)
+    {
+        if (lens instanceof CraftingInventoryLens) {
+            return new CraftingInventoryLensImpl(base,
+                    ((GridInventoryLens) lens).getWidth(),
+                    ((GridInventoryLens) lens).getHeight(),
+                    ((GridInventoryLens) lens).getStride(),
+                    slots);
+        }
+        if (lens instanceof GridInventoryLens) {
+            return new GridInventoryLensImpl(base,
+                    ((GridInventoryLens) lens).getWidth(),
+                    ((GridInventoryLens) lens).getHeight(),
+                    ((GridInventoryLens) lens).getStride(),
+                    slots);
+        }
+        if (lens instanceof Inventory2DLens) {
+            return new Inventory2DLensImpl(base,
+                    ((Inventory2DLens) lens).getWidth(),
+                    ((Inventory2DLens) lens).getHeight(),
+                    slots);
+        }
         return null;
     }
 

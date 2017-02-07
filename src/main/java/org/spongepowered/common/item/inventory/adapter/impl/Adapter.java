@@ -42,6 +42,7 @@ import org.spongepowered.common.item.inventory.InventoryIterator;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.LensProvider;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.item.inventory.lens.impl.DefaultIndexedLens;
@@ -390,6 +391,9 @@ public class Adapter implements MinecraftInventoryAdapter {
 //    }
 
     protected Lens<IInventory, net.minecraft.item.ItemStack> initRootLens() {
+        if (this instanceof LensProvider) {
+            return ((LensProvider) this).getRootLens(this.inventory, this);
+        }
         int size = this.inventory.getSize();
         if (size == 0) {
             return new DefaultEmptyLens(this);
