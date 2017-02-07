@@ -53,6 +53,7 @@ public class PlayerInventoryLens extends MinecraftLens {
     public PlayerInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
         super(0, adapter.getInventory().getSize(), adapter, slots);
         this.player = (EntityPlayerMP) ((InventoryPlayer) adapter).player;
+        this.init(slots);
     }
 
     @Override
@@ -62,10 +63,16 @@ public class PlayerInventoryLens extends MinecraftLens {
         this.equipment = new EquipmentInventoryLensImpl((ArmorEquipable) player, 36, 4, 1, slots);
         this.offhand = new SlotLensImpl(37);
 
+        // TODO Hotbar in Vanilla is part of the main inventory (first 9 slots) ; maybe wrap it in a Lens?
         this.addSpanningChild(this.hotbar);
         this.addSpanningChild(this.main);
         this.addSpanningChild(this.equipment);
         this.addSpanningChild(this.offhand);
+    }
+
+    @Override
+    protected boolean isDelayedInit() {
+        return true; // player is needed for EquipmentInventoryLensImpl
     }
 
     public HotbarLens<IInventory, net.minecraft.item.ItemStack> getHotbarLens() {

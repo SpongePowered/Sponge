@@ -30,6 +30,7 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.property.InventoryCapacity;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
@@ -69,6 +70,11 @@ public class CustomLens extends MinecraftLens {
         }
 
         this.addLensFor(archetype, 0, slots); // recursively get archetype sizes
+
+        // Adding slots
+        for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
+            this.addChild(slots.getSlot(slot), new SlotIndex(ord));
+        }
     }
 
     private int addLensFor(InventoryArchetype archetype, int base, SlotProvider<IInventory, ItemStack> slots) {

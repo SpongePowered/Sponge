@@ -69,6 +69,7 @@ public class SlotAdapter extends Adapter implements Slot {
         this.slot = lens;
         this.ordinal = lens.getOrdinal(inventory);
         this.slots = ImmutableList.of(this);
+        this.slotNumber = ordinal; // TODO this is used in events
     }
 
     public int getOrdinal() {

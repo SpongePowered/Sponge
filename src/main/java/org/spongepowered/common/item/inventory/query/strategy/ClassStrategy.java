@@ -47,7 +47,8 @@ public class ClassStrategy<TInventory, TStack> extends QueryStrategy<TInventory,
             return true;
         }
         for (Class<?> candidate : this.classes) {
-            if (candidate.isAssignableFrom(lens.getAdapterType())) {
+            // Check for null first because there are inventories without lens (e.g. InventoryCrafting in EntitySheep)
+            if (candidate != null && candidate.isAssignableFrom(lens.getAdapterType())) {
                 return true;
             }
         }
