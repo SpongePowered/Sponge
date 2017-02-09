@@ -332,6 +332,7 @@
         "item.inventory.MixinCustomContainer",
         "item.merchant.MixinMerchantRecipe",
         "nbt.MixinNBTTagCompound",
+        "netty.MixinAbstractChannelHandlerContext",
         "network.MixinNetHandlerPlayServer",
         "network.MixinNetworkManager",
         "network.MixinPacketBuffer",
