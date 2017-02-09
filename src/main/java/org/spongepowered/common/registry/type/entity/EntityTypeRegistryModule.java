@@ -186,12 +186,13 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     }
 
     private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
-        Class<? extends Entity> cls = SpongeImplHooks.getEntityClass(new ResourceLocation(mcName));
+        ResourceLocation resourceLoc = new ResourceLocation(mcName);
+        Class<? extends Entity> cls = SpongeImplHooks.getEntityClass(resourceLoc);
         if (cls == null) {
             throw new IllegalArgumentException("No class mapping for entity name " + mcName);
         }
         return new SpongeEntityType(SpongeImplHooks.getEntityId(cls), spongeName, cls,
-                new SpongeTranslation("entity." + mcName + ".name"));
+                new SpongeTranslation("entity." + SpongeImplHooks.getEntityTranslation(resourceLoc) + ".name"));
     }
 
     private SpongeEntityType newEntityTypeFromName(String name) {

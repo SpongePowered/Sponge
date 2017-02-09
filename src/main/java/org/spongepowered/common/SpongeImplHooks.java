@@ -105,6 +105,11 @@ public final class SpongeImplHooks {
         return EntityList.REGISTRY.getObject(name);
     }
 
+    @Nullable
+    public static String getEntityTranslation(ResourceLocation name) {
+        return EntityList.getTranslationName(name);
+    }
+
     public static int getEntityId(Class<? extends Entity> entityClass) {
         return EntityList.REGISTRY.getIDForObject(entityClass);
     }
