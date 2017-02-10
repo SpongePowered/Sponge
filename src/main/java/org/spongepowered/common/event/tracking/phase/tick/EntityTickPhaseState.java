@@ -219,35 +219,39 @@ class EntityTickPhaseState extends TickPhaseState {
                         }
                     }
                 });
-        phaseContext.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
-        phaseContext.getBlockItemDropSupplier()
-                .ifPresentAndNotEmpty(map -> {
-                    final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
-                    for (BlockSnapshot snapshot : capturedBlocks) {
-                        final BlockPos blockPos = ((IMixinLocation) (Object) snapshot.getLocation().get()).getBlockPos();
-                        final Collection<EntityItem> entityItems = map.get(blockPos);
-                        if (!entityItems.isEmpty()) {
-                            final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
-                                    .block(snapshot)
-                                    .type(InternalSpawnTypes.DROPPED_ITEM)
-                                    .build());
-                            notifier.ifPresent(builder::notifier);
-                            creator.ifPresent(builder::owner);
-                            builder.build();
-                            final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
-                            final DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(builder.build(), items, causeTracker.getWorld());
-                            SpongeImpl.postEvent(event);
-                            if (!event.isCancelled()) {
-                                for (Entity entity : event.getEntities()) {
-                                    creator.ifPresent(user -> entity.setCreator(user.getUniqueId()));
-                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+        if (!phaseContext.getCapturedBlockSupplier().isEmpty()) {
+            phaseContext.getCapturedBlockSupplier()
+                    .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
+        } else {
+            phaseContext.getBlockItemDropSupplier()
+                    .ifPresentAndNotEmpty(map -> {
+                        final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
+                        for (BlockSnapshot snapshot : capturedBlocks) {
+                            final BlockPos blockPos = ((IMixinLocation) (Object) snapshot.getLocation().get()).getBlockPos();
+                            final Collection<EntityItem> entityItems = map.get(blockPos);
+                            if (!entityItems.isEmpty()) {
+                                final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
+                                        .block(snapshot)
+                                        .type(InternalSpawnTypes.DROPPED_ITEM)
+                                        .build());
+                                notifier.ifPresent(builder::notifier);
+                                creator.ifPresent(builder::owner);
+                                builder.build();
+                                final List<Entity> items = entityItems.stream().map(EntityUtil::fromNative).collect(Collectors.toList());
+                                final DropItemEvent.Destruct event =
+                                        SpongeEventFactory.createDropItemEventDestruct(builder.build(), items, causeTracker.getWorld());
+                                SpongeImpl.postEvent(event);
+                                if (!event.isCancelled()) {
+                                    for (Entity entity : event.getEntities()) {
+                                        creator.ifPresent(user -> entity.setCreator(user.getUniqueId()));
+                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                    }
                                 }
                             }
                         }
-                    }
 
-                });
+                    });
+        }
         phaseContext.getCapturedItemStackSupplier()
                 .ifPresentAndNotEmpty(drops -> {
                     final List<EntityItem> items = drops.stream()
