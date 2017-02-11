@@ -95,7 +95,7 @@ public abstract class MixinWorldEntitySpawner {
     @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerChunkMap;getEntry(II)Lnet/minecraft/server/management/PlayerChunkMapEntry;"))
     public PlayerChunkMapEntry onFindChunksForSpawningGetMapEntry(PlayerChunkMap playerChunkMap, int chunkX, int chunkZ) {
         final Chunk chunk = ((IMixinChunkProviderServer) playerChunkMap.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkX, chunkZ);
-        if (chunk == null || (chunk.unloaded && !((IMixinChunk) chunk).isPersistedChunk())) {
+        if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
             // Don't attempt to spawn in an unloaded chunk
             return null;
         }

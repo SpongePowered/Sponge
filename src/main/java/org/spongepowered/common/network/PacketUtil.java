@@ -83,7 +83,7 @@ public class PacketUtil {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
-            EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
+            EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).player;
 
             // If true, logic was handled in Pre so return
             if (firePreEvents(packetIn, packetPlayer)) {
@@ -160,7 +160,7 @@ public class PacketUtil {
 
                 if (packetIn instanceof CPacketClientStatus) {
                     // update the reference of player
-                    packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
+                    packetPlayer = ((NetHandlerPlayServer) netHandler).player;
                 }
                 ((IMixinEntityPlayerMP) packetPlayer).setPacketItem(null);
             }

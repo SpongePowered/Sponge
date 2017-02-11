@@ -183,7 +183,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final public boolean isRemote;
     @Shadow @Final public WorldProvider provider;
     @Shadow @Final public Random rand;
-    @Shadow @Final public Profiler theProfiler;
+    @Shadow @Final public Profiler profiler;
     @Shadow @Final public List<EntityPlayer> playerEntities;
     @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
     @Shadow @Final public List<net.minecraft.entity.Entity> weatherEffects;
@@ -1112,7 +1112,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         } else {
             chunk = this.getChunkFromBlockCoords(pos);
         }
-        if (chunk == null || chunk.unloaded) {
+        if (chunk == null || chunk.unloadQueued) {
             cir.setReturnValue(0);
         }
     }
@@ -1127,8 +1127,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void updateEntities() {
-        this.theProfiler.startSection("entities");
-        this.theProfiler.startSection("global");
+        this.profiler.startSection("entities");
+        this.profiler.startSection("global");
         this.startEntityGlobalTimings(); // Sponge
 
 
@@ -1158,7 +1158,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.stopEntityTickTimingStartEntityRemovalTiming(); // Sponge
-        this.theProfiler.endStartSection("remove");
+        this.profiler.endStartSection("remove");
         this.loadedEntityList.removeAll(this.unloadedEntityList);
 
         for (int k = 0; k < this.unloadedEntityList.size(); ++k) {
@@ -1178,7 +1178,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.unloadedEntityList.clear();
         this.stopEntityRemovalTiming(); // Sponge
         this.tickPlayers();
-        this.theProfiler.endStartSection("regular");
+        this.profiler.endStartSection("regular");
 
         for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1) {
             net.minecraft.entity.Entity entity2 = this.loadedEntityList.get(i1);
@@ -1192,7 +1192,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 entity2.dismountRidingEntity();
             }
 
-            this.theProfiler.startSection("tick");
+            this.profiler.startSection("tick");
             this.startEntityTickTiming(); // Sponge
 
             if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
@@ -1208,8 +1208,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             this.stopEntityTickSectionBeforeRemove(); // Sponge
-            this.theProfiler.endSection();
-            this.theProfiler.startSection("remove");
+            this.profiler.endSection();
+            this.profiler.startSection("remove");
             this.startEntityRemovalTick(); // Sponge
 
             if (entity2.isDead) {
@@ -1225,10 +1225,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             this.stopEntityRemovalTiming(); // Sponge
-            this.theProfiler.endSection();
+            this.profiler.endSection();
         }
 
-        this.theProfiler.endStartSection("blockEntities");
+        this.profiler.endStartSection("blockEntities");
         this.processingLoadedTiles = true;
         Iterator<net.minecraft.tileentity.TileEntity> iterator = this.tickableTileEntities.iterator();
 
@@ -1241,9 +1241,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                 if (this.isBlockLoaded(blockpos) && this.worldBorder.contains(blockpos)) {
                     try {
-                        //this.theProfiler.startSection(tileentity.getClass().getSimpleName());
+                        //this.profiler.startSection(tileentity.getClass().getSimpleName());
                         ((ITickable) tileentity).update();
-                        //this.theProfiler.endSection();
+                        //this.profiler.endSection();
                     } catch (Throwable throwable) {
                         this.stopTimingTickTileEntityCrash(tileentity); // Sponge
                         CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
@@ -1289,7 +1289,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.tileEntitiesToBeRemoved.clear();
         }
 
-        this.theProfiler.endStartSection("pendingBlockEntities");
+        this.profiler.endStartSection("pendingBlockEntities");
 
         if (!this.addedTileEntityList.isEmpty()) {
             for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1) {
@@ -1313,8 +1313,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         this.endPendingTileEntities(); // Sponge
-        this.theProfiler.endSection();
-        this.theProfiler.endSection();
+        this.profiler.endSection();
+        this.profiler.endSection();
     }
 
     /**

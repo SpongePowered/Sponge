@@ -133,13 +133,13 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
      * @param chunkIn The chunk to queue
      */
     @Overwrite
-    public void unload(Chunk chunkIn)
+    public void queueUnload(Chunk chunkIn)
     {
         if (!((IMixinChunk) chunkIn).isPersistedChunk() && this.world.provider.canDropChunk(chunkIn.xPosition, chunkIn.zPosition))
         {
             // Sponge - we avoid using the queue and simply check the unloaded flag during unloads
             //this.droppedChunksSet.add(Long.valueOf(ChunkPos.asLong(chunkIn.xPosition, chunkIn.zPosition)));
-            chunkIn.unloaded = true;
+            chunkIn.unloadQueued = true;
         }
     }
 
@@ -262,7 +262,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             while (chunksUnloaded < this.maxChunkUnloads && iterator.hasNext()) {
                 Chunk chunk = iterator.next();
                 IMixinChunk spongeChunk = (IMixinChunk) chunk;
-                if (chunk != null && chunk.unloaded && !spongeChunk.isPersistedChunk()) {
+                if (chunk != null && chunk.unloadQueued && !spongeChunk.isPersistedChunk()) {
                     if (this.getChunkUnloadDelay() > 0) {
                         if ((now - spongeChunk.getScheduledForUnload()) < this.chunkUnloadDelay) {
                             continue;

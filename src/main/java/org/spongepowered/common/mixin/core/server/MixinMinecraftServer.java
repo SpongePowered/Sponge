@@ -124,7 +124,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         IMixinMinecraftServer {
 
     @Shadow @Final private static Logger LOG;
-    @Shadow @Final public Profiler theProfiler;
+    @Shadow @Final public Profiler profiler;
     @Shadow @Final public long[] tickTimeArray;
     @Shadow private boolean enableBonusChest;
     @Shadow private int tickCounter;
@@ -589,7 +589,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     
                 if (!worldprovider.canRespawnHere())
                 {
-                    worldServer.getChunkProvider().unloadAllChunks();
+                    worldServer.getChunkProvider().queueUnloadAll();
                 }
             }
         }

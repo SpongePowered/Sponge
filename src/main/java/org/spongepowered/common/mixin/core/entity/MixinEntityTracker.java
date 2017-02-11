@@ -60,7 +60,7 @@ public abstract class MixinEntityTracker {
     }
 
 
-    @Redirect(method = "track(Lnet/minecraft/entity/Entity;IIZ)V", at = @At(value = "NEW", args = "class=java/lang/IllegalStateException"))
+    @Redirect(method = "track(Lnet/minecraft/entity/Entity;IIZ)V", at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
     private IllegalStateException reportEntityAlreadyTrackedWithWorld(String string, Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates) {
         IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, ((World) this.world).getName()));;
         CauseTracker tracker = ((IMixinWorldServer) entityIn.getEntityWorld()).getCauseTracker();

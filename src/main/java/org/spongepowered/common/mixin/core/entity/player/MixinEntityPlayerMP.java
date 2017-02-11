@@ -816,7 +816,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (this.getHealth() > 0.0F) {
             return false;
         }
-        this.connection.playerEntity = this.mcServer.getPlayerList().recreatePlayerEntity(this.this$, this.this$.dimension, false);
+        this.connection.player = this.mcServer.getPlayerList().recreatePlayerEntity(this.this$, this.this$.dimension, false);
         return true;
     }
 

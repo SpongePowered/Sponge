@@ -111,7 +111,7 @@ public class TileEntityActivation {
         for (PlayerChunkMapEntry playerChunkMapEntry : playerChunkMap.entries) {
             for (EntityPlayer player : playerChunkMapEntry.players) {
                 final Chunk chunk = playerChunkMapEntry.chunk;
-                if (chunk == null || chunk.unloaded) {
+                if (chunk == null || chunk.unloadQueued) {
                     continue;
                 }
 

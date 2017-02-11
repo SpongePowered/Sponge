@@ -131,7 +131,7 @@ public final class TrackingUtil {
         checkArgument(entityIn instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entityIn);
         checkNotNull(entityIn, "Cannot capture on a null ticking entity!");
         final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) entityIn.world).getChunkProvider()).getLoadedChunkWithoutMarkingActive(entityIn.getPosition().getX() >> 4,  entityIn.getPosition().getZ() >> 4);
-        if (chunk == null || (chunk.unloaded && !((IMixinChunk) chunk).isPersistedChunk())) {
+        if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
             // Don't tick entities in chunks queued for unload
             return;
         }
@@ -158,7 +158,7 @@ public final class TrackingUtil {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
         final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) entity.world).getChunkProvider()).getLoadedChunkWithoutMarkingActive(entity.getPosition().getX() >> 4,  entity.getPosition().getZ() >> 4);
-        if (chunk == null || (chunk.unloaded && !((IMixinChunk) chunk).isPersistedChunk())) {
+        if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
             // Don't tick entity in chunks queued for unload
             return;
         }
@@ -187,7 +187,7 @@ public final class TrackingUtil {
         final WorldServer worldServer = causeTracker.getMinecraftWorld();
         final BlockPos pos = tileEntity.getPos();
         final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) worldServer.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4,  pos.getZ() >> 4);
-        if (chunk == null || (chunk.unloaded && !((IMixinChunk) chunk).isPersistedChunk())) {
+        if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
             // Don't tick TE's in chunks queued for unload
             return;
         }
@@ -399,9 +399,9 @@ public final class TrackingUtil {
 
 
         if (newState.getLightOpacity() != currentState.getLightOpacity() || newState.getLightValue() != currentState.getLightValue()) {
-            minecraftWorld.theProfiler.startSection("checkLight");
+            minecraftWorld.profiler.startSection("checkLight");
             minecraftWorld.checkLight(pos);
-            minecraftWorld.theProfiler.endSection();
+            minecraftWorld.profiler.endSection();
         }
 
         return true;

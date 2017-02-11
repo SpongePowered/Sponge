@@ -154,7 +154,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Shadow private boolean isChunkLoaded;
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isModified;
-    @Shadow public boolean unloaded;
+    @Shadow public boolean unloadQueued;
 
     // @formatter:off
     @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);

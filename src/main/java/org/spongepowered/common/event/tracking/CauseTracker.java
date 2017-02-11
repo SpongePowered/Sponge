@@ -451,9 +451,9 @@ public final class CauseTracker {
         {
             if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue())
             {
-                minecraftWorld.theProfiler.startSection("checkLight");
+                minecraftWorld.profiler.startSection("checkLight");
                 minecraftWorld.checkLight(pos);
-                minecraftWorld.theProfiler.endSection();
+                minecraftWorld.profiler.endSection();
             }
 
             if ((flags & 2) != 0 && (!minecraftWorld.isRemote || (flags & 4) == 0) && chunk.isPopulated())
@@ -499,9 +499,9 @@ public final class CauseTracker {
             return false;
         }
         if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
-            minecraftWorld.theProfiler.startSection("checkLight");
+            minecraftWorld.profiler.startSection("checkLight");
             minecraftWorld.checkLight(pos);
-            minecraftWorld.theProfiler.endSection();
+            minecraftWorld.profiler.endSection();
         }
 
         if (chunk.isPopulated()) {

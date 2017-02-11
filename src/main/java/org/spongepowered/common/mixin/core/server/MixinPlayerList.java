@@ -680,7 +680,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     // copy of transferEntityToWorld but only contains code to apply the location on entity before being placed into a portal
     @Override
     public void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn) {
-        oldWorldIn.theProfiler.startSection("moving");
+        oldWorldIn.profiler.startSection("moving");
         WorldProvider pOld = oldWorldIn.provider;
         WorldProvider pNew = toWorldIn.provider;
         double moveFactor = getMovementFactor(pOld) / getMovementFactor(pNew);
@@ -710,21 +710,21 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         }
 
         if (!(pOld instanceof WorldProviderEnd)) {
-            oldWorldIn.theProfiler.startSection("placing");
+            oldWorldIn.profiler.startSection("placing");
             x = (double)MathHelper.clamp((int)x, -29999872, 29999872);
             z = (double)MathHelper.clamp((int)z, -29999872, 29999872);
 
             if (entityIn.isEntityAlive()) {
                 entityIn.setLocationAndAngles(x, y, z, entityIn.rotationYaw, entityIn.rotationPitch);
             }
-            oldWorldIn.theProfiler.endSection();
+            oldWorldIn.profiler.endSection();
         }
 
         if (entityIn.isEntityAlive()) {
             oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
         }
 
-        oldWorldIn.theProfiler.endSection();
+        oldWorldIn.profiler.endSection();
     }
 
     /**

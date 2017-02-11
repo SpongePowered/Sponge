@@ -784,7 +784,7 @@ public final class WorldManager {
     public static WorldServer createWorldFromProperties(int dimensionId, ISaveHandler saveHandler, WorldInfo worldInfo, @Nullable WorldSettings
             worldSettings) {
         final MinecraftServer server = SpongeImpl.getServer();
-        final WorldServer worldServer = new WorldServer(server, saveHandler, worldInfo, dimensionId, server.theProfiler);
+        final WorldServer worldServer = new WorldServer(server, saveHandler, worldInfo, dimensionId, server.profiler);
         worldServer.init();
 
         // WorldSettings is only non-null here if this is a newly generated WorldInfo and therefore we need to initialize to calculate spawn.

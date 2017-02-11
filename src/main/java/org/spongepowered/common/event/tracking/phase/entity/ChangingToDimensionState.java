@@ -135,13 +135,13 @@ final class ChangingToDimensionState extends EntityPhaseState {
             return null;
         }
 
-        teleportingEntity.world.theProfiler.startSection("changeDimension");
+        teleportingEntity.world.profiler.startSection("changeDimension");
 
         WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
 
         teleportingEntity.world.removeEntity(teleportingEntity);
         teleportingEntity.isDead = false;
-        teleportingEntity.world.theProfiler.startSection("reposition");
+        teleportingEntity.world.profiler.startSection("reposition");
         final Vector3d position = event.getToTransform().getPosition();
         teleportingEntity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(),
                 (float) event.getToTransform().getPitch());
@@ -149,10 +149,10 @@ final class ChangingToDimensionState extends EntityPhaseState {
         teleportingEntity.world = toWorld;
 
         toWorld.updateEntityWithOptionalForce(teleportingEntity, false);
-        teleportingEntity.world.theProfiler.endStartSection("reloading");
+        teleportingEntity.world.profiler.endStartSection("reloading");
 
-        teleportingEntity.world.theProfiler.endSection();
-        teleportingEntity.world.theProfiler.endSection();
+        teleportingEntity.world.profiler.endSection();
+        teleportingEntity.world.profiler.endSection();
         return teleportingEntity;
     }
 }

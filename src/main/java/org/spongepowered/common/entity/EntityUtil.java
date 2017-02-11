@@ -163,13 +163,13 @@ public final class EntityUtil {
             return null;
         }
 
-        entity.world.theProfiler.startSection("changeDimension");
+        entity.world.profiler.startSection("changeDimension");
         // use the world from event
         final Transform<World> toTransform = event.getToTransform();
         WorldServer toWorld = (WorldServer) toTransform.getExtent();
         entity.world.removeEntity(entity);
         entity.isDead = false;
-        entity.world.theProfiler.startSection("reposition");
+        entity.world.profiler.startSection("reposition");
 
         final Vector3i toChunkPosition = toTransform.getLocation().getChunkPosition();
         toWorld.getChunkProvider().loadChunk(toChunkPosition.getX(), toChunkPosition.getZ());
@@ -179,10 +179,10 @@ public final class EntityUtil {
         entity.world = toWorld;
         toWorld.spawnEntity(entity);
         toWorld.updateEntityWithOptionalForce(entity, false);
-        entity.world.theProfiler.endSection();
+        entity.world.profiler.endSection();
 
-        entity.world.theProfiler.endSection();
-        entity.world.theProfiler.endSection();
+        entity.world.profiler.endSection();
+        entity.world.profiler.endSection();
         return entity;
     }
 
@@ -375,10 +375,10 @@ public final class EntityUtil {
         toCauseTracker.switchToPhase(EntityPhase.State.CHANGING_TO_DIMENSION, context);
 
         if (entityIn.isEntityAlive() && !(fromWorld.provider instanceof WorldProviderEnd)) {
-            fromWorld.theProfiler.startSection("placing");
+            fromWorld.profiler.startSection("placing");
             // need to use placeInPortal to support mods
             teleporter.placeInPortal(entityIn, entityIn.rotationYaw);
-            fromWorld.theProfiler.endSection();
+            fromWorld.profiler.endSection();
         }
 
         // Complete phases, just because we need to. The phases don't actually do anything, because the processing resides here.
@@ -808,7 +808,7 @@ public final class EntityUtil {
     }
 
     public static void adjustEntityPostionForTeleport(IMixinPlayerList playerList, Entity entity, WorldServer fromWorld, WorldServer toWorld) {
-        fromWorld.theProfiler.startSection("moving");
+        fromWorld.profiler.startSection("moving");
         WorldProvider pOld = fromWorld.provider;
         WorldProvider pNew = toWorld.provider;
         double moveFactor = playerList.getMovementFactor(pOld) / playerList.getMovementFactor(pNew);
@@ -838,21 +838,21 @@ public final class EntityUtil {
         }
 
         if (!(pOld instanceof WorldProviderEnd)) {
-            fromWorld.theProfiler.startSection("placing");
+            fromWorld.profiler.startSection("placing");
             x = (double) MathHelper.clamp((int)x, -29999872, 29999872);
             z = (double)MathHelper.clamp((int)z, -29999872, 29999872);
 
             if (entity.isEntityAlive()) {
                 entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
             }
-            fromWorld.theProfiler.endSection();
+            fromWorld.profiler.endSection();
         }
 
         if (entity.isEntityAlive()) {
             fromWorld.updateEntityWithOptionalForce(entity, false);
         }
 
-        fromWorld.theProfiler.endSection();
+        fromWorld.profiler.endSection();
     }
 
     /**
