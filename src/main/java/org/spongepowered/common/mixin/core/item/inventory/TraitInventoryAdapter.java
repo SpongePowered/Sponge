@@ -33,6 +33,8 @@ import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.tileentity.TileEntityHopper;
+import net.minecraft.tileentity.TileEntityLockable;
+import net.minecraft.tileentity.TileEntityLockableLoot;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
@@ -52,13 +54,12 @@ import java.util.List;
 @Mixin(value = {
         net.minecraft.inventory.Slot.class,
         InventoryPlayer.class,
-        TileEntityChest.class,
         TileEntityFurnace.class,
-        TileEntityHopper.class,
         EntityVillager.class,
         Container.class,
         InventoryLargeChest.class,
         InventoryEnderChest.class,
+        TileEntityLockableLoot.class,
         CustomInventory.class
 }, priority = 999)
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
