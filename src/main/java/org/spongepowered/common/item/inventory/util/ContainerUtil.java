@@ -80,7 +80,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 public final class ContainerUtil {
-    
+
     private static final Random RANDOM = new Random();
 
     private ContainerUtil() {
@@ -178,6 +178,11 @@ public final class ContainerUtil {
     @Nullable
     public static MinecraftLens getLens(net.minecraft.inventory.Container container, SlotCollection collection) {
         if (container instanceof ContainerChest) {
+            int size = ((ContainerChest) container).getLowerChestInventory().getSizeInventory();
+            if (size % 9 != 0) {
+                SpongeImpl.getLogger().warn("Invalid slot count of {} for container {} with inventory {} - most API inventory methods will not be supported", size, container, ((ContainerChest) container).getLowerChestInventory());
+                return null;
+            }
             return new ContainerChestInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection, ((ContainerChest) container).numRows);
         } else if (container instanceof ContainerPlayer) {
             return new ContainerPlayerInventoryLens((InventoryAdapter<IInventory, ItemStack>) container, collection);

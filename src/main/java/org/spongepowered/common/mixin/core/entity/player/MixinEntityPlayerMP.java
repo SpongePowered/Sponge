@@ -855,12 +855,4 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             mixinContainer.getCapturedTransactions().clear();
         }
     }
-
-    @Inject(method = "displayGUIChest", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;openContainer:Lnet/minecraft/inventory/Container;", opcode = Opcodes.PUTFIELD, ordinal = 1, shift = At.Shift.AFTER))
-    public void onSetContainer(IInventory chestInventory, CallbackInfo ci) {
-        if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ContainerChest) {
-            SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
-            ((IMixinContainer) this.openContainer).setSpectatorChest(true);
-        }
-    }
 }
