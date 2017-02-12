@@ -912,7 +912,7 @@ public interface PacketFunction {
                         .map(EntityUtil::fromNative)
                         .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    DropItemEvent.Custom drop = SpongeEventFactory.createDropItemEventCustom(spawnCause, entities, (World) player.getServerWorld());
+                    DropItemEvent.Dispense drop = SpongeEventFactory.createDropItemEventDispense(spawnCause, entities, (World) player.getServerWorld());
                     SpongeImpl.postEvent(drop);
                     if (!drop.isCancelled()) {
                         for (Entity droppedItem : drop.getEntities()) {
@@ -939,7 +939,7 @@ public interface PacketFunction {
                         .map(EntityUtil::fromNative)
                         .collect(Collectors.toList());
                 if (!entities.isEmpty()) {
-                    DropItemEvent.Custom drop = SpongeEventFactory.createDropItemEventCustom(spawnCause, entities, (World) player.getServerWorld());
+                    DropItemEvent.Dispense drop = SpongeEventFactory.createDropItemEventDispense(spawnCause, entities, (World) player.getServerWorld());
                     SpongeImpl.postEvent(drop);
                     if (!drop.isCancelled()) {
                         for (Entity droppedItem : drop.getEntities()) {
