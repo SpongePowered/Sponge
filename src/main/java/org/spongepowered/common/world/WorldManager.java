@@ -540,7 +540,10 @@ public final class WorldManager {
     public static Optional<WorldServer> loadWorld(UUID uuid) {
         checkNotNull(uuid);
         // If someone tries to load loaded world, return it
-        Sponge.getServer().getWorld(uuid).ifPresent(Optional::of);
+        Optional<org.spongepowered.api.world.World> optWorld = Sponge.getServer().getWorld(uuid);
+        if (optWorld.isPresent()) {
+            return Optional.of((WorldServer) optWorld.get());
+        }
         // Check if we even know of this UUID's folder
         final String worldFolder = worldUuidByFolderName.inverse().get(uuid);
         // We don't know of this UUID at all. TODO Search files?
