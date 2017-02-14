@@ -481,6 +481,11 @@ public final class WorldManager {
             }
         }
 
+        if (SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
+                worldServer))) {
+            return false;
+        }
+
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
         final int dimensionId = mixinWorldServer.getDimensionId();
 
@@ -499,9 +504,6 @@ public final class WorldManager {
             SpongeImpl.getLogger().info("Unloading world [{}] (DIM{})", worldServer.getWorldInfo().getWorldName(), dimensionId);
             reorderWorldsVanillaFirst();
         }
-
-        SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
-                worldServer));
 
         if (!server.isServerRunning()) {
             unregisterDimension(dimensionId);
