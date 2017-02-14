@@ -189,7 +189,13 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         setKeepSpawnLoaded(archetype.doesKeepSpawnLoaded());
         setGenerateSpawnOnLoad(archetype.doesGenerateSpawnOnLoad());
         setDifficulty(archetype.getDifficulty());
-        setGeneratorModifiers(archetype.getGeneratorModifiers());
+        Collection<WorldGeneratorModifier> modifiers = this.getGeneratorModifiers();
+        if (modifiers.isEmpty()) {
+            setGeneratorModifiers(archetype.getGeneratorModifiers());
+        } else {
+            // use config modifiers
+            setGeneratorModifiers(modifiers);
+        }
         setDoesGenerateBonusChest(archetype.doesGenerateBonusChest());
         setSerializationBehavior(archetype.getSerializationBehavior());
         // Mark configs enabled if coming from WorldCreationSettings builder and config didn't previously exist.
