@@ -191,13 +191,13 @@ class UserDiscoverer {
     }
 
     private static User getFromStoredData(org.spongepowered.api.profile.GameProfile profile) {
+        // Always cache user to avoid constant lookups in storage when file does not exist
+        final User user = create((GameProfile) profile);
         // Note: Uses the overworld's player data
         final File dataFile = getPlayerDataFile(profile.getUniqueId());
         if (dataFile == null) {
             return null;
         }
-
-        final User user = create((GameProfile) profile);
 
         try {
             ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(new FileInputStream(dataFile)));

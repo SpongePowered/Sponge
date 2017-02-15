@@ -77,6 +77,7 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -135,6 +136,13 @@ public final class TrackingUtil {
             // Don't tick entities in chunks queued for unload
             return;
         }
+
+        // safety check to prevent entities ticking in invalid area
+        if (((IMixinBlockPos) entityIn.getPosition()).isInvalidYPosition()) {
+            entityIn.setDead();
+            return;
+        }
+
         final PhaseContext phaseContext = PhaseContext.start()
                 .add(NamedCause.source(entityIn))
                 .addEntityCaptures()

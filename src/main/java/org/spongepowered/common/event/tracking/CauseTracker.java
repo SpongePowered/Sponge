@@ -360,7 +360,7 @@ public final class CauseTracker {
             }
             // Sponge End
 
-            iblockstate.getBlock().neighborChanged(iblockstate, this.targetWorld, notifyPos, sourceBlock, sourcePos);
+            iblockstate.neighborChanged(this.targetWorld, notifyPos, sourceBlock, sourcePos);
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
