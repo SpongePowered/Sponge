@@ -39,6 +39,7 @@ import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.IInventory;
@@ -57,6 +58,7 @@ import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandTypes;
@@ -502,6 +504,10 @@ public class SpongeCommonEventFactory {
     }
 
     public static boolean handleCollideBlockEvent(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity, Direction direction) {
+        if (pos.getY() <= 0) {
+            return false;
+        }
+
         final WorldServer worldServer = (WorldServer) world;
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
         final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
@@ -553,7 +559,12 @@ public class SpongeCommonEventFactory {
         boolean cancelled = false;
 
         if (movingObjectType == RayTraceResult.Type.BLOCK) {
-            BlockSnapshot targetBlock = ((World) projectile.worldObj).createSnapshot(VecHelper.toVector3i(movingObjectPosition.getBlockPos()));
+            final BlockPos blockPos = movingObjectPosition.getBlockPos();
+            if (blockPos.getY() <= 0) {
+                return false;
+            }
+
+            BlockSnapshot targetBlock = ((World) projectile.worldObj).createSnapshot(VecHelper.toVector3i(blockPos));
             Direction side = Direction.NONE;
             if (movingObjectPosition.sideHit != null) {
                 side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.sideHit).get();
