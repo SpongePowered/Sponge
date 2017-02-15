@@ -103,5 +103,10 @@ public class BasicInventoryPacketState extends BasicPacketState {
                .add(NamedCause.of(InternalNamedCauses.Packet.OPEN_CONTAINER, playerMP.openContainer));
     }
 
+    @Override
+    public boolean shouldCaptureEntity() {
+        // Example: Furnaces dropping XP when an item is picked up
+        return true;
+    }
 
 }
