@@ -41,9 +41,8 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.entity.living.monster.Monster;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
+import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeImpl;
@@ -55,7 +54,6 @@ import org.spongepowered.common.mixin.core.entity.MixinEntityCreature;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 @Mixin(EntityMob.class)
 public abstract class MixinEntityMob extends MixinEntityCreature implements Monster {
@@ -79,7 +77,7 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
         // Sponge Start - Prepare our event values
         // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
         final double originalBaseDamage = this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
-        final List<Tuple<DamageModifier, Function<? super Double, Double>>> originalFunctions = new ArrayList<>();
+        final List<DamageFunction> originalFunctions = new ArrayList<>();
         // Sponge End
         int knockbackModifier = 0;
 

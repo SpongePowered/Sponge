@@ -26,6 +26,7 @@ package org.spongepowered.common.interfaces.entity;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.DamageSource;
+import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.util.Tuple;
@@ -50,7 +51,7 @@ public interface IMixinEntityLivingBase {
 
     void onSpongeDeathUpdate();
 
-    Optional<List<Tuple<DamageModifier, Function<? super Double, Double>>>> provideArmorModifiers(EntityLivingBase entityLivingBase, DamageSource source, double damage);
+    Optional<List<DamageFunction>> provideArmorModifiers(EntityLivingBase entityLivingBase, DamageSource source, double damage);
 
     float applyModDamage(EntityLivingBase entityLivingBase, DamageSource source, float damage);
 

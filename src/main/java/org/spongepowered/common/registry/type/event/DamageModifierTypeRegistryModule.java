@@ -57,6 +57,7 @@ public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<D
 
     @Override
     public void registerDefaults() {
+        // TODO - convert these to properly use the sponge id.
         this.modifierTypeMap.put("weapon_enchantment", new SpongeDamageModifierType("Weapon Enchantment", "weapon_enchantment"));
         this.modifierTypeMap.put("offensive_potion_effect", new SpongeDamageModifierType("Offensive PotionEffect", "offensive_potion_effect"));
         this.modifierTypeMap.put("defensive_potion_effect", new SpongeDamageModifierType("Defensive PotionEffect", "defensive_potion_effect"));
@@ -71,5 +72,6 @@ public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<D
         this.modifierTypeMap.put("absorption", new SpongeDamageModifierType("Absorption", "absorption"));
         this.modifierTypeMap.put("critical_hit", new SpongeDamageModifierType("Critical Hit", "critical_hit"));
         this.modifierTypeMap.put("attack_cooldown", new SpongeDamageModifierType("Attack Cooldown", "attack_cooldown"));
+        this.modifierTypeMap.put("sweaping", new SpongeDamageModifierType("Sweaping", "sweaping"));
     }
 }

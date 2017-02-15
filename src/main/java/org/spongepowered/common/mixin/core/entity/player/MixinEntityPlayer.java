@@ -69,11 +69,15 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.ModifierFunction;
+import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -488,18 +492,20 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 // }
                 float attackStrength = this.getCooledAttackStrength(0.5F);
 
-                final List<Tuple<DamageModifier, Function<? super Double, Double>>> originalFunctions = new ArrayList<>();
+                final List<ModifierFunction<DamageModifier>> originalFunctions = new ArrayList<>();
 
                 final EnumCreatureAttribute creatureAttribute = targetEntity instanceof EntityLivingBase
                                                                 ? ((EntityLivingBase) targetEntity).getCreatureAttribute()
                                                                 : EnumCreatureAttribute.UNDEFINED;
-                final List<Tuple<DamageModifier, Function<? super Double, Double>>> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchamntmentFunction(this.getHeldItemMainhand(), creatureAttribute, attackStrength);
+                final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchamntmentFunction(this.getHeldItemMainhand(), creatureAttribute, attackStrength);
                 // This is kept for the post-damage event handling
-                final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream().map(Tuple::getFirst).collect(Collectors.toList());
+                final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream()
+                        .map(ModifierFunction::getModifier)
+                        .collect(Collectors.toList());
 
                 enchantmentDamage = (float) enchantmentModifierFunctions.stream()
-                        .map(Tuple::getSecond)
-                        .mapToDouble(function -> function.apply(originalBaseDamage))
+                        .map(ModifierFunction::getFunction)
+                        .mapToDouble(function -> function.applyAsDouble(originalBaseDamage))
                         .sum();
                 originalFunctions.addAll(enchantmentModifierFunctions);
                 // Sponge End
@@ -537,8 +543,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     // damage = damage + enchantmentDamage; // Sponge - We don't need this since our event will re-assign the damage to deal
                     double distanceWalkedDelta = (double) (this.distanceWalkedModified - this.prevDistanceWalkedModified);
 
+                    final ItemStack heldItem = this.getHeldItem(EnumHand.MAIN_HAND);
                     if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.onGround && distanceWalkedDelta < (double) this.getAIMoveSpeed()) {
-                        ItemStack itemstack = this.getHeldItem(EnumHand.MAIN_HAND);
+                        ItemStack itemstack = heldItem;
 
                         if (itemstack.getItem() instanceof ItemSword) {
                             isSweapingAttack = true;
@@ -556,6 +563,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     }
 
                     damage = (float) event.getFinalOutputDamage();
+                    // sponge - need final for later events
+                    final double attackDamage = damage;
                     knockbackModifier = event.getKnockbackModifier();
                     enchantmentDamage = (float) enchantmentModifiers.stream()
                             .mapToDouble(event::getOutputDamage)
@@ -600,10 +609,20 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                     // entitylivingbase.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                                     // entitylivingbase.attackEntityFrom(DamageSource.causePlayerDamage(this), 1.0F);
                                     final EntityDamageSource sweepingAttackSource = EntityDamageSource.builder().entity(this).type(DamageTypes.SWEEPING_ATTACK).build();
+                                    final ItemStackSnapshot heldSnapshot = ItemStackUtil.snapshotOf(heldItem);
                                     final Cause sweapingCause = Cause.source(sweepingAttackSource)
-                                            .named("Weapon", ItemStackUtil.snapshotOf(this.getHeldItem(EnumHand.MAIN_HAND)))
+                                            .named("Weapon", heldSnapshot)
                                             .build();
-                                    AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(sweapingCause, new ArrayList<>(), EntityUtil.fromNative(entitylivingbase), 1, 1.0D);
+                                    final DamageFunction sweapingFunction = DamageFunction.of(DamageModifier.builder()
+                                                    .cause(sweapingCause)
+                                                    .item(heldSnapshot)
+                                                    .type(DamageModifierTypes.SWEAPING)
+                                                    .build(),
+                                            (incoming) -> EnchantmentHelper.func_191527_a((EntityPlayer) (Object) this) * attackDamage);
+                                    final List<DamageFunction> sweapingFunctions = new ArrayList<>();
+                                    sweapingFunctions.add(sweapingFunction);
+                                    AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(sweapingCause,
+                                            sweapingFunctions, EntityUtil.fromNative(entitylivingbase), 1, 1.0D);
                                     SpongeImpl.postEvent(sweepingAttackEvent);
                                     if (!sweepingAttackEvent.isCancelled()) {
                                         entitylivingbase.knockBack((EntityPlayer) (Object) this, sweepingAttackEvent.getKnockbackModifier() * 0.4F,
