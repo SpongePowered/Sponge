@@ -77,7 +77,6 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -134,12 +133,6 @@ public final class TrackingUtil {
         final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) entityIn.worldObj.getChunkProvider()).getLoadedChunkWithoutMarkingActive(entityIn.getPosition().getX() >> 4,  entityIn.getPosition().getZ() >> 4);
         if (chunk == null || (chunk.unloaded && !((IMixinChunk) chunk).isPersistedChunk())) {
             // Don't tick entities in chunks queued for unload
-            return;
-        }
-
-        // safety check to prevent entities ticking in invalid area
-        if (((IMixinBlockPos) entityIn.getPosition()).isInvalidYPosition()) {
-            entityIn.setDead();
             return;
         }
 
