@@ -363,8 +363,4 @@ public final class GeneralPhase extends TrackingPhase {
         super.appendContextPreExplosion(phaseContext, currentPhaseData);
     }
 
-    @Override
-    public Cause generateTeleportCause(IPhaseState state, PhaseContext context) {
-        return ((GeneralState) state).generateTeleportCause(context);
-    }
 }

@@ -29,7 +29,7 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.server.management.UserListOpsEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.service.context.ServiceContext;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -128,7 +128,7 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public Tristate getPermissionValue(Set<ServiceContext> contexts, String permission) {
+    public Tristate getPermissionValue(Set<Context> contexts, String permission) {
         Tristate ret = super.getPermissionValue(contexts, permission);
         if (ret == Tristate.UNDEFINED) {
             ret = getDataPermissionValue(this.collection.getDefaults().getSubjectData(), permission);
@@ -143,7 +143,7 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public Optional<String> getOption(Set<ServiceContext> contexts, String option) {
+    public Optional<String> getOption(Set<Context> contexts, String option) {
         Optional<String> ret = super.getOption(contexts, option);
         if (!ret.isPresent()) {
             ret = getDataOptionValue(this.collection.getDefaults().getSubjectData(), option);

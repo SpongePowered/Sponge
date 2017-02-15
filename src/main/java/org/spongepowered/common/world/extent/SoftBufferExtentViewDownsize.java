@@ -47,8 +47,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Functional;
@@ -564,43 +564,43 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public boolean hitBlock(int x, int y, int z, Direction side, Cause cause) {
+    public boolean hitBlock(int x, int y, int z, Direction side, GameProfile cause) {
         checkBlockRange(x, y, z);
         return this.extent.hitBlock(x, y, z, side, cause);
     }
 
     @Override
-    public boolean interactBlock(int x, int y, int z, Direction side, Cause cause) {
+    public boolean interactBlock(int x, int y, int z, Direction side, GameProfile cause) {
         checkBlockRange(x, y, z);
         return this.extent.interactBlock(x, y, z, side, cause);
     }
 
     @Override
-    public boolean interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side, Cause cause) {
+    public boolean interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side, GameProfile cause) {
         checkBlockRange(x, y, z);
         return this.extent.interactBlockWith(x, y, z, itemStack, side, cause);
     }
 
     @Override
-    public boolean placeBlock(int x, int y, int z, BlockState block, Direction side, Cause cause) {
+    public boolean placeBlock(int x, int y, int z, BlockState block, Direction side, GameProfile cause) {
         checkBlockRange(x, y, z);
         return this.extent.placeBlock(x, y, z, block, side, cause);
     }
 
     @Override
-    public boolean digBlock(int x, int y, int z, Cause cause) {
+    public boolean digBlock(int x, int y, int z, GameProfile cause) {
         checkBlockRange(x, y, z);
         return this.extent.digBlock(x, y, z, cause);
     }
 
     @Override
-    public boolean digBlockWith(int x, int y, int z, ItemStack itemStack, Cause cause) {
+    public boolean digBlockWith(int x, int y, int z, ItemStack itemStack, GameProfile cause) {
         checkBlockRange(x, y, z);
         return this.extent.digBlockWith(x, y, z, itemStack, cause);
     }
 
     @Override
-    public int getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack, Cause cause) {
+    public int getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack, GameProfile cause) {
         checkBlockRange(x, y, z);
         return this.extent.getBlockDigTimeWith(x, y, z, itemStack, cause);
     }

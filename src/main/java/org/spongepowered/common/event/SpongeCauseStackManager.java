@@ -22,13 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.event;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
+import org.spongepowered.api.event.cause.EventContextKey;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.Deque;
 import java.util.HashMap;
@@ -45,7 +47,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
 
     private final Deque<Object> cause = Queues.newArrayDeque();
     private final Deque<CauseStackFrame> frames = Queues.newArrayDeque();
-    private Map<String, Object> ctx = Maps.newHashMap();
+    private Map<EventContextKey<?>, Object> ctx = Maps.newHashMap();
 
     private int min_depth = 0;
     private Cause cached_cause;
@@ -163,14 +165,14 @@ public class SpongeCauseStackManager implements CauseStackManager {
         // Remove new values
         boolean ctx_invalid = false;
         if (frame.hasNew()) {
-            for (String key : frame.getNew()) {
+            for (EventContextKey<?> key : frame.getNew()) {
                 this.ctx.remove(key);
             }
             ctx_invalid = true;
         }
         // Restore old values
         if (frame.hasStoredValues()) {
-            for (Map.Entry<String, Object> e : frame.getStoredValues()) {
+            for (Map.Entry<EventContextKey<?>, Object> e : frame.getStoredValues()) {
                 this.ctx.put(e.getKey(), e.getValue());
             }
             ctx_invalid = true;
@@ -191,7 +193,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
     }
 
     @Override
-    public CauseStackManager addContext(String key, Object value) {
+    public <T> CauseStackManager addContext(EventContextKey<T> key, T value) {
         this.cached_ctx = null;
         Object existing = this.ctx.put(key, value);
         if (!this.frames.isEmpty()) {
@@ -206,22 +208,14 @@ public class SpongeCauseStackManager implements CauseStackManager {
     }
 
     @Override
-    public Optional<?> getContext(String key) {
-        return Optional.ofNullable(this.ctx.get(key));
-    }
-
     @SuppressWarnings("unchecked")
-    @Override
-    public <T> Optional<T> getContext(String key, Class<T> expectedType) {
-        Object obj = this.ctx.get(key);
-        if (expectedType.isInstance(obj)) {
-            return Optional.of((T) obj);
-        }
-        return Optional.empty();
+    public <T> Optional<T> getContext(EventContextKey<T> key) {
+        return Optional.ofNullable((T) this.ctx.get(key.getId()));
     }
 
     @Override
-    public Optional<?> clearContext(String key) {
+    @SuppressWarnings("unchecked")
+    public <T> Optional<T> removeContext(EventContextKey<T> key) {
         this.cached_ctx = null;
         Object existing = this.ctx.remove(key);
         if (existing != null && !this.frames.isEmpty()) {
@@ -230,15 +224,15 @@ public class SpongeCauseStackManager implements CauseStackManager {
                 frame.store(key, existing);
             }
         }
-        return Optional.ofNullable(existing);
+        return Optional.ofNullable((T) existing);
     }
 
     // TODO could pool these for more fasts
     public static class CauseStackFrame implements AutoCloseable {
 
         // lazy loaded
-        private Map<String, Object> stored_ctx_values;
-        private Set<String> new_ctx_values;
+        private Map<EventContextKey<?>, Object> stored_ctx_values;
+        private Set<EventContextKey<?>> new_ctx_values;
         public int old_min_depth;
 
         public Exception stack_debug = null;
@@ -247,11 +241,11 @@ public class SpongeCauseStackManager implements CauseStackManager {
             this.old_min_depth = old_depth;
         }
 
-        public boolean isStored(String key) {
+        public boolean isStored(EventContextKey<?> key) {
             return this.stored_ctx_values != null && this.stored_ctx_values.containsKey(key);
         }
 
-        public Set<Map.Entry<String, Object>> getStoredValues() {
+        public Set<Map.Entry<EventContextKey<?>, Object>> getStoredValues() {
             return this.stored_ctx_values.entrySet();
         }
 
@@ -259,18 +253,18 @@ public class SpongeCauseStackManager implements CauseStackManager {
             return this.stored_ctx_values != null && !this.stored_ctx_values.isEmpty();
         }
 
-        public void store(String key, Object existing) {
+        public void store(EventContextKey<?> key, Object existing) {
             if (this.stored_ctx_values == null) {
                 this.stored_ctx_values = new HashMap<>();
             }
             this.stored_ctx_values.put(key, existing);
         }
 
-        public boolean isNew(String key) {
+        public boolean isNew(EventContextKey<?> key) {
             return this.new_ctx_values != null && this.new_ctx_values.contains(key);
         }
 
-        public Set<String> getNew() {
+        public Set<EventContextKey<?>> getNew() {
             return this.new_ctx_values;
         }
 
@@ -278,7 +272,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
             return this.new_ctx_values != null && !this.new_ctx_values.isEmpty();
         }
 
-        public void markNew(String key) {
+        public void markNew(EventContextKey<?> key) {
             if (this.new_ctx_values == null) {
                 this.new_ctx_values = new HashSet<>();
             }

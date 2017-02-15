@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.withSettings;
 
@@ -33,7 +34,10 @@ import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -41,6 +45,8 @@ import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.api.util.test.TestHooks;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.InjectedTest;
 import org.spongepowered.common.event.listener.NonPreListener;
 
@@ -56,7 +62,7 @@ public class SnapshotGenerationTest extends InjectedTest {
     private Object plugin;
 
     @Before
-    public void init() {
+    public void init() throws NoSuchFieldException, IllegalAccessException {
         PluginManager manager = Mockito.mock(PluginManager.class);
         this.eventManager = new SpongeEventManager(this.logger, manager);
 
@@ -81,6 +87,11 @@ public class SnapshotGenerationTest extends InjectedTest {
         this.entity = Mockito.mock(Entity.class, withSettings().defaultAnswer(Mockito.RETURNS_MOCKS));
 
         this.event = SpongeEventFactory.createSpawnEntityEvent(cause, Lists.newArrayList(this.entity));
+
+        Game game = mock(Game.class);
+        CauseStackManager csm = mock(CauseStackManager.class);
+        Mockito.when(game.getCauseStackManager()).thenReturn(csm);
+        TestHooks.setGame(game);
     }
 
     @Test

@@ -25,7 +25,7 @@
 package org.spongepowered.common.service.permission;
 
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.service.context.ServiceContext;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -123,7 +123,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public Tristate getPermissionValue(Set<ServiceContext> contexts, String permission) {
+        public Tristate getPermissionValue(Set<Context> contexts, String permission) {
             Tristate ret = super.getPermissionValue(contexts, permission);
 
             if (ret == Tristate.UNDEFINED) {
@@ -137,7 +137,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public Optional<String> getOption(Set<ServiceContext> contexts, String option) {
+        public Optional<String> getOption(Set<Context> contexts, String option) {
             Optional<String> ret = super.getOption(contexts, option);
             if (!ret.isPresent()) {
                 ret = getDataOptionValue(DataFactoryCollection.this.getDefaults().getSubjectData(), option);

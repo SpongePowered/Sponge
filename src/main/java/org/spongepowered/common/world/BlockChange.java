@@ -26,7 +26,6 @@ package org.spongepowered.common.world;
 
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -44,10 +43,10 @@ public enum BlockChange {
             return SpongeEventFactory.createChangeBlockEventBreak(cause, transactions);
         }
 
-        @Override
-        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-            Sponge.getCauseStackManager().addContext("BreakEvent", mainEvent);
-        }
+//        @Override
+//        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
+//            Sponge.getCauseStackManager().addContext("BreakEvent", mainEvent);
+//        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
@@ -67,10 +66,10 @@ public enum BlockChange {
             return SpongeEventFactory.createChangeBlockEventModify(cause, transactions);
         }
 
-        @Override
-        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-            Sponge.getCauseStackManager().addContext("ModifyEvent", mainEvent);
-        }
+//        @Override
+//        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
+//            Sponge.getCauseStackManager().addContext("ModifyEvent", mainEvent);
+//        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
@@ -83,10 +82,10 @@ public enum BlockChange {
             return SpongeEventFactory.createChangeBlockEventPlace(cause, transactions);
         }
 
-        @Override
-        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-            Sponge.getCauseStackManager().addContext("PlaceEvent", mainEvent);
-        }
+//        @Override
+//        public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
+//            Sponge.getCauseStackManager().addContext("PlaceEvent", mainEvent);
+//        }
 
         @Override
         public boolean allowsLogging(LoggingCategory category) {
@@ -131,7 +130,4 @@ public enum BlockChange {
         return null;
     }
 
-    public void suggestNamed(Cause.Builder builder, ChangeBlockEvent mainEvent) {
-        
-    }
 }

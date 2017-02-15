@@ -26,7 +26,7 @@ package org.spongepowered.common.service.permission.base;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.service.context.ServiceContext;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectReference;
@@ -107,7 +107,7 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
     }
 
     @Override
-    public Map<Subject, Boolean> getLoadedWithPermission(Set<ServiceContext> contexts, String permission) {
+    public Map<Subject, Boolean> getLoadedWithPermission(Set<Context> contexts, String permission) {
         final Map<Subject, Boolean> ret = new HashMap<>();
         for (Subject subj : getLoadedSubjects()) {
             Tristate state = subj.getPermissionValue(contexts, permission);

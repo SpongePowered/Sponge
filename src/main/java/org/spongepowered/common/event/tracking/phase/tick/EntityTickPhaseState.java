@@ -42,10 +42,12 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Ageable;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -108,7 +110,7 @@ class EntityTickPhaseState extends TickPhaseState {
                                 CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
                                 if (entry != null) {
                                     if (entry.damageSrc != null) {
-                                        Sponge.getCauseStackManager().addContext("LastDamageSource", entry.damageSrc);
+                                        Sponge.getCauseStackManager().addContext(EventContextKeys.LAST_DAMAGE_SOURCE, (DamageSource) entry.damageSrc);
                                     }
                                 }
                             }
@@ -124,14 +126,14 @@ class EntityTickPhaseState extends TickPhaseState {
                                 EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                             }
                         }
-                        Sponge.getCauseStackManager().clearContext("LastDamageSource");
+                        Sponge.getCauseStackManager().removeContext(EventContextKeys.LAST_DAMAGE_SOURCE);
                     }
                     if (!breeding.isEmpty()) {
                         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.BREEDING);
                         if (tickingEntity instanceof EntityAnimal) {
                             final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
                             if (playerInLove != null) {
-                                Sponge.getCauseStackManager().addContext("Player", playerInLove);
+                                Sponge.getCauseStackManager().addContext(EventContextKeys.PLAYER, (Player) playerInLove);
                             }
                         }
                         SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), breeding);
@@ -143,7 +145,7 @@ class EntityTickPhaseState extends TickPhaseState {
                                 EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                             }
                         }
-                        Sponge.getCauseStackManager().clearContext("Player");
+                        Sponge.getCauseStackManager().removeContext(EventContextKeys.PLAYER);
                     }
                     if (!projectile.isEmpty()) {
                         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.PROJECTILE);
@@ -357,7 +359,7 @@ class EntityTickPhaseState extends TickPhaseState {
                     CombatEntry entry = ((EntityLivingBase) tickingEntity).getCombatTracker().getBestCombatEntry();
                     if (entry != null) {
                         if (entry.damageSrc != null) {
-                            Sponge.getCauseStackManager().addContext("LastDamageSource", entry.damageSrc);
+                            Sponge.getCauseStackManager().addContext(EventContextKeys.LAST_DAMAGE_SOURCE, (DamageSource) entry.damageSrc);
                         }
                     }
                 }
@@ -384,7 +386,7 @@ class EntityTickPhaseState extends TickPhaseState {
             if (tickingEntity instanceof EntityAnimal) {
                 final EntityPlayer playerInLove = ((EntityAnimal) tickingEntity).getLoveCause();
                 if (playerInLove != null) {
-                    Sponge.getCauseStackManager().addContext("Player", playerInLove);
+                    Sponge.getCauseStackManager().addContext(EventContextKeys.PLAYER, (Player) playerInLove);
                 }
             }
             final List<Entity> breeding = new ArrayList<Entity>(1);

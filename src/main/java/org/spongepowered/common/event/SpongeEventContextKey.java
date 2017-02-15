@@ -22,25 +22,56 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.event;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.type.DimensionConfig;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import java.nio.file.Path;
+import org.spongepowered.api.event.cause.EventContextKey;
 
-public interface IMixinDimensionType {
+public class SpongeEventContextKey<T> implements EventContextKey<T> {
 
-    SpongeConfig<DimensionConfig> getDimensionConfig();
+    private final String id;
+    private final Class<T> allowed;
 
-    Context getContext();
+    public SpongeEventContextKey(String id, Class<T> allowed) {
+        this.id = checkNotNull(id, "Id");
+        this.allowed = checkNotNull(allowed, "Allowed");
+    }
 
-    String getEnumName();
+    @Override
+    public String getId() {
+        return this.id;
+    }
 
-    String getModId();
+    @Override
+    public String getName() {
+        return this.id;
+    }
 
-    Path getConfigPath();
+    @Override
+    public Class<T> getAllowedType() {
+        return this.allowed;
+    }
 
-    boolean shouldGenerateSpawnOnLoad();
+    @Override
+    public String toString() {
+        return this.id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == this) {
+            return true;
+        }
+        if (!(o instanceof EventContextKey)) {
+            return false;
+        }
+        return this.id.equals(((EventContextKey<?>) o).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.hashCode();
+    }
+
 }

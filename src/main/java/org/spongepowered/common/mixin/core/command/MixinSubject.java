@@ -29,7 +29,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntityCommandBlock;
-import org.spongepowered.api.service.context.ServiceContext;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -166,7 +166,7 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     }
 
     @Override
-    public boolean hasPermission(Set<ServiceContext> contexts, String permission) {
+    public boolean hasPermission(Set<Context> contexts, String permission) {
         Subject subj = resolveNullable();
         if (subj == null) {
             return permDefault(permission).asBoolean();
@@ -191,7 +191,7 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     }
 
     @Override
-    public boolean isChildOf(Set<ServiceContext> contexts, SubjectReference parent) {
+    public boolean isChildOf(Set<Context> contexts, SubjectReference parent) {
         return resolve().isChildOf(contexts, parent);
     }
 
@@ -201,7 +201,7 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     }
 
     @Override
-    public List<SubjectReference> getParents(Set<ServiceContext> contexts) {
+    public List<SubjectReference> getParents(Set<Context> contexts) {
         return resolve().getParents(contexts);
     }
 
@@ -211,7 +211,7 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     }
 
     @Override
-    public Optional<String> getOption(Set<ServiceContext> contexts, String key) {
+    public Optional<String> getOption(Set<Context> contexts, String key) {
         return resolve().getOption(contexts, key);
     }
 

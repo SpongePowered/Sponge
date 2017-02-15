@@ -25,7 +25,7 @@
 package org.spongepowered.common.service.permission.base;
 
 import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.service.context.ServiceContext;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectReference;
@@ -49,12 +49,12 @@ public class GlobalMemorySubjectData extends MemorySubjectData {
 
 
     @Override
-    public Map<Set<ServiceContext>, List<SubjectReference>> getAllParents() {
+    public Map<Set<Context>, List<SubjectReference>> getAllParents() {
         return ImmutableMap.of(GLOBAL_CONTEXT, getParents(GLOBAL_CONTEXT));
     }
 
     @Override
-    public CompletableFuture<Boolean> setPermission(Set<ServiceContext> contexts, String permission, Tristate value) {
+    public CompletableFuture<Boolean> setPermission(Set<Context> contexts, String permission, Tristate value) {
         if (!contexts.isEmpty()) {
             return CompletableFuture.completedFuture(false);
         }
@@ -62,7 +62,7 @@ public class GlobalMemorySubjectData extends MemorySubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> clearPermissions(Set<ServiceContext> contexts) {
+    public CompletableFuture<Boolean> clearPermissions(Set<Context> contexts) {
         if (!contexts.isEmpty()) {
             return CompletableFuture.completedFuture(false);
         }
@@ -70,7 +70,7 @@ public class GlobalMemorySubjectData extends MemorySubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> addParent(Set<ServiceContext> contexts, SubjectReference parent) {
+    public CompletableFuture<Boolean> addParent(Set<Context> contexts, SubjectReference parent) {
         if (!contexts.isEmpty()) {
             return CompletableFuture.completedFuture(false);
         }
@@ -78,7 +78,7 @@ public class GlobalMemorySubjectData extends MemorySubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> removeParent(Set<ServiceContext> contexts, SubjectReference parent) {
+    public CompletableFuture<Boolean> removeParent(Set<Context> contexts, SubjectReference parent) {
         if (!contexts.isEmpty()) {
             return CompletableFuture.completedFuture(false);
         }
@@ -86,7 +86,7 @@ public class GlobalMemorySubjectData extends MemorySubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> clearParents(Set<ServiceContext> contexts) {
+    public CompletableFuture<Boolean> clearParents(Set<Context> contexts) {
         if (!contexts.isEmpty()) {
             return CompletableFuture.completedFuture(false);
         }

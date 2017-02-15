@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.WorldProvider;
-import org.spongepowered.api.service.context.ServiceContext;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.modify.LocalVariableDiscriminator.Context;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
@@ -61,7 +60,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     private String modId;
     private Path configPath;
     private SpongeConfig<DimensionConfig> config;
-    private volatile ServiceContext context;
+    private volatile Context context;
     private boolean generateSpawnOnLoad;
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -76,7 +75,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
         this.config.getConfig().getWorld().setGenerateSpawnOnLoad(this.generateSpawnOnLoad);
         this.sanitizedId = this.modId + ":" + dimName;
         String contextId = this.sanitizedId.replace(":", ".");
-        this.context = new ServiceContext(ServiceContext.DIMENSION_KEY, contextId);
+        this.context = new Context(Context.DIMENSION_KEY, contextId);
         if (!WorldManager.isDimensionRegistered(idIn)) {
             DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog((org.spongepowered.api.world.DimensionType) this);
         }
@@ -122,7 +121,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     }
 
     @Override
-    public ServiceContext getContext() {
+    public Context getContext() {
         return this.context;
     }
 
