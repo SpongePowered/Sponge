@@ -708,6 +708,12 @@ public interface PacketFunction {
                 }
                 if (inventoryEvent instanceof SpawnEntityEvent) {
                     processSpawnedEntities(player, ((IMixinWorldServer) player.getServerWorld()).getCauseTracker(), (SpawnEntityEvent) inventoryEvent);
+                } else if (!context.getCapturedEntitySupplier().isEmpty()) {
+                    SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, context.getCapturedEntities(), (World) player.getServerWorld());
+                    SpongeImpl.postEvent(spawnEntityEvent);
+                    if (!spawnEntityEvent.isCancelled()) {
+                        processSpawnedEntities(player, ((IMixinWorldServer) player.getServerWorld()).getCauseTracker(), spawnEntityEvent);
+                    }
                 }
             }
         }
