@@ -857,10 +857,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void closeContainer(Container container) {
-        IMixinContainer mixinContainer = (IMixinContainer) this.openContainer;
-        mixinContainer.getCapturedTransactions().clear();
-        mixinContainer.setCaptureInventory(false);
-        closeScreen();
+    public boolean closeContainer(Container container, Cause cause) {
+        return container == this.openContainer && this.closeInventory(cause);
     }
 }

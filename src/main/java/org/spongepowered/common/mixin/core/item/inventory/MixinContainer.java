@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.item.inventory;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.IInventory;
@@ -42,6 +43,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -62,6 +64,7 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -297,35 +300,39 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     }
 
     @Override
-    public void open(Player viewer, Cause cause) throws IllegalArgumentException {
-        if (!(viewer instanceof IMixinEntityPlayerMP)) {
-            return;
+    public boolean open(Player viewer, Cause cause) throws IllegalArgumentException {
+        if(!(cause.root() instanceof PluginContainer)) {
+            throw new IllegalArgumentException("The root of the cause must be a PluginContainer.");
         }
 
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+        if (!(viewer instanceof IMixinEntityPlayerMP)) {
+            return false;
+        }
+
+        ItemStackSnapshot cursorSnapshot = ItemStackUtil.snapshotOf(((InventoryPlayer) viewer.getInventory()).getItemStack());
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, cursorSnapshot);
         InteractInventoryEvent.Open event = SpongeEventFactory.createInteractInventoryEventOpen(cause, cursorTransaction, this);
 
         if (Sponge.getEventManager().post(event)) {
-            return;
+            return false;
         }
 
+        ((InventoryPlayer) viewer.getInventory()).setItemStack(ItemStackUtil.fromSnapshotToNative(cursorTransaction.getFinal()));
         ((IMixinEntityPlayerMP) viewer).openContainer(this);
+        return true;
     }
 
     @Override
-    public void close(Player viewer, Cause cause) throws IllegalArgumentException {
+    public boolean close(Player viewer, Cause cause) throws IllegalArgumentException {
+        if(!(cause.root() instanceof PluginContainer)) {
+            throw new IllegalArgumentException("The root of the cause must be a PluginContainer.");
+        }
+
         if (!(viewer instanceof IMixinEntityPlayerMP)) {
-            return;
+            return false;
         }
 
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
-        InteractInventoryEvent.Open event = SpongeEventFactory.createInteractInventoryEventOpen(cause, cursorTransaction, this);
-
-        if (Sponge.getEventManager().post(event)) {
-            return;
-        }
-
-        ((IMixinEntityPlayerMP) viewer).closeContainer(this);
+        return ((IMixinEntityPlayerMP) viewer).closeContainer(this, cause);
     }
 }
 
