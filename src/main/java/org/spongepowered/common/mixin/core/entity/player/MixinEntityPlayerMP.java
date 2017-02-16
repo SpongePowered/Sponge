@@ -842,23 +842,23 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void openContainer(Container container) {
-        if (openContainer != inventoryContainer) {
+        if (this.openContainer != this.inventoryContainer) {
             closeScreen();
         }
 
         IInventory containerInventory = ((MinecraftInventoryAdapter) container).getInventory().get(0);
         String guiId = containerInventory instanceof IInteractionObject ? ((IInteractionObject) containerInventory).getGuiID() : "minecraft:chest";
 
-        this.getNextWindowId();
+        getNextWindowId();
         this.connection.sendPacket(new SPacketOpenWindow(this.currentWindowId, guiId, containerInventory.getDisplayName(), containerInventory.getSizeInventory()));
         this.openContainer = (net.minecraft.inventory.Container) container;
         this.openContainer.windowId = this.currentWindowId;
-        this.openContainer.addListener(this$);
+        this.openContainer.addListener(this.this$);
     }
 
     @Override
     public void closeContainer(Container container) {
-        IMixinContainer mixinContainer = (IMixinContainer) openContainer;
+        IMixinContainer mixinContainer = (IMixinContainer) this.openContainer;
         mixinContainer.getCapturedTransactions().clear();
         mixinContainer.setCaptureInventory(false);
         closeScreen();

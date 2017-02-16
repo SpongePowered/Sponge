@@ -288,12 +288,12 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     @Override
     public Set<Player> getViewers() {
-        return ImmutableSet.copyOf((Set) playerList);
+        return ImmutableSet.copyOf((Set) this.playerList);
     }
 
     @Override
     public boolean hasViewers() {
-        return playerList.size() > 0;
+        return this.playerList.size() > 0;
     }
 
     @Override
