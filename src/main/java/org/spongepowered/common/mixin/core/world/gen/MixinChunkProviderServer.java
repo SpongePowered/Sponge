@@ -129,7 +129,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     /**
      * @author blood - October 25th, 2016
      * @reason Removes usage of droppedChunksSet in favor of unloaded flag.
-     * 
+     *
      * @param chunkIn The chunk to queue
      */
     @Overwrite
@@ -192,6 +192,13 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         }
     }
 
+    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;"))
+    public void onError(CallbackInfoReturnable<Chunk> ci) {
+        if (CauseTracker.ENABLED) {
+            ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
+        }
+    }
+
     private boolean canDenyChunkRequest() {
         if (CauseTracker.ENABLED) {
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
@@ -247,7 +254,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
      * @reason Refactors entire method to not use the droppedChunksSet by
      * simply looping through all loaded chunks and determining whether it
      * can unload or not.
-     * 
+     *
      * @return true if unload queue was processed
      */
     @Overwrite
