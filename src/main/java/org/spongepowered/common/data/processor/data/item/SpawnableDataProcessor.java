@@ -59,11 +59,11 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
     @SuppressWarnings("unchecked")
     @Override
     public boolean set(ItemStack itemStack, EntityType value) {
-        final String name = EntityList.getKey((Class<? extends Entity>) value.getEntityClass()).toString();
+        final ResourceLocation name = EntityList.getKey((Class<? extends Entity>) value.getEntityClass());
         if (EntityList.ENTITY_EGGS.containsKey(name)) {
             final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(itemStack);
             final NBTTagCompound subCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.SPAWNABLE_ENTITY_TAG);
-            subCompound.setString(NbtDataUtil.ENTITY_TYPE_ID, name);
+            subCompound.setString(NbtDataUtil.ENTITY_TYPE_ID, name.toString());
             return true;
         }
         return false;
