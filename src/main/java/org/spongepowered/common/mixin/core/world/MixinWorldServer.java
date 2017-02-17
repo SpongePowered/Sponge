@@ -318,7 +318,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "createBonusChest", at = @At(value = "RETURN"))
     public void onCreateBonusChestEnd(CallbackInfo ci) {
         if (CauseTracker.ENABLED) {
-            this.getCauseTracker().completePhase();
+            this.getCauseTracker().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
         }
     }
 
@@ -607,7 +607,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 }
                 // Sponge Start - Cause tracker unwind
                 if (CauseTracker.ENABLED) {
-                    causeTracker.completePhase();
+                    causeTracker.completePhase(TickPhase.Tick.WEATHER);
                 }
                 // Sponge End
 
@@ -645,7 +645,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 {
                     this.getBlockState(blockpos2).getBlock().fillWithRain((WorldServer) (Object) this, blockpos2);
                 }
-                causeTracker.completePhase(); // Sponge - complete weather phase
+                causeTracker.completePhase(TickPhase.Tick.WEATHER); // Sponge - complete weather phase
             }
 
             this.timings.updateBlocksIceAndSnow.stopTiming(); // Sponge - Stop ice and snow timing
@@ -1026,7 +1026,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         final boolean state = setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, flag);
         if (!isWorldGen && !handlesOwnCompletion) {
-            causeTracker.completePhase();
+            causeTracker.completePhase(PluginPhase.State.BLOCK_WORKER);
         }
         return state;
     }
@@ -1170,7 +1170,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (SpongeImpl.postEvent(event)) {
             this.processingExplosion = false;
             if (CauseTracker.ENABLED) {
-                this.causeTracker.completePhase();
+                this.causeTracker.completePhase(PluginPhase.State.CUSTOM_EXPLOSION);
             }
             return;
         }
@@ -1193,7 +1193,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Sponge Start - end processing
         this.processingExplosion = false;
         if (CauseTracker.ENABLED) {
-            this.causeTracker.completePhase();
+            this.causeTracker.completePhase(PluginPhase.State.CUSTOM_EXPLOSION);
         }
         // Sponge End
     }
@@ -1421,7 +1421,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         player.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
         if (CauseTracker.ENABLED) {
-            this.causeTracker.completePhase();
+            this.causeTracker.completePhase(EntityPhase.State.PLAYER_WAKE_UP);
         }
     }
 
@@ -1476,7 +1476,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 .addCaptures()
                 .complete());
             causeTracker.spawnEntityWithCause(entity, cause);
-            causeTracker.completePhase();
+            causeTracker.completePhase(PluginPhase.State.CUSTOM_SPAWN);
             return true;
         }
         return causeTracker.spawnEntityWithCause(entity, cause);
@@ -1594,7 +1594,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (SpongeImpl.postEvent(event)) {
             this.processingExplosion = false;
             if (CauseTracker.ENABLED) {
-                this.causeTracker.completePhase();
+                this.causeTracker.completePhase(GeneralPhase.State.EXPLOSION);
             }
             return explosion;
         }
@@ -1617,7 +1617,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Sponge Start - end processing
         this.processingExplosion = false;
         if (CauseTracker.ENABLED) {
-            this.causeTracker.completePhase();
+            this.causeTracker.completePhase(GeneralPhase.State.EXPLOSION);
         }
         // Sponge End
         return explosion;

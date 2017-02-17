@@ -115,7 +115,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
     @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM, shift = At.Shift.AFTER))
     private void onDispenseReturn(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
         if (CauseTracker.ENABLED) {
-            ((IMixinWorldServer) worldIn).getCauseTracker().completePhase();
+            ((IMixinWorldServer) worldIn).getCauseTracker().completePhase(BlockPhase.State.DISPENSE);
         }
     }
 

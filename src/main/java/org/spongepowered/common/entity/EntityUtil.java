@@ -382,8 +382,8 @@ public final class EntityUtil {
         }
 
         // Complete phases, just because we need to. The phases don't actually do anything, because the processing resides here.
-        toCauseTracker.completePhase();
-        fromMixinWorld.getCauseTracker().completePhase();
+        toCauseTracker.completePhase(EntityPhase.State.CHANGING_TO_DIMENSION);
+        fromMixinWorld.getCauseTracker().completePhase(EntityPhase.State.LEAVING_DIMENSION);
         // Grab the exit location of entity after being placed into portal
         final Transform<World> portalExitTransform = mixinEntity.getTransform().setExtent((World) toWorld);
         final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(teleportCause, fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);

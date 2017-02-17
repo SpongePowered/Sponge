@@ -400,7 +400,7 @@ public class SpongeCommandManager implements CommandManager {
             Sponge.getServer().getWorlds().forEach(world -> {
                 final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
                 try {
-                    mixinWorld.getCauseTracker().completePhase();
+                    mixinWorld.getCauseTracker().completePhase(GeneralPhase.State.COMMAND);
                 } catch (Exception e) {
                     e.printStackTrace();
                     // Basically, we don't do anything because the worlds that were created during the

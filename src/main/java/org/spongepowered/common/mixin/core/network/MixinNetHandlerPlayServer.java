@@ -216,13 +216,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     .complete());
         }
         player.onUpdateEntity();
-        causeTracker.completePhase();
+        causeTracker.completePhase(TickPhase.Tick.PLAYER);
         for (WorldServer worldServer : WorldManager.getWorlds()) {
             if (worldServer == mixinWorldServer) { // we don't care about entering the phase for this world server of which we already entered
                 continue;
             }
             final IMixinWorldServer otherMixinWorldServer = (IMixinWorldServer) worldServer;
-            otherMixinWorldServer.getCauseTracker().completePhase();
+            otherMixinWorldServer.getCauseTracker().completePhase(TickPhase.Tick.PLAYER);
         }
     }
 

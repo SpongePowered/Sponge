@@ -313,7 +313,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.getCombatTracker().reset();
         // Sponge Start - Finish cause tracker
         if (causeTracker != null && tracksEntityDeaths) {
-            causeTracker.completePhase();
+            causeTracker.completePhase(EntityPhase.State.DEATH_UPDATE);
         }
         // Sponge end
     }

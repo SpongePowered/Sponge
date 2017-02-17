@@ -370,7 +370,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                 timing.stopTimingIfSync();
             }
             if (CauseTracker.ENABLED) {
-                causeTracker.completePhase();
+                causeTracker.completePhase(GenerationPhase.State.POPULATOR_RUNNING);
             }
         }
 
@@ -412,7 +412,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                     }
                     flag |= ((StructureOceanMonument) populator).generateStructure(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
                     if (CauseTracker.ENABLED) {
-                        causeTracker.completePhase();
+                        causeTracker.completePhase(GenerationPhase.State.POPULATOR_RUNNING);
                     }
                 }
             }
