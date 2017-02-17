@@ -38,12 +38,11 @@ import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.event.SpongeEventFactoryImpl;
+import org.spongepowered.api.event.EventFactory;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.service.ServiceManager;
-import org.spongepowered.api.util.generator.event.factory.ClassGenerator;
 import org.spongepowered.api.util.generator.event.factory.ClassGeneratorProvider;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
@@ -73,7 +72,7 @@ public abstract class SpongeGame implements Game {
     private final CommandManager commandManager;
     private final ChannelRegistrar channelRegistrar;
     private final ClassGeneratorProvider classGenerator;
-    private final SpongeEventFactoryImpl eventFactory;
+    private final EventFactory eventFactory;
 
     private GameState state = GameState.CONSTRUCTION;
 
@@ -92,7 +91,7 @@ public abstract class SpongeGame implements Game {
         this.commandManager = new SpongeCommandManager(LoggerFactory.getLogger(logger.getName()), new SpongeCommandDisambiguator(this));
 
         this.classGenerator = new ClassGeneratorProvider("org.spongepowered.api.event.impl");
-        this.eventFactory = this.classGenerator.createFactoryInterfaceImpl(SpongeEventFactoryImpl.class);
+        this.eventFactory = this.classGenerator.createFactoryInterfaceImpl(EventFactory.class);
     }
 
     @Override
@@ -166,7 +165,7 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
-    public SpongeEventFactoryImpl getEventFactory() {
+    public EventFactory getEventFactory() {
         return this.eventFactory;
     }
 
