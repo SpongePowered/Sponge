@@ -41,8 +41,11 @@ import org.spongepowered.common.registry.RegistryHelper;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.Nullable;
 
 public final class RegistryModuleLoader {
 
@@ -65,7 +68,7 @@ public final class RegistryModuleLoader {
                         return;
                     }
                     RegisterCatalog regAnnot = getRegisterCatalogAnnot(module);
-                    Set<String> ignored = regAnnot.ignoredFields().length == 0 ? null : Sets.newHashSet(regAnnot.ignoredFields());
+                    Set<String> ignored = regAnnot.ignoredFields().length == 0 ? Collections.emptySet() : Sets.newHashSet(regAnnot.ignoredFields());
                     RegistryHelper.mapFields(regAnnot.value(), map, ignored);
                 }
             }
@@ -74,6 +77,7 @@ public final class RegistryModuleLoader {
         }
     }
 
+    @Nullable
     private static Method getCustomRegistration(RegistryModule module) {
         for (Method method : module.getClass().getMethods()) {
             CustomCatalogRegistration registration = method.getDeclaredAnnotation(CustomCatalogRegistration.class);
@@ -188,6 +192,7 @@ public final class RegistryModuleLoader {
         }
     }
 
+    @Nullable
     private static Method getAdditionalMethod(RegistryModule module) {
         for (Method method : module.getClass().getMethods()) {
             AdditionalRegistration registration = method.getDeclaredAnnotation(AdditionalRegistration.class);

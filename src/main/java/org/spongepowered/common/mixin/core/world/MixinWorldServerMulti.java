@@ -70,6 +70,7 @@ public abstract class MixinWorldServerMulti extends WorldServer {
      * @author blood - February 6th, 2017
      * @reason Since we use a save handler per world, we can safely call super
      */
+    @Override
     @Overwrite
     public World init()
     {
