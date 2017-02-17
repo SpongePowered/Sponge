@@ -382,7 +382,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
         this.clearCurrentTask();
         if (CauseTracker.ENABLED) {
-            causeTracker.completePhase();
+            causeTracker.completePhase(GenerationPhase.State.TERRAIN_GENERATION);
         }
         chunkProviderServer.setForceChunkRequests(false);
     }
@@ -586,7 +586,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             if (worldServer.getPlayerChunkMap().players.isEmpty())
             {
                 WorldProvider worldprovider = worldServer.provider;
-    
+
                 if (!worldprovider.canRespawnHere())
                 {
                     worldServer.getChunkProvider().unloadAllChunks();

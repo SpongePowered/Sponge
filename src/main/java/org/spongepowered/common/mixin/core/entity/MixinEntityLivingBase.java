@@ -274,7 +274,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (this.dead) {
             // Sponge Start - ensure that we finish the tracker if necessary
             if (causeTracker != null && this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
-                causeTracker.completePhase();
+                causeTracker.completePhase(EntityPhase.State.DEATH);
             }
             // Sponge End
             return;
@@ -314,7 +314,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
         if (causeTracker != null && this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
             this.tracksEntityDeaths = false;
-            causeTracker.completePhase();
+            causeTracker.completePhase(EntityPhase.State.DEATH);
         }
         // Sponge End
     }
@@ -506,7 +506,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     }
                     this.onDeath(source);
                     if (enterDeathPhase) {
-                        causeTracker.completePhase();
+                        causeTracker.completePhase(EntityPhase.State.DEATH);
                     }
                     // Sponge End
                 } else if (flag1) {
@@ -794,7 +794,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     .add(NamedCause.source(entityLivingBase))
                     .complete());
             ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
-            causeTracker.completePhase();
+            causeTracker.completePhase(EntityPhase.State.DEATH_UPDATE);
         } else {
             ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
         }

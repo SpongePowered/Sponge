@@ -820,7 +820,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
                 .complete()
         );
         world.removeEntity(player);
-        causeTracker.completePhase();
+        causeTracker.completePhase(PlayerPhase.State.PLAYER_LOGOUT);
     }
 
     @Inject(method = "saveAllPlayerData()V", at = @At("RETURN"))

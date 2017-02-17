@@ -188,14 +188,14 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populateChunk(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", shift = Shift.AFTER))
     public void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
         if (CauseTracker.ENABLED) {
-            ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
+            ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
         }
     }
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;"))
     public void onError(CallbackInfoReturnable<Chunk> ci) {
         if (CauseTracker.ENABLED) {
-            ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
+            ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
         }
     }
 

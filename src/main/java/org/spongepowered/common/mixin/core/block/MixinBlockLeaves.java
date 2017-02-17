@@ -95,7 +95,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         }
         boolean result = worldIn.setBlockState(pos, state, flags);
         if (isBlockAlready && !isWorldGen) {
-            causeTracker.completePhase();
+            causeTracker.completePhase(BlockPhase.State.BLOCK_DECAY);
         }
         return result;
     }
@@ -136,7 +136,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
             this.dropBlockAsItem(worldIn, pos, state, 0);
             worldIn.setBlockToAir(pos);
             if (isBlockAlready && !isWorldGen) {
-                causeTracker.completePhase();
+                causeTracker.completePhase(BlockPhase.State.BLOCK_DECAY);
             }
             return;
         }

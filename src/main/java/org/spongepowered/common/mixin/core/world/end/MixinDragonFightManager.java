@@ -146,7 +146,7 @@ public abstract class MixinDragonFightManager {
                     .complete());
                 // Sponge End
                 this.respawnState.process(this.world, (DragonFightManager) (Object) this, this.crystals, this.respawnStateTicks++, this.exitPortalLocation);
-                causeTracker.completePhase(); // Sponge - Complete cause tracker
+                causeTracker.completePhase(DragonPhase.State.RESPAWN_DRAGON); // Sponge - Complete cause tracker
             }
 
             if (!this.dragonKilled) {

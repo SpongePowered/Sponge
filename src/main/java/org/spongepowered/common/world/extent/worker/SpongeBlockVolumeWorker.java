@@ -107,7 +107,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         }
         if (mixinWorld != null && CauseTracker.ENABLED) {
             final CauseTracker causeTracker = mixinWorld.getCauseTracker();
-            causeTracker.completePhase();
+            causeTracker.completePhase(PluginPhase.State.BLOCK_WORKER);
         }
     }
 
@@ -148,7 +148,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         }
         if (CauseTracker.ENABLED && destination instanceof IMixinWorldServer) {
             final CauseTracker causeTracker = ((IMixinWorldServer) destination).getCauseTracker();
-            causeTracker.completePhase();
+            causeTracker.completePhase(PluginPhase.State.BLOCK_WORKER);
         }
     }
 
@@ -181,7 +181,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
             }
         }
         if (CauseTracker.ENABLED && mixinWorld != null) {
-            mixinWorld.getCauseTracker().completePhase();
+            mixinWorld.getCauseTracker().completePhase(PluginPhase.State.BLOCK_WORKER);
         }
     }
 

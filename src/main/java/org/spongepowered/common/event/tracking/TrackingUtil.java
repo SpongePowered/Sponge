@@ -37,6 +37,7 @@ import net.minecraft.block.BlockRedstoneLight;
 import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.boss.dragon.phase.IPhase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ITickable;
@@ -156,7 +157,7 @@ public final class TrackingUtil {
             throw e;
         } finally {
             entityTiming.stopTiming();
-            causeTracker.completePhase();
+            causeTracker.completePhase(TickPhase.Tick.ENTITY);
         }
     }
 
@@ -183,7 +184,7 @@ public final class TrackingUtil {
         entityTiming.startTiming();
         entity.updateRidden();
         entityTiming.stopTiming();
-        causeTracker.completePhase();
+        causeTracker.completePhase(TickPhase.Tick.ENTITY);
     }
 
     public static void tickTileEntity(CauseTracker causeTracker, ITickable tile) {
@@ -221,7 +222,7 @@ public final class TrackingUtil {
             throw e;
         } finally {
             mixinTileEntity.getTimingsHandler().stopTiming();
-            causeTracker.completePhase();
+            causeTracker.completePhase(TickPhase.Tick.TILE_ENTITY);
         }
     }
 
@@ -253,14 +254,11 @@ public final class TrackingUtil {
         final IPhaseState currentState = current.state;
         currentState.getPhase().appendNotifierPreBlockTick(causeTracker, pos, currentState, current.context, phaseContext);
         // Now actually switch to the new phase
-        if (((IMixinBlock) block).requiresBlockCapture()) {
-            causeTracker.switchToPhase(TickPhase.Tick.BLOCK, phaseContext.complete());
-        } else {
-            causeTracker.switchToPhase(TickPhase.Tick.NO_CAPTURE_BLOCK, phaseContext.complete());
-        }
+        IPhaseState phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
 
+        causeTracker.switchToPhase(phase, phaseContext.complete());
         block.updateTick(minecraftWorld, pos, state, random);
-        causeTracker.completePhase();
+        causeTracker.completePhase(phase);
     }
 
     public static void randomTickBlock(CauseTracker causeTracker, Block block, BlockPos pos, IBlockState state, Random random) {
@@ -291,13 +289,10 @@ public final class TrackingUtil {
         final IPhaseState currentState = current.state;
         currentState.getPhase().appendNotifierPreBlockTick(causeTracker, pos, currentState, current.context, phaseContext);
         // Now actually switch to the new phase
-        if (((IMixinBlock) block).requiresBlockCapture()) {
-            causeTracker.switchToPhase(TickPhase.Tick.RANDOM_BLOCK, phaseContext.complete());
-        } else {
-            causeTracker.switchToPhase(TickPhase.Tick.NO_CAPTURE_BLOCK, phaseContext.complete());
-        }
+        IPhaseState phase = ((IMixinBlock) block).requiresBlockCapture() ? TickPhase.Tick.RANDOM_BLOCK : TickPhase.Tick.NO_CAPTURE_BLOCK;
+        causeTracker.switchToPhase(phase, phaseContext.complete());
         block.randomTick(minecraftWorld, pos, state, random);
-        causeTracker.completePhase();
+        causeTracker.completePhase(phase);
     }
 
     private static void checkAndAssignBlockTickConfig(Block block, WorldServer minecraftWorld, PhaseContext phaseContext) {
@@ -323,7 +318,7 @@ public final class TrackingUtil {
                 .addEntityDropCaptures()
                 .complete());
         worldProvider.onWorldUpdateEntities();
-        causeTracker.completePhase();
+        causeTracker.completePhase(TickPhase.Tick.DIMENSION);
     }
 
     public static boolean fireMinecraftBlockEvent(CauseTracker causeTracker, WorldServer worldIn, BlockEventData event) {
@@ -346,13 +341,10 @@ public final class TrackingUtil {
             phaseContext.add(NamedCause.notifier(blockEvent.getSourceUser()));
         }
 
-        if (blockEvent.getCaptureBlocks()) {
-            causeTracker.switchToPhase(TickPhase.Tick.BLOCK_EVENT, phaseContext.complete());
-        } else {
-            causeTracker.switchToPhase(TickPhase.Tick.NO_CAPTURE_BLOCK, phaseContext.complete());
-        }
+        IPhaseState phase = blockEvent.getCaptureBlocks() ? TickPhase.Tick.BLOCK_EVENT : TickPhase.Tick.NO_CAPTURE_BLOCK;
+        causeTracker.switchToPhase(phase, phaseContext.complete());
         boolean result = currentState.onBlockEventReceived(worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
-        causeTracker.completePhase();
+        causeTracker.completePhase(phase);
         return result;
     }
 
@@ -376,7 +368,7 @@ public final class TrackingUtil {
         }
         block.dropBlockAsItemWithChance((WorldServer) mixinWorld, pos, state, chance, fortune);
         if (shouldEnterBlockDropPhase) {
-            causeTracker.completePhase();
+            causeTracker.completePhase(BlockPhase.State.BLOCK_DROP_ITEMS);
         }
     }
 

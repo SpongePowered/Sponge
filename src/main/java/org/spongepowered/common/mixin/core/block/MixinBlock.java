@@ -308,7 +308,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             final IPhaseState currentState = causeTracker.getCurrentState();
             final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState);
             if (shouldEnterBlockDropPhase) {
-                causeTracker.completePhase();
+                causeTracker.completePhase(BlockPhase.State.BLOCK_DROP_ITEMS);
             }
         }
     }

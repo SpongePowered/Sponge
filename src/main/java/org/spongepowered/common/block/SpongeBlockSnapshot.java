@@ -195,7 +195,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         IBlockState replaced = (IBlockState) this.blockState;
         if (!force && (current.getBlock() != replaced.getBlock() || current.getBlock().getMetaFromState(current) != replaced.getBlock().getMetaFromState(replaced))) {
             if (currentState.tracksBlockRestores()) {
-                causeTracker.completePhase();
+                causeTracker.completePhase(BlockPhase.State.RESTORING_BLOCKS);
             }
             return false;
         }
@@ -210,7 +210,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             }
         }
         if (!currentState.tracksBlockRestores()) {
-            causeTracker.completePhase();
+            causeTracker.completePhase(BlockPhase.State.RESTORING_BLOCKS);
         }
         return true;
     }

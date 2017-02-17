@@ -217,13 +217,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     .complete());
         }
         playerEntity.onUpdateEntity();
-        causeTracker.completePhase();
+        causeTracker.completePhase(TickPhase.Tick.PLAYER);
         for (WorldServer worldServer : WorldManager.getWorlds()) {
             if (worldServer == mixinWorldServer) { // we don't care about entering the phase for this world server of which we already entered
                 continue;
             }
             final IMixinWorldServer otherMixinWorldServer = (IMixinWorldServer) worldServer;
-            otherMixinWorldServer.getCauseTracker().completePhase();
+            otherMixinWorldServer.getCauseTracker().completePhase(TickPhase.Tick.PLAYER);
         }
     }
 
@@ -393,7 +393,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/IntHashMap;addKey(ILjava/lang/Object;)V"))
     public void onInvalidClick(CPacketClickWindow packet, CallbackInfo ci) {
         // We want to treat an 'invalid' click just like a regular click - we still fire events, do restores, etc.
-        
+
         // Vanilla doesn't call detectAndSendChanges for 'invalid' clicks, since it restores the entire inventory
         // Passing 'captureOnly' as 'true' allows capturing to happen for event firing, but doesn't send any pointless packets
         ((IMixinContainer) this.playerEntity.openContainer).detectAndSendChanges(true);

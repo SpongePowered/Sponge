@@ -122,7 +122,7 @@ public abstract class MixinWorldEntitySpawner {
         IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServer);
         if (CauseTracker.ENABLED) {
             CauseTracker causeTracker = spongeWorld.getCauseTracker();
-            causeTracker.completePhase();
+            causeTracker.completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
         }
         spawnerEntityType = null;
         spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
@@ -146,7 +146,7 @@ public abstract class MixinWorldEntitySpawner {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldServer;
         if (CauseTracker.ENABLED) {
             final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-            causeTracker.completePhase();
+            causeTracker.completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
         }
         spawnerEntityType = null;
     }

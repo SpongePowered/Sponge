@@ -158,7 +158,7 @@ public final class CauseTracker {
             this.abortCurrentPhase(e);
             return;
         }
-        this.completePhase();
+        this.completePhase(state);
     }
 
     /**
@@ -175,7 +175,7 @@ public final class CauseTracker {
         stack.pop();
     }
 
-    public void completePhase() {
+    public void completePhase(IPhaseState prevState) {
         final PhaseData currentPhaseData = this.stack.peek();
         final IPhaseState state = currentPhaseData.state;
         final boolean isEmpty = this.stack.isEmpty();
@@ -197,6 +197,29 @@ public final class CauseTracker {
             }
             return;
         }
+
+        if (prevState != state) {
+            PrettyPrinter printer = new PrettyPrinter(60).add("Completing incorrect phase").centre().hr()
+                    .add("Sponge's tracking system is very dependent on knowing when\n"
+                            + "a change to any world takes place, however, we are attempting\n"
+                            + "to complete a \"phase\" other than the one we most recently entered.\n"
+                            + "This is an error usually on Sponge's part, so a report\n"
+                            + "is required on the issue tracker on GitHub.").hr()
+                    .add("  %s : %s", "Affected World", this.targetWorld)
+                    .add("Expected to exit phase: %s", prevState)
+                    .add("StackTrace:")
+                    .add(new Exception());
+            printer.add(" Phases Remaining:");
+            this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+
+            // The phase on the top of the stack was most likely never completed.
+            // Since we don't know when and where completePhase was intended to be called for it,
+            // we simply pop it to allow processing to continue (somewhat) as normal
+            stack.pop();
+
+        }
+
         if (this.isVerbose && this.stack.size() > 6 && state != GeneralPhase.Post.UNWINDING && !state.isExpectedForReEntrance()) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumulation.
@@ -233,7 +256,7 @@ public final class CauseTracker {
             }
             if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
                 try {
-                    completePhase();
+                    completePhase(GeneralPhase.Post.UNWINDING);
                 } catch (Exception e) {
                     printMessageWithCaughtException("Exception attempting to capture or spawn an Entity!", "Something happened trying to unwind", state, context, e);
                 }
