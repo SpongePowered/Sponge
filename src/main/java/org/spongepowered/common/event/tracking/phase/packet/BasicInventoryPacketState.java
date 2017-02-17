@@ -100,5 +100,10 @@ public class BasicInventoryPacketState extends BasicPacketState {
                .addEntityDropCaptures();
     }
 
+    @Override
+    public boolean shouldCaptureEntity() {
+        // Example: Furnaces dropping XP when an item is picked up
+        return true;
+    }
 
 }
