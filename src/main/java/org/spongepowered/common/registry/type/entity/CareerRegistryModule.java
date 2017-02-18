@@ -58,6 +58,8 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
             new SpongeCareer(0, "armorer", ProfessionRegistryModule.BLACKSMITH, new SpongeTranslation("entity.Villager.armor"));
     public final SpongeCareer CLERIC =
             new SpongeCareer(0, "cleric", ProfessionRegistryModule.PRIEST, new SpongeTranslation("entity.Villager.cleric"));
+    public final SpongeCareer CARTOGRAPHER =
+            new SpongeCareer(1, "cartographer", ProfessionRegistryModule.LIBRARIAN, new SpongeTranslation("entity.Villager.cartographer"));
     public final SpongeCareer LIBRARIAN =
             new SpongeCareer(0, "librarian", ProfessionRegistryModule.LIBRARIAN, new SpongeTranslation("entity.Villager.librarian"));
     public final SpongeCareer FLETCHER =
@@ -131,6 +133,7 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
         this.careerMap.put("fletcher", registerCareer(this.FLETCHER));
 
         this.careerMap.put("librarian", registerCareer(this.LIBRARIAN));
+        this.careerMap.put("cartographer", registerCareer(this.CARTOGRAPHER));
 
         this.careerMap.put("cleric", registerCareer(this.CLERIC));
 
