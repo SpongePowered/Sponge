@@ -50,6 +50,7 @@ import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCombatEvent;
 import net.minecraft.network.play.server.SPacketCustomSound;
+import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.network.play.server.SPacketSoundEffect;
@@ -150,6 +151,7 @@ import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
@@ -836,5 +838,26 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
             ((IMixinContainer) this.openContainer).setSpectatorChest(true);
         }
+    }
+
+    @Override
+    public void openContainer(Container container) {
+        if (this.openContainer != this.inventoryContainer) {
+            closeScreen();
+        }
+
+        IInventory containerInventory = ((MinecraftInventoryAdapter) container).getInventory().get(0);
+        String guiId = containerInventory instanceof IInteractionObject ? ((IInteractionObject) containerInventory).getGuiID() : "minecraft:chest";
+
+        getNextWindowId();
+        this.connection.sendPacket(new SPacketOpenWindow(this.currentWindowId, guiId, containerInventory.getDisplayName(), containerInventory.getSizeInventory()));
+        this.openContainer = (net.minecraft.inventory.Container) container;
+        this.openContainer.windowId = this.currentWindowId;
+        this.openContainer.addListener(this.this$);
+    }
+
+    @Override
+    public boolean closeContainer(Container container, Cause cause) {
+        return container == this.openContainer && this.closeInventory(cause);
     }
 }
