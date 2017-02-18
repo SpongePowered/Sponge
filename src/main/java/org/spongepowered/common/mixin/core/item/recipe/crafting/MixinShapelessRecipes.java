@@ -22,23 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.util;
+package org.spongepowered.common.mixin.core.item.recipe.crafting;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.item.recipe.Recipe;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.ShapelessRecipes;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.item.recipe.crafting.MatchCraftingVanillaItemStack;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-// TODO
-public class RecipeUtil {
+import javax.annotation.Nonnull;
 
-    public static Optional<Recipe> findMatchingRecipe(Fabric<IInventory> inventory, GridInventoryLens<IInventory, ItemStack> craftingGrid, SlotLens<IInventory, ItemStack> outputSlot) {
-        // TODO Auto-generated method stub
-        return null;
+@Mixin(ShapelessRecipes.class)
+public abstract class MixinShapelessRecipes implements IRecipe, ShapelessCraftingRecipe {
+
+    @Shadow @Final private List<ItemStack> recipeItems;
+
+    @Override
+    @Nonnull
+    public List<Predicate<ItemStackSnapshot>> getIngredientPredicates() {
+        return this.recipeItems.stream()
+                .map(ItemStackUtil::snapshotOf)
+                .map(MatchCraftingVanillaItemStack::new)
+                .collect(Collectors.toList());
     }
 
 }

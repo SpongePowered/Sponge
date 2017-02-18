@@ -33,6 +33,8 @@ import com.google.inject.Singleton;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityList;
 import net.minecraft.item.Item;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
@@ -46,7 +48,8 @@ import org.spongepowered.api.entity.ai.task.AbstractAITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
-import org.spongepowered.api.item.recipe.RecipeRegistry;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
+import org.spongepowered.api.item.recipe.smelting.SmeltingRecipeRegistry;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -403,9 +406,15 @@ public class SpongeGameRegistry implements GameRegistry {
         return SpongeFavicon.load(image);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public RecipeRegistry getRecipeRegistry() {
-        throw new UnsupportedOperationException(); // TODO
+    public CraftingRecipeRegistry getCraftingRecipeRegistry() {
+        return (CraftingRecipeRegistry) CraftingManager.getInstance();
+    }
+
+    @Override
+    public SmeltingRecipeRegistry getSmeltingRecipeRegistry() {
+        return (SmeltingRecipeRegistry) FurnaceRecipes.instance();
     }
 
     @Override
