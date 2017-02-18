@@ -45,6 +45,7 @@ public class SpongeLaunch {
 
     private static Path gameDir;
     private static Path pluginsDir;
+    private static Path additionalPluginsDir;
     private static Path configDir;
     private static Path spongeConfigDir;
     private static Path pluginConfigDir;
@@ -55,6 +56,14 @@ public class SpongeLaunch {
 
     public static Path getPluginsDir() {
         return pluginsDir;
+    }
+
+    public static Path getAdditionalPluginsDir() {
+        if (additionalPluginsDir == null) {
+            additionalPluginsDir = Paths.get(PathTokens.replace(SpongeImpl.getGlobalConfig().getConfig().getGeneral().pluginsDir()));
+        }
+
+        return additionalPluginsDir;
     }
 
     public static Path getConfigDir() {
