@@ -29,13 +29,13 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ReportedException;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
@@ -195,5 +195,22 @@ public final class SpongeImplHooks {
 
     public static void onTileEntityError(TileEntity tileEntity, CrashReport crashReport) {
         throw new ReportedException(crashReport);
+    }
+
+    public static int countEntities(WorldServer worldServer, net.minecraft.entity.EnumCreatureType type, boolean forSpawnCount) {
+        return worldServer.countEntities(type.getCreatureClass());
+    }
+
+    public static int getMaxSpawnPackSize(EntityLiving entityLiving) {
+        return entityLiving.getMaxSpawnedInChunk();
+    }
+
+    public static boolean canEntitySpawnHere(EntityLiving entityLiving, IEntityLivingData entityLivingData, boolean entityNotColliding) {
+        if (entityLiving.getCanSpawnHere() && entityNotColliding) {
+            entityLivingData = entityLiving.onInitialSpawn(entityLiving.worldObj.getDifficultyForLocation(new BlockPos(entityLiving)), entityLivingData);
+            return true;
+        }
+
+        return false;
     }
 }
