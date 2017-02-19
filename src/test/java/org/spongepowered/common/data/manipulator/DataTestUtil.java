@@ -48,7 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-final class DataTestUtil {
+public final class DataTestUtil {
 
     private DataTestUtil() {}
 

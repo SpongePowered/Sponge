@@ -39,7 +39,7 @@ import org.spongepowered.api.GameState;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.SpongeEventFactoryUtils;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.game.state.GameStateEvent;
 import org.spongepowered.api.event.game.state.GameStoppedEvent;
@@ -56,6 +56,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -193,14 +195,14 @@ public final class SpongeImpl {
         return components;
     }
 
-    public static void postState(Class<? extends GameStateEvent> type, GameState state) {
+    public static void postState(GameState state, Function<GameState, GameStateEvent> f) {
         getGame().setState(state);
-        ((SpongeEventManager) getGame().getEventManager()).post(SpongeEventFactoryUtils.createState(type, getGame()), true);
+        ((SpongeEventManager) getGame().getEventManager()).post(f.apply(state), true);
     }
 
     public static void postShutdownEvents() {
-        postState(GameStoppingEvent.class, GameState.GAME_STOPPING);
-        postState(GameStoppedEvent.class, GameState.GAME_STOPPED);
+        postState(GameState.GAME_STOPPING, s -> SpongeEventFactory.createGameStoppingEvent(Cause.source(getGame()).build(), s));
+        postState(GameState.GAME_STOPPED, s -> SpongeEventFactory.createGameStoppedEvent(Cause.source(getGame()).build(), s));
     }
 
     private static Package getPackage() {
