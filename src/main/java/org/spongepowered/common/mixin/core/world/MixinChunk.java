@@ -131,6 +131,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     private UUID uuid;
     private long scheduledForUnload = -1; // delay chunk unloads
     private boolean persistedChunk = false;
+    private boolean isSpawning = false;
     private net.minecraft.world.chunk.Chunk[] neighbors = new net.minecraft.world.chunk.Chunk[4];
     private long cacheKey;
     private static final Direction[] CARDINAL_DIRECTIONS = new Direction[] {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
@@ -200,6 +201,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public void setPersistedChunk(boolean flag) {
         this.persistedChunk = flag;
+    }
+
+    @Override
+    public boolean isSpawning() {
+        return this.isSpawning;
+    }
+
+    @Override
+    public void setIsSpawning(boolean spawning) {
+        this.isSpawning = spawning;
     }
 
     @Inject(method = "onChunkLoad()V", at = @At("RETURN"))

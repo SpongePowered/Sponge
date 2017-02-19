@@ -92,4 +92,8 @@ public interface IMixinChunk {
     void setPersistedChunk(boolean flag);
 
     void fill(ChunkPrimer primer);
+
+    boolean isSpawning();
+
+    void setIsSpawning(boolean spawning);
 }

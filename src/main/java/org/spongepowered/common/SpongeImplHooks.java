@@ -29,7 +29,9 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -203,5 +205,22 @@ public final class SpongeImplHooks {
 
     public static MapStorage getWorldMapStorage(World world) {
         return world.getMapStorage();
+    }
+
+    public static int countEntities(WorldServer worldServer, net.minecraft.entity.EnumCreatureType type, boolean forSpawnCount) {
+        return worldServer.countEntities(type.getCreatureClass());
+    }
+
+    public static int getMaxSpawnPackSize(EntityLiving entityLiving) {
+        return entityLiving.getMaxSpawnedInChunk();
+    }
+
+    public static boolean canEntitySpawnHere(EntityLiving entityLiving, IEntityLivingData entityLivingData, boolean entityNotColliding) {
+        if (entityLiving.getCanSpawnHere() && entityNotColliding) {
+            entityLivingData = entityLiving.onInitialSpawn(entityLiving.world.getDifficultyForLocation(new BlockPos(entityLiving)), entityLivingData);
+            return true;
+        }
+
+        return false;
     }
 }
