@@ -213,7 +213,10 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
             // States that can deny chunks
             if (currentState == GenerationPhase.State.WORLD_SPAWNER_SPAWNING
-                    || currentState == PluginPhase.Listener.PRE_WORLD_TICK_LISTENER) {
+                    || currentState == PluginPhase.Listener.PRE_SERVER_TICK_LISTENER
+                    || currentState == PluginPhase.Listener.POST_SERVER_TICK_LISTENER
+                    || currentState == PluginPhase.Listener.PRE_WORLD_TICK_LISTENER
+                    || currentState == PluginPhase.Listener.POST_WORLD_TICK_LISTENER) {
                 return true;
             }
 
