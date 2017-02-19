@@ -41,6 +41,7 @@ import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockPistonBase;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.passive.EntitySkeletonHorse;
 import net.minecraft.entity.player.EntityPlayer;
@@ -57,6 +58,7 @@ import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IProgressUpdate;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.ReportedException;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DifficultyInstance;
@@ -768,6 +770,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         spongeBlock.getTimingsHandler().startTiming();
         TrackingUtil.updateTickBlock(causeTracker, block, pos, state, rand);
         spongeBlock.getTimingsHandler().stopTiming();
+    }
+
+    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReportCategory;addBlockInfo(Lnet/minecraft/crash/CrashReportCategory;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)V"))
+    private void onBlockInfo(CrashReportCategory category, BlockPos pos, IBlockState state) {
+        try {
+            CrashReportCategory.addBlockInfo(category, pos, state);
+        } catch (NoClassDefFoundError e) {
+            SpongeImpl.getLogger().error("An error occurred while adding crash report info!", e);
+            SpongeImpl.getLogger().error("Original caught error:", category.crashReport.cause);
+            throw new ReportedException(category.crashReport);
+        }
+
     }
 
     @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
