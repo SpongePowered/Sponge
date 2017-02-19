@@ -39,10 +39,10 @@ import java.util.Optional;
 public class CraftingInventoryAdapter extends GridInventoryAdapter implements CraftingInventory {
 
     protected final CraftingInventoryLens<IInventory, net.minecraft.item.ItemStack> craftingLens;
-    
+
     private GridInventory craftingGrid;
     private CraftingOutput result;
-    
+
     public CraftingInventoryAdapter(Fabric<IInventory> inventory, CraftingInventoryLens<IInventory, net.minecraft.item.ItemStack> root) {
         this(inventory, root, null);
     }

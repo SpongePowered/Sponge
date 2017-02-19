@@ -35,6 +35,8 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.item.Item;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.item.crafting.CraftingManager;
+import net.minecraft.item.crafting.FurnaceRecipes;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
@@ -47,6 +49,8 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
+import org.spongepowered.api.item.recipe.crafting.CraftingRegistry;
+import org.spongepowered.api.item.recipe.smelting.SmeltingRegistry;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -404,8 +408,13 @@ public class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public RecipeRegistry getRecipeRegistry() {
-        throw new UnsupportedOperationException(); // TODO
+    public CraftingRegistry getCraftingRegistry() {
+        return (CraftingRegistry) CraftingManager.getInstance();
+    }
+
+    @Override
+    public SmeltingRegistry getSmeltingRegistry() {
+        return (SmeltingRegistry) FurnaceRecipes.instance();
     }
 
     @Override
