@@ -40,9 +40,6 @@ public class OptimizationCategory extends ConfigCategory {
                                                     + "pre-merged and actually spawned, in which case, the items will flow right through\n"
                                                     + "without being merged.";
 
-    @Setting(value = "ignore-unloaded-chunks-on-get-light", comment = "This prevents chunks being loaded for getting light values at specific block positions. May have side effects.")
-    private boolean ignoreUnloadedChunkLighting = true;
-
     @Setting(value = "chunk-map-caching", comment = "Caches chunks internally for faster returns when querying at various positions")
     private boolean useCachedChunkMap = true;
 
@@ -51,13 +48,6 @@ public class OptimizationCategory extends ConfigCategory {
 
     @Setting(value = "cache-tameable-owners", comment = "Caches tameable entities owners to avoid constant lookups against data watchers. If mods cause issue, disable.")
     private boolean cacheTameableOwners = true;
-
-    @Setting(value = "inline-block-position-checks", comment = "Inlines a simple check for whether a BlockPosition is valid\n"
-                                                               + "in a world. By patching the check, the JVM can optimize the\n"
-                                                               + "method further while reducing the number of operations performed\n"
-                                                               + "for such a simple check. This may however break mods that alter\n"
-                                                               + "world heights and can thus be disabled in those cases.")
-    private boolean inlineBlockPositionChecks = true;
 
     @Setting(value = "structure-saving", comment = "Handles structures that are saved to disk. Certain structures can take up large amounts\n"
             + "of disk space for very large maps and the data for these structures is only needed while the world\n"
@@ -83,10 +73,6 @@ public class OptimizationCategory extends ConfigCategory {
         return this.structureSaveCategory.isEnabled();
     }
 
-    public boolean useIgnoreUloadedChunkLightingPatch() {
-        return this.ignoreUnloadedChunkLighting;
-    }
-
     public boolean isUseCachedChunkMap() {
         return this.useCachedChunkMap;
     }
@@ -98,9 +84,5 @@ public class OptimizationCategory extends ConfigCategory {
 
     public boolean useCacheTameableOwners() {
         return this.cacheTameableOwners;
-    }
-
-    public boolean isInlineBlockPositionChecks() {
-        return this.inlineBlockPositionChecks;
     }
 }
