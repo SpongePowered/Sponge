@@ -26,15 +26,28 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityLockableLoot;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 
 @Mixin(TileEntityLockableLoot.class)
-public abstract class MixinTileEntityLockableLoot extends MixinTileEntityLockable {
+public abstract class MixinTileEntityLockableLoot extends MixinTileEntityLockable implements IMixinCustomNameable {
 
     @Shadow protected String customName;
+
+    @Shadow
+    public abstract void setCustomName(String p_190575_1_);
+
+    protected Fabric<IInventory> fabric;
+    protected SlotCollection slots;
+    protected Lens<IInventory, ItemStack> lens;
 
     @Override
     public DataContainer toContainer() {
@@ -43,6 +56,11 @@ public abstract class MixinTileEntityLockableLoot extends MixinTileEntityLockabl
             container.set(of("CustomName"), this.customName);
         }
         return container;
+    }
+
+    @Override
+    public void setCustomDisplayName(String name) {
+        setCustomName(name);
     }
 
 }

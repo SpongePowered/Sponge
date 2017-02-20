@@ -24,13 +24,80 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.EnumDyeColor;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityShulkerBox;
 import org.spongepowered.api.block.tileentity.carrier.ShulkerBox;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.data.manipulator.mutable.SpongeDyeableData;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntityShulkerBox;
+import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
+
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(TileEntityShulkerBox.class)
-public abstract class MixinTileEntityShulkerBox extends MixinTileEntityLockableLoot implements ShulkerBox {
+@Implements(@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
+public abstract class MixinTileEntityShulkerBox extends MixinTileEntityLockableLoot implements ShulkerBox, IMixinTileEntityShulkerBox {
+
+    @Shadow
+    @Nullable
+    private EnumDyeColor color;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(CallbackInfo ci) {
+        this.fabric = new DefaultInventoryFabric(this);
+        this.slots = new SlotCollection.Builder().add(27).build();
+        this.lens = new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        if (this.color != null) {
+            manipulators.add(new SpongeDyeableData((DyeColor) (Object) this.color));
+        }
+    }
+
+    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
+        return this.slots;
+    }
+
+    public Lens<IInventory, ItemStack> inventory$getRootLens() {
+        return this.lens;
+    }
+
+    public Fabric<IInventory> inventory$getInventory() {
+        return this.fabric;
+    }
+
+    @Override
+    public void setColor(@Nullable EnumDyeColor color) {
+        this.color = color;
+    }
+
+    @Override
+    @Nullable
+    public EnumDyeColor getColor() {
+        return this.color;
+    }
 
 }

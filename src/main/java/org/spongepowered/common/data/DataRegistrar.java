@@ -689,6 +689,8 @@ public class DataRegistrar {
 
         dataManager.registerDataProcessorAndImpl(MobSpawnerData.class, SpongeMobSpawnerData.class, ImmutableMobSpawnerData.class,
                 ImmutableSpongeMobSpawnerData.class, new MobSpawnerDataProcessor());
+        dataManager.registerDataProcessorAndImpl(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class,
+                ImmutableSpongeDyeableData.class, new ShulkerBoxDyeableDataProcessor());
 
 
         // Values
@@ -755,6 +757,7 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.DYE_COLOR, new WolfDyeColorValueProcessor());
         dataManager.registerValueProcessor(Keys.DYE_COLOR, new SheepDyeColorValueProcessor());
         dataManager.registerValueProcessor(Keys.DYE_COLOR, new ItemDyeColorValueProcessor());
+        dataManager.registerValueProcessor(Keys.DYE_COLOR, new ShulkerBoxDyeColorValueProcessor());
         dataManager.registerValueProcessor(Keys.FIRST_DATE_PLAYED, new FirstJoinValueProcessor());
         dataManager.registerValueProcessor(Keys.LAST_DATE_PLAYED, new LastPlayedValueProcessor());
         dataManager.registerValueProcessor(Keys.HIDE_ENCHANTMENTS, new HideEnchantmentsValueProcessor());
