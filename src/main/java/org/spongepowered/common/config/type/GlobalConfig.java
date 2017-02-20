@@ -34,6 +34,7 @@ import org.spongepowered.common.config.category.BungeeCordCategory;
 import org.spongepowered.common.config.category.CauseTrackerCategory;
 import org.spongepowered.common.config.category.CommandsCategory;
 import org.spongepowered.common.config.category.ExploitCategory;
+import org.spongepowered.common.config.category.GlobalGeneralCategory;
 import org.spongepowered.common.config.category.GlobalWorldCategory;
 import org.spongepowered.common.config.category.ModuleCategory;
 import org.spongepowered.common.config.category.OptimizationCategory;
@@ -69,6 +70,9 @@ public class GlobalConfig extends ConfigBase {
 
     @Setting(value = "optimizations")
     private OptimizationCategory optimizations = new OptimizationCategory();
+
+    @Setting
+    protected GlobalGeneralCategory general = new GlobalGeneralCategory();
 
     @Setting
     protected GlobalWorldCategory world = new GlobalWorldCategory();
@@ -117,6 +121,11 @@ public class GlobalConfig extends ConfigBase {
 
     public Predicate<InetAddress> getIpSet(String name) {
         return this.ipSets.containsKey(name) ? Predicates.and(this.ipSets.get(name)) : null;
+    }
+
+    @Override
+    public GlobalGeneralCategory getGeneral() {
+        return this.general;
     }
 
     @Override
