@@ -662,9 +662,9 @@ public final class TrackingUtil {
             // Handle item drops captured
             final BlockPos pos = ((IMixinLocation) (Object) oldBlockSnapshot.getLocation().get()).getBlockPos();
             // This is for pre-merged items
-            capturedBlockDrops.ifPresentAndNotEmpty(map -> spawnItemDataForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, phaseContext, phaseState));
+            capturedBlockDrops.ifPresentAndNotEmpty(map -> spawnItemDataForBlockDrops(map.containsKey(pos) ? map.removeAll(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, phaseContext, phaseState));
             // And this is for un-pre-merged items, these will be EntityItems, not ItemDropDatas.
-            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, phaseContext, phaseState));
+            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.removeAll(pos) : Collections.emptyList(), newBlockSnapshot, causeTracker, phaseContext, phaseState));
 
             SpongeHooks.logBlockAction(builder, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
             final BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();
