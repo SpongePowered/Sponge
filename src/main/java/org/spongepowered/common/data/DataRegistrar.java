@@ -663,6 +663,9 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(BannerData.class, SpongeBannerData.class, ImmutableBannerData.class,
                 ImmutableSpongeBannerData.class, new TileEntityBannerDataProcessor());
 
+        dataManager.registerDataProcessorAndImpl(BannerData.class, SpongeBannerData.class, ImmutableBannerData.class,
+                ImmutableSpongeBannerData.class, new ShieldBannerDataProcessor());
+
         dataManager.registerDataProcessorAndImpl(CommandData.class, SpongeCommandData.class, ImmutableCommandData.class,
                 ImmutableSpongeCommandData.class, new TileEntityCommandDataProcessor());
 
