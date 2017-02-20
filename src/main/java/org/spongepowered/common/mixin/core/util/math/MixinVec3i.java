@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.util.math;
+package org.spongepowered.common.mixin.core.util.math;
 
 import net.minecraft.util.math.Vec3i;
 import org.spongepowered.asm.mixin.Final;
@@ -35,7 +35,7 @@ import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 
 @Mixin(Vec3i.class)
 @Implements(@Interface(iface = IMixinBlockPos.class, prefix = "inline$", unique = true))
-public abstract class MixinVec3i_Inline_Valid_BlockPos implements IMixinBlockPos {
+public abstract class MixinVec3i implements IMixinBlockPos {
 
     @Shadow @Final private int x;
     @Shadow @Final private int y;

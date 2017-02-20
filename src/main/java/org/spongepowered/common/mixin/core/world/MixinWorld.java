@@ -60,6 +60,7 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
@@ -73,6 +74,7 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -130,6 +132,7 @@ import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -197,11 +200,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public boolean processingLoadedTiles;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
     @Shadow protected WorldInfo worldInfo;
+    @Shadow protected IChunkProvider chunkProvider;
     @Shadow @Final public net.minecraft.world.border.WorldBorder worldBorder;
-    @Shadow protected int updateLCG;
 
+    @Shadow protected int updateLCG;
     @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow public abstract EnumDifficulty shadow$getDifficulty();
+
     @Shadow protected abstract void tickPlayers();
 
     @Shadow public net.minecraft.world.World init() {
@@ -209,22 +214,24 @@ public abstract class MixinWorld implements World, IMixinWorld {
         throw new RuntimeException("Bad things have happened");
     }
 
+    // To be overridden in MixinWorldServer_Lighting
+    @Shadow public abstract int getLight(BlockPos pos);
+    @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
+    @Shadow public abstract int getSkylightSubtracted();
+    @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
+    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract WorldInfo getWorldInfo();
     @Shadow public abstract boolean checkLight(BlockPos pos);
-    @Shadow protected abstract boolean isValid(BlockPos pos);
     @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
     @Shadow protected abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
     @Shadow protected abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
-    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
     @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract Biome getBiome(BlockPos pos);
     @Shadow public abstract BiomeProvider getBiomeProvider();
-    @Shadow @Nullable public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
-    @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
     @Shadow protected abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
     @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
@@ -260,6 +267,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean canBlockFreezeNoWater(BlockPos pos);
     @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
     @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
+    @Shadow public abstract void notifyLightSet(BlockPos pos);
+    @Shadow @Nullable private net.minecraft.tileentity.TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) {
+        return null; // Shadowed
+    }
 
     // @formatter:on
 
@@ -1116,6 +1127,207 @@ public abstract class MixinWorld implements World, IMixinWorld {
             cir.setReturnValue(0);
         }
     }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param pos The position
+     * @return The block state at the desired position
+     */
+    @Overwrite
+    public IBlockState getBlockState(BlockPos pos) {
+        // Sponge - Replace with inlined method
+        // if (this.isOutsideBuildHeight(pos)) // Vanilla
+        if (((IMixinBlockPos) pos).isInvalidYPosition()) {
+            // Sponge end
+            return Blocks.AIR.getDefaultState();
+        } else {
+            net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+            return chunk.getBlockState(pos);
+        }
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param pos The position
+     * @return The tile entity at the desired position, or else null
+     */
+    @Overwrite
+    @Nullable
+    public net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos) {
+        // Sponge - Replace with inlined method
+        //  if (this.isOutsideBuildHeight(pos)) // Vanilla
+        if (((IMixinBlockPos) pos).isInvalidYPosition()) {
+            // Sponge End
+            return null;
+        } else {
+            net.minecraft.tileentity.TileEntity tileentity = null;
+
+            if (this.processingLoadedTiles) {
+                tileentity = this.getPendingTileEntityAt(pos);
+            }
+
+            if (tileentity == null) {
+                tileentity = this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.IMMEDIATE);
+            }
+
+            if (tileentity == null) {
+                tileentity = this.getPendingTileEntityAt(pos);
+            }
+
+            return tileentity;
+        }
+    }
+
+
+    /**
+     * @author gabizou
+     * @reason Adds a redirector to use instead of an injector to avoid duplicate chunk area loaded lookups.
+     * This is overridden in MixinWorldServer_Lighting.
+     *
+     * @param thisWorld This world
+     * @param pos The block position to check light for
+     * @param radius The radius, always 17
+     * @param allowEmtpy Whether to allow empty chunks, always false
+     * @param lightType The light type
+     * @param samePosition The block position to check light for, again.
+     * @return True if the area is loaded
+     */
+    @Redirect(method = "checkLightFor", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;IZ)Z"))
+    protected boolean spongeIsAreaLoadedForCheckingLight(net.minecraft.world.World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumSkyBlock lightType, BlockPos samePosition) {
+        return isAreaLoaded(pos, radius, allowEmtpy);
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param pos The position
+     * @return True if the block position is valid
+     */
+    @Overwrite
+    protected boolean isValid(BlockPos pos) { // isValid
+        return ((IMixinBlockPos) pos).isValidPosition();
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param pos The position
+     * @return True if the block position is outside build height
+     */
+    @Overwrite
+    private boolean isOutsideBuildHeight(BlockPos pos) { // isOutsideBuildHeight
+        return ((IMixinBlockPos) pos).isInvalidYPosition();
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param type The type of sky lighting
+     * @param pos The position
+     * @return The light for the defined sky type and block position
+     */
+    @Overwrite
+    public int getLightFor(EnumSkyBlock type, BlockPos pos) {
+        if (pos.getY() < 0) {
+            pos = new BlockPos(pos.getX(), 0, pos.getZ());
+        }
+
+        // Sponge Start - Replace with inlined method to check
+        // if (!this.isValid(pos)) // vanilla
+        if (!((IMixinBlockPos) pos).isValidPosition()) {
+            // Sponge End
+            return type.defaultLightValue;
+        } else {
+            net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+            return chunk.getLightFor(type, pos);
+        }
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Inlines the isValid check to BlockPos.
+     *
+     * @param type The type of sky lighting
+     * @param pos The block position
+     * @param lightValue The light value to set to
+     */
+    @Overwrite
+    public void setLightFor(EnumSkyBlock type, BlockPos pos, int lightValue) {
+        // Sponge Start - Replace with inlined Valid position check
+        // if (this.isValid(pos)) // Vanilla
+        if (((IMixinBlockPos) pos).isValidPosition()) { // Sponge - Replace with inlined method to check
+            // Sponge End
+            if (this.isBlockLoaded(pos)) {
+                net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+                chunk.setLightFor(type, pos, lightValue);
+                this.notifyLightSet(pos);
+            }
+        }
+    }
+
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Inlines the isValidXZPosition check to BlockPos.
+     *
+     * @param bbox The AABB to check
+     * @return True if the AABB collides with a block
+     */
+    @Overwrite
+    public boolean collidesWithAnyBlock(AxisAlignedBB bbox) {
+        List<AxisAlignedBB> list = Lists.<AxisAlignedBB>newArrayList();
+        int i = MathHelper.floor(bbox.minX) - 1;
+        int j = MathHelper.ceil(bbox.maxX) + 1;
+        int k = MathHelper.floor(bbox.minY) - 1;
+        int l = MathHelper.ceil(bbox.maxY) + 1;
+        int i1 = MathHelper.floor(bbox.minZ) - 1;
+        int j1 = MathHelper.ceil(bbox.maxZ) + 1;
+        BlockPos.PooledMutableBlockPos blockpos$pooledmutableblockpos = BlockPos.PooledMutableBlockPos.retain();
+
+        try {
+            for (int k1 = i; k1 < j; ++k1) {
+                for (int l1 = i1; l1 < j1; ++l1) {
+                    int i2 = (k1 != i && k1 != j - 1 ? 0 : 1) + (l1 != i1 && l1 != j1 - 1 ? 0 : 1);
+
+                    if (i2 != 2 && this.isBlockLoaded(blockpos$pooledmutableblockpos.setPos(k1, 64, l1))) {
+                        for (int j2 = k; j2 < l; ++j2) {
+                            if (i2 <= 0 || j2 != k && j2 != l - 1) {
+                                blockpos$pooledmutableblockpos.setPos(k1, j2, l1);
+
+                                // Sponge - Replace with inlined method
+                                // if (k1 < -30000000 || k1 >= 30000000 || l1 < -30000000 || l1 >= 30000000) // Vanilla
+                                if (!((IMixinBlockPos) (Object) blockpos$pooledmutableblockpos).isValidXZPosition()) {
+                                    // Sponge End
+                                    boolean flag1 = true;
+                                    return flag1;
+                                }
+
+                                IBlockState iblockstate = this.getBlockState(blockpos$pooledmutableblockpos);
+                                iblockstate.addCollisionBoxToList((net.minecraft.world.World) (Object) this, blockpos$pooledmutableblockpos, bbox, list, (net.minecraft.entity.Entity) null, false);
+
+                                if (!list.isEmpty()) {
+                                    boolean flag = true;
+                                    return flag;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        } finally {
+            blockpos$pooledmutableblockpos.release();
+        }
+    }
+
 
     /*********************** TIMINGS ***********************/
 

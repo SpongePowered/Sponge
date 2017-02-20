@@ -432,6 +432,8 @@
         "util.MixinIndirectEntityDamageSource",
         "util.MixinPacketThreadUtil",
         "util.datafix.MixinDataFixer",
+        "util.math.MixinMutableBlockPos",
+        "util.math.MixinVec3i",
         "village.MixinVillage",
         "world.MixinAnvilSaveHandler",
         "world.MixinBossInfo",

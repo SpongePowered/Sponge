@@ -61,6 +61,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.DimensionType;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.NextTickListEntry;
@@ -71,6 +72,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
@@ -1622,6 +1624,142 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Sponge End
         return explosion;
     }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Overrides the same method from MixinWorld_Lighting that redirects
+     * {@link #isAreaLoaded(BlockPos, int, boolean)} to simplify the check to
+     * whether the chunk's neighbors are loaded. Since the passed radius is always
+     * 17, the check is simply checking for whether neighboring chunks are loaded
+     * properly.
+     *
+     * @param thisWorld This world
+     * @param pos The block position to check light for
+     * @param radius The radius, always 17
+     * @param allowEmtpy Whether to allow empty chunks, always false
+     * @param lightType The light type
+     * @param samePosition The block position to check light for, again.
+     * @return True if the chunk is loaded and neighbors are loaded
+     */
+    @Override
+    protected boolean spongeIsAreaLoadedForCheckingLight(World thisWorld, BlockPos pos, int radius, boolean allowEmtpy, EnumSkyBlock lightType,
+            BlockPos samePosition) {
+        final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        return !(chunk == null || !((IMixinChunk) chunk).areNeighborsLoaded());
+    }
+
+    /**
+     * @author gabizou - April 8th, 2016
+     *
+     * Instead of providing chunks which has potential chunk loads,
+     * we simply get the chunk directly from the chunk provider, if it is loaded
+     * and return the light value accordingly.
+     *
+     * @param pos The block position
+     * @return The light at the desired block position
+     */
+    @Override
+    public int getLight(BlockPos pos) {
+        if (pos.getY() < 0) {
+            return 0;
+        } else {
+            if (pos.getY() >= 256) {
+                pos = new BlockPos(pos.getX(), 255, pos.getZ());
+            }
+            // Sponge Start - Use our hook to get the chunk only if it is loaded
+            // return this.getChunkFromBlockCoords(pos).getLightSubtracted(pos, 0);
+            final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            return chunk == null ? 0 : chunk.getLightSubtracted(pos, 0);
+            // Sponge End
+        }
+    }
+
+    /**
+     * @author gabizou - April 8th, 2016
+     *
+     * @reason Rewrites the chunk accessor to get only a chunk if it is loaded.
+     * This avoids loading chunks from file or generating new chunks
+     * if the chunk didn't exist, when the only function of this method is
+     * to get the light for the given block position.
+     *
+     * @param pos The block position
+     * @param checkNeighbors Whether to check neighboring block lighting
+     * @return The light value at the block position, if the chunk is loaded
+     */
+    @Override
+    public int getLight(BlockPos pos, boolean checkNeighbors) {
+        if (((IMixinBlockPos) pos).isValidXZPosition()) { // Sponge - Replace with inlined method
+            if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness()) {
+                int i1 = this.getLight(pos.up(), false);
+                int i = this.getLight(pos.east(), false);
+                int j = this.getLight(pos.west(), false);
+                int k = this.getLight(pos.south(), false);
+                int l = this.getLight(pos.north(), false);
+
+                if (i > i1) {
+                    i1 = i;
+                }
+
+                if (j > i1) {
+                    i1 = j;
+                }
+
+                if (k > i1) {
+                    i1 = k;
+                }
+
+                if (l > i1) {
+                    i1 = l;
+                }
+
+                return i1;
+            } else if (pos.getY() < 0) {
+                return 0;
+            } else {
+                if (pos.getY() >= 256) {
+                    pos = new BlockPos(pos.getX(), 255, pos.getZ());
+                }
+
+                // Sponge - Gets only loaded chunks, unloaded chunks will not get loaded to check lighting
+                // Chunk chunk = this.getChunkFromBlockCoords(pos);
+                // return chunk.getLightSubtracted(pos, this.skylightSubtracted);
+                final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+                return chunk == null ? 0 : chunk.getLightSubtracted(pos, this.getSkylightSubtracted());
+                // Sponge End
+            }
+        } else {
+            return 15;
+        }
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param type The type of sky lighting
+     * @param pos The position
+     * @return The light for the defined sky type and block position
+     */
+    @Override
+    public int getLightFor(EnumSkyBlock type, BlockPos pos) {
+        if (pos.getY() < 0) {
+            pos = new BlockPos(pos.getX(), 0, pos.getZ());
+        }
+
+        // Sponge Start - Replace with inlined method to check
+        // if (!this.isValid(pos)) // vanilla
+        if (!((IMixinBlockPos) pos).isValidPosition()) {
+            // Sponge End
+            return type.defaultLightValue;
+        } else {
+            Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) (Object) this).getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+            if (chunk == null) {
+                return type.defaultLightValue;
+            }
+            return chunk.getLightFor(type, pos);
+        }
+    }
+
 
     /**
      * @author amaranth - April 25th, 2016

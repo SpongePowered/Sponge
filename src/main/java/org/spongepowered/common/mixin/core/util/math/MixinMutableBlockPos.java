@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.util.math;
+package org.spongepowered.common.mixin.core.util.math;
 
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Implements;
@@ -33,14 +33,14 @@ import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 
 @Mixin(BlockPos.MutableBlockPos.class)
 @Implements(@Interface(iface = IMixinBlockPos.class, prefix = "inline$", unique = true))
-public abstract class MixinMutableBlockPos_Inline_Valid_BlockPos extends BlockPos implements IMixinBlockPos {
+public abstract class MixinMutableBlockPos extends BlockPos implements IMixinBlockPos {
 
     @Shadow protected int x;
     @Shadow protected int y;
     @Shadow protected int z;
 
     // NOT USED
-    public MixinMutableBlockPos_Inline_Valid_BlockPos(int xIn, int yIn, int zIn) {
+    public MixinMutableBlockPos(int xIn, int yIn, int zIn) {
         super(xIn, yIn, zIn);
     }
 
