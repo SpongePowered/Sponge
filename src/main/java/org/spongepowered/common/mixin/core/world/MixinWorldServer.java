@@ -1771,6 +1771,37 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
+    @Override
+    public boolean isLightLevel(Chunk chunk, BlockPos pos, int level) {
+        if (((IMixinBlockPos) pos).isValidPosition()) {
+            if (this.getBlockState(pos).useNeighborBrightness()) {
+                if (this.getLight(pos.up(), false) >= level) {
+                    return true;
+                }
+                if (this.getLight(pos.east(), false) >= level) {
+                    return true;
+                }
+                if (this.getLight(pos.west(), false) >= level) {
+                    return true;
+                }
+                if (this.getLight(pos.south(), false) >= level) {
+                    return true;
+                }
+                if (this.getLight(pos.north(), false) >= level) {
+                    return true;
+                }
+                return false;
+            } else {
+                if (pos.getY() >= 256) {
+                    pos = new BlockPos(pos.getX(), 255, pos.getZ());
+                }
+
+                return chunk.getLightSubtracted(pos, this.getSkylightSubtracted()) >= level;
+            }
+        } else {
+            return true;
+        }
+    }
 
     /**
      * @author amaranth - April 25th, 2016

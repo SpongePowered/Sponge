@@ -34,7 +34,10 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemAxe;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.EnumSkyBlock;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.entity.living.monster.Monster;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -46,6 +49,8 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.core.entity.MixinEntityCreature;
 
 import java.util.ArrayList;
@@ -130,4 +135,39 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
         return attackSucceeded;
     }
 
+    /**
+     * @author aikar - February 20th, 2017 - Optimizes light level check.
+     * @author blood - February 20th, 2017 - Avoids checking unloaded chunks and chunks with pending light updates.
+     *
+     * @return Whether current position has a valid light level for spawning
+     */
+    @Overwrite
+    protected boolean isValidLightLevel()
+    {
+        final BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
+        final Chunk chunk = ((IMixinChunkProviderServer) this.worldObj.getChunkProvider()).getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
+        if (chunk == null || chunk.unloaded) {
+            return false;
+        }
+
+        if (this.worldObj.getLightFor(EnumSkyBlock.SKY, blockpos) > this.rand.nextInt(32))
+        {
+            return false;
+        } 
+        else 
+        {
+            //int i = this.worldObj.getLightFromNeighbors(blockpos);
+            boolean passes; // Sponge
+            if (this.worldObj.isThundering()) {
+                int j = this.worldObj.getSkylightSubtracted();;
+                this.worldObj.setSkylightSubtracted(10);
+                passes = !((IMixinWorldServer) this.worldObj).isLightLevel(chunk, blockpos, this.rand.nextInt(9));
+                this.worldObj.setSkylightSubtracted(j);
+            } else { 
+                passes = !((IMixinWorldServer) this.worldObj).isLightLevel(chunk, blockpos, this.rand.nextInt(9)); 
+            }
+
+            return passes;
+        }
+    }
 }

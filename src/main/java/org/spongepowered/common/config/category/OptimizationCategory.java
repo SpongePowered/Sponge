@@ -40,9 +40,6 @@ public class OptimizationCategory extends ConfigCategory {
                                                     + "pre-merged and actually spawned, in which case, the items will flow right through\n"
                                                     + "without being merged.";
 
-    @Setting(value = "chunk-map-caching", comment = "Caches chunks internally for faster returns when querying at various positions")
-    private boolean useCachedChunkMap = true;
-
     @Setting(value = "drops-pre-merge", comment = PRE_MERGE_COMMENT)
     private boolean preItemDropMerge;
 
@@ -54,6 +51,9 @@ public class OptimizationCategory extends ConfigCategory {
             + "around them is generating. Disabling saving of these structures can save disk space and time during\n"
             + "saves if your world is already fully generated.")
     private StructureSaveCategory structureSaveCategory = new StructureSaveCategory();
+
+    @Setting(value = "async-lighting", comment = "Runs lighting updates async.")
+    private boolean asyncLighting = true;
 
     public OptimizationCategory() {
         try {
@@ -73,16 +73,15 @@ public class OptimizationCategory extends ConfigCategory {
         return this.structureSaveCategory.isEnabled();
     }
 
-    public boolean isUseCachedChunkMap() {
-        return this.useCachedChunkMap;
-    }
-
     public boolean doDropsPreMergeItemDrops() {
         return this.preItemDropMerge;
     }
 
-
     public boolean useCacheTameableOwners() {
         return this.cacheTameableOwners;
+    }
+
+    public boolean useAsyncLighting() {
+        return this.asyncLighting;
     }
 }

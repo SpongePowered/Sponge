@@ -190,6 +190,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tileEntitiesToBeRemoved;
     @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
     @Shadow protected List<IWorldEventListener> eventListeners;
+    @Shadow public int[] lightUpdateBlockList;
+    @Shadow public int skylightSubtracted;
 
     @Shadow private boolean processingLoadedTiles;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
@@ -210,12 +212,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract int getLight(BlockPos pos);
     @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
     @Shadow public abstract int getSkylightSubtracted();
-    @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract WorldInfo getWorldInfo();
     @Shadow public abstract boolean checkLight(BlockPos pos);
+    @Shadow public abstract boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos);
     @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
     @Shadow protected abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
     @Shadow protected abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
@@ -258,7 +261,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
     @Shadow public abstract boolean canBlockFreezeNoWater(BlockPos pos);
     @Shadow public abstract boolean canSnowAt(BlockPos pos, boolean checkLight);
-    @Shadow public abstract boolean canSeeSky(BlockPos pos);
     @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(AxisAlignedBB bb);
     @Shadow public abstract List<AxisAlignedBB> getCollisionBoxes(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
     @Shadow public abstract void notifyLightSet(BlockPos pos);
@@ -1092,6 +1094,28 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (uuid == null) {
             cir.setReturnValue(null);
         }
+    }
+
+    /**
+     * @author blood - February 20th, 2017
+     * @reason Avoids loading unloaded chunk when checking for sky.
+     *
+     * @param pos The position to get the light for
+     * @return Whether block position can see sky
+     */
+    @Overwrite
+    public boolean canSeeSky(BlockPos pos) {
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        if (chunk == null || chunk.unloaded) {
+            return false;
+        }
+
+        return chunk.canSeeSky(pos);
+    }
+
+    @Override
+    public int getRawBlockLight(BlockPos pos, EnumSkyBlock lightType) {
+        return this.getRawLight(pos, lightType);
     }
 
     /**

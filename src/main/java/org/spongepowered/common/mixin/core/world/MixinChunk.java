@@ -100,7 +100,6 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
-import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -1127,6 +1126,17 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public net.minecraft.world.chunk.Chunk getNeighborChunk(int index) {
         return this.neighbors[index];
+    }
+
+    @Override
+    public List<net.minecraft.world.chunk.Chunk> getNeighbors() {
+        List<net.minecraft.world.chunk.Chunk> neighborList = new ArrayList<>();
+        for (net.minecraft.world.chunk.Chunk neighbor : this.neighbors) {
+            if (neighbor != null) {
+                neighborList.add(neighbor);
+            }
+        }
+        return neighborList;
     }
 
     @Override
