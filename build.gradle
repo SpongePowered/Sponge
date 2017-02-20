@@ -69,7 +69,7 @@ dependencies {
         transitive = false
     }
 
-    testCompile 'org.spongepowered:launchwrappertestsuite:1.0-SNAPSHOT'
+    testCompile 'org.spongepowered:lwts:1.0.0'
 }
 
 // Include API dependencies in our POM
