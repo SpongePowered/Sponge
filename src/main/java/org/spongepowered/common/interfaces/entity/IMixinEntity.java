@@ -34,6 +34,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.Location;
@@ -59,6 +60,10 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     Entity getTeleportVehicle();
 
     void setTeleportVehicle(Entity entity);
+
+    boolean dismountRidingEntity(DismountType type);
+
+    boolean removePassengers(DismountType type);
 
     Optional<User> getTrackedPlayer(String nbtKey);
 
