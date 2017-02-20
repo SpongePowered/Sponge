@@ -34,12 +34,14 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.MoverType;
+import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -51,6 +53,7 @@ import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
@@ -61,7 +64,6 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
@@ -81,6 +83,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
@@ -109,8 +112,6 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
@@ -119,6 +120,7 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -138,8 +140,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
-
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.entity.Entity.class)
@@ -149,6 +149,7 @@ public abstract class MixinEntity implements IMixinEntity {
     private static final String LAVA_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;LAVA:Lnet/minecraft/util/DamageSource;";
     private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
     private static final String FIRE_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;IN_FIRE:Lnet/minecraft/util/DamageSource;";
+    private static final String LIGHTNING_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;LIGHTNING_BOLT:Lnet/minecraft/util/DamageSource;";
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
     private static final String RIDING_ENTITY_FIELD = "Lnet/minecraft/entity/Entity;ridingEntity:Lnet/minecraft/entity/Entity;";
     @SuppressWarnings("unused")
@@ -162,6 +163,7 @@ public abstract class MixinEntity implements IMixinEntity {
     private float origWidth;
     private float origHeight;
     @Nullable private DamageSource originalLava;
+    @Nullable private DamageSource originalLightning;
     protected boolean isConstructing = true;
     @Nullable private Text displayName;
     protected Cause destructCause;
@@ -211,7 +213,6 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract void setCustomNameTag(String name);
     @Shadow public abstract UUID getUniqueID();
     @Shadow @Nullable public abstract AxisAlignedBB getEntityBoundingBox();
-    @Shadow public abstract void setFire(int seconds);
     @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
     @Shadow public abstract int getEntityId();
@@ -241,6 +242,46 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow protected abstract void setFlag(int flag, boolean set);
 
     // @formatter:on
+
+    /**
+     * Overwritten to implement IgniteEntityEvent.
+     * It can't use injectors due to pass-by-value nature of Java
+     * @author Maxqia
+     */
+    @Overwrite
+    public void setFire(int seconds) {
+        int ticks = seconds * 20;
+
+        if (((Object)this) instanceof EntityLivingBase) {
+            ticks = EnchantmentProtection.getFireTimeForEntity((EntityLivingBase) (Object) this, ticks);
+        }
+
+        // Sponge start - Throw the Event
+        if (!world.isRemote) {
+            PhaseContext context = ((IMixinWorldServer) world).getCauseTracker().getCurrentContext();
+            Cause.Builder builder = Cause.builder().named(NamedCause.HIT_TARGET, this);
+
+            context.firstNamed(NamedCause.SOURCE, DamageSource.class).ifPresent(source -> builder.named(NamedCause.SOURCE, source));
+
+            IgniteEntityEvent event = SpongeEventFactory.createIgniteEntityEvent(
+                    builder.build(), ticks, ticks, this);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) return;
+            ticks = event.getFireTicks();
+        }
+        // Sponge end
+
+        if (this.fire < ticks) {
+            this.fire = ticks;
+        }
+    }
+
+    @Inject(method = "attackEntityFrom", at=@At("HEAD"))
+    public void onAttackEntityFrom(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+        if (!world.isRemote) {
+            ((IMixinWorldServer) world).getCauseTracker().getCurrentContext().add(NamedCause.of(NamedCause.SOURCE, source));
+        }
+    }
 
     @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
     private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
@@ -359,6 +400,25 @@ public abstract class MixinEntity implements IMixinEntity {
                 Thread.dumpStack();
             }
             DamageSource.IN_FIRE = this.originalInFire;
+        }
+    }
+
+    @Inject(method = "onStruckByLightning", at = @At(value = "FIELD", target = LIGHTNING_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC))
+    public void preLightning(EntityLightningBolt lightningBolt, CallbackInfo callbackInfo) {
+        if (!this.world.isRemote) {
+            this.originalLightning = DamageSource.LIGHTNING_BOLT;
+            DamageSource.LIGHTNING_BOLT = new EntityDamageSource("lightningBolt", lightningBolt);
+        }
+    }
+
+    @Inject(method = "onStruckByLightning", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD))
+    public void postLightning(EntityLightningBolt lightningBolt, CallbackInfo callbackInfo) {
+        if (!this.world.isRemote) {
+            if (this.originalLightning == null) {
+                SpongeImpl.getLogger().error("Original lightning is null!");
+                Thread.dumpStack();
+            }
+            DamageSource.LIGHTNING_BOLT = this.originalLightning;
         }
     }
 
