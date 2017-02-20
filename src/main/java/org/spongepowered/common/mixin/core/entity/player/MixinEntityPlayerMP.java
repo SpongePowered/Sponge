@@ -216,7 +216,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
     private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
-    private SettingManager settingManager = new SimpleSettingManager(Sponge.getRegistry().getSettingRegistry());
+    @Nullable private SettingManager settingManager;
 
     private GameType pendingGameType;
 
@@ -848,6 +848,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public SettingManager getSettingManager() {
+        if (this.settingManager == null) {
+            this.settingManager = new SimpleSettingManager(Sponge.getRegistry().getSettingRegistry());
+        }
         return this.settingManager;
     }
 
