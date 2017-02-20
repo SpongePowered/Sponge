@@ -48,6 +48,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -101,6 +102,11 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         this.denyChunkRequests = spongeConfig.getConfig().getWorld().getDenyChunkRequests();
         this.chunkUnloadDelay = spongeConfig.getConfig().getWorld().getChunkUnloadDelay() * 1000;
         this.maxChunkUnloads = spongeConfig.getConfig().getWorld().getMaxChunkUnloads();
+    }
+
+    @Override
+    public WorldServer getWorld() {
+        return this.world;
     }
 
     @Override
@@ -159,7 +165,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Redirect(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;loadChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
     public Chunk onProvideChunkHead(ChunkProviderServer chunkProviderServer, int x, int z) {
-        if (!this.denyChunkRequests || this.forceChunkRequests) {
+        if (!this.denyChunkRequests) {
             return this.loadChunk(x, z);
         }
 
@@ -200,6 +206,14 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     }
 
     private boolean canDenyChunkRequest() {
+        if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            return true;
+        }
+
+        if (this.forceChunkRequests) {
+            return false;
+        }
+
         if (CauseTracker.ENABLED) {
             final CauseTracker causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
             final IPhaseState currentState = causeTracker.getCurrentState();

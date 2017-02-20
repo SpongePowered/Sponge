@@ -1046,6 +1046,17 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
+    public List<net.minecraft.world.chunk.Chunk> getNeighbors() {
+        List<net.minecraft.world.chunk.Chunk> neighborList = new ArrayList<>();
+        for (net.minecraft.world.chunk.Chunk neighbor : this.neighbors) {
+            if (neighbor != null) {
+                neighborList.add(neighbor);
+            }
+        }
+        return neighborList;
+    }
+
+    @Override
     public boolean areNeighborsLoaded() {
         for (int i = 0; i < 4; i++) {
             if (this.neighbors[i] == null) {

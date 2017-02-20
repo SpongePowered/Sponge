@@ -162,10 +162,6 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.world.World.class)
 public abstract class MixinWorld implements World, IMixinWorld {
 
-    private static final String PROFILER_SS = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V";
-    private static final String PROFILER_ES = "Lnet/minecraft/profiler/Profiler;endSection()V";
-    private static final String PROFILER_ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
-
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
     private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
     private static final Vector3i BLOCK_SIZE = BLOCK_MAX.sub(BLOCK_MIN).add(Vector3i.ONE);
@@ -196,6 +192,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tileEntitiesToBeRemoved;
     @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
     @Shadow protected List<IWorldEventListener> eventListeners;
+    @Shadow public int[] lightUpdateBlockList;
+    @Shadow public int skylightSubtracted;
 
     @Shadow public boolean processingLoadedTiles;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
@@ -217,13 +215,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
     // To be overridden in MixinWorldServer_Lighting
     @Shadow public abstract int getLight(BlockPos pos);
     @Shadow public abstract int getLight(BlockPos pos, boolean checkNeighbors);
+    @Shadow public abstract int getRawLight(BlockPos pos, EnumSkyBlock lightType);
     @Shadow public abstract int getSkylightSubtracted();
-    @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract WorldInfo getWorldInfo();
     @Shadow public abstract boolean checkLight(BlockPos pos);
+    @Shadow public abstract boolean checkLightFor(EnumSkyBlock lightType, BlockPos pos);
     @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
     @Shadow protected abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract boolean isAreaLoaded(BlockPos center, int radius, boolean allowEmpty);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
     @Shadow protected abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
@@ -1112,7 +1112,37 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     /**
+<<<<<<< HEAD
      * @reason Avoid loading chunk for getting raw light.
+=======
+     * @author blood - February 20th, 2017
+     * @reason Avoids loading unloaded chunk when checking for sky.
+     *
+     * @param pos The position to get the light for
+     * @return Whether block position can see sky
+     */
+    @Overwrite
+    public boolean canSeeSky(BlockPos pos) {
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        if (chunk == null || chunk.unloadQueued) {
+            return false;
+        }
+
+        return chunk.canSeeSky(pos);
+    }
+
+    @Override
+    public int getRawBlockLight(BlockPos pos, EnumSkyBlock lightType) {
+        return this.getRawLight(pos, lightType);
+    }
+
+    /**
+     * @author gabizou - July 25th, 2016
+     * @reason Optimizes several blockstate lookups for getting raw light.
+     *
+     * @param pos The position to get the light for
+     * @param lightType The light type
+     * @return The raw light
      */
     @Inject(method = "getRawLight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState" +
             "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"), cancellable = true)

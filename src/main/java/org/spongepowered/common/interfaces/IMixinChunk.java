@@ -37,10 +37,12 @@ import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.extent.EntityUniverse;
 import org.spongepowered.common.entity.PlayerTracker;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
@@ -96,4 +98,12 @@ public interface IMixinChunk {
     boolean isSpawning();
 
     void setIsSpawning(boolean spawning);
+
+    AtomicInteger getPendingLightUpdates();
+
+    long getLightUpdateTime();
+
+    void setLightUpdateTime(long time);
+
+    List<net.minecraft.world.chunk.Chunk> getNeighbors();
 }

@@ -83,20 +83,26 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
 
     // So that any additional optimizations can be added in succession.
     private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean >> builder()
-            .put("org.spongepowered.common.mixin.optimization.world.gen.MixinChunkProviderServer_Chunk_Cache",
-                    OptimizationCategory::isUseCachedChunkMap)
-            .put("org.spongepowered.common.mixin.optimization.world.gen.structure.MixinMapGenStructure_Structure_Saving",
-                    OptimizationCategory::useStructureSave)
-            .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Chunk_Cache",
-                    OptimizationCategory::isUseCachedChunkMap)
+            .put("org.spongepowered.common.mixin.optimization.MixinExplosion_Explosion",
+                    (module) -> true) // TODO the velocity changes need to be sent to the client
             .put("org.spongepowered.common.mixin.optimization.MixinSpongeImplHooks_Item_Pre_Merge",
                     OptimizationCategory::doDropsPreMergeItemDrops)
             .put("org.spongepowered.common.mixin.optimization.MixinWorldServer_Explosion",
                     (module) -> true) // TODO the velocity changes need to be sent to the client
-            .put("org.spongepowered.common.mixin.optimization.MixinExplosion_Explosion",
-                    (module) -> true) // TODO the velocity changes need to be sent to the client
             .put("org.spongepowered.common.mixin.optimization.entity.MixinEntityTameable_Cached_Owner",
                     OptimizationCategory::useCacheTameableOwners)
+            .put("org.spongepowered.common.mixin.optimization.entity.monster.MixinEntityMob_Async_Lighting",
+                    OptimizationCategory::useAsyncLighting)
+            .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Async_Lighting",
+                    OptimizationCategory::useAsyncLighting)
+            .put("org.spongepowered.common.mixin.optimization.world.MixinWorldEntitySpawner_Async_Lighting",
+                    OptimizationCategory::useAsyncLighting)
+            .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Async_Lighting",
+                    OptimizationCategory::useAsyncLighting)
+            .put("org.spongepowered.common.mixin.optimization.world.gen.MixinChunkProviderServer_Async_Lighting",
+                    OptimizationCategory::useAsyncLighting)
+            .put("org.spongepowered.common.mixin.optimization.world.gen.structure.MixinMapGenStructure_Structure_Saving",
+                    OptimizationCategory::useStructureSave)
             .build();
 
 }

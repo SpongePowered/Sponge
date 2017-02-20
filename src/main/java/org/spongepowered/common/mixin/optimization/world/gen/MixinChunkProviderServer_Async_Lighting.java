@@ -22,24 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world.gen;
-
-import javax.annotation.Nullable;
+package org.spongepowered.common.mixin.optimization.world.gen;
 
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.IMixinChunk;
 
-public interface IMixinChunkProviderServer {
+@Mixin(value = ChunkProviderServer.class, priority = 1002)
+public abstract class MixinChunkProviderServer_Async_Lighting {
 
-    void setMaxChunkUnloads(int maxUnloads);
+    @Shadow @Final public WorldServer world;
 
-    void setDenyChunkRequests(boolean flag);
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lorg/spongepowered/common/interfaces/IMixinChunk;isPersistedChunk()Z", remap = false))
+    public boolean onTickIsPersisted(IMixinChunk chunk) {
+        if (chunk.isPersistedChunk() || chunk.getPendingLightUpdates().get() > 0
+                || this.world.getTotalWorldTime() - chunk.getLightUpdateTime() < 20) {
+            return true;
+        }
 
-    void setForceChunkRequests(boolean flag);
-
-    @Nullable Chunk getLoadedChunkWithoutMarkingActive(int x, int z);
-
-    long getChunkUnloadDelay();
-
-    WorldServer getWorld();
+        return false;
+    }
 }
