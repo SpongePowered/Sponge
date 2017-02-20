@@ -143,13 +143,7 @@ import org.spongepowered.common.event.damage.*;
 import org.spongepowered.common.event.entity.teleport.SpongeEntityTeleportCauseBuilder;
 import org.spongepowered.common.event.entity.teleport.SpongePortalTeleportCauseBuilder;
 import org.spongepowered.common.event.entity.teleport.SpongeTeleportCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeBlockSpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeBreedingSpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeEntitySpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeLocatableBlockSpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeMobSpawnerSpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeSpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeWeatherSpawnCauseBuilder;
+import org.spongepowered.common.event.spawn.*;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
@@ -196,6 +190,7 @@ import org.spongepowered.common.registry.type.tileentity.StructureModeRegistryMo
 import org.spongepowered.common.registry.type.world.*;
 import org.spongepowered.common.registry.type.world.gen.BiomeTreeTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.BiomeTypeRegistryModule;
+import org.spongepowered.common.registry.type.world.gen.DungeonMobRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.PopulatorObjectRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryModule;
 import org.spongepowered.common.scheduler.SpongeTaskBuilder;
@@ -440,6 +435,9 @@ public final class CommonModuleRegistry {
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
             .registerModule(SkeletonType.class, new SkeletonTypeRegistryModule())
             .registerModule(StructureMode.class, new StructureModeRegistryModule())
+
+            // Miscellaneous Registries
+            .registerModule(DungeonMobRegistryModule.getInstance())
             ;
     }
 

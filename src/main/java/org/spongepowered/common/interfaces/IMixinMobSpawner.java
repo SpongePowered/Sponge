@@ -22,12 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world.gen;
+package org.spongepowered.common.interfaces;
 
-import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
+import net.minecraft.tileentity.MobSpawnerBaseLogic;
 
-public interface IWorldGenDungeons {
+public interface IMixinMobSpawner {
 
-    void setSpawnerData(MobSpawnerData data);
+    MobSpawnerBaseLogic getLogic();
 
 }

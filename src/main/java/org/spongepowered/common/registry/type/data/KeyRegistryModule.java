@@ -53,8 +53,10 @@ import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.value.mutable.WeightedCollectionValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
+import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -72,6 +74,8 @@ import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.rotation.Rotation;
+import org.spongepowered.api.util.weighted.WeightedSerializableObject;
+import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.SpongeDataManager;
 
 import java.time.Instant;
@@ -573,6 +577,22 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     public static final TypeToken<Value<StructureMode>> STRUCTURE_MODE_VALUE_TOKEN = new TypeToken<Value<StructureMode>>() {
         private static final long serialVersionUID = -1;
     };
+    public static final TypeToken<WeightedSerializableObject<EntityArchetype>> WEIGHTED_ENTITY_ARCHETYPE_TOKEN =
+            new TypeToken<WeightedSerializableObject<EntityArchetype>>() {
+                private static final long serialVersionUID = -1;
+            };
+    public static final TypeToken<Value<WeightedSerializableObject<EntityArchetype>>> WEIGHTED_ENTITY_ARCHETYPE_VALUE_TOKEN =
+            new TypeToken<Value<WeightedSerializableObject<EntityArchetype>>>() {
+                private static final long serialVersionUID = -1;
+            };
+    public static final TypeToken<WeightedTable<EntityArchetype>> WEIGHTED_ENTITY_ARCHETYPE_TABLE_TOKEN =
+            new TypeToken<WeightedTable<EntityArchetype>>() {
+                private static final long serialVersionUID = -1;
+            };
+    public static final TypeToken<WeightedCollectionValue<EntityArchetype>> WEIGHTED_ENTITY_ARCHETYPE_COLLECTION_VALUE_TOKEN =
+            new TypeToken<WeightedCollectionValue<EntityArchetype>> () {
+                private static final long serialVersionUID = -1;
+            };
 
     public static final TypeToken<ZombieType> ZOMBIE_TYPE_TOKEN = new TypeToken<ZombieType>() {
         private static final long serialVersionUID = -1;
@@ -674,9 +694,32 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("firework_effects", makeListKey(LIST_FIREWORK_TOKEN, LIST_VALUE_FIREWORK_TOKEN, of("FireworkEffects"), "sponge:firework_effects", "Firework Effects"));
 
-        this.fieldMap.put("spawner_remaining_delay", makeSingleKey(SHORT_TOKEN, BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerRemainingDelay"), "sponge:spawner_remaining_delay", "Spawner Remaining Delay"));
+        this.fieldMap.put("spawner_entities", makeSingleKey(WEIGHTED_ENTITY_ARCHETYPE_TABLE_TOKEN, WEIGHTED_ENTITY_ARCHETYPE_COLLECTION_VALUE_TOKEN,
+                of("SpawnerEntities"), "sponge:spawner_entities", "Spawner Entities"));
 
-        this.fieldMap.put("spawner_minimum_delay", makeSingleKey(SHORT_TOKEN, BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerMinimumDelay"), "sponge:spawner_minimum_delay", "Spawner Minimum Delay"));
+        this.fieldMap.put("spawner_maximum_delay", makeSingleKey(SHORT_TOKEN, BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerMaximumDelay"),
+                "sponge:spawner_maximum_delay", "Spawner Maximum Delay"));
+
+        this.fieldMap.put("spawner_maximum_nearby_entities", makeSingleKey(SHORT_TOKEN, BOUNDED_SHORT_VALUE_TOKEN, of
+                ("SpawnerMaximumNearbyEntities"), "sponge:spawner_maximum_nearby_entities", "Spawner Maximum Nearby Entities"));
+
+        this.fieldMap.put("spawner_minimum_delay", makeSingleKey(SHORT_TOKEN, BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerMinimumDelay"),
+                "sponge:spawner_minimum_delay", "Spawner Minimum Delay"));
+
+        this.fieldMap.put("spawner_next_entity_to_spawn", makeSingleKey(WEIGHTED_ENTITY_ARCHETYPE_TOKEN, WEIGHTED_ENTITY_ARCHETYPE_VALUE_TOKEN,
+                of("SpawnerNextEntityToSpawn"), "sponge:spawner_next_entity_to_spawn", "Spawner Next Entity To Spawn"));
+
+        this.fieldMap.put("spawner_remaining_delay", makeSingleKey(SHORT_TOKEN, BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerRemainingDelay"),
+                "sponge:spawner_remaining_delay", "Spawner Remaining Delay"));
+
+        this.fieldMap.put("spawner_required_player_range", makeSingleKey(SHORT_TOKEN, BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerRequiredPlayerRange"),
+                "sponge:spawner_required_player_range", "Spawner Required Player Range"));
+
+        this.fieldMap.put("spawner_spawn_count", makeSingleKey(SHORT_TOKEN, BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerSpawnCount"),
+                "sponge:spawner_spawn_count", "Spawner Spawn Count"));
+
+        this.fieldMap.put("spawner_spawn_range", makeSingleKey(SHORT_TOKEN, BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerSpawnRange"),
+                "sponge:spawner_spawn_range", "Spawner Spawn Range"));
 
         this.fieldMap.put("connected_directions", makeSetKey(SET_DIRECTION_TOKEN, SET_DIRECTION_VALUE_TOKEN, of("ConnectedDirections"), "sponge:connected_directions", "Connected Directions"));
 

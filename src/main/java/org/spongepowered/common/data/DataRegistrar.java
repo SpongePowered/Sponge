@@ -94,6 +94,7 @@ import org.spongepowered.common.data.processor.data.entity.*;
 import org.spongepowered.common.data.processor.data.extra.FluidItemDataProcessor;
 import org.spongepowered.common.data.processor.data.item.*;
 import org.spongepowered.common.data.processor.data.tileentity.*;
+import org.spongepowered.common.data.processor.multi.*;
 import org.spongepowered.common.data.processor.multi.block.*;
 import org.spongepowered.common.data.processor.multi.entity.*;
 import org.spongepowered.common.data.processor.multi.item.*;
@@ -102,6 +103,7 @@ import org.spongepowered.common.data.processor.value.block.*;
 import org.spongepowered.common.data.processor.value.entity.*;
 import org.spongepowered.common.data.processor.value.item.*;
 import org.spongepowered.common.data.processor.value.tileentity.*;
+import org.spongepowered.common.data.processor.value.*;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.property.store.block.*;
 import org.spongepowered.common.data.property.store.entity.*;
@@ -679,6 +681,10 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(StructureData.class, SpongeStructureData.class,
             ImmutableStructureData.class, ImmutableSpongeStructureData.class, new StructureDataProcessor());
 
+        dataManager.registerDataProcessorAndImpl(MobSpawnerData.class, SpongeMobSpawnerData.class, ImmutableMobSpawnerData.class,
+                ImmutableSpongeMobSpawnerData.class, new MobSpawnerDataProcessor());
+
+
         // Values
 
         dataManager.registerValueProcessor(Keys.FUSE_DURATION, new FuseDurationValueProcessor());
@@ -770,6 +776,15 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.INFINITE_PICKUP_DELAY, new InfinitePickupDelayValueProcessor());
         dataManager.registerValueProcessor(Keys.DESPAWN_DELAY, new DespawnDelayValueProcessor());
         dataManager.registerValueProcessor(Keys.INFINITE_DESPAWN_DELAY, new InfiniteDespawnDelayValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_REMAINING_DELAY, new SpawnerRemainingDelayValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_MINIMUM_DELAY, new SpawnerMinimumDelayValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_MAXIMUM_DELAY, new SpawnerMaximumDelayValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_SPAWN_COUNT, new SpawnerSpawnCountValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, new SpawnerMaximumNearbyEntitiesValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, new SpawnerRequiredPlayerRangeValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_SPAWN_RANGE, new SpawnerSpawnRangeValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, new SpawnerNextEntityToSpawnValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_ENTITIES, new SpawnerEntitiesValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
