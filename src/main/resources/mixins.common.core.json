@@ -514,6 +514,7 @@
         "world.gen.structure.MixinMapGenStructure",
         "world.gen.structure.MixinMapGenVillage",
         "world.storage.MixinSaveHandler",
+        "world.storage.MixinThreadedFileIOBase",
         "world.storage.MixinWorldInfo"
     ],
     "server": [
