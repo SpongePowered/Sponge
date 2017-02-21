@@ -32,8 +32,7 @@ import org.spongepowered.api.entity.ai.task.builtin.creature.location.MoveToBloc
 import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.interfaces.ai.IMixinMoveToBlock;
-import org.spongepowered.common.mixin.core.entity.ai.MixinEntityAIMoveToBlock;
+import org.spongepowered.common.interfaces.ai.IMixinEntityAIMoveToBlock;
 
 import java.util.function.Predicate;
 
@@ -49,7 +48,7 @@ public class SpongeMoveToBlockAIBuilder implements MoveToBlockAITask.Builder {
 
     @Override
     public MoveToBlockAITask.Builder from(MoveToBlockAITask value) {
-        if (!((IMixinMoveToBlock) value).isVanillaTask()) {
+        if (!((IMixinEntityAIMoveToBlock) value).isVanillaTask()) {
             destinationPredicate(value.getDestinationPredicate());
         }
         return this.speed(value.getSpeed()).searchRange(value.getSearchRange());
@@ -66,10 +65,10 @@ public class SpongeMoveToBlockAIBuilder implements MoveToBlockAITask.Builder {
     @Override
     public MoveToBlockAITask build(Creature owner) {
         Preconditions.checkNotNull(destinationPredicate);
-        IMixinMoveToBlock aiTask = (IMixinMoveToBlock) (Object) new EntityAIMoveToBlock((EntityCreature) owner, this.speed, this.searchRange) {
+        IMixinEntityAIMoveToBlock aiTask = (IMixinEntityAIMoveToBlock) (Object) new EntityAIMoveToBlock((EntityCreature) owner, this.speed, this.searchRange) {
             @Override
             protected boolean shouldMoveTo(net.minecraft.world.World worldIn, BlockPos pos) {
-                return destinationPredicate.test(((World) worldIn).getLocation(pos.getX(), pos.getY(), pos.getZ()));
+                return ((IMixinEntityAIMoveToBlock) (Object) this).getDestinationPredicate().test(((World) worldIn).getLocation(pos.getX(), pos.getY(), pos.getZ()));
             }
         };
 

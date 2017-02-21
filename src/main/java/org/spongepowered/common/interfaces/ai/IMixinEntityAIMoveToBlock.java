@@ -29,9 +29,11 @@ import org.spongepowered.api.world.World;
 
 import java.util.function.Predicate;
 
-public interface IMixinMoveToBlock {
+public interface IMixinEntityAIMoveToBlock {
 
     boolean isVanillaTask();
+
+    Predicate<Location<World>> getDestinationPredicate();
 
     void setDestinationPredicate(Predicate<Location<World>> destinationPredicate);
 

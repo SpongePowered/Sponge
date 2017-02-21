@@ -30,15 +30,14 @@ import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.entity.ai.task.builtin.creature.location.MoveToBlockAITask;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.ai.IMixinMoveToBlock;
+import org.spongepowered.common.interfaces.ai.IMixinEntityAIMoveToBlock;
 
 import java.util.function.Predicate;
 
 @Mixin(EntityAIMoveToBlock.class)
-public abstract class MixinEntityAIMoveToBlock extends MixinEntityAIBase implements MoveToBlockAITask, IMixinMoveToBlock {
+public abstract class MixinEntityAIMoveToBlock extends MixinEntityAIBase implements MoveToBlockAITask, IMixinEntityAIMoveToBlock {
 
     @Shadow public int searchLength;
     @Shadow public double movementSpeed;
