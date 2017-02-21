@@ -25,8 +25,10 @@
 package org.spongepowered.common.interfaces.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -44,6 +46,8 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     User getUserObject();
 
     void setVelocityOverride(@Nullable Vector3d velocity);
+
+    void sendBlockChange(BlockPos pos, IBlockState state);
 
     MessageChannel getDeathMessageChannel();
 

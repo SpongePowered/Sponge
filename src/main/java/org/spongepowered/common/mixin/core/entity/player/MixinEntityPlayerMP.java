@@ -786,12 +786,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    public void sendBlockChange(BlockPos pos, IBlockState state) {
+        final SPacketBlockChange packet = new SPacketBlockChange();
+        packet.blockPosition = pos;
+        packet.blockState = state;
+        this.connection.sendPacket(packet);
+    }
+
+    @Override
     public void sendBlockChange(int x, int y, int z, BlockState state) {
         checkNotNull(state, "state");
-        SPacketBlockChange packet = new SPacketBlockChange();
-        packet.blockPosition = new BlockPos(x, y, z);
-        packet.blockState = (IBlockState) state;
-        this.connection.sendPacket(packet);
+        this.sendBlockChange(new BlockPos(x, y, z), (IBlockState) state);
     }
 
     @Override
