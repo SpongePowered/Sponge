@@ -42,10 +42,6 @@ public class SpongeMoveToBlockAIBuilder implements MoveToBlockAITask.Builder {
     private int searchRange;
     private Predicate<Location<World>> destinationPredicate;
 
-    public SpongeMoveToBlockAIBuilder() {
-        this.reset();
-    }
-
     @Override
     public MoveToBlockAITask.Builder from(MoveToBlockAITask value) {
         if (!((IMixinEntityAIMoveToBlock) value).isVanillaTask()) {
