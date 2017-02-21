@@ -440,7 +440,7 @@ public class SpongeCommonEventFactory {
         if (hand == EnumHand.MAIN_HAND) {
             event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Cause.of(NamedCause.source(player)), HandTypes.MAIN_HAND, Optional.empty(), blockSnapshot, direction);
         } else {
-            event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Cause.of(NamedCause.source(player)), HandTypes.OFF_HAND, Optional.empty(), blockSnapshot, direction);
+            event = SpongeEventFactory.createInteractBlockEventPrimaryOffHand(Cause.of(NamedCause.source(player)), HandTypes.OFF_HAND, Optional.empty(), blockSnapshot, direction);
         }
         SpongeImpl.postEvent(event);
         return event;
