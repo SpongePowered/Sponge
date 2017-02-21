@@ -1,0 +1,15 @@
+{
+    "required": false,
+    "minVersion": "0.6.8",
+    "package": "org.spongepowered.common.mixin.core",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.CorePlugin",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+        "util.math.MixinMutableBlockPos"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}
