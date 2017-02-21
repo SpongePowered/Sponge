@@ -43,6 +43,7 @@ import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.Humanoid;
@@ -199,14 +200,14 @@ public class PacketUtil {
                 case START_DESTROY_BLOCK:
                 case ABORT_DESTROY_BLOCK:
                 case STOP_DESTROY_BLOCK:
-                    Vector3d interactionPoint = VecHelper.toVector3d(packet.getPosition());
+                    final BlockPos pos = packet.getPosition();
+                    Vector3d interactionPoint = VecHelper.toVector3d(pos);
                     BlockSnapshot blockSnapshot = new Location<>((World) playerMP.world, interactionPoint).createSnapshot();
                     if(SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, stack, EnumHand.MAIN_HAND, Optional.of(interactionPoint), blockSnapshot).isCancelled()) {
-                        BlockUtil.sendClientBlockChange(playerMP, packet.getPosition());
+                        ((IMixinEntityPlayerMP) playerMP).sendBlockChange(pos, playerMP.world.getBlockState(pos));
                         return true;
                     }
 
-                    BlockPos pos = packet.getPosition();
                     double d0 = playerMP.posX - ((double)pos.getX() + 0.5D);
                     double d1 = playerMP.posY - ((double)pos.getY() + 0.5D) + 1.5D;
                     double d2 = playerMP.posZ - ((double)pos.getZ() + 0.5D);
@@ -222,7 +223,7 @@ public class PacketUtil {
                     }
                     if (packet.getAction() == CPacketPlayerDigging.Action.START_DESTROY_BLOCK) {
                         if (SpongeCommonEventFactory.callInteractBlockEventPrimary(playerMP, blockSnapshot, EnumHand.MAIN_HAND, packet.getFacing()).isCancelled()) {
-                            BlockUtil.sendClientBlockChange(playerMP, pos);
+                            ((IMixinEntityPlayerMP) playerMP).sendBlockChange(pos, playerMP.world.getBlockState(pos));
                             return true;
                         }
                     }
