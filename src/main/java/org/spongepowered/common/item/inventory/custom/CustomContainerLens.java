@@ -46,7 +46,7 @@ public class CustomContainerLens extends MinecraftLens {
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
-        int size = this.customLens.getAdapter(adapter.getInventory(), null).capacity();
+        int size = this.customLens.getAdapter(this.adapter.getInventory(), null).capacity();
         this.mainInventory = new GridInventoryLensImpl(size, 9, 3, 9, slots);
         this.hotbar = new HotbarLensImpl(size + 9 * 3, 9, slots);
 

@@ -96,7 +96,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(WorldServer worldObjIn, IChunkLoader chunkLoaderIn, IChunkGenerator chunkGeneratorIn, CallbackInfo ci) {
-        EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
+        this.EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
         SpongeConfig<?> spongeConfig = SpongeHooks.getActiveConfig(worldObjIn);
         ((IMixinWorldServer) worldObjIn).setActiveConfig(spongeConfig);
         this.denyChunkRequests = spongeConfig.getConfig().getWorld().getDenyChunkRequests();
@@ -171,7 +171,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
         Chunk chunk = this.getLoadedChunk(x, z);
         if (chunk == null && this.canDenyChunkRequest()) {
-            return EMPTY_CHUNK;
+            return this.EMPTY_CHUNK;
         }
 
         if (chunk == null) {

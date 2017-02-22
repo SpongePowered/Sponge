@@ -69,17 +69,17 @@ public abstract class MixinCustomContainer implements MinecraftInventoryAdapter,
         this.inventory = MinecraftFabric.of(this);
         // CustomInventory + Main PlayerInventory + HotBar PlayerInventory
         this.slots = new SlotCollection.Builder().add(inventory.getSizeInventory()).add(36).build();
-        this.lens = new CustomContainerLens(this, slots, (CustomLens)((MinecraftInventoryAdapter)inventory).getRootLens());
+        this.lens = new CustomContainerLens(this, this.slots, (CustomLens)((MinecraftInventoryAdapter)inventory).getRootLens());
     }
 
     @Override
     public Lens<IInventory, ItemStack> getRootLens() {
-        return lens;
+        return this.lens;
     }
 
     @Override
     public Fabric<IInventory> getInventory() {
-        return inventory;
+        return this.inventory;
     }
 
     @Override

@@ -62,7 +62,7 @@ public class ContainerChestInventoryLens extends MinecraftLens {
         // (9 * numRows) lots after the chest slots
         this.playerInventory = new GridInventoryLensImpl(9 * this.numRows, 9, 3, 9, slots);
         // Add an additional 27 slots, for the player inventory
-        this.hotbarInventory = new HotbarLensImpl((9 * numRows) + 27, 9, slots);
+        this.hotbarInventory = new HotbarLensImpl((9 * this.numRows) + 27, 9, slots);
 
         this.addSpanningChild(this.chestInventory);
         this.addSpanningChild(this.playerInventory);

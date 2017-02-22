@@ -297,7 +297,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     public LocatableBlock getLocatableBlock() {
         if (this.locatableBlock == null) {
             this.locatableBlock = LocatableBlock.builder()
-                    .location(new Location<World>((World) this.worldObj, pos.getX(), pos.getY(), pos.getZ()))
+                    .location(new Location<World>((World) this.worldObj, this.pos.getX(), this.pos.getY(), this.pos.getZ()))
                     .state(this.getBlock())
                     .build();
         }

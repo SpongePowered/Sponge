@@ -92,7 +92,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         this.fabric = MinecraftFabric.of(this.this$);
         this.slots = ContainerUtil.countSlots(this.this$);
         this.lens = ContainerUtil.getLens(this.this$, this.slots); // TODO - use a fallback lens for spectactor ContainerChest
-        this.archetype = ContainerUtil.getArchetype(this$);
+        this.archetype = ContainerUtil.getArchetype(this.this$);
         this.carrier = Optional.ofNullable(ContainerUtil.getCarrier(this));
 
         // If we know the lens, we can cache the adapters now

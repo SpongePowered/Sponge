@@ -68,7 +68,7 @@ public class CustomLens extends MinecraftLens {
             return;
         }
 
-        this.addLensFor(archetype, 0, slots); // recursively get archetype sizes
+        this.addLensFor(this.archetype, 0, slots); // recursively get archetype sizes
     }
 
     private int addLensFor(InventoryArchetype archetype, int base, SlotProvider<IInventory, ItemStack> slots) {

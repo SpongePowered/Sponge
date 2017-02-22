@@ -107,7 +107,7 @@ public abstract class MixinBlockFarmland extends MixinBlock {
             return false;
         }
         if (this.currentGriefer instanceof IMixinGriefer) {
-            return ((IMixinGriefer) currentGriefer).canGrief();
+            return ((IMixinGriefer) this.currentGriefer).canGrief();
         }
         return true;
     }

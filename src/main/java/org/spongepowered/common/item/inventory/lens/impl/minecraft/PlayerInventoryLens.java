@@ -59,7 +59,7 @@ public class PlayerInventoryLens extends MinecraftLens {
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
         this.hotbar = new HotbarLensImpl(0, InventoryPlayer.getHotbarSize(), slots);
         this.main = new GridInventoryLensImpl(9, 9, 3, 9, slots);
-        this.equipment = new EquipmentInventoryLensImpl((ArmorEquipable) player, 36, 4, 1, slots);
+        this.equipment = new EquipmentInventoryLensImpl((ArmorEquipable) this.player, 36, 4, 1, slots);
         this.offhand = new SlotLensImpl(37);
 
         this.addSpanningChild(this.hotbar);

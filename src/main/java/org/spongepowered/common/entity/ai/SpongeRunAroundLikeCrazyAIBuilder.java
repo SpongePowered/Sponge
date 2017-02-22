@@ -58,6 +58,6 @@ public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCra
     @Override
     public RunAroundLikeCrazyAITask build(Horse owner) {
         Preconditions.checkNotNull(owner);
-        return (RunAroundLikeCrazyAITask) new EntityAIRunAroundLikeCrazy((EntityHorse) owner, speed);
+        return (RunAroundLikeCrazyAITask) new EntityAIRunAroundLikeCrazy((EntityHorse) owner, this.speed);
     }
 }

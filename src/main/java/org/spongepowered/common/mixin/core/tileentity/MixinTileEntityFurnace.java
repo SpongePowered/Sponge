@@ -81,7 +81,7 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
                 }))
                 .add(OutputSlotAdapter.class, (i) -> new OutputSlotLensImpl(i, (s) -> false, (t) -> false))
                 .build();
-        this.lens = new OrderedInventoryLensImpl(0, 3, 1, slots);
+        this.lens = new OrderedInventoryLensImpl(0, 3, 1, this.slots);
     }
 
     @Override

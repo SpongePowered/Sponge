@@ -45,7 +45,7 @@ public class AnvilInventoryLens extends OrderedInventoryLensImpl {
         this.input = new OrderedInventoryLensImpl(0, 2, 1, slots);
         this.output = new OutputSlotLensImpl(2, (i) -> false, (t) -> false); // Only output
 
-        this.addSpanningChild(input);
-        this.addSpanningChild(output);
+        this.addSpanningChild(this.input);
+        this.addSpanningChild(this.output);
     }
 }

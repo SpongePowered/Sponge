@@ -45,7 +45,7 @@ public class SpongeHorseVariant extends SpongeEntityMeta implements HorseVariant
 
     @Override
     public Translation getTranslation() {
-        switch (type) {
+        switch (this.type) {
             case 0:
             default:
                 return new SpongeTranslation("entity.horse.name");

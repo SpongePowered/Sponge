@@ -140,7 +140,7 @@ public class GlobalConfig extends ConfigBase {
     }
 
     public CauseTrackerCategory getCauseTracker() {
-        return causeTracker;
+        return this.causeTracker;
     }
 
 }

@@ -172,7 +172,7 @@ public final class CauseTracker {
         // Since an exception occured during the main phase code, we don't know what state we're in.
         // Therefore, we skip running the normal unwind functions that completePhase calls,
         // and simply op the phase from the stack.
-        stack.pop();
+        this.stack.pop();
     }
 
     public void completePhase(IPhaseState prevState) {
@@ -216,7 +216,7 @@ public final class CauseTracker {
             // The phase on the top of the stack was most likely never completed.
             // Since we don't know when and where completePhase was intended to be called for it,
             // we simply pop it to allow processing to continue (somewhat) as normal
-            stack.pop();
+            this.stack.pop();
 
         }
 

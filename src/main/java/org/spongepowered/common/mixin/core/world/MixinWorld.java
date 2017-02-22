@@ -1547,7 +1547,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         if (!this.tileEntitiesToBeRemoved.isEmpty()) {
             // Sponge start - use forge hook
-            for (Object tile : tileEntitiesToBeRemoved) {
+            for (Object tile : this.tileEntitiesToBeRemoved) {
                SpongeImplHooks.onTileChunkUnload(((net.minecraft.tileentity.TileEntity)tile));
             }
             // Sponge end

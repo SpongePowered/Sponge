@@ -60,7 +60,7 @@ public class CustomContainer extends Container {
     @Override
     public void onContainerClosed(EntityPlayer playerIn) {
         super.onContainerClosed(playerIn);
-        inv.closeInventory(playerIn);
+        this.inv.closeInventory(playerIn);
     }
 
     @Override
@@ -73,14 +73,14 @@ public class CustomContainer extends Container {
             ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
 
-            if (index < inv.getSizeInventory())
+            if (index < this.inv.getSizeInventory())
             {
-                if (!this.mergeItemStack(itemstack1, inv.getSizeInventory(), this.inventorySlots.size(), true))
+                if (!this.mergeItemStack(itemstack1, this.inv.getSizeInventory(), this.inventorySlots.size(), true))
                 {
                     return null;
                 }
             }
-            else if (!this.mergeItemStack(itemstack1, 0, inv.getSizeInventory(), false))
+            else if (!this.mergeItemStack(itemstack1, 0, this.inv.getSizeInventory(), false))
             {
                 return null;
             }

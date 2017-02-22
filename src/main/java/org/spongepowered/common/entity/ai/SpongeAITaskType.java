@@ -41,25 +41,25 @@ public final class SpongeAITaskType implements AITaskType {
 
     @Override
     public Class<? extends AITask<? extends Agent>> getAIClass() {
-        return aiClass;
+        return this.aiClass;
     }
 
     @Override
     public String getId() {
-        return id;
+        return this.id;
     }
 
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .addValue(id)
-                .addValue(name)
-                .add("aiClass", aiClass)
+                .addValue(this.id)
+                .addValue(this.name)
+                .add("aiClass", this.aiClass)
                 .toString();
     }
 }

@@ -57,7 +57,7 @@ public class ZombieTypeRegistryModule implements CatalogRegistryModule<ZombieTyp
         if (!id.contains(":")) {
             id = "minecraft:" + id;
         }
-        return Optional.ofNullable(types.get(id));
+        return Optional.ofNullable(this.types.get(id));
     }
 
     @Override

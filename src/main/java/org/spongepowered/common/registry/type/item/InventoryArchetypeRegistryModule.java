@@ -82,7 +82,7 @@ public class InventoryArchetypeRegistryModule implements AlternateCatalogRegistr
     public Map<String, InventoryArchetype> provideCatalogMap() {
 
         Map<String, InventoryArchetype> map = new HashMap<>();
-        map.putAll(mapping);
+        map.putAll(this.mapping);
         for (Map.Entry<String, InventoryArchetype> entry : this.mapping.entrySet()) {
             map.put(entry.getKey().replace("minecraft:", "").replace("sponge:", ""), entry.getValue());
         }

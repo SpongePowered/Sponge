@@ -67,6 +67,6 @@ public final class SpongeWanderAIBuilder implements WanderAITask.Builder {
     @Override
     public WanderAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
-        return (WanderAITask) new EntityAIWander((EntityCreature) owner, speed, executionChance);
+        return (WanderAITask) new EntityAIWander((EntityCreature) owner, this.speed, this.executionChance);
     }
 }

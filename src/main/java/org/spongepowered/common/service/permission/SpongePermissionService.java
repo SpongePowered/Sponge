@@ -70,7 +70,7 @@ public class SpongePermissionService implements PermissionService {
 
     public SpongePermissionService(Game game) {
         this.game = game;
-        this.subjects.put(SUBJECTS_DEFAULT, (defaultCollection = newCollection(SUBJECTS_DEFAULT)));
+        this.subjects.put(SUBJECTS_DEFAULT, (this.defaultCollection = newCollection(SUBJECTS_DEFAULT)));
         this.subjects.put(SUBJECTS_USER, new UserCollection(this));
         this.subjects.put(SUBJECTS_GROUP, new OpLevelCollection(this));
 
@@ -178,6 +178,6 @@ public class SpongePermissionService implements PermissionService {
     }
 
     public SpongeSubjectCollection getDefaultCollection() {
-        return defaultCollection;
+        return this.defaultCollection;
     }
 }

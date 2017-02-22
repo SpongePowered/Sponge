@@ -73,7 +73,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
         this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, this.configPath.resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
         this.generateSpawnOnLoad = idIn == 0;
         this.config.getConfig().getWorld().setGenerateSpawnOnLoad(this.generateSpawnOnLoad);
-        this.sanitizedId = modId + ":" + dimName;
+        this.sanitizedId = this.modId + ":" + dimName;
         String contextId = this.sanitizedId.replace(":", ".");
         this.context = new Context(Context.DIMENSION_KEY, contextId);
         if (!WorldManager.isDimensionRegistered(idIn)) {

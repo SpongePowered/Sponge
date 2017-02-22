@@ -41,7 +41,7 @@ public abstract class MixinDataFixer {
             constant = @Constant(intValue = 512)
     )
     private int modifyVersion(int versionComingIn) {
-        return version;
+        return this.version;
     }
 
 }

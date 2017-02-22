@@ -48,7 +48,7 @@ public class BrewingStandInventoryLens extends OrderedInventoryLensImpl {
         this.ingredient = new InputSlotLensImpl(3, (i) -> true, (i) -> true); // TODO filter PotionIngredients
         // TODO 1.9 Fuel slot
 
-        this.addSpanningChild(potions);
-        this.addSpanningChild(ingredient);
+        this.addSpanningChild(this.potions);
+        this.addSpanningChild(this.ingredient);
     }
 }
