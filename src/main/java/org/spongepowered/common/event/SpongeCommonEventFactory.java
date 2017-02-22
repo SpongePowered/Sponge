@@ -107,6 +107,7 @@ import org.spongepowered.common.event.tracking.phase.block.BlockPhase.State;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
@@ -470,9 +471,7 @@ public class SpongeCommonEventFactory {
         boolean messageCancelled = false;
 
         if (entity instanceof EntityPlayerMP) {
-            Player player = (Player) entity;
-            originalChannel = player.getMessageChannel();
-            channel = player.getMessageChannel();
+            originalChannel = channel = ((IMixinEntityPlayerMP) entity).getDeathMessageChannel();
         } else {
             originalChannel = MessageChannel.TO_NONE;
             channel = MessageChannel.TO_NONE;
