@@ -43,6 +43,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.util.SpongeUsernameCache;
 import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
@@ -105,6 +106,7 @@ class UserDiscoverer {
     }
 
     static User findByUsername(String username) {
+        // check mojang cache
         PlayerProfileCache cache = SpongeImpl.getServer().getPlayerProfileCache();
         HashSet<String> names = Sets.newHashSet(cache.getUsernames());
         if (names.contains(username.toLowerCase(Locale.ROOT))) {
@@ -113,6 +115,13 @@ class UserDiscoverer {
                 return findByProfile((org.spongepowered.api.profile.GameProfile) profile);
             }
         }
+
+        // check username cache
+        final UUID uuid = SpongeUsernameCache.getLastKnownUUID(username);
+        if (uuid != null) {
+            return create(new GameProfile(uuid, username));
+        }
+
         return null;
     }
 
