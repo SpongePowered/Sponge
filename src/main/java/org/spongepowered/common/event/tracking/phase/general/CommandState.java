@@ -33,6 +33,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.teleport.EntityTeleportCause;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -159,6 +160,6 @@ final class CommandState extends GeneralState {
                     .build();
         }
 
-        return super.generateTeleportCause(context);
+        return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.COMMAND).build()));
     }
 }
