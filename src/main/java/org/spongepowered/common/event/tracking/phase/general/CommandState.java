@@ -32,6 +32,8 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.teleport.EntityTeleportCause;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.common.SpongeImpl;
@@ -142,5 +144,21 @@ final class CommandState extends GeneralState {
     @Override
     public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         return context.getCapturedEntities().add(entity);
+    }
+
+    @Override
+    public Cause generateTeleportCause(PhaseContext context) {
+        final Entity entity = context.getSource(Entity.class).orElse(null);
+        if (entity != null) {
+            return Cause
+                    .source(EntityTeleportCause.builder()
+                            .entity(entity)
+                            .type(TeleportTypes.COMMAND)
+                            .build()
+                    )
+                    .build();
+        }
+
+        return super.generateTeleportCause(context);
     }
 }
