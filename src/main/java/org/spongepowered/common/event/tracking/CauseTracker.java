@@ -180,21 +180,19 @@ public final class CauseTracker {
         final IPhaseState state = currentPhaseData.state;
         final boolean isEmpty = this.stack.isEmpty();
         if (isEmpty) {
-            if (this.isVerbose) {
-                // The random occurrence that we're told to complete a phase
-                // while a world is being changed unknowingly.
-                new PrettyPrinter(60).add("Unexpected ").centre().hr()
-                        .add("Sponge's tracking system is very dependent on knowing when\n"
-                             + "a change to any world takes place, however, we have been told\n"
-                             + "to complete a \"phase\" without having entered any phases.\n"
-                             + "This is an error usually on Sponge's part, so a report\n"
-                             + "is required on the issue tracker on GitHub.").hr()
-                        .add("  %s : %s", "Affected World", this.targetWorld)
-                        .add("StackTrace:")
-                        .add(new Exception())
-                        .trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+            // The random occurrence that we're told to complete a phase
+            // while a world is being changed unknowingly.
+            new PrettyPrinter(60).add("Unexpected ").centre().hr()
+                    .add("Sponge's tracking system is very dependent on knowing when\n"
+                            + "a change to any world takes place, however, we have been told\n"
+                            + "to complete a \"phase\" without having entered any phases.\n"
+                            + "This is an error usually on Sponge's part, so a report\n"
+                            + "is required on the issue tracker on GitHub.").hr()
+                    .add("  %s : %s", "Affected World", this.targetWorld)
+                    .add("StackTrace:")
+                    .add(new Exception())
+                    .trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
 
-            }
             return;
         }
 
@@ -207,6 +205,7 @@ public final class CauseTracker {
                             + "is required on the issue tracker on GitHub.").hr()
                     .add("  %s : %s", "Affected World", this.targetWorld)
                     .add("Expected to exit phase: %s", prevState)
+                    .add("But instead found phase: %s", state)
                     .add("StackTrace:")
                     .add(new Exception());
             printer.add(" Phases Remaining:");
@@ -432,7 +431,7 @@ public final class CauseTracker {
         final PhaseData phaseData = this.stack.peek();
         final IPhaseState phaseState = phaseData.state;
         final boolean isComplete = phaseState == GeneralPhase.State.COMPLETE;
-        if (CauseTracker.ENABLED && this.isVerbose && isComplete) {
+        if (CauseTracker.ENABLED && isComplete) {
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
             new PrettyPrinter(60).add("Unexpected World Change Detected").centre().hr()
