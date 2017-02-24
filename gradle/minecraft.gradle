@@ -33,9 +33,7 @@ sourceSets {
 
 // Java 6 source set for compatibility checking
 sourceSets {
-    java6 {
-        compileClasspath += main.compileClasspath + main.output
-    }
+    java6
 }
 
 // Compile options
