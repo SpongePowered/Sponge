@@ -93,6 +93,7 @@ task devJar(type: Jar) {
     // Include API
     from api.sourceSets.main.output
     from api.sourceSets.ap.output
+    from zipTree(api.tasks.genEventImpl.outputs.files.first())
 }
 
 artifacts {
