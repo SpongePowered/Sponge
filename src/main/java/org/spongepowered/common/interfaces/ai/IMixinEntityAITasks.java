@@ -43,4 +43,8 @@ public interface IMixinEntityAITasks {
 
     Set<EntityAITasks.EntityAITaskEntry> getTasksUnsafe();
 
+    boolean initialized();
+
+    void setInitialized(boolean initialized);
+
 }
