@@ -1475,6 +1475,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public void onSpongeEntityAdded(net.minecraft.entity.Entity entity) {
         this.onEntityAdded(entity);
+        ((IMixinEntity) entity).onJoinWorld();
     }
 
     @Override

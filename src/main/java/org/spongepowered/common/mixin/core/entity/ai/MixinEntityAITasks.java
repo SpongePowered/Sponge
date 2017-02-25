@@ -67,6 +67,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
 
     private EntityLiving owner;
     private GoalType type;
+    private boolean initialized;
 
     public Agent goal$getOwner() {
         return (Agent) this.owner;
@@ -236,6 +237,16 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     @Overwrite
     private boolean areTasksCompatible(EntityAITasks.EntityAITaskEntry taskEntry1, EntityAITasks.EntityAITaskEntry taskEntry2) {
         return (((AITask) taskEntry2.action).canRunConcurrentWith((AITask) taskEntry1.action));
+    }
+
+    @Override
+    public boolean initialized() {
+        return this.initialized;
+    }
+
+    @Override
+    public void setInitialized(boolean initialized) {
+        this.initialized = initialized;
     }
 
     @Override

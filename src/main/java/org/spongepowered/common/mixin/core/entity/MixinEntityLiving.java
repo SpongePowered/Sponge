@@ -90,17 +90,22 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getLeashedToEntity();
     @Shadow protected abstract void initEntityAI();
 
-    boolean initAI = false;
-
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
     public void onInitAi(EntityLiving this$0) {
-        if (!this.initAI) {
+        this.initSpongeAI();;
+        this.initEntityAI();
+    }
+
+    private void initSpongeAI() {
+        if (!((IMixinEntityAITasks) this.tasks).initialized()) {
             ((IMixinEntityAITasks) this.tasks).setOwner((EntityLiving) (Object) this);
             ((IMixinEntityAITasks) this.tasks).setType(GoalTypes.NORMAL);
+            ((IMixinEntityAITasks) this.tasks).setInitialized(true);
+        }
+        if (!((IMixinEntityAITasks) this.targetTasks).initialized()) {
             ((IMixinEntityAITasks) this.targetTasks).setOwner((EntityLiving) (Object) this);
             ((IMixinEntityAITasks) this.targetTasks).setType(GoalTypes.TARGET);
-            this.initEntityAI();
-            this.initAI = true;
+            ((IMixinEntityAITasks) this.targetTasks).setInitialized(true);
         }
     }
 
@@ -263,6 +268,11 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getAgentData());
+    }
+
+    @Override
+    public void onJoinWorld() {
+        this.initSpongeAI();
     }
 
 }

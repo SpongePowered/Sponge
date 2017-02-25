@@ -140,4 +140,8 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     // Timings
     Timing getTimingsHandler();
+
+    default void onJoinWorld() {
+
+    }
 }
