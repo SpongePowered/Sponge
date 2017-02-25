@@ -197,12 +197,12 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     @Override
     public void setNoAI(boolean disable) {
-        this.aiDisabled = disable; // TODO I believe the name of the method parameter is incorrect and is actually enable...
+        this.aiDisabled = disable;
     }
 
     @Override
-    public void setLeftHanded(boolean disable) {
-        this.leftHanded = disable; // TODO I believe the name of the method parameter is incorrect and is actually enable...
+    public void setLeftHanded(boolean leftHanded) {
+        this.leftHanded = leftHanded;
     }
 
     @Override
