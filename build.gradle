@@ -49,8 +49,11 @@ version = api.version
 ext.apiVersion = version
 
 dependencies {
-    compile api
-    compile('org.spongepowered:mixin:0.6.6-SNAPSHOT') {
+    compile(api) {
+        exclude module: 'asm'
+    }
+    compile 'org.ow2.asm:asm-debug-all:5.0.3'
+    compile('org.spongepowered:mixin:0.6.8-SNAPSHOT') {
         exclude module: 'launchwrapper'
     }
 

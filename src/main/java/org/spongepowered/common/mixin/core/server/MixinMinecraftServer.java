@@ -320,7 +320,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @reason Add multiworld support
      */
     @Overwrite
-    protected void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generatorOptions) {
+    public void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generatorOptions) {
         SpongeCommonEventFactory.convertingMapFormat = true;
         this.convertMapIfNeeded(overworldFolder);
         SpongeCommonEventFactory.convertingMapFormat = false;
