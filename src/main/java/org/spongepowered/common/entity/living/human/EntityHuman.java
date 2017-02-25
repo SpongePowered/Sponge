@@ -24,6 +24,11 @@
  */
 package org.spongepowered.common.entity.living.human;
 
+import static net.minecraft.entity.player.EntityPlayer.ABSORPTION;
+import static net.minecraft.entity.player.EntityPlayer.MAIN_HAND;
+import static net.minecraft.entity.player.EntityPlayer.PLAYER_MODEL_FLAG;
+import static net.minecraft.entity.player.EntityPlayer.PLAYER_SCORE;
+
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -36,7 +41,6 @@ import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityTippedArrow;
 import net.minecraft.init.Enchantments;
@@ -99,7 +103,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     private GameProfile fakeProfile;
     @Nullable private UUID skinUuid;
-    private boolean aiDisabled = false;
+    private boolean aiDisabled = false, leftHanded = false;
 
     public EntityHuman(World worldIn) {
         super(worldIn);
@@ -116,20 +120,22 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     @Override
     protected void entityInit() {
-        this.dataManager.register(EntityLivingBase.HAND_STATES, Byte.valueOf((byte)0));
-        this.dataManager.register(EntityLivingBase.POTION_EFFECTS, Integer.valueOf(0));
-        this.dataManager.register(EntityLivingBase.HIDE_PARTICLES, Boolean.valueOf(false));
-        this.dataManager.register(EntityLivingBase.ARROW_COUNT_IN_ENTITY, Integer.valueOf(0));
-        this.dataManager.register(EntityLivingBase.HEALTH, Float.valueOf(1.0F));
-        this.dataManager.register(EntityPlayer.ABSORPTION, 0.0F);
-        this.dataManager.register(EntityPlayer.PLAYER_SCORE, 0);
-        this.dataManager.register(EntityPlayer.MAIN_HAND, (byte) 1);
-        this.dataManager.register(EntityPlayer.PLAYER_MODEL_FLAG, (byte) 0xFF);
+        // EntityLivingBase
+        this.dataManager.register(HAND_STATES, Byte.valueOf((byte)0));
+        this.dataManager.register(POTION_EFFECTS, Integer.valueOf(0));
+        this.dataManager.register(HIDE_PARTICLES, Boolean.valueOf(false));
+        this.dataManager.register(ARROW_COUNT_IN_ENTITY, Integer.valueOf(0));
+        this.dataManager.register(HEALTH, Float.valueOf(1.0F));
+        // EntityPlayer
+        this.dataManager.register(ABSORPTION, Float.valueOf(0.0F));
+        this.dataManager.register(PLAYER_SCORE, Integer.valueOf(0));
+        this.dataManager.register(PLAYER_MODEL_FLAG, Byte.valueOf((byte)0));
+        this.dataManager.register(MAIN_HAND, Byte.valueOf((byte)1));
     }
 
     @Override
     public boolean isLeftHanded() {
-        return this.dataManager.get(EntityPlayer.MAIN_HAND) == 0;
+        return this.leftHanded;
     }
 
     @Override
@@ -187,6 +193,16 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     public void onLivingUpdate() {
         super.onLivingUpdate();
         this.updateArmSwingProgress();
+    }
+
+    @Override
+    public void setNoAI(boolean disable) {
+        this.aiDisabled = disable; // TODO I believe the name of the method parameter is incorrect and is actually enable...
+    }
+
+    @Override
+    public void setLeftHanded(boolean disable) {
+        this.leftHanded = disable; // TODO I believe the name of the method parameter is incorrect and is actually enable...
     }
 
     @Override
@@ -254,7 +270,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     @Override
     public float getAbsorptionAmount() {
-        return this.getDataManager().get(EntityPlayer.ABSORPTION);
+        return this.getDataManager().get(ABSORPTION);
     }
 
     @Override
@@ -262,7 +278,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         if (amount < 0.0F) {
             amount = 0.0F;
         }
-        this.getDataManager().set(EntityPlayer.ABSORPTION, amount);
+        this.getDataManager().set(ABSORPTION, amount);
     }
 
     @Override
