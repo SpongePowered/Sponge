@@ -340,7 +340,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * generate spawn on server start. I enforce that here.
      */
     @Overwrite
-    protected void initialWorldChunkLoad() {
+    public void initialWorldChunkLoad() {
         for (WorldServer worldServer: this.worlds) {
             this.prepareSpawnArea(worldServer);
         }
@@ -674,22 +674,21 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @param dontLog Whether to log during saving
      */
     @Overwrite
-    protected void saveAllWorlds(boolean dontLog)
-    {
-        for (WorldServer worldserver : this.worlds)
-        {
-            if (worldserver != null)
-            {
+    public void saveAllWorlds(boolean dontLog) {
+        for (WorldServer worldserver : this.worlds) {
+            if (worldserver != null) {
                 // Sponge start - check auto save interval in world config
                 if (this.isDedicatedServer() && this.isServerRunning()) {
                     final IMixinWorldServer spongeWorld = (IMixinWorldServer) worldserver;
                     final int autoSaveInterval = spongeWorld.getActiveConfig().getConfig().getWorld().getAutoSaveInterval();
                     final boolean logAutoSave = spongeWorld.getActiveConfig().getConfig().getLogging().worldAutoSaveLogging();
-                    if (autoSaveInterval <= 0 || ((WorldProperties) worldserver.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
+                    if (autoSaveInterval <= 0
+                            || ((WorldProperties) worldserver.getWorldInfo()).getSerializationBehavior() != SerializationBehaviors.AUTOMATIC) {
                         if (logAutoSave) {
                             LOG.warn("Auto-saving has been disabled for level \'" + worldserver.getWorldInfo().getWorldName() + "\'/"
                                     + worldserver.provider.getDimensionType().getName() + ". "
-                                    + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than zero in the corresponding world config.");
+                                    + "No chunk data will be auto-saved - to re-enable auto-saving set 'auto-save-interval' to a value greater than"
+                                    + " zero in the corresponding world config.");
                         }
                         continue;
                     }
