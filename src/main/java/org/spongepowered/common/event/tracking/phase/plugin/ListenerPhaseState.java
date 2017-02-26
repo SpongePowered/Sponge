@@ -90,7 +90,7 @@ abstract class ListenerPhaseState extends PluginPhaseState {
         printer.addWrapped("%s : %s", "Listener", listener);
         printer.add("Stacktrace:");
         printer.add(new Exception());
-        printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
     static void logWarningOfDifferentWorldchanges(CauseTracker causeTracker, Object listener) {
         final PrettyPrinter printer = new PrettyPrinter(50).add("Changing a different World than expected!!").centre().hr();
@@ -104,7 +104,7 @@ abstract class ListenerPhaseState extends PluginPhaseState {
         printer.addWrapped("%s : %s", "Listener", listener);
         printer.add("Stacktrace:");
         printer.add(new Exception());
-        printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
 
