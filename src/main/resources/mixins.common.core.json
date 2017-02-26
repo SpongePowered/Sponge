@@ -177,6 +177,7 @@
         "entity.MixinArmorEquipable",
         "entity.MixinEntity",
         "entity.MixinEntityAreaEffectCloud",
+        "entity.MixinArmorEquipable",
         "entity.MixinEntityAgeable",
         "entity.MixinEntityCreature",
         "entity.MixinEntityFlying",
