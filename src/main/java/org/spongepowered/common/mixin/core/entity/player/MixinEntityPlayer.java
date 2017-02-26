@@ -559,9 +559,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                                                 : EnumCreatureAttribute.UNDEFINED;
                 final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchamntmentFunction(this.getHeldItemMainhand(), creatureAttribute, attackStrength);
                 // This is kept for the post-damage event handling
-                final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream()
-                        .map(ModifierFunction::getModifier)
-                        .collect(Collectors.toList());
+                final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream().map(ModifierFunction::getModifier).collect(Collectors.toList());
 
                 enchantmentDamage = (float) enchantmentModifierFunctions.stream()
                         .map(ModifierFunction::getFunction)

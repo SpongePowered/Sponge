@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.event;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContext;
@@ -57,10 +60,17 @@ public class SpongeCauseStackManager implements CauseStackManager {
 
     }
 
+    private void enforceMainThread() {
+        if (!Sponge.getServer().isMainThread()) {
+            throw new IllegalStateException("CauseStackManager called from off main thread!");
+        }
+    }
+
     @Override
     public Cause getCurrentCause() {
+        enforceMainThread();
         if (this.cached_cause == null || this.cached_ctx == null) {
-            if(this.cause.isEmpty()) {
+            if (this.cause.isEmpty()) {
                 this.cached_cause = Cause.of(getCurrentContext(), SpongeImpl.getGame());
             } else {
                 this.cached_cause = Cause.of(getCurrentContext(), this.cause);
@@ -71,6 +81,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     public EventContext getCurrentContext() {
+        enforceMainThread();
         if (this.cached_ctx == null) {
             this.cached_ctx = EventContext.of(this.ctx);
         }
@@ -79,15 +90,21 @@ public class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     public CauseStackManager pushCause(Object obj) {
-        this.cached_cause = null;
+        enforceMainThread();
+        checkNotNull(obj, "obj");
+        if(obj != this.cause.peek()) {
+            this.cached_cause = null;
+        }
         this.cause.push(obj);
         return this;
     }
 
     @Override
     public Object popCause() {
-        if (this.cause.size() == this.min_depth) {
-            throw new IllegalStateException("Cause stack corruption, tried to pop more objects off than were pushed since last frame.");
+        enforceMainThread();
+        if (this.cause.size() <= this.min_depth) {
+            throw new IllegalStateException("Cause stack corruption, tried to pop more objects off than were pushed since last frame (Size was "
+                    + this.cause.size() + " but mid depth is " + this.min_depth + ")");
         }
         this.cached_cause = null;
         return this.cause.pop();
@@ -95,6 +112,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     public void popCauses(int n) {
+        enforceMainThread();
         for (int i = 0; i < n; i++) {
             popCause();
         }
@@ -102,11 +120,13 @@ public class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     public Object peekCause() {
+        enforceMainThread();
         return this.cause.peek();
     }
 
     @Override
     public CauseStackFrame pushCauseFrame() {
+        enforceMainThread();
         CauseStackFrame frame = new CauseStackFrame(this.min_depth);
         this.frames.push(frame);
         this.min_depth = this.cause.size();
@@ -121,6 +141,8 @@ public class SpongeCauseStackManager implements CauseStackManager {
 
     @Override
     public void popCauseFrame(Object oldFrame) {
+        enforceMainThread();
+        checkNotNull(oldFrame, "oldFrame");
         CauseStackFrame frame = this.frames.peek();
         if (frame != oldFrame) {
             // If the given frame is not the top frame then some form of
@@ -180,20 +202,24 @@ public class SpongeCauseStackManager implements CauseStackManager {
         if (ctx_invalid) {
             this.cached_ctx = null;
         }
-        this.min_depth = frame.old_min_depth;
         // If there were any objects left on the stack then we pop them off
         while (this.cause.size() > this.min_depth) {
             this.cause.pop();
         }
+        this.min_depth = frame.old_min_depth;
     }
 
     @Override
     public AutoCloseable createCauseFrame() {
+        enforceMainThread();
         return pushCauseFrame();
     }
 
     @Override
     public <T> CauseStackManager addContext(EventContextKey<T> key, T value) {
+        enforceMainThread();
+        checkNotNull(key, "key");
+        checkNotNull(value, "value");
         this.cached_ctx = null;
         Object existing = this.ctx.put(key, value);
         if (!this.frames.isEmpty()) {
@@ -210,12 +236,16 @@ public class SpongeCauseStackManager implements CauseStackManager {
     @Override
     @SuppressWarnings("unchecked")
     public <T> Optional<T> getContext(EventContextKey<T> key) {
+        enforceMainThread();
+        checkNotNull(key, "key");
         return Optional.ofNullable((T) this.ctx.get(key.getId()));
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> Optional<T> removeContext(EventContextKey<T> key) {
+        enforceMainThread();
+        checkNotNull(key, "key");
         this.cached_ctx = null;
         Object existing = this.ctx.remove(key);
         if (existing != null && !this.frames.isEmpty()) {

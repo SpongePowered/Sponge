@@ -728,12 +728,15 @@ public interface PacketFunction {
         context.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(
                         originalBlocks -> {
+            Sponge.getCauseStackManager().pushCause(player);
             boolean success = TrackingUtil.processBlockCaptures(originalBlocks, state,
                     context);
             if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
+                Sponge.getCauseStackManager().pushCause(player);
                 EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
                 PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
             }
+            Sponge.getCauseStackManager().popCause();
         });
         context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(drops -> {
             final List<Entity> entities =

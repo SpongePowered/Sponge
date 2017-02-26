@@ -35,6 +35,7 @@ import org.spongepowered.api.event.cause.EventContextKey;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -78,9 +79,9 @@ public final class EventContextKeysModule implements AlternateCatalogRegistryMod
     public void registerAdditionalCatalog(EventContextKey extraCatalog) {
         final String id = checkNotNull(extraCatalog).getId();
         final String key = id.toLowerCase(Locale.ENGLISH);
-        checkArgument(!key.contains("sponge:"), "Cannot register spoofed teleport type!");
-        checkArgument(!key.contains("minecraft:"), "Cannot register spoofed teleport type!");
-        checkArgument(!this.keyMappings.containsKey(key), "Cannot register an already registered TeleportType: %s", key);
+        checkArgument(!key.contains("sponge:"), "Cannot register spoofed event context key!");
+        checkArgument(!key.contains("minecraft:"), "Cannot register spoofed event context key!");
+        checkArgument(!this.keyMappings.containsKey(key), "Cannot register an already registered EventContextKey: %s", key);
         this.keyMappings.put(key, extraCatalog);
 
     }
@@ -89,6 +90,7 @@ public final class EventContextKeysModule implements AlternateCatalogRegistryMod
     public void registerDefaults() {
         this.keyMappings.put("sponge:creator", new SpongeEventContextKey<>("sponge:creator", UUID.class));
         this.keyMappings.put("sponge:damage_type", new SpongeEventContextKey<>("sponge:damage_type", DamageType.class));
+        this.keyMappings.put("sponge:dismount_type", new SpongeEventContextKey<>("sponge:dismount_type", DismountType.class));
         this.keyMappings.put("sponge:igniter", new SpongeEventContextKey<>("sponge:igniter", User.class));
         this.keyMappings.put("sponge:last_damage_source", new SpongeEventContextKey<>("sponge:last_damage_source", DamageSource.class));
         this.keyMappings.put("sponge:notifier", new SpongeEventContextKey<>("sponge:notifier", User.class));

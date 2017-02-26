@@ -34,6 +34,8 @@ import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
@@ -94,13 +96,13 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
     @Override
     public boolean fireAuthEvent() {
         Text disconnectMessage = Text.of("You are not allowed to log in to this server.");
-        Sponge.getCauseStackManager().pushCause(this.loginGameProfile);
+        // Cause is created directly as we can't access the cause stack manager
+        // from off the main thread
         ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(
-                Sponge.getCauseStackManager().getCurrentCause(), (RemoteConnection) this.networkManager,
+                Cause.of(EventContext.empty(), this.loginGameProfile), (RemoteConnection) this.networkManager,
                 new MessageEvent.MessageFormatter(disconnectMessage), (GameProfile) this.loginGameProfile, false
         );
         SpongeImpl.postEvent(event);
-        Sponge.getCauseStackManager().popCause();
         if (event.isCancelled()) {
             this.disconnectClient(event.isMessageCancelled() ? Optional.empty() : Optional.of(event.getMessage()));
         }

@@ -266,11 +266,11 @@ public class SpongeCommonEventFactory {
             if (SpongeImplHooks.isFakePlayer(player)) {
                 isFake = true;
             }
-        } else {
-
         }
 
-        Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner);
+        if(owner != null) {
+            Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner);
+        }
         if (notifier != null) {
             Optional<Player> oplayer = data.context.getSource(Player.class);
             if (oplayer.isPresent()) {
@@ -490,7 +490,7 @@ public class SpongeCommonEventFactory {
 
     public static InteractItemEvent callInteractItemEventPrimary(EntityPlayer player, ItemStack stack, EnumHand hand,
             Optional<Vector3d> interactionPoint, Object hitTarget) {
-        Object frame = Sponge.getCauseStackManager();
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
         Sponge.getCauseStackManager().pushCause(hitTarget);
         Sponge.getCauseStackManager().pushCause(player);
         InteractItemEvent.Primary event;
