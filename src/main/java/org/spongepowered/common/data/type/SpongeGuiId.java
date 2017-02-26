@@ -22,19 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.archetype;
+package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.item.inventory.InventoryProperty;
+import org.spongepowered.api.item.inventory.property.GuiId;
+import org.spongepowered.common.SpongeCatalogType;
 
-import java.util.Collections;
-import java.util.Map;
+import javax.annotation.Nullable;
 
-/**
- * Base Archetype
- */
-public class SlotArchetype extends CompositeInventoryArchetype {
+public class SpongeGuiId extends SpongeCatalogType implements GuiId {
 
-    public SlotArchetype(Map<String, InventoryProperty<String, ?>> properties) {
-        super("minecraft:slot", "Slot", Collections.emptyList(), properties, null);
+    @Nullable private String internalId;
+
+    public SpongeGuiId(String id) {
+        super(id);
+    }
+
+    public SpongeGuiId(String id, String internalId) {
+        this(id);
+        this.internalId = internalId;
+    }
+
+    public String getInternalId() {
+        return this.internalId == null ? this.getId() : this.internalId;
     }
 }

@@ -85,6 +85,7 @@ import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.property.GuiId;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
@@ -457,6 +458,7 @@ public final class CommonModuleRegistry {
             .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
             .registerModule(DismountType.class, new DismountTypeRegistryModule())
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
+            .registerModule(GuiId.class, GuiIdRegistryModule.getInstance()) // Used in InventoryArchetype
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
             .registerModule(StructureMode.class, new StructureModeRegistryModule())
             .registerModule(CraftingRecipe.class, SpongeCraftingRecipeRegistry.getInstance())

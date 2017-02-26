@@ -25,16 +25,26 @@
 package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.AbstractHorse;
+import net.minecraft.inventory.ContainerHorseChest;
 import org.spongepowered.api.entity.living.animal.Horse;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.interfaces.inventory.IMixinCarriedInventory;
 
 @Mixin(AbstractHorse.class)
 @Implements(@Interface(iface = Horse.class, prefix = "horse$", unique = true))
 public abstract class MixinAbstractHorse extends MixinEntityAnimal implements Horse {
+
+    @Shadow protected ContainerHorseChest horseChest;
 
     @Unique
     protected void printDeprecatedHorseUsage(String specificSubHeader) {
@@ -46,5 +56,17 @@ public abstract class MixinAbstractHorse extends MixinEntityAnimal implements Ho
                                + "notify the plugin developer using these methods!")
                 .add(new UnsupportedOperationException("Deprecated Usage Detected"))
                 .trace();
+    }
+
+    @Override
+    public CarriedInventory<? extends Carrier> getInventory() {
+        return ((CarriedInventory) this.horseChest);
+    }
+
+    @Inject(method = "initHorseChest", at = @At("RETURN"))
+    public void onInitHorseChest(CallbackInfo ci) {
+        if (horseChest instanceof IMixinCarriedInventory) {
+            ((IMixinCarriedInventory) horseChest).setCarrier(this);
+        }
     }
 }
