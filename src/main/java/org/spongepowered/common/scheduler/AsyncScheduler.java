@@ -129,7 +129,7 @@ public class AsyncScheduler extends SchedulerBase {
     }
 
     @Override
-    protected void executeTaskRunnable(Runnable runnable) {
+    protected void executeTaskRunnable(ScheduledTask task, Runnable runnable) {
         this.executor.submit(runnable);
     }
 

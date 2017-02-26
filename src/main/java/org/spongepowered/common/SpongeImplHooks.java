@@ -36,6 +36,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ReportedException;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameType;
@@ -46,10 +47,18 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.world.WorldManager;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.concurrent.FutureTask;
 
 import javax.annotation.Nullable;
 
@@ -212,5 +221,21 @@ public final class SpongeImplHooks {
         }
 
         return false;
+    }
+
+    public static Object onUtilRunTask(FutureTask<?> task, Logger logger) {
+        for (WorldServer worldServer : WorldManager.getWorlds()) {
+            final CauseTracker otherCauseTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
+            otherCauseTracker.switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
+                    .add(NamedCause.source(task))
+                    .addCaptures()
+                    .complete()
+            );
+        }
+        Object value = Util.runTask(task, logger);
+        for (WorldServer worldServer : WorldManager.getWorlds()) {
+            ((IMixinWorldServer) worldServer).getCauseTracker().completePhase(PluginPhase.State.SCHEDULED_TASK);
+        }
+        return value;
     }
 }
