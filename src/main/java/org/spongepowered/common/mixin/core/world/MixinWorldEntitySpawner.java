@@ -186,7 +186,7 @@ public abstract class MixinWorldEntitySpawner {
                 continue;
             }
 
-            if ((!enumCreatureType.getPeacefulCreature() || spawnPeacefulMobs) && (enumCreatureType.getPeacefulCreature() || spawnHostileMobs) && (!enumCreatureType.getAnimal())) {
+            if ((!enumCreatureType.getPeacefulCreature() || spawnPeacefulMobs) && (enumCreatureType.getPeacefulCreature() || spawnHostileMobs)) {
                 int entityCount = SpongeImplHooks.countEntities(worldServerIn, enumCreatureType, true);
                 int maxCount = limit * chunkSpawnCandidates / MOB_COUNT_DIV;
                 if (entityCount > maxCount) {
