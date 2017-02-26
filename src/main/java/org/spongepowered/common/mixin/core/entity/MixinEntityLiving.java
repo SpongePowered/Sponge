@@ -92,7 +92,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
     public void onInitAi(EntityLiving this$0) {
-        this.initSpongeAI();;
+        this.initSpongeAI();
         this.initEntityAI();
     }
 
