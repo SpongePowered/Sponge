@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import net.minecraft.block.Block;
+import net.minecraft.entity.boss.dragon.phase.IPhase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -45,6 +46,7 @@ public final class PluginPhase extends TrackingPhase {
         public static final IPhaseState BLOCK_WORKER = new BlockWorkerPhaseState();
         public static final IPhaseState CUSTOM_SPAWN = new PluginPhaseState();
         public static final IPhaseState CUSTOM_EXPLOSION = new CustomExplosionState();
+        public static final IPhaseState SCHEDULED_TASK = new ScheduledTaskPhaseState();
 
         private State() {
         }

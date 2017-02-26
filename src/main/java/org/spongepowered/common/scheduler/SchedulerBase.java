@@ -176,7 +176,7 @@ abstract class SchedulerBase {
      * @param task The task to start
      */
     protected void startTask(final ScheduledTask task) {
-        this.executeTaskRunnable(() -> {
+        this.executeTaskRunnable(task, () -> {
             task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
             task.getTimingsHandler().startTimingIfSync();
             try {
@@ -194,6 +194,6 @@ abstract class SchedulerBase {
      *
      * @param runnable The runnable to run
      */
-    protected abstract void executeTaskRunnable(Runnable runnable);
+    protected abstract void executeTaskRunnable(ScheduledTask task, Runnable runnable);
 
 }

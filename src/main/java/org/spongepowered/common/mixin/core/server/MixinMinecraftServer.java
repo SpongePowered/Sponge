@@ -88,11 +88,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
@@ -115,7 +117,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.FutureTask;
 
 import javax.annotation.Nullable;
 
@@ -744,5 +748,34 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public boolean isMainThread() {
         return this.serverThread == Thread.currentThread();
+    }
+
+    @Redirect(method = "callFromMainThread", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;"))
+    public Object onCall(Callable<?> callable) throws Exception {
+        for (WorldServer worldServer : WorldManager.getWorlds()) {
+            final CauseTracker otherCauseTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
+            otherCauseTracker.switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
+                    .add(NamedCause.source(callable))
+                    .addCaptures()
+                    .complete()
+            );
+        }
+        Object value;
+        try {
+            value = callable.call();
+        } catch (Exception e) {
+            throw e;
+        }
+        finally {
+            for (WorldServer worldServer : WorldManager.getWorlds()) {
+                ((IMixinWorldServer) worldServer).getCauseTracker().completePhase(PluginPhase.State.SCHEDULED_TASK);
+            }
+        }
+        return value;
+    }
+
+    @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;runTask(Ljava/util/concurrent/FutureTask;Lorg/apache/logging/log4j/Logger;)Ljava/lang/Object;"))
+    private Object onRun(FutureTask task, Logger logger) {
+        return SpongeImplHooks.onUtilRunTask(task, logger);
     }
 }
