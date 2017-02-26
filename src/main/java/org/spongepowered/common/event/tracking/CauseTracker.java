@@ -191,7 +191,7 @@ public final class CauseTracker {
                     .add("  %s : %s", "Affected World", this.targetWorld)
                     .add("StackTrace:")
                     .add(new Exception())
-                    .trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+                    .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
 
             return;
         }
@@ -210,7 +210,7 @@ public final class CauseTracker {
                     .add(new Exception());
             printer.add(" Phases Remaining:");
             this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-            printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
 
             // The phase on the top of the stack was most likely never completed.
             // Since we don't know when and where completePhase was intended to be called for it,
@@ -231,7 +231,7 @@ public final class CauseTracker {
             this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
             printer.add("Stacktrace:");
             printer.add(new Exception("Stack trace"));
-            printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
         }
         this.stack.pop();
         // If pop is called, the Deque will already throw an exception if there is no element
@@ -277,7 +277,7 @@ public final class CauseTracker {
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add("  %s :", "Printing stack trace")
                 .add(new Exception("Stack trace"))
-                .trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+                .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
     private void printPhaseIncompatibility(IPhaseState currentState, IPhaseState incompatibleState) {
@@ -293,7 +293,7 @@ public final class CauseTracker {
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add("  %s :", "Printing stack trace");
         printer.add(new Exception("Stack trace"));
-        printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
     public void printMessageWithCaughtException(String header, String subHeader, Exception e) {
@@ -311,7 +311,7 @@ public final class CauseTracker {
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add("Stacktrace:")
                 .add(e)
-                .trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+                .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
     // ----------------- SIMPLE GETTERS --------------------------------------
@@ -442,7 +442,7 @@ public final class CauseTracker {
                          + "change tracked correctly and accurately.").hr()
                     .add("StackTrace:")
                     .add(new Exception())
-                    .trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+                    .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
 
         }
         if (CauseTracker.ENABLED && phaseState.getPhase().requiresBlockCapturing(phaseState)) {
@@ -458,7 +458,7 @@ public final class CauseTracker {
                 this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
                 printer.add("Stacktrace:");
                 printer.add(e);
-                printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+                printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
                 return false;
             }
         }
@@ -639,7 +639,7 @@ public final class CauseTracker {
                     this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
                     printer.add("Stacktrace:");
                     printer.add(e);
-                    printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+                    printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
                     return false;
                 }
             }
