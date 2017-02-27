@@ -58,8 +58,8 @@ public abstract class MixinBlockRedstoneDiode extends BlockHorizontal {
 
         NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent((World) worldIn, pos, java.util.EnumSet.of(enumfacing.getOpposite()));
         if (event == null || (!event.isCancelled() && !event.getNeighbors().isEmpty())) {
-            worldIn.neighborChanged(blockpos, (BlockRedstoneDiode)(Object) this, pos);
-            worldIn.notifyNeighborsOfStateExcept(blockpos, (BlockRedstoneDiode)(Object) this, enumfacing);
+            worldIn.neighborChanged(blockpos, (BlockRedstoneDiode) (Object) this, pos);
+            worldIn.notifyNeighborsOfStateExcept(blockpos, (BlockRedstoneDiode) (Object) this, enumfacing);
         }
         // We cancel here to avoid Forge event call in SF
         ci.cancel();

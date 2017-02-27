@@ -46,7 +46,6 @@ import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModDat
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
 public class MixinEntity_Collisions implements IModData_Collisions {
 
-    private net.minecraft.entity.Entity mcEntity = (net.minecraft.entity.Entity) (Object) this;
     private int maxCollisions = 8;
     private boolean refreshCache = false;
     private SpongeEntityType spongeEntityType;
@@ -57,14 +56,14 @@ public class MixinEntity_Collisions implements IModData_Collisions {
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onEntityConstruction(World world, CallbackInfo ci) {
         if (world != null && ((IMixinWorldInfo) world.getWorldInfo()).isValid()) {
-            EntityType entityType = ((Entity) this.mcEntity).getType();
+            EntityType entityType = ((Entity) this).getType();
             if (entityType == EntityTypes.UNKNOWN || !(entityType instanceof SpongeEntityType)) {
                 return;
             }
             this.spongeEntityType = (SpongeEntityType) entityType;
 
-            if (this.mcEntity instanceof EntityItem) {
-                EntityItem item = (EntityItem) this.mcEntity;
+            if ((Object) this instanceof EntityItem) {
+                EntityItem item = (EntityItem) (Object) this;
                 ItemStack itemstack = item.getEntityItem();
                 if (!itemstack.isEmpty()) {
                     this.entityName = itemstack.getUnlocalizedName().replace("item.", "");
@@ -135,7 +134,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
             }
 
             Integer entityMaxCollision = null;
-            if (this.mcEntity instanceof EntityItem) {
+            if ((Object) this instanceof EntityItem) {
                 // check if all items are overridden
                 entityMaxCollision = collisionMod.getEntityList().get(this.spongeEntityType.getName());
             }

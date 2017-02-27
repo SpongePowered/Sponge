@@ -157,7 +157,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         {
             this.id2ChunkMap.put(ChunkPos.asLong(x, z), chunk);
             chunk.onChunkLoad();
-            chunk.populateChunk((ChunkProviderServer)(Object) this, this.chunkGenerator);
+            chunk.populateChunk((ChunkProviderServer) (Object) this, this.chunkGenerator);
         }
 
         return chunk;

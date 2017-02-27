@@ -105,7 +105,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
         if (this.settings == null) {
             this.settings = new ChunkProviderSettings.Factory().build();
         }
-        this.isVanilla = WorldGenConstants.isValid((IChunkGenerator)(Object) this, GenerationPopulator.class);
+        this.isVanilla = WorldGenConstants.isValid((IChunkGenerator) (Object) this, GenerationPopulator.class);
     }
 
     @Override

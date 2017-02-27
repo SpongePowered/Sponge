@@ -40,7 +40,7 @@ public abstract class MixinWorld_TileEntityActivation {
 
     @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=blockEntities"))
     private void onBeginUpdateTileEntities(CallbackInfo ci) {
-        TileEntityActivation.activateTileEntities((WorldServer)(Object) this);
+        TileEntityActivation.activateTileEntities((WorldServer) (Object) this);
     }
 
 }

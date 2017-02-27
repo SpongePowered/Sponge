@@ -77,7 +77,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
         String contextId = this.sanitizedId.replace(":", ".");
         this.context = new Context(Context.DIMENSION_KEY, contextId);
         if (!WorldManager.isDimensionRegistered(idIn)) {
-            DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog((org.spongepowered.api.world.DimensionType)(Object) this);
+            DimensionTypeRegistryModule.getInstance().registerAdditionalCatalog((org.spongepowered.api.world.DimensionType) (Object) this);
         }
     }
 

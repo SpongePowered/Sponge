@@ -128,13 +128,13 @@ public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore
     @SuppressWarnings("unchecked")
     @Override
     public java.util.function.Predicate<BlockState> getPlacementCondition() {
-        return (java.util.function.Predicate<BlockState>)(Object)GuavaJavaUtils.asJavaPredicate(this.predicate);
+        return (java.util.function.Predicate<BlockState>) (Object) GuavaJavaUtils.asJavaPredicate(this.predicate);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public void setPlacementCondition(java.util.function.Predicate<BlockState> condition) {
-        this.predicate = (Predicate<IBlockState>)(Object)GuavaJavaUtils.asGuavaPredicate(condition);
+        this.predicate = (Predicate<IBlockState>) (Object) GuavaJavaUtils.asGuavaPredicate(condition);
     }
 
     @Override

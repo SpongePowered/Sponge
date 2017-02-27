@@ -204,8 +204,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int currentWindowId;
     @Shadow private void getNextWindowId() { }
 
-    private EntityPlayerMP this$ = (EntityPlayerMP) (Object) this;
-
     public int newExperience = 0;
     public int newLevel = 0;
     public int newTotalExperience = 0;
@@ -525,14 +523,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Optional<Container> openInventory(Inventory inventory, Cause cause) throws IllegalArgumentException {
-        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer(cause, this.this$,
+        return Optional.ofNullable((Container) SpongeCommonEventFactory.displayContainer(cause, (EntityPlayerMP) (Object) this,
                 inventory));
     }
 
     @Override
     public boolean closeInventory(Cause cause) throws IllegalArgumentException {
         ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
-        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, this.openContainer, this.this$, cursor, cursor, false).isCancelled();
+        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, this.openContainer, (EntityPlayerMP) (Object) this, cursor, cursor, false).isCancelled();
     }
 
     @Override
@@ -811,7 +809,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // We need to re-send the player's inventory to overwrite any client-side inventory changes that may have occured as a result
         // of the client (but not the server) calling Item#onPlayerStoppedUsing (which in the case of a bow, removes one arrow from the inventory).
         if (this.activeItemStack.isEmpty()) {
-            this.this$.sendContainerToPlayer(this.this$.inventoryContainer);
+            ((EntityPlayerMP) (Object) this).sendContainerToPlayer(((EntityPlayerMP) (Object) this).inventoryContainer);
         }
         super.stopActiveHand();
     }
@@ -826,7 +824,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (this.getHealth() > 0.0F) {
             return false;
         }
-        this.connection.player = this.mcServer.getPlayerList().recreatePlayerEntity(this.this$, this.this$.dimension, false);
+        this.connection.player = this.mcServer.getPlayerList().recreatePlayerEntity((EntityPlayerMP) (Object) this, this.dimension, false);
         return true;
     }
 

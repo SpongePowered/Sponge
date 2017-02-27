@@ -228,7 +228,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
                 int neighborIndex = directionToIndex(direction);
                 int oppositeNeighborIndex = directionToIndex(direction.getOpposite());
                 this.setNeighborChunk(neighborIndex, neighbor);
-                ((IMixinChunk) neighbor).setNeighborChunk(oppositeNeighborIndex, (net.minecraft.world.chunk.Chunk)(Object) this);
+                ((IMixinChunk) neighbor).setNeighborChunk(oppositeNeighborIndex, (net.minecraft.world.chunk.Chunk) (Object) this);
             }
         }
     }

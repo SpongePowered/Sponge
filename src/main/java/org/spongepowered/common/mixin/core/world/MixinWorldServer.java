@@ -1139,7 +1139,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // This prevents invisible entities from loading into the world and blocking the position.
         for (Entity entity : entityList) {
             if (!chunkLoad.getEntities().contains(entity)) {
-                ((net.minecraft.world.World)(Object) this).removeEntityDangerously((net.minecraft.entity.Entity) entity);
+                ((net.minecraft.world.World) (Object) this).removeEntityDangerously((net.minecraft.entity.Entity) entity);
             }
         }
         callbackInfo.cancel();
@@ -2197,7 +2197,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return Objects.toStringHelper(this)
                 .add("LevelName", this.worldInfo.getWorldName())
                 .add("DimensionId", this.provider.getDimensionType().getId())
-                .add("DimensionType", ((org.spongepowered.api.world.DimensionType)(Object) this.provider.getDimensionType()).getId())
+                .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getId())
                 .toString();
     }
 }

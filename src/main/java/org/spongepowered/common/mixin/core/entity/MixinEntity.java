@@ -425,9 +425,8 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Inject(method = "setPosition", at = @At("HEAD"))
     public void onSetPosition(double x, double y, double z, CallbackInfo ci) {
-        net.minecraft.entity.Entity entity = (net.minecraft.entity.Entity)(Object) this;
-        if (entity instanceof EntityPlayerMP) {
-            EntityPlayerMP player = (EntityPlayerMP) entity;
+        if ((Object) this instanceof EntityPlayerMP) {
+            EntityPlayerMP player = (EntityPlayerMP) (Object) this;
             if (player.connection != null) {
                 ((IMixinNetHandlerPlayServer) player.connection).captureCurrentPlayerPosition();
             }
@@ -511,7 +510,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public void setLocationAndAngles(Location<World> location) {
         if (((Entity) this) instanceof EntityPlayerMP) {
-            ((EntityPlayerMP)(Object) this).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
+            ((EntityPlayerMP) (Object) this).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
         } else {
             this.setPosition(location.getX(), location.getY(), location.getZ());
         }
@@ -525,7 +524,7 @@ public abstract class MixinEntity implements IMixinEntity {
         Vector3d position = transform.getPosition();
         EntityPlayerMP player = null;
         if (((Entity) this) instanceof EntityPlayerMP) {
-            player = ((EntityPlayerMP)(Object) this);
+            player = ((EntityPlayerMP) (Object) this);
         }
         if (player != null && player.connection != null) {
             player.connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());

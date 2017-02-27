@@ -146,7 +146,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             // ignore
         }
 
-        Block block = (Block)(Object) this;
+        Block block = (Block) (Object) this;
         if (block instanceof BlockLeaves || block instanceof BlockLog || block instanceof BlockGrass || block instanceof BlockLiquid) {
             this.requiresBlockCapture = false;
         }
@@ -340,7 +340,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public Timing getTimingsHandler() {
         if (this.timing == null) {
-            this.timing = SpongeTimings.getBlockTiming((net.minecraft.block.Block)(Object) this);
+            this.timing = SpongeTimings.getBlockTiming((net.minecraft.block.Block) (Object) this);
         }
         return this.timing;
     }

@@ -60,7 +60,6 @@ import java.util.Random;
 @Mixin(Teleporter.class)
 public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
-    private Teleporter mcTeleporter = (Teleporter) (Object) this;
     private int searchRadius = 128;
     private int creationRadius = 16;
     private boolean createNetherPortal = true;
@@ -223,7 +222,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         if (closest >= 0.0D) {
             if (addToCache) {
                 this.destinationCoordinateCache.put(targetPosition,
-                        this.mcTeleporter.new PortalPosition(portalPosition, this.worldServerInstance.getTotalWorldTime()));
+                        ((Teleporter) (Object) this).new PortalPosition(portalPosition, this.worldServerInstance.getTotalWorldTime()));
             }
 
             return Optional.of(new Location<World>(searchLocation.getExtent(), VecHelper.toVector3d(portalPosition)));
