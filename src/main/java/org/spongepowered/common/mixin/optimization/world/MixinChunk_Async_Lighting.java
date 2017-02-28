@@ -137,7 +137,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
             this.isGapLightingUpdated = false;
         }
 
-        this.worldObj.theProfiler.endSection();
+        // this.worldObj.theProfiler.endSection(); Sponge - don't use profiler off of the main thread
     }
 
     /**
