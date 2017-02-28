@@ -119,7 +119,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
@@ -313,6 +315,23 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Inject(method = "stopServer()V", at = @At("HEAD"))
     public void onServerStopping(CallbackInfo ci) {
         ((MinecraftServer) (Object) this).getPlayerProfileCache().save();
+
+        if (SpongeImpl.getGlobalConfig().getConfig().getModules().useOptimizations() &&
+                SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
+            for (WorldServer world : this.worlds) {
+                ((IMixinWorldServer) world).getLightingExecutor().shutdown();
+            }
+
+            for (WorldServer world : this.worlds) {
+                try {
+                    ((IMixinWorldServer) world).getLightingExecutor().awaitTermination(1, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } finally {
+                    ((IMixinWorldServer) world).getLightingExecutor().shutdownNow();
+                }
+            }
+        }
     }
 
     /**

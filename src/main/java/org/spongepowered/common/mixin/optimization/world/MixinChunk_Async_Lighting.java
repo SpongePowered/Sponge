@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.optimization.world;
 
+import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
@@ -51,8 +52,14 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isLightPopulated;
     @Shadow private boolean chunkTicked;
+    @Shadow @Final public int xPosition;
+    @Shadow @Final public int zPosition;
+    @Shadow @Final private boolean[] updateSkylightColumns;
+    @Shadow private boolean isGapLightingUpdated;
 
-    @Shadow public abstract void recheckGaps(boolean isClient);
+    @Shadow protected abstract void recheckGaps(boolean isClient);
+    @Shadow public abstract int getHeightValue(int x, int z);
+    @Shadow protected abstract void checkSkylightNeighborHeight(int x, int z, int maxValue);
 
     @Override
     public AtomicInteger getPendingLightUpdates() {
@@ -79,13 +86,58 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
     }
 
     @Inject(method = "recheckGaps", at = @At("HEAD"), cancellable = true)
-    private void onRecheckGaps(boolean isClient, CallbackInfo ci) {
+    private void onRecheckGaps(boolean onlyOnce, CallbackInfo ci) {
         if (!this.world.isRemote) {
             ((IMixinWorldServer) this.world).getLightingExecutor().execute(() -> {
-                this.recheckGaps(isClient);
+                this.recheckGapsAsync(onlyOnce);
             });
             ci.cancel();
         }
+    }
+
+    private void recheckGapsAsync(boolean p_150803_1_) {
+        //this.worldObj.theProfiler.startSection("recheckGaps"); Sponge - don't use profiler off of main thread
+
+        if (this.world.isAreaLoaded(new BlockPos(this.xPosition * 16 + 8, 0, this.zPosition * 16 + 8), 16))
+        {
+            for (int i = 0; i < 16; ++i)
+            {
+                for (int j = 0; j < 16; ++j)
+                {
+                    if (this.updateSkylightColumns[i + j * 16])
+                    {
+                        this.updateSkylightColumns[i + j * 16] = false;
+                        int k = this.getHeightValue(i, j);
+                        int l = this.xPosition * 16 + i;
+                        int i1 = this.zPosition * 16 + j;
+                        int j1 = Integer.MAX_VALUE;
+
+                        for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
+                        {
+                            j1 = Math.min(j1, this.world.getChunksLowestHorizon(l + enumfacing.getFrontOffsetX(), i1 + enumfacing.getFrontOffsetZ()));
+                        }
+
+                        this.checkSkylightNeighborHeight(l, i1, j1);
+
+                        for (EnumFacing enumfacing1 : EnumFacing.Plane.HORIZONTAL)
+                        {
+                            this.checkSkylightNeighborHeight(l + enumfacing1.getFrontOffsetX(), i1 + enumfacing1.getFrontOffsetZ(), k);
+                        }
+
+
+                        if (p_150803_1_)
+                        {
+                            // this.worldObj.theProfiler.endSection(); Sponge - don't use profiler off of the main thread
+                            return;
+                        }
+                    }
+                }
+            }
+
+            this.isGapLightingUpdated = false;
+        }
+
+        // this.world.profiler.endSection(); Sponge - don't use profiler off of the main thread
     }
 
     /**
