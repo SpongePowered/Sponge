@@ -86,16 +86,16 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
     }
 
     @Inject(method = "recheckGaps", at = @At("HEAD"), cancellable = true)
-    private void onRecheckGaps(boolean isClient, CallbackInfo ci) {
+    private void onRecheckGaps(boolean onlyOnce, CallbackInfo ci) {
         if (!this.worldObj.isRemote) {
             ((IMixinWorldServer) this.worldObj).getLightingExecutor().execute(() -> {
-                this.recheckGapsAsync();
+                this.recheckGapsAsync(onlyOnce);
             });
             ci.cancel();
         }
     }
 
-    private void recheckGapsAsync() {
+    private void recheckGapsAsync(boolean p_150803_1_) {
         //this.worldObj.theProfiler.startSection("recheckGaps"); Sponge - don't use profiler off of main thread
 
         if (this.worldObj.isAreaLoaded(new BlockPos(this.xPosition * 16 + 8, 0, this.zPosition * 16 + 8), 16))
@@ -124,12 +124,12 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
                             this.checkSkylightNeighborHeight(l + enumfacing1.getFrontOffsetX(), i1 + enumfacing1.getFrontOffsetZ(), k);
                         }
 
-                        /* Sponge start - remove isRemote check, this is only ever called from the server
+
                         if (p_150803_1_)
                         {
-                            this.worldObj.theProfiler.endSection();
+                            // this.worldObj.theProfiler.endSection(); Sponge - don't use profiler off of the main thread
                             return;
-                        }*/
+                        }
                     }
                 }
             }
