@@ -46,6 +46,7 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -215,14 +216,29 @@ public final class TrackingUtil {
         // This is a lazy evaluating snapshot to avoid the overhead of snapshot creation
         causeTracker.switchToPhase(TickPhase.Tick.TILE_ENTITY, phaseContext
                 .complete());
+
+        for (WorldServer world: SpongeImpl.getServer().worlds) {
+            if (world == worldServer) {
+                continue;
+            }
+            ((IMixinWorldServer) world).getCauseTracker().switchToPhase(GeneralPhase.State.MARKER_CROSS_WORLD, PhaseContext.start()
+                    .add(NamedCause.source(Sponge.getGame()))
+            .complete());
+        }
+
         mixinTileEntity.getTimingsHandler().startTiming();
         try {
             tile.update();
-        } catch (Exception e) {
-            throw e;
         } finally {
             mixinTileEntity.getTimingsHandler().stopTiming();
             causeTracker.completePhase(TickPhase.Tick.TILE_ENTITY);
+
+            for (WorldServer world: SpongeImpl.getServer().worlds) {
+                if (world == worldServer) {
+                    continue;
+                }
+                ((IMixinWorldServer) world).getCauseTracker().completePhase(GeneralPhase.State.MARKER_CROSS_WORLD);
+            }
         }
     }
 
