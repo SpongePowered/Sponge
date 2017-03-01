@@ -27,9 +27,12 @@ package org.spongepowered.common.mixin.core.network;
 import io.netty.channel.Channel;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
+import net.minecraft.network.INetHandler;
+import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.api.MinecraftVersion;
-import org.spongepowered.api.network.RemoteConnection;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeMinecraftVersion;
@@ -42,9 +45,10 @@ import java.net.UnknownHostException;
 
 @SuppressWarnings("rawtypes")
 @Mixin(NetworkManager.class)
-public abstract class MixinNetworkManager extends SimpleChannelInboundHandler implements RemoteConnection, IMixinNetworkManager {
+public abstract class MixinNetworkManager extends SimpleChannelInboundHandler implements PlayerConnection, IMixinNetworkManager {
 
     @Shadow private Channel channel;
+    @Shadow private INetHandler packetListener;
 
     @Shadow public abstract SocketAddress getRemoteAddress();
 
@@ -92,5 +96,21 @@ public abstract class MixinNetworkManager extends SimpleChannelInboundHandler im
     @Override
     public void setVersion(int version) {
         this.version = new SpongeMinecraftVersion(String.valueOf(version), version);
+    }
+
+    @Override
+    public Player getPlayer() {
+        if(this.packetListener instanceof NetHandlerPlayServer) {
+            return (Player) ((NetHandlerPlayServer) this.packetListener).playerEntity;
+        }
+        throw new IllegalStateException("Player is not currently available");
+    }
+
+    @Override
+    public int getLatency() {
+        if(this.packetListener instanceof NetHandlerPlayServer) {
+            return ((NetHandlerPlayServer) this.packetListener).playerEntity.ping;
+        }
+        throw new IllegalStateException("Latency is not currently available");
     }
 }
