@@ -74,6 +74,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
     private DataContainer generatorSettings;
     private ImmutableList<WorldGeneratorModifier> generatorModifiers;
     private PortalAgentType portalAgentType;
+    private boolean seedRandomized;
 
     public SpongeWorldArchetypeBuilder() {
         reset();
@@ -82,6 +83,14 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
     @Override
     public SpongeWorldArchetypeBuilder seed(long seed) {
         this.seed = seed;
+        this.seedRandomized = false;
+        return this;
+    }
+
+    @Override
+    public SpongeWorldArchetypeBuilder randomSeed() {
+        this.seed = SpongeImpl.random.nextLong();
+        this.seedRandomized = true;
         return this;
     }
 
@@ -198,6 +207,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.difficulty = value.getDifficulty();
         this.serializationBehavior = value.getSerializationBehavior();
         this.seed = value.getSeed();
+        this.seedRandomized = value.isSeedRandomized();
         this.mapFeaturesEnabled = value.usesMapFeatures();
         this.hardcore = value.isHardcore();
         this.worldEnabled = value.isEnabled();
@@ -222,6 +232,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.difficulty = value.getDifficulty();
         this.serializationBehavior = value.getSerializationBehavior();
         this.seed = value.getSeed();
+        this.seedRandomized = false;
         this.mapFeaturesEnabled = value.usesMapFeatures();
         this.hardcore = value.isHardcore();
         this.worldEnabled = value.isEnabled();
@@ -262,6 +273,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         spongeSettings.setGenerateBonusChest(this.generateBonusChest);
         spongeSettings.fromBuilder(true);
         spongeSettings.setPortalAgentType(this.portalAgentType);
+        spongeSettings.setRandomSeed(this.seedRandomized);
         Sponge.getRegistry().register(WorldArchetype.class, (WorldArchetype) (Object) settings);
         return (WorldArchetype) (Object) settings;
     }
@@ -274,6 +286,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.difficulty = Difficulties.NORMAL;
         this.serializationBehavior = SerializationBehaviors.AUTOMATIC;
         this.seed = SpongeImpl.random.nextLong();
+        this.seedRandomized = true;
         this.mapFeaturesEnabled = true;
         this.hardcore = false;
         this.worldEnabled = true;

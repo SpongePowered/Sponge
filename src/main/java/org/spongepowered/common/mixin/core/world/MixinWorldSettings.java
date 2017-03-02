@@ -94,6 +94,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     private boolean fromBuilder = false;
     private PortalAgentType portalAgentType;
     private Collection<WorldGeneratorModifier> generatorModifiers = ImmutableList.of();
+    private boolean seedRandomized = false;
 
     @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
     public void onConstruct(WorldInfo info, CallbackInfo ci) {
@@ -119,6 +120,16 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     @Intrinsic
     public long archetype$getSeed() {
         return this.shadow$getSeed();
+    }
+
+    @Override
+    public boolean isSeedRandomized() {
+        return this.seedRandomized;
+    }
+
+    @Override
+    public void setRandomSeed(boolean state) {
+        this.seedRandomized = state;
     }
 
     @Inject(method = "setGeneratorOptions", at = @At(value = "RETURN"))

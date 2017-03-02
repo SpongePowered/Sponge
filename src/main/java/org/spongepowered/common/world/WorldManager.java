@@ -408,6 +408,10 @@ public final class WorldManager {
             ((WorldProperties) worldInfo).setGeneratorModifiers(archetype.getGeneratorModifiers());
         }
 
+        if (archetype.isSeedRandomized()) {
+            ((IMixinWorldInfo) worldInfo).setSeed(SpongeImpl.random.nextLong());
+        }
+
         setUuidOnProperties(getCurrentSavesDirectory().get(), (WorldProperties) worldInfo);
         if (dimensionId != null) {
             ((IMixinWorldInfo) worldInfo).setDimensionId(dimensionId);
