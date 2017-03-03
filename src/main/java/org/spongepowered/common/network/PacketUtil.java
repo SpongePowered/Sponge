@@ -127,12 +127,10 @@ public class PacketUtil {
                 final IMixinWorldServer world = (IMixinWorldServer) packetPlayer.world;
                 final CauseTracker causeTracker = world.getCauseTracker();
                 IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
-                if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
-                    if (packetPlayer.getHeldItemMainhand() != null) {
+                if (packetIn instanceof CPacketPlayerTryUseItem) {
+                    if (packetPlayer.getHeldItemMainhand().getItem() instanceof ItemBucket) {
                         // Don't capture liquids
-                        if (packetPlayer.getHeldItemMainhand().getItem() instanceof ItemBucket) {
-                            packetState = PacketPhase.General.NO_CAPTURE_PLACE_BLOCK;
-                        }
+                        packetState = PacketPhase.General.NO_CAPTURE_PLACE_BLOCK;
                     }
                 }
                 if (packetState == null) {
