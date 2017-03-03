@@ -53,13 +53,14 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
 
     @Override
     public boolean checkLightAsync(EnumSkyBlock lightType, BlockPos pos, net.minecraft.world.chunk.Chunk chunk) {
-        if (chunk == null || !this.isAreaLoaded(pos, 17, false)) {
+        // Sponge - This check is not needed as neighbors are checked in updateLightSync
+        if (false || !this.isAreaLoaded(pos, 17, false)) {
             return false;
         } else {
             final IMixinChunk spongeChunk = (IMixinChunk) chunk;
             int i = 0;
             int j = 0;
-            this.theProfiler.startSection("getBrightness");
+            //this.theProfiler.startSection("getBrightness"); // Sponge - don't use profiler off of main thread
             int k = this.getLightFor(lightType, pos);
             int l = this.getRawBlockLight(pos, lightType);
             int i1 = pos.getX();
@@ -113,8 +114,8 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
                 i = 0;
             }
 
-            this.theProfiler.endSection();
-            this.theProfiler.startSection("checkedPosition < toCheckCount");
+            //this.theProfiler.endSection(); // Sponge - don't use profiler off of main thread
+            //this.theProfiler.startSection("checkedPosition < toCheckCount"); // Sponge - don't use profiler off of main thread
 
             while (i < j) {
                 int i5 = this.lightUpdateBlockList[i++];
@@ -172,7 +173,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
                 }
             }
             // Sponge end
-            this.theProfiler.endSection();
+            //this.theProfiler.endSection(); // Sponge - don't use profiler off of main thread
             return true;
         }
     }
@@ -181,11 +182,11 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
     public boolean updateLightAsync(EnumSkyBlock lightType, BlockPos pos) {
         final net.minecraft.world.chunk.Chunk chunk =
                 ((IMixinChunkProviderServer) this.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
-        if (chunk == null || chunk.unloaded) {
+        IMixinChunk spongeChunk = (IMixinChunk) chunk;
+        if (chunk == null || chunk.unloaded || !spongeChunk.areNeighborsLoaded()) {
             return false;
         }
 
-        IMixinChunk spongeChunk = (IMixinChunk) chunk;
         spongeChunk.getPendingLightUpdates().incrementAndGet();
         spongeChunk.setLightUpdateTime(chunk.getWorld().getTotalWorldTime());
 
