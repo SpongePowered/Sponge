@@ -53,8 +53,8 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
 
     @Override
     public boolean checkLightAsync(EnumSkyBlock lightType, BlockPos pos, net.minecraft.world.chunk.Chunk chunk) {
-        // Sponge - This check is not needed as neighbors are checked in updateLightSync
-        if (false || !this.isAreaLoaded(pos, 17, false)) {
+        // Sponge - This check is not needed as neighbors are checked in updateLightAsync
+        if (false && !this.isAreaLoaded(pos, 17, false)) {
             return false;
         } else {
             final IMixinChunk spongeChunk = (IMixinChunk) chunk;
