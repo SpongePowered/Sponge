@@ -490,9 +490,10 @@ public abstract class MixinEntity implements IMixinEntity {
             EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(), ((IMixinWorldServer) nmsWorld).getDimensionId());
         } else {
             if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
+                EntityPlayerMP thisPlayer = (EntityPlayerMP) thisEntity;
                 ((WorldServer) location.getExtent()).getChunkProvider().loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
-                ((EntityPlayerMP) thisEntity).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
-                        thisEntity.rotationYaw, thisEntity.rotationPitch);
+                thisPlayer.connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
+                ((IMixinNetHandlerPlayServer) thisPlayer.connection).setLastMoveLocation(null); // Set last move to teleport target
             } else {
                 setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
             }
