@@ -101,7 +101,7 @@ public final class PacketPhase extends TrackingPhase {
         public static final IPacketState INTERACT_AT_ENTITY = new InteractAtEntityPacketState();
         public static final IPacketState CHAT = new ChatPacketState();
         public static final IPacketState CREATIVE_INVENTORY = new CreativeInventoryPacketState();
-        public static final IPacketState NO_CAPTURE_PLACE_BLOCK = new NoCapturePlaceBlockPacketState();
+        public static final IPacketState NO_CAPTURE_USE_ITEM = new NoCaptureUseItemPacketState();
         public static final IPacketState PLACE_BLOCK = new PlaceBlockPacketState();
         public static final IPacketState OPEN_INVENTORY = new BasicPacketState();
         public static final IPacketState REQUEST_RESPAWN = new BasicPacketState();
@@ -326,7 +326,7 @@ public final class PacketPhase extends TrackingPhase {
 
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return !(currentState instanceof BasicInventoryPacketState);
+        return ((IPacketState) currentState).doBlockCapturing();
     }
 
     @Override

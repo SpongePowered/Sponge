@@ -43,7 +43,6 @@ import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.Humanoid;
@@ -58,7 +57,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -130,7 +128,7 @@ public class PacketUtil {
                 if (packetIn instanceof CPacketPlayerTryUseItem) {
                     if (packetPlayer.getHeldItemMainhand().getItem() instanceof ItemBucket) {
                         // Don't capture liquids
-                        packetState = PacketPhase.General.NO_CAPTURE_PLACE_BLOCK;
+                        packetState = PacketPhase.General.NO_CAPTURE_USE_ITEM;
                     }
                 }
                 if (packetState == null) {

@@ -45,7 +45,7 @@ import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
 
-final class UseItemPacketState extends BasicPacketState {
+class UseItemPacketState extends BasicPacketState {
 
     @Override
     public boolean isInteraction() {
@@ -54,7 +54,6 @@ final class UseItemPacketState extends BasicPacketState {
 
     @Override
     public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-        // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
         final CPacketPlayerTryUseItem placeBlock = (CPacketPlayerTryUseItem) packet;
         final net.minecraft.item.ItemStack usedItem = playerMP.getHeldItem(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);

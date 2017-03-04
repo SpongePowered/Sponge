@@ -66,6 +66,10 @@ public interface IPacketState extends IPhaseState {
     default boolean doesCaptureEntityDrops() {
         return false;
     }
+
+    default boolean doBlockCapturing() {
+        return true;
+    }
     /**
      * A defaulted method to handle entities that are spawned due to packet placement during post processing.
      * Examples can include a player placing a redstone block priming a TNT explosive.
