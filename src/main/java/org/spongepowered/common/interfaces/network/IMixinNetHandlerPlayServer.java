@@ -24,15 +24,17 @@
  */
 package org.spongepowered.common.interfaces.network;
 
-import org.spongepowered.api.resourcepack.ResourcePack;
+import net.minecraft.network.play.server.SPacketResourcePackSend;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-import java.util.Map;
+import java.util.Deque;
 
 public interface IMixinNetHandlerPlayServer {
 
-    Map<String, ResourcePack> getSentResourcePacks();
+    Deque<SPacketResourcePackSend> getPendingResourcePackQueue();
+
+    void resendLatestResourcePackRequest();
 
     void setAllowClientLocationUpdate(boolean flag);
 

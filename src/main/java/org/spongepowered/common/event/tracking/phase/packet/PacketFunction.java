@@ -41,6 +41,7 @@ import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
+import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import org.apache.logging.log4j.Level;
@@ -78,6 +79,7 @@ import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -926,14 +928,12 @@ public interface PacketFunction {
             }
         }
     });
-    PacketFunction RESOURCE_PACKET = ((packet, state, player, context) -> {
+    PacketFunction RESOURCE_PACKET = (packet, state, player, context) -> {
         final NetHandlerPlayServer connection = player.connection;
         final IMixinNetHandlerPlayServer mixinHandler = (IMixinNetHandlerPlayServer) connection;
         final CPacketResourcePackStatus resource = (CPacketResourcePackStatus) packet;
-        //final String hash = resource.hash; // TODO
-        final String hash = "";
         final ResourcePackStatusEvent.ResourcePackStatus status;
-        final ResourcePack pack = mixinHandler.getSentResourcePacks().get(hash);
+        ResourcePack pack = ((IMixinPacketResourcePackSend) mixinHandler.getPendingResourcePackQueue().peek()).getResourcePack();
         switch (resource.action) {
             case ACCEPTED:
                 status = ResourcePackStatusEvent.ResourcePackStatus.ACCEPTED;
@@ -950,13 +950,33 @@ public interface PacketFunction {
             default:
                 throw new AssertionError();
         }
+        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(Cause.source(player).build(), pack, (Player) player, status));
         if (status.wasSuccessful().isPresent()) {
-            mixinHandler.getSentResourcePacks().remove(hash);
+            mixinHandler.getPendingResourcePackQueue().remove();
+
+            if (!mixinHandler.getPendingResourcePackQueue().isEmpty()) {
+                Cause supersededCause = Cause.source(player).named(InternalNamedCauses.Packet.RESPONDED_RESOURCE_PACK, pack).build();
+                while (mixinHandler.getPendingResourcePackQueue().size() > 1) {
+                    // Fire events so other plugins know what happened to their resource packs.
+                    pack = ((IMixinPacketResourcePackSend) mixinHandler.getPendingResourcePackQueue().remove()).getResourcePack();
+                    if (status == ResourcePackStatusEvent.ResourcePackStatus.DECLINED) {
+                        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(supersededCause, pack, (Player) player,
+                                ResourcePackStatusEvent.ResourcePackStatus.DECLINED));
+                    } else {
+                        // Say it was successful even if it wasn't. Minecraft makes no guarantees, and I don't want to change the API.
+                        // In addition, I would assume this would result in the expected behavior from plugins.
+                        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(supersededCause, pack, (Player) player,
+                                ResourcePackStatusEvent.ResourcePackStatus.ACCEPTED));
+                        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(supersededCause, pack, (Player) player,
+                                ResourcePackStatusEvent.ResourcePackStatus.SUCCESSFULLY_LOADED));
+                    }
+                }
+                if (connection.getNetworkManager().isChannelOpen()) {
+                    connection.sendPacket(mixinHandler.getPendingResourcePackQueue().element());
+                }
+            }
         }
-        final Cause cause = Cause.of(NamedCause.source(SpongeImpl.getGame()));
-        final ResourcePackStatusEvent event = SpongeEventFactory.createResourcePackStatusEvent(cause, pack, (Player) player, status);
-        SpongeImpl.postEvent(event);
-    });
+    };
     PacketFunction MOVEMENT = (packet, state, player, context) -> {
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.world;
         context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil

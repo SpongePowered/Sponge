@@ -151,6 +151,7 @@ import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -626,6 +627,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         SPacketResourcePackSend packet = new SPacketResourcePackSend();
         ((IMixinPacketResourcePackSend) packet).setResourcePack(pack);
         this.connection.sendPacket(packet);
+    }
+
+    @Inject(method = "markPlayerActive()V", at = @At("HEAD"))
+    private void onPlayerActive(CallbackInfo ci) {
+        ((IMixinNetHandlerPlayServer) this.connection).resendLatestResourcePackRequest();
     }
 
     @Override
