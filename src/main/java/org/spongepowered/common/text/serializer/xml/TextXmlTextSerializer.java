@@ -59,6 +59,16 @@ public class TextXmlTextSerializer implements TextSerializer {
     }
 
     @Override
+    public String getId() {
+        return "sponge:text_xml";
+    }
+
+    @Override
+    public String getName() {
+        return "TextXML";
+    }
+
+    @Override
     public String serialize(Text text) {
         final StringWriter writer = new StringWriter();
         try {

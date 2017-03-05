@@ -98,6 +98,7 @@ import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.selector.SelectorType;
+import org.spongepowered.api.text.serializer.TextSerializer;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.rotation.Rotation;
@@ -406,7 +407,7 @@ public final class CommonModuleRegistry {
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
             .registerModule(TeleportType.class, TeleportTypeRegistryModule.getInstance())
             .registerModule(TextColor.class, new TextColorRegistryModule())
-            .registerModule(new TextSerializerRegistryModule())
+            .registerModule(TextSerializer.class, new TextSerializerRegistryModule())
             .registerModule(TextStyle.Base.class, new TextStyleRegistryModule())
             .registerModule(TileEntityType.class, TileEntityTypeRegistryModule.getInstance())
             .registerModule(ToolType.class, new ToolTypeRegistryModule())

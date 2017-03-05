@@ -38,6 +38,16 @@ import org.spongepowered.common.interfaces.text.IMixinText;
 public final class JsonTextSerializer implements TextSerializer {
 
     @Override
+    public String getId() {
+        return "minecraft:json";
+    }
+
+    @Override
+    public String getName() {
+        return "JSON";
+    }
+
+    @Override
     public String serialize(Text text) {
         return ((IMixinText) text).toJson();
     }
@@ -50,6 +60,5 @@ public final class JsonTextSerializer implements TextSerializer {
             throw new TextParseException("Failed to parse JSON", e);
         }
     }
-
 
 }

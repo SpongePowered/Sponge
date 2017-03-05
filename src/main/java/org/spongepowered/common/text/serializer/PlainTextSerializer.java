@@ -27,9 +27,17 @@ package org.spongepowered.common.text.serializer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.SafeTextSerializer;
 
-import java.util.Locale;
-
 public final class PlainTextSerializer implements SafeTextSerializer {
+
+    @Override
+    public String getId() {
+        return "minecraft:plain";
+    }
+
+    @Override
+    public String getName() {
+        return "Plain Text";
+    }
 
     @Override
     public String serialize(Text text) {
