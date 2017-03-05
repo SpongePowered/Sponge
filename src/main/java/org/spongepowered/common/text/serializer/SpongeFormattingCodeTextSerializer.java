@@ -30,10 +30,28 @@ import org.spongepowered.common.interfaces.text.IMixinText;
 
 public final class SpongeFormattingCodeTextSerializer implements FormattingCodeTextSerializer {
 
+    private final String id;
+    private final String name;
     private final char formattingChar;
 
     public SpongeFormattingCodeTextSerializer(char formattingChar) {
+        this("sponge:formatting_code_" + formattingChar, "Formatting Codes (" + formattingChar + ")", formattingChar);
+    }
+
+    public SpongeFormattingCodeTextSerializer(String id, String name, char formattingChar) {
+        this.id = id;
+        this.name = name;
         this.formattingChar = formattingChar;
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
     }
 
     @Override

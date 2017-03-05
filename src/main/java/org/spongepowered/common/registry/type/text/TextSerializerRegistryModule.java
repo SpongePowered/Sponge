@@ -26,7 +26,10 @@ package org.spongepowered.common.registry.type.text;
 
 import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.serializer.TextSerializer;
@@ -36,15 +39,40 @@ import org.spongepowered.common.text.serializer.PlainTextSerializer;
 import org.spongepowered.common.text.serializer.SpongeFormattingCodeTextSerializer;
 import org.spongepowered.common.text.serializer.xml.TextXmlTextSerializer;
 
-public final class TextSerializerRegistryModule implements RegistryModule {
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+public final class TextSerializerRegistryModule implements AdditionalCatalogRegistryModule<TextSerializer> {
 
     @RegisterCatalog(TextSerializers.class)
-    private static final ImmutableMap<String, TextSerializer> textSerializerMappings = ImmutableMap.<String, TextSerializer>builder()
-            .put("plain", new PlainTextSerializer())
-            .put("legacy_formatting_code", new SpongeFormattingCodeTextSerializer(COLOR_CHAR))
-            .put("formatting_code", new SpongeFormattingCodeTextSerializer('&'))
-            .put("json", new JsonTextSerializer())
-            .put("text_xml", new TextXmlTextSerializer())
-            .build();
+    private static final Map<String, TextSerializer> textSerializerMappings = new HashMap<>();
+
+    @Override
+    public Optional<TextSerializer> getById(String id) {
+        return Optional.ofNullable(textSerializerMappings.get(id));
+    }
+
+    @Override
+    public Collection<TextSerializer> getAll() {
+        return ImmutableList.copyOf(textSerializerMappings.values());
+    }
+
+    @Override
+    public void registerDefaults() {
+        textSerializerMappings.put("plain", new PlainTextSerializer());
+        textSerializerMappings.put("json", new JsonTextSerializer());
+        textSerializerMappings.put("formatting_code", new SpongeFormattingCodeTextSerializer(
+                "sponge:formatting_code", "Formatting Codes", '&'));
+        textSerializerMappings.put("legacy_formatting_code", new SpongeFormattingCodeTextSerializer(
+                "minecraft:legacy_formatting_code", "Legacy Formatting Codes", COLOR_CHAR));
+        textSerializerMappings.put("text_xml", new TextXmlTextSerializer());
+    }
+
+    @Override
+    public void registerAdditionalCatalog(TextSerializer serializer) {
+        textSerializerMappings.put(serializer.getId(), serializer);
+    }
 
 }
