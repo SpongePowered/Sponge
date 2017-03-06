@@ -316,7 +316,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     public void onServerStopping(CallbackInfo ci) {
         ((MinecraftServer) (Object) this).getPlayerProfileCache().save();
 
-        if (SpongeImpl.getGlobalConfig().getConfig().getModules().useOptimizations() &&
+        if (this.worlds != null && SpongeImpl.getGlobalConfig().getConfig().getModules().useOptimizations() &&
                 SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
             for (WorldServer world : this.worlds) {
                 ((IMixinWorldServer) world).getLightingExecutor().shutdown();
