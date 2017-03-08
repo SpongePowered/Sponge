@@ -61,16 +61,14 @@ jar {
 
     manifest {
         attributes(
-                'Specification-Title': api.name,
-                'Specification-Version': api.version,
-                'Specification-Vendor': api.url
-        )
-    }
+                'Implementation-Title': project.name,
+                'Implementation-Version': "${-> project.version}",
+                'Implementation-Vendor': project.organization,
 
-    afterEvaluate {
-        manifest {
-            attributes('FMLAT': project.ats.join(' '))
-        }
+                'Specification-Version': "${-> common.apiVersion}",
+
+                'FMLAT': "${-> project.ats.join(' ')}"
+        )
     }
 }
 
@@ -129,10 +127,6 @@ uploadArchives.repositories.mavenDeployer.pom.whenConfigured {
 configure([jar, devJar]) {
     // Append API revision to the SpongeAPI version
     dependsOn common.resolveApiRevision
-}
-
-common.tasks.resolveApiRevision.doLast {
-    jar.manifest.attributes('Specification-Version': common.apiVersion)
 }
 
 // Code style configuration
