@@ -48,6 +48,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
@@ -182,35 +183,12 @@ public final class CauseTracker {
         if (isEmpty) {
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
-            new PrettyPrinter(60).add("Unexpected ").centre().hr()
-                    .add("Sponge's tracking system is very dependent on knowing when\n"
-                            + "a change to any world takes place, however, we have been told\n"
-                            + "to complete a \"phase\" without having entered any phases.\n"
-                            + "This is an error usually on Sponge's part, so a report\n"
-                            + "is required on the issue tracker on GitHub.").hr()
-                    .add("  %s : %s", "Affected World", this.targetWorld)
-                    .add("StackTrace:")
-                    .add(new Exception())
-                    .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
-
+            printEmptyStackOnCompletion();
             return;
         }
 
         if (prevState != state) {
-            PrettyPrinter printer = new PrettyPrinter(60).add("Completing incorrect phase").centre().hr()
-                    .add("Sponge's tracking system is very dependent on knowing when\n"
-                            + "a change to any world takes place, however, we are attempting\n"
-                            + "to complete a \"phase\" other than the one we most recently entered.\n"
-                            + "This is an error usually on Sponge's part, so a report\n"
-                            + "is required on the issue tracker on GitHub.").hr()
-                    .add("  %s : %s", "Affected World", this.targetWorld)
-                    .add("Expected to exit phase: %s", prevState)
-                    .add("But instead found phase: %s", state)
-                    .add("StackTrace:")
-                    .add(new Exception());
-            printer.add(" Phases Remaining:");
-            this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-            printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+            printIncorrectPhaseCompletion(prevState, state);
 
             // The phase on the top of the stack was most likely never completed.
             // Since we don't know when and where completePhase was intended to be called for it,
@@ -222,16 +200,7 @@ public final class CauseTracker {
         if (this.isVerbose && this.stack.size() > 6 && state != GeneralPhase.Post.UNWINDING && !state.isExpectedForReEntrance()) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumulation.
-            final PrettyPrinter printer = new PrettyPrinter(60);
-            printer.add("Completing Phase").centre().hr();
-            printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
-            printer.add("  %s : %s", "Affected World", this.targetWorld);
-            printer.addWrapped(60, "%s : %s", "Completing phase", state);
-            printer.add(" Phases Remaining:");
-            this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
-            printer.add("Stacktrace:");
-            printer.add(new Exception("Stack trace"));
-            printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+            printRunnawayPhaseCompletion(state);
         }
         this.stack.pop();
         // If pop is called, the Deque will already throw an exception if there is no element
@@ -265,10 +234,68 @@ public final class CauseTracker {
         }
     }
 
+    private void printRunnawayPhaseCompletion(IPhaseState state) {
+        final PrettyPrinter printer = new PrettyPrinter(60);
+        printer.add("Completing Phase").centre().hr();
+        printer.addWrapped(50, "Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
+        printer.add("  %s : %s", "Affected World", this.targetWorld);
+        printer.add();
+        printer.addWrapped(60, "%s : %s", "Completing phase", state);
+        printer.add(" Phases Remaining:");
+        this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+        printer.add("Stacktrace:");
+        printer.add(new Exception("Stack trace"));
+        printer.add();
+        generateVersionInfo(printer);
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+    }
+
+    private void generateVersionInfo(PrettyPrinter printer) {
+        for (PluginContainer pluginContainer : SpongeImpl.getInternalPlugins()) {
+            pluginContainer.getVersion().ifPresent(version ->
+                    printer.add("%s : %s", pluginContainer.getName(), version)
+            );
+        }
+    }
+
+    private void printIncorrectPhaseCompletion(IPhaseState prevState, IPhaseState state) {
+        PrettyPrinter printer = new PrettyPrinter(60).add("Completing incorrect phase").centre().hr()
+                .addWrapped(50, "Sponge's tracking system is very dependent on knowing when\n"
+                        + "a change to any world takes place, however, we are attempting\n"
+                        + "to complete a \"phase\" other than the one we most recently entered.\n"
+                        + "This is an error usually on Sponge's part, so a report\n"
+                        + "is required on the issue tracker on GitHub.").hr()
+                .add("  %s : %s", "Affected World", this.targetWorld)
+                .add("Expected to exit phase: %s", prevState)
+                .add("But instead found phase: %s", state)
+                .add("StackTrace:")
+                .add(new Exception());
+        printer.add(" Phases Remaining:");
+        this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+        printer.add();
+        generateVersionInfo(printer);
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+    }
+
+    private void printEmptyStackOnCompletion() {
+        final PrettyPrinter printer = new PrettyPrinter(60).add("Unexpected ").centre().hr()
+                .addWrapped(50, "Sponge's tracking system is very dependent on knowing when"
+                                + "a change to any world takes place, however, we have been told"
+                                + "to complete a \"phase\" without having entered any phases."
+                                + "This is an error usually on Sponge's part, so a report"
+                                + "is required on the issue tracker on GitHub.").hr()
+                .add("  %s : %s", "Affected World", this.targetWorld)
+                .add("StackTrace:")
+                .add(new Exception())
+                .add();
+        generateVersionInfo(printer);
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+    }
+
     private void printRunawayPhase(IPhaseState state, PhaseContext context) {
         final PrettyPrinter printer = new PrettyPrinter(40);
         printer.add("Switching Phase").centre().hr();
-        printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
+        printer.addWrapped(50, "Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
         printer.add("  %s : %s", "Affected World", this.targetWorld);
         printer.add("  %s : %s", "Entering Phase", state.getPhase());
         printer.add("  %s : %s", "Entering State", state);
@@ -276,8 +303,10 @@ public final class CauseTracker {
         printer.addWrapped(60, "%s :", "Phases remaining");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add("  %s :", "Printing stack trace")
-                .add(new Exception("Stack trace"))
-                .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+                .add(new Exception("Stack trace"));
+        printer.add();
+        generateVersionInfo(printer);
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
     private void printPhaseIncompatibility(IPhaseState currentState, IPhaseState incompatibleState) {
@@ -293,6 +322,8 @@ public final class CauseTracker {
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add("  %s :", "Printing stack trace");
         printer.add(new Exception("Stack trace"));
+        printer.add();
+        generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
@@ -310,12 +341,14 @@ public final class CauseTracker {
         printer.addWrapped(60, "%s :", "Phases remaining");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add("Stacktrace:")
-                .add(e)
-                .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+                .add(e);
+        printer.add();
+        generateVersionInfo(printer);
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
     // ----------------- SIMPLE GETTERS --------------------------------------
-//https://github.com/OpenModLoader/OpenModLoader
+
     /**
      * Gets the {@link World} as a SpongeAPI world.
      *
