@@ -142,7 +142,7 @@ public class SpongeCommandManager implements CommandManager {
             List<String> aliasesWithPrefix = new ArrayList<>(aliases.size() * 3);
             for (String alias : aliases) {
                 if (alias.contains(" ")) {
-                    throw new IllegalArgumentException("A plugin may not register a command or alias with a space. The alias was ('" + alias + "')!");
+                    throw new IllegalArgumentException("Plugin " + container.getId() + " attempted to register an invalid alias ('" + alias + "'). Aliases may not contain spaces.");
                 }
                 final Collection<CommandMapping> ownedCommands = this.owners.get(container);
                 for (CommandMapping mapping : this.dispatcher.getAll(alias)) {
