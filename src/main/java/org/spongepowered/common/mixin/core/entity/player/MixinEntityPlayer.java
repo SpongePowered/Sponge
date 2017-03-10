@@ -394,7 +394,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Overwrite
     @Nullable
-    public ItemStack dropItemAndGetStack(EntityItem p_184816_1_) {
+    protected ItemStack dropItemAndGetStack(EntityItem p_184816_1_) {
         this.world.spawnEntity(p_184816_1_);
         return p_184816_1_.getEntityItem();
     }

@@ -36,8 +36,10 @@ import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
+import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.ImmutableDataBuilder;
@@ -51,7 +53,9 @@ import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataManipulatorBuilder;
@@ -313,13 +317,17 @@ public final class SpongeDataManager implements DataManager {
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void register(Class<? extends T> manipulatorClass,
             Class<? extends I> immutableManipulatorClass, DataManipulatorBuilder<T, I> builder) {
         checkState(allowRegistrations, "Registrations are no longer allowed!");
-        if (!this.builderMap.containsKey(checkNotNull(manipulatorClass))) {
-            this.builderMap.put(manipulatorClass, checkNotNull(builder));
-            this.immutableBuilderMap.put(checkNotNull(immutableManipulatorClass), builder);
-            SpongeDataManager.getInstance().registerBuilder((Class<T>) manipulatorClass, builder);
-        } else {
-            throw new IllegalStateException("Already registered the DataUtil for " + manipulatorClass.getCanonicalName());
-        }
+        SpongeImplHooks
+        SpongeImpl.getLogger().log(Level.WARN, "Detected $1 being registered with the old way! Please notify the developer", builder);
+    }
+
+    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void register(DataRegistration<T, I> registration) {
+        checkState(allowRegistrations, "Registrations are no longer allowed!");
+        final Class<T> manipulatorClass = registration.getManipulatorClass();
+        final Class<I> immutableManipulatorClass = registration.getImmutableManipulatorClass();
+        final DataManipulatorBuilder<T, I> builder = registration.getDataManipulatorBuilder();
+        final String manipulatorId = registration.getId();
+        final PluginContainer pluginContainer = registration.getPluginContainer();
     }
 
     @SuppressWarnings("unchecked")
