@@ -24,42 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockStone;
 import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.data.type.StoneTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class StoneTypeRegistryModule implements CatalogRegistryModule<StoneType> {
-
-    @RegisterCatalog(StoneTypes.class)
-    private final Map<String, StoneType> stoneTypeMappings = new ImmutableMap.Builder<String, StoneType>()
-        .put("stone", (StoneType) (Object) BlockStone.EnumType.STONE)
-        .put("granite", (StoneType) (Object) BlockStone.EnumType.GRANITE)
-        .put("smooth_granite", (StoneType) (Object) BlockStone.EnumType.GRANITE_SMOOTH)
-        .put("diorite", (StoneType) (Object) BlockStone.EnumType.DIORITE)
-        .put("smooth_diorite", (StoneType) (Object) BlockStone.EnumType.DIORITE_SMOOTH)
-        .put("andesite", (StoneType) (Object) BlockStone.EnumType.ANDESITE)
-        .put("smooth_andesite", (StoneType) (Object) BlockStone.EnumType.ANDESITE_SMOOTH)
-        .build();
+@RegisterCatalog(StoneTypes.class)
+public final class StoneTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockStone.EnumType, StoneType> {
 
     @Override
-    public Optional<StoneType> getById(String id) {
-        return Optional.ofNullable(this.stoneTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    protected BlockStone.EnumType[] getValues() {
+        return BlockStone.EnumType.values();
     }
-
-    @Override
-    public Collection<StoneType> getAll() {
-        return ImmutableList.copyOf(this.stoneTypeMappings.values());
-    }
-
 }

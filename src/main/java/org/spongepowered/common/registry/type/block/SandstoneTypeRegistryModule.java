@@ -24,38 +24,18 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockSandStone;
 import org.spongepowered.api.data.type.SandstoneType;
 import org.spongepowered.api.data.type.SandstoneTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class SandstoneTypeRegistryModule implements CatalogRegistryModule<SandstoneType> {
-
-    @RegisterCatalog(SandstoneTypes.class)
-    private final Map<String, SandstoneType> sandStoneTypeMappings = new ImmutableMap.Builder<String, SandstoneType>()
-        .put("default", (SandstoneType) (Object) BlockSandStone.EnumType.DEFAULT)
-        .put("chiseled", (SandstoneType) (Object) BlockSandStone.EnumType.CHISELED)
-        .put("smooth", (SandstoneType) (Object) BlockSandStone.EnumType.SMOOTH)
-        .build();
+@RegisterCatalog(SandstoneTypes.class)
+public final class SandstoneTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockSandStone.EnumType, SandstoneType> {
 
     @Override
-    public Optional<SandstoneType> getById(String id) {
-        return Optional.ofNullable(this.sandStoneTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<SandstoneType> getAll() {
-        return ImmutableList.copyOf(this.sandStoneTypeMappings.values());
+    protected BlockSandStone.EnumType[] getValues() {
+        return BlockSandStone.EnumType.values();
     }
 
 }

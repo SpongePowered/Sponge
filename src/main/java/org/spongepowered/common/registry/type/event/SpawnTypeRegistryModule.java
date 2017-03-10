@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
@@ -39,7 +40,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class SpawnTypeRegistryModule implements AdditionalCatalogRegistryModule<SpawnType> {
+public class SpawnTypeRegistryModule implements AlternateCatalogRegistryModule<SpawnType>, AdditionalCatalogRegistryModule<SpawnType> {
 
     @RegisterCatalog(SpawnTypes.class)
     private final Map<String, SpawnType> spawnTypeMap = new HashMap<>();
@@ -53,7 +54,11 @@ public class SpawnTypeRegistryModule implements AdditionalCatalogRegistryModule<
 
     @Override
     public Optional<SpawnType> getById(String id) {
-        return Optional.ofNullable(this.spawnTypeMap.get(checkNotNull(id, "Id cannot be null!").toLowerCase(Locale.ENGLISH)));
+        String key = checkNotNull(id).toLowerCase(Locale.ENGLISH);
+        if (!key.contains(":")) {
+            key = "sponge:" + key; // There are no minecraft based spawn types.
+        }
+        return Optional.ofNullable(this.spawnTypeMap.get(key));
     }
 
     @Override
@@ -63,23 +68,32 @@ public class SpawnTypeRegistryModule implements AdditionalCatalogRegistryModule<
 
     @Override
     public void registerDefaults() {
-        this.spawnTypeMap.put("block_spawning", InternalSpawnTypes.BLOCK_SPAWNING);
-        this.spawnTypeMap.put("breeding", InternalSpawnTypes.BREEDING);
-        this.spawnTypeMap.put("dispense", InternalSpawnTypes.DISPENSE);
-        this.spawnTypeMap.put("dropped_item", InternalSpawnTypes.DROPPED_ITEM);
-        this.spawnTypeMap.put("experience", InternalSpawnTypes.EXPERIENCE);
-        this.spawnTypeMap.put("falling_block", InternalSpawnTypes.FALLING_BLOCK);
-        this.spawnTypeMap.put("mob_spawner", InternalSpawnTypes.MOB_SPAWNER);
-        this.spawnTypeMap.put("passive", InternalSpawnTypes.PASSIVE);
-        this.spawnTypeMap.put("placement", InternalSpawnTypes.PLACEMENT);
-        this.spawnTypeMap.put("projectile", InternalSpawnTypes.PROJECTILE);
-        this.spawnTypeMap.put("spawn_egg", InternalSpawnTypes.SPAWN_EGG);
-        this.spawnTypeMap.put("structure", InternalSpawnTypes.STRUCTURE);
-        this.spawnTypeMap.put("tnt_ignite", InternalSpawnTypes.TNT_IGNITE);
-        this.spawnTypeMap.put("weather", InternalSpawnTypes.WEATHER);
-        this.spawnTypeMap.put("custom", InternalSpawnTypes.CUSTOM);
-        this.spawnTypeMap.put("chunk_load", InternalSpawnTypes.CHUNK_LOAD);
-        this.spawnTypeMap.put("world_spawner", InternalSpawnTypes.WORLD_SPAWNER);
-        this.spawnTypeMap.put("plugin", InternalSpawnTypes.PLUGIN);
+        this.spawnTypeMap.put("sponge:block_spawning", InternalSpawnTypes.BLOCK_SPAWNING);
+        this.spawnTypeMap.put("sponge:breeding", InternalSpawnTypes.BREEDING);
+        this.spawnTypeMap.put("sponge:dispense", InternalSpawnTypes.DISPENSE);
+        this.spawnTypeMap.put("sponge:dropped_item", InternalSpawnTypes.DROPPED_ITEM);
+        this.spawnTypeMap.put("sponge:experience", InternalSpawnTypes.EXPERIENCE);
+        this.spawnTypeMap.put("sponge:falling_block", InternalSpawnTypes.FALLING_BLOCK);
+        this.spawnTypeMap.put("sponge:mob_spawner", InternalSpawnTypes.MOB_SPAWNER);
+        this.spawnTypeMap.put("sponge:passive", InternalSpawnTypes.PASSIVE);
+        this.spawnTypeMap.put("sponge:placement", InternalSpawnTypes.PLACEMENT);
+        this.spawnTypeMap.put("sponge:projectile", InternalSpawnTypes.PROJECTILE);
+        this.spawnTypeMap.put("sponge:spawn_egg", InternalSpawnTypes.SPAWN_EGG);
+        this.spawnTypeMap.put("sponge:structure", InternalSpawnTypes.STRUCTURE);
+        this.spawnTypeMap.put("sponge:tnt_ignite", InternalSpawnTypes.TNT_IGNITE);
+        this.spawnTypeMap.put("sponge:weather", InternalSpawnTypes.WEATHER);
+        this.spawnTypeMap.put("sponge:custom", InternalSpawnTypes.CUSTOM);
+        this.spawnTypeMap.put("sponge:chunk_load", InternalSpawnTypes.CHUNK_LOAD);
+        this.spawnTypeMap.put("sponge:world_spawner", InternalSpawnTypes.WORLD_SPAWNER);
+        this.spawnTypeMap.put("sponge:plugin", InternalSpawnTypes.PLUGIN);
+    }
+
+    @Override
+    public Map<String, SpawnType> provideCatalogMap() {
+        final HashMap<String, SpawnType> map = new HashMap<>();
+        for (Map.Entry<String, SpawnType> entry : this.spawnTypeMap.entrySet()) {
+            map.put(entry.getKey().replace("sponge:", ""), entry.getValue());
+        }
+        return map;
     }
 }

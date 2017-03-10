@@ -24,20 +24,28 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
+import com.google.common.base.CaseFormat;
 import net.minecraft.scoreboard.Team;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import javax.annotation.Nullable;
+
 @Mixin(Team.CollisionRule.class)
 public class MixinCollisionRule implements CollisionRule {
 
     @Shadow @Final public String name;
 
+    @Nullable private String spongeId;
+
     @Override
     public String getId() {
-        return this.name;
+        if (this.spongeId == null) {
+            this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.name);
+        }
+        return this.spongeId;
     }
 
     @Override

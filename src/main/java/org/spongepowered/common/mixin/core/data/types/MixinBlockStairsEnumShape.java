@@ -33,17 +33,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockStairs.EnumShape.class)
-@Implements(@Interface(iface = StairShape.class, prefix = "shadow$"))
+@Implements(@Interface(iface = StairShape.class, prefix = "stair$"))
 public abstract class MixinBlockStairsEnumShape {
 
-    @Shadow public abstract String getName();
+    @Shadow public abstract String shadow$getName();
 
-    public String shadow$getId() {
-        return getName();
+    public String stair$getId() {
+        return "minecraft:" + shadow$getName();
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return getName();
+    public String stair$getName() {
+        return shadow$getName();
     }
 }

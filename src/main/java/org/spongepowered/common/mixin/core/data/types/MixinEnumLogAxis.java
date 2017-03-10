@@ -34,22 +34,21 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockLog.EnumAxis.class)
 @Implements(@Interface(iface = LogAxis.class, prefix = "log$"))
-public abstract class MixinEnumLogAxis {
+public abstract class MixinEnumLogAxis implements LogAxis {
 
-    @Shadow public abstract String getName();
+    @Shadow public abstract String shadow$getName();
 
     public String log$getId() {
-        return getName();
+        return "minecraft:" + shadow$getName();
     }
 
     @Intrinsic
     public String log$getName() {
-        return getName();
+        return shadow$getName();
     }
 
-    /* TODO when generic mixin methods work.
-    public LogAxis log$cycleNext() {
+    @Override
+    public LogAxis cycleNext() {
         return (LogAxis) (Object) BlockLog.EnumAxis.values()[((BlockLog.EnumAxis) (Object) this).ordinal() + 1 % BlockLog.EnumAxis.values().length];
     }
-    */
 }

@@ -39,12 +39,12 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     private final Class<? extends TileEntity> clazz;
     private final boolean canTick;
 
-    public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id, boolean canTick) {
+    public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id, boolean canTick, String modId) {
         super(id);
         this.name = checkNotNull(name, "name");
         this.clazz = checkNotNull(clazz, "clazz");
         this.canTick = canTick;
-        this.modId = SpongeImplHooks.getModIdFromClass(clazz);
+        this.modId = modId;
     }
 
     @Override

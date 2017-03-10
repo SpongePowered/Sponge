@@ -24,38 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockTallGrass;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.ShrubTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class ShrubTypeRegistryModule implements CatalogRegistryModule<ShrubType> {
-
-    @RegisterCatalog(ShrubTypes.class)
-    private final Map<String, ShrubType> shrubTypeMappings = new ImmutableMap.Builder<String, ShrubType>()
-        .put("dead_bush", (ShrubType) (Object) BlockTallGrass.EnumType.DEAD_BUSH)
-        .put("tall_grass", (ShrubType) (Object) BlockTallGrass.EnumType.GRASS)
-        .put("fern", (ShrubType) (Object) BlockTallGrass.EnumType.FERN)
-        .build();
+@RegisterCatalog(ShrubTypes.class)
+public final class ShrubTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockTallGrass.EnumType, ShrubType> {
 
     @Override
-    public Optional<ShrubType> getById(String id) {
-        return Optional.ofNullable(this.shrubTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    protected BlockTallGrass.EnumType[] getValues() {
+        return BlockTallGrass.EnumType.values();
     }
-
-    @Override
-    public Collection<ShrubType> getAll() {
-        return ImmutableList.copyOf(this.shrubTypeMappings.values());
-    }
-
 }

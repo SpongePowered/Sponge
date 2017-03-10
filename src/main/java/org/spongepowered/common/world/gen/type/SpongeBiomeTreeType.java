@@ -37,23 +37,25 @@ import javax.annotation.Nullable;
 
 public class SpongeBiomeTreeType implements BiomeTreeType {
 
+    private String id;
     private String name;
     private PopulatorObject smallObject;
     private @Nullable PopulatorObject largeObject;
 
-    public SpongeBiomeTreeType(String name, PopulatorObject small) {
+    public SpongeBiomeTreeType(String id, String name, PopulatorObject small) {
+        this.id = id;
         this.name = name;
         this.smallObject = small;
     }
 
-    public SpongeBiomeTreeType(String name, PopulatorObject small, @Nullable PopulatorObject large) {
-        this(name, small);
+    public SpongeBiomeTreeType(String id, String name, PopulatorObject small, @Nullable PopulatorObject large) {
+        this(id, name, small);
         this.largeObject = large;
     }
 
     @Override
     public String getId() {
-        return this.name;
+        return this.id;
     }
 
     @Override

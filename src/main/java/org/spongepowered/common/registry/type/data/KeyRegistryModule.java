@@ -43,6 +43,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.mutable.entity.DominantHandData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.*;
@@ -60,6 +61,7 @@ import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.item.FireworkEffect;
@@ -608,6 +610,28 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     public static final TypeToken<Value<ParticleType>> PARTICLE_TYPE_VALUE_TOKEN = new TypeToken<Value<ParticleType>>() {
         private static final long serialVersionUID = -1;
     };
+    public static final TypeToken<Map<EntityType, Double>> ENTITY_TYPE_DOUBLE_MAP_TOKEN = new TypeToken<Map<EntityType, Double>>() {};
+    public static final TypeToken<MapValue<EntityType, Double>> ENTITY_TYPE_DOUBLE_MAP_VALUE_TOKEN = new TypeToken<MapValue<EntityType, Double>>() {};
+
+    public static final TypeToken<HandPreference> HAND_PREFERENCE_TYPE_TOKEN = new TypeToken<HandPreference>() {};
+    public static final TypeToken<Value<HandPreference>> HAND_PREFERENCE_VALUE_TOKEN = new TypeToken<Value<HandPreference>>() {};
+
+    public static final TypeToken<Optional<Living>> LAST_ATTACKER_TOKEN = new TypeToken<Optional<Living>>() {};
+
+    public static final TypeToken<OptionalValue<Living>> LAST_ATTACKER_VALUE_TOKEN = new TypeToken<OptionalValue<Living>>() {};
+
+    public static final TypeToken<LlamaVariant> LLAMA_VARIANT_TOKEN = new TypeToken<LlamaVariant>() {};
+
+    public static final TypeToken<Value<LlamaVariant>> LLAMA_VARIANT_VALUE_TOKEN = new TypeToken<Value<LlamaVariant>>() {};
+
+    public static final TypeToken<Map<Direction, WireAttachmentType>> WIRE_ATTACHMENT_MAP_TOKEN = new TypeToken<Map<Direction, WireAttachmentType>>() {};
+
+    public static final TypeToken<MapValue<Direction, WireAttachmentType>> WIRE_ATTACHMENT_MAP_VALUE_TOKEN = new TypeToken<MapValue<Direction, WireAttachmentType>>() {};
+
+    public static final TypeToken<WireAttachmentType> WIRE_ATTACHMENT_TYPE_TOKEN = new TypeToken<WireAttachmentType>() {};
+
+    public static final TypeToken<Value<WireAttachmentType>> WIRE_ATTACHMENT_TYPE_VALUE_TOKEN = new TypeToken<Value<WireAttachmentType>>() {};
+
 
     public static KeyRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -1043,7 +1067,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("glowing", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("Glowing"), "sponge:glowing", "Glowing"));
 
-        this.fieldMap.put("pickup_rule", makeSingleKey(PICKUP_TOKEN, PICKUP_VALUE_TOKEN, of("PickupRule"), "sponge:pickupRule", "Pickup Rule"));
+        this.fieldMap.put("pickup_rule", makeSingleKey(PICKUP_TOKEN, PICKUP_VALUE_TOKEN, of("PickupRule"), "sponge:pickup_rule", "Pickup Rule"));
 
         this.fieldMap.put("invulnerability_ticks", makeSingleKey(INTEGER_TOKEN, BOUNDED_INTEGER_VALUE_TOKEN, of("HurtTime"), "sponge:invulnerability_ticks", "Invulnerability Ticks"));
 
@@ -1098,6 +1122,46 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("area_effect_cloud_particle_type", makeSingleKey(PARTICLE_TYPE_TOKEN, PARTICLE_TYPE_VALUE_TOKEN, of("CloudParticleType"), "sponge:area_effect_cloud_particle_type", "AreaEffectCloud ParticleType"));
 
+        this.fieldMap.put("age", makeSingleKey(INTEGER_TOKEN, BOUNDED_INTEGER_VALUE_TOKEN, of("EntityAge"), "sponge:entity_age", "Entity Age"));
+
+        this.fieldMap.put("attack_damage", makeSingleKey(DOUBLE_TOKEN, BOUNDED_DOUBLE_VALUE_TOKEN, of("EntityAttackDamage"), "sponge:entity_attack_damage", "Entity Attack Damage"));
+
+        this.fieldMap.put("base_size", makeSingleKey(DOUBLE_TOKEN, BOUNDED_DOUBLE_VALUE_TOKEN, of("EntityBaseSize"), "sponge:base_size", "Entity Base Size"));
+
+        this.fieldMap.put("damage_entity_map", makeMapKey(ENTITY_TYPE_DOUBLE_MAP_TOKEN, ENTITY_TYPE_DOUBLE_MAP_VALUE_TOKEN, of("DamageEntityTypeMap"), "sponge:entity_type_damage_map", "Entity Type Damage Map"));
+
+        this.fieldMap.put("dominant_hand", makeSingleKey(HAND_PREFERENCE_TYPE_TOKEN, HAND_PREFERENCE_VALUE_TOKEN, of("HandPreference"), "sponge:hand_preference", "Hand Preference"));
+
+        this.fieldMap.put("filled", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("Filled"), "sponge:filled", "Filled"));
+
+        this.fieldMap.put("fluid_level", makeSingleKey(INTEGER_TOKEN, BOUNDED_INTEGER_VALUE_TOKEN, of("LiquidLevel"), "sponge:fluid_level", "Fluid Level"));
+
+        this.fieldMap.put("health_scale", makeSingleKey(DOUBLE_TOKEN, BOUNDED_DOUBLE_VALUE_TOKEN, of("HealthScale"), "sponge:health_scale", "Health Scale"));
+
+        this.fieldMap.put("height", makeSingleKey(DOUBLE_TOKEN, BOUNDED_DOUBLE_VALUE_TOKEN, of("EntityHeight"), "sponge:entity_height", "Entity Height"));
+
+        this.fieldMap.put("held_experience", makeSingleKey(INTEGER_TOKEN, BOUNDED_INTEGER_VALUE_TOKEN, of("HeldExperience"), "sponge:held_experience", "Held Experience"));
+
+        this.fieldMap.put("is_sleeping", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("IsSleeping"), "sponge:is_sleeping", "Is Sleeping"));
+
+        this.fieldMap.put("johnny_vindicator", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("JohnnyVindicator"), "sponge:johnny_vindicator", "Johnny Vindicator"));
+
+        this.fieldMap.put("last_attacker", makeSingleKey(LAST_ATTACKER_TOKEN, LAST_ATTACKER_VALUE_TOKEN, of("LastAttacker"), "sponge:last_attacker", "Last Attacking Entity"));
+
+        this.fieldMap.put("llama_strength", makeSingleKey(INTEGER_TOKEN, BOUNDED_INTEGER_VALUE_TOKEN, of("LlamaStrength"), "sponge:llama_strength", "Llama Strength"));
+
+        this.fieldMap.put("llama_variant", makeSingleKey(LLAMA_VARIANT_TOKEN, LLAMA_VARIANT_VALUE_TOKEN, of("LlamaVariant"), "sponge:llama_variant", "Llama Variant"));
+
+        this.fieldMap.put("scale", makeSingleKey(DOUBLE_TOKEN, DOUBLE_VALUE_TOKEN, of("EntityScale"), "sponge:entity_scale", "Entity Scale"));
+
+        this.fieldMap.put("will_shatter", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("WillShatter"), "sponge:will_shatter", "Will Shatter"));
+
+        this.fieldMap.put("wire_attachments", makeMapKey(WIRE_ATTACHMENT_MAP_TOKEN, WIRE_ATTACHMENT_MAP_VALUE_TOKEN, of("WireAttachmentMap"), "sponge:wire_attachment_map", "Wire Attachment Map"));
+
+        this.fieldMap.put("wire_attachment_east", makeSingleKey(WIRE_ATTACHMENT_TYPE_TOKEN, WIRE_ATTACHMENT_TYPE_VALUE_TOKEN, of("WireAttachmentEast"), "sponge:wire_attachment_east", "Wire Attachment East"));
+        this.fieldMap.put("wire_attachment_south", makeSingleKey(WIRE_ATTACHMENT_TYPE_TOKEN, WIRE_ATTACHMENT_TYPE_VALUE_TOKEN, of("WireAttachmentSouth"), "sponge:wire_attachment_south", "Wire Attachment South"));
+        this.fieldMap.put("wire_attachment_north", makeSingleKey(WIRE_ATTACHMENT_TYPE_TOKEN, WIRE_ATTACHMENT_TYPE_VALUE_TOKEN, of("WireAttachmentNorth"), "sponge:wire_attachment_north", "Wire Attachment North"));
+        this.fieldMap.put("wire_attachment_west", makeSingleKey(WIRE_ATTACHMENT_TYPE_TOKEN, WIRE_ATTACHMENT_TYPE_VALUE_TOKEN, of("WireAttachmentWest"), "sponge:wire_attachment_west", "Wire Attachment West"));
 
         for (Key<?> key : this.fieldMap.values()) {
             this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
@@ -1116,9 +1180,6 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
     @Override
     public Optional<Key<?>> getById(String id) {
-        if (checkNotNull(id, "Key id cannot be null!").contains("sponge:")) {
-            id = id.replace("sponge:", "");
-        }
         return Optional.ofNullable(this.keyMap.get(id));
     }
 

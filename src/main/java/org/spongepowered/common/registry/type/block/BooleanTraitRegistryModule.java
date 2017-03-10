@@ -34,6 +34,8 @@ import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
+import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -41,10 +43,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class BooleanTraitRegistryModule implements SpongeAdditionalCatalogRegistryModule<BooleanTrait>, AlternateCatalogRegistryModule<BooleanTrait> {
-
-    @RegisterCatalog(BooleanTraits.class)
-    private Map<String, BooleanTrait> booleanTraitMap = new HashMap<>();
+@RegisterCatalog(BooleanTraits.class)
+public final class BooleanTraitRegistryModule
+        extends AbstractPrefixAlternateCatalogTypeRegistryModule<BooleanTrait>
+        implements SpongeAdditionalCatalogRegistryModule<BooleanTrait>{
 
     public static BooleanTraitRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -57,36 +59,19 @@ public final class BooleanTraitRegistryModule implements SpongeAdditionalCatalog
 
     @Override
     public void registerAdditionalCatalog(BooleanTrait extraCatalog) {
-        this.booleanTraitMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
-    }
-
-    @Override
-    public Optional<BooleanTrait> getById(String id) {
-        return Optional.ofNullable(this.booleanTraitMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<BooleanTrait> getAll() {
-        return ImmutableList.copyOf(this.booleanTraitMap.values());
+        this.catalogTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     public void registerBlock(String id, BlockType block, BooleanTrait property) {
         checkNotNull(id, "Id was null!");
         checkNotNull(property, "Property was null!");
-        this.booleanTraitMap.put(id.toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH), property);
+        this.catalogTypeMap.put(id.toLowerCase(Locale.ENGLISH), property);
         final String propertyId = block.getId().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
-        this.booleanTraitMap.put(propertyId, property);
+        this.catalogTypeMap.put(propertyId, property);
     }
 
-    BooleanTraitRegistryModule() { }
-
-    @Override
-    public Map<String, BooleanTrait> provideCatalogMap() {
-        Map<String, BooleanTrait> map = new HashMap<>();
-        for (Map.Entry<String, BooleanTrait> enumTraitEntry : this.booleanTraitMap.entrySet()) {
-            map.put(enumTraitEntry.getKey().replace("minecraft:", ""), enumTraitEntry.getValue());
-        }
-        return map;
+    BooleanTraitRegistryModule() {
+        super("minecraft", new String[] {"minecraft:"} );
     }
 
     private static final class Holder {

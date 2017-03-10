@@ -46,7 +46,7 @@ public abstract class MixinFishType implements Fish {
 
     @Override
     public String getId() {
-        return "raw." + this.unlocalizedName;
+        return "minecraft:raw." + this.unlocalizedName;
     }
 
     @Override

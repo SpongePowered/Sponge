@@ -24,42 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLog;
 import org.spongepowered.api.data.type.LogAxes;
 import org.spongepowered.api.data.type.LogAxis;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Optional;
-
-public final class LogAxisRegistryModule implements CatalogRegistryModule<LogAxis> {
-
-    @RegisterCatalog(LogAxes.class)
-    private final BiMap<String, LogAxis> logAxisMappings = HashBiMap.create();
+@RegisterCatalog(LogAxes.class)
+public final class LogAxisRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockLog.EnumAxis, LogAxis> {
 
     @Override
-    public Optional<LogAxis> getById(String id) {
-        return Optional.ofNullable(this.logAxisMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    protected BlockLog.EnumAxis[] getValues() {
+        return BlockLog.EnumAxis.values();
     }
-
-    @Override
-    public Collection<LogAxis> getAll() {
-        return ImmutableList.copyOf((LogAxis[]) (Object[]) BlockLog.EnumAxis.values());
-    }
-
-    @Override
-    public void registerDefaults() {
-        this.logAxisMappings.put("x", (LogAxis) (Object) BlockLog.EnumAxis.X);
-        this.logAxisMappings.put("y", (LogAxis) (Object) BlockLog.EnumAxis.Y);
-        this.logAxisMappings.put("z", (LogAxis) (Object) BlockLog.EnumAxis.Z);
-        this.logAxisMappings.put("none", (LogAxis) (Object) BlockLog.EnumAxis.NONE);
-    }
-
 }

@@ -60,6 +60,7 @@ import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.mixin.core.world.MixinWorldType;
 import org.spongepowered.common.world.WorldManager;
 
 import java.util.Collection;
@@ -84,7 +85,14 @@ public final class SpongeImplHooks {
     }
 
     public static String getModIdFromClass(Class<?> clazz) {
-        return clazz.getName().startsWith("net.minecraft.") ? "minecraft" : "unknown";
+        final String className = clazz.getName();
+        if (className.startsWith("net.minecraft.")) {
+            return "minecraft";
+        }
+        if (className.startsWith("org.spongepowered.")) {
+            return "sponge";
+        }
+        return "unknown";
     }
 
     // Entity

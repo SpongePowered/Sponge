@@ -24,43 +24,18 @@
  */
 package org.spongepowered.common.registry.type.scoreboard;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import net.minecraft.scoreboard.Team;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.CollisionRules;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-
-public final class CollisionRuleRegistryModule implements CatalogRegistryModule<CollisionRule> {
-
-    @RegisterCatalog(CollisionRules.class)
-    public final Map<String, CollisionRule> collisionRules = Maps.newHashMap();
+@RegisterCatalog(CollisionRules.class)
+public final class CollisionRuleRegistryModule extends MinecraftEnumBasedCatalogTypeModule<Team.CollisionRule, CollisionRule> {
 
     @Override
-    public void registerDefaults() {
-        this.collisionRules.put("always", (CollisionRule) (Object) Team.CollisionRule.ALWAYS);
-        this.collisionRules.put("never", (CollisionRule) (Object) Team.CollisionRule.NEVER);
-        // NOTE - These are deliberately set to the 'wrong' enum values, because of https://bugs.mojang.com/browse/MC-87984
-        // Since this bug affects the client (since collisions are run on both the client and server), we can't fix it server side
-        this.collisionRules.put("push_other_teams", (CollisionRule) (Object) Team.CollisionRule.HIDE_FOR_OWN_TEAM);
-        this.collisionRules.put("push_own_team", (CollisionRule) (Object) Team.CollisionRule.HIDE_FOR_OTHER_TEAMS);
-    }
-
-    @Override
-    public Optional<CollisionRule> getById(String id) {
-        return Optional.ofNullable(this.collisionRules.get(checkNotNull(id, "id").toLowerCase()));
-    }
-
-    @Override
-    public Collection<CollisionRule> getAll() {
-        return ImmutableSet.copyOf(this.collisionRules.values());
+    protected Team.CollisionRule[] getValues() {
+        return Team.CollisionRule.values();
     }
 
 }

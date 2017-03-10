@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
+import com.google.common.base.CaseFormat;
+import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.ScoreCriteria;
 import net.minecraft.scoreboard.ScoreCriteriaColored;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
@@ -32,9 +34,13 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 
+import javax.annotation.Nullable;
+
 @Mixin(value = {ScoreCriteriaColored.class, ScoreCriteria.class})
 @Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
-public abstract class MixinCriterion implements Criterion { // Trick to allow avoid shadowing, since multiple targets are used
+public abstract class MixinCriterion implements IScoreCriteria { // Trick to allow avoid shadowing, since multiple targets are used
+
+    @Nullable private String spongeId;
 
     @Intrinsic
     public String criterion$getName() {
@@ -42,6 +48,9 @@ public abstract class MixinCriterion implements Criterion { // Trick to allow av
     }
 
     public String criterion$getId() {
-        return this.getName();
+        if (this.spongeId == null) {
+            this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.getName().replace("count", "s"));
+        }
+        return this.spongeId;
     }
 }

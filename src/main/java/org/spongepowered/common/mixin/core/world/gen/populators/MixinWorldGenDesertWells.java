@@ -144,7 +144,6 @@ public abstract class MixinWorldGenDesertWells extends WorldGenerator implements
         return Objects.toStringHelper(this)
                 .add("Type", "DesertWell")
                 .add("Chance", this.spawnProbability)
-                .add("Object", this.obj)
                 .toString();
     }
 

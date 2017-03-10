@@ -36,6 +36,7 @@ import net.minecraft.item.Item;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.ResourceLocation;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.block.BlockType;
@@ -73,9 +74,11 @@ import org.spongepowered.api.text.serializer.TextSerializerFactory;
 import org.spongepowered.api.text.serializer.TextTemplateConfigSerializer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.ResettableBuilder;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.CatalogTypeTypeSerializer;
 import org.spongepowered.common.data.DataRegistrar;
@@ -104,6 +107,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -118,6 +122,8 @@ import javax.annotation.Nullable;
 @SuppressWarnings("deprecation")
 @Singleton
 public class SpongeGameRegistry implements GameRegistry {
+
+    public static final boolean PRINT_CATALOG_TYPES = Boolean.parseBoolean(System.getProperty("sponge.print_all_catalog_types"));
 
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(CatalogType.class), new CatalogTypeTypeSerializer());
@@ -159,6 +165,31 @@ public class SpongeGameRegistry implements GameRegistry {
         registerModulePhase();
         SpongeVillagerRegistry.registerVanillaTrades();
         DataRegistrar.setupSerialization(SpongeImpl.getGame());
+        final List<Tuple<Class<? extends CatalogType>, CatalogRegistryModule<?>>> modules = new ArrayList<>();
+        for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : this.catalogRegistryMap.entrySet()) {
+            modules.add(new Tuple<>(entry.getKey(), entry.getValue()));
+        }
+        modules.sort(Comparator.comparing(tuple -> tuple.getFirst().getSimpleName()));
+        if (PRINT_CATALOG_TYPES) { // Lol... this gets spammy really fast.... Probably at some point should be put to file.
+            final PrettyPrinter printer = new PrettyPrinter(100).add("Printing all Catalogs and their ID's").centre().hr()
+                .addWrapped(
+                    "This is a test to print out all registered catalogs during initialization for their mapping, id's, and objects themselves.");
+            for (Tuple<Class<? extends CatalogType>, CatalogRegistryModule<?>> module : modules) {
+                printer.add(" %s : %s", "CatalogType", module.getFirst().getSimpleName());
+
+                final Collection<? extends CatalogType> all = module.getSecond().getAll();
+                final List<CatalogType> catalogTypes = new ArrayList<>();
+                for (CatalogType o : all) {
+                    catalogTypes.add(o);
+                }
+                catalogTypes.sort(Comparator.comparing(CatalogType::getId));
+                for (CatalogType catalogType : catalogTypes) {
+                    printer.add("  -%s", catalogType.getId());
+                }
+                printer.hr();
+            }
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.DEBUG);
+        }
     }
 
 
@@ -371,12 +402,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Optional<Rotation> getRotationFromDegree(int degrees) {
-        for (Rotation rotation : RotationRegistryModule.rotationMap.values()) {
-            if (rotation.getAngle() == degrees) {
-                return Optional.of(rotation);
-            }
-        }
-        return Optional.empty();
+        return RotationRegistryModule.getInstance().getRotationFromDegree(degrees);
     }
 
     @Override

@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(value = SelectorText.class, remap = false)
 public abstract class MixinTextSelector extends MixinText {
 
-    @Shadow @Final protected Selector selector;
+    @Shadow @Final Selector selector;
 
     @Override
     protected TextComponentBase createComponent() {

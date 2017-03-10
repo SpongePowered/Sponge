@@ -29,6 +29,7 @@ import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -44,10 +45,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class TextSerializerRegistryModule implements AdditionalCatalogRegistryModule<TextSerializer> {
+public final class TextSerializerRegistryModule implements AlternateCatalogRegistryModule<TextSerializer>, AdditionalCatalogRegistryModule<TextSerializer> {
 
     @RegisterCatalog(TextSerializers.class)
-    private static final Map<String, TextSerializer> textSerializerMappings = new HashMap<>();
+    private final Map<String, TextSerializer> textSerializerMappings = new HashMap<>();
 
     @Override
     public Optional<TextSerializer> getById(String id) {
@@ -61,13 +62,15 @@ public final class TextSerializerRegistryModule implements AdditionalCatalogRegi
 
     @Override
     public void registerDefaults() {
-        textSerializerMappings.put("plain", new PlainTextSerializer());
-        textSerializerMappings.put("json", new JsonTextSerializer());
-        textSerializerMappings.put("formatting_code", new SpongeFormattingCodeTextSerializer(
-                "sponge:formatting_code", "Formatting Codes", '&'));
-        textSerializerMappings.put("legacy_formatting_code", new SpongeFormattingCodeTextSerializer(
-                "minecraft:legacy_formatting_code", "Legacy Formatting Codes", COLOR_CHAR));
-        textSerializerMappings.put("text_xml", new TextXmlTextSerializer());
+        registerSerializer(new PlainTextSerializer());
+        registerSerializer(new JsonTextSerializer());
+        registerSerializer(new SpongeFormattingCodeTextSerializer("sponge:formatting_code", "Formatting Codes", '&'));
+        registerSerializer(new SpongeFormattingCodeTextSerializer("minecraft:legacy_formatting_code", "Legacy Formatting Codes", COLOR_CHAR));
+        registerSerializer(new TextXmlTextSerializer());
+    }
+
+    private void registerSerializer(TextSerializer serializer) {
+        textSerializerMappings.put(serializer.getId(), serializer);
     }
 
     @Override
@@ -75,4 +78,12 @@ public final class TextSerializerRegistryModule implements AdditionalCatalogRegi
         textSerializerMappings.put(serializer.getId(), serializer);
     }
 
+    @Override
+    public Map<String, TextSerializer> provideCatalogMap() {
+        final HashMap<String, TextSerializer> map = new HashMap<>();
+        for (Map.Entry<String, TextSerializer> entry : this.textSerializerMappings.entrySet()) {
+            map.put(entry.getKey().replace("minecraft:", "").replace("sponge:", ""), entry.getValue());
+        }
+        return map;
+    }
 }

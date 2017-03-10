@@ -24,34 +24,21 @@
  */
 package org.spongepowered.common.registry.type.economy;
 
-import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.service.economy.transaction.TransactionTypes;
 import org.spongepowered.common.economy.SpongeTransactionType;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(TransactionTypes.class)
+public class TransactionTypeRegistryModule
+    extends AbstractPrefixAlternateCatalogTypeRegistryModule<TransactionType>
+    implements SpongeAdditionalCatalogRegistryModule<TransactionType> {
 
-public class TransactionTypeRegistryModule implements CatalogRegistryModule<TransactionType>, SpongeAdditionalCatalogRegistryModule<TransactionType> {
 
-    @RegisterCatalog(TransactionTypes.class)
-    public final Map<String, TransactionType> transactionTypeMappings = new HashMap<>();
-
-    @Override
-    public Optional<TransactionType> getById(String id) {
-        return Optional.ofNullable(this.transactionTypeMappings.get(Preconditions.checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<TransactionType> getAll() {
-        return ImmutableList.copyOf(this.transactionTypeMappings.values());
+    public TransactionTypeRegistryModule() {
+        super("sponge");
     }
 
     @Override
@@ -61,13 +48,15 @@ public class TransactionTypeRegistryModule implements CatalogRegistryModule<Tran
 
     @Override
     public void registerAdditionalCatalog(TransactionType extraCatalog) {
-        this.transactionTypeMappings.put(Preconditions.checkNotNull(extraCatalog).getId(), extraCatalog);
+        if (!this.catalogTypeMap.containsKey(extraCatalog.getId())) {
+            this.catalogTypeMap.put(extraCatalog.getId(), extraCatalog);
+        }
     }
 
     @Override
     public void registerDefaults() {
-        this.transactionTypeMappings.put("deposit", new SpongeTransactionType("deposit"));
-        this.transactionTypeMappings.put("withdraw", new SpongeTransactionType("withdraw"));
-        this.transactionTypeMappings.put("transfer",new SpongeTransactionType("transfer"));
+        register(new SpongeTransactionType("sponge:deposit", "deposit"));
+        register(new SpongeTransactionType("sponge:withdraw", "withdraw"));
+        register(new SpongeTransactionType("sponge:transfer", "transfer"));
     }
 }

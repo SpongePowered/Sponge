@@ -38,4 +38,5 @@ public class ImmutableSpongeSkeletonData
         super(org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSkeletonData.class,
             type, org.spongepowered.api.data.type.SkeletonTypes.NORMAL, org.spongepowered.api.data.key.Keys.SKELETON_TYPE, SpongeSkeletonData.class);
     }
+
 }

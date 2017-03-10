@@ -24,45 +24,18 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockFlower;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PlantTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class PlantTypeModuleRegistry implements CatalogRegistryModule<PlantType> {
-
-    @RegisterCatalog(PlantTypes.class)
-    private final Map<String, PlantType> plantTypeMappings = new ImmutableMap.Builder<String, PlantType>()
-        .put("dandelion", (PlantType) (Object) BlockFlower.EnumFlowerType.DANDELION)
-        .put("poppy", (PlantType) (Object) BlockFlower.EnumFlowerType.POPPY)
-        .put("blue_orchid", (PlantType) (Object) BlockFlower.EnumFlowerType.BLUE_ORCHID)
-        .put("allium", (PlantType) (Object) BlockFlower.EnumFlowerType.ALLIUM)
-        .put("houstonia", (PlantType) (Object) BlockFlower.EnumFlowerType.HOUSTONIA)
-        .put("red_tulip", (PlantType) (Object) BlockFlower.EnumFlowerType.RED_TULIP)
-        .put("orange_tulip", (PlantType) (Object) BlockFlower.EnumFlowerType.ORANGE_TULIP)
-        .put("white_tulip", (PlantType) (Object) BlockFlower.EnumFlowerType.WHITE_TULIP)
-        .put("pink_tulip", (PlantType) (Object) BlockFlower.EnumFlowerType.PINK_TULIP)
-        .put("oxeye_daisy", (PlantType) (Object) BlockFlower.EnumFlowerType.OXEYE_DAISY)
-        .build();
+@RegisterCatalog(PlantTypes.class)
+public final class PlantTypeModuleRegistry extends MinecraftEnumBasedCatalogTypeModule<BlockFlower.EnumFlowerType, PlantType> {
 
     @Override
-    public Optional<PlantType> getById(String id) {
-        return Optional.ofNullable(this.plantTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<PlantType> getAll() {
-        return ImmutableList.copyOf(this.plantTypeMappings.values());
+    protected BlockFlower.EnumFlowerType[] getValues() {
+        return BlockFlower.EnumFlowerType.values();
     }
 
 }

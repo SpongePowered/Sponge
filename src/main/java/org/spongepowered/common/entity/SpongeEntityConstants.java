@@ -28,6 +28,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.passive.EntityDonkey;
 import net.minecraft.entity.passive.EntityHorse;
+import net.minecraft.entity.passive.EntityLlama;
 import net.minecraft.entity.passive.EntityMule;
 import net.minecraft.entity.passive.EntitySkeletonHorse;
 import net.minecraft.entity.passive.EntityZombieHorse;
@@ -89,6 +90,7 @@ public class SpongeEntityConstants {
     public static final SpongeHorseVariant MULE = new SpongeHorseVariant(2, EntityMule.class, "MULE");
     public static final SpongeHorseVariant UNDEAD_HORSE = new SpongeHorseVariant(3, EntityZombieHorse.class, "UNDEAD_HORSE");
     public static final SpongeHorseVariant SKELETON_HORSE = new SpongeHorseVariant(4, EntitySkeletonHorse.class, "SKELETON_HORSE");
+    public static final SpongeHorseVariant LLAMA = new SpongeHorseVariant(-1, EntityLlama.class, "LLAMA");
 
     static {
         OCELOT_TYPES.put("wild_ocelot", WILD_OCELOT);
@@ -150,11 +152,13 @@ public class SpongeEntityConstants {
         HORSE_VARIANTS.put("mule", MULE);
         HORSE_VARIANTS.put("undead_horse", UNDEAD_HORSE);
         HORSE_VARIANTS.put("skeleton_horse", SKELETON_HORSE);
+        HORSE_VARIANTS.put("llama", LLAMA);
 
         HORSE_VARIANT_IDMAP.put(EntityHorse.class, HORSE);
         HORSE_VARIANT_IDMAP.put(EntityDonkey.class, DONKEY);
         HORSE_VARIANT_IDMAP.put(EntityMule.class, MULE);
         HORSE_VARIANT_IDMAP.put(EntityZombieHorse.class, UNDEAD_HORSE);
         HORSE_VARIANT_IDMAP.put(EntitySkeletonHorse.class, SKELETON_HORSE);
+        HORSE_VARIANT_IDMAP.put(EntityLlama.class, LLAMA);
     }
 }

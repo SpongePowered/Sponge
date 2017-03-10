@@ -97,7 +97,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Shadow public abstract NBTTagCompound getTagCompound();
     @Shadow public abstract NBTTagCompound getOrCreateSubCompound(String key);
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
-    @Shadow @Nullable public abstract Item shadow$getItem();
+    @Shadow public abstract Item shadow$getItem();
 
 
     @Inject(method = "writeToNBT", at = @At(value = "HEAD"))

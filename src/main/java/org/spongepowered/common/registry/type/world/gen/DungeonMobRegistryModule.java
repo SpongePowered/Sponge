@@ -77,8 +77,8 @@ public class DungeonMobRegistryModule implements RegistryModule {
     public void put(EntityType type, int weight) {
         remove(type);
 
-        dungeonMobs.add(new WeightedSerializableObject<>(EntityUtil.archetype(type), weight));
-        presentTypes.add(type);
+        this.dungeonMobs.add(new WeightedSerializableObject<>(EntityUtil.archetype(type), weight));
+        this.presentTypes.add(type);
     }
 
     /**
@@ -87,8 +87,8 @@ public class DungeonMobRegistryModule implements RegistryModule {
      * @param type Type to remove
      */
     public void remove(EntityType type) {
-        get(type).ifPresent(dungeonMobs::remove);
-        presentTypes.remove(type);
+        get(type).ifPresent(this.dungeonMobs::remove);
+        this.presentTypes.remove(type);
     }
 
     /**
@@ -98,7 +98,7 @@ public class DungeonMobRegistryModule implements RegistryModule {
      * @return Weighed archetype, if one exists
      */
     public Optional<WeightedSerializableObject<EntityArchetype>> get(EntityType type) {
-        return dungeonMobs
+        return this.dungeonMobs
                 .getEntries()
                 .stream()
                 .map(entry -> (WeightedSerializableObject<EntityArchetype>) entry)
@@ -106,7 +106,7 @@ public class DungeonMobRegistryModule implements RegistryModule {
     }
 
     public WeightedTable<EntityArchetype> getRaw() {
-        return dungeonMobs;
+        return this.dungeonMobs;
     }
 
     private static final class Holder {

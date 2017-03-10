@@ -44,7 +44,7 @@ public final class InternalSpawnTypes {
     public static final SpawnType PROJECTILE = new SpongeSpawnType("Projectile");
     public static final SpawnType SPAWN_EGG = new SpongeSpawnType("SpawnEgg");
     public static final SpawnType STRUCTURE = new SpongeSpawnType("Structure");
-    public static final SpawnType TNT_IGNITE = new SpongeSpawnType("TNT");
+    public static final SpawnType TNT_IGNITE = new SpongeSpawnType("tnt_ignite", "TNTIgnite");
     public static final SpawnType WEATHER = new SpongeSpawnType("Weather");
     public static final SpawnType CUSTOM = new SpongeSpawnType("Custom");
     public static final SpawnType CHUNK_LOAD = new SpongeSpawnType("ChunkLoad");

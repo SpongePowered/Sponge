@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.minecraft.tileentity.TileEntity;
@@ -40,28 +37,22 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
+import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
-import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
-public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<TileEntityType, TileEntity>,
+@RegisterCatalog(TileEntityTypes.class)
+public final class TileEntityTypeRegistryModule
+        extends AbstractPrefixAlternateCatalogTypeRegistryModule<TileEntityType>
+        implements ExtraClassCatalogRegistryModule<TileEntityType, TileEntity>,
         SpongeAdditionalCatalogRegistryModule<TileEntityType> {
 
 
     private static final Map<String, String> NAME_TO_ID_MAPPING = ImmutableMap.<String, String>builder()
-        .put("Cauldron", "brewing_stand")
-        .put("Control", "command_block")
-        .put("DLDetector", "daylight_detector")
-        .put("Trap", "dispenser")
-        .put("EnchantTable", "enchantment_table")
-        .put("EnderChest", "ender_chest")
-        .put("Airportal", "end_portal")
-        .put("FlowerPot", "flower_pot")
-        .put("RecordPlayer", "jukebox")
-        .put("MobSpawner", "mob_spawner")
-        .put("Music", "note")
+        .put("enchanting_table", "enchantment_table")
+        .put("noteblock", "note")
         .put("EndGateway", "end_gateway")
         .build();
 
@@ -69,10 +60,7 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
         return Holder.INSTANCE;
     }
 
-    public final Map<Class<? extends TileEntity>, TileEntityType> tileClassToTypeMappings = Maps.newHashMap();
-
-    @RegisterCatalog(TileEntityTypes.class)
-    public final Map<String, TileEntityType> tileEntityTypeMappings = Maps.newHashMap();
+    private final Map<Class<? extends TileEntity>, TileEntityType> tileClassToTypeMappings = Maps.newHashMap();
 
     @Override
     public boolean allowsApiRegistration() {
@@ -83,7 +71,7 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
     @Override
     public void registerAdditionalCatalog(TileEntityType extraCatalog) {
         this.tileClassToTypeMappings.put((Class<? extends TileEntity>) extraCatalog.getTileEntityType(), extraCatalog);
-        this.tileEntityTypeMappings.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
+        this.catalogTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     @Override
@@ -94,16 +82,6 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
     @Override
     public TileEntityType getForClass(Class<? extends TileEntity> clazz) {
         return this.tileClassToTypeMappings.get(clazz);
-    }
-
-    @Override
-    public Optional<TileEntityType> getById(String id) {
-        return Optional.ofNullable(this.tileEntityTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<TileEntityType> getAll() {
-        return ImmutableList.copyOf(this.tileEntityTypeMappings.values());
     }
 
     @Override
@@ -137,14 +115,25 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
         } catch (Throwable e) {
             // ignore
         }
-
+        final String modId = SpongeImplHooks.getModIdFromClass(clazz);
+        final String tileId = modId + ":" + id;
         final TileEntityType tileEntityType =
-                new SpongeTileEntityType((Class<? extends org.spongepowered.api.block.tileentity.TileEntity>) clazz, name, id, canTick);
+                new SpongeTileEntityType((Class<? extends org.spongepowered.api.block.tileentity.TileEntity>) clazz, name, tileId, canTick, modId);
 
         TileEntityTypeRegistryModule.getInstance().registerAdditionalCatalog(tileEntityType);
     }
 
-    TileEntityTypeRegistryModule() { }
+    TileEntityTypeRegistryModule() {
+        super("minecraft",
+                new String[] {"minecraft:"},
+                string -> string.equals("noteblock")
+                          ? "note"
+                          : string.equals("enchanting_table")
+                            ? "enchantment_table"
+                            : string.equals("structure_block")
+                              ? "structure"
+                              : string);
+    }
 
     private static final class Holder {
         static final TileEntityTypeRegistryModule INSTANCE = new TileEntityTypeRegistryModule();

@@ -24,38 +24,18 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockDoor;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.Hinges;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class HingeRegistryModule implements CatalogRegistryModule<Hinge> {
-
-    @RegisterCatalog(Hinges.class)
-    private final Map<String, Hinge> hingeMappings = new ImmutableMap.Builder<String, Hinge>()
-        .put("left", (Hinge) (Object) BlockDoor.EnumHingePosition.LEFT)
-        .put("right", (Hinge) (Object) BlockDoor.EnumHingePosition.RIGHT)
-        .build();
-
+@RegisterCatalog(Hinges.class)
+public final class HingeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockDoor.EnumHingePosition, Hinge> {
 
     @Override
-    public Optional<Hinge> getById(String id) {
-        return Optional.ofNullable(this.hingeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<Hinge> getAll() {
-        return ImmutableList.copyOf(this.hingeMappings.values());
+    protected BlockDoor.EnumHingePosition[] getValues() {
+        return BlockDoor.EnumHingePosition.values();
     }
 
 }

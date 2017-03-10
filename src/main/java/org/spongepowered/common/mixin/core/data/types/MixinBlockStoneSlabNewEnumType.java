@@ -33,17 +33,18 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockStoneSlabNew.EnumType.class)
-@Implements(@Interface(iface = SlabType.class, prefix = "shadow$"))
+@Implements(@Interface(iface = SlabType.class, prefix = "slab$"))
 public abstract class MixinBlockStoneSlabNewEnumType {
 
-    @Shadow public abstract String getName();
+    @Shadow public abstract String shadow$getName();
+    @Shadow public abstract String shadow$getUnlocalizedName();
 
-    public String shadow$getId() {
-        return getName();
+    public String slab$getId() {
+        return "minecraft:" + shadow$getName();
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return getName();
+    public String slab$getName() {
+        return shadow$getUnlocalizedName();
     }
 }

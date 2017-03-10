@@ -33,17 +33,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockHugeMushroom.EnumType.class)
-@Implements(@Interface(iface = BigMushroomType.class, prefix = "shadow$"))
+@Implements(@Interface(iface = BigMushroomType.class, prefix = "mushroom$"))
 public abstract class MixinBlockHugeMushroomEnumType {
 
-    @Shadow public abstract String getName();
+    @Shadow public abstract String shadow$getName();
 
-    public String shadow$getId() {
-        return getName();
+    public String mushroom$getId() {
+        return "minecraft:" + shadow$getName();
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return getName();
+    public String mushroom$getName() {
+        return shadow$getName();
     }
 }

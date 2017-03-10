@@ -24,43 +24,30 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SkullTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeSkullType;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(SkullTypes.class)
+public final class SkullTypeRegistryModule
+        extends AbstractPrefixAlternateCatalogTypeRegistryModule<SkullType>
+        implements CatalogRegistryModule<SkullType> {
 
-public final class SkullTypeRegistryModule implements CatalogRegistryModule<SkullType> {
-
-    @RegisterCatalog(SkullTypes.class)
-    private final Map<String, SkullType> skullTypeMap = new LinkedHashMap<>();
-
-    @Override
-    public Optional<SkullType> getById(String id) {
-        return Optional.ofNullable(this.skullTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    public SkullTypeRegistryModule() {
+        super("minecraft");
     }
-
-    @Override
-    public Collection<SkullType> getAll() {
-        return ImmutableList.copyOf(this.skullTypeMap.values());
-    }
-
     @Override
     public void registerDefaults() {
-        this.skullTypeMap.put("skeleton", new SpongeSkullType((byte) 0, "skeleton"));
-        this.skullTypeMap.put("wither_skeleton", new SpongeSkullType((byte)1, "wither_skeleton"));
-        this.skullTypeMap.put("zombie", new SpongeSkullType((byte) 2, "zombie"));
-        this.skullTypeMap.put("player", new SpongeSkullType((byte) 3, "player"));
-        this.skullTypeMap.put("creeper", new SpongeSkullType((byte) 4, "creeper"));
-        this.skullTypeMap.put("ender_dragon", new SpongeSkullType((byte) 5, "ender_dragon"));
+        register(new SpongeSkullType((byte) 0, "minecraft:skeleton", "skeleton"));
+        register(new SpongeSkullType((byte)1, "minecraft:wither_skeleton", "wither_skeleton"));
+        register(new SpongeSkullType((byte) 2, "minecraft:zombie", "zombie"));
+        register(new SpongeSkullType((byte) 3, "minecraft:player", "player"));
+        register(new SpongeSkullType((byte) 4,"minecraft:creeper", "creeper"));
+        register(new SpongeSkullType((byte) 5, "minecraft:ender_dragon", "ender_dragon"));
     }
+
+
 }

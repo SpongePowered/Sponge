@@ -33,17 +33,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockRedstoneComparator.Mode.class)
-@Implements(@Interface(iface = ComparatorType.class, prefix = "shadow$"))
+@Implements(@Interface(iface = ComparatorType.class, prefix = "comparator$"))
 public abstract class MixinBlockRedstoneComparatorMode {
 
-    @Shadow public abstract String getName();
+    @Shadow public abstract String shadow$getName();
 
-    public String shadow$getId() {
-        return getName();
+    public String comparator$getId() {
+        return "minecraft:" + shadow$getName();
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return getName();
+    public String comparator$getName() {
+        return shadow$getName();
     }
 }

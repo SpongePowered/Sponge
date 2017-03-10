@@ -58,23 +58,24 @@ public class RegistryHelper {
     public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction, Set<String> ignoredFields, boolean ignore) {
         boolean mappingSuccess = true;
         for (Field f : apiClass.getDeclaredFields()) {
-            if (ignoredFields != null && ignoredFields.contains(f.getName())) {
+            final String fieldName = f.getName();
+            if (ignoredFields != null && ignoredFields.contains(fieldName)) {
                 continue;
             }
             try {
-                Object value = mapFunction.apply(f.getName());
+                Object value = mapFunction.apply(fieldName);
                 if (value == null) {
                     // check for minecraft id
-                    value = mapFunction.apply("minecraft:" + f.getName());
+                    value = mapFunction.apply("minecraft:" + fieldName);
                 }
                 if (value == null && !ignore) {
-                    SpongeImpl.getLogger().warn("Skipping {}.{}", f.getDeclaringClass().getName(), f.getName());
+                    SpongeImpl.getLogger().warn("Skipping {}.{}", f.getDeclaringClass().getName(), fieldName);
                     continue;
                 }
                 f.set(null, value);
             } catch (Exception e) {
                 if (!ignore) {
-                    SpongeImpl.getLogger().error("Error while mapping {}.{}", f.getDeclaringClass().getName(), f.getName(), e);
+                    SpongeImpl.getLogger().error("Error while mapping {}.{}", f.getDeclaringClass().getName(), fieldName, e);
                 }
                 mappingSuccess = false;
             }

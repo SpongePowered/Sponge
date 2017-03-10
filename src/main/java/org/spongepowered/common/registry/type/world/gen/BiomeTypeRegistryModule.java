@@ -27,9 +27,7 @@ package org.spongepowered.common.registry.type.world.gen;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
-import net.minecraft.init.Biomes;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
@@ -38,29 +36,25 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
 import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 
-public final class BiomeTypeRegistryModule implements AdditionalCatalogRegistryModule<BiomeType> {
-
-    @RegisterCatalog(BiomeTypes.class)
-    private final Map<String, BiomeType> biomeTypeMappings = Maps.newHashMap();
+@RegisterCatalog(BiomeTypes.class)
+public final class BiomeTypeRegistryModule
+    extends AbstractPrefixAlternateCatalogTypeRegistryModule<BiomeType>
+    implements AdditionalCatalogRegistryModule<BiomeType> {
 
     private final List<BiomeType> biomeTypes = new ArrayList<>();
 
-    @Override
-    public Optional<BiomeType> getById(String id) {
-        return Optional.ofNullable(this.biomeTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<BiomeType> getAll() {
-        return ImmutableList.copyOf(this.biomeTypes);
+    public BiomeTypeRegistryModule() {
+        super("minecraft",
+            new String[] {"minecraft:"},
+            string -> {
+                final String alternateKey = MINECRAFT_TO_SPONGE_FIELD_NAMES.get(string);
+                return alternateKey == null ? string : alternateKey;
+            });
     }
 
     @Override
@@ -68,70 +62,9 @@ public final class BiomeTypeRegistryModule implements AdditionalCatalogRegistryM
         for (Biome biome : Biome.REGISTRY) {
             if (biome != null) {
                 this.biomeTypes.add((BiomeType) biome);
+                this.catalogTypeMap.put(((BiomeType) biome).getId(), (BiomeType) biome);
             }
         }
-        this.biomeTypeMappings.put("ocean", (BiomeType) Biomes.OCEAN);
-        this.biomeTypeMappings.put("plains", (BiomeType) Biomes.PLAINS);
-        this.biomeTypeMappings.put("desert", (BiomeType) Biomes.DESERT);
-        this.biomeTypeMappings.put("extreme_hills", (BiomeType) Biomes.EXTREME_HILLS);
-        this.biomeTypeMappings.put("forest", (BiomeType) Biomes.FOREST);
-        this.biomeTypeMappings.put("taiga", (BiomeType) Biomes.TAIGA);
-        this.biomeTypeMappings.put("swampland", (BiomeType) Biomes.SWAMPLAND);
-        this.biomeTypeMappings.put("river", (BiomeType) Biomes.RIVER);
-        this.biomeTypeMappings.put("hell", (BiomeType) Biomes.HELL);
-        this.biomeTypeMappings.put("sky", (BiomeType) Biomes.SKY);
-        this.biomeTypeMappings.put("frozen_ocean", (BiomeType) Biomes.FROZEN_OCEAN);
-        this.biomeTypeMappings.put("frozen_river", (BiomeType) Biomes.FROZEN_RIVER);
-        this.biomeTypeMappings.put("ice_plains", (BiomeType) Biomes.ICE_PLAINS);
-        this.biomeTypeMappings.put("ice_mountains", (BiomeType) Biomes.ICE_MOUNTAINS);
-        this.biomeTypeMappings.put("mushroom_island", (BiomeType) Biomes.MUSHROOM_ISLAND);
-        this.biomeTypeMappings.put("mushroom_island_shore", (BiomeType) Biomes.MUSHROOM_ISLAND_SHORE);
-        this.biomeTypeMappings.put("beach", (BiomeType) Biomes.BEACH);
-        this.biomeTypeMappings.put("desert_hills", (BiomeType) Biomes.DESERT_HILLS);
-        this.biomeTypeMappings.put("forest_hills", (BiomeType) Biomes.FOREST_HILLS);
-        this.biomeTypeMappings.put("taiga_hills", (BiomeType) Biomes.TAIGA_HILLS);
-        this.biomeTypeMappings.put("extreme_hills_edge", (BiomeType) Biomes.EXTREME_HILLS_EDGE);
-        this.biomeTypeMappings.put("jungle", (BiomeType) Biomes.JUNGLE);
-        this.biomeTypeMappings.put("jungle_hills", (BiomeType) Biomes.JUNGLE_HILLS);
-        this.biomeTypeMappings.put("jungle_edge", (BiomeType) Biomes.JUNGLE_EDGE);
-        this.biomeTypeMappings.put("deep_ocean", (BiomeType) Biomes.DEEP_OCEAN);
-        this.biomeTypeMappings.put("stone_beach", (BiomeType) Biomes.STONE_BEACH);
-        this.biomeTypeMappings.put("cold_beach", (BiomeType) Biomes.COLD_BEACH);
-        this.biomeTypeMappings.put("birch_forest", (BiomeType) Biomes.BIRCH_FOREST);
-        this.biomeTypeMappings.put("birch_forest_hills", (BiomeType) Biomes.BIRCH_FOREST_HILLS);
-        this.biomeTypeMappings.put("roofed_forest", (BiomeType) Biomes.ROOFED_FOREST);
-        this.biomeTypeMappings.put("cold_taiga", (BiomeType) Biomes.COLD_TAIGA);
-        this.biomeTypeMappings.put("cold_taiga_hills", (BiomeType) Biomes.COLD_TAIGA_HILLS);
-        this.biomeTypeMappings.put("mega_taiga", (BiomeType) Biomes.REDWOOD_TAIGA);
-        this.biomeTypeMappings.put("mega_taiga_hills", (BiomeType) Biomes.REDWOOD_TAIGA_HILLS);
-        this.biomeTypeMappings.put("extreme_hills_plus", (BiomeType) Biomes.EXTREME_HILLS_WITH_TREES);
-        this.biomeTypeMappings.put("savanna", (BiomeType) Biomes.SAVANNA);
-        this.biomeTypeMappings.put("savanna_plateau", (BiomeType) Biomes.SAVANNA_PLATEAU);
-        this.biomeTypeMappings.put("mesa", (BiomeType) Biomes.MESA);
-        this.biomeTypeMappings.put("mesa_plateau_forest", (BiomeType) Biomes.MESA_ROCK);
-        this.biomeTypeMappings.put("mesa_plateau", (BiomeType) Biomes.MESA_CLEAR_ROCK);
-        this.biomeTypeMappings.put("sunflower_plains", (BiomeType) Biomes.MUTATED_PLAINS);
-        this.biomeTypeMappings.put("desert_mountains", (BiomeType) Biomes.MUTATED_DESERT);
-        this.biomeTypeMappings.put("flower_forest", (BiomeType) Biomes.MUTATED_FOREST);
-        this.biomeTypeMappings.put("taiga_mountains", (BiomeType) Biomes.MUTATED_TAIGA);
-        this.biomeTypeMappings.put("swampland_mountains", (BiomeType) Biomes.MUTATED_SWAMPLAND);
-        this.biomeTypeMappings.put("ice_plains_spikes", (BiomeType) Biomes.MUTATED_ICE_FLATS);
-        this.biomeTypeMappings.put("jungle_mountains", (BiomeType) Biomes.MUTATED_JUNGLE);
-        this.biomeTypeMappings.put("jungle_edge_mountains", (BiomeType) Biomes.MUTATED_JUNGLE_EDGE);
-        this.biomeTypeMappings.put("cold_taiga_mountains", (BiomeType) Biomes.MUTATED_TAIGA_COLD);
-        this.biomeTypeMappings.put("savanna_mountains", (BiomeType) Biomes.MUTATED_SAVANNA);
-        this.biomeTypeMappings.put("savanna_plateau_mountains", (BiomeType) Biomes.MUTATED_SAVANNA_ROCK);
-        this.biomeTypeMappings.put("mesa_bryce", (BiomeType) Biomes.MUTATED_MESA);
-        this.biomeTypeMappings.put("mesa_plateau_forest_mountains", (BiomeType) Biomes.MUTATED_MESA_ROCK);
-        this.biomeTypeMappings.put("mesa_plateau_mountains", (BiomeType) Biomes.MUTATED_MESA_CLEAR_ROCK);
-        this.biomeTypeMappings.put("birch_forest_mountains", (BiomeType) Biomes.MUTATED_BIRCH_FOREST);
-        this.biomeTypeMappings.put("birch_forest_hills_mountains", (BiomeType) Biomes.MUTATED_BIRCH_FOREST_HILLS);
-        this.biomeTypeMappings.put("roofed_forest_mountains", (BiomeType) Biomes.MUTATED_ROOFED_FOREST);
-        this.biomeTypeMappings.put("mega_spruce_taiga", (BiomeType) Biomes.MUTATED_REDWOOD_TAIGA);
-        this.biomeTypeMappings.put("extreme_hills_mountains", (BiomeType) Biomes.MUTATED_EXTREME_HILLS);
-        this.biomeTypeMappings.put("extreme_hills_plus_mountains", (BiomeType) Biomes.MUTATED_EXTREME_HILLS_WITH_TREES);
-        this.biomeTypeMappings.put("mega_spruce_taiga_hills", (BiomeType) Biomes.MUTATED_REDWOOD_TAIGA_HILLS);
-        this.biomeTypeMappings.put("void", (BiomeType) Biomes.VOID);
     }
 
     @AdditionalRegistration
@@ -139,12 +72,49 @@ public final class BiomeTypeRegistryModule implements AdditionalCatalogRegistryM
         for (Biome biome : Biome.REGISTRY) {
             if (biome != null && !this.biomeTypes.contains(biome)) {
                 this.biomeTypes.add((BiomeType) biome);
-                this.biomeTypeMappings.put(biome.getBiomeName().toLowerCase(Locale.ENGLISH), (BiomeType) biome);
+                this.catalogTypeMap.put(((BiomeType) biome).getId(), (BiomeType) biome);
             }
         }
         // Re-map fields in case mods have changed vanilla world types
-        RegistryHelper.mapFields(BiomeTypes.class, this.biomeTypeMappings);
+        RegistryHelper.mapFields(BiomeTypes.class, provideCatalogMap());
     }
+
+    public static final ImmutableMap<String, String> MINECRAFT_TO_SPONGE_FIELD_NAMES = ImmutableMap.<String, String>builder()
+        .put("ice_flats", "ice_plains")
+        .put("beaches", "beach")
+        .put("smaller_extreme_hills", "extreme_hills_edge")
+        .put("birch_forest_hills", "birch_forest_hills")
+        .put("roofed_forest", "roofed_forest")
+        .put("taiga_cold", "cold_taiga")
+        .put("taiga_cold_hills", "cold_taiga_hills")
+        .put("redwood_taiga", "mega_taiga")
+        .put("redwood_taiga_hills", "mega_taiga_hills")
+        .put("extreme_hills_with_trees", "extreme_hills_plus")
+        .put("savanna_rock", "savanna_plateau")
+        .put("mesa_rock", "mesa_plateau_forest")
+        .put("mesa_clear_rock", "mesa_plateau")
+        .put("mutated_plains", "sunflower_plains")
+        .put("mutated_desert", "desert_mountains")
+        .put("mutated_extreme_hills", "extreme_hills_mountains")
+        .put("mutated_forest", "flower_forest")
+        .put("mutated_taiga", "taiga_mountains")
+        .put("mutated_swampland", "swampland_mountains")
+        .put("mutated_ice_flats", "ice_plains_spikes")
+        .put("mutated_jungle", "jungle_mountains")
+        .put("mutated_jungle_edge", "jungle_edge_mountains")
+        .put("mutated_birch_forest", "birch_forest_mountains")
+        .put("mutated_birch_forest_hills", "birch_forest_hills_mountains")
+        .put("mutated_roofed_forest", "roofed_forest_mountains")
+        .put("mutated_taiga_cold", "cold_taiga_mountains")
+        .put("mutated_redwood_taiga", "mega_spruce_taiga")
+        .put("mutated_redwood_taiga_hills", "mega_spruce_taiga_hills")
+        .put("mutated_extreme_hills_with_trees", "extreme_hills_plus_mountains")
+        .put("mutated_savanna", "savanna_mountains")
+        .put("mutated_savanna_rock", "savanna_plateau_mountains")
+        .put("mutated_mesa", "mesa_bryce")
+        .put("mutated_mesa_rock", "mesa_plateau_forest_mountains")
+        .put("mutated_mesa_clear_rock", "mesa_plateau_mountains")
+        .build();
 
     @Override
     public void registerAdditionalCatalog(BiomeType biome) {
@@ -153,6 +123,6 @@ public final class BiomeTypeRegistryModule implements AdditionalCatalogRegistryM
         checkArgument(!getById(biome.getId()).isPresent(), "Duplicate biome id");
 
         this.biomeTypes.add(biome);
-        this.biomeTypeMappings.put(biome.getId().toLowerCase(Locale.ENGLISH), biome);
     }
+
 }

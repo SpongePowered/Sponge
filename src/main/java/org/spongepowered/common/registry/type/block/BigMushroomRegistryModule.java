@@ -24,48 +24,18 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockHugeMushroom;
 import org.spongepowered.api.data.type.BigMushroomType;
 import org.spongepowered.api.data.type.BigMushroomTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class BigMushroomRegistryModule implements CatalogRegistryModule<BigMushroomType> {
-
-    @RegisterCatalog(BigMushroomTypes.class)
-    private final Map<String, BigMushroomType> bigMushroomTypeMappings = ImmutableMap.<String, BigMushroomType>builder()
-        .put("center", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.CENTER)
-        .put("all_inside", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.ALL_INSIDE)
-        .put("all_outside", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.ALL_OUTSIDE)
-        .put("all_stem", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.ALL_STEM)
-        .put("east", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.EAST)
-        .put("north", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.NORTH)
-        .put("north_east", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.NORTH_EAST)
-        .put("north_west", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.NORTH_WEST)
-        .put("south", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.SOUTH)
-        .put("south_east", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.SOUTH_EAST)
-        .put("south_west", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.SOUTH_WEST)
-        .put("stem", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.STEM)
-        .put("west", (BigMushroomType) (Object) BlockHugeMushroom.EnumType.WEST)
-        .build();
+@RegisterCatalog(BigMushroomTypes.class)
+public final class BigMushroomRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockHugeMushroom.EnumType, BigMushroomType> {
 
     @Override
-    public Optional<BigMushroomType> getById(String id) {
-        return Optional.ofNullable(this.bigMushroomTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<BigMushroomType> getAll() {
-        return ImmutableList.copyOf(this.bigMushroomTypeMappings.values());
+    protected BlockHugeMushroom.EnumType[] getValues() {
+        return BlockHugeMushroom.EnumType.values();
     }
 
 }

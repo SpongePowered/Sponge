@@ -24,40 +24,18 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockQuartz;
 import org.spongepowered.api.data.type.QuartzType;
 import org.spongepowered.api.data.type.QuartzTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class QuartzTypeRegistryModule implements CatalogRegistryModule<QuartzType> {
-
-    @RegisterCatalog(QuartzTypes.class)
-    private final Map<String, QuartzType> quartzTypeMappings = new ImmutableMap.Builder<String, QuartzType>()
-        .put("default", (QuartzType) (Object) BlockQuartz.EnumType.DEFAULT)
-        .put("chiseled", (QuartzType) (Object) BlockQuartz.EnumType.CHISELED)
-        .put("lines_x", (QuartzType) (Object) BlockQuartz.EnumType.LINES_X)
-        .put("lines_y", (QuartzType) (Object) BlockQuartz.EnumType.LINES_Y)
-        .put("lines_z", (QuartzType) (Object) BlockQuartz.EnumType.LINES_Z)
-        .build();
+@RegisterCatalog(QuartzTypes.class)
+public final class QuartzTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockQuartz.EnumType, QuartzType> {
 
     @Override
-    public Optional<QuartzType> getById(String id) {
-        return Optional.ofNullable(this.quartzTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<QuartzType> getAll() {
-        return ImmutableList.copyOf(this.quartzTypeMappings.values());
+    protected BlockQuartz.EnumType[] getValues() {
+        return BlockQuartz.EnumType.values();
     }
 
 }

@@ -51,7 +51,7 @@ public abstract class MixinItemArmorMaterial implements ArmorType {
 
     @Override
     public String getId() {
-        return this.name;
+        return "minecraft:" + this.name;
     }
 
     @Override

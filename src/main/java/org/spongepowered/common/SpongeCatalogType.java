@@ -31,6 +31,7 @@ import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.text.translation.Translation;
 
+// TODO - id's and names should NEVER be the same....
 public abstract class SpongeCatalogType implements CatalogType {
 
     private final String id;

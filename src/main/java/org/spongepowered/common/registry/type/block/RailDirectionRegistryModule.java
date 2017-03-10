@@ -24,45 +24,17 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockRailBase;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.type.RailDirections;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class RailDirectionRegistryModule implements CatalogRegistryModule<RailDirection> {
-
-    @RegisterCatalog(RailDirections.class)
-    private final Map<String, RailDirection> railDirectionMappings = new ImmutableMap.Builder<String, RailDirection>()
-        .put("ascending_east", (RailDirection) (Object) BlockRailBase.EnumRailDirection.ASCENDING_EAST)
-        .put("ascending_north", (RailDirection) (Object) BlockRailBase.EnumRailDirection.ASCENDING_NORTH)
-        .put("ascending_south", (RailDirection) (Object) BlockRailBase.EnumRailDirection.ASCENDING_SOUTH)
-        .put("ascending_west", (RailDirection) (Object) BlockRailBase.EnumRailDirection.ASCENDING_WEST)
-        .put("north_east", (RailDirection) (Object) BlockRailBase.EnumRailDirection.NORTH_EAST)
-        .put("north_south", (RailDirection) (Object) BlockRailBase.EnumRailDirection.NORTH_SOUTH)
-        .put("north_west", (RailDirection) (Object) BlockRailBase.EnumRailDirection.NORTH_WEST)
-        .put("east_west", (RailDirection) (Object) BlockRailBase.EnumRailDirection.EAST_WEST)
-        .put("south_east", (RailDirection) (Object) BlockRailBase.EnumRailDirection.SOUTH_EAST)
-        .put("south_west", (RailDirection) (Object) BlockRailBase.EnumRailDirection.SOUTH_WEST)
-        .build();
+@RegisterCatalog(RailDirections.class)
+public final class RailDirectionRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockRailBase.EnumRailDirection, RailDirection> {
 
     @Override
-    public Optional<RailDirection> getById(String id) {
-        return Optional.ofNullable(this.railDirectionMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    protected BlockRailBase.EnumRailDirection[] getValues() {
+        return BlockRailBase.EnumRailDirection.values();
     }
-
-    @Override
-    public Collection<RailDirection> getAll() {
-        return ImmutableList.copyOf(this.railDirectionMappings.values());
-    }
-
 }

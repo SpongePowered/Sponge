@@ -37,7 +37,7 @@ public class SpongeDisplaySlot extends SpongeCatalogType implements DisplaySlot 
     private int id;
 
     public SpongeDisplaySlot(String name, TextColor textColor, int id) {
-        super(name);
+        super("minecraft:" + name);
         this.textColor = Optional.ofNullable(textColor);
         this.id = id;
     }

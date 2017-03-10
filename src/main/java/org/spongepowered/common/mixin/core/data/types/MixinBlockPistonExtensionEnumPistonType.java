@@ -33,17 +33,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BlockPistonExtension.EnumPistonType.class)
-@Implements(@Interface(iface = PistonType.class, prefix = "shadow$"))
+@Implements(@Interface(iface = PistonType.class, prefix = "piston$"))
 public abstract class MixinBlockPistonExtensionEnumPistonType {
 
-    @Shadow public abstract String getName();
+    @Shadow public abstract String shadow$getName();
 
-    public String shadow$getId() {
-        return getName();
+    public String piston$getId() {
+        return "minecraft:" + shadow$getName();
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return getName();
+    public String piston$getName() {
+        return shadow$getName();
     }
 }

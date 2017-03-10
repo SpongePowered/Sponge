@@ -31,8 +31,15 @@ import org.spongepowered.common.SpongeCatalogType;
 @NonnullByDefault
 public class SpongeSelectorType extends SpongeCatalogType implements SelectorType {
 
-    public SpongeSelectorType(String id) {
+    private String name;
+
+    public SpongeSelectorType(String id, String name) {
         super(id);
+        this.name = name;
     }
 
+    @Override
+    public String getName() {
+        return this.name;
+    }
 }

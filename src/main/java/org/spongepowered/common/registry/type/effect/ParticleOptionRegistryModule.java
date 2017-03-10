@@ -92,6 +92,6 @@ public class ParticleOptionRegistryModule implements CatalogRegistryModule<Parti
     private <V> void registerOption(String id, Class<V> valueType, @Nullable Function<V, IllegalArgumentException> valueValidator) {
         SpongeParticleOption<?> option = new SpongeParticleOption<>("minecraft:" + id, id, valueType, valueValidator);
         this.particleOptionsMappings.put(id, option);
-        this.particleOptions.put(id, option);
+        this.particleOptions.put(option.getId(), option);
     }
 }

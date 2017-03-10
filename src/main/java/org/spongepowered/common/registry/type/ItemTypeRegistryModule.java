@@ -62,14 +62,15 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
         for (Map.Entry<String, ItemType> entry : this.itemTypeMappings.entrySet()) {
             itemTypeMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
         }
+        itemTypeMap.put("none", ((ItemType) ItemTypeRegistryModule.NONE_ITEM));
         return itemTypeMap;
     }
 
     @Override
     public Optional<ItemType> getById(String id) {
         checkNotNull(id);
-        if (!id.contains(":") && !id.equals("none")) {
-            id = "minecraft:" + id; // assume vanilla
+        if (!id.contains(":")) {
+            id = "minecraft:" + id.toLowerCase(Locale.ENGLISH); // assume vanilla
         }
         return Optional.ofNullable(this.itemTypeMappings.get(id));
     }
@@ -95,12 +96,11 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
 
     @Override
     public void registerDefaults() {
-        ItemTypeRegistryModule.NONE_ITEM = new Item().setUnlocalizedName("none").setMaxDamage(0).setMaxStackSize(1);
-        ItemTypeRegistryModule.NONE = (ItemStack) new net.minecraft.item.ItemStack(ItemTypeRegistryModule.NONE_ITEM);
+        ItemTypeRegistryModule.NONE_ITEM = net.minecraft.item.ItemStack.EMPTY.getItem();
+        ItemTypeRegistryModule.NONE = (ItemStack) net.minecraft.item.ItemStack.EMPTY;
         ItemTypeRegistryModule.NONE_SNAPSHOT = NONE.createSnapshot();
 
         setItemNone();
-        this.itemTypeMappings.put("none", (ItemType) NONE_ITEM);
     }
 
     private void setItemNone() {

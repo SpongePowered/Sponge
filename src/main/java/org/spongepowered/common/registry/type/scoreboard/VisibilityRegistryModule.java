@@ -24,41 +24,18 @@
  */
 package org.spongepowered.common.registry.type.scoreboard;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import net.minecraft.scoreboard.Team;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-
-public final class VisibilityRegistryModule implements CatalogRegistryModule<Visibility> {
-
-    @RegisterCatalog(Visibilities.class)
-    public static final Map<String, Visibility> visibilityMappings = Maps.newHashMap();
+@RegisterCatalog(Visibilities.class)
+public final class VisibilityRegistryModule extends MinecraftEnumBasedCatalogTypeModule<Team.EnumVisible, Visibility> {
 
     @Override
-    public Optional<Visibility> getById(String id) {
-        return Optional.ofNullable(visibilityMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    protected Team.EnumVisible[] getValues() {
+        return Team.EnumVisible.values();
     }
 
-    @Override
-    public Collection<Visibility> getAll() {
-        return ImmutableList.copyOf(visibilityMappings.values());
-    }
-
-    @Override
-    public void registerDefaults() {
-        visibilityMappings.put("always", (Visibility) (Object) Team.EnumVisible.ALWAYS);
-        visibilityMappings.put("never", (Visibility) (Object) Team.EnumVisible.NEVER);
-        visibilityMappings.put("hide_for_other_teams", (Visibility) (Object) Team.EnumVisible.HIDE_FOR_OTHER_TEAMS);
-        visibilityMappings.put("hide_for_own_team", (Visibility) (Object) Team.EnumVisible.HIDE_FOR_OWN_TEAM);
-    }
 }

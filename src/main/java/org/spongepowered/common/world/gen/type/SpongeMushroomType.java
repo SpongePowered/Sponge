@@ -33,16 +33,18 @@ import org.spongepowered.api.world.gen.type.MushroomType;
 public class SpongeMushroomType implements MushroomType {
 
     private final String name;
+    private final String id;
     private PopulatorObject obj;
 
-    public SpongeMushroomType(String name, PopulatorObject o) {
+    public SpongeMushroomType(String id, String name, PopulatorObject o) {
+        this.id = id;
         this.name = name;
         this.obj = o;
     }
 
     @Override
     public String getId() {
-        return this.name;
+        return this.id;
     }
 
     @Override

@@ -24,41 +24,23 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockDoublePlant;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DoublePlantTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+@RegisterCatalog(DoublePlantTypes.class)
+public final class DoublePlantTypeRegistryModule extends
+        MinecraftEnumBasedAlternateCatalogTypeRegistryModule<BlockDoublePlant.EnumPlantType, DoublePlantType> {
 
-public final class DoublePlantTypeRegistryModule implements CatalogRegistryModule<DoublePlantType> {
-
-    @RegisterCatalog(DoublePlantTypes.class)
-    private final Map<String, DoublePlantType> doublePlantMappings = new ImmutableMap.Builder<String, DoublePlantType>()
-        .put("sunflower", (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.SUNFLOWER)
-        .put("syringa", (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.SYRINGA)
-        .put("grass", (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.GRASS)
-        .put("fern", (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.FERN)
-        .put("rose", (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.ROSE)
-        .put("paeonia", (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.PAEONIA)
-        .build();
-
-    @Override
-    public Optional<DoublePlantType> getById(String id) {
-        return Optional.ofNullable(this.doublePlantMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    public DoublePlantTypeRegistryModule() {
+        super(new String[] {"double_"});
     }
 
     @Override
-    public Collection<DoublePlantType> getAll() {
-        return ImmutableList.copyOf(this.doublePlantMappings.values());
+    protected BlockDoublePlant.EnumPlantType[] getValues() {
+        return BlockDoublePlant.EnumPlantType.values();
     }
 
 }

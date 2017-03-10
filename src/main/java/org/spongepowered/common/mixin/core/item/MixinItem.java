@@ -62,9 +62,6 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Override
     public String getId() {
-        if ((Object) this == ItemTypeRegistryModule.NONE_ITEM) {
-            return "NONE";
-        }
         return Item.REGISTRY.getNameForObject((Item) (Object) this).toString();
     }
 

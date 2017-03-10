@@ -35,10 +35,9 @@ import java.util.Locale;
 @Mixin(EnumHand.class)
 public abstract class MixinEnumHand implements HandType {
 
-
     @Override
     public String getId() {
-        return ((EnumHand) (Object) this).name().toLowerCase(Locale.ENGLISH);
+        return "minecraft:" + ((EnumHand) (Object) this).name().toLowerCase(Locale.ENGLISH);
     }
 
     @Override

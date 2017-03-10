@@ -59,7 +59,10 @@ public class EquipmentTypeRegistryModule implements CatalogRegistryModule<Equipm
     public void registerDefaults() {
         this.equipmentTypeMap.put("any", new SpongeEquipmentType("any"));
         this.equipmentTypeMap.put("equipped", new SpongeEquipmentType("equipped"));
-        this.equipmentTypeMap.put("headwear", new SpongeEquipmentTypeWorn("head", 0));
+        // TODO - evaluate whether the id's are used for any other purpose than the catalog id type to look up
+        final SpongeEquipmentTypeWorn head = new SpongeEquipmentTypeWorn("head", 0);
+        this.equipmentTypeMap.put("headwear", head);
+        this.equipmentTypeMap.put("head", head);
         this.equipmentTypeMap.put("chestplate", new SpongeEquipmentTypeWorn("chestplate", 1));
         this.equipmentTypeMap.put("leggings", new SpongeEquipmentTypeWorn("leggings", 2));
         this.equipmentTypeMap.put("boots", new SpongeEquipmentTypeWorn("boots", 3));
