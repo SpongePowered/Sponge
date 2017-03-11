@@ -54,7 +54,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class AbstractArchetype<C extends CatalogType, S extends LocatableSnapshot<S>> implements Archetype<S> {
+public abstract class AbstractArchetype<C extends CatalogType, S extends LocatableSnapshot<S>, E> implements Archetype<S, E> {
 
     protected final C type;
     protected NBTTagCompound data;

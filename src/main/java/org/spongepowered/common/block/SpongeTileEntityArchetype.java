@@ -49,7 +49,9 @@ import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.util.VecHelper;
 
-public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType, BlockSnapshot> implements TileEntityArchetype {
+import java.util.Optional;
+
+public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType, BlockSnapshot, org.spongepowered.api.block.tileentity.TileEntity> implements TileEntityArchetype {
 
     final BlockState blockState;
 
@@ -74,7 +76,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     }
 
     @Override
-    public boolean apply(Location<World> location, Cause cause) {
+    public Optional<org.spongepowered.api.block.tileentity.TileEntity> apply(Location<World> location, Cause cause) {
         final BlockState currentState = location.getBlock();
         final Block currentBlock = BlockUtil.toBlock(currentState);
         final Block newBlock = BlockUtil.toBlock(this.blockState);
@@ -88,14 +90,14 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
 
         TileEntity tileEntity = minecraftWorld.getTileEntity(blockpos);
         if (tileEntity == null) {
-            throw new IllegalStateException("Could not create a tile entity for this archetype, possibly there's some issues with deserialization?");
+            return Optional.empty();
         }
         compound.setInteger("x", blockpos.getX());
         compound.setInteger("y", blockpos.getY());
         compound.setInteger("z", blockpos.getZ());
         tileEntity.readFromNBT(compound);
         tileEntity.markDirty();
-        return true;
+        return Optional.of((org.spongepowered.api.block.tileentity.TileEntity) tileEntity);
     }
 
     @Override

@@ -53,8 +53,9 @@ import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Arrays;
+import java.util.Optional;
 
-public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot> implements EntityArchetype {
+public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity> implements EntityArchetype {
 
     SpongeEntityArchetype(SpongeEntityArchetypeBuilder builder) {
         super(builder.entityType, NbtTranslator.getInstance().translateData(builder.entityData));
@@ -72,7 +73,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean apply(Location<World> location, Cause cause) {
+    public Optional<org.spongepowered.api.entity.Entity> apply(Location<World> location, Cause cause) {
         final Vector3d position = location.getPosition();
         final double x = position.getX();
         final double y = position.getY();
@@ -93,7 +94,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         }
 
         if (entity == null) {
-            return false;
+            return Optional.empty();
         }
 
         this.data.setTag("Pos", NbtDataUtil.newDoubleNBTList(x, y, z));
@@ -114,9 +115,9 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             } else {
                 mixinWorldServer.forceSpawnEntity(entity);
             }
-            return true;
+            return Optional.of(spongeEntity);
         }
-        return false;
+        return Optional.empty();
     }
 
     @Override
