@@ -302,10 +302,12 @@ public abstract class MixinEntity implements IMixinEntity {
      */
     @Overwrite
     public void dismountRidingEntity() {
-        if (this.getRidingEntity().isDead) {
-            this.dismountRidingEntity(DismountTypes.DEATH);
-        } else {
-            this.dismountRidingEntity(DismountTypes.PLAYER);
+        if (this.ridingEntity != null) {
+            if (this.getRidingEntity().isDead) {
+                this.dismountRidingEntity(DismountTypes.DEATH);
+            } else {
+                this.dismountRidingEntity(DismountTypes.PLAYER);
+            }
         }
     }
 
