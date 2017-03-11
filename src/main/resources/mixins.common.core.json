@@ -494,6 +494,7 @@
         "world.gen.populators.MixinWorldGenerator",
         "world.gen.populators.MixinWorldGenFire",
         "world.gen.populators.MixinWorldGenFlowers",
+        "world.gen.populators.MixinWorldGenFossils",
         "world.gen.populators.MixinWorldGenBirchTree",
         "world.gen.populators.MixinWorldGenGlowstone",
         "world.gen.populators.MixinWorldGenIcePath",

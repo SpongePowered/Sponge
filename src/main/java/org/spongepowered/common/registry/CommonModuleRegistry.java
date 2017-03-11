@@ -325,6 +325,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(SoundType.Builder.class, SpongeSoundBuilder::new)
             .registerBuilderSupplier(LocatableBlock.Builder.class, SpongeLocatableBlockBuilder::new)
             .registerBuilderSupplier(LocatableBlockSpawnCause.Builder.class, SpongeLocatableBlockSpawnCauseBuilder::new)
+            .registerBuilderSupplier(Fossil.Builder.class, FossilBuilder::new)
         ;
     }
 

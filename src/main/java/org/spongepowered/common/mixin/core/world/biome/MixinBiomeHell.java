@@ -104,6 +104,16 @@ public abstract class MixinBiomeHell extends MixinBiome {
                 .build();
         gensettings.getPopulators().add(quartz);
 
+        int halfSeaLevel = world.getSeaLevel() / 2 + 1;
+        Ore magma = Ore.builder()
+                .height(VariableAmount.baseWithRandomAddition(halfSeaLevel - 5, 10))
+                .ore(BlockTypes.MAGMA.getDefaultState())
+                .perChunk(4)
+                .placementCondition((o) -> o != null && o.getType() == BlockTypes.NETHERRACK)
+                .size(33)
+                .build();
+        gensettings.getPopulators().add(magma);
+
         RandomBlock lava2 = RandomBlock.builder()
                 .block((BlockState) Blocks.FLOWING_LAVA.getDefaultState())
                 .perChunk(16)

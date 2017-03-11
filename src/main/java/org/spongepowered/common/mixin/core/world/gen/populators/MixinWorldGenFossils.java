@@ -22,32 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.biome;
+package org.spongepowered.common.mixin.core.world.gen.populators;
 
-import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeSwamp;
-import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.gen.populator.Forest;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.gen.feature.WorldGenFossils;
+import net.minecraft.world.gen.feature.WorldGenerator;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Fossil;
-import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
-@Mixin(BiomeSwamp.class)
-public abstract class MixinBiomeSwamp extends MixinBiome {
+import java.util.Random;
+
+@Mixin(WorldGenFossils.class)
+public abstract class MixinWorldGenFossils extends WorldGenerator implements Fossil {
+
+    private double chance = 1 / 64.0;
 
     @Override
-    public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-//        gensettings.getGenerationPopulators().add(new SwampLilyPopulator());
-        super.buildPopulators(world, gensettings);
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
-        Forest.Builder forest = Forest.builder();
-        forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
-        forest.type(BiomeTreeTypes.SWAMP.getPopulatorObject(), 1);
-        gensettings.getPopulators().add(0, forest.build());
-        gensettings.getPopulators().add(Fossil.builder().probability(1 / 64.0).build());
+    public PopulatorType getType() {
+        return PopulatorTypes.FOSSIL;
+    }
+
+    @Override
+    public void populate(World world, Extent volume, Random random) {
+        if (random.nextDouble() > this.chance) {
+            return;
+        }
+        int x = volume.getBlockMin().getX();
+        int z = volume.getBlockMin().getZ();
+        generate((net.minecraft.world.World) world, random, new BlockPos((x >> 4) << 4, 0, (z >> 4) << 4));
+    }
+
+    @Override
+    public double getSpawnProbability() {
+        return this.chance;
+    }
+
+    @Override
+    public void setSpawnProbability(double chance) {
+        this.chance = chance;
     }
 
 }

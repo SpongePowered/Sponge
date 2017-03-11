@@ -22,28 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.biome;
+package org.spongepowered.common.world.gen.builders;
 
-import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDesert;
-import org.spongepowered.api.world.gen.PopulatorObjects;
-import org.spongepowered.api.world.gen.populator.DesertWell;
+import net.minecraft.world.gen.feature.WorldGenFossils;
 import org.spongepowered.api.world.gen.populator.Fossil;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
+import org.spongepowered.api.world.gen.populator.Fossil.Builder;
 
-@Mixin(BiomeDesert.class)
-public abstract class MixinBiomeDesert extends MixinBiome {
+public class FossilBuilder implements Fossil.Builder {
+
+    private double probability;
+
+    public FossilBuilder() {
+        reset();
+    }
 
     @Override
-    public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        super.buildPopulators(world, gensettings);
-        DesertWell well = DesertWell.builder()
-                .probability(1 / 1000f)
-                .wellObject(PopulatorObjects.DESERT_WELL)
-                .build();
-        gensettings.getPopulators().add(well);
-        gensettings.getPopulators().add(Fossil.builder().probability(1 / 64.0).build());
+    public Builder from(Fossil value) {
+        this.probability = value.getSpawnProbability();
+        return this;
+    }
+
+    @Override
+    public Builder reset() {
+        this.probability = 1 / 64.0;
+        return this;
+    }
+
+    @Override
+    public Builder probability(double p) {
+        this.probability = p;
+        return this;
+    }
+
+    @Override
+    public Fossil build() throws IllegalStateException {
+        Fossil pop = (Fossil) new WorldGenFossils();
+        pop.setSpawnProbability(this.probability);
+        return pop;
     }
 
 }

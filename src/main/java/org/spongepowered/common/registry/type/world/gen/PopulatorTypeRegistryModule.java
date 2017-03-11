@@ -44,6 +44,7 @@ import net.minecraft.world.gen.feature.WorldGenDungeons;
 import net.minecraft.world.gen.feature.WorldGenEndIsland;
 import net.minecraft.world.gen.feature.WorldGenFire;
 import net.minecraft.world.gen.feature.WorldGenFlowers;
+import net.minecraft.world.gen.feature.WorldGenFossils;
 import net.minecraft.world.gen.feature.WorldGenGlowStone1;
 import net.minecraft.world.gen.feature.WorldGenGlowStone2;
 import net.minecraft.world.gen.feature.WorldGenHellLava;
@@ -126,6 +127,7 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         this.populatorTypeMappings.put("end_island", new SpongePopulatorType("end_island"));
         this.populatorTypeMappings.put("flower", new SpongePopulatorType("flower"));
         this.populatorTypeMappings.put("forest", new SpongePopulatorType("forest"));
+        this.populatorTypeMappings.put("fossil", new SpongePopulatorType("fossil"));
         this.populatorTypeMappings.put("glowstone", new SpongePopulatorType("glowstone"));
         this.populatorTypeMappings.put("ice_path", new SpongePopulatorType("ice_path"));
         this.populatorTypeMappings.put("ice_spike", new SpongePopulatorType("ice_spike"));
@@ -168,6 +170,7 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         this.populatorClassToTypeMappings.put(WorldGeneratorBonusChest.class, this.populatorTypeMappings.get("bonus_chest"));
         this.populatorClassToTypeMappings.put(WorldGenFire.class, this.populatorTypeMappings.get("generic_block"));
         this.populatorClassToTypeMappings.put(WorldGenFlowers.class, this.populatorTypeMappings.get("flower"));
+        this.populatorClassToTypeMappings.put(WorldGenFossils.class, this.populatorTypeMappings.get("fossil"));
         this.populatorClassToTypeMappings.put(WorldGenGlowStone1.class, this.populatorTypeMappings.get("glowstone"));
         this.populatorClassToTypeMappings.put(WorldGenGlowStone2.class, this.populatorTypeMappings.get("glowstone"));
         this.populatorClassToTypeMappings.put(WorldGenHellLava.class, this.populatorTypeMappings.get("generic_block"));
