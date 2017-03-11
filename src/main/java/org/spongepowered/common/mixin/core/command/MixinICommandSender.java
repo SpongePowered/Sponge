@@ -30,14 +30,19 @@ import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.command.CommandPermissions;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 
 @Mixin(value = {EntityPlayerMP.class, MinecraftServer.class, RConConsoleSource.class, CommandBlockBaseLogic.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
-public abstract class MixinICommandSender implements ICommandSender, IMixinCommandSender {
+public abstract class MixinICommandSender implements ICommandSender {
 
-    @Override
-    public boolean canUseCommand(int permissionLevel, String commandName) {
-        return CommandPermissions.testPermission(this.asCommandSource(), commandName);
+    @Inject(method = "canUseCommand(ILjava/lang/String;)Z", at = @At("HEAD"), cancellable = true)
+    private void onCanUseCommand(int permissionLevel, String commandName, CallbackInfoReturnable<Boolean> cir) {
+        if (this instanceof IMixinCommandSender) {
+            cir.setReturnValue(CommandPermissions.testPermission(((IMixinCommandSender) this).asCommandSource(), commandName));
+        }
     }
 }
