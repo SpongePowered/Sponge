@@ -409,7 +409,7 @@ public final class WorldManager {
         }
 
         if (archetype.isSeedRandomized()) {
-            ((IMixinWorldInfo) worldInfo).setSeed(SpongeImpl.random.nextLong());
+            ((WorldProperties) worldInfo).setSeed(SpongeImpl.random.nextLong());
         }
 
         setUuidOnProperties(getCurrentSavesDirectory().get(), (WorldProperties) worldInfo);

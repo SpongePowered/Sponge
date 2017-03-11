@@ -76,8 +76,6 @@ public interface IMixinWorldInfo {
 
     void setPortalAgentType(PortalAgentType type);
 
-    void setSeed(long seed);
-
     void setScoreboard(ServerScoreboard scoreboard);
 
     boolean isValid();
