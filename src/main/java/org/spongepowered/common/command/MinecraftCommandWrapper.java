@@ -47,11 +47,11 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.command.IMixinCommandBase;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -61,10 +61,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 /**
  * Wrapper around ICommands so they fit into the Sponge command system.
  */
 public class MinecraftCommandWrapper implements CommandCallable {
+
     private static final String TRANSLATION_NO_PERMISSION = "commands.generic.permission";
     private final PluginContainer owner;
     protected final ICommand command;
@@ -81,6 +84,11 @@ public class MinecraftCommandWrapper implements CommandCallable {
     public MinecraftCommandWrapper(final PluginContainer owner, final ICommand command) {
         this.owner = owner;
         this.command = command;
+
+        // Add the namespaced alias to the wrapped command so permission checks are sent to the right command.
+        if (this.command instanceof IMixinCommandBase) {
+            ((IMixinCommandBase) this.command).updateNamespacedAlias(this.owner.getId());
+        }
     }
 
     private String[] splitArgs(String arguments) {
