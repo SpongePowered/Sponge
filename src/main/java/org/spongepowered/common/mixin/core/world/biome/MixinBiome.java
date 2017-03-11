@@ -121,7 +121,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                 .ore((BlockState) Blocks.DIRT.getDefaultState())
                 .size(settings.dirtSize)
                 .perChunk(settings.dirtCount)
-                .height(VariableAmount.baseWithRandomAddition(settings.dirtMinHeight, settings.dirtMaxHeight))
+                .height(VariableAmount.baseWithRandomAddition(settings.dirtMinHeight, settings.dirtMaxHeight - settings.dirtMinHeight))
                 .build();
         gensettings.getPopulators().add(dirt);
 
@@ -129,7 +129,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                 .ore((BlockState) Blocks.GRAVEL.getDefaultState())
                 .size(settings.gravelSize)
                 .perChunk(settings.gravelCount)
-                .height(VariableAmount.baseWithRandomAddition(settings.gravelMinHeight, settings.gravelMaxHeight))
+                .height(VariableAmount.baseWithRandomAddition(settings.gravelMinHeight, settings.gravelMaxHeight - settings.gravelMinHeight))
                 .build();
         gensettings.getPopulators().add(gravel);
 
@@ -137,7 +137,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                 .ore((BlockState) Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE))
                 .size(settings.dioriteSize)
                 .perChunk(settings.dioriteCount)
-                .height(VariableAmount.baseWithRandomAddition(settings.dioriteMinHeight, settings.dioriteMaxHeight))
+                .height(VariableAmount.baseWithRandomAddition(settings.dioriteMinHeight, settings.dioriteMaxHeight - settings.dioriteMinHeight))
                 .build();
         gensettings.getPopulators().add(diorite);
 
@@ -145,7 +145,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                 .ore((BlockState) Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE))
                 .size(settings.graniteSize)
                 .perChunk(settings.graniteCount)
-                .height(VariableAmount.baseWithRandomAddition(settings.graniteMinHeight, settings.graniteMaxHeight))
+                .height(VariableAmount.baseWithRandomAddition(settings.graniteMinHeight, settings.graniteMaxHeight - settings.graniteMinHeight))
                 .build();
         gensettings.getPopulators().add(granite);
 
@@ -153,7 +153,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                 .ore((BlockState) Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE))
                 .size(settings.andesiteSize)
                 .perChunk(settings.andesiteCount)
-                .height(VariableAmount.baseWithRandomAddition(settings.andesiteMinHeight, settings.andesiteMaxHeight))
+                .height(VariableAmount.baseWithRandomAddition(settings.andesiteMinHeight, settings.andesiteMaxHeight - settings.andesiteMinHeight))
                 .build();
         gensettings.getPopulators().add(andesite);
 
@@ -161,7 +161,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                 .ore((BlockState) Blocks.COAL_ORE.getDefaultState())
                 .size(settings.coalSize)
                 .perChunk(settings.coalCount)
-                .height(VariableAmount.baseWithRandomAddition(settings.coalMinHeight, settings.coalMaxHeight))
+                .height(VariableAmount.baseWithRandomAddition(settings.coalMinHeight, settings.coalMaxHeight - settings.coalMinHeight))
                 .build();
         gensettings.getPopulators().add(coal);
 
@@ -169,7 +169,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                 .ore((BlockState) Blocks.IRON_ORE.getDefaultState())
                 .size(settings.ironSize)
                 .perChunk(settings.ironCount)
-                .height(VariableAmount.baseWithRandomAddition(settings.ironMinHeight, settings.ironMaxHeight))
+                .height(VariableAmount.baseWithRandomAddition(settings.ironMinHeight, settings.ironMaxHeight - settings.ironMinHeight))
                 .build();
         gensettings.getPopulators().add(iron);
 
@@ -177,7 +177,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                 .ore((BlockState) Blocks.GOLD_ORE.getDefaultState())
                 .size(settings.goldSize)
                 .perChunk(settings.goldCount)
-                .height(VariableAmount.baseWithRandomAddition(settings.goldMinHeight, settings.goldMaxHeight))
+                .height(VariableAmount.baseWithRandomAddition(settings.goldMinHeight, settings.goldMaxHeight - settings.goldMinHeight))
                 .build();
         gensettings.getPopulators().add(gold);
 
@@ -185,7 +185,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                 .ore((BlockState) Blocks.REDSTONE_ORE.getDefaultState())
                 .size(settings.redstoneSize)
                 .perChunk(settings.redstoneCount)
-                .height(VariableAmount.baseWithRandomAddition(settings.redstoneMinHeight, settings.redstoneMaxHeight))
+                .height(VariableAmount.baseWithRandomAddition(settings.redstoneMinHeight, settings.redstoneMaxHeight - settings.redstoneMinHeight))
                 .build();
         gensettings.getPopulators().add(redstone);
 
@@ -193,7 +193,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                 .ore((BlockState) Blocks.DIAMOND_ORE.getDefaultState())
                 .size(settings.diamondSize)
                 .perChunk(settings.diamondCount)
-                .height(VariableAmount.baseWithRandomAddition(settings.diamondMinHeight, settings.diamondMaxHeight))
+                .height(VariableAmount.baseWithRandomAddition(settings.diamondMinHeight, settings.diamondMaxHeight - settings.diamondMinHeight))
                 .build();
         gensettings.getPopulators().add(diamond);
 
