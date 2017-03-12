@@ -491,21 +491,37 @@ public class SpongeCommand {
                         }
                     } else {
                         Collection<PluginContainer> plugins = SpongeImpl.getGame().getPluginManager().getPlugins();
-                        List<Text> pluginList = new ArrayList<Text>();
-                        PaginationList.Builder builder = PaginationList.builder();
-                        builder.title(Text.builder(String.format("Plugins: (%d): ", plugins.size())).build()).padding(Text.of("-"));
-                        int counter = 1;
-                        for (PluginContainer next : plugins) {
+                        if (src instanceof Player) {
+                            List<Text> pluginList = new ArrayList<Text>();
+                            PaginationList.Builder builder = PaginationList.builder();
+                            builder.title(Text.builder(String.format("Plugins: (%d): ", plugins.size())).build()).padding(Text.of("-"));
+                            int counter = 1;
+                            for (PluginContainer next : plugins) {
 
-                            Text.Builder pluginBuilder = Text.builder((counter++) + next.getName())
-                                    .color(TextColors.GREEN)
-                                    .onClick(TextActions.runCommand("/sponge:sponge plugins " + next.getId()));
+                                Text.Builder pluginBuilder = Text.builder((counter++) + ". " + next.getName())
+                                        .color(TextColors.GREEN)
+                                        .onClick(TextActions.runCommand("/sponge:sponge plugins " + next.getId()));
 
-                            next.getVersion()
-                                    .ifPresent(version -> pluginBuilder.onHover(TextActions.showText(Text.of("Version " + version))));
-                            pluginList.add(pluginBuilder.build());
+                                next.getVersion()
+                                        .ifPresent(version -> pluginBuilder.onHover(TextActions.showText(Text.of("Version " + version))));
+                                pluginList.add(pluginBuilder.build());
+                            }
+                            builder.contents(pluginList).sendTo(src);
+                        } else {
+                            Text.Builder builder = Text.builder(String.format("Plugins (%d): ", plugins.size()));
+                            boolean first = true;
+                            for (PluginContainer next : plugins) {
+                                if (!first) {
+                                    builder.append(SEPARATOR_TEXT);
+                                }
+                                first = false;
+
+                                Text.Builder pluginBuilder = Text.builder(next.getName())
+                                        .color(TextColors.GREEN);
+                                builder.append(pluginBuilder.build());
+                            }
+                            src.sendMessage(builder.build());
                         }
-                        builder.contents(pluginList).sendTo(src);
                     }
                     return CommandResult.success();
                 }).build();
