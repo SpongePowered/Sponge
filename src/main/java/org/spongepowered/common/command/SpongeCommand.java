@@ -63,6 +63,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
@@ -93,7 +94,9 @@ import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -488,23 +491,21 @@ public class SpongeCommand {
                         }
                     } else {
                         Collection<PluginContainer> plugins = SpongeImpl.getGame().getPluginManager().getPlugins();
-                        Text.Builder build = Text.builder(String.format("Plugins (%d): ", plugins.size()));
-                        boolean first = true;
+                        List<Text> pluginList = new ArrayList<Text>();
+                        PaginationList.Builder builder = PaginationList.builder();
+                        builder.title(Text.builder(String.format("Plugins: (%d): ", plugins.size())).build()).padding(Text.of("-"));
+                        int counter = 1;
                         for (PluginContainer next : plugins) {
-                            if (!first) {
-                                build.append(SEPARATOR_TEXT);
-                            }
-                            first = false;
 
-                            Text.Builder pluginBuilder = Text.builder(next.getName())
+                            Text.Builder pluginBuilder = Text.builder((counter++) + next.getName())
                                     .color(TextColors.GREEN)
                                     .onClick(TextActions.runCommand("/sponge:sponge plugins " + next.getId()));
 
                             next.getVersion()
                                     .ifPresent(version -> pluginBuilder.onHover(TextActions.showText(Text.of("Version " + version))));
-                            build.append(pluginBuilder.build());
+                            pluginList.add(pluginBuilder.build());
                         }
-                        src.sendMessage(build.build());
+                        builder.contents(pluginList).sendTo(src);
                     }
                     return CommandResult.success();
                 }).build();
