@@ -260,10 +260,10 @@ public final class CauseTracker {
 
     private void printIncorrectPhaseCompletion(IPhaseState prevState, IPhaseState state) {
         PrettyPrinter printer = new PrettyPrinter(60).add("Completing incorrect phase").centre().hr()
-                .addWrapped(50, "Sponge's tracking system is very dependent on knowing when\n"
-                        + "a change to any world takes place, however, we are attempting\n"
-                        + "to complete a \"phase\" other than the one we most recently entered.\n"
-                        + "This is an error usually on Sponge's part, so a report\n"
+                .addWrapped(50, "Sponge's tracking system is very dependent on knowing when"
+                        + "a change to any world takes place, however, we are attempting"
+                        + "to complete a \"phase\" other than the one we most recently entered."
+                        + "This is an error usually on Sponge's part, so a report"
                         + "is required on the issue tracker on GitHub.").hr()
                 .add("  %s : %s", "Affected World", this.targetWorld)
                 .add("Expected to exit phase: %s", prevState)
