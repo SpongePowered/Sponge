@@ -96,6 +96,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -490,7 +491,8 @@ public class SpongeCommand {
                             src.sendMessage(builder.build());
                         }
                     } else {
-                        Collection<PluginContainer> plugins = SpongeImpl.getGame().getPluginManager().getPlugins();
+                        List<PluginContainer> plugins = new ArrayList<PluginContainer>(SpongeImpl.getGame().getPluginManager().getPlugins());
+                        plugins.sort(Comparator.comparing(PluginContainer::getName));
                         if (src instanceof Player) {
                             List<Text> pluginList = new ArrayList<Text>();
                             PaginationList.Builder builder = PaginationList.builder();
