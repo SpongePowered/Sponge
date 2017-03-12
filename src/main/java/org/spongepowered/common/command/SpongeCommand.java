@@ -494,7 +494,7 @@ public class SpongeCommand {
                         if (src instanceof Player) {
                             List<Text> pluginList = new ArrayList<Text>();
                             PaginationList.Builder builder = PaginationList.builder();
-                            builder.title(Text.builder(String.format("Plugins: (%d): ", plugins.size())).build()).padding(Text.of("-"));
+                            builder.title(Text.builder(String.format("Plugins: (%d)", plugins.size())).build()).padding(Text.of("-"));
                             int counter = 1;
                             for (PluginContainer next : plugins) {
 
