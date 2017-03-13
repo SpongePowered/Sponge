@@ -464,7 +464,7 @@ public final class CauseTracker {
         final PhaseData phaseData = this.stack.peek();
         final IPhaseState phaseState = phaseData.state;
         final boolean isComplete = phaseState == GeneralPhase.State.COMPLETE;
-        if (CauseTracker.ENABLED && isComplete) {
+        if (CauseTracker.ENABLED && this.isVerbose && isComplete) {
             // The random occurrence that we're told to complete a phase
             // while a world is being changed unknowingly.
             new PrettyPrinter(60).add("Unexpected World Change Detected").centre().hr()

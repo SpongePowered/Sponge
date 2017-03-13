@@ -91,11 +91,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     (module) -> true) // TODO the velocity changes need to be sent to the client
             .put("org.spongepowered.common.mixin.optimization.entity.MixinEntityTameable_Cached_Owner",
                     OptimizationCategory::useCacheTameableOwners)
-            .put("org.spongepowered.common.mixin.optimization.entity.monster.MixinEntityMob_Async_Lighting",
-                    OptimizationCategory::useAsyncLighting)
             .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Async_Lighting",
-                    OptimizationCategory::useAsyncLighting)
-            .put("org.spongepowered.common.mixin.optimization.world.MixinWorldEntitySpawner_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
             .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Async_Lighting",
                     OptimizationCategory::useAsyncLighting)
