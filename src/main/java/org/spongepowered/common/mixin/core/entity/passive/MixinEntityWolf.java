@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemFood;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.Sponge;
@@ -39,12 +40,16 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Mixin(EntityWolf.class)
@@ -91,4 +96,21 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
         manipulators.add(get(SittingData.class).get());
         manipulators.add(new SpongeAggressiveData(this.isAngry()));
     }
+
+    @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
+                at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityWolf;heal(F)V"))
+    public void onHealFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir,
+            org.spongepowered.api.item.inventory.ItemStack itemStack) {
+        SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventHealing(Cause.of(NamedCause.source(player)),
+                Optional.of(this.getLocation()), itemStack.getItem(), this));
+    }
+
+    @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
+            at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isRemote:Z", ordinal = 1))
+    public void onTameFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir,
+            org.spongepowered.api.item.inventory.ItemStack itemStack) {
+        SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventTaming(Cause.of(NamedCause.source(player)),
+                Optional.of(this.getLocation()), itemStack.getItem(), this));
+    }
+
 }

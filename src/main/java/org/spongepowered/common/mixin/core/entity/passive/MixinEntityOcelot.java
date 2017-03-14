@@ -44,6 +44,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
@@ -53,6 +55,7 @@ import org.spongepowered.common.registry.type.entity.OcelotTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @Mixin(EntityOcelot.class)
@@ -76,6 +79,14 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
             }
         }
         return 1;
+    }
+
+    @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
+            at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isRemote:Z", ordinal = 1))
+    public void onHealFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir,
+            org.spongepowered.api.item.inventory.ItemStack itemStack) {
+        SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventTaming(Cause.of(NamedCause.source(player)),
+                Optional.of(this.getLocation()), itemStack.getItem(), this));
     }
 
     @Inject(method = "setupTamedAI", at = @At(value = "HEAD"), cancellable = true)
