@@ -27,19 +27,16 @@ package org.spongepowered.common.world.border;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketWorldBorder;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
-public final class PlayerBorderListener implements IBorderListener {
+public class PlayerOwnBorderListener implements IBorderListener {
 
-    private final int dimensionId;
-    private final MinecraftServer server;
+    private EntityPlayerMP player;
 
-    public PlayerBorderListener(MinecraftServer server, int dimensionId) {
-        this.server = server;
-        this.dimensionId = dimensionId;
+    public PlayerOwnBorderListener(EntityPlayerMP player) {
+        this.player = player;
     }
 
     @Override
@@ -74,12 +71,15 @@ public final class PlayerBorderListener implements IBorderListener {
     @Override
     public void onDamageBufferChanged(WorldBorder border, double newSize) {
     }
+    
+    /**
+     * This method is for cleaning up the player reference once they disconnect.
+     */
+    public void onPlayerDisconnect() {
+        ((IMixinEntityPlayerMP) this.player).getWorldBorder().ifPresent(border -> ((WorldBorder) border).listeners.remove(this));
+    }
 
     private void sendBorderPacket(Packet<?> packet) {
-        for (EntityPlayerMP player : this.server.getPlayerList().getPlayers()) {
-            if (player.dimension == this.dimensionId && !((Player) player).getWorldBorder().isPresent()) {
-                player.connection.sendPacket(packet);
-            }
-        }
+        this.player.connection.sendPacket(packet);
     }
 }

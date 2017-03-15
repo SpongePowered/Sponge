@@ -112,6 +112,7 @@ import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -206,6 +207,7 @@ import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettingsBuilder;
 import org.spongepowered.common.world.biome.SpongeVirtualBiomeTypeBuilder;
+import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import org.spongepowered.common.world.gen.builders.*;
 
@@ -328,6 +330,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(LocatableBlockSpawnCause.Builder.class, SpongeLocatableBlockSpawnCauseBuilder::new)
             .registerBuilderSupplier(Fossil.Builder.class, FossilBuilder::new)
             .registerBuilderSupplier(DataRegistration.Builder.class, SpongeDataRegistrationBuilder::new)
+            .registerBuilderSupplier(WorldBorder.Builder.class, SpongeWorldBorderBuilder::new)
         ;
     }
 

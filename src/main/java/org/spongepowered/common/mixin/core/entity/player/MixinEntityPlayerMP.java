@@ -34,6 +34,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.ai.attributes.BaseAttribute;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.player.EntityPlayer;
@@ -55,6 +56,7 @@ import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
+import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
@@ -116,6 +118,7 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -164,6 +167,7 @@ import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.common.util.SkinUtil;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.time.Instant;
@@ -224,6 +228,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
     @Nullable private Vector3d velocityOverride = null;
+
+    @Nullable private WorldBorder worldBorder;
+    public final PlayerOwnBorderListener borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
 
     @Inject(method = "removeEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
@@ -907,6 +914,37 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             event.getChannel().ifPresent(channel -> channel.send(this, event.getMessage(), ChatTypes.CHAT));
         }
         return event;
+    }
+
+    @Override
+    public Optional<WorldBorder> getWorldBorder() {
+        return Optional.ofNullable(this.worldBorder);
+    }
+
+    @Override
+    public void setWorldBorder(@Nullable WorldBorder border, Cause cause) {
+        if (this.worldBorder == border) {
+            return; //do not fire an event since nothing would have changed
+        }
+        if (!SpongeImpl.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(cause, Optional.ofNullable(this.worldBorder), Optional.ofNullable(border), this))) {
+            if (this.worldBorder != null) { //is the world border about to be unset?
+                ((net.minecraft.world.border.WorldBorder) this.worldBorder).listeners.remove(this.borderListener); //remove the listener, if so
+            }
+            this.worldBorder = border;
+            if (this.worldBorder != null) {
+                if (!((net.minecraft.world.border.WorldBorder) this.worldBorder).listeners.contains(this.borderListener)) {
+                    ((net.minecraft.world.border.WorldBorder) this.worldBorder).addListener(this.borderListener);
+                }
+                this.connection.sendPacket(new SPacketWorldBorder((net.minecraft.world.border.WorldBorder) (Object) this.worldBorder, SPacketWorldBorder.Action.INITIALIZE));
+            } else { //unset the border if null
+                this.connection.sendPacket(new SPacketWorldBorder(this.world.getWorldBorder(), SPacketWorldBorder.Action.INITIALIZE));
+            }
+        }
+    }
+
+    @Override
+    public PlayerOwnBorderListener getWorldBorderListener() {
+        return this.borderListener;
     }
 
 }
