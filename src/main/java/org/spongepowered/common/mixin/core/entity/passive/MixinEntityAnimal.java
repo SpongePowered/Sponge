@@ -45,18 +45,18 @@ import java.util.Optional;
 @Mixin(EntityAnimal.class)
 public abstract class MixinEntityAnimal extends MixinEntityAgeable implements Animal {
 
-    @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILSOFT,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityAnimal;setInLove(Lnet/minecraft/entity/player/EntityPlayer;)V"))
+    @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", ordinal = 0,
+            target = "Lnet/minecraft/entity/passive/EntityAnimal;consumeItemFromStack(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"))
     private void onBreedFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
         SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventLove(Cause.of(NamedCause.source(player)),
-                Optional.of(this.getLocation()), itemStack.getItem(), this));
+                Optional.of(this.getLocation()), itemStack.createSnapshot(), this));
     }
 
-    @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILSOFT,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityAnimal;ageUp(IZ)V"))
+    @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", ordinal = 1,
+            target = "Lnet/minecraft/entity/passive/EntityAnimal;consumeItemFromStack(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"))
     private void onAgeFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
         SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventAging(Cause.of(NamedCause.source(player)),
-                Optional.of(this.getLocation()), itemStack.getItem(), this));
+                Optional.of(this.getLocation()), itemStack.createSnapshot(), this));
     }
 
 }

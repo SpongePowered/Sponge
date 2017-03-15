@@ -98,19 +98,19 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
     }
 
     @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
-                at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityWolf;heal(F)V"))
+                at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z"))
     public void onHealFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir,
             org.spongepowered.api.item.inventory.ItemStack itemStack) {
         SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventHealing(Cause.of(NamedCause.source(player)),
-                Optional.of(this.getLocation()), itemStack.getItem(), this));
+                Optional.of(this.getLocation()), itemStack.createSnapshot(), this));
     }
 
     @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
-            at = @At(value = "FIELD", target = "Lnet/minecraft/world/World;isRemote:Z", ordinal = 1))
+            at = @At(value = "FIELD", ordinal = 2, target = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z"))
     public void onTameFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir,
             org.spongepowered.api.item.inventory.ItemStack itemStack) {
         SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventTaming(Cause.of(NamedCause.source(player)),
-                Optional.of(this.getLocation()), itemStack.getItem(), this));
+                Optional.of(this.getLocation()), itemStack.createSnapshot(), this));
     }
 
 }
