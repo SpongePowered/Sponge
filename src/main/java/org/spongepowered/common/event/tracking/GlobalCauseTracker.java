@@ -28,9 +28,15 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.WorldManager;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Predicate;
+
 public final class GlobalCauseTracker extends BaseCauseTracker {
 
     private static final GlobalCauseTracker INSTANCE = new GlobalCauseTracker();
+
+    private final Map<PhaseData, Predicate<WorldServer>> filters = new HashMap<>();
 
     private GlobalCauseTracker() {
     }
@@ -41,16 +47,26 @@ public final class GlobalCauseTracker extends BaseCauseTracker {
 
     @Override
     public void switchToPhase(IPhaseState state, PhaseContext phaseContext) {
+        switchToPhase(state, phaseContext, x -> true);
+    }
+
+    public void switchToPhase(IPhaseState state, PhaseContext phaseContext, Predicate<WorldServer> filter) {
         super.switchToPhase(state, phaseContext);
+        this.filters.put(this.getCurrentPhaseData(), filter);
         for (WorldServer world : WorldManager.getWorlds()) {
-            ((IMixinWorldServer) world).getCauseTracker().switchToPhase(state, phaseContext.copy());
+            if (filter.test(world)) {
+                ((IMixinWorldServer) world).getCauseTracker().switchToPhase(state, phaseContext.copy());
+            }
         }
     }
 
     @Override
     protected void doCompletePhase(PhaseData currentPhaseData) {
+        Predicate<WorldServer> filter = this.filters.remove(currentPhaseData);
         for (WorldServer world : WorldManager.getWorlds()) {
-            ((IMixinWorldServer) world).getCauseTracker().completePhase(currentPhaseData.state);
+            if (filter.test(world)) {
+                ((IMixinWorldServer) world).getCauseTracker().completePhase(currentPhaseData.state);
+            }
         }
     }
 
@@ -62,19 +78,25 @@ public final class GlobalCauseTracker extends BaseCauseTracker {
     @Override
     protected void popFromError() {
         IPhaseState currentState = this.getCurrentState();
+        Predicate<WorldServer> filter = this.filters.remove(this.getCurrentPhaseData());
         super.popFromError();
         for (WorldServer server : WorldManager.getWorlds()) {
-            CauseTracker worldTracker = ((IMixinWorldServer) server).getCauseTracker();
-            if (!worldTracker.getCurrentState().equals(currentState)) {
-                // The last phase must not have been completed.
+            if (filter.test(server)) {
+                CauseTracker worldTracker = ((IMixinWorldServer) server).getCauseTracker();
+                if (!worldTracker.getCurrentState().equals(currentState)) {
+                    // The last phase must not have been completed.
+                    worldTracker.popFromError();
+                }
                 worldTracker.popFromError();
             }
-            worldTracker.popFromError();
         }
     }
 
     public void addWorld(WorldServer world) {
-        this.stack.forEachFromBase(data -> ((IMixinWorldServer) world).getCauseTracker()
-                .switchToPhase(data.state, data.context.copy()));
+        this.stack.forEachFromBase(data -> {
+            if (filters.get(data).test(world)) {
+                ((IMixinWorldServer) world).getCauseTracker().switchToPhase(data.state, data.context.copy());
+            }
+        });
     }
 }

@@ -37,7 +37,6 @@ import net.minecraft.block.BlockRedstoneLight;
 import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.boss.dragon.phase.IPhase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.ITickable;
@@ -217,14 +216,9 @@ public final class TrackingUtil {
         causeTracker.switchToPhase(TickPhase.Tick.TILE_ENTITY, phaseContext
                 .complete());
 
-        for (WorldServer world: SpongeImpl.getServer().worlds) {
-            if (world == worldServer) {
-                continue;
-            }
-            ((IMixinWorldServer) world).getCauseTracker().switchToPhase(GeneralPhase.State.MARKER_CROSS_WORLD, PhaseContext.start()
-                    .add(NamedCause.source(Sponge.getGame()))
-            .complete());
-        }
+        GlobalCauseTracker.getInstance().switchToPhase(GeneralPhase.State.MARKER_CROSS_WORLD, PhaseContext.start()
+                .add(NamedCause.source(Sponge.getGame()))
+                .complete(), world -> !world.equals(worldServer));
 
         mixinTileEntity.getTimingsHandler().startTiming();
         try {
@@ -232,13 +226,7 @@ public final class TrackingUtil {
         } finally {
             mixinTileEntity.getTimingsHandler().stopTiming();
             causeTracker.completePhase(TickPhase.Tick.TILE_ENTITY);
-
-            for (WorldServer world: SpongeImpl.getServer().worlds) {
-                if (world == worldServer) {
-                    continue;
-                }
-                ((IMixinWorldServer) world).getCauseTracker().completePhase(GeneralPhase.State.MARKER_CROSS_WORLD);
-            }
+            GlobalCauseTracker.getInstance().completePhase(GeneralPhase.State.MARKER_CROSS_WORLD);
         }
     }
 
