@@ -68,6 +68,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.GlobalCauseTracker;
 import org.spongepowered.common.interfaces.IMixinIntegratedServer;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
@@ -816,6 +817,7 @@ public final class WorldManager {
         // Set the worlds on the Minecraft server
         reorderWorldsVanillaFirst();
 
+        GlobalCauseTracker.getInstance().addWorld(worldServer);
         SpongeImpl.postEvent(SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(Sponge.getServer())),
                 (org.spongepowered.api.world.World) worldServer));
         ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);

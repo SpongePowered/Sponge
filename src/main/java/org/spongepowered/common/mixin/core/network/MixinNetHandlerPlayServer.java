@@ -99,6 +99,7 @@ import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.GlobalCauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -196,35 +197,14 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             player.onUpdateEntity();
             return;
         }
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.world;
-        final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
-        causeTracker.switchToPhase(TickPhase.Tick.PLAYER, PhaseContext.start()
+        GlobalCauseTracker.getInstance().switchToPhase(TickPhase.Tick.PLAYER, PhaseContext.start()
                 .add(NamedCause.source(player))
                 .addCaptures()
                 .addEntityDropCaptures()
                 //.addBlockCaptures()
                 .complete());
-        for (WorldServer worldServer : WorldManager.getWorlds()) {
-            if (worldServer == mixinWorldServer) { // we don't care about entering the phase for this world server of which we already entered
-                continue;
-            }
-            final IMixinWorldServer otherMixinWorldServer = (IMixinWorldServer) worldServer;
-            otherMixinWorldServer.getCauseTracker().switchToPhase(TickPhase.Tick.PLAYER, PhaseContext.start()
-                    .add(NamedCause.source(player))
-                    .addCaptures()
-                    .addEntityDropCaptures()
-                    //.addBlockCaptures()
-                    .complete());
-        }
         player.onUpdateEntity();
-        causeTracker.completePhase(TickPhase.Tick.PLAYER);
-        for (WorldServer worldServer : WorldManager.getWorlds()) {
-            if (worldServer == mixinWorldServer) { // we don't care about entering the phase for this world server of which we already entered
-                continue;
-            }
-            final IMixinWorldServer otherMixinWorldServer = (IMixinWorldServer) worldServer;
-            otherMixinWorldServer.getCauseTracker().completePhase(TickPhase.Tick.PLAYER);
-        }
+        GlobalCauseTracker.getInstance().completePhase(TickPhase.Tick.PLAYER);
     }
 
     @Override

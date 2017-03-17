@@ -92,6 +92,10 @@ final class CauseStack {
         this.states.forEach(consumer::accept);
     }
 
+    public void forEachFromBase(Consumer<PhaseData> consumer) {
+        this.states.descendingIterator().forEachRemaining(consumer);
+    }
+
     public boolean isEmpty() {
         return this.states.isEmpty();
     }

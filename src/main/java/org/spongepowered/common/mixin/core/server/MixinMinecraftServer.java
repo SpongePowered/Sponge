@@ -92,6 +92,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.GlobalCauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
@@ -771,14 +772,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Redirect(method = "callFromMainThread", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;", remap = false))
     public Object onCall(Callable<?> callable) throws Exception {
-        for (WorldServer worldServer : WorldManager.getWorlds()) {
-            final CauseTracker otherCauseTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
-            otherCauseTracker.switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
-                    .add(NamedCause.source(callable))
-                    .addCaptures()
-                    .complete()
-            );
-        }
+        GlobalCauseTracker.getInstance().switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
+                .add(NamedCause.source(callable))
+                .addCaptures()
+                .complete()
+        );
         Object value;
         try {
             value = callable.call();
@@ -786,9 +784,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             throw e;
         }
         finally {
-            for (WorldServer worldServer : WorldManager.getWorlds()) {
-                ((IMixinWorldServer) worldServer).getCauseTracker().completePhase(PluginPhase.State.SCHEDULED_TASK);
-            }
+            GlobalCauseTracker.getInstance().completePhase(PluginPhase.State.SCHEDULED_TASK);
         }
         return value;
     }
