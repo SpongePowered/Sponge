@@ -141,6 +141,9 @@ public class SpongeCommandManager implements CommandManager {
             // <namespace>:<alias> for all commands
             List<String> aliasesWithPrefix = new ArrayList<>(aliases.size() * 3);
             for (String alias : aliases) {
+                if (alias.contains(" ")) {
+                    throw new IllegalArgumentException("Plugin '" + container.getId() + "' attempted to register an alias ('" + alias + "') which contained a space.");
+                }
                 final Collection<CommandMapping> ownedCommands = this.owners.get(container);
                 for (CommandMapping mapping : this.dispatcher.getAll(alias)) {
                     if (ownedCommands.contains(mapping)) {
