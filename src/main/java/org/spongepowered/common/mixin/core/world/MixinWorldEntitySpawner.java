@@ -160,10 +160,21 @@ public abstract class MixinWorldEntitySpawner {
             }
         }
 
+        // If there are no eligible chunks, return early
+        if (this.eligibleSpawnChunks.size() == 0) {
+            if (CauseTracker.ENABLED) {
+                CauseTracker causeTracker = spongeWorld.getCauseTracker();
+                causeTracker.completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
+            }
+            spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
+            return 0;
+        }
+
         int totalSpawned = 0;
         final long worldTotalTime = worldServerIn.getTotalWorldTime();
         final SpongeConfig<?> activeConfig = ((IMixinWorldServer) worldServerIn).getActiveConfig();
 
+        labelOuterLoop:
         for (EnumCreatureType enumCreatureType : EnumCreatureType.values()) {
             int limit = 0;
             int tickRate = 0;
@@ -181,7 +192,7 @@ public abstract class MixinWorldEntitySpawner {
                 tickRate = activeConfig.getConfig().getSpawner().getAmbientTickRate();
             }
 
-            if ((limit == 0 || tickRate == 0) || worldTotalTime % tickRate != 0L) {
+            if (limit == 0 || tickRate == 0 || (worldTotalTime % tickRate) != 0L) {
                 continue;
             }
 
@@ -189,12 +200,7 @@ public abstract class MixinWorldEntitySpawner {
                 int entityCount = SpongeImplHooks.countEntities(worldServerIn, enumCreatureType, true);
                 int maxCount = limit * chunkSpawnCandidates / MOB_COUNT_DIV;
                 if (entityCount > maxCount) {
-                    if (CauseTracker.ENABLED) {
-                        CauseTracker causeTracker = spongeWorld.getCauseTracker();
-                        causeTracker.completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
-                    }
-                    spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
-                    return totalSpawned;
+                    continue labelOuterLoop;
                 }
 
                 chunkIterator = this.eligibleSpawnChunks.iterator();
@@ -254,12 +260,7 @@ public abstract class MixinWorldEntitySpawner {
                                             entityliving = (EntityLiving)spawnListEntry.entityClass.getConstructor(new Class[] {World.class}).newInstance(new Object[] {worldServerIn});
                                         } catch (Exception exception) {
                                             exception.printStackTrace();
-                                            if (CauseTracker.ENABLED) {
-                                                CauseTracker causeTracker = spongeWorld.getCauseTracker();
-                                                causeTracker.completePhase(GenerationPhase.State.WORLD_SPAWNER_SPAWNING);
-                                            }
-                                            spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
-                                            return totalSpawned;
+                                            continue labelOuterLoop;
                                         }
 
                                         entityliving.setLocationAndAngles(spawnX, spawnY, spawnZ, worldServerIn.rand.nextFloat() * 360.0F, 0.0F);
