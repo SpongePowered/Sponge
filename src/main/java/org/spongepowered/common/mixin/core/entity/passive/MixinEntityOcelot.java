@@ -83,10 +83,9 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
 
     @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z"))
-    public void onHealFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir,
-            org.spongepowered.api.item.inventory.ItemStack itemStack) {
+    public void onHealFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
         SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventTaming(Cause.of(NamedCause.source(player)),
-                Optional.of(this.getLocation()), itemStack.createSnapshot(), this));
+                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this));
     }
 
     @Inject(method = "setupTamedAI", at = @At(value = "HEAD"), cancellable = true)

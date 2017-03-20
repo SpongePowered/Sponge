@@ -26,12 +26,12 @@ package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -49,14 +49,14 @@ public abstract class MixinEntityAnimal extends MixinEntityAgeable implements An
             target = "Lnet/minecraft/entity/passive/EntityAnimal;consumeItemFromStack(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"))
     private void onBreedFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
         SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventLove(Cause.of(NamedCause.source(player)),
-                Optional.of(this.getLocation()), itemStack.createSnapshot(), this));
+                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this));
     }
 
     @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILSOFT, at = @At(value = "INVOKE", ordinal = 1,
             target = "Lnet/minecraft/entity/passive/EntityAnimal;consumeItemFromStack(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/item/ItemStack;)V"))
     private void onAgeFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
         SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventAging(Cause.of(NamedCause.source(player)),
-                Optional.of(this.getLocation()), itemStack.createSnapshot(), this));
+                Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this));
     }
 
 }
