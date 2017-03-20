@@ -366,6 +366,7 @@
         "server.network.MixinNetHandlerLoginServerAnonThread",
         "sound.MixinSoundCategory",
         "sound.MixinSoundEvent",
+        "stats.MixinAchievement",
         "status.MixinLegacyPingHandler",
         "status.MixinNetHandlerStatusServer",
         "status.MixinServerStatusResponse",
