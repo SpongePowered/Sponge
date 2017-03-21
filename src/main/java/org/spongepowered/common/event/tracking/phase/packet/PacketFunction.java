@@ -691,26 +691,17 @@ public interface PacketFunction {
                     capturedItems.clear();
                 }
 
-                if (inventoryEvent instanceof ClickInventoryEvent) {
-                    // Restore cursor
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
-                }
+                // Restore cursor
+                PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
 
-                if (inventoryEvent instanceof ChangeInventoryEvent) {
-                    // Restore target slots
-                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions(), true, inventoryEvent);
-                }
+                // Restore target slots
+                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), true, inventoryEvent);
             } else {
-                if (inventoryEvent instanceof ChangeInventoryEvent) {
-                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions(), false, inventoryEvent);
-                }
+                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), false, inventoryEvent);
 
                 // Custom cursor
-                if (inventoryEvent instanceof ClickInventoryEvent) {
-                    final ClickInventoryEvent clickInventory = (ClickInventoryEvent) inventoryEvent;
-                    if (clickInventory.getCursorTransaction().getCustom().isPresent()) {
-                        PacketPhaseUtil.handleCustomCursor(player, clickInventory.getCursorTransaction().getFinal());
-                    }
+                if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
+                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
                 }
                 if (inventoryEvent instanceof SpawnEntityEvent) {
                     processSpawnedEntities(player, ((IMixinWorldServer) player.getServerWorld()).getCauseTracker(), (SpawnEntityEvent) inventoryEvent);
@@ -886,11 +877,12 @@ public interface PacketFunction {
                 new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
         final ChangeInventoryEvent.Held changeInventoryEventHeld = SpongeEventFactory
                 .createChangeInventoryEventHeld(Cause.of(NamedCause.source(player)), (Inventory) inventoryContainer, transactions);
+        Container openContainer = player.openContainer;
         SpongeImpl.postEvent(changeInventoryEventHeld);
         if (changeInventoryEventHeld.isCancelled()) {
             player.connection.sendPacket(new SPacketHeldItemChange(previousSlot));
         } else {
-            PacketPhaseUtil.handleSlotRestore(player, changeInventoryEventHeld.getTransactions(), false, false);
+            PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false, false);
             inventory.currentItem = itemChange.getSlotId();
             player.markPlayerActive();
         }

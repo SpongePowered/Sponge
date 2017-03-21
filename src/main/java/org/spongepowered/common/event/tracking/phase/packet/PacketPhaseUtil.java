@@ -43,13 +43,13 @@ import java.util.List;
 
 public final class PacketPhaseUtil {
 
-    public static void handleSlotRestore(EntityPlayerMP player, List<SlotTransaction> slotTransactions, boolean eventCancelled, Event event) {
+    public static void handleSlotRestore(EntityPlayerMP player, Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled, Event event) {
         // We always need to force resync for shift click events, since a previous event cancellation could have caused a desync
         // (if the event is from a shift double click)c
-        handleSlotRestore(player, slotTransactions, eventCancelled, event instanceof ClickInventoryEvent.Shift);
+        handleSlotRestore(player, openContainer, slotTransactions, eventCancelled, event instanceof ClickInventoryEvent.Shift);
     }
 
-    public static void handleSlotRestore(EntityPlayerMP player, List<SlotTransaction> slotTransactions, boolean eventCancelled, boolean forceResync) {
+    public static void handleSlotRestore(EntityPlayerMP player, Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled, boolean forceResync) {
         for (SlotTransaction slotTransaction : slotTransactions) {
 
             if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
@@ -68,14 +68,15 @@ public final class PacketPhaseUtil {
                 slot.offer((org.spongepowered.api.item.inventory.ItemStack) originalStack);
             }*/
 
-            final Slot nmsSlot = player.openContainer.getSlot(slotNumber);
+            final Slot nmsSlot = openContainer.getSlot(slotNumber);
             if (nmsSlot != null) {
                 nmsSlot.putStack(originalStack);
             }
         }
-        player.openContainer.detectAndSendChanges();
-        if (forceResync) {
-            player.sendContainerToPlayer(player.openContainer);
+        openContainer.detectAndSendChanges();
+        // we must validate the player still has the same container open after the event has been processed
+        if (forceResync && player.openContainer == openContainer) {
+            player.sendContainerToPlayer(openContainer);
         }
     }
 
