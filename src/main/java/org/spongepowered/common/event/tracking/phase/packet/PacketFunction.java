@@ -691,9 +691,9 @@ public interface PacketFunction {
                 PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
 
                 // Restore target slots
-                PacketPhaseUtil.handleSlotRestore(player, inventoryEvent.getTransactions(), true, inventoryEvent);
+                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), true, inventoryEvent);
             } else {
-                PacketPhaseUtil.handleSlotRestore(player, inventoryEvent.getTransactions(), false, inventoryEvent);
+                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), false, inventoryEvent);
 
                 // Custom cursor
                 if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
@@ -821,11 +821,12 @@ public interface PacketFunction {
                 new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
         final ChangeInventoryEvent.Held changeInventoryEventHeld = SpongeEventFactory
                 .createChangeInventoryEventHeld(Cause.of(NamedCause.source(player)), (Inventory) inventoryContainer, transactions);
+        Container openContainer = player.openContainer;
         SpongeImpl.postEvent(changeInventoryEventHeld);
         if (changeInventoryEventHeld.isCancelled()) {
             player.connection.sendPacket(new SPacketHeldItemChange(previousSlot));
         } else {
-            PacketPhaseUtil.handleSlotRestore(player, changeInventoryEventHeld.getTransactions(), false, false);
+            PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false, false);
             inventory.currentItem = itemChange.getSlotId();
             player.markPlayerActive();
         }
