@@ -68,6 +68,9 @@ public class TileEntityActivation {
 
         IModData_Activation spongeEntity = (IModData_Activation) tileEntity;
         SpongeTileEntityType spongeType = (SpongeTileEntityType) type;
+        if (spongeType == null || spongeType.getModId() == null) {
+            return true;
+        }
         TileEntityActivationModCategory tileEntityMod = config.getModList().get(spongeType.getModId());
         int defaultActivationRange = config.getDefaultBlockRange();
         if (tileEntityMod == null) {
