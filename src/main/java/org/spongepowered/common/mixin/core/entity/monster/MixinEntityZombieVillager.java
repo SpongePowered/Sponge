@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.monster.EntityZombieVillager;
-import org.spongepowered.api.data.manipulator.mutable.entity.ZombieData;
-import org.spongepowered.api.data.type.ZombieTypes;
 import org.spongepowered.api.entity.living.monster.ZombieVillager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,7 +40,7 @@ public abstract class MixinEntityZombieVillager extends MixinEntityZombie implem
     @Shadow public abstract int getProfession();
 
     @Override
-    public ZombieData getZombieData() {
-        return new SpongeZombieData(ZombieTypes.VILLAGER, Optional.of(EntityUtil.validateProfession(getProfession())));
+    public org.spongepowered.api.data.manipulator.mutable.entity.ZombieData getZombieData() {
+        return new SpongeZombieData(org.spongepowered.api.data.type.ZombieTypes.VILLAGER, Optional.of(EntityUtil.validateProfession(getProfession())));
     }
 }

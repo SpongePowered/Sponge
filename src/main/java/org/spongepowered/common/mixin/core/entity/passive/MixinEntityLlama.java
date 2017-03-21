@@ -26,8 +26,6 @@ package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.EntityLlama;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.HorseVariant;
-import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.type.LlamaVariant;
 import org.spongepowered.api.data.type.LlamaVariants;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
@@ -51,9 +49,9 @@ public abstract class MixinEntityLlama extends MixinAbstractHorse implements Lla
     @Shadow public abstract void setVariant(int p_190710_1_);
 
     @Override
-    public Value<HorseVariant> variant() {
+    public Value<org.spongepowered.api.data.type.HorseVariant> variant() {
         printDeprecatedHorseUsage("HorseVariant is no longer applicable to all horses! HorseVariants cannot be changed!");
-        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT, HorseVariants.LLAMA);
+        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT, org.spongepowered.api.data.type.HorseVariants.LLAMA);
     }
 
     @Override

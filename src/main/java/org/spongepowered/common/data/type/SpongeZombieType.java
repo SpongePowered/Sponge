@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.data.type.ZombieType;
 import org.spongepowered.common.SpongeCatalogType;
 
 @SuppressWarnings("deprecation")
-public class SpongeZombieType extends SpongeCatalogType implements ZombieType {
+public class SpongeZombieType extends SpongeCatalogType implements org.spongepowered.api.data.type.ZombieType {
 
     private final String name;
 

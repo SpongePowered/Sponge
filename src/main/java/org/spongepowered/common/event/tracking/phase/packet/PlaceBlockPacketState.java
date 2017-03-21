@@ -93,10 +93,10 @@ class PlaceBlockPacketState extends BasicPacketState {
     @Override
     public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
         final Player player = context.first(Player.class).get();
-        final Location<World> location = new Location<World>((World) player.getWorld(), pos.getX(), pos.getY(), pos.getZ());
+        final Location<World> location = new Location<>(player.getWorld(), pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatableBlock = LocatableBlock.builder()
                 .location(location)
-                .state((BlockState) location.getBlock())
+                .state(location.getBlock())
                 .build();
 
         blockEvent.setTickBlock(locatableBlock);

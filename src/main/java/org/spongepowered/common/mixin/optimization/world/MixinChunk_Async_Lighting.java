@@ -95,6 +95,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void recheckGapsAsync(boolean p_150803_1_) {
         //this.worldObj.theProfiler.startSection("recheckGaps"); Sponge - don't use profiler off of main thread
 

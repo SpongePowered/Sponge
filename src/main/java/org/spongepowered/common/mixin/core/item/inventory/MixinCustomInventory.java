@@ -67,21 +67,21 @@ public abstract class MixinCustomInventory implements MinecraftInventoryAdapter,
     private CustomLens lens;
 
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
-    private void onConstructed(InventoryArchetype archetype, Map<String, InventoryProperty> properties, Carrier carrier, Map<Class<? extends
+    private void onConstructed(InventoryArchetype archetype, Map<String, InventoryProperty<?, ?>> properties, Carrier carrier, Map<Class<? extends
             InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, Object plugin, CallbackInfo ci) {
         this.inventory = MinecraftFabric.of(this);
-        this.slots = new SlotCollection.Builder().add(inv.getSizeInventory()).build();
-        this.lens = new CustomLens(this, slots, archetype, properties);
+        this.slots = new SlotCollection.Builder().add(this.inv.getSizeInventory()).build();
+        this.lens = new CustomLens(this, this.slots, archetype, properties);
     }
 
     @Override
     public Lens<IInventory, ItemStack> getRootLens() {
-        return lens;
+        return this.lens;
     }
 
     @Override
     public Fabric<IInventory> getInventory() {
-        return inventory;
+        return this.inventory;
     }
 
     @Override

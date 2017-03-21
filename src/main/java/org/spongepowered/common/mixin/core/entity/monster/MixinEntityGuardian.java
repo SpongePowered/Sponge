@@ -30,7 +30,6 @@ import net.minecraft.entity.monster.EntityGuardian;
 import net.minecraft.network.datasync.DataParameter;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Guardian;
@@ -49,8 +48,9 @@ public abstract class MixinEntityGuardian extends MixinEntityMob implements Guar
     @Shadow @Final private static DataParameter<Integer> TARGET_ENTITY;
     @Shadow private void setTargetedEntity(int entityId) { } // setTargetedEntity
 
+    @SuppressWarnings("deprecation")
     @Override
-    public ElderData getElderData() {
+    public org.spongepowered.api.data.manipulator.mutable.entity.ElderData getElderData() {
         return new SpongeElderData((Object) this instanceof EntityElderGuardian);
     }
 

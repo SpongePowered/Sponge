@@ -195,12 +195,12 @@ public final class ContainerUtil {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Nullable
     public static Lens<IInventory, ItemStack> getLens(Fabric<IInventory> fabric, net.minecraft.inventory.Container container, SlotCollection slots) {
         // Container is Adapter?
         if (container instanceof InventoryAdapter) {
-            Lens lens = ((InventoryAdapter) container).getRootLens();
+            Lens lens = ((InventoryAdapter<?, ?>) container).getRootLens();
             if (lens != null) {
                 return lens;
             }
@@ -235,6 +235,7 @@ public final class ContainerUtil {
      * @param slots The slots of the Container
      * @return The generated fallback lens
      */
+    @SuppressWarnings("unchecked")
     private static Lens<IInventory, ItemStack> generateLens(net.minecraft.inventory.Container container, SlotCollection slots) {
         // Get all inventories viewed in the Container & count slots & retain order
         Map<IInventory, List<Slot>> viewed = container.inventorySlots.stream()

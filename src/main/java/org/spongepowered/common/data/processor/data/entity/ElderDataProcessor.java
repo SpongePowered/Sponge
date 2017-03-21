@@ -28,8 +28,6 @@ import net.minecraft.entity.monster.EntityElderGuardian;
 import net.minecraft.entity.monster.EntityGuardian;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -42,14 +40,19 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 
 @SuppressWarnings("deprecation")
-public class ElderDataProcessor extends AbstractEntitySingleDataProcessor<EntityGuardian, Boolean, Value<Boolean>, ElderData, ImmutableElderData> {
+public class ElderDataProcessor
+    extends AbstractEntitySingleDataProcessor<EntityGuardian,
+    Boolean,
+    Value<Boolean>,
+    org.spongepowered.api.data.manipulator.mutable.entity.ElderData,
+    org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData> {
 
     public ElderDataProcessor() {
         super(EntityGuardian.class, Keys.ELDER_GUARDIAN);
     }
 
     @Override
-    protected ElderData createManipulator() {
+    protected org.spongepowered.api.data.manipulator.mutable.entity.ElderData createManipulator() {
         return new SpongeElderData(false);
     }
 

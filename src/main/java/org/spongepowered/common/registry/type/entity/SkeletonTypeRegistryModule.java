@@ -27,11 +27,8 @@ package org.spongepowered.common.registry.type.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.type.SkeletonType;
-import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeSkeletonType;
 
 import java.util.Collection;
@@ -40,26 +37,27 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class SkeletonTypeRegistryModule implements CatalogRegistryModule<SkeletonType> {
+@SuppressWarnings("deprecation")
+public class SkeletonTypeRegistryModule implements CatalogRegistryModule<org.spongepowered.api.data.type.SkeletonType> {
 
-    @RegisterCatalog(SkeletonTypes.class)
-    private final Map<String, SkeletonType> skeletonTypeMap = new HashMap<>();
+    @RegisterCatalog(org.spongepowered.api.data.type.SkeletonTypes.class)
+    private final Map<String, org.spongepowered.api.data.type.SkeletonType> skeletonTypeMap = new HashMap<>();
 
     @Override
-    public Optional<SkeletonType> getById(String id) {
+    public Optional<org.spongepowered.api.data.type.SkeletonType> getById(String id) {
         return Optional.ofNullable(this.skeletonTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
-    public Collection<SkeletonType> getAll() {
+    public Collection<org.spongepowered.api.data.type.SkeletonType> getAll() {
         return ImmutableList.copyOf(this.skeletonTypeMap.values());
     }
 
     @Override
     public void registerDefaults() {
-        skeletonTypeMap.put("normal", new SpongeSkeletonType("normal"));
-        skeletonTypeMap.put("stray", new SpongeSkeletonType("stray"));
-        skeletonTypeMap.put("wither", new SpongeSkeletonType("wither"));
+        this.skeletonTypeMap.put("normal", new SpongeSkeletonType("normal"));
+        this.skeletonTypeMap.put("stray", new SpongeSkeletonType("stray"));
+        this.skeletonTypeMap.put("wither", new SpongeSkeletonType("wither"));
     }
 
 }

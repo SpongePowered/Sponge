@@ -162,6 +162,7 @@ public class SpongeGameRegistry implements GameRegistry {
     }
 
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> SpongeGameRegistry registerModule(Class<T> catalogClass, CatalogRegistryModule<T> registryModule) {
         @Nullable final CatalogRegistryModule<T> existingModule = (CatalogRegistryModule<T>) this.catalogRegistryMap.get(catalogClass);

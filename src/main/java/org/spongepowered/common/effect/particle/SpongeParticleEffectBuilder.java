@@ -53,6 +53,7 @@ public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEff
         this.reset();
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected Optional<ParticleEffect> buildContent(DataView container) throws InvalidDataException {
         if (!container.contains(DataQueries.PARTICLE_TYPE, DataQueries.PARTICLE_OPTIONS)) {
@@ -61,10 +62,10 @@ public class SpongeParticleEffectBuilder extends AbstractDataBuilder<ParticleEff
         ParticleType particleType = container.getCatalogType(DataQueries.PARTICLE_TYPE, ParticleType.class).get();
         Map<ParticleOption<?>, Object> options = new HashMap<>();
         container.getViewList(DataQueries.PARTICLE_OPTIONS).get().forEach(view -> {
-            ParticleOption option = view.getCatalogType(DataQueries.PARTICLE_OPTION_KEY, ParticleOption.class).get();
+            ParticleOption<?> option = view.getCatalogType(DataQueries.PARTICLE_OPTION_KEY, ParticleOption.class).get();
             Object value;
             if (option.getValueType().isAssignableFrom(DataSerializable.class)) {
-                value = view.getSerializable(DataQueries.PARTICLE_OPTION_VALUE, option.getValueType()).get();
+                value = view.getSerializable(DataQueries.PARTICLE_OPTION_VALUE, (Class<? extends DataSerializable>) option.getValueType()).get();
             } else {
                 value = view.getObject(DataQueries.PARTICLE_OPTION_VALUE, option.getValueType()).get();
             }

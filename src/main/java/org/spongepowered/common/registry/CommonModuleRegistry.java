@@ -329,7 +329,7 @@ public final class CommonModuleRegistry {
         ;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
     protected void registerCommonModules(SpongeGameRegistry registry) {
         registry.registerModule(new ArgumentRegistryModule())
             .registerModule(AITaskType.class, AITaskTypeModule.getInstance())
@@ -384,7 +384,7 @@ public final class CommonModuleRegistry {
             .registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule())
             .registerModule(OcelotType.class, new OcelotTypeRegistryModule())
             .registerModule(ParticleType.class, ParticleRegistryModule.getInstance())
-            .registerModule(ParticleOption.class, new ParticleOptionRegistryModule())
+            .registerModule((Class<ParticleOption<?>>) (Class<?>) ParticleOption.class, new ParticleOptionRegistryModule())
             .registerModule(PistonType.class, new PistonTypeRegistryModule())
             .registerModule(PlantType.class, new PlantTypeModuleRegistry())
             .registerModule(PopulatorObject.class, new PopulatorObjectRegistryModule())
@@ -436,9 +436,9 @@ public final class CommonModuleRegistry {
             .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
             .registerModule(DismountType.class, new DismountTypeRegistryModule())
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
-            .registerModule(ZombieType.class, ZombieTypeRegistryModule.getInstance())
+            .registerModule(org.spongepowered.api.data.type.ZombieType.class, ZombieTypeRegistryModule.getInstance())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
-            .registerModule(SkeletonType.class, new SkeletonTypeRegistryModule())
+            .registerModule(org.spongepowered.api.data.type.SkeletonType.class, new SkeletonTypeRegistryModule())
             .registerModule(StructureMode.class, new StructureModeRegistryModule())
 
             // Miscellaneous Registries

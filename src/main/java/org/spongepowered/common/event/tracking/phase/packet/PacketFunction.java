@@ -687,26 +687,17 @@ public interface PacketFunction {
                     capturedItems.clear();
                 }
 
-                if (inventoryEvent instanceof ClickInventoryEvent) {
-                    // Restore cursor
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
-                }
+                // Restore cursor
+                PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
 
-                if (inventoryEvent instanceof ChangeInventoryEvent) {
-                    // Restore target slots
-                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions(), true, inventoryEvent);
-                }
+                // Restore target slots
+                PacketPhaseUtil.handleSlotRestore(player, inventoryEvent.getTransactions(), true, inventoryEvent);
             } else {
-                if (inventoryEvent instanceof ChangeInventoryEvent) {
-                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions(), false, inventoryEvent);
-                }
+                PacketPhaseUtil.handleSlotRestore(player, inventoryEvent.getTransactions(), false, inventoryEvent);
 
                 // Custom cursor
-                if (inventoryEvent instanceof ClickInventoryEvent) {
-                    final ClickInventoryEvent clickInventory = (ClickInventoryEvent) inventoryEvent;
-                    if (clickInventory.getCursorTransaction().getCustom().isPresent()) {
-                        PacketPhaseUtil.handleCustomCursor(player, clickInventory.getCursorTransaction().getFinal());
-                    }
+                if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
+                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
                 }
                 if (inventoryEvent instanceof SpawnEntityEvent) {
                     processSpawnedEntities(player, ((IMixinWorldServer) player.getServerWorld()).getCauseTracker(), (SpawnEntityEvent) inventoryEvent);

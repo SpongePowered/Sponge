@@ -26,47 +26,55 @@ package org.spongepowered.common.registry.type.entity;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.data.type.ZombieType;
-import org.spongepowered.api.data.type.ZombieTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeZombieType;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
 @SuppressWarnings("deprecation")
-public class ZombieTypeRegistryModule implements CatalogRegistryModule<ZombieType> {
+public class ZombieTypeRegistryModule implements AlternateCatalogRegistryModule<org.spongepowered.api.data.type.ZombieType> {
 
     public static ZombieTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(ZombieTypes.class)
-    public final Map<String, ZombieType> types = Maps.newHashMap();
+    @RegisterCatalog(org.spongepowered.api.data.type.ZombieTypes.class)
+    public final Map<String, org.spongepowered.api.data.type.ZombieType> types = Maps.newHashMap();
 
     @Override
     public void registerDefaults() {
-        this.types.put("normal", new SpongeZombieType("minecraft:normal", "Zombie"));
-        this.types.put("villager", new SpongeZombieType("minecraft:villager", "ZombieVillager"));
-        this.types.put("husk", new SpongeZombieType("minecraft:husk", "Husk"));
+        this.types.put("minecraft:normal", new SpongeZombieType("minecraft:normal", "Zombie"));
+        this.types.put("minecraft:villager", new SpongeZombieType("minecraft:villager", "ZombieVillager"));
+        this.types.put("minecraft:husk", new SpongeZombieType("minecraft:husk", "Husk"));
     }
 
     @Override
-    public Optional<ZombieType> getById(String id) {
+    public Optional<org.spongepowered.api.data.type.ZombieType> getById(String id) {
         if (!id.contains(":")) {
             id = "minecraft:" + id;
         }
-        return Optional.ofNullable(types.get(id));
+        return Optional.ofNullable(this.types.get(id));
     }
 
     @Override
-    public Collection<ZombieType> getAll() {
+    public Collection<org.spongepowered.api.data.type.ZombieType> getAll() {
         return ImmutableSet.copyOf(this.types.values());
     }
 
     private ZombieTypeRegistryModule() {
+    }
+
+    @Override
+    public Map<String, org.spongepowered.api.data.type.ZombieType> provideCatalogMap() {
+        final HashMap<String, org.spongepowered.api.data.type.ZombieType> map = new HashMap<>();
+        for (Map.Entry<String, org.spongepowered.api.data.type.ZombieType> entry : this.types.entrySet()) {
+            map.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return map;
     }
 
     static final class Holder {

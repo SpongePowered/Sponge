@@ -39,7 +39,6 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyles;
-import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.entity.EntityType;
@@ -62,6 +61,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
+@SuppressWarnings("deprecation")
 public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<EntityType, Entity>, SpongeAdditionalCatalogRegistryModule<EntityType> {
 
     @RegisterCatalog(EntityTypes.class)
@@ -222,7 +222,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("minecraft:ozelot", this.entityTypeMappings.get("minecraft:ocelot"));
 
         RegistryHelper.mapFields(HorseColors.class, SpongeEntityConstants.HORSE_COLORS);
-        RegistryHelper.mapFields(HorseVariants.class, SpongeEntityConstants.HORSE_VARIANTS);
+        RegistryHelper.mapFields(org.spongepowered.api.data.type.HorseVariants.class, SpongeEntityConstants.HORSE_VARIANTS);
         RegistryHelper.mapFields(HorseStyles.class, SpongeEntityConstants.HORSE_STYLES);
         RegistryHelper.mapFields(OcelotTypes.class, SpongeEntityConstants.OCELOT_TYPES);
         RegistryHelper.mapFields(RabbitTypes.class, SpongeEntityConstants.RABBIT_TYPES);

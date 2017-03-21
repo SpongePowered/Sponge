@@ -22,30 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.monster;
-
-import net.minecraft.entity.monster.EntityWitherSkeleton;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.living.monster.WitherSkeleton;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkeletonData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
-
-@SuppressWarnings("deprecation")
-@Mixin(EntityWitherSkeleton.class)
-public abstract class MixinEntityWitherSkeleton extends MixinAbstractSkeleton implements WitherSkeleton {
-
-    @Deprecated
-    @Override
-    public org.spongepowered.api.data.manipulator.mutable.entity.SkeletonData getSkeletonData() {
-        return new SpongeSkeletonData(org.spongepowered.api.data.type.SkeletonTypes.WITHER);
-    }
-
-    @Deprecated
-    @Override
-    public Value<org.spongepowered.api.data.type.SkeletonType> variant() {
-        return new SpongeValue<>(Keys.SKELETON_TYPE, org.spongepowered.api.data.type.SkeletonTypes.WITHER, org.spongepowered.api.data.type.SkeletonTypes.WITHER);
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.item.inventory.adapter;

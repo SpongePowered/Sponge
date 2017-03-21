@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.monster.EntityZombieVillager;
 import net.minecraft.entity.passive.AbstractHorse;
 import net.minecraft.entity.passive.EntityDonkey;
 import net.minecraft.entity.passive.EntityHorse;
@@ -33,54 +32,51 @@ import net.minecraft.entity.passive.EntitySkeletonHorse;
 import net.minecraft.entity.passive.EntityZombieHorse;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.HorseVariant;
-import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.processor.common.HorseUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.SpongeHorseVariant;
 
 import java.util.Optional;
 
-public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<AbstractHorse, HorseVariant, Value<HorseVariant>> {
+@SuppressWarnings("deprecation")
+public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<AbstractHorse, org.spongepowered.api.data.type.HorseVariant, Value<org.spongepowered.api.data.type.HorseVariant>> {
 
     public HorseVariantValueProcessor() {
         super(AbstractHorse.class, Keys.HORSE_VARIANT);
     }
 
     @Override
-    protected Value<HorseVariant> constructValue(HorseVariant defaultValue) {
+    protected Value<org.spongepowered.api.data.type.HorseVariant> constructValue(org.spongepowered.api.data.type.HorseVariant defaultValue) {
         return new SpongeValue<>(Keys.HORSE_VARIANT, defaultValue);
     }
 
     @Override
-    protected boolean set(AbstractHorse container, HorseVariant value) {
+    protected boolean set(AbstractHorse container, org.spongepowered.api.data.type.HorseVariant value) {
         throw new UnsupportedOperationException("HorseData is deprecated - horse types are now separate entities!");
     }
 
     @Override
-    protected Optional<HorseVariant> getVal(AbstractHorse container) {
+    protected Optional<org.spongepowered.api.data.type.HorseVariant> getVal(AbstractHorse container) {
         if (container instanceof EntityHorse) {
-            return Optional.of(HorseVariants.HORSE);
+            return Optional.of(org.spongepowered.api.data.type.HorseVariants.HORSE);
         } else if (container instanceof EntityDonkey) {
-            return Optional.of(HorseVariants.DONKEY);
+            return Optional.of(org.spongepowered.api.data.type.HorseVariants.DONKEY);
         } else if (container instanceof EntityMule) {
-            return Optional.of(HorseVariants.MULE);
+            return Optional.of(org.spongepowered.api.data.type.HorseVariants.MULE);
         } else if (container instanceof EntityZombieHorse) {
-            return Optional.of(HorseVariants.UNDEAD_HORSE);
+            return Optional.of(org.spongepowered.api.data.type.HorseVariants.UNDEAD_HORSE);
         } else if (container instanceof EntitySkeletonHorse) {
-            return Optional.of(HorseVariants.SKELETON_HORSE);
+            return Optional.of(org.spongepowered.api.data.type.HorseVariants.SKELETON_HORSE);
         }
         return Optional.empty();
     }
 
     @Override
-    protected ImmutableValue<HorseVariant> constructImmutableValue(HorseVariant value) {
-        return ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE, value);
+    protected ImmutableValue<org.spongepowered.api.data.type.HorseVariant> constructImmutableValue(org.spongepowered.api.data.type.HorseVariant value) {
+        return ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, org.spongepowered.api.data.type.HorseVariants.HORSE, value);
     }
 
     @Override

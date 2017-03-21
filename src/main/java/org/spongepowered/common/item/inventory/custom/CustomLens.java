@@ -45,10 +45,10 @@ import java.util.Optional;
 public class CustomLens extends MinecraftLens {
 
     private InventoryArchetype archetype;
-    private Map<String, InventoryProperty> properties;
+    private Map<String, InventoryProperty<?, ?>> properties;
 
     public CustomLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots, InventoryArchetype archetype,
-            Map<String, InventoryProperty> properties) {
+            Map<String, InventoryProperty<?, ?>> properties) {
         super(0, adapter.getInventory().getSize(), adapter, slots);
         this.archetype = archetype;
         this.properties = properties;
@@ -59,7 +59,7 @@ public class CustomLens extends MinecraftLens {
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
         // TODO this logic should not be done here (see PR #1010)
         // but for now this will have to do:
-        InventoryProperty size = this.properties.get(CustomInventory.INVENTORY_DIMENSION);
+        InventoryProperty<?, ?> size = this.properties.get(CustomInventory.INVENTORY_DIMENSION);
         if (size == null) {
             size = this.properties.get(CustomInventory.INVENTORY_CAPACITY);
         }
@@ -69,7 +69,7 @@ public class CustomLens extends MinecraftLens {
             return;
         }
 
-        this.addLensFor(archetype, 0, slots); // recursively get archetype sizes
+        this.addLensFor(this.archetype, 0, slots); // recursively get archetype sizes
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
@@ -97,7 +97,7 @@ public class CustomLens extends MinecraftLens {
         return slotCount;
     }
 
-    private int addLensFor(InventoryProperty size, int base, SlotProvider<IInventory, ItemStack> slots) {
+    private int addLensFor(InventoryProperty<?, ?> size, int base, SlotProvider<IInventory, ItemStack> slots) {
         Lens<IInventory, ItemStack> lens;
         int slotCount;
         if (size instanceof InventoryDimension) {

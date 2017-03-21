@@ -54,6 +54,7 @@ import javax.xml.bind.annotation.XmlElementRef;
 import javax.xml.bind.annotation.XmlMixed;
 import javax.xml.bind.annotation.XmlSeeAlso;
 
+@SuppressWarnings("deprecation")
 @XmlSeeAlso({
         A.class,
         B.class,

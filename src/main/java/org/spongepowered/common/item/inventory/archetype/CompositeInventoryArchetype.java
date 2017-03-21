@@ -67,6 +67,7 @@ public class CompositeInventoryArchetype implements InventoryArchetype {
         return Optional.ofNullable(this.properties.get(key));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends InventoryProperty<String, ?>> Optional<T> getProperty(Class<T> type, String key) {
 

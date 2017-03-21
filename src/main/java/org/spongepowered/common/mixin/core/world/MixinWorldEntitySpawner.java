@@ -257,7 +257,7 @@ public abstract class MixinWorldEntitySpawner {
                                         EntityLiving entityliving;
 
                                         try {
-                                            entityliving = (EntityLiving)spawnListEntry.entityClass.getConstructor(new Class[] {World.class}).newInstance(new Object[] {worldServerIn});
+                                            entityliving = spawnListEntry.entityClass.getConstructor(new Class<?>[] {World.class}).newInstance(worldServerIn);
                                         } catch (Exception exception) {
                                             exception.printStackTrace();
                                             continue labelOuterLoop;
@@ -311,6 +311,12 @@ public abstract class MixinWorldEntitySpawner {
         return new BlockPos(i, l, j);
     }
 
+    /**
+     * @author aikar - February 20th, 2017 - Optimizes light level check.
+     * @author blood - February 20th, 2017 - Avoids checking unloaded chunks and chunks with pending light updates.
+     *
+     * @reason Avoids checking unloaded chunks and chunks with pending light updates.
+     */
     @Overwrite
     private static BlockPos getRandomChunkPosition(World worldIn, int x, int z)
     {

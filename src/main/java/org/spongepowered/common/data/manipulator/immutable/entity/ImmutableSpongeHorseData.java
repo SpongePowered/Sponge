@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHorseData;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
@@ -34,24 +32,23 @@ import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseStyles;
-import org.spongepowered.api.data.type.HorseVariant;
-import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
+@SuppressWarnings("deprecation")
 public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHorseData, HorseData> implements ImmutableHorseData {
 
     private final HorseColor horseColor;
     private final HorseStyle horseStyle;
-    private final HorseVariant horseVariant;
+    private final org.spongepowered.api.data.type.HorseVariant horseVariant;
 
     private final ImmutableValue<HorseColor> colorValue;
     private final ImmutableValue<HorseStyle> styleValue;
-    private final ImmutableValue<HorseVariant> variantValue;
+    private final ImmutableValue<org.spongepowered.api.data.type.HorseVariant> variantValue;
 
-    public ImmutableSpongeHorseData(HorseColor horseColor, HorseStyle horseStyle, HorseVariant horseVariant) {
+    public ImmutableSpongeHorseData(HorseColor horseColor, HorseStyle horseStyle, org.spongepowered.api.data.type.HorseVariant horseVariant) {
         super(ImmutableHorseData.class);
         this.horseColor = horseColor;
         this.horseStyle = horseStyle;
@@ -59,7 +56,7 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
 
         this.colorValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_COLOR, HorseColors.BLACK, this.horseColor);
         this.styleValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, this.horseStyle);
-        this.variantValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, HorseVariants.HORSE, this.horseVariant);
+        this.variantValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, org.spongepowered.api.data.type.HorseVariants.HORSE, this.horseVariant);
 
         registerGetters();
     }
@@ -87,7 +84,7 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
     }
 
     @Override
-    public ImmutableValue<HorseVariant> variant() {
+    public ImmutableValue<org.spongepowered.api.data.type.HorseVariant> variant() {
         return this.variantValue;
     }
 
@@ -112,7 +109,7 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
         return this.horseStyle;
     }
 
-    private HorseVariant getHorseVariant() {
+    private org.spongepowered.api.data.type.HorseVariant getHorseVariant() {
         return this.horseVariant;
     }
 }

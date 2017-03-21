@@ -90,6 +90,7 @@ public final class SpongeParticleHelper {
         return packets;
     }
 
+    @SuppressWarnings("deprecation")
     private static int getBlockState(SpongeParticleEffect effect, Optional<BlockState> defaultBlockState) {
         Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
         if (blockState.isPresent()) {

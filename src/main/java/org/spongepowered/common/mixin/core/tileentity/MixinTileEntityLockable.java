@@ -94,6 +94,7 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public TileEntityInventory<TileEntityCarrier> getInventory() {
         return (TileEntityInventory<TileEntityCarrier>) this;

@@ -26,42 +26,40 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableZombieData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ZombieData;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.data.type.ZombieType;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeZombieData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
 @SuppressWarnings("deprecation")
-public class SpongeZombieData extends AbstractData<ZombieData, ImmutableZombieData> implements ZombieData {
+public class SpongeZombieData extends AbstractData<org.spongepowered.api.data.manipulator.mutable.entity.ZombieData,
+    org.spongepowered.api.data.manipulator.immutable.entity.ImmutableZombieData>
+    implements org.spongepowered.api.data.manipulator.mutable.entity.ZombieData {
 
-    private ZombieType type;
+    private org.spongepowered.api.data.type.ZombieType type;
     private Optional<Profession> profession;
 
     public SpongeZombieData() {
         this(DataConstants.Catalog.DEFAULT_ZOMBIE_TYPE, Optional.empty());
     }
 
-    public SpongeZombieData(ZombieType type, Optional<Profession> profession) {
-        super(ZombieData.class);
+    public SpongeZombieData(org.spongepowered.api.data.type.ZombieType type, Optional<Profession> profession) {
+        super(org.spongepowered.api.data.manipulator.mutable.entity.ZombieData.class);
         this.type = type;
         this.profession = profession;
     }
 
-    private ZombieType getType() {
+    private org.spongepowered.api.data.type.ZombieType getType() {
         return this.type;
     }
 
-    private void setType(ZombieType type) {
+    private void setType(org.spongepowered.api.data.type.ZombieType type) {
         this.type = type;
     }
 
@@ -74,7 +72,7 @@ public class SpongeZombieData extends AbstractData<ZombieData, ImmutableZombieDa
     }
 
     @Override
-    public Value<ZombieType> type() {
+    public Value<org.spongepowered.api.data.type.ZombieType> type() {
         return new SpongeValue<>(Keys.ZOMBIE_TYPE, DataConstants.Catalog.DEFAULT_ZOMBIE_TYPE, this.type);
     }
 
@@ -96,12 +94,12 @@ public class SpongeZombieData extends AbstractData<ZombieData, ImmutableZombieDa
     }
 
     @Override
-    public ZombieData copy() {
+    public org.spongepowered.api.data.manipulator.mutable.entity.ZombieData copy() {
         return new SpongeZombieData(this.type, this.profession);
     }
 
     @Override
-    public ImmutableZombieData asImmutable() {
+    public org.spongepowered.api.data.manipulator.immutable.entity.ImmutableZombieData asImmutable() {
         return new ImmutableSpongeZombieData(this.type, this.profession);
     }
 

@@ -574,7 +574,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandManager;getTabCompletions"
             + "(Lnet/minecraft/command/ICommandSender;Ljava/lang/String;Lnet/minecraft/util/math/BlockPos;)Ljava/util/List;"))
     public List<String> onGetTabCompletionOptions(ICommandManager manager, ICommandSender sender, String input, @Nullable BlockPos pos, ICommandSender sender_, String input_, BlockPos pos_, boolean hasTargetBlock) {
-        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, this.getTarget(sender, pos), hasTargetBlock);
+        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, getTarget(sender, pos), hasTargetBlock);
     }
 
     @Nullable
@@ -769,7 +769,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return this.serverThread == Thread.currentThread();
     }
 
-    @Redirect(method = "callFromMainThread", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;"))
+    @Redirect(method = "callFromMainThread", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;", remap = false))
     public Object onCall(Callable<?> callable) throws Exception {
         for (WorldServer worldServer : WorldManager.getWorlds()) {
             final CauseTracker otherCauseTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
@@ -794,7 +794,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;runTask(Ljava/util/concurrent/FutureTask;Lorg/apache/logging/log4j/Logger;)Ljava/lang/Object;"))
-    private Object onRun(FutureTask task, Logger logger) {
+    private Object onRun(FutureTask<?> task, Logger logger) {
         return SpongeImplHooks.onUtilRunTask(task, logger);
     }
 }

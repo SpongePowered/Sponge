@@ -65,6 +65,7 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
     private SlotCollection slots;
     private Lens<IInventory, ItemStack> lens;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
@@ -76,7 +77,7 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
                 }))
                 .add(OutputSlotAdapter.class, (i) -> new OutputSlotLensImpl(i, (s) -> false, (t) -> false))
                 .build();
-        this.lens = new FurnaceInventoryLens((InventoryAdapter<IInventory, ItemStack>) this, slots);
+        this.lens = new FurnaceInventoryLens((InventoryAdapter<IInventory, ItemStack>) this, this.slots);
     }
 
     @Override

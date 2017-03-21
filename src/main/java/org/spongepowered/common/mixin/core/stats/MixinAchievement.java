@@ -56,7 +56,7 @@ public abstract class MixinAchievement extends MixinStatBase implements Achievem
     private final Set<Achievement> children = Sets.newHashSet();
 
     @Inject(method = "registerStat()Lnet/minecraft/stats/Achievement;", at = @At("RETURN"))
-    public void registerAchievement(CallbackInfoReturnable ci) {
+    public void registerAchievement(CallbackInfoReturnable<net.minecraft.stats.Achievement> ci) {
         AchievementRegistryModule.getInstance().registerAdditionalCatalog(this);
     }
 

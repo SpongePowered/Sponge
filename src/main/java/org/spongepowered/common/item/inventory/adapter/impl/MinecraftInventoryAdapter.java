@@ -142,6 +142,7 @@ public interface MinecraftInventoryAdapter extends InventoryAdapter<IInventory, 
         return this.parent().getProperties(this, property);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     default <T extends InventoryProperty<?, ?>> Optional<T> getProperty(Inventory child, Class<T> property, Object key) {
         for (InventoryProperty<?, ?> prop : Adapter.Logic.getProperties(this, child, property)) {

@@ -25,20 +25,22 @@
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeElderData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
-public class SpongeElderData extends AbstractBooleanData<ElderData, ImmutableElderData> implements ElderData {
+@SuppressWarnings("deprecation")
+public class SpongeElderData extends AbstractBooleanData<org.spongepowered.api.data.manipulator.mutable.entity.ElderData,
+    org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData>
+    implements org.spongepowered.api.data.manipulator.mutable.entity.ElderData {
 
     public SpongeElderData() {
         this(false);
     }
 
     public SpongeElderData(boolean value) {
-        super(ElderData.class, value, Keys.ELDER_GUARDIAN, ImmutableSpongeElderData.class, false);
+        super(org.spongepowered.api.data.manipulator.mutable.entity.ElderData.class, value,
+            Keys.ELDER_GUARDIAN, ImmutableSpongeElderData.class, false);
     }
 
     @Override

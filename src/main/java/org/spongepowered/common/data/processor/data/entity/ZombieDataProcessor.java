@@ -33,12 +33,7 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableZombieData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ZombieData;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.data.type.ZombieType;
-import org.spongepowered.api.data.type.ZombieTypes;
-import org.spongepowered.api.entity.living.monster.Zombie;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeZombieData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.entity.EntityUtil;
@@ -48,7 +43,8 @@ import java.util.Optional;
 
 @SuppressWarnings("deprecation")
 public class ZombieDataProcessor
-        extends AbstractEntityDataProcessor<EntityZombie, ZombieData, ImmutableZombieData> {
+        extends AbstractEntityDataProcessor<EntityZombie, org.spongepowered.api.data.manipulator.mutable.entity.ZombieData,
+    org.spongepowered.api.data.manipulator.immutable.entity.ImmutableZombieData> {
 
     public ZombieDataProcessor() {
         super(EntityZombie.class);
@@ -69,15 +65,15 @@ public class ZombieDataProcessor
     protected Map<Key<?>, ?> getValues(EntityZombie dataHolder) {
         Map<Key<?>, Object> values = Maps.newHashMap();
 
-        ZombieType type = ZombieTypes.NORMAL;
+        org.spongepowered.api.data.type.ZombieType type = org.spongepowered.api.data.type.ZombieTypes.NORMAL;
         if (dataHolder instanceof EntityHusk) {
-            type = ZombieTypes.HUSK;
+            type = org.spongepowered.api.data.type.ZombieTypes.HUSK;
         } else if (dataHolder instanceof EntityZombieVillager) {
-            type = ZombieTypes.VILLAGER;
+            type = org.spongepowered.api.data.type.ZombieTypes.VILLAGER;
         }
 
         values.put(Keys.ZOMBIE_TYPE, type);
-        if (type != ZombieTypes.VILLAGER) {
+        if (type != org.spongepowered.api.data.type.ZombieTypes.VILLAGER) {
             values.put(Keys.VILLAGER_ZOMBIE_PROFESSION, Optional.empty());
             return values;
         }
@@ -87,15 +83,15 @@ public class ZombieDataProcessor
     }
 
     @Override
-    protected ZombieData createManipulator() {
+    protected org.spongepowered.api.data.manipulator.mutable.entity.ZombieData createManipulator() {
         return new SpongeZombieData();
     }
 
     @Override
-    public Optional<ZombieData> fill(DataContainer container, ZombieData zombieData) {
+    public Optional<org.spongepowered.api.data.manipulator.mutable.entity.ZombieData> fill(DataContainer container, org.spongepowered.api.data.manipulator.mutable.entity.ZombieData zombieData) {
         if (container.contains(Keys.ZOMBIE_TYPE)) {
             zombieData.set(Keys.ZOMBIE_TYPE,
-                    container.getCatalogType(Keys.ZOMBIE_TYPE.getQuery(), ZombieType.class).get());
+                    container.getCatalogType(Keys.ZOMBIE_TYPE.getQuery(), org.spongepowered.api.data.type.ZombieType.class).get());
         }
         if (container.contains(Keys.VILLAGER_ZOMBIE_PROFESSION)) {
             zombieData.set(Keys.VILLAGER_ZOMBIE_PROFESSION,

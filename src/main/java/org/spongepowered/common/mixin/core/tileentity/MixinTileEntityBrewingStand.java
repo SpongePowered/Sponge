@@ -68,6 +68,7 @@ public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockabl
     private SlotCollection slots;
     private Lens<IInventory, ItemStack> lens;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);

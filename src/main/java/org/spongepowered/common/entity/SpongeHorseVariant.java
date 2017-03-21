@@ -30,11 +30,11 @@ import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.passive.EntityMule;
 import net.minecraft.entity.passive.EntitySkeletonHorse;
 import net.minecraft.entity.passive.EntityZombieHorse;
-import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public class SpongeHorseVariant extends SpongeEntityMeta implements HorseVariant {
+@SuppressWarnings("deprecation")
+public class SpongeHorseVariant extends SpongeEntityMeta implements org.spongepowered.api.data.type.HorseVariant {
 
     private final Class<? extends AbstractHorse> type;
 

@@ -24,19 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.monster.AbstractSkeleton;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.SkeletonData;
-import org.spongepowered.api.data.type.SkeletonType;
-import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.monster.Skeleton;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkeletonData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -48,14 +41,15 @@ public abstract class MixinAbstractSkeleton extends MixinEntityMob implements Sk
 
     @Deprecated
     @Override
-    public SkeletonData getSkeletonData() {
-        return new SpongeSkeletonData(SkeletonTypes.NORMAL);
+    public org.spongepowered.api.data.manipulator.mutable.entity.SkeletonData getSkeletonData() {
+        return new SpongeSkeletonData(org.spongepowered.api.data.type.SkeletonTypes.NORMAL);
     }
 
     @Deprecated
     @Override
-    public Value<SkeletonType> variant() {
-        return new SpongeValue<>(Keys.SKELETON_TYPE, SkeletonTypes.NORMAL, SkeletonTypes.NORMAL);
+    public Value<org.spongepowered.api.data.type.SkeletonType> variant() {
+        return new SpongeValue<>(Keys.SKELETON_TYPE,
+            org.spongepowered.api.data.type.SkeletonTypes.NORMAL, org.spongepowered.api.data.type.SkeletonTypes.NORMAL);
     }
 
     @Override

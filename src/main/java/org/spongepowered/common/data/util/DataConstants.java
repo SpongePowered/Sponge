@@ -137,9 +137,10 @@ public final class DataConstants {
             (EntityUtil.archetype(Catalog.DEFAULT_SPAWNER_ENTITY), 1);
 
 
+    @SuppressWarnings("deprecation")
     public static final class Catalog {
 
-        public static final SkeletonType DEFAULT_SKELETON = SkeletonTypes.NORMAL;
+        public static final org.spongepowered.api.data.type.SkeletonType DEFAULT_SKELETON = org.spongepowered.api.data.type.SkeletonTypes.NORMAL;
         public static final DyeColor DEFAULT_SHEEP_COLOR = DyeColors.WHITE;
         public static final EntityType DEFAULT_SPAWNER_ENTITY = EntityTypes.PIG;
 
@@ -159,7 +160,7 @@ public final class DataConstants {
         public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
         public static final Art DEFAULT_ART = Arts.KEBAB;
         public static final PickupRule DEFAULT_PICKUP_RULE = PickupRules.ALLOWED;
-        @Deprecated public static final ZombieType DEFAULT_ZOMBIE_TYPE = ZombieTypes.NORMAL;
+        @Deprecated public static final org.spongepowered.api.data.type.ZombieType DEFAULT_ZOMBIE_TYPE = org.spongepowered.api.data.type.ZombieTypes.NORMAL;
     }
 
     public static final class Entity {
@@ -181,9 +182,10 @@ public final class DataConstants {
     }
 
 
+    @SuppressWarnings("deprecation")
     public static final class Horse {
 
-        public static final HorseVariant DEFAULT_VARIANT = HorseVariants.HORSE;
+        public static final org.spongepowered.api.data.type.HorseVariant DEFAULT_VARIANT = org.spongepowered.api.data.type.HorseVariants.HORSE;
         public static final HorseStyle DEFAULT_STYLE = HorseStyles.NONE;
         public static final HorseColor DEFAULT_COLOR = HorseColors.WHITE;
         private Horse() {

@@ -301,9 +301,9 @@ public class SpongeCommonEventFactory {
     public static boolean handlePistonEvent(IMixinWorldServer world, WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
         boolean extending = (eventId == 0);
         final IBlockState blockstate = ((net.minecraft.world.World) world).getBlockState(pos);
-        EnumFacing direction = (EnumFacing) blockstate.getValue(BlockDirectional.FACING);
+        EnumFacing direction = blockstate.getValue(BlockDirectional.FACING);
         final LocatableBlock locatable = LocatableBlock.builder()
-                .location(new Location<World>((World) world, pos.getX(), pos.getY(), pos.getZ()))
+                .location(new Location<>((World) world, pos.getX(), pos.getY(), pos.getZ()))
                 .state((BlockState) blockstate)
                 .build();
 
@@ -343,7 +343,7 @@ public class SpongeCommonEventFactory {
 
         final BlockState blockstate = (BlockState)((net.minecraft.world.World) world).getBlockState(sourcePos);
         final LocatableBlock locatable = LocatableBlock.builder()
-                .location(new Location<World>((World) world, sourcePos.getX(), sourcePos.getY(), sourcePos.getZ()))
+                .location(new Location<>(world, sourcePos.getX(), sourcePos.getY(), sourcePos.getZ()))
                 .state(blockstate)
                 .build();
         builder = Cause.source(locatable);

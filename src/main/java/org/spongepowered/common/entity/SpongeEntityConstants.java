@@ -33,12 +33,12 @@ import net.minecraft.entity.passive.EntitySkeletonHorse;
 import net.minecraft.entity.passive.EntityZombieHorse;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.RabbitType;
 
 import java.util.Map;
 
+@SuppressWarnings("deprecation")
 public class SpongeEntityConstants {
 
     public static final Map<String, OcelotType> OCELOT_TYPES = Maps.newHashMap();
@@ -49,8 +49,8 @@ public class SpongeEntityConstants {
     public static final Map<Integer, HorseColor> HORSE_COLOR_IDMAP = Maps.newHashMap();
     public static final Map<String, HorseStyle> HORSE_STYLES = Maps.newHashMap();
     public static final Map<Integer, HorseStyle> HORSE_STYLE_IDMAP = Maps.newHashMap();
-    public static final Map<String, HorseVariant> HORSE_VARIANTS = Maps.newHashMap();
-    public static final Map<Class<? extends AbstractHorse>, HorseVariant> HORSE_VARIANT_IDMAP = Maps.newHashMap();
+    public static final Map<String, org.spongepowered.api.data.type.HorseVariant> HORSE_VARIANTS = Maps.newHashMap();
+    public static final Map<Class<? extends AbstractHorse>, org.spongepowered.api.data.type.HorseVariant> HORSE_VARIANT_IDMAP = Maps.newHashMap();
 
     // ocelot types
     public static final SpongeOcelotType WILD_OCELOT = new SpongeOcelotType(0, "WILD_OCELOT");

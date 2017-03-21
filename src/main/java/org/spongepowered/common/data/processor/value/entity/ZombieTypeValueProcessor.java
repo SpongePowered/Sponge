@@ -29,8 +29,6 @@ import net.minecraft.entity.monster.EntityZombie;
 import net.minecraft.entity.monster.EntityZombieVillager;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.ZombieType;
-import org.spongepowered.api.data.type.ZombieTypes;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -38,40 +36,40 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.entity.EntityUtil;
 
 import java.util.Optional;
 
-public class ZombieTypeValueProcessor extends AbstractSpongeValueProcessor<EntityZombie, ZombieType, Value<ZombieType>> {
+@SuppressWarnings("deprecation")
+public class ZombieTypeValueProcessor extends AbstractSpongeValueProcessor<EntityZombie, org.spongepowered.api.data.type.ZombieType, Value<org.spongepowered.api.data.type.ZombieType>> {
 
     public ZombieTypeValueProcessor() {
         super(EntityZombie.class, Keys.ZOMBIE_TYPE);
     }
 
     @Override
-    protected Value<ZombieType> constructValue(ZombieType actualValue) {
+    protected Value<org.spongepowered.api.data.type.ZombieType> constructValue(org.spongepowered.api.data.type.ZombieType actualValue) {
         return new SpongeValue<>(Keys.ZOMBIE_TYPE, DataConstants.Catalog.DEFAULT_ZOMBIE_TYPE, actualValue);
     }
 
     @Override
-    protected boolean set(EntityZombie container, ZombieType value) {
+    protected boolean set(EntityZombie container, org.spongepowered.api.data.type.ZombieType value) {
         throw new UnsupportedOperationException("ZombieData is deprecated - zombie types are now separate entities!");
     }
 
     @Override
-    protected Optional<ZombieType> getVal(EntityZombie dataHolder) {
-        ZombieType type = ZombieTypes.NORMAL;
+    protected Optional<org.spongepowered.api.data.type.ZombieType> getVal(EntityZombie dataHolder) {
+        org.spongepowered.api.data.type.ZombieType type = org.spongepowered.api.data.type.ZombieTypes.NORMAL;
         if (dataHolder instanceof EntityHusk) {
-            type = ZombieTypes.HUSK;
+            type = org.spongepowered.api.data.type.ZombieTypes.HUSK;
         } else if (dataHolder instanceof EntityZombieVillager) {
-            type = ZombieTypes.VILLAGER;
+            type = org.spongepowered.api.data.type.ZombieTypes.VILLAGER;
         }
 
         return Optional.of(type);
     }
 
     @Override
-    protected ImmutableValue<ZombieType> constructImmutableValue(ZombieType value) {
+    protected ImmutableValue<org.spongepowered.api.data.type.ZombieType> constructImmutableValue(org.spongepowered.api.data.type.ZombieType value) {
         return ImmutableSpongeValue.cachedOf(Keys.ZOMBIE_TYPE, DataConstants.Catalog.DEFAULT_ZOMBIE_TYPE, value);
     }
 

@@ -146,6 +146,7 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -520,7 +521,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Iterable<Chunk> getLoadedChunks() {
-        return (List<Chunk>) (List<?>) Lists.newArrayList(((ChunkProviderServer) (((WorldServer) (Object) this).getChunkProvider())).getLoadedChunks());
+        if (this.isRemote) { // If we're client side, we can't know solidly what loaded chunks are... need to do this in MixinWorldClient in forge.
+            return Collections.emptyList();
+        }
+        return (List<Chunk>) (List<?>) Lists.newArrayList(((WorldServer) (Object) this).getChunkProvider().getLoadedChunks());
     }
 
     @Override

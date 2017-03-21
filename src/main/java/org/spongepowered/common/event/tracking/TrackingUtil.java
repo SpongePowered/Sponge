@@ -466,8 +466,8 @@ public final class TrackingUtil {
         return getNotifierOrOwnerFromBlock((WorldServer) location.getExtent(), blockPos);
     }
 
-    public static User getNotifierOrOwnerFromBlock(net.minecraft.world.WorldServer world, BlockPos blockPos) {
-        final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) world).getChunkFromBlockCoords(blockPos);
+    public static User getNotifierOrOwnerFromBlock(WorldServer world, BlockPos blockPos) {
+        final IMixinChunk mixinChunk = (IMixinChunk) world.getChunkFromBlockCoords(blockPos);
         User notifier = mixinChunk.getBlockNotifier(blockPos).orElse(null);
         if (notifier != null) {
             return notifier;

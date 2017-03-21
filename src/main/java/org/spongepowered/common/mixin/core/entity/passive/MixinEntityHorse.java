@@ -30,8 +30,6 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.type.HorseVariant;
-import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.RideableHorse;
 import org.spongepowered.api.text.translation.Translation;
@@ -53,12 +51,12 @@ public abstract class MixinEntityHorse extends MixinAbstractHorse implements Rid
     @Override
     public Translation getTranslation() {
         final HorseData horseData = getHorseData();
-        final HorseVariant horseVariant = horseData.variant().get();
+        final org.spongepowered.api.data.type.HorseVariant horseVariant = horseData.variant().get();
         return horseVariant.getTranslation();
     }
 
     @Override
-    public Value<HorseVariant> variant() {
+    public Value<org.spongepowered.api.data.type.HorseVariant> variant() {
         return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT);
     }
 
@@ -74,7 +72,8 @@ public abstract class MixinEntityHorse extends MixinAbstractHorse implements Rid
 
     @Override
     public HorseData getHorseData() {
-        return new SpongeHorseData(HorseUtils.getHorseColor((EntityHorse) (Object) this), HorseUtils.getHorseStyle((EntityHorse) (Object) this), HorseVariants.HORSE);
+        return new SpongeHorseData(HorseUtils.getHorseColor((EntityHorse) (Object) this), HorseUtils.getHorseStyle((EntityHorse) (Object) this),
+            org.spongepowered.api.data.type.HorseVariants.HORSE);
     }
 
     @Override

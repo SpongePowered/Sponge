@@ -64,6 +64,7 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected boolean set(EntityAreaEffectCloud dataHolder, Map<Key<?>, Object> keyValues) {
         final int age = (int) keyValues.get(Keys.AREA_EFFECT_CLOUD_AGE);

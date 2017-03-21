@@ -65,7 +65,7 @@ public abstract class MixinStatBase implements Statistic, SpongeStatistic, IMixi
     private String spongeId;
 
     @Inject(method = "registerStat()Lnet/minecraft/stats/StatBase;", at = @At("RETURN"))
-    public void registerStat(CallbackInfoReturnable ci) {
+    public void registerStat(CallbackInfoReturnable<StatBase> ci) {
         if (!isAchievement()) {
             StatisticRegistryModule.getInstance().registerAdditionalCatalog(this);
         }

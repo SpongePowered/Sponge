@@ -61,12 +61,13 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     private InventoryBasic inv;
     protected InventoryArchetype archetype;
-    private Map<String, InventoryProperty> properties;
+    private Map<String, InventoryProperty<?, ?>> properties;
     private Carrier carrier;
 
     private Set<EntityPlayer> viewers = new HashSet<>();
 
-    public CustomInventory(InventoryArchetype archetype, Map<String, InventoryProperty> properties, Carrier carrier,
+    @SuppressWarnings("deprecation")
+    public CustomInventory(InventoryArchetype archetype, Map<String, InventoryProperty<?, ?>> properties, Carrier carrier,
             Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, Object plugin) {
         this.archetype = archetype;
         this.properties = properties;
@@ -269,11 +270,11 @@ public class CustomInventory implements IInventory, IInteractionObject {
         this.inv.clear();
     }
 
-    public Map<String, InventoryProperty> getProperties() {
+    public Map<String, InventoryProperty<?, ?>> getProperties() {
         return this.properties;
     }
 
     public Carrier getCarrier() {
-        return carrier;
+        return this.carrier;
     }
 }

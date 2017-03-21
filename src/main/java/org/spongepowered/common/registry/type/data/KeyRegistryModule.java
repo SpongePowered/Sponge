@@ -89,7 +89,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-@SuppressWarnings("rawTypes")
+@SuppressWarnings({"rawTypes", "deprecation"})
 public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>> {
 
     public static final TypeToken<Double> DOUBLE_TOKEN = new TypeToken<Double>() {
@@ -296,10 +296,10 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     public static final TypeToken<Value<HorseStyle>> HORSE_STYLE_VALUE_TOKEN = new TypeToken<Value<HorseStyle>>() {
         private static final long serialVersionUID = -1;
     };
-    public static final TypeToken<HorseVariant> HORSE_VARIANT_TOKEN = new TypeToken<HorseVariant>() {
+    public static final TypeToken<org.spongepowered.api.data.type.HorseVariant> HORSE_VARIANT_TOKEN = new TypeToken<org.spongepowered.api.data.type.HorseVariant>() {
         private static final long serialVersionUID = -1;
     };
-    public static final TypeToken<Value<HorseVariant>> HORSE_VARIANT_VALUE_TOKEN = new TypeToken<Value<HorseVariant>>() {
+    public static final TypeToken<Value<org.spongepowered.api.data.type.HorseVariant>> HORSE_VARIANT_VALUE_TOKEN = new TypeToken<Value<org.spongepowered.api.data.type.HorseVariant>>() {
         private static final long serialVersionUID = -1;
     };
     public static final TypeToken<List<Text>> LIST_TEXT_TOKEN = new TypeToken<List<Text>>() {
@@ -485,10 +485,10 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
     public static final TypeToken<Value<BlockState>> BLOCK_VALUE_TOKEN = new TypeToken<Value<BlockState>>() {
         private static final long serialVersionUID = -1;
     };
-    public static final TypeToken<SkeletonType> SKELETON_TOKEN = new TypeToken<SkeletonType>() {
+    public static final TypeToken<org.spongepowered.api.data.type.SkeletonType> SKELETON_TOKEN = new TypeToken<org.spongepowered.api.data.type.SkeletonType>() {
         private static final long serialVersionUID = -1;
     };
-    public static final TypeToken<Value<SkeletonType>> SKELETON_VALUE_TOKEN = new TypeToken<Value<SkeletonType>>() {
+    public static final TypeToken<Value<org.spongepowered.api.data.type.SkeletonType>> SKELETON_VALUE_TOKEN = new TypeToken<Value<org.spongepowered.api.data.type.SkeletonType>>() {
         private static final long serialVersionUID = -1;
     };
     public static final TypeToken<OcelotType> OCELOT_TOKEN = new TypeToken<OcelotType>() {
@@ -595,10 +595,10 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
                 private static final long serialVersionUID = -1;
             };
 
-    public static final TypeToken<ZombieType> ZOMBIE_TYPE_TOKEN = new TypeToken<ZombieType>() {
+    public static final TypeToken<org.spongepowered.api.data.type.ZombieType> ZOMBIE_TYPE_TOKEN = new TypeToken<org.spongepowered.api.data.type.ZombieType>() {
         private static final long serialVersionUID = -1;
     };
-    public static final TypeToken<Value<ZombieType>> ZOMBIE_TYPE_VALUE_TOKEN = new TypeToken<Value<ZombieType>>() {
+    public static final TypeToken<Value<org.spongepowered.api.data.type.ZombieType>> ZOMBIE_TYPE_VALUE_TOKEN = new TypeToken<Value<org.spongepowered.api.data.type.ZombieType>>() {
         private static final long serialVersionUID = -1;
     };
 

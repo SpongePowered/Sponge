@@ -140,6 +140,8 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
      * @author aikar - February 20th, 2017 - Optimizes light level check.
      * @author blood - February 20th, 2017 - Avoids checking unloaded chunks and chunks with pending light updates.
      *
+     * @reason Avoids checking unloaded chunks and chunks with pending light updates.
+     *
      * @return Whether current position has a valid light level for spawning
      */
     @Overwrite

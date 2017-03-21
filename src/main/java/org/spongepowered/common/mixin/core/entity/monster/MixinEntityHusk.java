@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.monster.EntityHusk;
-import org.spongepowered.api.data.manipulator.mutable.entity.ZombieData;
-import org.spongepowered.api.data.type.ZombieTypes;
 import org.spongepowered.api.entity.living.monster.Husk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeZombieData;
@@ -38,7 +36,7 @@ import java.util.Optional;
 public abstract class MixinEntityHusk extends MixinEntityZombie implements Husk {
 
     @Override
-    public ZombieData getZombieData() {
-        return new SpongeZombieData(ZombieTypes.HUSK, Optional.empty());
+    public org.spongepowered.api.data.manipulator.mutable.entity.ZombieData getZombieData() {
+        return new SpongeZombieData(org.spongepowered.api.data.type.ZombieTypes.HUSK, Optional.empty());
     }
 }
