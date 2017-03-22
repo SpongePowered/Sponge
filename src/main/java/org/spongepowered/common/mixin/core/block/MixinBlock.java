@@ -322,6 +322,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Redirect(method = "spawnAsEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private static boolean redirectGameRulesToCaptureItemDrops(GameRules gameRules, String argument, net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack) {
+        if (stack == null) { // Because in extremely rare cases, vanilla can have null itemstacks, and mods as well.
+            return false;
+        }
         final boolean allowTileDrops = gameRules.getBoolean(argument);
         if (allowTileDrops && worldIn instanceof IMixinWorldServer) {
             final IMixinWorldServer mixin = (IMixinWorldServer) worldIn;
