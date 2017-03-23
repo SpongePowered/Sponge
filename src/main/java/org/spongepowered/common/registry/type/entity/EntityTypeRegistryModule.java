@@ -83,6 +83,9 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         if (!checkNotNull(id).contains(":")) {
             id = "minecraft:" + id;
         }
+        if ("unknown:unknown".equalsIgnoreCase(id)) {
+            return Optional.of(SpongeEntityType.UNKNOWN);
+        }
         return Optional.ofNullable(this.entityTypeMappings.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
@@ -182,7 +185,6 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("player", new SpongeEntityType(-5, "Player", EntityPlayerMP.class, new SpongeTranslation("soundCategory.player")));
         this.entityTypeMappings.put("complex_part", new SpongeEntityType(-6, "ComplexPart", EntityDragonPart.class, null));
         this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "human", "Human", 300, null)); // TODO: Figure out what id to use, as negative ids no longer work
-        this.entityTypeMappings.put("unknown:unknown", SpongeEntityType.UNKNOWN); // TODO - Is this still needed anymore?
         //this.entityClassToTypeMappings.put("human", new SpongeEntityType(-6))
     }
 
