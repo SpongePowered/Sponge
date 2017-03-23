@@ -111,7 +111,7 @@ public final class SpongeImpl {
         }
 
         for (Platform.Component component : Platform.Component.values()) {
-            internalPlugins.add(platform.getContainer(component));
+            this.internalPlugins.add(platform.getContainer(component));
         }
 
         this.implementationCause = Cause.source(platform.getContainer(IMPLEMENTATION)).build();

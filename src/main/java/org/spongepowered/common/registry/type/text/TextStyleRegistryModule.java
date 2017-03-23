@@ -51,13 +51,13 @@ public final class TextStyleRegistryModule implements AlternateCatalogRegistryMo
         .put("minecraft:strikethrough", SpongeTextStyle.of(TextFormatting.STRIKETHROUGH))
         .put("minecraft:obfuscated", SpongeTextStyle.of(TextFormatting.OBFUSCATED))
         .put("minecraft:reset", SpongeTextStyle.of(TextFormatting.RESET))
-        .put("none", TextStyles.NONE)
+        .put("none", (TextStyle.Base) TextStyles.NONE)
         .build();
 
     @Override
     public Optional<TextStyle.Base> getById(String id) {
         if (id.equals("NONE")) {
-            return Optional.of(TextStyles.NONE);
+            return Optional.of((TextStyle.Base) TextStyles.NONE);
         }
         return Optional.ofNullable(textStyleMappings.get(Preconditions.checkNotNull(id)));
     }
