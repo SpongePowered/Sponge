@@ -50,6 +50,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 
 /**
  * Similar to {@link Cause} except it can be built continuously
@@ -702,4 +703,52 @@ public class PhaseContext {
             return com.google.common.base.Objects.hashCode(this.pos);
         }
     }
+
+    public PhaseContext copy() {
+        PhaseContext to = new PhaseContext();
+        copy(to);
+        return to;
+    }
+
+    @OverridingMethodsMustInvokeSuper
+    protected void copy(PhaseContext to) {
+        to.cause = this.cause;
+        to.isCompleted = this.isCompleted;
+        to.contextObjects.clear();
+        to.contextObjects.addAll(this.contextObjects);
+        if (this.blocksSupplier != null) {
+            to.blocksSupplier = new CapturedBlocksSupplier();
+        }
+        if (this.blockItemDropsSupplier != null) {
+            to.blockItemDropsSupplier = new BlockItemDropsSupplier();
+        }
+        if (this.blockItemEntityDropsSupplier != null) {
+            to.blockItemEntityDropsSupplier = new BlockItemEntityDropsSupplier();
+        }
+        if (this.capturedItemsSupplier != null) {
+            to.capturedItemsSupplier = new CapturedItemsSupplier();
+        }
+        if (this.capturedEntitiesSupplier != null) {
+            to.capturedEntitiesSupplier = new CapturedEntitiesSupplier();
+        }
+        if (this.capturedItemStackSupplier != null) {
+            to.capturedItemStackSupplier = new CapturedItemStackSupplier();
+        }
+        if (this.entityItemDropsSupplier != null) {
+            to.entityItemDropsSupplier = new EntityItemDropsSupplier();
+        }
+        if (this.entityItemEntityDropsSupplier != null) {
+            to.entityItemEntityDropsSupplier = new EntityItemEntityDropsSupplier();
+        }
+        if (this.blockEntitySpawnSupplier != null) {
+            to.blockEntitySpawnSupplier = new CapturedBlockEntitySpawnSupplier();
+        }
+        if (this.captureBlockPos != null) {
+            to.captureBlockPos = new CaptureBlockPos(this.captureBlockPos.pos);
+        }
+        to.owner = this.owner;
+        to.notifier = this.notifier;
+        to.source = this.source;
+    }
+
 }

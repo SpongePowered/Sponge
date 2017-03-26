@@ -92,4 +92,12 @@ final class UnwindingPhaseContext extends PhaseContext {
         }
         return Optional.ofNullable(super.getSource(sourceClass).orElseGet(() -> this.unwindingContext.getSource(sourceClass).orElse(null)));
     }
+
+    @Override
+    public UnwindingPhaseContext copy() {
+        UnwindingPhaseContext to = new UnwindingPhaseContext(this.unwindingState, this.unwindingContext);
+        copy(to);
+        return to;
+    }
+
 }

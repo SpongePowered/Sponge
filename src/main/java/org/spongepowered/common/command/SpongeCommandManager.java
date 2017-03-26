@@ -57,11 +57,10 @@ import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.GlobalCauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -283,34 +282,25 @@ public class SpongeCommandManager implements CommandManager {
         try {
             try {
                 if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-                    final String commandUsed = commandLine;
-                    Sponge.getServer().getWorlds().forEach(world -> {
-                        final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
-                        mixinWorld.getCauseTracker().switchToPhase(GeneralPhase.State.COMMAND, PhaseContext.start()
-                                .add(NamedCause.source(source))
-                                // unused, to be removed and re-located when phase context is cleaned up
-                                //.add(NamedCause.of(InternalNamedCauses.General.COMMAND, commandUsed))
-                                .addCaptures()
-                                .addEntityDropCaptures()
-                                .complete());
-                    });
+                    GlobalCauseTracker.getInstance().switchToPhase(GeneralPhase.State.COMMAND, PhaseContext.start()
+                            .add(NamedCause.source(source))
+                            // unused, to be removed and re-located when phase context is cleaned up
+                            //.add(NamedCause.of(InternalNamedCauses.General.COMMAND, commandUsed))
+                            .addCaptures()
+                            .addEntityDropCaptures()
+                            .complete());
                 }
-                final CommandResult result = this.dispatcher.process(source, commandLine);
-                this.completeCommandPhase();
-                return result;
+                return this.dispatcher.process(source, commandLine);
             } catch (InvocationCommandException ex) {
-                this.completeCommandPhase();
                 if (ex.getCause() != null) {
                     throw ex.getCause();
                 }
             } catch (CommandPermissionException ex) {
-                this.completeCommandPhase();
                 Text text = ex.getText();
                 if (text != null) {
                     source.sendMessage(error(text));
                 }
             } catch (CommandException ex) {
-                this.completeCommandPhase();
                 Text text = ex.getText();
                 if (text != null) {
                     source.sendMessage(error(text));
@@ -324,7 +314,6 @@ public class SpongeCommandManager implements CommandManager {
                 }
             }
         } catch (Throwable thr) {
-            this.completeCommandPhase();
             Text.Builder excBuilder;
             if (thr instanceof TextMessageException) {
                 Text text = ((TextMessageException) thr).getText();
@@ -343,6 +332,8 @@ public class SpongeCommandManager implements CommandManager {
             source.sendMessage(error(t("Error occurred while executing command: %s", excBuilder.build())));
             this.log.error(TextSerializers.PLAIN.serialize(t("Error occurred while executing command '%s' for source %s: %s", commandLine, source.toString(), String
                     .valueOf(thr.getMessage()))), thr);
+        } finally {
+            this.completeCommandPhase();
         }
         return CommandResult.empty();
     }
@@ -400,17 +391,14 @@ public class SpongeCommandManager implements CommandManager {
 
     private void completeCommandPhase() {
         if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            Sponge.getServer().getWorlds().forEach(world -> {
-                final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
-                try {
-                    mixinWorld.getCauseTracker().completePhase(GeneralPhase.State.COMMAND);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    // Basically, we don't do anything because the worlds that were created during the
-                    // command being executed. However, we still will process any additional captures that took place
-                    // during the command's phase.
-                }
-            });
+            try {
+                GlobalCauseTracker.getInstance().completePhase(GeneralPhase.State.COMMAND);
+            } catch (Exception e) {
+                e.printStackTrace();
+                // Basically, we don't do anything because the worlds that were created during the
+                // command being executed. However, we still will process any additional captures that took place
+                // during the command's phase.
+            }
         }
     }
 }
