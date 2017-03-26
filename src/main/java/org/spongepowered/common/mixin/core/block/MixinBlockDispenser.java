@@ -107,7 +107,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
             mixinChunk.getBlockNotifier(pos)
                     .ifPresent(phaseContext::notifier);
 
-            mixinWorldServer.getCauseTracker().switchToPhase(BlockPhase.State.DISPENSE, phaseContext
+            CauseTracker.getInstance().switchToPhase(BlockPhase.State.DISPENSE, phaseContext
                     .complete());
         }
     }
@@ -115,7 +115,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
     @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM, shift = At.Shift.AFTER))
     private void onDispenseReturn(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
         if (CauseTracker.ENABLED) {
-            ((IMixinWorldServer) worldIn).getCauseTracker().completePhase(BlockPhase.State.DISPENSE);
+            CauseTracker.getInstance().completePhase(BlockPhase.State.DISPENSE);
         }
     }
 

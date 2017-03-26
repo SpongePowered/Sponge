@@ -249,9 +249,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             return;
         }
         // Double check that the CauseTracker is already capturing the Death phase
-        final CauseTracker causeTracker;
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         if (!this.worldObj.isRemote) {
-            causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
             this.tracksEntityDeaths = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
@@ -267,13 +266,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         .complete());
             }
         } else {
-            causeTracker = null;
             this.tracksEntityDeaths = false;
         }
         // Sponge End
         if (this.dead) {
             // Sponge Start - ensure that we finish the tracker if necessary
-            if (causeTracker != null && this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
+            if (this.tracksEntityDeaths && !properlyOverridesOnDeathForCauseTrackerCompletion()) {
                 causeTracker.completePhase(EntityPhase.State.DEATH);
             }
             // Sponge End
@@ -491,7 +489,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     }
 
                     // Sponge Start - notify the cause tracker
-                    final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
+                    final CauseTracker causeTracker = CauseTracker.getInstance();
                     final boolean enterDeathPhase = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths();
                     if (enterDeathPhase) {
                         final PhaseContext context = PhaseContext.start()
@@ -787,7 +785,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
     private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
         if (!entityLivingBase.worldObj.isRemote && CauseTracker.ENABLED) {
-            final CauseTracker causeTracker = ((IMixinWorldServer) entityLivingBase.worldObj).getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             causeTracker.switchToPhase(EntityPhase.State.DEATH_UPDATE, PhaseContext.start()
                     .addCaptures()
                     .addEntityDropCaptures()

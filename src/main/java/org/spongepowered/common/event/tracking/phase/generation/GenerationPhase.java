@@ -34,6 +34,7 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 
@@ -96,8 +97,8 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        ((GeneralGenerationPhaseState) state).unwind(causeTracker, phaseContext);
+    public void unwind(IPhaseState state, PhaseContext phaseContext) {
+        ((GeneralGenerationPhaseState) state).unwind(phaseContext);
     }
 
     @Override
@@ -116,20 +117,20 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public void appendNotifierPreBlockTick(CauseTracker causeTracker, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
 
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
             int chunkZ) {
         return context.getCapturedEntities().add(entity);
     }
 
     @Override
-    public void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
-            ArrayList<Entity> entities) {
-        super.processPostEntitySpawns(causeTracker, unwindingState, phaseContext, entities);
+    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext phaseContext,
+        ArrayList<Entity> entities) {
+        super.processPostEntitySpawns(unwindingState, phaseContext, entities);
     }
 
     @Override

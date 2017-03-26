@@ -34,7 +34,8 @@ class NoCaptureBlockTickPhaseState extends BlockTickPhaseState {
     }
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext, BlockPos pos) {
+    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext,
+        BlockPos pos) {
         return false;
     }
 

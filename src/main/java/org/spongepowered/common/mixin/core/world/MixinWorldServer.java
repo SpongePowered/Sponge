@@ -224,7 +224,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     private static final EnumSet<EnumFacing> NOTIFY_DIRECTIONS = EnumSet.of(EnumFacing.WEST, EnumFacing.EAST, EnumFacing.DOWN, EnumFacing.UP, EnumFacing.NORTH, EnumFacing.SOUTH);
 
-    private final CauseTracker causeTracker = new CauseTracker((WorldServer) (Object) this);
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private SpongeChunkGenerator spongegen;
     private SpongeConfig<?> activeConfig;
@@ -312,8 +311,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "createBonusChest", at = @At(value = "HEAD"))
     public void onCreateBonusChest(CallbackInfo ci) {
         if (CauseTracker.ENABLED) {
-            this.getCauseTracker().switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+            CauseTracker.getInstance().switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                     .add(NamedCause.source(this))
+                    .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, this))
                     .addCaptures()
                     .complete());
         }
@@ -323,7 +323,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "createBonusChest", at = @At(value = "RETURN"))
     public void onCreateBonusChestEnd(CallbackInfo ci) {
         if (CauseTracker.ENABLED) {
-            this.getCauseTracker().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+            CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
         }
     }
 
@@ -490,10 +490,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public CauseTracker getCauseTracker() {
-        return this.causeTracker;
+    public WorldServer asMinecraftWorld() {
+        return (WorldServer) (Object) this;
     }
 
+    @Override
+    public org.spongepowered.api.world.World asSpongeWorld() {
+        return this;
+    }
 
     /**
      * @author blood - July 1st, 2016
@@ -524,7 +528,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         boolean flag1 = this.isThundering();
         this.theProfiler.startSection("pollingChunks");
 
-        final CauseTracker causeTracker = this.getCauseTracker(); // Sponge - get the cause tracker
+        final CauseTracker causeTracker = CauseTracker.getInstance(); // Sponge - get the cause tracker
 
         // Sponge: Use SpongeImplHooks for Forge
         for (Iterator<net.minecraft.world.chunk.Chunk> iterator =
@@ -689,7 +693,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                                 if (!CauseTracker.ENABLED || phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.context)) {
                                     block.randomTick((WorldServer) (Object) this, pos, iblockstate, this.rand);
                                 } else {
-                                    TrackingUtil.randomTickBlock(causeTracker, block, pos, iblockstate, this.rand);
+                                    TrackingUtil.randomTickBlock(causeTracker, this, block, pos, iblockstate, this.rand);
                                 }
                                 spongeBlock.getTimingsHandler().stopTiming();
                                 // Sponge end
@@ -760,7 +764,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     // This ticks pending updates to blocks, Requires mixin for NextTickListEntry so we use the correct tracking
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData phaseData = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = phaseData.state;
         if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, phaseData.context) || phaseState.getPhase().ignoresBlockUpdateTick(phaseData)) {
@@ -770,7 +774,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         IMixinBlock spongeBlock = (IMixinBlock) block;
         spongeBlock.getTimingsHandler().startTiming();
-        TrackingUtil.updateTickBlock(causeTracker, block, pos, state, rand);
+        TrackingUtil.updateTickBlock(this, block, pos, state, rand);
         spongeBlock.getTimingsHandler().stopTiming();
     }
 
@@ -804,7 +808,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         if (CauseTracker.ENABLED) {
-            final CauseTracker causeTracker = this.getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             final PhaseData currentPhase = causeTracker.getCurrentPhaseData();
             final IPhaseState phaseState = currentPhase.state;
             if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
@@ -813,12 +817,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             final PhaseContext context = currentPhase.context;
 
             final LocatableBlock locatable = LocatableBlock.builder()
-                    .location(new Location<org.spongepowered.api.world.World>(this, pos.getX(), pos.getY(), pos.getZ()))
+                    .location(new Location<>(this, pos.getX(), pos.getY(), pos.getZ()))
                     .state(this.getBlock(pos.getX(), pos.getY(), pos.getZ()))
                     .build();
 
             blockEvent.setTickBlock(locatable);
-            phaseState.getPhase().addNotifierToBlockEvent(phaseState, context, causeTracker, pos, blockEvent);
+            phaseState.getPhase().addNotifierToBlockEvent(phaseState, context, this, pos, blockEvent);
         }
         return list.add((BlockEventData) obj);
     }
@@ -830,7 +834,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (!CauseTracker.ENABLED) {
             fireBlockEvent(event);
         }
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState phaseState = causeTracker.getCurrentState();
         if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
             return fireBlockEvent(event);
@@ -948,7 +952,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Redirect(method = "scheduleBlockUpdate",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState phaseState = causeTracker.getCurrentState();
 
         if (phaseState.getPhase().ignoresScheduledUpdates(phaseState)) {
@@ -1017,7 +1021,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public boolean setBlock(int x, int y, int z, BlockState blockState, BlockChangeFlag flag, Cause cause) {
         checkBlockBounds(x, y, z);
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
         boolean isWorldGen = CauseTracker.ENABLED && peek.state.getPhase().isWorldGeneration(peek.state);
         boolean handlesOwnCompletion = CauseTracker.ENABLED && peek.state.getPhase().handlesOwnPhaseCompletion(peek.state);
@@ -1154,6 +1158,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         checkNotNull(origin, "location");
         checkNotNull(cause, "Cause cannot be null!");
         checkArgument(cause.containsType(PluginContainer.class), "Cause must contain a PluginContainer!");
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         if (CauseTracker.ENABLED) {
             final PhaseContext phaseContext = PhaseContext.start()
                     .add(NamedCause.source(cause))
@@ -1163,7 +1168,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     .addBlockCaptures();
             phaseContext.getCaptureExplosion().addExplosion(explosion);
             phaseContext.complete();
-            this.causeTracker.switchToPhase(PluginPhase.State.CUSTOM_EXPLOSION, phaseContext);
+            causeTracker.switchToPhase(PluginPhase.State.CUSTOM_EXPLOSION, phaseContext);
         }
         final Explosion mcExplosion;
         try {
@@ -1188,7 +1193,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (SpongeImpl.postEvent(event)) {
             this.processingExplosion = false;
             if (CauseTracker.ENABLED) {
-                this.causeTracker.completePhase(PluginPhase.State.CUSTOM_EXPLOSION);
+                causeTracker.completePhase(PluginPhase.State.CUSTOM_EXPLOSION);
             }
             return;
         }
@@ -1211,7 +1216,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Sponge Start - end processing
         this.processingExplosion = false;
         if (CauseTracker.ENABLED) {
-            this.causeTracker.completePhase(PluginPhase.State.CUSTOM_EXPLOSION);
+            causeTracker.completePhase(PluginPhase.State.CUSTOM_EXPLOSION);
         }
         // Sponge End
     }
@@ -1242,7 +1247,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
-        return canAddEntity(entity) && getCauseTracker().spawnEntity(EntityUtil.fromNative(entity));
+        return canAddEntity(entity) && CauseTracker.getInstance().spawnEntity(EntityUtil.fromNative(entity));
     }
 
 
@@ -1261,7 +1266,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return false;
         } else {
             // Sponge - reroute to the CauseTracker
-            return this.getCauseTracker().setBlockState(pos, newState, flags);
+            return CauseTracker.getInstance().setBlockState(this, pos, newState, flags);
         }
     }
 
@@ -1273,7 +1278,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return false;
         } else {
             // Sponge - reroute to the CauseTracker
-            return this.getCauseTracker().setBlockStateWithFlag(pos, state, flag);
+            return CauseTracker.getInstance().setBlockStateWithFlag(this, pos, state, flag);
         }
     }
 
@@ -1286,7 +1291,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void immediateBlockTick(BlockPos pos, IBlockState state, Random random) {
         this.scheduledUpdatesAreImmediate = true;
         // Sponge start - Cause tracking
-        final PhaseData peek = this.causeTracker.getCurrentPhaseData();
+        final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
         if (!CauseTracker.ENABLED || peek.state.getPhase().ignoresBlockUpdateTick(peek)) {
             state.getBlock().updateTick((WorldServer) (Object) this, pos, state, random);
             // THIS NEEDS TO BE SET BACK TO FALSE OR ELSE ALL HELL BREAKS LOOSE!
@@ -1295,7 +1300,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.scheduledUpdatesAreImmediate = false;
             return;
         }
-        TrackingUtil.updateTickBlock(this.causeTracker, state.getBlock(), pos, state, random);
+        TrackingUtil.updateTickBlock(this, state.getBlock(), pos, state, random);
         // Sponge end
         this.scheduledUpdatesAreImmediate = false;
     }
@@ -1307,7 +1312,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      */
     @Override
     public void notifyBlockOfStateChange(BlockPos pos, Block blockIn) {
-        this.getCauseTracker().notifyBlockOfStateChange(pos, blockIn, null);
+        CauseTracker.getInstance().notifyBlockOfStateChange(this, pos, blockIn, null);
     }
 
     /**
@@ -1325,7 +1330,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         directions.remove(skipSide);
         final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
         if (event == null || !event.isCancelled()) {
-            final CauseTracker causeTracker = this.getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             for (EnumFacing facing : EnumFacing.values()) {
                 if (event != null) {
                     final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
@@ -1334,7 +1339,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     }
                 }
 
-                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+                causeTracker.notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
             }
         }
     }
@@ -1352,7 +1357,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         final NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, NOTIFY_DIRECTIONS);
         if (event == null || !event.isCancelled()) {
-            final CauseTracker causeTracker = this.getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             for (EnumFacing facing : EnumFacing.values()) {
                 if (event != null) {
                     final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
@@ -1361,7 +1366,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     }
                 }
 
-                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+                causeTracker.notifyBlockOfStateChange(this, pos.offset(facing), blockType, pos);
             }
         }
     }
@@ -1369,13 +1374,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @SuppressWarnings("Duplicates")
     @Override
     protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
         if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
             entityIn.onUpdate();
             return;
         }
-        TrackingUtil.tickEntity(causeTracker, entityIn);
+        TrackingUtil.tickEntity(entityIn);
         updateRotation(entityIn);
     }
 
@@ -1386,7 +1391,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     // separated from onUpdateEntities for TileEntityActivation mixin
     private void updateTileEntity(ITickable tile) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
 
         if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingTileTicks(state)) {
@@ -1394,39 +1399,39 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        TrackingUtil.tickTileEntity(causeTracker, tile);
+        TrackingUtil.tickTileEntity(this, tile);
     }
 
     @Override
     protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
         if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
             entity.onUpdate();
             return;
         }
 
-        TrackingUtil.tickEntity(causeTracker, entity);
+        TrackingUtil.tickEntity(entity);
         updateRotation(entity);
     }
 
     @Override
     protected void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
         if (!CauseTracker.ENABLED || state.getPhase().alreadyCapturingEntityTicks(state)) {
             entity.updateRidden();
             return;
         }
 
-        TrackingUtil.tickRidingEntity(causeTracker, entity);
+        TrackingUtil.tickRidingEntity(entity);
         updateRotation(entity);
     }
 
     @Redirect(method = "wakeAllPlayers", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;wakeUpPlayer(ZZZ)V"))
     private void spongeWakeUpPlayer(EntityPlayer player, boolean immediately, boolean updateWorldFlag, boolean setSpawn) {
         if (CauseTracker.ENABLED) {
-            this.causeTracker.switchToPhase(EntityPhase.State.PLAYER_WAKE_UP, PhaseContext.start()
+            CauseTracker.getInstance().switchToPhase(EntityPhase.State.PLAYER_WAKE_UP, PhaseContext.start()
                     .add(NamedCause.source(player))
                     .addCaptures()
                     .complete()
@@ -1434,7 +1439,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         player.wakeUpPlayer(immediately, updateWorldFlag, setSpawn);
         if (CauseTracker.ENABLED) {
-            this.causeTracker.completePhase(EntityPhase.State.PLAYER_WAKE_UP);
+            CauseTracker.getInstance().completePhase(EntityPhase.State.PLAYER_WAKE_UP);
         }
     }
 
@@ -1482,7 +1487,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
-        final CauseTracker causeTracker = this.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState state = causeTracker.getCurrentState();
         if (CauseTracker.ENABLED && !state.getPhase().alreadyCapturingEntitySpawns(state)) {
             causeTracker.switchToPhase(PluginPhase.State.CUSTOM_SPAWN, PhaseContext.start()
@@ -1580,7 +1585,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Sponge Start - Cause tracking
         this.processingExplosion = true;
         if (CauseTracker.ENABLED) {
-            PhaseContext phaseContext = PhaseContext.start()
+            final PhaseContext phaseContext = PhaseContext.start()
                     .explosion()
                     .addEntityCaptures()
                     .addEntityDropCaptures()
@@ -1590,10 +1595,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             } else {
                 phaseContext.add(NamedCause.source(this));
             }
-            final PhaseData currentPhaseData = this.causeTracker.getCurrentPhaseData();
+            final PhaseData currentPhaseData = CauseTracker.getInstance().getCurrentPhaseData();
             currentPhaseData.state.getPhase().appendContextPreExplosion(phaseContext, currentPhaseData);
             phaseContext.complete();
-            this.causeTracker.switchToPhase(GeneralPhase.State.EXPLOSION, phaseContext);
+            CauseTracker.getInstance().switchToPhase(GeneralPhase.State.EXPLOSION, phaseContext);
         }
         // Sponge End
 
@@ -1602,7 +1607,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Sponge Start - More cause tracking
         if (CauseTracker.ENABLED) {
             try {
-                this.causeTracker.getCurrentContext().getCaptureExplosion().addExplosion(((org.spongepowered.api.world.explosion.Explosion) explosion));
+                CauseTracker.getInstance().getCurrentContext().getCaptureExplosion().addExplosion(((org.spongepowered.api.world.explosion.Explosion) explosion));
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -1613,7 +1618,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (SpongeImpl.postEvent(event)) {
             this.processingExplosion = false;
             if (CauseTracker.ENABLED) {
-                this.causeTracker.completePhase(GeneralPhase.State.EXPLOSION);
+                CauseTracker.getInstance().completePhase(GeneralPhase.State.EXPLOSION);
             }
             return explosion;
         }
@@ -1636,7 +1641,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Sponge Start - end processing
         this.processingExplosion = false;
         if (CauseTracker.ENABLED) {
-            this.causeTracker.completePhase(GeneralPhase.State.EXPLOSION);
+            CauseTracker.getInstance().completePhase(GeneralPhase.State.EXPLOSION);
         }
         // Sponge End
         return explosion;

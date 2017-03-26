@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
@@ -86,7 +87,7 @@ public class MixinChunk_Collisions {
                 return true;
             }
 
-            final PhaseContext phaseContext = spongeWorld.getCauseTracker().getCurrentContext();
+            final PhaseContext phaseContext = CauseTracker.getInstance().getCurrentContext();
             LocatableBlock locatable = phaseContext.getSource(LocatableBlock.class).orElse(null);
             if (locatable != null) {
                 BlockType blockType =locatable.getLocation().getBlockType();

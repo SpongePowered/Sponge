@@ -30,7 +30,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -43,30 +43,30 @@ class WeatherTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+    public void processPostTick(PhaseContext phaseContext) {
         phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
             final Cause.Builder builder = Cause.source(SpawnCause.builder()
                     .type(InternalSpawnTypes.WEATHER)
                     .build());
             final SpawnEntityEvent
                     spawnEntityEvent =
-                    SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, causeTracker.getWorld());
+                    SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, entities.get(0).getWorld());
             SpongeImpl.postEvent(spawnEntityEvent);
             for (Entity entity : spawnEntityEvent.getEntities()) {
-                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
             }
         });
         phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
-            TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
+            TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
         });
     }
     @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
 
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final Cause.Builder builder = Cause.source(SpawnCause.builder()
                 .type(InternalSpawnTypes.WEATHER)
                 .build());
@@ -74,11 +74,11 @@ class WeatherTickPhaseState extends TickPhaseState {
         capturedEntities.add(entity);
         final SpawnEntityEvent
                 spawnEntityEvent =
-                SpongeEventFactory.createSpawnEntityEvent(builder.build(), capturedEntities, causeTracker.getWorld());
+                SpongeEventFactory.createSpawnEntityEvent(builder.build(), capturedEntities, entity.getWorld());
         SpongeImpl.postEvent(spawnEntityEvent);
         if (!spawnEntityEvent.isCancelled()) {
             for (Entity anEntity : spawnEntityEvent.getEntities()) {
-                causeTracker.getMixinWorld().forceSpawnEntity(anEntity);
+                EntityUtil.getMixinWorld(anEntity).forceSpawnEntity(anEntity);
             }
             return true;
         }

@@ -43,12 +43,12 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -80,11 +80,10 @@ public abstract class TrackingPhase {
      * to the {@link WorldServer}, {@link IMixinWorldServer}, and
      * {@link World} instances.</p>
      *
-     * @param causeTracker The cause tracker instance
      * @param state The state
      * @param phaseContext The context of the current state being unwound
      */
-    public abstract void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext);
+    public abstract void unwind(IPhaseState state, PhaseContext phaseContext);
 
 
     /**
@@ -92,7 +91,7 @@ public abstract class TrackingPhase {
      * states that deem it necessary to have some post processing for
      * advanced game mechanics. This is always performed when capturing
      * has been turned on during a phases's
-     * {@link #unwind(CauseTracker, IPhaseState, PhaseContext)} is
+     * {@link #unwind(IPhaseState, PhaseContext)} is
      * dispatched. The rules of post dispatch are as follows:
      * - Entering extra phases is not allowed: This is to avoid
      *  potential recursion in various corner cases.
@@ -106,44 +105,33 @@ public abstract class TrackingPhase {
      * - post dispatch may loop several times until no more notifications
      *  are required to be dispatched. This may include block physics for
      *  neighbor notification events.
-     *
-     * @param causeTracker The cause tracker responsible for the dispatch
-     * @param unwindingState The state that was unwinding
+     *  @param unwindingState The state that was unwinding
      * @param unwindingContext The context of the state that was unwinding,
      *     contains the root cause for the state
      * @param postContext The post dispatch context captures containing any
-     *     extra captures that took place during the state's unwinding
      */
-    public void postDispatch(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwindingContext, PhaseContext postContext) {
+    public void postDispatch(IPhaseState unwindingState, PhaseContext unwindingContext, PhaseContext postContext) {
     }
 
-    public void processPostItemSpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> items) {
-        final SpawnEntityEvent
-                event =
-                SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, items, causeTracker.getWorld());
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
-            for (Entity entity : event.getEntities()) {
-                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-            }
-        }
+    public void processPostItemSpawns(IPhaseState unwindingState, ArrayList<Entity> items) {
+        TrackingUtil.splitAndSpawnEntities(InternalSpawnTypes.UNKNOWN_CAUSE, items);
     }
 
-    public void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
-            ArrayList<Entity> entities) {
-        final SpawnEntityEvent
-                event =
-                SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, entities, causeTracker.getWorld());
-        final User creator = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
-            for (Entity entity : event.getEntities()) {
-                if (creator != null) {
-                    EntityUtil.toMixin(entity).setCreator(creator.getUniqueId());
-                }
-                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-            }
-        }
+    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext phaseContext,
+        ArrayList<Entity> entities) {
+        final Optional<User> creator = Optional.ofNullable(phaseContext
+            .getNotifier()
+            .orElseGet(() ->
+                phaseContext.getOwner()
+                    .orElse(null)));
+        TrackingUtil.splitAndSpawnEntities(InternalSpawnTypes.UNKNOWN_CAUSE,
+            entities,
+            entity -> creator
+                .map(User::getUniqueId)
+                .ifPresent(entity::setCreator)
+        );
+
+
     }
 
     // Default methods that are basic qualifiers, leaving up to the phase and state to decide
@@ -206,7 +194,7 @@ public abstract class TrackingPhase {
         return false;
     }
 
-    public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+    public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder) {
 
     }
 
@@ -230,14 +218,14 @@ public abstract class TrackingPhase {
      * a single lever pull to blocks getting updated hundreds of blocks
      * away.
      *
-     * @param causeTracker
+     * @param mixinWorld
      * @param pos
      * @param currentState
      * @param context
      * @param newContext
      */
-    public void appendNotifierPreBlockTick(CauseTracker causeTracker, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
-        final Chunk chunk = causeTracker.getMinecraftWorld().getChunkFromBlockCoords(pos);
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
+        final Chunk chunk = mixinWorld.asMinecraftWorld().getChunkFromBlockCoords(pos);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         if (chunk != null && !chunk.isEmpty()) {
             mixinChunk.getBlockOwner(pos).ifPresent(newContext::owner);
@@ -258,7 +246,6 @@ public abstract class TrackingPhase {
      * returns {@code true}. Violation of this will have unforseen consequences.</p>
      *
      *
-     * @param causeTracker
      * @param phaseState The current phase state
      * @param context The current context
      * @param entity The entity being captured
@@ -266,8 +253,7 @@ public abstract class TrackingPhase {
      * @param chunkZ The chunk z position
      * @return True if the entity was successfully captured
      */
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
-            int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final WorldServer minecraftWorld = (WorldServer) minecraftEntity.worldObj;
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
@@ -281,7 +267,7 @@ public abstract class TrackingPhase {
         SpongeImpl.postEvent(event);
         if (!event.isCancelled() && event.getEntities().size() > 0) {
             for (Entity item: event.getEntities()) {
-                causeTracker.getMixinWorld().forceSpawnEntity(item);
+                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
             }
             return true;
         }
@@ -298,7 +284,7 @@ public abstract class TrackingPhase {
         return Optional.empty();
     }
 
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 

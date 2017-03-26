@@ -31,7 +31,6 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.config.category.LoggingCategory;
 
 import javax.annotation.Nullable;
@@ -40,8 +39,9 @@ public enum BlockChange {
 
     BREAK("BreakEvent") {
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, World world, ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventBreak(cause, world, transactions);
+        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+
+            return SpongeEventFactory.createChangeBlockEventBreak(cause, transactions.get(0).getOriginal().getLocation().get().getExtent(), transactions);
         }
 
         @Override
@@ -57,14 +57,14 @@ public enum BlockChange {
     DECAY() {
         @Nullable
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, World world, ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventDecay(cause, world, transactions);
+        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+            return SpongeEventFactory.createChangeBlockEventDecay(cause, transactions.get(0).getOriginal().getLocation().get().getExtent(), transactions);
         }
     },
     MODIFY("ModifyEvent") {
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, World world, ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventModify(cause, world, transactions);
+        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+            return SpongeEventFactory.createChangeBlockEventModify(cause, transactions.get(0).getOriginal().getLocation().get().getExtent(), transactions);
         }
 
         @Override
@@ -79,8 +79,8 @@ public enum BlockChange {
     },
     PLACE("PlaceEvent") {
         @Override
-        public ChangeBlockEvent createEvent(Cause cause, World world, ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventPlace(cause, world, transactions);
+        public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+            return SpongeEventFactory.createChangeBlockEventPlace(cause, transactions.get(0).getOriginal().getLocation().get().getExtent(), transactions);
         }
 
         @Override
@@ -127,7 +127,7 @@ public enum BlockChange {
     }
 
     @Nullable
-    public ChangeBlockEvent createEvent(Cause cause, World world, ImmutableList<Transaction<BlockSnapshot>> transactions) {
+    public ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions) {
         return null;
     }
 

@@ -78,23 +78,12 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int xMax = unmodifiableVolume.getBlockMax().getX();
         final int yMax = unmodifiableVolume.getBlockMax().getY();
         final int zMax = unmodifiableVolume.getBlockMax().getZ();
-        // TODO integrate with the cause tracker to handle the block sets in
         // a single go, requiring only one event
-        IMixinWorldServer mixinWorld = null;
         if (CauseTracker.ENABLED) {
-            mixinWorld = null;
-            if (destination instanceof IMixinWorldServer) {
-                mixinWorld = (IMixinWorldServer) destination;
-            } else if (destination instanceof Chunk) {
-                mixinWorld = (IMixinWorldServer) ((Chunk) destination).getWorld();
-            }
-            if (mixinWorld != null) {
-                final CauseTracker causeTracker = mixinWorld.getCauseTracker();
-                causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
-                        .add(NamedCause.source(this))
-                        .addCaptures()
-                        .complete());
-            }
+            CauseTracker.getInstance().switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
+                .add(NamedCause.source(this))
+                .addCaptures()
+                .complete());
         }
         for (int z = zMin; z <= zMax; z++) {
             for (int y = yMin; y <= yMax; y++) {
@@ -105,9 +94,8 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
                 }
             }
         }
-        if (mixinWorld != null && CauseTracker.ENABLED) {
-            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
-            causeTracker.completePhase(PluginPhase.State.BLOCK_WORKER);
+        if (CauseTracker.ENABLED) {
+            CauseTracker.getInstance().completePhase(PluginPhase.State.BLOCK_WORKER);
         }
     }
 
@@ -131,11 +119,11 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final UnmodifiableBlockVolume secondUnmodifiableVolume = second.getUnmodifiableBlockView();
         // TODO integrate with the cause tracker to handle the block sets in
         // a single go, requiring only one event
-        if (CauseTracker.ENABLED && destination instanceof IMixinWorldServer) {
-            final CauseTracker causeTracker = ((IMixinWorldServer) destination).getCauseTracker();
-            causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
-                    .add(NamedCause.source(this))
-                    .complete());
+        if (CauseTracker.ENABLED) {
+            CauseTracker.getInstance().switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
+                .add(NamedCause.source(this))
+                .addCaptures()
+                .complete());
         }
         for (int z = zMin; z <= zMax; z++) {
             for (int y = yMin; y <= yMax; y++) {
@@ -146,9 +134,8 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
                 }
             }
         }
-        if (CauseTracker.ENABLED && destination instanceof IMixinWorldServer) {
-            final CauseTracker causeTracker = ((IMixinWorldServer) destination).getCauseTracker();
-            causeTracker.completePhase(PluginPhase.State.BLOCK_WORKER);
+        if (CauseTracker.ENABLED) {
+            CauseTracker.getInstance().completePhase(PluginPhase.State.BLOCK_WORKER);
         }
     }
 
@@ -160,18 +147,11 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int xMax = this.volume.getBlockMax().getX();
         final int yMax = this.volume.getBlockMax().getY();
         final int zMax = this.volume.getBlockMax().getZ();
-        IMixinWorldServer mixinWorld = null;
-        if (this.volume instanceof IMixinWorldServer) {
-            mixinWorld = (IMixinWorldServer) this.volume;
-        } else if (this.volume instanceof Chunk) {
-            mixinWorld = (IMixinWorldServer) ((Chunk) this.volume).getWorld();
-        }
-        if (CauseTracker.ENABLED && mixinWorld != null) {
-            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
-            causeTracker.switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
-                    .add(NamedCause.source(this))
-                    .add(NamedCause.of(InternalNamedCauses.General.BLOCK_CHANGE, new PhaseContext.CaptureFlag()))
-                    .complete());
+        if (CauseTracker.ENABLED) {
+            CauseTracker.getInstance().switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
+                .add(NamedCause.source(this))
+                .addCaptures()
+                .complete());
         }
         for (int z = zMin; z <= zMax; z++) {
             for (int y = yMin; y <= yMax; y++) {
@@ -180,8 +160,8 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
                 }
             }
         }
-        if (CauseTracker.ENABLED && mixinWorld != null) {
-            mixinWorld.getCauseTracker().completePhase(PluginPhase.State.BLOCK_WORKER);
+        if (CauseTracker.ENABLED) {
+            CauseTracker.getInstance().completePhase(PluginPhase.State.BLOCK_WORKER);
         }
     }
 

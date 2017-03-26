@@ -31,9 +31,7 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -46,21 +44,19 @@ final class PostServerTickListenerState extends ListenerPhaseState {
     }
 
     @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
         context.getCapturedPlayer().ifPresent(player -> builder.named(NamedCause.notifier(player)));
     }
 
     @Override
-    public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+    public void processPostTick(PhaseContext phaseContext) {
         final Object listener = phaseContext.getSource(Object.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));
 
         phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
-            if (SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().reportWorldTickDifferences()) {
-                logWarningOfDifferentWorldchanges(causeTracker, listener);
-            }
-            TrackingUtil.processBlockCaptures(blocks, causeTracker, this, phaseContext);
+            TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
         });
+
     }
 
     @Override

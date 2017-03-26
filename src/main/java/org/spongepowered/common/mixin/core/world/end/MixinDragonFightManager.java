@@ -139,7 +139,7 @@ public abstract class MixinDragonFightManager {
                 }
 
                 // Sponge Start - Cause tracker - todo: do more logistical configuration of how this all works.
-                final CauseTracker causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
+                final CauseTracker causeTracker = CauseTracker.getInstance();
                 causeTracker.switchToPhase(DragonPhase.State.RESPAWN_DRAGON, PhaseContext.start()
                     .addCaptures()
                     .add(NamedCause.of("RespawnState", this.respawnState))

@@ -68,7 +68,8 @@ abstract class LocationBasedTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
+    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange,
+        Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
         final Location<World> location = getLocatableBlockSourceFromContext(context).getLocation();
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
         final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();

@@ -143,7 +143,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Inject(method = "onBlockDestroyed", at = @At("HEAD"))
     private void capturePlayerOnBlockDestroyed(World worldIn, IBlockState blockIn, BlockPos pos, EntityPlayer playerIn, CallbackInfo ci) {
         if (!worldIn.isRemote) {
-            final CauseTracker causeTracker = ((IMixinWorldServer) worldIn).getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
             state.getPhase().capturePlayerUsingStackToBreakBlock(this, (EntityPlayerMP) playerIn, state, peek.context, causeTracker);

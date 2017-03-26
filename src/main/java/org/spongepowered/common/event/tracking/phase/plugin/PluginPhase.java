@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import net.minecraft.block.Block;
-import net.minecraft.entity.boss.dragon.phase.IPhase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -37,6 +36,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import javax.annotation.Nullable;
 
@@ -75,22 +75,22 @@ public final class PluginPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        ((PluginPhaseState) state).processPostTick(causeTracker, phaseContext);
+    public void unwind(IPhaseState state, PhaseContext phaseContext) {
+        ((PluginPhaseState) state).processPostTick(phaseContext);
     }
 
     @Override
-    public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+    public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder) {
         if (state instanceof ListenerPhaseState) {
-            ((ListenerPhaseState) state).associateAdditionalBlockChangeCauses(context, builder, causeTracker);
+            ((ListenerPhaseState) state).associateAdditionalBlockChangeCauses(context, builder);
         }
     }
 
     @Override
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos,
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos,
             IMixinBlockEventData blockEvent) {
         if (phaseState instanceof ListenerPhaseState) {
-            ((ListenerPhaseState) phaseState).associateBlockEventNotifier(context, causeTracker, pos, blockEvent);
+            ((ListenerPhaseState) phaseState).associateBlockEventNotifier(context, mixinWorld, pos, blockEvent);
         }
     }
 

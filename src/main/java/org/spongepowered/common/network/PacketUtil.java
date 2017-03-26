@@ -124,8 +124,7 @@ public class PacketUtil {
                 packetIn.processPacket(netHandler);
             } else {
                 final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
-                final IMixinWorldServer world = (IMixinWorldServer) packetPlayer.worldObj;
-                final CauseTracker causeTracker = world.getCauseTracker();
+                final CauseTracker causeTracker = CauseTracker.getInstance();
                 IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
                 if (packetIn instanceof CPacketPlayerTryUseItemOnBlock) {
                     if (packetPlayer.getHeldItemMainhand() != null) {

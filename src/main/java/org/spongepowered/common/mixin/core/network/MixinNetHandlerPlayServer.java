@@ -196,35 +196,14 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             playerEntity.onUpdateEntity();
             return;
         }
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) playerEntity.worldObj;
-        final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         causeTracker.switchToPhase(TickPhase.Tick.PLAYER, PhaseContext.start()
                 .add(NamedCause.source(playerEntity))
                 .addCaptures()
                 .addEntityDropCaptures()
-                //.addBlockCaptures()
                 .complete());
-        for (WorldServer worldServer : WorldManager.getWorlds()) {
-            if (worldServer == mixinWorldServer) { // we don't care about entering the phase for this world server of which we already entered
-                continue;
-            }
-            final IMixinWorldServer otherMixinWorldServer = (IMixinWorldServer) worldServer;
-            otherMixinWorldServer.getCauseTracker().switchToPhase(TickPhase.Tick.PLAYER, PhaseContext.start()
-                    .add(NamedCause.source(playerEntity))
-                    .addCaptures()
-                    .addEntityDropCaptures()
-                    //.addBlockCaptures()
-                    .complete());
-        }
         playerEntity.onUpdateEntity();
         causeTracker.completePhase(TickPhase.Tick.PLAYER);
-        for (WorldServer worldServer : WorldManager.getWorlds()) {
-            if (worldServer == mixinWorldServer) { // we don't care about entering the phase for this world server of which we already entered
-                continue;
-            }
-            final IMixinWorldServer otherMixinWorldServer = (IMixinWorldServer) worldServer;
-            otherMixinWorldServer.getCauseTracker().completePhase(TickPhase.Tick.PLAYER);
-        }
     }
 
     @Override
@@ -324,7 +303,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
         if (this.playerEntity.interactionManager.isCreative()) {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.playerEntity.getServerWorld();
-            final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
+            final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
             final PhaseContext context = peek.context;
             final boolean ignoresCreative = context.firstNamed(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class).get();
             boolean clickedOutside = packetIn.getSlotId() < 0;
@@ -535,23 +514,28 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     @Redirect(method = "processRightClickBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClickBlock(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;"))
     public EnumActionResult onProcessRightClickBlock(PlayerInteractionManager interactionManager, EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
-        EnumActionResult result = interactionManager.processRightClickBlock(this.playerEntity, worldIn, stack, hand, pos, facing, hitX, hitY, hitZ);
-        // If a plugin or mod has changed the item, avoid restoring
-        if (!SpongeCommonEventFactory.playerInteractItemChanged) {
-            final CauseTracker causeTracker = ((IMixinWorldServer) player.worldObj).getCauseTracker();
-            final PhaseData peek = causeTracker.getCurrentPhaseData();
-            final ItemStack itemStack = peek.context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
+        EnumActionResult actionResult = interactionManager.processRightClickBlock(this.playerEntity, worldIn, stack, hand, pos, facing, hitX, hitY, hitZ);
+        // If result is not SUCCESS, we need to avoid throwing an InteractBlockEvent.Secondary for AIR
+        // since the client will send the server a CPacketTryUseItem right after this packet is done processing.
+        if (actionResult != EnumActionResult.SUCCESS) {
+            //SpongeCommonEventFactory.ignoreRightClickAirEvent = true;
+            // If a plugin or mod has changed the item, avoid restoring
+            if (!SpongeCommonEventFactory.playerInteractItemChanged) {
+                final CauseTracker causeTracker = CauseTracker.getInstance();
+                final PhaseData peek = causeTracker.getCurrentPhaseData();
+                final ItemStack itemStack = peek.context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
 
-            // Only do a restore if something actually changed. The client does an identity check ('==')
-            // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
-            // cancelling item usage (e.g. eating food) that occurs while targeting a block
-            if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && SpongeCommonEventFactory.interactBlockEventCancelled) {
-                PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
+                // Only do a restore if something actually changed. The client does an identity check ('==')
+                // to determine if it should continue using an itemstack. If we always resend the itemstack, we end up
+                // cancelling item usage (e.g. eating food) that occurs while targeting a block
+                if (!ItemStack.areItemStacksEqual(itemStack, player.getHeldItem(hand)) && SpongeCommonEventFactory.interactBlockEventCancelled) {
+                    PacketPhaseUtil.handlePlayerSlotRestore((EntityPlayerMP) player, itemStack, hand);
+                }
             }
         }
         SpongeCommonEventFactory.playerInteractItemChanged = false;
         SpongeCommonEventFactory.interactBlockEventCancelled = false;
-        return result;
+        return actionResult;
     }
 
     @Nullable

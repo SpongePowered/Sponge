@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.world.dragon;
 
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -55,7 +54,7 @@ public final class DragonPhase extends TrackingPhase {
     }
 
     @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
+    public void unwind(IPhaseState state, PhaseContext phaseContext) {
 
     }
 }

@@ -66,6 +66,7 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.AABB;
@@ -90,6 +91,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -448,7 +450,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
     public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote || ((IMixinWorldServer) this.worldObj).getCauseTracker().getCurrentPhaseData().state.ignoresEntityCollisions()) {
+        if (this.worldObj.isRemote || CauseTracker.getInstance().getCurrentPhaseData().state.ignoresEntityCollisions()) {
             return;
         }
 
@@ -457,8 +459,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, entityIn, listToFill);
-        final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-        final PhaseData peek = causeTracker.getCurrentPhaseData();
+        final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
 
         if (event == null || event.isCancelled()) {
             if (event == null && !peek.state.getPhase().isTicking(peek.state)) {
@@ -472,7 +473,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"))
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote || ((IMixinWorldServer) this.worldObj).getCauseTracker().getCurrentPhaseData().state.ignoresEntityCollisions()) {
+        if (this.worldObj.isRemote || CauseTracker.getInstance().getCurrentPhaseData().state.ignoresEntityCollisions()) {
             return;
         }
 
@@ -481,8 +482,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, null, listToFill);
-        final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-        final PhaseData peek = causeTracker.getCurrentPhaseData();
+        final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
 
         if (event == null || event.isCancelled()) {
             if (event == null && !peek.state.getPhase().isTicking(peek.state)) {
@@ -580,18 +580,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             if (!this.worldObj.isRemote) {
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
                 if (currentState.getBlock() != newState.getBlock()) {
-                    final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-                    final PhaseData peek = causeTracker.getCurrentPhaseData();
-                    // We need to capture this block position if necessary
-                    // TODO - make sure that this is not always necessary
-                    if (peek.state.requiresBlockPosTracking()) {
-                        peek.context.getCaptureBlockPos().setPos(pos);
-                    }
                     currentBlock.breakBlock(this.worldObj, pos, currentState);
-                    // And then un-set the captured block position
-                    if (peek.state.requiresBlockPosTracking()) {
-                        peek.context.getCaptureBlockPos().setPos(null);
-                    }
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
                 // still work by themselves in vanilla.
@@ -641,7 +630,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             // Sponge start - Ignore block activations during block placement captures unless it's
             // a BlockContainer. Prevents blocks such as TNT from activating when
             // cancelled.
-            final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final boolean requiresCapturing = peek.state.getPhase().requiresBlockCapturing(peek.state);
             if (!requiresCapturing || SpongeImplHooks.hasBlockTileEntity(newBlock, newState)) {
@@ -939,8 +928,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkGenerator;populate(II)V"))
     private void onChunkPopulate(IChunkGenerator generator, CallbackInfo callbackInfo) {
         if (CauseTracker.ENABLED && !this.worldObj.isRemote) {
-            final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+                    .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, this.world))
                     .addCaptures()
                     .complete());
         }
@@ -949,8 +939,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setChunkModified()V"))
     private void onChunkPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
         if (CauseTracker.ENABLED && !this.worldObj.isRemote) {
-            ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
-
+            CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
         }
     }
 

@@ -52,7 +52,9 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot> implements EntityArchetype {
 
@@ -103,7 +105,9 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         this.data.removeTag("Dimension");
 
         final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entity);
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(spongeEntity), world);
+        final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>();
+        entities.add(spongeEntity);
+        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(cause, entities, spongeEntity.getWorld());
         if (!event.isCancelled()) {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
             entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);

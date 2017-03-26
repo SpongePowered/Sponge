@@ -44,7 +44,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -83,7 +82,7 @@ class BlockEventTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final Optional<User> notifier = context.getNotifier();
         final Optional<User> owner = context.getOwner();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
@@ -94,14 +93,14 @@ class BlockEventTickPhaseState extends TickPhaseState {
         entities.add(entity);
         final SpawnEntityEvent
                 spawnEntityEvent =
-                SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+                SpongeEventFactory.createSpawnEntityEvent(cause, entities, entity.getWorld());
         SpongeImpl.postEvent(spawnEntityEvent);
         if (!spawnEntityEvent.isCancelled()) {
             for (Entity anEntity : spawnEntityEvent.getEntities()) {
                 if (entityCreator != null) {
                     EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
                 }
-                causeTracker.getMixinWorld().forceSpawnEntity(anEntity);
+                EntityUtil.getMixinWorld(anEntity).forceSpawnEntity(anEntity);
             }
             return true;
         }
@@ -109,7 +108,8 @@ class BlockEventTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
+    public void handleBlockChangeWithUser(@Nullable BlockChange blockChange,
+        Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
         final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
         final Location<World> changedLocation = snapshotTransaction.getOriginal().getLocation().get();
         final Vector3d changedPosition = changedLocation.getPosition();
@@ -122,12 +122,12 @@ class BlockEventTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+    public void processPostTick(PhaseContext phaseContext) {
         final Optional<User> notifier = phaseContext.getNotifier();
         final Optional<User> owner = phaseContext.getOwner();
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
         phaseContext.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
+                .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
         phaseContext.getCapturedItemsSupplier()
                 .ifPresentAndNotEmpty(items -> {
                     final Cause cause = Cause.source(InternalSpawnTypes.SpawnCauses.CUSTOM_SPAWN)
@@ -138,19 +138,19 @@ class BlockEventTickPhaseState extends TickPhaseState {
                     }
                     final SpawnEntityEvent
                             spawnEntityEvent =
-                            SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld());
+                            SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, capturedEntities.get(0).getWorld());
                     SpongeImpl.postEvent(spawnEntityEvent);
                     for (Entity entity : spawnEntityEvent.getEntities()) {
                         if (entityCreator != null) {
                             EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
                         }
-                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                     }
                 });
     }
 
     @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
         LocatableBlock locatable =  context.getSource(LocatableBlock.class).orElse(null);
         if (locatable == null) {
             TileEntity tileEntity = context.getSource(TileEntity.class).orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a TileEntity!", context));

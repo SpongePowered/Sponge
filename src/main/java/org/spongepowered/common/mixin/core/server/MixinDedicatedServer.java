@@ -104,7 +104,7 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
     public boolean isBlockProtected(net.minecraft.world.World worldIn, BlockPos pos, EntityPlayer playerIn) {
         final WorldServer worldServer = (WorldServer) worldIn;
         // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
-        final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = peek.state;
         if (phaseState == null || !phaseState.isInteraction()) {

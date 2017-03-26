@@ -67,6 +67,7 @@ import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -105,9 +106,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Inject(method = "markDirty", at = @At(value = "HEAD"))
     public void onMarkDirty(CallbackInfo ci) {
         if (this.worldObj != null && !this.worldObj.isRemote) {
-            IMixinWorldServer world = (IMixinWorldServer) this.worldObj;
             // This handles transfers to this TE from a source such as a Hopper
-            world.getCauseTracker().getCurrentPhaseData().context.getSource(TileEntity.class).ifPresent(currentTick -> {
+            CauseTracker.getInstance().getCurrentPhaseData().context.getSource(TileEntity.class).ifPresent(currentTick -> {
                 if (currentTick != this) {
                     net.minecraft.tileentity.TileEntity te = (net.minecraft.tileentity.TileEntity) currentTick;
 //                    world.getCauseTracker().trackTargetBlockFromSource(te, te.getPos(), this.getBlockType(), this.pos, PlayerTracker.Type.NOTIFIER);

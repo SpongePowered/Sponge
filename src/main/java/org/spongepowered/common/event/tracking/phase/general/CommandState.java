@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import net.minecraft.command.ICommandSender;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -37,15 +39,16 @@ import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhaseState;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,6 +57,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 final class CommandState extends GeneralState {
 
@@ -68,11 +73,17 @@ final class CommandState extends GeneralState {
     }
 
     @Override
-    void unwind(CauseTracker causeTracker, PhaseContext phaseContext) {
+    void unwind(PhaseContext phaseContext) {
         final CommandSource sender = phaseContext.getSource(CommandSource.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
+        final World world;
+        if (sender instanceof ICommandSender) {
+            world = ((World) ((ICommandSender) sender).getEntityWorld());
+        } else {
+            world = (World) WorldManager.getWorldByDimensionId(0).get(); // Overworld should always be loaded.
+        }
         phaseContext.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(list -> TrackingUtil.processBlockCaptures(list, causeTracker, this, phaseContext));
+                .ifPresentAndNotEmpty(list -> TrackingUtil.processBlockCaptures(list, this, phaseContext));
         phaseContext.getCapturedEntitySupplier()
                 .ifPresentAndNotEmpty(entities -> {
                     // TODO the entity spawn causes are not likely valid, need to investigate further.
@@ -81,7 +92,7 @@ final class CommandState extends GeneralState {
                                     .type(InternalSpawnTypes.PLACEMENT)
                                     .build())
                             .build();
-                    final SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+                    final SpawnEntityEvent spawnEntityEvent = SpongeEventFactory.createSpawnEntityEvent(cause, entities, world);
                     SpongeImpl.postEvent(spawnEntityEvent);
                     if (!spawnEntityEvent.isCancelled()) {
                         final boolean isPlayer = sender instanceof Player;
@@ -90,7 +101,7 @@ final class CommandState extends GeneralState {
                             if (isPlayer) {
                                 EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
                             }
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                         }
                     }
                 });
@@ -98,7 +109,15 @@ final class CommandState extends GeneralState {
                 .ifPresentAndNotEmpty(uuidItemStackMultimap -> {
                     for (Map.Entry<UUID, Collection<ItemDropData>> entry : uuidItemStackMultimap.asMap().entrySet()) {
                         final UUID key = entry.getKey();
-                        final Optional<Entity> affectedEntity = causeTracker.getWorld().getEntity(key);
+                        @Nullable net.minecraft.entity.Entity foundEntity = null;
+                        for (WorldServer worldServer : WorldManager.getWorlds()) {
+                            final net.minecraft.entity.Entity entityFromUuid = worldServer.getEntityFromUuid(key);
+                            if (entityFromUuid != null) {
+                                foundEntity = entityFromUuid;
+                                break;
+                            }
+                        }
+                        final Optional<Entity> affectedEntity = Optional.ofNullable((Entity) foundEntity);
                         if (!affectedEntity.isPresent()) {
                             continue;
                         }
@@ -110,9 +129,10 @@ final class CommandState extends GeneralState {
                         items.addAll(itemStacks);
                         itemStacks.clear();
 
+                        final WorldServer minecraftWorld = EntityUtil.getMinecraftWorld(affectedEntity.get());
                         if (!items.isEmpty()) {
                             final List<Entity> itemEntities = items.stream()
-                                    .map(data -> data.create(causeTracker.getMinecraftWorld()))
+                                    .map(data -> data.create(minecraftWorld))
                                     .map(EntityUtil::fromNative)
                                     .collect(Collectors.toList());
                             final Cause cause = Cause.source(EntitySpawnCause.builder()
@@ -124,7 +144,7 @@ final class CommandState extends GeneralState {
                                     .build();
                             final DropItemEvent.Destruct
                                     destruct =
-                                    SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld());
+                                    SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, world);
                             SpongeImpl.postEvent(destruct);
                             if (!destruct.isCancelled()) {
                                 final boolean isPlayer = sender instanceof Player;
@@ -133,7 +153,7 @@ final class CommandState extends GeneralState {
                                     if (isPlayer) {
                                         EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
                                     }
-                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                                 }
                             }
 
@@ -143,7 +163,7 @@ final class CommandState extends GeneralState {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         return context.getCapturedEntities().add(entity);
     }
 

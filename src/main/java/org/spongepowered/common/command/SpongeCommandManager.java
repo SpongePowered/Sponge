@@ -280,17 +280,13 @@ public class SpongeCommandManager implements CommandManager {
         try {
             try {
                 if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-                    final String commandUsed = commandLine;
-                    Sponge.getServer().getWorlds().forEach(world -> {
-                        final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
-                        mixinWorld.getCauseTracker().switchToPhase(GeneralPhase.State.COMMAND, PhaseContext.start()
-                                .add(NamedCause.source(source))
-                                // unused, to be removed and re-located when phase context is cleaned up
-                                //.add(NamedCause.of(InternalNamedCauses.General.COMMAND, commandUsed))
-                                .addCaptures()
-                                .addEntityDropCaptures()
-                                .complete());
-                    });
+                    CauseTracker.getInstance().switchToPhase(GeneralPhase.State.COMMAND, PhaseContext.start()
+                        .add(NamedCause.source(source))
+                        // unused, to be removed and re-located when phase context is cleaned up
+                        //.add(NamedCause.of(InternalNamedCauses.General.COMMAND, commandUsed))
+                        .addCaptures()
+                        .addEntityDropCaptures()
+                        .complete());
                 }
                 final CommandResult result = this.dispatcher.process(source, commandLine);
                 this.completeCommandPhase();
@@ -397,17 +393,7 @@ public class SpongeCommandManager implements CommandManager {
 
     private void completeCommandPhase() {
         if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-            Sponge.getServer().getWorlds().forEach(world -> {
-                final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
-                try {
-                    mixinWorld.getCauseTracker().completePhase(GeneralPhase.State.COMMAND);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    // Basically, we don't do anything because the worlds that were created during the
-                    // command being executed. However, we still will process any additional captures that took place
-                    // during the command's phase.
-                }
-            });
+            CauseTracker.getInstance().completePhase(GeneralPhase.State.COMMAND);
         }
     }
 }

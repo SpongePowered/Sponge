@@ -35,7 +35,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -54,10 +54,12 @@ class DimensionTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+    public void processPostTick(PhaseContext phaseContext) {
+        final World spongeWorld = phaseContext.firstNamed(InternalNamedCauses.WorldGeneration.WORLD, World.class)
+            .orElseThrow(TrackingUtil.throwWithContext("Expected a world during dimension tick!", phaseContext));
         phaseContext.getCapturedBlockSupplier()
                 .ifPresentAndNotEmpty(blockSnapshots -> {
-                    TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
+                    TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
                 });
 
         phaseContext.getCapturedEntitySupplier()
@@ -68,11 +70,11 @@ class DimensionTickPhaseState extends TickPhaseState {
                             .build())
                             .build();
                     final SpawnEntityEvent event =
-                            SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+                            SpongeEventFactory.createSpawnEntityEvent(cause, entities, spongeWorld);
                     SpongeImpl.postEvent(event);
                     if (!event.isCancelled()) {
                         for (Entity entity : event.getEntities()) {
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                         }
                     }
 
@@ -88,17 +90,17 @@ class DimensionTickPhaseState extends TickPhaseState {
                         capturedEntities.add(EntityUtil.fromNative(entity));
                     }
                     final SpawnEntityEvent event =
-                            SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld());
+                            SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, spongeWorld);
                     SpongeImpl.postEvent(event);
                     if (!event.isCancelled()) {
                         for (Entity entity : event.getEntities()) {
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                         }
                     }
                 });
     }
     @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
 
     }
 
@@ -113,7 +115,7 @@ class DimensionTickPhaseState extends TickPhaseState {
 
      */
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final WorldServer minecraftWorld = (WorldServer) minecraftEntity.worldObj;
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
@@ -126,12 +128,11 @@ class DimensionTickPhaseState extends TickPhaseState {
                 .type(InternalSpawnTypes.PLACEMENT)
                 .build())
                 .build();
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause,
-                entities, (World) minecraftWorld);
+        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, entities, (World) minecraftWorld);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled() && event.getEntities().size() > 0) {
             for (Entity item: event.getEntities()) {
-                causeTracker.getMixinWorld().forceSpawnEntity(item);
+                EntityUtil.getMixinWorld(entity).forceSpawnEntity(item);
             }
             return true;
         }

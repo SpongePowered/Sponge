@@ -73,18 +73,13 @@ public class SyncScheduler extends SchedulerBase {
 
     @Override
     protected void executeTaskRunnable(ScheduledTask task, Runnable runnable) {
-        for (WorldServer worldServer : WorldManager.getWorlds()) {
-            final CauseTracker otherCauseTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
-            otherCauseTracker.switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
-                    .add(NamedCause.source(task))
-                    .addCaptures()
-                    .complete()
-            );
-        }
+        CauseTracker.getInstance().switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
+            .add(NamedCause.source(task))
+            .addCaptures()
+            .complete()
+        );
         runnable.run();
-        for (WorldServer worldServer : WorldManager.getWorlds()) {
-            ((IMixinWorldServer) worldServer).getCauseTracker().completePhase(PluginPhase.State.SCHEDULED_TASK);
-        }
+        CauseTracker.getInstance().completePhase(PluginPhase.State.SCHEDULED_TASK);
     }
 
 }

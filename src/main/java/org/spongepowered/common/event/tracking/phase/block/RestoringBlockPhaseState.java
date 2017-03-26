@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
 final class RestoringBlockPhaseState extends BlockPhaseState {
@@ -34,7 +33,7 @@ final class RestoringBlockPhaseState extends BlockPhaseState {
 
     @SuppressWarnings("unchecked")
     @Override
-    void unwind(CauseTracker causeTracker, PhaseContext phaseContext) {
+    void unwind(PhaseContext phaseContext) {
 
     }
 
