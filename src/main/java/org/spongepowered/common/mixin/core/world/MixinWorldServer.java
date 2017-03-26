@@ -1580,11 +1580,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // Sponge Start - Cause tracking
         this.processingExplosion = true;
         if (CauseTracker.ENABLED) {
-            final PhaseContext phaseContext = PhaseContext.start()
+            PhaseContext phaseContext = PhaseContext.start()
                     .explosion()
                     .addEntityCaptures()
                     .addEntityDropCaptures()
                     .addBlockCaptures();
+            if (entityIn != null) {
+                phaseContext.add(NamedCause.source(entityIn));
+            } else {
+                phaseContext.add(NamedCause.source(this));
+            }
             final PhaseData currentPhaseData = this.causeTracker.getCurrentPhaseData();
             currentPhaseData.state.getPhase().appendContextPreExplosion(phaseContext, currentPhaseData);
             phaseContext.complete();
