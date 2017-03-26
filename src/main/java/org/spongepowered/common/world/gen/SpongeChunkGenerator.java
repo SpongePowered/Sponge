@@ -293,7 +293,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         IMixinWorldServer world = (IMixinWorldServer) this.world;
         world.getTimingsHandler().chunkPopulate.startTimingIfSync();
         this.chunkGeneratorTiming.startTimingIfSync();
-        final CauseTracker causeTracker = world.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final Cause populateCause = Cause.of(NamedCause.source(this));
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -357,6 +357,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             }
             if (CauseTracker.ENABLED) {
                 causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()
+                        .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, world))
                         .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, type))
                         .addEntityCaptures()
                         .complete());
@@ -403,9 +404,10 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {
                 if (populator instanceof StructureOceanMonument) {
-                    final CauseTracker causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
+                    final CauseTracker causeTracker = CauseTracker.getInstance();
                     if (CauseTracker.ENABLED) {
                         causeTracker.switchToPhase(GenerationPhase.State.POPULATOR_RUNNING, PhaseContext.start()
+                                .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, this.world))
                                 .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType()))
                                 .addEntityCaptures()
                                 .complete());

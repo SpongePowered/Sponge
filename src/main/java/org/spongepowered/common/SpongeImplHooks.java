@@ -45,6 +45,7 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.Explosion;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.Teleporter;
@@ -60,6 +61,7 @@ import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.mixin.core.world.MixinExplosion;
 import org.spongepowered.common.mixin.core.world.MixinWorldType;
 import org.spongepowered.common.world.WorldManager;
 
@@ -245,20 +247,22 @@ public final class SpongeImplHooks {
         return false;
     }
 
+    @Nullable
     public static Object onUtilRunTask(FutureTask<?> task, Logger logger) {
-        for (WorldServer worldServer : WorldManager.getWorlds()) {
-            final CauseTracker otherCauseTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
-            otherCauseTracker.switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
-                    .add(NamedCause.source(task))
-                    .addCaptures()
-                    .complete()
-            );
+        final CauseTracker causeTracker = CauseTracker.getInstance();
+        causeTracker.switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
+            .add(NamedCause.source(task))
+            .addCaptures()
+            .complete()
+        );
+        try {
+            final Object o = Util.runTask(task, logger);
+            causeTracker.completePhase(PluginPhase.State.SCHEDULED_TASK);
+            return o;
+        } catch (Exception e) {
+            causeTracker.abortCurrentPhase(e);
+            return null;
         }
-        Object value = Util.runTask(task, logger);
-        for (WorldServer worldServer : WorldManager.getWorlds()) {
-            ((IMixinWorldServer) worldServer).getCauseTracker().completePhase(PluginPhase.State.SCHEDULED_TASK);
-        }
-        return value;
     }
 
     public static void onEntityError(Entity entity, CrashReport crashReport) {
@@ -267,5 +271,10 @@ public final class SpongeImplHooks {
 
     public static void onTileEntityError(TileEntity tileEntity, CrashReport crashReport) {
         throw new ReportedException(crashReport);
+    }
+
+    public static void blockExploded(Block block, World world, BlockPos blockpos, Explosion explosion) {
+        world.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 2);
+        block.onBlockDestroyedByExplosion(world, blockpos, explosion);
     }
 }

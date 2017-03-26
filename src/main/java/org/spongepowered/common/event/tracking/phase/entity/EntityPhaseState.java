@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -50,7 +49,7 @@ public abstract class EntityPhaseState implements IPhaseState {
         return null;
     }
 
-    void unwind(CauseTracker causeTracker, PhaseContext context) {
+    void unwind(PhaseContext context) {
 
     }
 }

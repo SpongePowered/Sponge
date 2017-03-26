@@ -30,12 +30,12 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 
@@ -64,8 +64,8 @@ public final class TickPhase extends TrackingPhase {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext context) {
-        ((TickPhaseState) state).processPostTick(causeTracker, context);
+    public void unwind(IPhaseState state, PhaseContext context) {
+        ((TickPhaseState) state).processPostTick(context);
     }
 
     public static TickPhase getInstance() {
@@ -80,14 +80,14 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
-        return ((TickPhaseState) phaseState).spawnEntityOrCapture(causeTracker, context, entity, chunkX, chunkZ);
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        return ((TickPhaseState) phaseState).spawnEntityOrCapture(context, entity, chunkX, chunkZ);
     }
 
     @Override
-    public void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
-            ArrayList<Entity> entities) {
-        ((TickPhaseState) unwindingState).processPostSpawns(causeTracker, phaseContext, entities);
+    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext phaseContext,
+        ArrayList<Entity> entities) {
+        ((TickPhaseState) unwindingState).processPostSpawns(phaseContext, entities);
 
     }
 
@@ -100,17 +100,16 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+    public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder) {
     }
 
     @Override
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
-        ((TickPhaseState) phaseState).associateBlockEventNotifier(context, causeTracker, pos, blockEvent);
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
+        ((TickPhaseState) phaseState).associateBlockEventNotifier(context, pos, blockEvent);
     }
 
     @Override
-    public void appendNotifierPreBlockTick(CauseTracker causeTracker, BlockPos pos, IPhaseState currentState, PhaseContext context,
-            PhaseContext newContext) {
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
         if (currentState == Tick.BLOCK || currentState == Tick.RANDOM_BLOCK) {
 
         }

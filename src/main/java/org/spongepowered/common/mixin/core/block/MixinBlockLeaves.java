@@ -79,7 +79,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
     public boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldIn;
-        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final boolean isBlockAlready = CauseTracker.ENABLED && causeTracker.getCurrentState().getPhase() != TrackingPhases.BLOCK;
         final IPhaseState currentState = causeTracker.getCurrentPhaseData().state;
         final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);
@@ -118,7 +118,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         // Sponge Start - Cause tracking
         if (CauseTracker.ENABLED && !worldIn.isRemote) {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldIn;
-            final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState currentState = peek.state;
             final boolean isWorldGen = currentState.getPhase().isWorldGeneration(currentState);

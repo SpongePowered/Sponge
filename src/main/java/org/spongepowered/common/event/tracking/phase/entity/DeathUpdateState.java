@@ -37,7 +37,6 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -56,7 +55,7 @@ final class DeathUpdateState extends EntityPhaseState {
     }
 
     @Override
-    void unwind(CauseTracker causeTracker, PhaseContext context) {
+    void unwind(PhaseContext context) {
         final Entity dyingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
         context.getCapturedItemsSupplier()
@@ -75,11 +74,11 @@ final class DeathUpdateState extends EntityPhaseState {
                     }
                     final DropItemEvent.Destruct
                             destruct =
-                            SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld());
+                            SpongeEventFactory.createDropItemEventDestruct(cause, entities);
                     SpongeImpl.postEvent(destruct);
                     if (!destruct.isCancelled()) {
                         for (Entity entity : destruct.getEntities()) {
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                         }
                     }
                 });
@@ -97,11 +96,11 @@ final class DeathUpdateState extends EntityPhaseState {
                                         .build();
                                 final SpawnEntityEvent
                                         event =
-                                        SpongeEventFactory.createSpawnEntityEvent(cause, experience, causeTracker.getWorld());
+                                        SpongeEventFactory.createSpawnEntityEvent(cause, experience);
                                 SpongeImpl.postEvent(event);
                                 if (!event.isCancelled()) {
                                     for (Entity entity : event.getEntities()) {
-                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                                     }
                                 }
                             }
@@ -118,11 +117,11 @@ final class DeathUpdateState extends EntityPhaseState {
                                         .build();
                                 final SpawnEntityEvent
                                         event1 =
-                                        SpongeEventFactory.createSpawnEntityEvent(cause, other, causeTracker.getWorld());
+                                        SpongeEventFactory.createSpawnEntityEvent(cause, other);
                                 SpongeImpl.postEvent(event1);
                                 if (!event1.isCancelled()) {
                                     for (Entity entity : event1.getEntities()) {
-                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                                     }
                                 }
                             }
@@ -146,7 +145,7 @@ final class DeathUpdateState extends EntityPhaseState {
             printer.trace(System.err);
         });
         context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, causeTracker, this, context));
+                .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
 
     }
 }

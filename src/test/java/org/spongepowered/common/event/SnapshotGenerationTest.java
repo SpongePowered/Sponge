@@ -80,7 +80,7 @@ public class SnapshotGenerationTest {
         this.entity = Mockito.mock(Entity.class, withSettings().defaultAnswer(Mockito.RETURNS_MOCKS));
         World world = Mockito.mock(World.class);
 
-        this.event = SpongeEventFactory.createSpawnEntityEvent(cause, Lists.newArrayList(this.entity), world);
+        this.event = SpongeEventFactory.createSpawnEntityEvent(cause, Lists.newArrayList(this.entity));
     }
 
     @Test

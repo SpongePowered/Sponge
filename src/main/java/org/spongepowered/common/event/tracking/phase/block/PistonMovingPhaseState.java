@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.MutableWrapper;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -54,9 +53,9 @@ final class PistonMovingPhaseState extends BlockPhaseState {
 
     @SuppressWarnings("unchecked")
     @Override
-    void unwind(CauseTracker causeTracker, PhaseContext phaseContext) {
+    void unwind(PhaseContext phaseContext) {
         final List<BlockSnapshot> capturedBlocks = phaseContext.getCapturedBlocks();
-        if (!TrackingUtil.processBlockCaptures(capturedBlocks, causeTracker, this, phaseContext)) {
+        if (!TrackingUtil.processBlockCaptures(capturedBlocks, this, phaseContext)) {
             phaseContext.firstNamed(InternalNamedCauses.Piston.DUMMY_CALLBACK, MutableWrapper.class)
                     .map(wrapper -> ((MutableWrapper<CallbackInfoReturnable<Boolean>>) wrapper).getObj())
                     .ifPresent(callback -> callback.setReturnValue(false));
@@ -82,11 +81,11 @@ final class PistonMovingPhaseState extends BlockPhaseState {
                     }
                     final DropItemEvent.Destruct
                             event =
-                            SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld());
+                            SpongeEventFactory.createDropItemEventDestruct(cause, entities);
                     SpongeImpl.postEvent(event);
                     if (!event.isCancelled()) {
                         for (Entity entity : event.getEntities()) {
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                         }
                     }
                 });
@@ -105,7 +104,7 @@ final class PistonMovingPhaseState extends BlockPhaseState {
                             .build();
                     final SpawnEntityEvent
                             event =
-                            SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld());
+                            SpongeEventFactory.createSpawnEntityEvent(cause, entities);
                     SpongeImpl.postEvent(event);
                     final User user = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
                     if (!event.isCancelled()) {
@@ -113,7 +112,7 @@ final class PistonMovingPhaseState extends BlockPhaseState {
                             if (user != null) {
                                 EntityUtil.toMixin(entity).setCreator(user.getUniqueId());
                             }
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                         }
                     }
                 });

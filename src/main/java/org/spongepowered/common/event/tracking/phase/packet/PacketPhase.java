@@ -79,6 +79,7 @@ import org.spongepowered.common.event.tracking.phase.packet.drag.PrimaryDragInve
 import org.spongepowered.common.event.tracking.phase.packet.drag.SecondaryDragInventoryStopState;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -298,7 +299,7 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
             int chunkZ) {
         return ((IPacketState) phaseState).shouldCaptureEntity()
                ? context.getCapturedEntities().add(entity)
@@ -307,7 +308,8 @@ public final class PacketPhase extends TrackingPhase {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext phaseContext) {
+    public void unwind(IPhaseState phaseState,
+        PhaseContext phaseContext) {
         if (phaseState == General.INVALID) { // Invalid doesn't capture any packets.
             return;
         }
@@ -335,9 +337,9 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
-    public void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
-            ArrayList<Entity> entities) {
-        ((IPacketState) unwindingState).postSpawnEntities(causeTracker, phaseContext, entities);
+    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext phaseContext,
+        ArrayList<Entity> entities) {
+        ((IPacketState) unwindingState).postSpawnEntities(phaseContext, entities);
     }
 
     @Override
@@ -346,8 +348,8 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
-        ((BasicPacketState) phaseState).associateBlockEventNotifier(context, causeTracker, pos, blockEvent);
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
+        ((BasicPacketState) phaseState).associateBlockEventNotifier(context, mixinWorld, pos, blockEvent);
     }
 
     // Inventory packet specific methods

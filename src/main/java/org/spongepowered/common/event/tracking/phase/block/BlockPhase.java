@@ -69,16 +69,16 @@ public final class BlockPhase extends TrackingPhase {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        ((BlockPhaseState) state).unwind(causeTracker, phaseContext);
+    public void unwind(IPhaseState state, PhaseContext phaseContext) {
+        ((BlockPhaseState) state).unwind(phaseContext);
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
             int chunkZ) {
         return this.allowEntitySpawns(phaseState)
                ? context.getCapturedEntities().add(entity)
-               : super.spawnEntityOrCapture(causeTracker, phaseState, context, entity, chunkX, chunkZ);
+               : super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
     }
 
     @Override

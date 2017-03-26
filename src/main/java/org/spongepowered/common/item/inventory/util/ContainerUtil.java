@@ -139,8 +139,7 @@ public final class ContainerUtil {
      * @param inventory The inventory to drop items from
      */
     public static void performBlockInventoryDrops(WorldServer worldServer, double x, double y, double z, IInventory inventory) {
-        final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldServer;
-        final PhaseData currentPhase = mixinWorld.getCauseTracker().getCurrentPhaseData();
+        final PhaseData currentPhase = CauseTracker.getInstance().getCurrentPhaseData();
         final IPhaseState currentState = currentPhase.state;
         if (CauseTracker.ENABLED && currentState.tracksBlockSpecificDrops()) {
             final PhaseContext context = currentPhase.context;

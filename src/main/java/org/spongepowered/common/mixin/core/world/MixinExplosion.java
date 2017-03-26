@@ -26,17 +26,23 @@ package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
+import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentProtection;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Blocks;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -54,18 +60,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -81,6 +88,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
     @Shadow @Final private List<BlockPos> affectedBlockPositions;
     @Shadow @Final private Map<EntityPlayer, Vec3d> playerKnockbackMap;
+    @Shadow @Final private Random explosionRNG;
     @Shadow public boolean isFlaming;
     @Shadow public boolean isSmoking;
     @Shadow public net.minecraft.world.World world;
@@ -136,7 +144,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
             builder.named(NamedCause.of("Igniter", igniter));
         }
         if (CauseTracker.ENABLED) {
-            final PhaseData phaseData = ((IMixinWorldServer) this.world).getCauseTracker().getCurrentPhaseData();
+            final PhaseData phaseData = CauseTracker.getInstance().getCurrentPhaseData();
             phaseData.state.getPhase().appendExplosionCause(phaseData);
         }
         return this.createdCause = builder.build();
@@ -299,6 +307,105 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
             }
         }
     }
+
+    /**
+     * @author gabizou - March 26th, 2017
+     * @reason Since forge will attempt to call the normalized method for modded blocks,
+     * we must artificially capture the block position for any block drops or changes during the
+     * explosion phase.
+     *
+     * Does the second part of the explosion (sound, particles, drop spawn)
+     */
+    @Overwrite
+    public void doExplosionB(boolean spawnParticles) {
+        this.world.playSound((EntityPlayer) null, this.explosionX, this.explosionY, this.explosionZ, SoundEvents.ENTITY_GENERIC_EXPLODE,
+            SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
+
+        if (this.explosionSize >= 2.0F && this.isSmoking) {
+            if (this.world instanceof WorldServer) {
+                ((WorldServer) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_HUGE,
+                    this.explosionX, this.explosionY, this.explosionZ,
+                    1,
+                    0, 0, 0,
+                    0.1D);
+            } else {
+                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE,
+                    this.explosionX, this.explosionY, this.explosionZ,
+                    1.0D, 0.0D, 0.0D);
+            }
+        } else {
+            if (this.world instanceof WorldServer) {
+                ((WorldServer) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_LARGE,
+                    this.explosionX, this.explosionY, this.explosionZ,
+                    1,
+                    0, 0, 0,
+                    0.1D);
+            } else {
+                this.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE,
+                    this.explosionX, this.explosionY, this.explosionZ,
+                    1.0D, 0.0D, 0.0D);
+            }
+        }
+
+        if (this.isSmoking) {
+            for (BlockPos blockpos : this.affectedBlockPositions) {
+                IBlockState iblockstate = this.world.getBlockState(blockpos);
+                Block block = iblockstate.getBlock();
+
+                if (spawnParticles) {
+                    double d0 = (double) ((float) blockpos.getX() + this.world.rand.nextFloat());
+                    double d1 = (double) ((float) blockpos.getY() + this.world.rand.nextFloat());
+                    double d2 = (double) ((float) blockpos.getZ() + this.world.rand.nextFloat());
+                    double d3 = d0 - this.explosionX;
+                    double d4 = d1 - this.explosionY;
+                    double d5 = d2 - this.explosionZ;
+                    double d6 = (double) MathHelper.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
+                    d3 = d3 / d6;
+                    d4 = d4 / d6;
+                    d5 = d5 / d6;
+                    double d7 = 0.5D / (d6 / (double) this.explosionSize + 0.1D);
+                    d7 = d7 * (double) (this.world.rand.nextFloat() * this.world.rand.nextFloat() + 0.3F);
+                    d3 = d3 * d7;
+                    d4 = d4 * d7;
+                    d5 = d5 * d7;
+                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.explosionX) / 2.0D, (d1 + this.explosionY) / 2.0D,
+                        (d2 + this.explosionZ) / 2.0D, d3, d4, d5, new int[0]);
+                    this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5, new int[0]);
+                }
+
+                if (iblockstate.getMaterial() != Material.AIR) {
+                    if (block.canDropFromExplosion((net.minecraft.world.Explosion) (Object) this)) {
+                        block.dropBlockAsItemWithChance(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.explosionSize, 0);
+                    }
+
+                    // Sponge Start - Track the block position being destroyed
+                    final CauseTracker causeTracker = CauseTracker.getInstance();
+                    final PhaseData peek = causeTracker.getCurrentPhaseData();
+                    // We need to capture this block position if necessary
+                    if (peek.state.requiresBlockPosTracking()) {
+                        peek.context.getCaptureBlockPos().setPos(blockpos);
+                    }
+                    // Because we need to hook into forge.
+                    SpongeImplHooks.blockExploded(block, this.world, blockpos, (net.minecraft.world.Explosion) (Object) this);
+                    // And then un-set the captured block position
+                    if (peek.state.requiresBlockPosTracking()) {
+                        peek.context.getCaptureBlockPos().setPos(null);
+                    }
+                    // Sponge End
+                }
+            }
+        }
+
+        if (this.isFlaming) {
+            for (BlockPos blockpos1 : this.affectedBlockPositions) {
+                if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock()
+                    && this.explosionRNG.nextInt(3) == 0) {
+                    this.world.setBlockState(blockpos1, Blocks.FIRE.getDefaultState());
+                }
+            }
+        }
+    }
+
 
     @Nullable
     private Location<World> location;

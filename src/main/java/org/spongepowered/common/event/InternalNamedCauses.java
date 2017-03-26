@@ -34,6 +34,7 @@ public final class InternalNamedCauses {
         public static final String CAPTURED_POPULATOR = "PopulatorType";
         public static final String CHUNK_PROVIDER = "ChunkProvider";
         public static final String STRUCTURE = "Structure";
+        public static final String WORLD = "World";
 
         private WorldGeneration() {
         }

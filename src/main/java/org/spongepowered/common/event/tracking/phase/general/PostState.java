@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -46,12 +45,12 @@ final class PostState extends GeneralState {
         return false; // TODO - check that this really is needed.
     }
     @Override
-    void unwind(CauseTracker causeTracker, PhaseContext context) {
+    void unwind(PhaseContext context) {
         final IPhaseState unwindingState = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no phase found!", context));
         final PhaseContext unwindingContext = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be unwinding a phase, but no context found!", context));
-        this.getPhase().postDispatch(causeTracker, unwindingState, unwindingContext, context);
+        this.getPhase().postDispatch(unwindingState, unwindingContext, context);
     }
 
     public void appendContextPreExplosion(PhaseContext phaseContext, PhaseData currentPhaseData) {
@@ -65,7 +64,7 @@ final class PostState extends GeneralState {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         return context.getCapturedEntities().add(entity);
     }
 }

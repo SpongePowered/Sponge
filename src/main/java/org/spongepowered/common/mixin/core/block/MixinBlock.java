@@ -250,13 +250,13 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)
     public void onDropBlockAsItemWithChanceHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
         if (!worldIn.isRemote && worldIn instanceof IMixinWorldServer) {
-            if (((IMixinWorldServer) worldIn).getCauseTracker().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
+            if (CauseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
                 ci.cancel();
                 return;
             }
 
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
-            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             final IPhaseState currentState = causeTracker.getCurrentState();
             final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState);
             if (shouldEnterBlockDropPhase) {
@@ -287,8 +287,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "RETURN"), cancellable = true)
     public void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
         if (!worldIn.isRemote && worldIn instanceof IMixinWorldServer) {
-            final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
-            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             final IPhaseState currentState = causeTracker.getCurrentState();
             final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState);
             if (shouldEnterBlockDropPhase) {
@@ -299,7 +298,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "spawnAsEntity", at = @At(value = "HEAD"), cancellable = true)
     private static void onSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.item.ItemStack stack, CallbackInfo ci) {
-        if (!worldIn.isRemote && ((IMixinWorldServer) worldIn).getCauseTracker().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
+        if (!worldIn.isRemote && CauseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
             ci.cancel();
         }
     }
@@ -308,8 +307,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private static boolean redirectGameRulesToCaptureItemDrops(GameRules gameRules, String argument, net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack) {
         final boolean allowTileDrops = gameRules.getBoolean(argument);
         if (allowTileDrops && worldIn instanceof IMixinWorldServer) {
-            final IMixinWorldServer mixin = (IMixinWorldServer) worldIn;
-            final PhaseData currentPhase = mixin.getCauseTracker().getCurrentPhaseData();
+            final PhaseData currentPhase = CauseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState currentState = currentPhase.state;
             if (currentState.tracksBlockSpecificDrops()) {
                 final PhaseContext context = currentPhase.context;

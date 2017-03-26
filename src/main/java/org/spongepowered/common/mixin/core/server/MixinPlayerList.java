@@ -810,7 +810,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
 
     @Redirect(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;removeEntity(Lnet/minecraft/entity/Entity;)V"))
     private void onPlayerRemoveFromWorldFromDisconnect(WorldServer world, Entity player, EntityPlayerMP playerMP) {
-        final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         causeTracker.switchToPhase(PlayerPhase.State.PLAYER_LOGOUT, PhaseContext.start()
                 .add(NamedCause.source(playerMP))
                 .addCaptures()
@@ -868,7 +868,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     }
 
     @Redirect(method = "updatePermissionLevel", at = @At(value = "INVOKE",
-            target = "net/minecraft/world/WorldServer.getWorldInfo()Lnet/minecraft/world/storage/WorldInfo;"))
+            target = "Lnet/minecraft/world/WorldServer;getWorldInfo()Lnet/minecraft/world/storage/WorldInfo;"))
     private WorldInfo onGetWorldInfo(WorldServer overworld, EntityPlayerMP player) {
         // TODO: This applies only to singleplayer, on the server canSendCommands is called with the game profile
         // We can't get the world from the game profile

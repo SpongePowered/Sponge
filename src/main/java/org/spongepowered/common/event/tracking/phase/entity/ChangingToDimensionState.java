@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.entity;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
@@ -40,7 +39,7 @@ final class ChangingToDimensionState extends EntityPhaseState {
 
     @SuppressWarnings("unchecked")
     @Override
-    void unwind(CauseTracker causeTracker, PhaseContext context) {
+    void unwind(PhaseContext context) {
 //                final MoveEntityEvent.Teleport.Portal portalEvent = context.firstNamed(InternalNamedCauses.Teleporting.TELEPORT_EVENT, MoveEntityEvent.Teleport.Portal.class)
 //                                .orElseThrow(PhaseUtil.throwWithContext("Expected to capture a portal event!", context));
 //
@@ -109,7 +108,7 @@ final class ChangingToDimensionState extends EntityPhaseState {
 //                final List<BlockSnapshot> capturedBlocks = context.getCapturedBlocks();
 //                final CauseTracker targetCauseTracker = targetMixinWorldServer.getCauseTracker();
 //                if (capturedBlocks.isEmpty()
-//                    || !GeneralFunctions.processBlockCaptures(capturedBlocks, targetCauseTracker, State.CHANGING_TO_DIMENSION, context)) {
+//                    || !GeneralFunctions.processBlockCaptures(capturedBlocks, targetCauseTracker, State.CHANGING_DIMENSION, context)) {
 //                    targetMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
 //                }
 //

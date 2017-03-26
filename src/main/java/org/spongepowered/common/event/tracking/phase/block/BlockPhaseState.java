@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -44,7 +43,7 @@ public class BlockPhaseState implements IPhaseState {
         return TrackingPhases.BLOCK;
     }
 
-    void unwind(CauseTracker causeTracker, PhaseContext context) {
+    void unwind(PhaseContext context) {
 
     }
 

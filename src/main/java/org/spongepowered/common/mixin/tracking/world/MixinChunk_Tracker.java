@@ -49,6 +49,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -105,8 +106,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         if (this.world.isRemote) {
             return;
         } else {
-            IMixinWorldServer spongeWorld = (IMixinWorldServer) this.world;
-            if (spongeWorld.getCauseTracker().getCurrentState().ignoresBlockTracking()) {
+            if (CauseTracker.getInstance().getCurrentState().ignoresBlockTracking()) {
                 // Don't track chunk gen
                 return;
             }
@@ -344,8 +344,9 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Inject(method = "onChunkLoad", at = @At("HEAD"))
     private void startChunkLoad(CallbackInfo callbackInfo) {
         if (CauseTracker.ENABLED && !this.world.isRemote) {
-            ((IMixinWorldServer) this.world).getCauseTracker().switchToPhase(GenerationPhase.State.CHUNK_LOADING, PhaseContext.start()
+            CauseTracker.getInstance().switchToPhase(GenerationPhase.State.CHUNK_LOADING, PhaseContext.start()
                 .add(NamedCause.source(this))
+                .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, this.world))
                 .addCaptures()
                 .complete());
         }
@@ -354,7 +355,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Inject(method = "onChunkLoad", at = @At("RETURN"))
     private void endChunkLoad(CallbackInfo callbackInfo) {
         if (CauseTracker.ENABLED && !this.world.isRemote) {
-            ((IMixinWorldServer) this.world).getCauseTracker().completePhase(GenerationPhase.State.CHUNK_LOADING);
+            CauseTracker.getInstance().completePhase(GenerationPhase.State.CHUNK_LOADING);
         }
     }
 

@@ -35,8 +35,8 @@ import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -71,11 +71,11 @@ abstract class TickPhaseState implements IPhaseState {
         return true;
     }
 
-    public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) { }
+    public void processPostTick(PhaseContext phaseContext) { }
 
-    public abstract void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker);
+    public abstract void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder);
 
-    public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void associateBlockEventNotifier(PhaseContext context, BlockPos pos, IMixinBlockEventData blockEvent) {
 
     }
 
@@ -88,14 +88,14 @@ abstract class TickPhaseState implements IPhaseState {
         return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.UNKNOWN).build()));
     }
 
-    public void processPostSpawns(CauseTracker causeTracker, PhaseContext phaseContext, ArrayList<Entity> entities) {
+    public void processPostSpawns(PhaseContext phaseContext, ArrayList<Entity> entities) {
         final SpawnEntityEvent
                 event =
-                SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, entities, causeTracker.getWorld());
+                SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, entities);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
             for (Entity entity : event.getEntities()) {
-                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
             }
         }
     }
@@ -104,5 +104,5 @@ abstract class TickPhaseState implements IPhaseState {
 
     }
 
-    public abstract boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ);
+    public abstract boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ);
 }

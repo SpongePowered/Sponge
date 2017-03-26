@@ -43,7 +43,6 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -76,7 +75,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
     }
 
     @Override
-    public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+    public void processPostTick(PhaseContext phaseContext) {
         final TileEntity tickingTile = phaseContext.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
         final Optional<User> notifier = phaseContext.getNotifier();
@@ -87,7 +86,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
 
             phaseContext.getCapturedBlockSupplier()
                     .ifPresentAndNotEmpty(blockSnapshots -> {
-                        TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
+                        TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
                     });
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(entities -> {
@@ -102,14 +101,14 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
                         }
                         final SpawnEntityEvent
                                 spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, causeTracker.getWorld());
+                                SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities);
                         SpongeImpl.postEvent(spawnEntityEvent);
                         if (!spawnEntityEvent.isCancelled()) {
                             for (Entity entity : spawnEntityEvent.getEntities()) {
                                 if (entityCreator != null) {
                                     EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
                                 }
-                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                             }
                         }
                     });
@@ -119,14 +118,14 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
     }
 
     @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
         final TileEntity tickingTile = context.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
         builder.named(NamedCause.notifier(tickingTile));
     }
 
     @Override
-    public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void associateBlockEventNotifier(PhaseContext context, BlockPos pos, IMixinBlockEventData blockEvent) {
         final TileEntity tickingTile = context.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
         blockEvent.setTickTileEntity(tickingTile);
@@ -149,7 +148,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(CauseTracker causeTracker, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final TileEntity tickingTile = context.getSource(TileEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
         final Optional<User> notifier = context.getNotifier();
@@ -171,14 +170,14 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
             final ArrayList<Entity> exp = new ArrayList<>();
             exp.add(entity);
             final SpawnEntityEvent event =
-                    SpongeEventFactory.createSpawnEntityEvent(builder.build(), exp, causeTracker.getWorld());
+                    SpongeEventFactory.createSpawnEntityEvent(builder.build(), exp);
             SpongeImpl.postEvent(event);
             if (!event.isCancelled()) {
                 for (Entity anEntity : event.getEntities()) {
                     if (entityCreator != null) {
                         EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
                     }
-                    causeTracker.getMixinWorld().forceSpawnEntity(anEntity);
+                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
                 }
                 return true;
             }
@@ -196,14 +195,14 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         final Cause cause = builder.build();
         final SpawnEntityEvent
                 spawnEntityEvent =
-                SpongeEventFactory.createSpawnEntityEvent(cause, nonExpEntities, causeTracker.getWorld());
+                SpongeEventFactory.createSpawnEntityEvent(cause, nonExpEntities);
         SpongeImpl.postEvent(spawnEntityEvent);
         if (!spawnEntityEvent.isCancelled()) {
             for (Entity anEntity : spawnEntityEvent.getEntities()) {
                 if (entityCreator != null) {
                     EntityUtil.toMixin(anEntity).setCreator(entityCreator.getUniqueId());
                 }
-                causeTracker.getMixinWorld().forceSpawnEntity(anEntity);
+                EntityUtil.getMixinWorld(entity).forceSpawnEntity(anEntity);
             }
             return true;
         }

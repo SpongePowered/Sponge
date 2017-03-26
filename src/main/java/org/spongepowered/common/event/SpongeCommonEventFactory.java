@@ -195,8 +195,7 @@ public class SpongeCommonEventFactory {
     public static CollideEntityEvent callCollideEntityEvent(net.minecraft.world.World world, @Nullable net.minecraft.entity.Entity sourceEntity,
             List<net.minecraft.entity.Entity> entities) {
 
-        IMixinWorldServer spongeWorld = (IMixinWorldServer) world;
-        CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        CauseTracker causeTracker = CauseTracker.getInstance();
         Cause.Builder builder = null;
         if (sourceEntity != null) {
             builder = Cause.source(sourceEntity);
@@ -226,7 +225,7 @@ public class SpongeCommonEventFactory {
         }
 
         List<Entity> spEntities = (List<Entity>) (List<?>) entities;
-        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(builder.build(), spEntities, (World) world);
+        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(builder.build(), spEntities);
         SpongeImpl.postEvent(event);
         return event;
     }
@@ -240,7 +239,7 @@ public class SpongeCommonEventFactory {
     }
 
     public static ChangeBlockEvent.Pre callChangeBlockEventPre(IMixinWorldServer worldIn, ImmutableList<Location<World>> locations, NamedCause namedWorldCause, Object source) {
-        final CauseTracker causeTracker = worldIn.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData data = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = data.state;
         if (source == null) {
@@ -248,8 +247,7 @@ public class SpongeCommonEventFactory {
             if (source == null) {
                 // safety measure, return a dummy event
                 if (DUMMY_BLOCK_PRE_EVENT == null) {
-                    DUMMY_BLOCK_PRE_EVENT = SpongeEventFactory.createChangeBlockEventPre(Cause.source(worldIn).build(), ImmutableList.of(),
-                        (World) worldIn);
+                    DUMMY_BLOCK_PRE_EVENT = SpongeEventFactory.createChangeBlockEventPre(Cause.source(worldIn).build(), ImmutableList.of());
                 }
                 return DUMMY_BLOCK_PRE_EVENT;
             }
@@ -289,7 +287,7 @@ public class SpongeCommonEventFactory {
 
         builder.named(namedWorldCause);
 
-        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), locations, (World) worldIn);
+        ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(builder.build(), locations);
         SpongeImpl.postEvent(event);
         return event;
     }
@@ -324,7 +322,7 @@ public class SpongeCommonEventFactory {
 
     @SuppressWarnings("rawtypes")
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos sourcePos, EnumSet notifiedSides) {
-        final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
         final PhaseContext context = peek.context;
         // Don't fire notify events during world gen or while restoring
@@ -353,7 +351,7 @@ public class SpongeCommonEventFactory {
             if (user != null) {
                 builder.named(NamedCause.notifier(user));
             } else {
-                final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(sourcePos);
+                final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) world).getChunkFromBlockCoords(sourcePos);
                 peek.state.getPhase().populateCauseForNotifyNeighborEvent(peek.state, context, builder, causeTracker, mixinChunk, sourcePos);
             }
         }
@@ -509,9 +507,7 @@ public class SpongeCommonEventFactory {
             return false;
         }
 
-        final WorldServer worldServer = (WorldServer) world;
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
-        final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final Cause.Builder builder = Cause.source(entity);
         builder.named(NamedCause.of(NamedCause.PHYSICAL, entity));
 
@@ -544,9 +540,7 @@ public class SpongeCommonEventFactory {
 
     public static boolean handleCollideImpactEvent(net.minecraft.entity.Entity projectile, @Nullable ProjectileSource projectileSource,
             RayTraceResult movingObjectPosition) {
-        final WorldServer worldServer = (WorldServer) projectile.world;
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
-        final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         RayTraceResult.Type movingObjectType = movingObjectPosition.typeOfHit;
         final Cause.Builder builder = Cause.source(projectile).named("ProjectileSource", projectileSource == null
                                                                                          ? ProjectileSource.UNKNOWN
@@ -583,8 +577,7 @@ public class SpongeCommonEventFactory {
         } else if (movingObjectPosition.entityHit != null) { // entity
             ArrayList<Entity> entityList = new ArrayList<>();
             entityList.add((Entity) movingObjectPosition.entityHit);
-            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(builder.build(), entityList, impactPoint,
-                    (World) projectile.world);
+            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(builder.build(), entityList, impactPoint);
             return SpongeImpl.postEvent(event);
         }
 

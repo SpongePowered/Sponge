@@ -27,10 +27,12 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -41,7 +43,9 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -669,6 +673,7 @@ public class PhaseContext {
 
     public static final class CaptureBlockPos {
         @Nullable private BlockPos pos;
+        @Nullable private WeakReference<IMixinWorldServer> mixinWorldReference;
 
         public CaptureBlockPos() {
         }
@@ -683,6 +688,26 @@ public class PhaseContext {
 
         public void setPos(@Nullable BlockPos pos) {
             this.pos = pos;
+        }
+
+        public void setWorld(@Nullable IMixinWorldServer world) {
+            if (world == null) {
+                this.mixinWorldReference = null;
+            } else {
+                this.mixinWorldReference = new WeakReference<>(world);
+            }
+        }
+
+        public void setWorld(@Nullable WorldServer world) {
+            if (world == null) {
+                this.mixinWorldReference = null;
+            } else {
+                this.mixinWorldReference = new WeakReference<>((IMixinWorldServer) world);
+            }
+        }
+
+        public Optional<IMixinWorldServer> getMixinWorld() {
+            return this.mixinWorldReference == null ? Optional.empty() : Optional.ofNullable(this.mixinWorldReference.get());
         }
 
         @Override

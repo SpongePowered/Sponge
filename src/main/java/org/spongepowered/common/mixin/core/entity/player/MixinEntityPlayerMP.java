@@ -251,7 +251,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         final CauseTracker causeTracker;
         final boolean tracksEntityDeaths;
         if (!this.world.isRemote) {
-            causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
+            causeTracker = CauseTracker.getInstance();
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
             tracksEntityDeaths = CauseTracker.ENABLED && causeTracker.getCurrentState().tracksEntityDeaths();

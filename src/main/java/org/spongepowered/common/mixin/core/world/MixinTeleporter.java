@@ -94,7 +94,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     /**
      * @author blood - May 21st, 2016
      *
-     * @reason - rewritten to handle {@link DisplaceEntityEvent.Teleport.Portal}
+     * @reason - rewritten to handle {@link MoveEntityEvent.Teleport.Portal}
      *
      * @param entityIn The entity being placed into the portal
      * @param rotationYaw The yaw of entity
@@ -286,7 +286,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     /**
      * @author blood - May 21st, 2016
      *
-     * @reason - rewritten to handle {@link DisplaceEntityEvent.Teleport.Portal}
+     * @reason - rewritten to handle {@link MoveEntityEvent.Teleport.Portal}
      *
      * @param entityIn The entity being placed into the portal
      */
@@ -307,7 +307,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     // Adds boolean to turn on special tracking if called from API
     public Optional<Location<World>> createTeleporter(Location<World> nearLocation, boolean plugin) {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) nearLocation.getExtent();
-        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
 //        if (plugin) {
 //            Cause teleportCause = Cause.of(NamedCause.source(this));
 //            if (causeTracker.getCurrentCause() != null) {

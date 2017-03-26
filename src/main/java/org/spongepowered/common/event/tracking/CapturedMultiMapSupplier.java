@@ -25,10 +25,11 @@
 package org.spongepowered.common.event.tracking;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.ListMultimap;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -36,15 +37,15 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<Multimap<K, V>> {
+public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<ListMultimap<K, V>> {
 
-    @Nullable private Multimap<K, V> captured;
+    @Nullable private ListMultimap<K, V> captured;
 
     CapturedMultiMapSupplier() {
     }
 
     @Override
-    public Multimap<K, V> get() {
+    public ListMultimap<K, V> get() {
         if (this.captured == null) {
             this.captured = ArrayListMultimap.create();
         }
@@ -55,13 +56,21 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<Multima
         return this.captured == null || this.captured.isEmpty();
     }
 
-    public final void ifPresentAndNotEmpty(Consumer<Multimap<K, V>> consumer) {
+    public final void ifPresentAndNotEmpty(Consumer<ListMultimap<K, V>> consumer) {
         if (this.captured != null && !this.captured.isEmpty()) {
             consumer.accept(this.captured);
         }
     }
 
-    public final void ifPresentAndNotEmpty(K key, Consumer<Collection<V>> consumer) {
+    public final void ifPresentAndNotEmpty(BiConsumer<K, List<V>> biConsumer) {
+        if (this.captured != null && !this.captured.isEmpty()) {
+            for (K key : this.captured.asMap().keySet()) {
+                biConsumer.accept(key, this.captured.get(key)); // Note that this will cause the consumer to be called for each key
+            }
+        }
+    }
+
+    public final void ifPresentAndNotEmpty(K key, Consumer<List<V>> consumer) {
         if (this.captured != null && !this.captured.isEmpty()) {
             if (this.captured.containsKey(key)) {
                 consumer.accept(this.captured.get(key));
@@ -69,7 +78,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<Multima
         }
     }
 
-    public final Multimap<K, V> orElse(Multimap<K, V> list) {
+    public final ListMultimap<K, V> orElse(ListMultimap<K, V> list) {
         return this.captured == null ? list : this.captured;
     }
 
@@ -79,7 +88,7 @@ public abstract class CapturedMultiMapSupplier<K, V> implements Supplier<Multima
     }
 
     @Nullable
-    public final <U> U map(K key, Function<Collection<V>, ? extends U> function) {
+    public final <U> U map(K key, Function<List<V>, ? extends U> function) {
         return this.captured == null ? null : function.apply(this.captured.get(key));
     }
 

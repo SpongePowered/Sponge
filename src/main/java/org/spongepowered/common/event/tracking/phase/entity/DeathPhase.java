@@ -39,7 +39,6 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -63,7 +62,7 @@ final class DeathPhase extends EntityPhaseState {
     }
 
     @Override
-    void unwind(CauseTracker causeTracker, PhaseContext context) {
+    void unwind(PhaseContext context) {
         final Entity dyingEntity =
                 context.getSource(Entity.class)
                         .orElseThrow(TrackingUtil.throwWithContext("Dying entity not found!", context));
@@ -96,11 +95,11 @@ final class DeathPhase extends EntityPhaseState {
                                 .build();
                         final SpawnEntityEvent
                                 spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(experienceCause, experience, causeTracker.getWorld());
+                                SpongeEventFactory.createSpawnEntityEvent(experienceCause, experience);
                         SpongeImpl.postEvent(spawnEntityEvent);
                         if (!spawnEntityEvent.isCancelled()) {
                             for (Entity entity : spawnEntityEvent.getEntities()) {
-                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                             }
                         }
                     }
@@ -119,11 +118,11 @@ final class DeathPhase extends EntityPhaseState {
                                 .build();
                         final SpawnEntityEvent
                                 spawnEntityEvent =
-                                SpongeEventFactory.createSpawnEntityEvent(otherCause, experience, causeTracker.getWorld());
+                                SpongeEventFactory.createSpawnEntityEvent(otherCause, experience);
                         SpongeImpl.postEvent(spawnEntityEvent);
                         if (!spawnEntityEvent.isCancelled()) {
                             for (Entity entity : spawnEntityEvent.getEntities()) {
-                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                             }
                         }
                     }
@@ -132,11 +131,11 @@ final class DeathPhase extends EntityPhaseState {
         // This allows mods such as Draconic Evolution to add items to the drop list
         if (context.getCapturedEntityItemDropSupplier().isEmpty() && context.getCapturedEntityDropSupplier().isEmpty()) {
             final ArrayList<Entity> entities = new ArrayList<>();
-            final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld());
+            final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(cause, entities);
             SpongeImpl.postEvent(destruct);
             if (!destruct.isCancelled()) {
                 for (Entity entity : destruct.getEntities()) {
-                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                 }
             }
             return;
@@ -156,11 +155,11 @@ final class DeathPhase extends EntityPhaseState {
 
             final DropItemEvent.Destruct
                     destruct =
-                    SpongeEventFactory.createDropItemEventDestruct(cause, entities, causeTracker.getWorld());
+                    SpongeEventFactory.createDropItemEventDestruct(cause, entities);
             SpongeImpl.postEvent(destruct);
             if (!destruct.isCancelled()) {
                 for (Entity entity : destruct.getEntities()) {
-                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                   EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                 }
             }
 
@@ -191,14 +190,14 @@ final class DeathPhase extends EntityPhaseState {
 
                 final DropItemEvent.Destruct
                         destruct =
-                        SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld());
+                        SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities);
                 SpongeImpl.postEvent(destruct);
                 if (!destruct.isCancelled()) {
                     for (Entity entity : destruct.getEntities()) {
                         if (entityCreator != null) {
                             EntityUtil.toMixin(entity).setCreator(entityCreator.getUniqueId());
                         }
-                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                        EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                     }
                 }
 

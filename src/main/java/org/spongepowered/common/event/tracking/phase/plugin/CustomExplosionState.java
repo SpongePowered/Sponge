@@ -42,13 +42,11 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -78,7 +76,7 @@ final class CustomExplosionState extends PluginPhaseState {
     }
 
     @Override
-    void processPostTick(CauseTracker causeTracker, PhaseContext context) {
+    void processPostTick(PhaseContext context) {
         final Optional<Explosion> explosion = context.getCaptureExplosion().getExplosion();
         if (!explosion.isPresent()) { // More than likely never will happen
             return;
@@ -86,7 +84,9 @@ final class CustomExplosionState extends PluginPhaseState {
         final Cause cause = context.getSource(Cause.class)
                 .orElseThrow(TrackingUtil.throwWithContext("We seemingly lost the cause for this explosion!", context));
         context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blocks -> processBlockCaptures(blocks, explosion.get(), cause, causeTracker, context));
+                .ifPresentAndNotEmpty(blocks ->
+                    processBlockCaptures(blocks, explosion.get(), cause, context)
+                );
         context.getCapturedEntitySupplier()
                 .ifPresentAndNotEmpty(entities -> {
                     final Cause.Builder builder = Cause.builder();
@@ -120,17 +120,7 @@ final class CustomExplosionState extends PluginPhaseState {
                     context.getOwner().ifPresent(builder::owner);
                     builder.named(NamedCause.of("Explosion", explosion.get()));
                     final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
-                    final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, causeTracker.getWorld());
-                    SpongeImpl.postEvent(event);
-                    if (!event.isCancelled()) {
-                        for (Entity entity : event.getEntities()) {
-                            if (user != null) {
-                                EntityUtil.toMixin(entity).setCreator(user.getUniqueId());
-                            }
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-
-                        }
-                    }
+                    TrackingUtil.splitAndSpawnEntities(builder.build(), entities, entity -> entity.setCreator(user.getUniqueId()));
 
 
                 });
@@ -138,7 +128,7 @@ final class CustomExplosionState extends PluginPhaseState {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, Cause cause, CauseTracker causeTracker, PhaseContext context) {
+    private void processBlockCaptures(List<BlockSnapshot> snapshots, Explosion explosion, Cause cause, PhaseContext context) {
         if (snapshots.isEmpty()) {
             return;
         }
@@ -148,12 +138,12 @@ final class CustomExplosionState extends PluginPhaseState {
             transactionBuilders[i] = new ImmutableList.Builder<>();
         }
         final List<ChangeBlockEvent> blockEvents = new ArrayList<>();
-        final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
+        final WorldServer minecraftWorld = (WorldServer) ((net.minecraft.world.Explosion) explosion).world;
 
         for (BlockSnapshot snapshot : snapshots) {
             // This processes each snapshot to assign them to the correct event in the next area, with the
             // correct builder array entry.
-            TrackingUtil.TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(TrackingUtil.TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
+            TrackingUtil.TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(TrackingUtil.TRANSACTION_CREATION.apply(snapshot));
         }
         for (int i = 0; i < TrackingUtil.EVENT_COUNT; i++) {
             // Build each event array
@@ -168,14 +158,14 @@ final class CustomExplosionState extends PluginPhaseState {
         context.getNotifier().ifPresent(builder::notifier);
         context.getOwner().ifPresent(builder::owner);
         try {
-            this.getPhase().associateAdditionalCauses(this, context, builder, causeTracker);
+            this.getPhase().associateAdditionalCauses(this, context, builder);
         } catch (Exception e) {
             // TODO - this should be a thing to associate additional objects in the cause, or context, but for now it's just a simple
             // try catch to avoid bombing on performing block changes.
         }
-        final org.spongepowered.api.world.World world = causeTracker.getWorld();
+        final World world = ((World) minecraftWorld);
         // Creates the block events accordingly to the transaction arrays
-        iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world); // Needs to throw events
+        iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder); // Needs to throw events
         // We create the post event and of course post it in the method, regardless whether any transactions are invalidated or not
 
         // Copied from TrackingUtil#throwMultiEventsAndCreatePost
@@ -187,7 +177,7 @@ final class CustomExplosionState extends PluginPhaseState {
         }
         final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[TrackingUtil.MULTI_CHANGE_INDEX];
 
-        final ExplosionEvent.Post postEvent = SpongeEventFactory.createExplosionEventPost(cause, explosion, world, transactions);
+        final ExplosionEvent.Post postEvent = SpongeEventFactory.createExplosionEventPost(cause, explosion, transactions);
         if (postEvent == null) { // Means that we have had no actual block changes apparently?
             return;
         }
@@ -250,7 +240,7 @@ final class CustomExplosionState extends PluginPhaseState {
                 });
             }
         }
-        TrackingUtil.performBlockAdditions(causeTracker, postEvent.getTransactions(), builder, this, context, noCancelledTransactions);
+        TrackingUtil.performBlockAdditions(postEvent.getTransactions(), builder, this, context, noCancelledTransactions);
     }
 
     @Override

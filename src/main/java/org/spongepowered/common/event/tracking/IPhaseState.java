@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.world.World;
@@ -41,7 +39,7 @@ import javax.annotation.Nullable;
  * A literal phase state of which the {@link World} is currently running
  * in. The state itself is owned by {@link TrackingPhase}s as the phase
  * defines what to do upon
- * {@link TrackingPhase#unwind(CauseTracker, IPhaseState, PhaseContext)}.
+ * {@link TrackingPhase#unwind(IPhaseState, PhaseContext)}.
  * As these should be enums, there's no data that should be stored on
  * this state. It can have control flow with {@link #canSwitchTo(IPhaseState)}
  * where preventing switching to another state is possible (likely points out
@@ -59,7 +57,7 @@ public interface IPhaseState {
         return false;
     }
 
-    default void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
+    default void handleBlockChangeWithUser(@Nullable BlockChange blockChange, Transaction<BlockSnapshot> snapshotTransaction, PhaseContext context) {
 
     }
 

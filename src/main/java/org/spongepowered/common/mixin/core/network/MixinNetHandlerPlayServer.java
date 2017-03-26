@@ -196,35 +196,14 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             player.onUpdateEntity();
             return;
         }
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.world;
-        final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         causeTracker.switchToPhase(TickPhase.Tick.PLAYER, PhaseContext.start()
                 .add(NamedCause.source(player))
                 .addCaptures()
                 .addEntityDropCaptures()
-                //.addBlockCaptures()
                 .complete());
-        for (WorldServer worldServer : WorldManager.getWorlds()) {
-            if (worldServer == mixinWorldServer) { // we don't care about entering the phase for this world server of which we already entered
-                continue;
-            }
-            final IMixinWorldServer otherMixinWorldServer = (IMixinWorldServer) worldServer;
-            otherMixinWorldServer.getCauseTracker().switchToPhase(TickPhase.Tick.PLAYER, PhaseContext.start()
-                    .add(NamedCause.source(player))
-                    .addCaptures()
-                    .addEntityDropCaptures()
-                    //.addBlockCaptures()
-                    .complete());
-        }
         player.onUpdateEntity();
         causeTracker.completePhase(TickPhase.Tick.PLAYER);
-        for (WorldServer worldServer : WorldManager.getWorlds()) {
-            if (worldServer == mixinWorldServer) { // we don't care about entering the phase for this world server of which we already entered
-                continue;
-            }
-            final IMixinWorldServer otherMixinWorldServer = (IMixinWorldServer) worldServer;
-            otherMixinWorldServer.getCauseTracker().completePhase(TickPhase.Tick.PLAYER);
-        }
     }
 
     @Override
@@ -338,7 +317,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
         if (this.player.interactionManager.isCreative()) {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.player.getServerWorld();
-            final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
+            final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
             final PhaseContext context = peek.context;
             final boolean ignoresCreative = context.firstNamed(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class).get();
             boolean clickedOutside = packetIn.getSlotId() < 0;
@@ -556,7 +535,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             //SpongeCommonEventFactory.ignoreRightClickAirEvent = true;
             // If a plugin or mod has changed the item, avoid restoring
             if (!SpongeCommonEventFactory.playerInteractItemChanged) {
-                final CauseTracker causeTracker = ((IMixinWorldServer) player.world).getCauseTracker();
+                final CauseTracker causeTracker = CauseTracker.getInstance();
                 final PhaseData peek = causeTracker.getCurrentPhaseData();
                 final ItemStack itemStack = peek.context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
 

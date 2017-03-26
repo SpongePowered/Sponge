@@ -34,7 +34,6 @@ import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -75,7 +74,7 @@ public class PlayerPhase extends TrackingPhase {
 
     @SuppressWarnings("unchecked")
 	@Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
+    public void unwind(IPhaseState state, PhaseContext phaseContext) {
         // Since currently all we have is PLAYER_LOGOUT, don't care about states.
         final Player player = phaseContext.firstNamed(NamedCause.SOURCE, Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing a player leaving, but we're not!", phaseContext));
@@ -92,17 +91,17 @@ public class PlayerPhase extends TrackingPhase {
             }
             final DropItemEvent.Dispense
                     dispense =
-                    SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld());
+                    SpongeEventFactory.createDropItemEventDispense(cause, entities);
             SpongeImpl.postEvent(dispense);
             if (!dispense.isCancelled()) {
                 for (Entity entity : dispense.getEntities()) {
-                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                 }
             }
         });
         phaseContext.getCapturedItemStackSupplier().ifPresentAndNotEmpty(items -> {
             final List<EntityItem> drops = items.stream()
-                    .map(drop -> drop.create(causeTracker.getMinecraftWorld()))
+                    .map(drop -> drop.create(EntityUtil.getMinecraftWorld(player)))
                     .collect(Collectors.toList());
             final Cause.Builder builder = Cause.source(
                     EntitySpawnCause.builder()
@@ -113,18 +112,18 @@ public class PlayerPhase extends TrackingPhase {
             final Cause cause = builder.build();
             final List<Entity> entities = (List<Entity>) (List<?>) drops;
             if (!entities.isEmpty()) {
-                DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities, causeTracker.getWorld());
+                DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     for (Entity droppedItem : event.getEntities()) {
-                        causeTracker.getMixinWorld().forceSpawnEntity(droppedItem);
+                        EntityUtil.getMixinWorld(droppedItem).forceSpawnEntity(droppedItem);
                     }
                 }
             }
         });
 
         phaseContext.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, causeTracker, state, phaseContext));
+                .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, state, phaseContext));
 
     }
 

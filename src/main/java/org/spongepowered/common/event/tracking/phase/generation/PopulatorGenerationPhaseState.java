@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -40,11 +41,12 @@ final class PopulatorGenerationPhaseState extends GeneralGenerationPhaseState {
     }
 
     @Override
-    Cause provideSpawnCause(CauseTracker causeTracker, PhaseContext context) {
+    Cause provideSpawnCause(PhaseContext context) {
         final PopulatorType runningGenerator = context.firstNamed(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, PopulatorType.class)
                 .orElse(null);
+        final World world = context.firstNamed(InternalNamedCauses.WorldGeneration.WORLD, World.class).orElse(null);
         final Cause.Builder causeBuilder = Cause.builder();
-        Cause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE).named("World",  causeTracker.getWorld());
+        Cause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE).named("World", world);
         if (InternalPopulatorTypes.ANIMAL.equals(runningGenerator)) {
             causeBuilder.named(NamedCause.source(InternalSpawnTypes.SpawnCauses.WORLD_SPAWNER_CAUSE))
                     .named(NamedCause.of(InternalNamedCauses.General.ANIMAL_SPAWNER, runningGenerator));

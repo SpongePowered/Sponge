@@ -90,6 +90,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.command.SpongeCommandManager;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -378,10 +379,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) worldServer.getChunkProvider();
         chunkProviderServer.setForceChunkRequests(true);
-        final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         if (CauseTracker.ENABLED) {
             causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                     .add(NamedCause.source(worldServer))
+                    .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, worldServer))
                     .addCaptures()
                     .complete());
         }
@@ -771,14 +773,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Redirect(method = "callFromMainThread", at = @At(value = "INVOKE", target = "Ljava/util/concurrent/Callable;call()Ljava/lang/Object;", remap = false))
     public Object onCall(Callable<?> callable) throws Exception {
-        for (WorldServer worldServer : WorldManager.getWorlds()) {
-            final CauseTracker otherCauseTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
-            otherCauseTracker.switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
-                    .add(NamedCause.source(callable))
-                    .addCaptures()
-                    .complete()
-            );
-        }
+        CauseTracker.getInstance().switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
+            .add(NamedCause.source(callable))
+            .addCaptures()
+            .complete()
+        );
         Object value;
         try {
             value = callable.call();
@@ -786,9 +785,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             throw e;
         }
         finally {
-            for (WorldServer worldServer : WorldManager.getWorlds()) {
-                ((IMixinWorldServer) worldServer).getCauseTracker().completePhase(PluginPhase.State.SCHEDULED_TASK);
-            }
+            CauseTracker.getInstance().completePhase(PluginPhase.State.SCHEDULED_TASK);
         }
         return value;
     }

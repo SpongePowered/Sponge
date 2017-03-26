@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
@@ -34,8 +33,8 @@ final class PlayerWakeUpState extends EntityPhaseState {
     }
 
     @Override
-    void unwind(CauseTracker causeTracker, PhaseContext context) {
+    void unwind(PhaseContext context) {
         context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil
-                .processBlockCaptures(blocks, causeTracker, this, context));
+                .processBlockCaptures(blocks, this, context));
     }
 }

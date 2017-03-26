@@ -33,6 +33,7 @@ import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.storage.ChunkDataStream;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -50,6 +51,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -96,7 +98,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(WorldServer worldObjIn, IChunkLoader chunkLoaderIn, IChunkGenerator chunkGeneratorIn, CallbackInfo ci) {
-        EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
+        this.EMPTY_CHUNK = new SpongeEmptyChunk(worldObjIn, 0, 0);
         SpongeConfig<?> spongeConfig = SpongeHooks.getActiveConfig(worldObjIn);
         ((IMixinWorldServer) worldObjIn).setActiveConfig(spongeConfig);
         this.denyChunkRequests = spongeConfig.getConfig().getWorld().getDenyChunkRequests();
@@ -171,7 +173,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
 
         Chunk chunk = this.getLoadedChunk(x, z);
         if (chunk == null && this.canDenyChunkRequest()) {
-            return EMPTY_CHUNK;
+            return this.EMPTY_CHUNK;
         }
 
         if (chunk == null) {
@@ -184,9 +186,10 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/ChunkPos;asLong(II)J"))
     public void onProvideChunkStart(int x, int z, CallbackInfoReturnable<Chunk> cir) {
         if (CauseTracker.ENABLED) {
-            final CauseTracker causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                     .addCaptures()
+                    .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, this.world))
                     .complete());
         }
     }
@@ -194,14 +197,14 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populateChunk(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", shift = Shift.AFTER))
     public void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
         if (CauseTracker.ENABLED) {
-            ((IMixinWorldServer) this.world).getCauseTracker().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+            CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
         }
     }
 
     @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;"))
     public void onError(CallbackInfoReturnable<Chunk> ci) {
         if (CauseTracker.ENABLED) {
-            ((IMixinWorldServer) this.world).getCauseTracker().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
+            CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
         }
     }
 
@@ -215,12 +218,12 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         }
 
         if (CauseTracker.ENABLED) {
-            final CauseTracker causeTracker = ((IMixinWorldServer) this.world).getCauseTracker();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
             final IPhaseState currentState = causeTracker.getCurrentState();
             // States that cannot deny chunks
             if (currentState == TickPhase.Tick.PLAYER
                     || currentState == TickPhase.Tick.DIMENSION
-                    || currentState == EntityPhase.State.CHANGING_TO_DIMENSION
+                    || currentState == EntityPhase.State.CHANGING_DIMENSION
                     || currentState == EntityPhase.State.LEAVING_DIMENSION) {
                 return false;
             }

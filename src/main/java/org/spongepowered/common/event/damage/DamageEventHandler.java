@@ -62,6 +62,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -442,8 +443,7 @@ public class DamageEventHandler {
         }
 
         if (entity.world instanceof IMixinWorldServer) {
-            IMixinWorldServer spongeWorld = (IMixinWorldServer) entity.world;
-            final PhaseData peek = spongeWorld.getCauseTracker().getCurrentPhaseData();
+            final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
             return peek.state.getPhase().createDestructionDamageSource(peek.state, peek.context, entity).orElse(null);
         }
         return null;

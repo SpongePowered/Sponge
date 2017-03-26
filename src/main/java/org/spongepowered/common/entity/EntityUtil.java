@@ -286,8 +286,7 @@ public final class EntityUtil {
     public static MoveEntityEvent.Teleport handleDisplaceEntityTeleportEvent(Entity entityIn, Transform<World> fromTransform, Transform<World> toTransform, boolean apiCall) {
 
         // Use origin world to get correct cause
-        IMixinWorldServer spongeWorld = (IMixinWorldServer) fromTransform.getExtent();
-        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        final CauseTracker causeTracker = CauseTracker.getInstance();
         final PhaseData peek = causeTracker.getCurrentPhaseData();
         final IPhaseState state = peek.state;
         final PhaseContext context = peek.context;
@@ -373,10 +372,9 @@ public final class EntityUtil {
                 )
         );
         context.complete();
-        fromMixinWorld.getCauseTracker().switchToPhase(EntityPhase.State.LEAVING_DIMENSION, context);
+        final CauseTracker causeTracker = CauseTracker.getInstance();
+        causeTracker.switchToPhase(EntityPhase.State.CHANGING_DIMENSION, context);
 
-        final CauseTracker toCauseTracker = toMixinWorld.getCauseTracker();
-        toCauseTracker.switchToPhase(EntityPhase.State.CHANGING_TO_DIMENSION, context);
 
         if (entityIn.isEntityAlive() && !(fromWorld.provider instanceof WorldProviderEnd)) {
             fromWorld.profiler.startSection("placing");
@@ -386,8 +384,8 @@ public final class EntityUtil {
         }
 
         // Complete phases, just because we need to. The phases don't actually do anything, because the processing resides here.
-        toCauseTracker.completePhase(EntityPhase.State.CHANGING_TO_DIMENSION);
-        fromMixinWorld.getCauseTracker().completePhase(EntityPhase.State.LEAVING_DIMENSION);
+        causeTracker.completePhase(EntityPhase.State.CHANGING_DIMENSION);
+
         // Grab the exit location of entity after being placed into portal
         final Transform<World> portalExitTransform = mixinEntity.getTransform().setExtent((World) toWorld);
         final MoveEntityEvent.Teleport.Portal event = SpongeEventFactory.createMoveEntityEventTeleportPortal(teleportCause, fromTransform, portalExitTransform, (PortalAgent) teleporter, mixinEntity, true);
@@ -439,7 +437,7 @@ public final class EntityUtil {
         }
 
         if (!capturedBlocks.isEmpty()
-            && !TrackingUtil.processBlockCaptures(capturedBlocks, toCauseTracker, EntityPhase.State.CHANGING_TO_DIMENSION, context)) {
+            && !TrackingUtil.processBlockCaptures(capturedBlocks, EntityPhase.State.CHANGING_DIMENSION, context)) {
             toMixinTeleporter.removePortalPositionFromCache(ChunkPos.asLong(chunkPosition.getX(), chunkPosition.getZ()));
         }
 
@@ -449,6 +447,22 @@ public final class EntityUtil {
             entityIn.motionZ = 0;
         }
         return event;
+    }
+
+    public static IMixinWorldServer getMixinWorld(org.spongepowered.api.entity.Entity entity) {
+        return (IMixinWorldServer) entity.getWorld();
+    }
+
+    public static IMixinWorldServer getMixinWorld(Entity entity) {
+        return (IMixinWorldServer) entity.world;
+    }
+
+    public static WorldServer getMinecraftWorld(org.spongepowered.api.entity.Entity entity) {
+        return (WorldServer) entity.getWorld();
+    }
+
+    public static World getSpongeWorld(Entity player) {
+        return (World) player.world;
     }
 
 
@@ -906,8 +920,7 @@ public final class EntityUtil {
         if (item == null) {
             return null;
         }
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) entity.world;
-        final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
+        final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
 
@@ -980,8 +993,7 @@ public final class EntityUtil {
         if (item == null) {
             return null;
         }
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.world;
-        final PhaseData peek = mixinWorldServer.getCauseTracker().getCurrentPhaseData();
+        final PhaseData peek = CauseTracker.getInstance().getCurrentPhaseData();
         final IPhaseState currentState = peek.state;
         final PhaseContext phaseContext = peek.context;
 
