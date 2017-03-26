@@ -30,4 +30,6 @@ public interface IMixinCommandBase {
 
     void setExpandedSelector(boolean expandedSelector);
 
+    void updateNamespacedAlias(String ownerId);
+
 }
