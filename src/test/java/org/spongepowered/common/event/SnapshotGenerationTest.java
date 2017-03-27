@@ -74,13 +74,13 @@ public class SnapshotGenerationTest {
 
         this.plugin = new Object();
         PluginContainer container = Mockito.mock(PluginContainer.class);
-        Mockito.when(manager.fromInstance(plugin)).thenReturn(Optional.of(container));
+        Mockito.when(manager.fromInstance(this.plugin)).thenReturn(Optional.of(container));
 
         Cause cause = Cause.source(this).build();
         this.entity = Mockito.mock(Entity.class, withSettings().defaultAnswer(Mockito.RETURNS_MOCKS));
         World world = Mockito.mock(World.class);
 
-        this.event = SpongeEventFactory.createSpawnEntityEvent(cause, Lists.newArrayList(this.entity));
+        this.event = SpongeEventFactory.createSpawnEntityEvent(cause, Lists.newArrayList(this.entity), world);
     }
 
     @Test
