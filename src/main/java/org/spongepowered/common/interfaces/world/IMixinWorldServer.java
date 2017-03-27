@@ -42,10 +42,10 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import javax.annotation.Nullable;
@@ -96,7 +96,7 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     boolean updateLightAsync(EnumSkyBlock lightType, BlockPos pos);
 
-    boolean checkLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk);
+    boolean checkLightAsync(EnumSkyBlock lightType, BlockPos pos, Chunk chunk, List<Chunk> neighbors);
 
     ExecutorService getLightingExecutor();
 
@@ -119,6 +119,5 @@ public interface IMixinWorldServer extends IMixinWorld {
     default World asSpongeWorld() {
         return (World) this;
     }
-
 
 }
