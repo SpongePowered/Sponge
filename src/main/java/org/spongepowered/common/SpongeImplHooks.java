@@ -41,8 +41,6 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ReportedException;
 import net.minecraft.util.Util;
-import net.minecraft.util.ReportedException;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Explosion;
@@ -60,10 +58,6 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.mixin.core.world.MixinExplosion;
-import org.spongepowered.common.mixin.core.world.MixinWorldType;
-import org.spongepowered.common.world.WorldManager;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -149,6 +143,9 @@ public final class SpongeImplHooks {
         return state.getLightOpacity();
     }
 
+	public static int getChunkPosLight(IBlockState blockState, World world, BlockPos pos) {
+		return blockState.getLightValue();
+	}
     // Tile entity
 
     @Nullable
@@ -277,4 +274,5 @@ public final class SpongeImplHooks {
         world.setBlockState(blockpos, Blocks.AIR.getDefaultState(), 2);
         block.onBlockDestroyedByExplosion(world, blockpos, explosion);
     }
+
 }
