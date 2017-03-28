@@ -43,8 +43,8 @@ import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.effect.potion.PotionEffect;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
@@ -59,7 +59,6 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -68,6 +67,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.ArrayList;
@@ -231,7 +231,6 @@ public class DamageEventHandler {
     }
 
     private static double enchantmentDamageTracked;
-    private static double previousEnchantmentModifier = 0;
 
     public static Optional<List<Tuple<DamageModifier, Function<? super Double, Double>>>> createEnchantmentModifiers(EntityLivingBase entityLivingBase, DamageSource damageSource) {
         net.minecraft.item.ItemStack[] inventory = entityLivingBase instanceof EntityPlayer ? ((EntityPlayer) entityLivingBase).inventory.armorInventory : entityLivingBase.armorArray;
@@ -329,7 +328,6 @@ public class DamageEventHandler {
         return Optional.empty();
     }
 
-
     public static Location<World> findFirstMatchingBlock(Entity entity, AxisAlignedBB bb, Predicate<IBlockState> predicate) {
         int i = MathHelper.floor_double(bb.minX);
         int j = MathHelper.floor_double(bb.maxX + 1.0D);
@@ -337,17 +335,23 @@ public class DamageEventHandler {
         int l = MathHelper.floor_double(bb.maxY + 1.0D);
         int i1 = MathHelper.floor_double(bb.minZ);
         int j1 = MathHelper.floor_double(bb.maxZ + 1.0D);
+        final IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) entity.worldObj.getChunkProvider();
         for (int k1 = i; k1 < j; ++k1) {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
                     BlockPos blockPos = new BlockPos(k1, l1, i2);
-                    if (predicate.test(entity.worldObj.getBlockState(blockPos))) {
+                    final Chunk chunk = spongeChunkProvider.getLoadedChunkWithoutMarkingActive(blockPos.getX() >> 4, blockPos.getZ() >> 4);
+                    if (chunk == null) {
+                        continue;
+                    }
+                    if (predicate.test(chunk.getBlockState(blockPos))) {
                         return new Location<>((World) entity.worldObj, k1, l1, i2);
                     }
                 }
             }
         }
-        SpongeImpl.getLogger().error("Could not find a Source block!");
+
+        // Entity is source of fire
         return ((org.spongepowered.api.entity.Entity) entity).getLocation();
     }
 
