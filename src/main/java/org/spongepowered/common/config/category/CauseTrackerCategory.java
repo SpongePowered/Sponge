@@ -35,7 +35,7 @@ public class CauseTrackerCategory extends ConfigCategory {
                                           + "indicates an unexpected issue of tracking phases not to complete.\n"
                                           + "If this is not reported yet, please report to Sponge. If it has been\n"
                                           + "reported, you may disable this.")
-    boolean isVerbose = false;
+    boolean isVerbose = true;
 
     @Setting(value = "verbose-errors", comment = "If true, the cause tracker will dump extra information about the current phases"
                                                 + "when certain non-CauseTracker related exceptions occur. This is usually not necessary, as the information "

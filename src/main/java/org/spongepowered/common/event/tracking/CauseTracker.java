@@ -157,7 +157,7 @@ public final class CauseTracker {
         this.switchToPhase(state, context);
         try {
             phaseBody.call();
-        } catch (Exception e) {
+        } catch (Exception | NoClassDefFoundError e) {
             this.abortCurrentPhase(e);
             return;
         }
@@ -168,9 +168,9 @@ public final class CauseTracker {
      * Used when exception occurs during the main body of a phase.
      * Avoids running the normal unwinding code
      */
-    public void abortCurrentPhase(Exception e) {
+    public void abortCurrentPhase(Throwable t) {
         PhaseData data = this.stack.peek();
-        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", data.state, data.context, e);
+        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", data.state, data.context, t);
 
         // Since an exception occured during the main phase code, we don't know what state we're in.
         // Therefore, we skip running the normal unwind functions that completePhase calls,
@@ -221,17 +221,17 @@ public final class CauseTracker {
                 this.currentProcessingState = currentPhaseData;
                 phase.unwind(state, context);
                 this.currentProcessingState = null;
-            } catch (Exception e) {
+            } catch (Exception | NoClassDefFoundError e) {
                 printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
             }
             if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
                 try {
                     completePhase(GeneralPhase.Post.UNWINDING);
-                } catch (Exception e) {
+                } catch (Exception | NoClassDefFoundError e) {
                     printMessageWithCaughtException("Exception attempting to capture or spawn an Entity!", "Something happened trying to unwind", state, context, e);
                 }
             }
-        } catch (Exception e) {
+        } catch (Exception | NoClassDefFoundError e) {
             printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
         }
     }
@@ -328,7 +328,7 @@ public final class CauseTracker {
         this.printMessageWithCaughtException(header, subHeader, this.getCurrentState(), this.getCurrentContext(), e);
     }
 
-    public void printMessageWithCaughtException(String header, String subHeader, IPhaseState state, PhaseContext context, Exception e) {
+    public void printMessageWithCaughtException(String header, String subHeader, IPhaseState state, PhaseContext context, Throwable t) {
         final PrettyPrinter printer = new PrettyPrinter(40);
         printer.add(header).centre().hr()
                 .add("%s %s", subHeader, state)
@@ -337,7 +337,7 @@ public final class CauseTracker {
         printer.addWrapped(60, "%s :", "Phases remaining");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add("Stacktrace:")
-                .add(e);
+                .add(t);
         printer.add();
         generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
@@ -454,7 +454,7 @@ public final class CauseTracker {
                 // Default, this means we've captured the block. Keeping with the semantics
                 // of the original method where true means it successfully changed.
                 return TrackingUtil.trackBlockChange(this, mixinWorld, chunk, currentState, newState, pos, flags, phaseData.context, phaseState);
-            } catch (Exception e) {
+            } catch (Exception | NoClassDefFoundError e) {
                 final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture a block change!").centre().hr();
                 printer.addWrapped(40, "%s :", "PhaseContext");
                 CONTEXT_PRINTER.accept(printer, phaseData.context);
@@ -634,7 +634,7 @@ public final class CauseTracker {
             if (!isForced) {
                 try {
                     return phase.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
-                } catch (Exception e) {
+                } catch (Exception | NoClassDefFoundError e) {
                     // Just in case something really happened, we should print a nice exception for people to
                     // paste us
                     final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture or spawn an Entity!").centre().hr();
