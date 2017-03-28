@@ -126,6 +126,10 @@ public final class CauseTracker {
         checkNotNull(state.getPhase(), "Phase cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
+        if (state.getClass().getSimpleName().contains("PlaceBlockPacket")/* || state.getClass().getSimpleName().contains("ScheduledTask")*/) {
+            System.out.println("switchToPhase " + state + ", time = " + System.currentTimeMillis());
+        }
+
         final IPhaseState currentState = this.stack.peek().state;
         if (this.isVerbose) {
             if (this.stack.size() > 6 && !currentState.isExpectedForReEntrance()) {
@@ -157,8 +161,8 @@ public final class CauseTracker {
         this.switchToPhase(state, context);
         try {
             phaseBody.call();
-        } catch (Exception e) {
-            this.abortCurrentPhase(e);
+        } catch (Throwable t) {
+            this.abortCurrentPhase(t);
             return;
         }
         this.completePhase(state);
@@ -168,9 +172,9 @@ public final class CauseTracker {
      * Used when exception occurs during the main body of a phase.
      * Avoids running the normal unwinding code
      */
-    public void abortCurrentPhase(Exception e) {
+    public void abortCurrentPhase(Throwable t) {
         PhaseData data = this.stack.peek();
-        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", data.state, data.context, e);
+        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", data.state, data.context, t);
 
         // Since an exception occured during the main phase code, we don't know what state we're in.
         // Therefore, we skip running the normal unwind functions that completePhase calls,
@@ -328,7 +332,7 @@ public final class CauseTracker {
         this.printMessageWithCaughtException(header, subHeader, this.getCurrentState(), this.getCurrentContext(), e);
     }
 
-    public void printMessageWithCaughtException(String header, String subHeader, IPhaseState state, PhaseContext context, Exception e) {
+    public void printMessageWithCaughtException(String header, String subHeader, IPhaseState state, PhaseContext context, Throwable t) {
         final PrettyPrinter printer = new PrettyPrinter(40);
         printer.add(header).centre().hr()
                 .add("%s %s", subHeader, state)
@@ -337,7 +341,7 @@ public final class CauseTracker {
         printer.addWrapped(60, "%s :", "Phases remaining");
         this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
         printer.add("Stacktrace:")
-                .add(e);
+                .add(t.getStackTrace());
         printer.add();
         generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
