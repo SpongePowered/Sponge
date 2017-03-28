@@ -126,9 +126,6 @@ public final class CauseTracker {
         checkNotNull(state.getPhase(), "Phase cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
-        if (state.getClass().getSimpleName().contains("PlaceBlockPacket")/* || state.getClass().getSimpleName().contains("ScheduledTask")*/) {
-            System.out.println("switchToPhase " + state + ", time = " + System.currentTimeMillis());
-        }
 
         final IPhaseState currentState = this.stack.peek().state;
         if (this.isVerbose) {
@@ -225,18 +222,18 @@ public final class CauseTracker {
                 this.currentProcessingState = currentPhaseData;
                 phase.unwind(state, context);
                 this.currentProcessingState = null;
-            } catch (Exception e) {
-                printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, e);
+            } catch (Throwable t) {
+                printMessageWithCaughtException("Exception Exiting Phase", "Something happened when trying to unwind", state, context, t);
             }
             if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
                 try {
                     completePhase(GeneralPhase.Post.UNWINDING);
-                } catch (Exception e) {
-                    printMessageWithCaughtException("Exception attempting to capture or spawn an Entity!", "Something happened trying to unwind", state, context, e);
+                } catch (Throwable t) {
+                    printMessageWithCaughtException("Exception attempting to capture or spawn an Entity!", "Something happened trying to unwind", state, context, t);
                 }
             }
-        } catch (Exception e) {
-            printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
+        } catch (Throwable t) {
+            printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, t);
         }
     }
 
