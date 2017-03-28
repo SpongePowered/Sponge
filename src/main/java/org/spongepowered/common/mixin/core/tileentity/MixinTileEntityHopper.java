@@ -47,7 +47,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -63,13 +62,9 @@ import java.util.Optional;
 @NonnullByDefault
 @Mixin(TileEntityHopper.class)
 @Implements(@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"))
-public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot implements Hopper, IMixinCustomNameable {
+public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot implements Hopper {
 
     @Shadow private int transferCooldown;
-
-    private Fabric<IInventory> fabric;
-    private SlotCollection slots;
-    private Lens<IInventory, ItemStack> lens;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
@@ -104,11 +99,6 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockableLoot 
         if (cooldownData.isPresent()) {
             manipulators.add(cooldownData.get());
         }
-    }
-
-    @Override
-    public void setCustomDisplayName(String customName) {
-        ((TileEntityHopper) (Object) this).setCustomName(customName);
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {

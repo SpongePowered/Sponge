@@ -39,7 +39,6 @@ import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -73,10 +72,6 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
     @Shadow public TileEntityChest adjacentChestZPos;
 
     @Shadow public abstract void checkForAdjacentChests();
-
-    private Fabric<IInventory> fabric;
-    private SlotCollection slots;
-    private Lens<IInventory, ItemStack> lens;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
@@ -124,7 +119,8 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
                 posZ += 0.5D;
             }
 
-            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_OPEN, SoundCategory.BLOCKS, 0.5F,
+                    this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 
@@ -148,9 +144,9 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
                 this.lidAngle = 0.0f;
             }
 
-            double posX = (double)this.pos.getX() + 0.5D;
-            double posY = (double)this.pos.getY() + 0.5D;
-            double posZ = (double)this.pos.getZ() + 0.5D;
+            double posX = (double) this.pos.getX() + 0.5D;
+            double posY = (double) this.pos.getY() + 0.5D;
+            double posZ = (double) this.pos.getZ() + 0.5D;
 
             if (this.adjacentChestXPos != null) {
                 posX += 0.5D;
@@ -160,7 +156,8 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
                 posZ += 0.5D;
             }
 
-            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F,
+                    this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 
@@ -171,11 +168,6 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
         if (connectedChestData.isPresent()) {
             manipulators.add(connectedChestData.get());
         }
-    }
-
-    @Override
-    public void setCustomDisplayName(String customName) {
-        ((TileEntityChest) (Object) this).setCustomName(customName);
     }
 
     public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
@@ -200,11 +192,10 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
             if (tileentity1 instanceof TileEntityChest) {
                 InventoryLargeChest inventory;
 
-                if (enumfacing != EnumFacing.WEST && enumfacing != EnumFacing.NORTH)
-                {
-                    inventory = new InventoryLargeChest("container.chestDouble", this, (TileEntityChest)tileentity1);
+                if (enumfacing != EnumFacing.WEST && enumfacing != EnumFacing.NORTH) {
+                    inventory = new InventoryLargeChest("container.chestDouble", this, (TileEntityChest) tileentity1);
                 } else {
-                    inventory = new InventoryLargeChest("container.chestDouble", (TileEntityChest)tileentity1, this);
+                    inventory = new InventoryLargeChest("container.chestDouble", (TileEntityChest) tileentity1, this);
                 }
 
                 return Optional.of((Inventory) inventory);
