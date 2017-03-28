@@ -54,12 +54,11 @@ import java.util.List;
 @Mixin(value = {
         net.minecraft.inventory.Slot.class,
         InventoryPlayer.class,
-        TileEntityFurnace.class,
         EntityVillager.class,
         Container.class,
         InventoryLargeChest.class,
         InventoryEnderChest.class,
-        TileEntityLockableLoot.class,
+        TileEntityLockable.class,
         CustomInventory.class
 }, priority = 999)
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
