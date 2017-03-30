@@ -27,7 +27,6 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import co.aikar.timings.TimingsManager;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
@@ -342,7 +341,9 @@ public class SpongeEventManager implements EventManager {
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
             try {
                 handler.getTimingsHandler().startTimingIfSync();
-                ((AbstractEvent) event).currentOrder = handler.getOrder();
+                if (event instanceof AbstractEvent) {
+                    ((AbstractEvent) event).currentOrder = handler.getOrder();
+                }
                 handler.handle(event);
                 handler.getTimingsHandler().stopTimingIfSync();
             } catch (Throwable e) {
@@ -350,7 +351,9 @@ public class SpongeEventManager implements EventManager {
                 this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
             }
         }
-        ((AbstractEvent) event).currentOrder = null;
+        if (event instanceof AbstractEvent) {
+            ((AbstractEvent) event).currentOrder = null;
+        }
 
         return event instanceof Cancellable && ((Cancellable) event).isCancelled();
     }
