@@ -28,9 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
@@ -38,38 +36,26 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
-import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 
 import java.util.List;
 import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(TileEntityChest.class)
-@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
-        @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
-public abstract class MixinTileEntityChest extends MixinTileEntityLockable implements Chest, IMixinCustomNameable, ILockableContainer {
+public abstract class MixinTileEntityChest extends MixinTileEntityLockable implements Chest, ILockableContainer, IMixinCustomNameable {
 
     @Shadow public String customName;
     @Shadow public float lidAngle;
@@ -81,13 +67,8 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
 
     @Shadow public abstract void checkForAdjacentChests();
 
-    private Fabric<IInventory> fabric;
-    private SlotCollection slots;
-    private Lens<IInventory, ItemStack> lens;
-
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.fabric = new DefaultInventoryFabric(this);
         this.slots = new SlotCollection.Builder().add(27).build();
         this.lens = new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
     }
@@ -192,37 +173,6 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockable imple
     @Override
     public void setCustomDisplayName(String customName) {
         ((TileEntityChest) (Object) this).setCustomName(customName);
-    }
-
-    @SuppressWarnings({"RedundantCast", "unchecked"})
-    @Override
-    public TileEntityInventory<TileEntityCarrier> getInventory() {
-        return (TileEntityInventory<TileEntityCarrier>) (Object) this;
-    }
-
-    @Intrinsic
-    public void tilentityinventory$markDirty() {
-        this.markDirty();
-    }
-
-    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
-        return this.slots;
-    }
-
-    public Lens<IInventory, ItemStack> inventory$getRootLens() {
-        return this.lens;
-    }
-
-    public Fabric<IInventory> inventory$getInventory() {
-        return this.fabric;
-    }
-
-    public Optional<Chest> tileentityinventory$getTileEntity() {
-        return Optional.of(this);
-    }
-
-    public Optional<Chest> tileentityinventory$getCarrier() {
-        return Optional.of(this);
     }
 
     @Override

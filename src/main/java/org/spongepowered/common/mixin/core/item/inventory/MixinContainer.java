@@ -34,6 +34,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -65,7 +66,7 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 @Mixin(Container.class)
 @Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$")})
-public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer {
+public abstract class MixinContainer implements org.spongepowered.api.item.inventory.Container, IMixinContainer, CarriedInventory<Carrier> {
 
     @Shadow public List<Slot> inventorySlots;
     @Shadow public List<ItemStack> inventoryItemStacks;
@@ -266,6 +267,11 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Override
     public void setCanInteractWith(@Nullable Predicate<EntityPlayer> predicate) {
         this.canInteractWithPredicate = Optional.ofNullable(predicate); // TODO mixin into all classes extending container
+    }
+
+    @Override
+    public Optional<Carrier> getCarrier() {
+        return this.carrier;
     }
 }
 

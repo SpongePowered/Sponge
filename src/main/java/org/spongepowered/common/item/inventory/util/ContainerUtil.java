@@ -44,6 +44,7 @@ import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.inventory.InventoryLargeChest;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.math.BlockPos;
@@ -61,7 +62,6 @@ import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.IMixinContainer;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
@@ -282,6 +282,17 @@ public final class ContainerUtil {
                 return (Carrier) player;
             }
         }
+
+        // Fallback: Try to find a Carrier owning the first Slot of the Container
+        if (container instanceof net.minecraft.inventory.Container) {
+            for (Slot slot : ((net.minecraft.inventory.Container) container).inventorySlots) {
+                if (slot.inventory instanceof Carrier) {
+                    return ((Carrier) slot.inventory);
+                }
+                return null;
+            }
+        }
+
         return null;
     }
 

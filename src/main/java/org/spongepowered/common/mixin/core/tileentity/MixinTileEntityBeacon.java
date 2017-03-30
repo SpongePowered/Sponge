@@ -26,57 +26,39 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.block.tileentity.carrier.Beacon;
-import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapter;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
-import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
-import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
-import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
 import java.util.List;
-import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(TileEntityBeacon.class)
-@Implements({@Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),
-        @Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$")})
-public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable implements Beacon {
+public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable implements Beacon, IMixinCustomNameable {
 
     @Shadow private Potion primaryEffect;
     @Shadow private Potion secondaryEffect;
     @Shadow private int levels;
+    @Shadow private String customName;
     @Override @Shadow public abstract boolean isItemValidForSlot(int index, ItemStack stack);
-
-    private Fabric<IInventory> fabric;
-    private SlotCollection slots;
-    private Lens<IInventory, ItemStack> lens;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.fabric = new DefaultInventoryFabric(this);
         InputSlotLensImpl lens = new InputSlotLensImpl(0, itemStack -> isItemValidForSlot(0, (ItemStack) itemStack),
                 itemType -> isItemValidForSlot(0, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1)));
 
@@ -124,33 +106,8 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
         manipulators.add(getBeaconData());
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public TileEntityInventory<TileEntityCarrier> getInventory() {
-        return (TileEntityInventory<TileEntityCarrier>) this;
-    }
-
-    public void tilentityinventory$markDirty() {
-        ((IInventory) (Object) this).markDirty();
-    }
-
-    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
-        return this.slots;
-    }
-
-    public Lens<IInventory, ItemStack> inventory$getRootLens() {
-        return this.lens;
-    }
-
-    public Fabric<IInventory> inventory$getInventory() {
-        return this.fabric;
-    }
-
-    public Optional<Beacon> tileentityinventory$getTileEntity() {
-        return Optional.of(this);
-    }
-
-    public Optional<Beacon> tileentityinventory$getCarrier() {
-        return Optional.of(this);
+    public void setCustomDisplayName(String customName) {
+        ((TileEntityBeacon) (Object) this).setName(customName);
     }
 }

@@ -38,19 +38,45 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.InventoryItemData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
+import org.spongepowered.api.item.inventory.type.TileEntityInventory;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(TileEntityLockable.class)
+@Implements({@Interface(iface = TileEntityInventory.class, prefix = "tileentityinventory$"),
+             @Interface(iface = MinecraftInventoryAdapter.class, prefix = "inventory$"),})
 public abstract class MixinTileEntityLockable extends MixinTileEntity implements TileEntityCarrier, IInventory {
 
     @Shadow private LockCode code;
+
+    protected Fabric<IInventory> fabric; // is set when constructed
+    protected SlotCollection slots; // is set by Mixin further down the line OR fallback in getter
+    @Nullable protected Lens<IInventory, ItemStack> lens = null; // is set by Mixin further down the line OR fallback in getter
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(CallbackInfo ci) {
+        this.fabric = new DefaultInventoryFabric(this);
+    }
 
     @Override
     public DataContainer toContainer() {
@@ -90,4 +116,35 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public TileEntityInventory<TileEntityCarrier> getInventory() {
+        return (TileEntityInventory<TileEntityCarrier>) this;
+    }
+
+    public Optional<? extends TileEntityCarrier> tileentityinventory$getTileEntity() {
+        return Optional.of(this);
+    }
+
+    public Optional<? extends TileEntityCarrier> tileentityinventory$getCarrier() {
+        return Optional.of(this);
+    }
+
+    public SlotProvider<IInventory, ItemStack> inventory$getSlotProvider() {
+        if (this.slots == null) {
+            this.slots = new SlotCollection.Builder().add(this.getSizeInventory()).build(); // Fallback
+        }
+        return this.slots;
+    }
+
+    public Lens<IInventory, ItemStack> inventory$getRootLens() {
+        if (this.lens == null) {
+            this.lens = new OrderedInventoryLensImpl(0, this.getSizeInventory(), 1, inventory$getSlotProvider());
+        }
+        return this.lens;
+    }
+
+    public Fabric<IInventory> inventory$getInventory() {
+        return this.fabric;
+    }
 }
