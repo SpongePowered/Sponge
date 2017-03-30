@@ -419,6 +419,11 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     }
 
     @Override
+    public World getWorld() {
+        return (World) this.worldObj;
+    }
+
+    @Override
     public Optional<Explosive> getSourceExplosive() {
         if (this.exploder instanceof Explosive) {
             return Optional.of((Explosive) this.exploder);

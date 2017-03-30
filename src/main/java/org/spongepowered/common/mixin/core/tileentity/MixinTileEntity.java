@@ -124,9 +124,22 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         }
     }
 
+    private BlockPos cachedPos;
+    private Location<World> cachedLocation;
+
     @Override
     public Location<World> getLocation() {
-        return new Location<>((World) this.worldObj, VecHelper.toVector3i(this.getPos()));
+        if (this.cachedPos == this.getPos()) {
+            return this.cachedLocation;
+        }
+        this.cachedPos = this.getPos();
+        this.cachedLocation = new Location<>((World) this.worldObj, this.cachedPos.getX(), this.cachedPos.getY(), this.cachedPos.getZ());
+        return this.cachedLocation;
+    }
+
+    @Override
+    public World getWorld() {
+        return (World) this.worldObj;
     }
 
     @Override

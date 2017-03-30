@@ -72,6 +72,11 @@ public class MixinNextTickListEntry implements ScheduledBlockUpdate, IMixinNextT
     }
 
     @Override
+    public org.spongepowered.api.world.World getWorld() {
+        return (org.spongepowered.api.world.World) this.world;
+    }
+
+    @Override
     public int getTicks() {
         if (this.world == null) {
             return Integer.MAX_VALUE;

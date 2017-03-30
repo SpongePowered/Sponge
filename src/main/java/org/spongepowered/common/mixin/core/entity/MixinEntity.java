@@ -618,6 +618,11 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
+    public World getWorld() {
+        return (World) this.worldObj;
+    }
+
+    @Override
     public boolean setTransform(Transform<World> transform) {
         checkNotNull(transform, "The transform cannot be null!");
         boolean result = setLocation(transform.getLocation());
