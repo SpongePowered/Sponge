@@ -206,10 +206,13 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
 
             // Sponge start
             if (otherAiBase.equals(aiBase)) {
-                final AITaskEvent.Remove event = SpongeEventFactory.createAITaskEventRemove(Cause.of(NamedCause.source(Sponge.getGame())),
-                    (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
-                SpongeImpl.postEvent(event);
-                if (!event.isCancelled()) {
+                AITaskEvent.Remove event = null;
+                if (this.owner != null && !((IMixinEntity) this.owner).isInConstructPhase()) {
+                    event = SpongeEventFactory.createAITaskEventRemove(Cause.of(NamedCause.source(Sponge.getGame())),
+                            (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
+                    SpongeImpl.postEvent(event);
+                }
+                if (event == null || !event.isCancelled()) {
 
                     if (entityaitaskentry.using) {
                         entityaitaskentry.using = false;
