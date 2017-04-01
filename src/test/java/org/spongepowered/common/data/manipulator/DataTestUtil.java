@@ -24,69 +24,24 @@
  */
 package org.spongepowered.common.data.manipulator;
 
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import net.minecraft.init.Bootstrap;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.Platform;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.common.SpongeGame;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongePlatform;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
-import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 final class DataTestUtil {
 
     private DataTestUtil() {}
 
-    private static void initializeEnvironment() {
-        Bootstrap.register();
-
-        Game game = mock(SpongeGame.class);
-        RegistryHelper.setFinalStatic(Sponge.class, "game", game);
-
-        SpongeGameRegistry registry = new SpongeGameRegistry();
-        when(game.getRegistry()).thenReturn(registry);
-        when(game.getDataManager()).thenCallRealMethod();
-
-        // Initialize plugin manager
-        PluginManager manager = mock(PluginManager.class);
-        when(manager.getPlugin(anyString())).thenReturn(Optional.of(mock(PluginContainer.class)));
-        when(game.getPluginManager()).thenReturn(manager);
-
-        // Initialize platform
-        Platform platform = new SpongePlatform(manager, SpongeImpl.MINECRAFT_VERSION);
-        when(game.getPlatform()).thenReturn(platform);
-
-        new SpongeImpl(game, manager);
-
-        registry.preRegistryInit();
-        registry.preInit();
-        registry.init();
-        //registry.postInit();
-    }
-
     @SuppressWarnings("unchecked")
     static List<Object[]> generateManipulatorTestObjects() throws Exception {
-        initializeEnvironment();
-
         final Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> manipulatorBuilderMap = getBuilderMap();
         final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> delegateMap = getDelegateMap();
         return delegateMap.entrySet().stream()

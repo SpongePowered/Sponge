@@ -22,35 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch;
+package org.spongepowered.common.test;
 
-import static org.spongepowered.asm.mixin.MixinEnvironment.Side.SERVER;
+import com.google.inject.Guice;
+import net.minecraft.init.Bootstrap;
+import org.spongepowered.common.inject.SpongeModule;
+import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.test.inject.TestImplementationModule;
 
-import net.minecraft.launchwrapper.LaunchClassLoader;
-import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.asm.mixin.Mixins;
-import org.spongepowered.lwts.AbstractTestTweaker;
+public final class TestMain {
 
-import java.io.File;
-
-public class TestTweaker extends AbstractTestTweaker {
-
-    @Override
-    public void injectIntoClassLoader(LaunchClassLoader loader) {
-        super.injectIntoClassLoader(loader);
-
-        registerAccessTransformer("META-INF/common_at.cfg");
-
-        SpongeLaunch.initPaths(new File("."));
-
-        SpongeLaunch.setupMixinEnvironment();
-        Mixins.addConfiguration("mixins.common.test.json");
-        MixinEnvironment.getDefaultEnvironment().setSide(SERVER);
+    private TestMain() {
     }
 
-    @Override
-    public String getLaunchTarget() {
-        return "org.spongepowered.common.test.TestMain";
+    public static void main(String[] args) {
+        Bootstrap.register();
+        SpongeGameRegistry registry = Guice.createInjector(new SpongeModule(), new TestImplementationModule())
+                .getInstance(SpongeGameRegistry.class);
+
+        registry.preRegistryInit();
+        registry.preInit();
+        registry.init();
+        //registry.postInit();
     }
 
 }
