@@ -3,13 +3,17 @@
 // will append it to the SpongeAPI version included in the implementation
 // jar files.
 task('resolveApiRevision').doLast {
-    def process = ['git', 'rev-parse', '--short', 'HEAD'].execute(null as String[], api.projectDir)
+    try {
+        def process = ['git', 'rev-parse', '--short', 'HEAD'].execute(null as String[], api.projectDir)
 
-    def result = process.waitFor()
-    if (result == 0) {
-        project.ext.apiVersion = apiVersion + '-' + process.inputStream.readLines().first().trim()
-    } else {
-        logger.warn('Failed to resolve API revision (Process returned error code {})', result)
-        return
+        def result = process.waitFor()
+        if (result == 0) {
+            project.ext.apiVersion = apiVersion + '-' + process.inputStream.readLines().first().trim()
+        } else {
+            logger.warn('Failed to resolve API revision (Process returned error code {})', result)
+            return
+        }
+    } catch (IOException e) {
+        logger.warn("Failed to resolve API revision: $e")
     }
 }
