@@ -96,6 +96,7 @@ import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -235,17 +236,18 @@ public final class ContainerUtil {
      */
     private static Lens<IInventory, ItemStack> generateLens(net.minecraft.inventory.Container container, SlotCollection slots) {
         // Get all inventories viewed in the Container & count slots & retain order
-        Map<IInventory, List<Slot>> viewed = container.inventorySlots.stream()
-                .collect(Collectors.groupingBy(i -> i.inventory, LinkedHashMap::new, Collectors.toList()));
+        Map<Optional<IInventory>, List<Slot>> viewed = container.inventorySlots.stream()
+                .collect(Collectors.groupingBy(i -> Optional.ofNullable(i.inventory), LinkedHashMap::new, Collectors.toList()));
         int index = 0; // Count the index
         List<Lens<IInventory, ItemStack>> lenses = new ArrayList<>();
-        for (Map.Entry<IInventory, List<Slot>> entry : viewed.entrySet()) {
+        for (Map.Entry<Optional<IInventory>, List<Slot>> entry : viewed.entrySet()) {
+            IInventory subInventory = entry.getKey().orElse(null);
             int slotCount = entry.getValue().size();
             Lens<IInventory, ItemStack> lens = null;
             boolean playerLens = false;
-            if (entry.getKey() instanceof InventoryAdapter) { // Check if sub-inventory is Adapter
+            if (subInventory instanceof InventoryAdapter) { // Check if sub-inventory is Adapter
                 // TODO the lenses in "slots" are not used in this lens and thus cannot be found later
-                Lens<IInventory, ItemStack> adapterLens = ((InventoryAdapter) entry.getKey()).getRootLens();
+                Lens<IInventory, ItemStack> adapterLens = ((InventoryAdapter) subInventory).getRootLens();
                 if (adapterLens != null) {
                     lens = copyLens(index, adapterLens, slots);
                     if (adapterLens instanceof PlayerInventoryLens) {
@@ -253,19 +255,19 @@ public final class ContainerUtil {
                     }
                 }
             }
-            if (lens == null && entry.getKey() instanceof LensProvider) // Check if sub-inventory is LensProvider
+            if (lens == null && subInventory instanceof LensProvider) // Check if sub-inventory is LensProvider
             {
-                Fabric<IInventory> keyFabric = MinecraftFabric.of(entry.getKey());
-                lens = ((LensProvider) entry.getKey()).getRootLens(keyFabric, new Adapter(keyFabric));
+                Fabric<IInventory> keyFabric = MinecraftFabric.of(subInventory);
+                lens = ((LensProvider) subInventory).getRootLens(keyFabric, new Adapter(keyFabric));
             }
             if (lens == null // Unknown Inventory or
                     || lens.slotCount() != slotCount) { // Inventory size <> Lens size
-                if (entry.getKey() instanceof InventoryCraftResult) { // InventoryCraftResult is a Slot
+                if (subInventory instanceof InventoryCraftResult) { // InventoryCraftResult is a Slot
                     Slot slot = entry.getValue().get(0);
                     lens = new CraftingOutputSlotLensImpl(index, item -> slot.isItemValid(((ItemStack) item)),
                             itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
-                } else if (entry.getKey() instanceof InventoryCrafting) { // InventoryCrafting has width and height
-                    InventoryCrafting craftGrid = (InventoryCrafting) entry.getKey();
+                } else if (subInventory instanceof InventoryCrafting) { // InventoryCrafting has width and height
+                    InventoryCrafting craftGrid = (InventoryCrafting) subInventory;
                     lens = new GridInventoryLensImpl(index, craftGrid.getWidth(), craftGrid.getHeight(), craftGrid.getWidth(), slots);
                 } else if (slotCount == 1) { // Unknown - A single Slot
                     lens = new SlotLensImpl(index);
