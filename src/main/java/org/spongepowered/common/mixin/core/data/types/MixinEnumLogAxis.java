@@ -49,6 +49,6 @@ public abstract class MixinEnumLogAxis implements LogAxis {
 
     @Override
     public LogAxis cycleNext() {
-        return (LogAxis) (Object) BlockLog.EnumAxis.values()[((BlockLog.EnumAxis) (Object) this).ordinal() + 1 % BlockLog.EnumAxis.values().length];
+        return (LogAxis) (Object) BlockLog.EnumAxis.values()[(((BlockLog.EnumAxis) (Object) this).ordinal() + 1) % BlockLog.EnumAxis.values().length];
     }
 }
