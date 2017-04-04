@@ -53,6 +53,17 @@ public class CatalogTypeMethodTest {
     private static final Set<String> ignoredFailures = ImmutableSet.<String>builder()
             .add("org.spongepowered.common.statistic.SpongeEntityStatistic#getEntityType()")
             .add("org.spongepowered.common.world.gen.SpongePopulatorType#getTranslation()")
+            .add("net.minecraft.block.BlockDirt$DirtType#getTranslation()")
+            .add("net.minecraft.block.BlockPistonExtension$EnumPistonType#getTranslation()")
+            .add("net.minecraft.block.BlockPrismarine$EnumType#getTranslation()")
+            .add("net.minecraft.block.BlockQuartz$EnumType#getTranslation()")
+            .add("net.minecraft.block.BlockSand$EnumType#getTranslation()")
+            .add("net.minecraft.block.BlockSandStone$EnumType#getTranslation()")
+            .add("net.minecraft.block.BlockStone$EnumType#getTranslation()")
+            .add("net.minecraft.block.BlockStoneBrick$EnumType#getTranslation()")
+            .add("net.minecraft.block.BlockStoneSlab$EnumType#getTranslation()")
+            .add("net.minecraft.block.BlockStoneSlabNew$EnumType#getTranslation()")
+            .add("net.minecraft.item.ItemArmor$ArmorMaterial#getRepairItemType()")
             .add("net.minecraft.util.EnumHand#getTranslation()")
             .build();
 
@@ -85,7 +96,7 @@ public class CatalogTypeMethodTest {
                 }
             }
         } catch (Throwable t) {
-            if (ignoredFailures.contains(this.implementationClass + "#" + this.method.getName() + "()") || t instanceof AbstractMethodError) {
+            if (ignoredFailures.contains(this.implementationClass + "#" + this.method.getName() + "()")) {
                 LOG.warn("Catalog Type: {} Id : {} has broken Method: {} ({}): {}", this.name, this.catalogId, this.methodName,
                         this.implementationClass, t);
                 return;
