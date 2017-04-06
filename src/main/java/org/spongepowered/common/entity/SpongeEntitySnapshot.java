@@ -228,7 +228,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             return optional;
         }
         // try harder
-        final Optional<DataProcessor> processorOptional = SpongeDataManager.getInstance().getWildImmutableProcessor(containerClass);
+        final Optional<DataProcessor> processorOptional = DataUtil.getWildImmutableProcessor(containerClass);
         if (processorOptional.isPresent()) {
             if (processorOptional.get().supports(this.entityType)) {
                 return Optional
@@ -246,7 +246,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 return true;
             }
         }
-        final Optional<DataProcessor> processorOptional = SpongeDataManager.getInstance().getWildImmutableProcessor(containerClass);
+        final Optional<DataProcessor> processorOptional = DataUtil.getWildImmutableProcessor(containerClass);
         return processorOptional.isPresent() && processorOptional.get().supports(this.entityType);
     }
 

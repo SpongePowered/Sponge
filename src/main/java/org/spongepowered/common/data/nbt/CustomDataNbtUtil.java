@@ -120,10 +120,10 @@ public class CustomDataNbtUtil {
         if (spongeTag.contains(DataQueries.General.CUSTOM_MANIPULATOR_LIST)) {
             final List<DataView> customData = spongeTag.getViewList(DataQueries.General.CUSTOM_MANIPULATOR_LIST).orElseThrow(DataUtil.dataNotFound());
             for (DataView dataView : customData) {
-                final String dataClass = dataView.getString(DataQueries.DATA_CLASS).orElseThrow(DataUtil.dataNotFound());
-                if (manipulator.getClass().getName().equals(dataClass)) {
+                final String dataId = dataView.getString(DataQueries.DATA_ID).orElseThrow(DataUtil.dataNotFound());
+                if (DataUtil.getRegistrationFor(manipulator).getId().equals(dataId)) {
                     final DataView existingData = dataView.getView(DataQueries.INTERNAL_DATA).orElseThrow(DataUtil.dataNotFound());
-                    DataManipulator<?, ?> existing = deserialize(dataClass, existingData);
+                    DataManipulator<?, ?> existing = deserialize(dataId, existingData);
                     isReplacing = existing != null;
                     final DataContainer container = manipulator.toContainer();
                     dataView.set(DataQueries.INTERNAL_DATA, container);
@@ -137,7 +137,7 @@ public class CustomDataNbtUtil {
             }
             // We are now adding to the list, not replacing
             final MemoryDataContainer container = new MemoryDataContainer();
-            container.set(DataQueries.DATA_CLASS, manipulator.getClass().getName());
+            container.set(DataQueries.DATA_ID, DataUtil.getRegistrationFor(manipulator).getId());
             container.set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
             customData.add(container);
             spongeTag.set(DataQueries.General.CUSTOM_MANIPULATOR_LIST, customData);
@@ -145,7 +145,7 @@ public class CustomDataNbtUtil {
         } else {
             final List<DataView> dataViews = new ArrayList<>();
             final MemoryDataContainer container = new MemoryDataContainer();
-            container.set(DataQueries.DATA_CLASS, manipulator.getClass().getName())
+            container.set(DataQueries.DATA_ID, DataUtil.getRegistrationFor(manipulator).getId())
                     .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
             dataViews.add(container);
             spongeTag.set(DataQueries.General.CUSTOM_MANIPULATOR_LIST, dataViews);

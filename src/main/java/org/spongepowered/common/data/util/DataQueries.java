@@ -28,6 +28,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import org.spongepowered.api.data.DataQuery;
 
+@SuppressWarnings("DeprecatedIsStillUsed")
 public final class DataQueries {
 
     // BannerPatterns
@@ -91,7 +92,9 @@ public final class DataQueries {
     // General DataQueries
     public static final DataQuery UNSAFE_NBT = of("UnsafeData");
     public static final DataQuery DATA_MANIPULATORS = of("Data");
-    public static final DataQuery DATA_CLASS = of(NbtDataUtil.CUSTOM_DATA_CLASS);
+    @Deprecated public static final DataQuery DATA_CLASS = of(NbtDataUtil.CUSTOM_DATA_CLASS);
+    public static final DataQuery DATA_ID = of("ManipulatorId");
+    public static final DataQuery FAILED_SERIALIZED_DATA = of("DataUnableToDeserialize");
     public static final DataQuery INTERNAL_DATA = of(NbtDataUtil.CUSTOM_DATA);
 
     // World

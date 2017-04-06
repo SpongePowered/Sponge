@@ -189,6 +189,12 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     @Override
     public DataContainer translate(Schematic schematic) throws InvalidDataException {
         DataContainer data = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
+        addTo(schematic, data);
+        return data;
+    }
+
+    @Override
+    public DataView addTo(Schematic schematic, DataView data) {
         final int xMin = schematic.getBlockMin().getX();
         final int yMin = schematic.getBlockMin().getY();
         final int zMin = schematic.getBlockMin().getZ();
@@ -197,7 +203,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         final int length = schematic.getBlockSize().getZ();
         if (width > MAX_SIZE || height > MAX_SIZE || length > MAX_SIZE) {
             throw new IllegalArgumentException(String.format(
-                    "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, MAX_SIZE));
+                "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, MAX_SIZE));
         }
         data.set(DataQueries.Schematic.WIDTH, width);
         data.set(DataQueries.Schematic.HEIGHT, height);

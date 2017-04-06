@@ -50,6 +50,7 @@ import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.DataVersions;
 
 import java.util.Optional;
@@ -128,7 +129,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     public TileEntityArchetype.Builder tileData(DataView dataView) {
         checkNotNull(dataView, "Provided DataView cannot be null!");
         final DataContainer copy = dataView.copy();
-        SpongeDataManager.getInstance().getValidators(Validations.TILE_ENTITY).validate(copy);
+        DataUtil.getValidators(Validations.TILE_ENTITY).validate(copy);
         this.tileData = copy;
         return this;
     }
@@ -139,7 +140,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
         if (this.tileData == null) {
             this.tileData = new MemoryDataContainer();
         }
-        SpongeDataManager.getInstance().getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, manipulator.getClass())
+        DataUtil.getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, manipulator.getClass())
                 .ifPresent(processor -> processor.storeToView(this.tileData, manipulator));
         return this;
     }
@@ -150,7 +151,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
         if (this.tileData == null) {
             this.tileData = new MemoryDataContainer();
         }
-        SpongeDataManager.getInstance().getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, value.getKey())
+        DataUtil.getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, value.getKey())
                 .ifPresent(processor -> processor.offer(this.tileData, value));
         return this;
     }
@@ -161,7 +162,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
         if (this.tileData == null) {
             this.tileData = new MemoryDataContainer();
         }
-        SpongeDataManager.getInstance().getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, key)
+        DataUtil.getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, key)
                 .ifPresent(processor -> processor.offer(this.tileData, value));
         return this;
     }

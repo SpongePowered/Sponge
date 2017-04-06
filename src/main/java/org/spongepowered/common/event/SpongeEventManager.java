@@ -47,6 +47,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
+import org.spongepowered.common.event.tracking.CauseTracker;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -299,14 +300,16 @@ public class SpongeEventManager implements EventManager {
     @SuppressWarnings("unchecked")
     protected boolean post(Event event, List<RegisteredListener<?>> handlers) {
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
+            CauseTracker.getInstance().getCurrentContext().activeContainer(handler.getPlugin());
             try {
                 handler.getTimingsHandler().startTimingIfSync();
                 ((AbstractEvent) event).currentOrder = handler.getOrder();
                 handler.handle(event);
-                handler.getTimingsHandler().stopTimingIfSync();
             } catch (Throwable e) {
-                handler.getTimingsHandler().stopTimingIfSync();
                 this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
+            } finally {
+                handler.getTimingsHandler().stopTimingIfSync();
+                CauseTracker.getInstance().getCurrentContext().activeContainer(null);
             }
         }
         ((AbstractEvent) event).currentOrder = null;

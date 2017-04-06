@@ -44,6 +44,12 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
     }
 
     @Override
+    public DataRegistration.Builder<M, I> setBuilder(DataManipulatorBuilder<M, I> builder) {
+        this.manipulatorBuilder = checkNotNull(builder, "ManipulatorBuilder cannot be null!");
+        return this;
+    }
+
+    @Override
     public SpongeDataRegistrationBuilder<M, I> from(DataRegistration<M, I> value) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Cannot set a builder with already created DataRegistrations!");
     }
@@ -68,7 +74,11 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
         checkState(this.immutableClass != null, "ImmutableDataManipulator class cannot be null!");
         checkState(this.id != null, "Data ID cannot be null!");
 
-        SpongeDataManager.getInstance()
-        return new SpongeDataRegistration<>(this);
+        SpongeManipulatorRegistry.getInstance().validateRegistration(this);
+        SpongeDataManager.getInstance().validateRegistration(this);
+        final SpongeDataRegistration<M, I> registration = new SpongeDataRegistration<>(this);
+        SpongeDataManager.getInstance().registerInternally(registration);
+        SpongeManipulatorRegistry.getInstance().register(registration);
+        return registration;
     }
 }

@@ -151,6 +151,12 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
     @Override
     public DataContainer translate(Schematic schematic) throws InvalidDataException {
         DataContainer data = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
+        addTo(schematic, data);
+        return data;
+    }
+
+    @Override
+    public DataView addTo(Schematic schematic, DataView data) {
         final int xMin = schematic.getBlockMin().getX();
         final int yMin = schematic.getBlockMin().getY();
         final int zMin = schematic.getBlockMin().getZ();

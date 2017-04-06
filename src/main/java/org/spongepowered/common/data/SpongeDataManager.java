@@ -28,16 +28,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.HashMultimap;
+import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableTable;
-import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.logging.log4j.Level;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataSerializable;
@@ -54,27 +51,24 @@ import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataManipulatorBuilder;
 import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 import org.spongepowered.common.data.nbt.NbtDataType;
-import org.spongepowered.common.data.nbt.SpongeNbtProcessorDelegate;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.RawDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.value.NbtValueProcessor;
 import org.spongepowered.common.data.persistence.DataTranslatorTypeSerializer;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.util.ComparatorUtil;
-import org.spongepowered.common.data.util.DataFunction;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ValueProcessorDelegate;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -82,62 +76,40 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 public final class SpongeDataManager implements DataManager {
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(DataSerializable.class), new DataSerializableTypeSerializer());
     }
 
-    private static final SpongeDataManager instance = new SpongeDataManager();
-    private final Map<Class<?>, DataBuilder<?>> builders = Maps.newHashMap();
-    private final Map<Class<? extends ImmutableDataHolder<?>>, ImmutableDataBuilder<?, ?>> immutableDataBuilderMap = new MapMaker().concurrencyLevel(4).makeMap();
-
     // Builders
+    private final Map<Class<?>, DataBuilder<?>> builders = Maps.newHashMap();
 
-    private final Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> builderMap = new MapMaker()
-            .concurrencyLevel(4)
-            .makeMap();
+
+    final Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> builderMap = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
+
     private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> immutableBuilderMap = new MapMaker()
-            .concurrencyLevel(4)
-            .makeMap();
+        .concurrencyLevel(4)
+        .makeMap();
 
+    private final Map<Class<? extends ImmutableDataHolder<?>>, ImmutableDataBuilder<?, ?>> immutableDataBuilderMap = new MapMaker()
+        .concurrencyLevel(4)
+        .makeMap();
     private final Map<Class<?>, DataTranslator<?>> dataSerializerMap = new MapMaker().concurrencyLevel(4).makeMap();
-
-    // Registrations
-
-    private final Map<Class<? extends DataManipulator<?, ?>>, List<DataProcessor<?, ?>>> processorMap = new MapMaker()
-            .concurrencyLevel(4)
-            .makeMap();
-    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, List<DataProcessor<?, ?>>> immutableProcessorMap = new MapMaker()
-            .concurrencyLevel(4)
-            .makeMap();
-    private final Map<Key<? extends BaseValue<?>>, List<ValueProcessor<?, ?>>> valueProcessorMap = new MapMaker()
-            .concurrencyLevel(4)
-            .makeMap();
-
-    private final Map<Class<? extends DataManipulator<?, ?>>, List<NbtDataProcessor<?, ?>>> nbtProcessorMap = new MapMaker()
-            .concurrencyLevel(4)
-            .makeMap();
-
-
-    // Processor delegates
-
-    private final Map<Key<? extends BaseValue<?>>, ValueProcessorDelegate<?, ?>> valueDelegates = new IdentityHashMap<>();
-    private final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> dataProcessorDelegates =  new IdentityHashMap<>();
-    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> immutableDataProcessorDelegates =  new IdentityHashMap<>();
-    private final Map<Class<? extends DataManipulator<?, ?>>, Class<? extends DataManipulator<?, ?>>> interfaceToImplDataManipulatorClasses = new IdentityHashMap<>();
-    private ImmutableTable<Class<? extends DataManipulator<?, ?>>, NbtDataType, NbtDataProcessor<?, ?>> nbtProcessorTable = ImmutableTable.of();
-    private ImmutableTable<Key<?>, NbtDataType, NbtValueProcessor<?, ?>> nbtValueTable = ImmutableTable.of();
-
     // Content updaters
     private final Map<Class<? extends DataSerializable>, List<DataContentUpdater>> updatersMap = new IdentityHashMap<>();
 
-    private static boolean allowRegistrations = true;
+
+    private static final SpongeDataManager instance = new SpongeDataManager();
+
+    static boolean allowRegistrations = true;
+
+
     public static SpongeDataManager getInstance() {
         return instance;
     }
-
     private SpongeDataManager() {}
 
     @Override
@@ -223,11 +195,7 @@ public final class SpongeDataManager implements DataManager {
     @Override
     public <T extends DataSerializable> Optional<T> deserialize(Class<T> clazz, final DataView dataView) {
         final Optional<DataBuilder<T>> optional = getBuilder(clazz);
-        if (optional.isPresent()) {
-            return optional.get().build(dataView);
-        } else {
-            return Optional.empty();
-        }
+        return optional.flatMap(tDataBuilder -> tDataBuilder.build(dataView));
     }
 
     @Override
@@ -248,77 +216,60 @@ public final class SpongeDataManager implements DataManager {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void finalizeRegistration() {
         allowRegistrations = false;
-        final SpongeDataManager registry = instance;
-        registry.valueProcessorMap.entrySet().forEach( entry -> {
-            ImmutableList.Builder<ValueProcessor<?, ?>> valueListBuilder = ImmutableList.builder();
-            Collections.sort(entry.getValue(), ComparatorUtil.VALUE_PROCESSOR_COMPARATOR);
-            valueListBuilder.addAll(entry.getValue());
-            final ValueProcessorDelegate<?, ?> delegate = new ValueProcessorDelegate(entry.getKey(), valueListBuilder.build());
-            registry.valueDelegates.put(entry.getKey(), delegate);
-        });
-        registry.valueProcessorMap.clear();
-        registry.processorMap.entrySet().forEach(entry -> {
-            ImmutableList.Builder<DataProcessor<?, ?>> dataListBuilder = ImmutableList.builder();
-            Collections.sort(entry.getValue(), ComparatorUtil.DATA_PROCESSOR_COMPARATOR);
-            dataListBuilder.addAll(entry.getValue());
-            final DataProcessorDelegate<?, ?> delegate = new DataProcessorDelegate(dataListBuilder.build());
-            registry.dataProcessorDelegates.put(entry.getKey(), delegate);
-        });
-        registry.processorMap.clear();
-
-        SpongeDataManager serializationService = SpongeDataManager.getInstance();
-        registry.dataProcessorDelegates.entrySet().forEach(entry -> {
-            if (!Modifier.isInterface(entry.getKey().getModifiers()) && !Modifier.isAbstract(entry.getKey().getModifiers())) {
-                DataFunction<DataContainer, DataManipulator, Optional<? extends DataManipulator<?, ?>>> function =
-                        (dataContainer, dataManipulator) -> ((DataProcessor) entry.getValue()).fill(dataContainer, dataManipulator);
-                SpongeDataManipulatorBuilder builder = new SpongeDataManipulatorBuilder(entry.getValue(), entry.getKey(), function);
-                registry.builderMap.put(entry.getKey(), checkNotNull(builder));
-                serializationService.registerBuilder(entry.getKey(), builder);
-            } else {
-                final Class<? extends DataManipulator<?, ?>> clazz = registry.interfaceToImplDataManipulatorClasses.get(entry.getKey());
-                DataFunction<DataContainer, DataManipulator, Optional<? extends DataManipulator<?, ?>>> function =
-                        (dataContainer, dataManipulator) -> ((DataProcessor) entry.getValue()).fill(dataContainer, dataManipulator);
-                SpongeDataManipulatorBuilder builder = new SpongeDataManipulatorBuilder(entry.getValue(), clazz, function);
-                registry.builderMap.put(entry.getKey(), checkNotNull(builder));
-                serializationService.registerBuilder(entry.getKey(), builder);
-            }
-        });
-        registry.immutableProcessorMap.entrySet().forEach(entry -> {
-            ImmutableList.Builder<DataProcessor<?, ?>> dataListBuilder = ImmutableList.builder();
-            Collections.sort(entry.getValue(), ComparatorUtil.DATA_PROCESSOR_COMPARATOR);
-            dataListBuilder.addAll(entry.getValue());
-            final DataProcessorDelegate<?, ?> delegate = new DataProcessorDelegate(dataListBuilder.build());
-            registry.immutableDataProcessorDelegates.put(entry.getKey(), delegate);
-        });
-        registry.immutableProcessorMap.clear();
-
-        ImmutableTable.Builder<Class<? extends DataManipulator<?, ?>>, NbtDataType, NbtDataProcessor<?, ?>> builder = ImmutableTable.builder();
-        registry.nbtProcessorMap.entrySet().forEach(entry -> {
-            final HashMultimap<NbtDataType, NbtDataProcessor<?, ?>> processorMultimap = HashMultimap.create();
-            final List<NbtDataProcessor<?, ?>> value = entry.getValue();
-            for (NbtDataProcessor<?, ?> nbtDataProcessor : value) {
-                processorMultimap.put(nbtDataProcessor.getTargetType(), nbtDataProcessor);
-            }
-            for (Map.Entry<NbtDataType, Collection<NbtDataProcessor<?, ?>>> nbtDataTypeCollectionEntry : processorMultimap.asMap().entrySet()) {
-                ImmutableList.Builder<NbtDataProcessor<?, ?>> processorBuilder = ImmutableList.builder();
-                processorBuilder.addAll(nbtDataTypeCollectionEntry.getValue());
-                final NbtDataType dataType = nbtDataTypeCollectionEntry.getKey();
-                builder.put(entry.getKey(), dataType, new SpongeNbtProcessorDelegate(processorBuilder.build(), dataType));
-            }
-        });
-        registry.nbtProcessorMap.clear();
-        registry.nbtProcessorTable = builder.build();
-
+        SpongeManipulatorRegistry.getInstance().bake();
     }
-
 
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void register(Class<? extends T> manipulatorClass,
             Class<? extends I> immutableManipulatorClass, DataManipulatorBuilder<T, I> builder) {
         checkState(allowRegistrations, "Registrations are no longer allowed!");
-        SpongeImplHooks
+        final Optional<PluginContainer> activeContainer = CauseTracker.getInstance().getCurrentContext().getActiveContainer();
+        if (!activeContainer.isPresent()) {
+            new PrettyPrinter(60).centre().add("Unknown Plugin registering custom data!").hr()
+                .addWrapped("Sponge's Custom Data system must know what plugin container is registering"
+                            + "what custom data to assign a \"legacy\" id for the custom data! It is not"
+                            + "recommended for developers to continue using the old registration methods"
+                            + "as they will be removed in future API versions! Please notify the developer"
+                            + "of the offending plugin to update!")
+                .addWrapped("Since the plugin id cannot be determined, custom data will not be registered! The following custom data was attempted")
+                .add("%s : %s", "DataManipulator", manipulatorClass.getName())
+                .add("%s : %s", "ImmutableManipulator", immutableManipulatorClass.getName())
+                .add("%s : %s", "ManipulatorBuilder", builder.getClass().getName())
+                .add(new Exception())
+                .trace();
+            return;
+        }
         SpongeImpl.getLogger().log(Level.WARN, "Detected $1 being registered with the old way! Please notify the developer", builder);
+        final String manipulatorSimpleNamePriorToProcessing = manipulatorClass.getSimpleName().replace("data", "").replace("Data", "");
+        final String generatedManipulatorId = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, manipulatorSimpleNamePriorToProcessing);
+        final PluginContainer pluginContainer = activeContainer.get();
+        final String finalId = pluginContainer.getId() + ":" + generatedManipulatorId;
+        // Print the warning, this is VERY important and should NEVER be ignored as the plugin developer must be made aware of this
+        new PrettyPrinter(60).add("Legacy Data Registration").centre().hr()
+            .addWrapped("Sponge's Custom Data Registration is changing! Plugin developers are strongly advised to update their data registrations!"
+                        + "However, because of this, Sponge is automatically applying an upgrade policy for their old registrations that will persist"
+                        + "until an unknown future time. Likely for the next few Minecraft versions.").hr()
+            .add("%s: %s", "Plugin registering custom data", pluginContainer.getId())
+            .add("%s: %s", "Custom Data Class", manipulatorClass.getSimpleName())
+            .add("%s: %s", "Generated Manipulator Id", finalId)
+            .addWrapped("The generated Id is already registered with Sponge, and is likely advisable for the plugin developer to utilize"
+                        + "the id for future registrations.")
+            .trace();
+        DataRegistration<T, I> registration = DataRegistration.<T, I>builder()
+            .setDataClass((Class<T>) manipulatorClass)
+            .setImmutableDataClass((Class<I>) immutableManipulatorClass)
+            .setManipulatorId(finalId)
+            .setBuilder(builder)
+            .buildAndRegister(pluginContainer);
+        SpongeManipulatorRegistry.getInstance().registerLegacyId(registration);
+    }
+
+
+    @Override
+    public void registerLegacyManipulatorIds(String legacyId, DataRegistration<?, ?> registration) {
+        checkState(allowRegistrations);
+        SpongeManipulatorRegistry.getInstance().registerLegacyId(legacyId, registration);
     }
 
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void register(DataRegistration<T, I> registration) {
@@ -328,6 +279,8 @@ public final class SpongeDataManager implements DataManager {
         final DataManipulatorBuilder<T, I> builder = registration.getDataManipulatorBuilder();
         final String manipulatorId = registration.getId();
         final PluginContainer pluginContainer = registration.getPluginContainer();
+        final String pluginId = pluginContainer.getId().toLowerCase();
+
     }
 
     @SuppressWarnings("unchecked")
@@ -367,6 +320,11 @@ public final class SpongeDataManager implements DataManager {
         return Optional.ofNullable((DataTranslator<T>) this.dataSerializerMap.get(checkNotNull(objectclass, "Target class cannot be null!")));
     }
 
+    @Override
+    public Collection<Class<? extends DataManipulator<?, ?>>> getAllRegistrationsFor(PluginContainer container) {
+        return SpongeManipulatorRegistry.getInstance().getRegistrations(container);
+    }
+
     public Optional<DataManipulatorBuilder<?, ?>> getWildManipulatorBuilder(Class<? extends DataManipulator<?, ?>> manipulatorClass) {
         return Optional.ofNullable(this.builderMap.get(checkNotNull(manipulatorClass)));
     }
@@ -375,185 +333,30 @@ public final class SpongeDataManager implements DataManager {
         return Optional.ofNullable(this.immutableBuilderMap.get(checkNotNull(immutable)));
     }
 
-    /**
-     * Registers a {@link DataManipulator} class and the
-     * {@link ImmutableDataManipulator} class along with the implemented
-     * classes such that the processor is meant to handle the implementations
-     * for those specific classes.
-     *
-     * @param manipulatorClass The manipulator class
-     * @param implClass The implemented manipulator class
-     * @param immutableDataManipulator The immutable class
-     * @param implImClass The implemented immutable class
-     * @param processor The processor
-     * @param <T> The type of data manipulator
-     * @param <I> The type of immutable data manipulator
-     */
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
-    registerDataProcessorAndImpl(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
-            Class<? extends I> implImClass, DataProcessor<T, I> processor) {
-        checkState(allowRegistrations, "Registrations are no longer allowed!");
-        checkArgument(!Modifier.isAbstract(implClass.getModifiers()), "The Implemented DataManipulator class cannot be abstract!");
-        checkArgument(!Modifier.isInterface(implClass.getModifiers()), "The Implemented DataManipulator class cannot be an interface!");
-        checkArgument(!Modifier.isAbstract(implImClass.getModifiers()), "The implemented ImmutableDataManipulator class cannot be an interface!");
-        checkArgument(!Modifier.isInterface(implImClass.getModifiers()), "The implemented ImmutableDataManipulator class cannot be an interface!");
-        checkArgument(!(processor instanceof DataProcessorDelegate), "Cannot register DataProcessorDelegates!");
-        if (!this.interfaceToImplDataManipulatorClasses.containsKey(manipulatorClass)) { // we only need to insert it once.
-            this.interfaceToImplDataManipulatorClasses.put(manipulatorClass, implClass);
-        }
-        List<DataProcessor<?, ?>> processorList = this.processorMap.get(manipulatorClass);
-        if (processorList == null) {
-            processorList = new CopyOnWriteArrayList<>();
-            this.processorMap.put(manipulatorClass, processorList);
-            this.processorMap.put(implClass, processorList);
-        }
-        checkArgument(!processorList.contains(processor), "Duplicate DataProcessor Registration!");
-        processorList.add(processor);
-
-        List<DataProcessor<?, ?>> immutableProcessorList = this.immutableProcessorMap.get(immutableDataManipulator);
-        if (immutableProcessorList == null) {
-            immutableProcessorList = new CopyOnWriteArrayList<>();
-            this.immutableProcessorMap.put(immutableDataManipulator, immutableProcessorList);
-            this.immutableProcessorMap.put(implImClass, immutableProcessorList);
-        }
-        checkArgument(!immutableProcessorList.contains(processor), "Duplicate DataProcessor Registration!");
-        immutableProcessorList.add(processor);
-    }
-
-    public <E, V extends BaseValue<E>, T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
-    registerDualProcessor(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
-            Class<? extends I> implImClass, AbstractSingleDataSingleTargetProcessor<?, E, V, T, I> processor) {
-        registerDataProcessorAndImpl(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
-        registerValueProcessor(processor.getKey(), processor);
-    }
-    /**
-     * Gets the {@link DataProcessorDelegate} for the provided
-     * {@link DataManipulator} class.
-     *
-     * @param mutableClass The class of the data manipulator
-     * @param <T> The type of data manipulator
-     * @param <I> The type of immutable data manipulator
-     * @return The data processor
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>> getProcessor(
-            Class<T> mutableClass) {
-        return Optional.ofNullable((DataProcessor<T, I>) this.dataProcessorDelegates.get(checkNotNull(mutableClass)));
-    }
-
-    /**
-     * Gets a wildcarded typed {@link DataProcessor} for the provided
-     * {@link DataManipulator} class. This is primarily useful when the
-     * type information is not known (due to type erasure).
-     *
-     * @param mutableClass The mutable class
-     * @return The data processor
-     */
-    public Optional<DataProcessor<?, ?>> getWildProcessor(Class<? extends DataManipulator<?, ?>> mutableClass) {
-        return Optional.ofNullable(this.dataProcessorDelegates.get(checkNotNull(mutableClass)));
-    }
-
-    /**
-     * Gets the raw typed {@link DataProcessor} with no type generics.
-     *
-     * @param class1 The class of the {@link DataManipulator}
-     * @return The raw typed data processor
-     */
-    @SuppressWarnings({"rawtypes", "SuspiciousMethodCalls"})
-    public Optional<DataProcessor> getWildDataProcessor(Class<? extends DataManipulator> class1) {
-        return Optional.ofNullable(this.dataProcessorDelegates.get(checkNotNull(class1)));
-    }
-
-    /**
-     * Gets the {@link DataProcessor} for the {@link ImmutableDataManipulator}
-     * class.
-     *
-     * @param immutableClass The immutable data manipulator class
-     * @param <T> The type of DataManipulator
-     * @param <I> The type of ImmutableDataManipulator
-     * @return The data processor
-     */
-    @SuppressWarnings("unchecked")
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>>
-    getImmutableProcessor(Class<I> immutableClass) {
-        return Optional.ofNullable((DataProcessor<T, I>) this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
-    }
-
-    /**
-     * Gets the raw typed {@link DataProcessor} for the
-     * {@link ImmutableDataManipulator} class.
-     *
-     * @param immutableClass The immutable data manipulator class
-     * @return The raw typed data processor
-     */
-    @SuppressWarnings("rawtypes")
-    public Optional<DataProcessor> getWildImmutableProcessor(Class<? extends ImmutableDataManipulator<?, ?>> immutableClass) {
-        return Optional.ofNullable(this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
-    }
+    public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistration(
+        SpongeDataRegistrationBuilder<M, I> builder) {
+        checkState(allowRegistrations);
+        final Class<M> manipulatorClass = builder.manipulatorClass;
+        final Class<I> immutableClass = builder.immutableClass;
+        final DataManipulatorBuilder<M, I> manipulatorBuilder = builder.manipulatorBuilder;
+        checkState(!this.builders.containsKey(manipulatorClass), "DataManipulator already registered!");
+        checkState(!this.builderMap.containsKey(manipulatorClass), "DataManipulator already registered!");
+        checkState(!this.builderMap.containsValue(manipulatorBuilder), "DataManipulatorBuilder already registered!");
+        checkState(!this.builders.containsKey(immutableClass), "ImmutableDataManipulator already registered!");
+        checkState(!this.immutableBuilderMap.containsKey(immutableClass), "ImmutableDataManipulator already registered!");
+        checkState(!this.immutableBuilderMap.containsValue(manipulatorBuilder), "DataManipulatorBuilder already registered!");
 
 
-    public <E, V extends BaseValue<E>> void registerValueProcessor(Key<V> key, ValueProcessor<E, V> valueProcessor) {
-        checkState(allowRegistrations, "Registrations are no longer allowed!");
-        checkNotNull(valueProcessor);
-        checkArgument(!(valueProcessor instanceof ValueProcessorDelegate), "Cannot register ValueProcessorDelegates! READ THE DOCS!");
-        checkNotNull(key);
-        List<ValueProcessor<?, ?>> processorList = this.valueProcessorMap.get(key);
-        if (processorList == null) {
-            processorList = Collections.synchronizedList(Lists.newArrayList());
-            this.valueProcessorMap.put(key, processorList);
-        }
-        checkArgument(!processorList.contains(valueProcessor), "Duplicate ValueProcessor registration!");
-        processorList.add(valueProcessor);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <E, V extends BaseValue<E>> Optional<ValueProcessor<E, V>> getValueProcessor(Key<V> key) {
-        return Optional.ofNullable((ValueProcessor<E, V>) this.valueDelegates.get(key));
-    }
-
-    public Optional<ValueProcessor<?, ?>> getWildValueProcessor(Key<?> key) {
-        return Optional.ofNullable(this.valueDelegates.get(key));
-    }
-
-    @SuppressWarnings("unchecked")
-    public <E> Optional<ValueProcessor<E, ? extends BaseValue<E>>> getBaseValueProcessor(Key<? extends BaseValue<E>> key) {
-        return Optional.ofNullable((ValueProcessor<E, ? extends BaseValue<E>>) this.valueDelegates.get(key));
-    }
-
-    public RawDataValidator getValidators(ValidationType validationType) {
-
-        return new DelegateDataValidator(ImmutableList.of(), validationType);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<NbtDataProcessor<T, I>> getNbtProcessor(NbtDataType dataType, Class<T> clazz) {
-        return Optional.ofNullable((NbtDataProcessor<T, I>) this.nbtProcessorTable.get(checkNotNull(clazz, "Manipulator class cannot be null!"), dataType));
-    }
-
-    @SuppressWarnings("unchecked")
-    public <E, V extends BaseValue<E>> Optional<NbtValueProcessor<E, V>> getNbtProcessor(NbtDataType dataType, Key<V> key) {
-        return Optional.ofNullable((NbtValueProcessor<E, V>) this.nbtValueTable.get(key, dataType));
-    }
-
-    @SuppressWarnings("rawtypes")
-    public Optional<NbtDataProcessor> getRawNbtProcessor(NbtDataType dataType, Class<? extends DataManipulator> aClass) {
-        return Optional.ofNullable(this.nbtProcessorTable.get(checkNotNull(aClass, "Manipulator class cannot be null!"), dataType));
-    }
-
-    @SuppressWarnings("rawtypes")
-    public Optional<NbtValueProcessor> getRawNbtProcessor(NbtDataType dataType, Key<?> key) {
-        return Optional.ofNullable(this.nbtValueTable.get(key, dataType));
-    }
-
-    public Collection<NbtDataProcessor<?, ?>> getNbtProcessors(NbtDataType type) {
-        return this.nbtProcessorTable.column(type).values();
-    }
-
-    public Collection<NbtValueProcessor<?, ?>> getNbtValueProcessors(NbtDataType type) {
-        return this.nbtValueTable.column(type).values();
     }
 
     public static boolean areRegistrationsComplete() {
         return !allowRegistrations;
+    }
+
+    public <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void registerInternally(
+        SpongeDataRegistration<M, I> registration) {
+        this.builders.put(registration.getManipulatorClass(), registration.getDataManipulatorBuilder());
+        this.builderMap.put(registration.getManipulatorClass(), registration.getDataManipulatorBuilder());
+        this.immutableBuilderMap.put(registration.getImmutableManipulatorClass(), registration.getDataManipulatorBuilder());
     }
 }
