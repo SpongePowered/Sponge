@@ -640,8 +640,9 @@ public final class EntityUtil {
                 }
             }
         }
-        throw new IllegalStateException("Invalid Villager profession id is present! Found: " + professionId
-                                        + " when the expected contain: " + professions);
+        // If at this point we don't have a villager profession, this means that somehow, forge
+        // has a registered profession id that we don't know about.
+        return SpongeImplHooks.retrieveVillagerProfession(professionId);
     }
 
     public static List<EntityHanging> findHangingEntities(WorldServer worldIn, BlockPos pos) {

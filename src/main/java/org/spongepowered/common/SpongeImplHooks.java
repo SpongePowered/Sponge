@@ -50,6 +50,8 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.api.data.type.Professions;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
@@ -250,4 +252,7 @@ public final class SpongeImplHooks {
         block.onBlockDestroyedByExplosion(world, blockpos, explosion);
     }
 
+    public static Profession retrieveVillagerProfession(int professionId) {
+        return Professions.LIBRARIAN;
+    }
 }
