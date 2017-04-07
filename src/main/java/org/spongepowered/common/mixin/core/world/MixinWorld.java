@@ -141,6 +141,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -1546,6 +1547,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
 
         // this.profiler.endStartSection("blockEntities"); // Sponge - Don't use the profiler
+
+        spongeTileEntityActivation();
+
         this.processingLoadedTiles = true;
         Iterator<net.minecraft.tileentity.TileEntity> iterator = this.tickableTileEntities.iterator();
 
@@ -1641,6 +1645,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.endPendingTileEntities(); // Sponge
         // this.profiler.endSection(); // Sponge - Don't use the profiler
         // this.profiler.endSection(); // Sponge - Don't use the profiler
+    }
+
+    /**
+     * Overridden in {@link MixinWorldServer_TileEntityActivation}
+     */
+    protected void spongeTileEntityActivation() {
+
     }
 
     protected void entityActivationCheck() {

@@ -30,12 +30,25 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.mixin.core.world.MixinWorld;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 
 @Mixin(value = WorldServer.class, priority = 1300)
-public abstract class MixinWorldServer_TileEntityActivation {
+public abstract class MixinWorldServer_TileEntityActivation extends MixinWorld {
 
+    @Override
+    protected void spongeTileEntityActivation() {
+        TileEntityActivation.activateTileEntities((WorldServer) (Object) this);
+    }
+
+    /**
+     * Injects into Sponge added injection for updating tile entities, since we need to
+     * declare the tile entity to be updateable based on the activation range.
+     *
+     * @param tile The tile ticking
+     * @param ci The callback
+     */
     @Inject(method = "updateTileEntity", at = @At("HEAD"), cancellable = true, remap = false)
     public void onUpdateTileEntityHead(ITickable tile, CallbackInfo ci) {
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
