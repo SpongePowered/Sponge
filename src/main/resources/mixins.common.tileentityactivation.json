@@ -8,7 +8,6 @@
     "server": [
         "MixinChunk_TileEntityActivation",
         "MixinTileEntity_Activation",
-        "MixinWorld_TileEntityActivation",
         "MixinWorldServer_TileEntityActivation"
     ],
     "injectors": {

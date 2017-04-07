@@ -28,11 +28,17 @@ import net.minecraft.util.ITickable;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.mixin.core.world.MixinWorld;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActivation;
 
 @Mixin(value = WorldServer.class, priority = 1300)
-public abstract class MixinWorldServer_TileEntityActivation {
+public abstract class MixinWorldServer_TileEntityActivation extends MixinWorld {
+
+    @Override
+    protected void spongeTileEntityActivation() {
+        TileEntityActivation.activateTileEntities((WorldServer) (Object) this);
+    }
 
     // TODO 1.12-pre2 I have no fucking clue what this injection is trying to target
     // updateTileEntity doesn't exist, and it didn't exist in 1.11 either
