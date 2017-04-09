@@ -538,6 +538,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             return;
         }
         final Player player = ((Player) this.player);
+        player.getConversation().ifPresent(c -> c.removeConversant(player));
         final Text message = SpongeTexts.toText(component);
         final MessageChannel originalChannel = player.getMessageChannel();
         final ClientConnectionEvent.Disconnect event = SpongeEventFactory.createClientConnectionEventDisconnect(

@@ -77,6 +77,7 @@ import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.conversation.Conversation;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
@@ -220,6 +221,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
 
     private GameType pendingGameType;
+
+    @Nullable private Conversation conversation;
 
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
@@ -404,9 +407,20 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    public void sendThroughMessage(Text message) {
+        checkNotNull(message, "The message text cannot be null!");
+        this.connection.sendPacket(new SPacketChat(SpongeTexts.toComponent(message)));
+    }
+
+    @Override
     public void sendMessage(ChatType type, Text message) {
         checkNotNull(type, "type");
         checkNotNull(message, "message");
+
+        if (this.conversation != null && this.conversation.getChatHandler(this).isPresent()
+            && !this.conversation.getChatHandler(this).get().process(message)) {
+            return;
+        }
 
         ITextComponent component = SpongeTexts.toComponent(message);
         if (type == ChatTypes.ACTION_BAR) {

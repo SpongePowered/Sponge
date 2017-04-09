@@ -58,6 +58,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.conversation.ConversationEndTypes;
 import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -321,6 +322,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             for (WorldServer world : this.worlds) {
                 ((IMixinWorldServer) world).getLightingExecutor().shutdown();
             }
+
+            Sponge.getConversationManager().endAll(ConversationEndTypes.FORCED, Cause.of(NamedCause.source(SpongeImpl.getPlugin())));
 
             for (WorldServer world : this.worlds) {
                 try {

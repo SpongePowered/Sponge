@@ -29,6 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.conversation.ConversationManager;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -55,5 +56,6 @@ public class TestImplementationModule extends SpongeImplementationModule {
 
         this.bind(EventManager.class).toInstance(mock(EventManager.class));
         this.bind(ChannelRegistrar.class).toInstance(mock(ChannelRegistrar.class));
+        this.bind(ConversationManager.class).toInstance(mock(ConversationManager.class));
     }
 }
