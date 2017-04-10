@@ -71,7 +71,7 @@ public class SpongeConversationManager implements ConversationManager {
 
     @Override
     public Collection<Conversation> getConversation(PluginContainer plugin, String id) {
-        return conversations.get(plugin.getId() + ":" + id.toLowerCase());
+        return this.conversations.get(plugin.getId() + ":" + id.toLowerCase());
     }
 
     @Override
@@ -86,7 +86,7 @@ public class SpongeConversationManager implements ConversationManager {
             final Conversation conversation = optionalConversation.get();
             if (message.equalsIgnoreCase(conversation.getExitString())) {
                 conversation.end(ConversationEndTypes.QUIT, Cause.of(NamedCause.source(conversant)));
-            } else if (!conversation.ended()) {
+            } else if (!conversation.hasEnded()) {
                 final Optional<Question> optionalQuestion = conversation.getCurrentQuestion();
                 if (!optionalQuestion.isPresent()) {
                     conversant.sendThroughMessage(Text.of("Your current conversation has no current question. Feel free to attempt to leave it."));

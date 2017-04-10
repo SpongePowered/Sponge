@@ -41,7 +41,7 @@ public class SpongeConversationEndCause extends AbstractConversationEndCause imp
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("ConversationEndCause")
+        return Objects.toStringHelper(this)
             .add("ConversationEndType", this.endType)
             .toString();
     }

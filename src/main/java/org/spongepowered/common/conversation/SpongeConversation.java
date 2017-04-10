@@ -176,7 +176,7 @@ public class SpongeConversation implements Conversation {
     }
 
     @Override
-    public boolean ended() {
+    public boolean hasEnded() {
         return this.ended;
     }
 
