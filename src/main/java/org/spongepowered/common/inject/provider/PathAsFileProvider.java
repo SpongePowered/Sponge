@@ -31,10 +31,10 @@ import java.nio.file.Path;
 
 public abstract class PathAsFileProvider implements Provider<File> {
 
-    protected Path path;
+    protected Provider<Path> path;
 
     @Override
     public File get() {
-        return this.path.toFile();
+        return this.path.get().toFile();
     }
 }

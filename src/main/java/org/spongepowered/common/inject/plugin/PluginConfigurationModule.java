@@ -25,6 +25,7 @@
 package org.spongepowered.common.inject.plugin;
 
 import com.google.inject.AbstractModule;
+import com.google.inject.Provider;
 import com.google.inject.TypeLiteral;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
@@ -54,7 +55,7 @@ class PluginConfigurationModule extends AbstractModule {
      */
     private static final PathAsFileProvider NON_SHARED_CONFIG_DIR = new PathAsFileProvider() {
         @Inject
-        void init(@ConfigDir(sharedRoot = false) Path path) {
+        void init(@ConfigDir(sharedRoot = false) Provider<Path> path) {
             this.path = path;
         }
     };
@@ -65,7 +66,7 @@ class PluginConfigurationModule extends AbstractModule {
      */
     private static final PathAsFileProvider NON_SHARED_CONFIG_FILE = new PathAsFileProvider() {
         @Inject
-        void init(@DefaultConfig(sharedRoot = false) Path path) {
+        void init(@DefaultConfig(sharedRoot = false) Provider<Path> path) {
             this.path = path;
         }
     };
@@ -76,7 +77,7 @@ class PluginConfigurationModule extends AbstractModule {
      */
     private static final PathAsFileProvider SHARED_CONFIG_FILE = new PathAsFileProvider() {
         @Inject
-        void init(@DefaultConfig(sharedRoot = true) Path path) {
+        void init(@DefaultConfig(sharedRoot = true) Provider<Path> path) {
             this.path = path;
         }
     };
