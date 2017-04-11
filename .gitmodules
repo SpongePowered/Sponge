@@ -1,4 +1,4 @@
 [submodule "SpongeAPI"]
 	path = SpongeAPI
-	url = https://github.com/Meronat/SpongeAPI.git
+	url = https://github.com/SpongePowered/SpongeAPI.git
 	branch = bleeding
