@@ -45,9 +45,7 @@ public class SpongeHoverAction {
     }
 
     private static HoverEvent.Action getType(HoverAction<?> action) {
-        if (action instanceof HoverAction.ShowAchievement) {
-            return HoverEvent.Action.SHOW_ACHIEVEMENT;
-        } else if (action instanceof HoverAction.ShowEntity) {
+        if (action instanceof HoverAction.ShowEntity) {
             return HoverEvent.Action.SHOW_ENTITY;
         } else if (action instanceof HoverAction.ShowItem) {
             return HoverEvent.Action.SHOW_ITEM;

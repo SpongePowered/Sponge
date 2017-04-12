@@ -495,8 +495,6 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("has_gravity", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HasGravity"), "sponge:has_gravity", "Has Gravity"));
 
-        this.fieldMap.put("achievements", makeSingleKey(TypeTokens.ACHIEVEMENT_SET_TOKEN, TypeTokens.ACHIEVEMENT_SET_VALUE_TOKEN, of("Achievements"), "sponge:achievements", "Achievements"));
-
         this.fieldMap.put("statistics", makeSingleKey(TypeTokens.STATISTIC_MAP_TOKEN, TypeTokens.STATISTIC_MAP_VALUE_TOKEN, of("Statistics"), "sponge:statistics", "Statistics"));
 
         this.fieldMap.put("infinite_despawn_delay", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("InfiniteDespawnDelay"), "sponge:infinite_despawn_delay", "Infinite Despawn Delay"));

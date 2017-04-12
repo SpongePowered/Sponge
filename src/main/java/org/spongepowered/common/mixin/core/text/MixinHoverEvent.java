@@ -29,12 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.stats.StatList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.asm.mixin.Final;
@@ -65,10 +63,6 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
                 switch (this.action) {
                     case SHOW_TEXT:
                         setHandle(TextActions.showText(((IMixinTextComponent) this.value).toText()));
-                        break;
-                    case SHOW_ACHIEVEMENT:
-                        String stat = this.value.getUnformattedText();
-                        setHandle(TextActions.showAchievement((Achievement) checkNotNull(StatList.getOneShotStat(stat), "Unknown statistic: %s", stat)));
                         break;
                     case SHOW_ITEM:
                         setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(new net.minecraft.item.ItemStack(loadNbt()))));
