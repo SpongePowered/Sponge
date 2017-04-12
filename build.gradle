@@ -60,7 +60,7 @@ dependencies {
     fastutil 'it.unimi.dsi:fastutil:7.0.12'
 
     // log4j2 slf4j implementation
-    runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta9'
+    runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.8.1'
 
     // Database connectors
     compile 'com.zaxxer:HikariCP:2.5.1'
