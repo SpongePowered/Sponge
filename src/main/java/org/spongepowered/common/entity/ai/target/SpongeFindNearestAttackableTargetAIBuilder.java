@@ -33,16 +33,18 @@ import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.common.util.GuavaJavaUtils;
+import org.spongepowered.api.util.Functional;
 
 import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
 
 public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTargetAIBuilder<FindNearestAttackableTargetAITask, FindNearestAttackableTargetAITask.Builder>
         implements FindNearestAttackableTargetAITask.Builder {
 
     private Class<? extends Living> targetClass;
     private int chance;
-    private Predicate<? extends Living> predicate;
+    @Nullable private Predicate<? extends Living> predicate;
 
     public SpongeFindNearestAttackableTargetAIBuilder() {
         this.reset();
@@ -90,6 +92,6 @@ public final class SpongeFindNearestAttackableTargetAIBuilder extends SpongeTarg
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetClass);
         return (FindNearestAttackableTargetAITask) new EntityAINearestAttackableTarget<>((EntityCreature) owner, (Class<? extends EntityLivingBase>) this.targetClass, this.chance, this.checkSight,
-            this.onlyNearby, this.predicate == null ? Predicates.alwaysTrue() : GuavaJavaUtils.asGuavaPredicate((Predicate<Entity>) (Predicate<?>) this.predicate));
+            this.onlyNearby, this.predicate == null ? Predicates.alwaysTrue() : Functional.java8ToGuava((Predicate) this.predicate));
     }
 }
