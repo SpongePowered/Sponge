@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.entity.ai;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.GoalType;
 
@@ -55,7 +55,7 @@ public final class SpongeGoalType implements GoalType {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .addValue(id)
                 .addValue(name)
                 .add("goalClass", goalClass)

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.plugin;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.plugin.PluginContainer;
 
 public abstract class AbstractPluginContainer implements PluginContainer {
@@ -32,8 +32,8 @@ public abstract class AbstractPluginContainer implements PluginContainer {
     protected AbstractPluginContainer() {
     }
 
-    protected Objects.ToStringHelper toStringHelper() {
-        return Objects.toStringHelper("Plugin")
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return MoreObjects.toStringHelper("Plugin")
                 .omitNullValues()
                 .add("id", getId())
                 .add("name", getName())

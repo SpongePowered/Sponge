@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -123,7 +123,7 @@ public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("Enchantment")
+        return MoreObjects.toStringHelper("Enchantment")
                 .add("Name", shadow$getName())
                 .add("Id", getId())
                 .toString();

@@ -26,7 +26,7 @@ package org.spongepowered.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameState;
 
@@ -52,8 +52,8 @@ public abstract class SpongeGame implements Game {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-                .add("platform", getPlatform())
+        return MoreObjects.toStringHelper(this)
+                .add("platform", this.getPlatform())
                 .toString();
     }
 

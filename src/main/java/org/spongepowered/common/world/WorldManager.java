@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.MapMaker;
@@ -988,7 +987,7 @@ public final class WorldManager {
             try {
                 saveWorld(worldServer, true);
             } catch (MinecraftException e) {
-                Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
 
             ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(false);

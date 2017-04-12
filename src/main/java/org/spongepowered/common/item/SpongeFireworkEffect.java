@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.Queries;
@@ -94,7 +94,7 @@ public class SpongeFireworkEffect implements FireworkEffect {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("shape", this.shape)
                 .add("trails", this.trails)
                 .add("flickers", this.flicker)

@@ -496,7 +496,7 @@ public class PhaseContext {
 
     @Override
     public String toString() {
-        return com.google.common.base.Objects.toStringHelper(this)
+        return com.google.common.base.MoreObjects.toStringHelper(this)
                 .add("isCompleted", this.isCompleted)
                 .add("contextObjects", this.contextObjects)
                 .add("cause", this.cause)
@@ -591,7 +591,7 @@ public class PhaseContext {
 
         @Override
         public String toString() {
-            return com.google.common.base.Objects.toStringHelper(this)
+            return com.google.common.base.MoreObjects.toStringHelper(this)
                     .add("player", this.player)
                     .toString();
         }
@@ -636,7 +636,7 @@ public class PhaseContext {
 
         @Override
         public String toString() {
-            return com.google.common.base.Objects.toStringHelper(this)
+            return com.google.common.base.MoreObjects.toStringHelper(this)
                     .add("explosion", this.explosion)
                     .toString();
         }

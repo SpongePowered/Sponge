@@ -26,8 +26,8 @@ package org.spongepowered.common.world.gen.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects;
+import com.google.common.base.MoreObjects.ToStringHelper;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
 
@@ -107,7 +107,7 @@ public class SpongeBiomeTreeType implements BiomeTreeType {
 
     @Override
     public String toString() {
-        ToStringHelper tsh = Objects.toStringHelper(this)
+        ToStringHelper tsh = MoreObjects.toStringHelper(this)
                 .add("id", this.getId())
                 .add("smallObj", this.smallObject.getClass().getName());
         if (this.largeObject != null) {

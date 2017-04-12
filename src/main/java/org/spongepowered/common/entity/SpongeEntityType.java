@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EnumCreatureType;
@@ -130,7 +130,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     }
 
     @Override
-    protected ToStringHelper toStringHelper() {
+    protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
                 .add("modid", this.modId)
                 .add("class", this.entityClass.getName());

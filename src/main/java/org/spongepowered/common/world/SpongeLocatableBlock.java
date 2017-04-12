@@ -25,6 +25,7 @@
 package org.spongepowered.common.world;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -217,7 +218,7 @@ public class SpongeLocatableBlock implements LocatableBlock {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("blockState", this.blockState)
                 .add("position", this.position)
                 .add("worldId", this.worldId)

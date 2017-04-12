@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.spawn;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.event.cause.entity.spawn.common.AbstractLocatableBlockSpawnCause;
 
@@ -52,7 +53,7 @@ public class SpongeLocatableBlockSpawnCause extends AbstractLocatableBlockSpawnC
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("LocatableBlockSpawnCause")
+        return MoreObjects.toStringHelper("LocatableBlockSpawnCause")
                 .add("SpawnType", this.getType())
                 .add("LocatableBlock", this.locatableBlock)
                 .toString();

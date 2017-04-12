@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.entity.Entity;
@@ -138,7 +139,7 @@ class GeneralGenerationPhaseState implements IPhaseState {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("id", this.id)
                 .toString();
     }

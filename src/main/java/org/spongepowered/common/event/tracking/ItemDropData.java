@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -109,7 +110,7 @@ public class ItemDropData {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("stack", this.stack)
                 .add("position", this.position)
                 .add("pitch", this.pitch)
@@ -235,7 +236,7 @@ public class ItemDropData {
 
         @Override
         public String toString() {
-            return Objects.toStringHelper(this)
+            return MoreObjects.toStringHelper(this)
                     .add("trace", this.trace)
                     .add("playerName", this.playerName)
                     .add("dropAround", this.dropAround)

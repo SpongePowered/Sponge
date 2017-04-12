@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.block.BlockBush;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
@@ -146,7 +146,7 @@ public abstract class MixinWorldGenBush implements Mushroom {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("Type", "Mushroom")
                 .add("PerChunk", this.mushroomsPerChunk)
                 .toString();

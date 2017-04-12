@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.entity.teleport;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 
@@ -68,7 +69,7 @@ public class SpongeTeleportType implements TeleportType {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("id", this.id)
                 .add("name", this.name)
                 .toString();

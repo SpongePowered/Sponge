@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.util;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import org.spongepowered.api.entity.living.player.User;
@@ -62,7 +62,7 @@ public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageS
 
     @Override
     public String toString() {
-        Objects.ToStringHelper helper = Objects.toStringHelper("IndirectEntityDamageSource")
+        MoreObjects.ToStringHelper helper = MoreObjects.toStringHelper("IndirectEntityDamageSource")
             .add("Name", this.damageType)
             .add("Type", this.getType().getId())
             .add("Source", this.getSource())

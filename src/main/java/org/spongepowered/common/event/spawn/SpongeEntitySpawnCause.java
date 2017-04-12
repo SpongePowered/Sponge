@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.spawn;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.common.AbstractEntitySpawnCause;
@@ -53,7 +54,7 @@ public class SpongeEntitySpawnCause extends AbstractEntitySpawnCause implements 
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("EntitySpawnCause")
+        return MoreObjects.toStringHelper("EntitySpawnCause")
                 .add("SpawnType", this.getType())
                 .add("Entity", this.entity)
                 .toString();

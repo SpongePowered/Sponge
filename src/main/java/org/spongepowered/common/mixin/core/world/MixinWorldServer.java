@@ -31,8 +31,7 @@ import co.aikar.timings.TimingHistory;
 import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
-import com.google.common.base.Throwables;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
@@ -909,7 +908,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         try {
             WorldManager.saveWorld((WorldServer) (Object) this, true);
         } catch (MinecraftException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
         return true;
     }
@@ -2252,7 +2251,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("LevelName", this.worldInfo.getWorldName())
                 .add("DimensionId", this.provider.getDimensionType().getId())
                 .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getId())

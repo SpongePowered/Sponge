@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.text;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Throwables;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
@@ -99,7 +98,7 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
         try {
             return checkNotNull(JsonToNBT.getTagFromJson(this.value.getUnformattedText()), "NBT");
         } catch (NBTException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
     }
 

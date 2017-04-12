@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.entity.ai.EntityAIBase;
 import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.task.AITask;
@@ -93,7 +93,7 @@ public abstract class MixinEntityAIBase implements IMixinEntityAIBase {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .addValue(this.type)
                 .addValue(task$getGoal())
                 .toString();

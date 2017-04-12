@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.block;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -144,6 +144,6 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).add("type", this.type).add("state", this.blockState).add("data", this.data).toString();
+        return MoreObjects.toStringHelper(this).add("type", this.type).add("state", this.blockState).add("data", this.data).toString();
     }
 }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.event.cause.entity.damage;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.world.Location;
@@ -53,7 +53,7 @@ public abstract class MixinMinecraftBlockDamageSource extends MixinDamageSource 
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("BlockDamageSource")
+        return MoreObjects.toStringHelper("BlockDamageSource")
             .add("Name", this.damageType)
             .add("Type", getType().getId())
             .add("BlockSnapshot", getBlockSnapshot())

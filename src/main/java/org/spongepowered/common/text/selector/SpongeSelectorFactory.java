@@ -26,7 +26,6 @@ package org.spongepowered.common.text.selector;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -96,7 +95,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
                             .debug(m + " failed with paramter " + input, e);
                     return null;
                 } catch (InvocationTargetException e) {
-                    throw Throwables.propagate(e.getCause());
+                    throw new RuntimeException(e.getCause());
                 }
             };
         } else {
@@ -111,7 +110,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
                             .debug(m + " failed with paramter " + input, e);
                     return null;
                 } catch (InvocationTargetException e) {
-                    throw Throwables.propagate(e.getCause());
+                    throw new RuntimeException(e.getCause());
                 }
             };
         }

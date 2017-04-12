@@ -27,7 +27,7 @@ package org.spongepowered.common.world.gen.populators;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
@@ -150,7 +150,7 @@ public class SeaFloorPopulator implements SeaFloor {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("depth", this.depth)
                 .add("radius", this.radius)
                 .add("block", this.block.getType().getName())

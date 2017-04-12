@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.spawn;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.common.AbstractBlockSpawnCause;
@@ -53,7 +54,7 @@ public class SpongeBlockSpawnCause extends AbstractBlockSpawnCause implements Bl
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("BlockSpawnCause")
+        return MoreObjects.toStringHelper("BlockSpawnCause")
                 .add("SpawnType", this.getType())
                 .add("BlockSnapshot", this.blockSnapshot)
                 .toString();

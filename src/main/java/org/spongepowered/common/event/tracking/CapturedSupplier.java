@@ -91,7 +91,7 @@ public abstract class CapturedSupplier<T> implements Supplier<List<T>> {
 
     @Override
     public String toString() {
-        return com.google.common.base.Objects.toStringHelper(this)
+        return com.google.common.base.MoreObjects.toStringHelper(this)
                 .add("Captured", this.captured == null ? 0 : this.captured.size())
                 .toString();
     }

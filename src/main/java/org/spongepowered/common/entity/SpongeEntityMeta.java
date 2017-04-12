@@ -26,7 +26,7 @@ package org.spongepowered.common.entity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.common.SpongeCatalogType;
 
@@ -44,7 +44,7 @@ public class SpongeEntityMeta extends SpongeCatalogType {
     }
 
     @Override
-    protected ToStringHelper toStringHelper() {
+    protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
                 .add("type", this.type);
     }

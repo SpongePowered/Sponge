@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.DamageSource;
@@ -276,7 +276,7 @@ public abstract class TrackingPhase {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .toString();
     }
 

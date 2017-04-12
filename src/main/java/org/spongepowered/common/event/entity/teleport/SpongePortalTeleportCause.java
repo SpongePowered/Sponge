@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.entity.teleport;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.event.cause.entity.teleport.PortalTeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.common.AbstractPortalTeleportCause;
@@ -53,7 +54,7 @@ public class SpongePortalTeleportCause extends AbstractPortalTeleportCause imple
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("PortalTeleportCause")
+        return MoreObjects.toStringHelper("PortalTeleportCause")
                 .add("TeleportType", this.teleportType)
                 .add("PortalAgent", this.agent)
                 .toString();

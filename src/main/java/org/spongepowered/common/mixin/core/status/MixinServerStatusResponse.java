@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.status;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Throwables;
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -147,7 +146,7 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
                 this.faviconHandle = new SpongeFavicon(faviconBlob);
                 this.favicon = faviconBlob;
             } catch (IOException e) {
-                throw Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
         }
     }

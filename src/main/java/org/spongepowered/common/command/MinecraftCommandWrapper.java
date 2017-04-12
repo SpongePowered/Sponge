@@ -26,7 +26,6 @@ package org.spongepowered.common.command;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandHandler;
@@ -111,7 +110,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
         try {
             usernameIndex = handler.getUsernameIndex(this.command, splitArgs);
         } catch (net.minecraft.command.CommandException e) {
-            Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
         int successCount = 0;
 
@@ -126,7 +125,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
             try {
                 list = EntitySelector.matchEntities(mcSender, splitArgs[usernameIndex], Entity.class);
             } catch (net.minecraft.command.CommandException e) {
-                Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
             String previousNameVal = splitArgs[usernameIndex];
             affectedEntities = list.size();
@@ -163,7 +162,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
         } finally {
             Throwable error = commandErrors.get().pop();
             if (error != noError) {
-                throw Throwables.propagate(error);
+                throw new RuntimeException(error);
             }
         }
     }

@@ -26,7 +26,7 @@ package org.spongepowered.common.data.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.common.SpongeCatalogType;
@@ -66,7 +66,7 @@ public class SpongeTileEntityType extends SpongeCatalogType implements TileEntit
     }
 
     @Override
-    protected ToStringHelper toStringHelper() {
+    protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
                 .add("TileEntityClass", this.clazz);
     }

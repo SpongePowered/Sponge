@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.type;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.common.SpongeCatalogType;
@@ -45,7 +46,7 @@ public final class SpongeSkinPart extends SpongeCatalogType.Translatable impleme
     }
 
     @Override
-    protected Objects.ToStringHelper toStringHelper() {
+    protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
                 .add("ordinal", this.ordinal);
     }

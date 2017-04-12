@@ -26,7 +26,7 @@ package org.spongepowered.common.world.biome;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -100,7 +100,7 @@ public class SpongeVirtualBiomeType implements VirtualBiomeType {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("id", this.id)
                 .add("name", this.name)
                 .add("persistedBiome", this.persisted)
