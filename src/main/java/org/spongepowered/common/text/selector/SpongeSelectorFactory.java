@@ -41,7 +41,6 @@ import org.spongepowered.api.text.selector.ArgumentTypes;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorFactory;
 import org.spongepowered.api.text.selector.SelectorType;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 
@@ -342,7 +341,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
             }
             choices = choices.map(input -> prefix + input);
         }
-        return choices.filter(choice -> choice.startsWith(selector)).collect(GuavaCollectors.toImmutableList());
+        return choices.filter(choice -> choice.startsWith(selector)).collect(ImmutableList.toImmutableList());
     }
 
 }

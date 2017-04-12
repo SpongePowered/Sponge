@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
@@ -32,7 +33,6 @@ import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -54,7 +54,7 @@ public final class SpongeProxyBlockAccess implements IBlockAccess {
         this.transactions = snapshotTransaction;
         this.poses = this.transactions.stream()
             .map(transaction -> ((IMixinLocation) (Object) transaction.getOriginal().getLocation().get()).getBlockPos())
-            .collect(GuavaCollectors.toImmutableList());
+            .collect(ImmutableList.toImmutableList());
         this.index = 0;
         this.processingWorld = ((WorldServer) snapshotTransaction.get(0).getOriginal().getLocation().get().getExtent());
     }

@@ -47,7 +47,6 @@ import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.StartsWithPredicate;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
@@ -190,7 +189,7 @@ public class SpongePaginationService implements PaginationService {
                 .description(t("Helper command for paginations occurring"))
                 .build();
     }
-    
+
     private class ActivePaginationCommandElement extends CommandElement {
 
         protected ActivePaginationCommandElement(@Nullable Text key) {
@@ -237,12 +236,12 @@ public class SpongePaginationService implements PaginationService {
                 return paginations.keys().stream()
                     .map(Object::toString)
                     .filter(new StartsWithPredicate(optNext.get()))
-                    .collect(GuavaCollectors.toImmutableList());
+                    .collect(ImmutableList.toImmutableList());
             } else {
                 return ImmutableList.copyOf(Iterables.transform(paginations.keys(), Object::toString));
             }
         }
-        
+
         @Override
         public Text getUsage(CommandSource src) {
             return getKey() == null ? Text.of() : Text.of("[", getKey(), "]");

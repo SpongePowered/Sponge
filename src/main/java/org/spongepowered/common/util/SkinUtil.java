@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.util;
 
+import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 
 import java.util.Set;
@@ -40,7 +40,7 @@ public final class SkinUtil {
         return Sponge.getRegistry().getAllOf(SkinPart.class).stream()
                 .map(part -> (SpongeSkinPart) part)
                 .filter(part -> part.test(flags))
-                .collect(GuavaCollectors.toImmutableSet());
+                .collect(ImmutableSet.toImmutableSet());
     }
 
 }

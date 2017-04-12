@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import co.aikar.timings.TimingsManager;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.EntityTracker;
@@ -65,7 +66,6 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.Location;
@@ -470,7 +470,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     public Collection<WorldProperties> getUnloadedWorlds() {
         return WorldManager.getAllWorldProperties().stream()
                 .filter(props -> !this.getWorld(props.getUniqueId()).isPresent())
-                .collect(GuavaCollectors.toImmutableSet());
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
