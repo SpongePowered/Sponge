@@ -46,10 +46,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.world.GeneratorTypeRegistryModule;
-import org.spongepowered.common.util.persistence.JsonTranslator;
+
+import java.io.IOException;
 
 @NonnullByDefault
 @Mixin(WorldType.class)
@@ -87,12 +89,9 @@ public abstract class MixinWorldType implements GeneratorType {
         if ((Object) this == WorldType.CUSTOMIZED) {
             // They easiest way to go from ChunkProviderSettings to DataContainer is via json and NBT
             try {
-                String jsonString = ChunkProviderSettings.Factory.jsonToFactory("").toString();
-                return JsonTranslator.translateFrom(new JsonParser().parse(jsonString).getAsJsonObject());
-            } catch (JsonParseException | IllegalStateException e) {
-                AssertionError error = new AssertionError("Failed to parse default settings of CUSTOMIZED world type");
-                error.initCause(e);
-                throw error;
+                return JsonDataFormat.serialize(ChunkProviderSettings.Factory.JSON_ADAPTER, new ChunkProviderSettings.Factory());
+            } catch (JsonParseException | IOException e) {
+                throw new AssertionError("Failed to serialize default settings of CUSTOMIZED world type", e);
             }
         }
 

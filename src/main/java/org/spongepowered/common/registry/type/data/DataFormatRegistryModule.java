@@ -33,6 +33,7 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.persistence.HoconDataFormat;
+import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.persistence.NbtDataFormat;
 
 import java.util.Collection;
@@ -67,6 +68,7 @@ public class DataFormatRegistryModule implements AdditionalCatalogRegistryModule
     @Override
     public void registerDefaults() {
         this.dataFormatMappings.put("nbt", new NbtDataFormat("nbt"));
+        this.dataFormatMappings.put("json", JsonDataFormat.INSTANCE);
         this.dataFormatMappings.put("hocon", new HoconDataFormat("hocon"));
     }
 }
