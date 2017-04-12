@@ -47,7 +47,7 @@ public abstract class MixinEntityAIAvoidEntity extends MixinEntityAIBase impleme
     @SuppressWarnings("unchecked")
     @Override
     public Predicate<Entity> getTargetSelector() {
-        return Functional.guavaToJava8(this.avoidTargetSelector);
+        return this.avoidTargetSelector;
     }
 
     @Override
