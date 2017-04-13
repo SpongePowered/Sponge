@@ -34,6 +34,7 @@ import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.SynchronousExecutor;
+import org.spongepowered.common.inject.InjectionPointProvider;
 
 public class PluginModule extends AbstractModule {
 
@@ -66,6 +67,7 @@ public class PluginModule extends AbstractModule {
         });
 
         this.install(new PluginConfigurationModule(this.container));
+        this.install(new InjectionPointProvider());
     }
 
     private static abstract class SpongeExecutorServiceProvider implements Provider<SpongeExecutorService> {
