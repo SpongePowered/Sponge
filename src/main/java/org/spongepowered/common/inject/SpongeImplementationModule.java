@@ -27,6 +27,7 @@ package org.spongepowered.common.inject;
 import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.binder.AnnotatedBindingBuilder;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameRegistry;
@@ -65,22 +66,14 @@ public class SpongeImplementationModule extends PrivateModule {
     protected void configure() {
         this.bind(SpongeImpl.class);
 
-        this.bind(Game.class).to(SpongeGame.class);
-        this.expose(Game.class);
-        this.bind(MinecraftVersion.class).toInstance(SpongeImpl.MINECRAFT_VERSION);
-        this.expose(MinecraftVersion.class);
-        this.bind(ServiceManager.class).to(SimpleServiceManager.class);
-        this.expose(ServiceManager.class);
-        this.bind(AssetManager.class).to(SpongeAssetManager.class);
-        this.expose(AssetManager.class);
-        this.bind(GameRegistry.class).to(SpongeGameRegistry.class);
-        this.expose(GameRegistry.class);
-        this.bind(TeleportHelper.class).to(SpongeTeleportHelper.class);
-        this.expose(TeleportHelper.class);
-        this.bind(Scheduler.class).to(SpongeScheduler.class);
-        this.expose(Scheduler.class);
-        this.bind(CommandManager.class).to(SpongeCommandManager.class);
-        this.expose(CommandManager.class);
+        this.bindAndExpose(Game.class).to(SpongeGame.class);
+        this.bindAndExpose(MinecraftVersion.class).toInstance(SpongeImpl.MINECRAFT_VERSION);
+        this.bindAndExpose(ServiceManager.class).to(SimpleServiceManager.class);
+        this.bindAndExpose(AssetManager.class).to(SpongeAssetManager.class);
+        this.bindAndExpose(GameRegistry.class).to(SpongeGameRegistry.class);
+        this.bindAndExpose(TeleportHelper.class).to(SpongeTeleportHelper.class);
+        this.bindAndExpose(Scheduler.class).to(SpongeScheduler.class);
+        this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
 
         // These are bound in implementation-specific modules
         this.expose(Platform.class);
@@ -98,6 +91,11 @@ public class SpongeImplementationModule extends PrivateModule {
         this.requestStaticInjection(SpongeChunkPreGenerateTask.class);
         this.requestStaticInjection(WorldManager.class);
         this.requestStaticInjection(WorldStorageUtil.class);
+    }
+
+    protected <T> AnnotatedBindingBuilder<T> bindAndExpose(final Class<T> type) {
+        this.expose(type);
+        return this.bind(type);
     }
 
     @Provides
