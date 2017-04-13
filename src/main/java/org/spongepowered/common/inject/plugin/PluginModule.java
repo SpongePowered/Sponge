@@ -39,7 +39,11 @@ import org.spongepowered.common.inject.InjectionPointProvider;
 import org.spongepowered.common.inject.provider.ChannelBindingProvider;
 import org.spongepowered.common.inject.provider.PluginAssetProvider;
 import org.spongepowered.common.inject.provider.SpongeExecutorServiceProvider;
+import org.spongepowered.common.inject.provider.config.PluginConfigurationModule;
 
+/**
+ * A module installed for each plugin.
+ */
 public class PluginModule extends AbstractModule {
 
     private final PluginContainer container;
@@ -65,6 +69,6 @@ public class PluginModule extends AbstractModule {
         this.bind(ChannelBinding.RawDataChannel.class).annotatedWith(ChannelId.class).toProvider(ChannelBindingProvider.Raw.class);
         this.bind(Asset.class).annotatedWith(AssetId.class).toProvider(PluginAssetProvider.class);
 
-        this.install(new PluginConfigurationModule(this.container));
+        this.install(new PluginConfigurationModule());
     }
 }

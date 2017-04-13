@@ -22,22 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject.config;
+package org.spongepowered.common.inject.provider.config;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.config.ConfigDir;
+import org.spongepowered.api.config.DefaultConfig;
 
 import java.lang.annotation.Annotation;
 
-// This is strange, but required for Guice and annotations with values.
-public class ConfigDirAnnotation implements ConfigDir {
+public class DefaultConfigAnnotation implements DefaultConfig {
 
-    public static final ConfigDir NON_SHARED = new ConfigDirAnnotation(false);
-    public static final ConfigDir SHARED = new ConfigDirAnnotation(true);
+    public static final DefaultConfig NON_SHARED = new DefaultConfigAnnotation(false);
+    public static final DefaultConfig SHARED = new DefaultConfigAnnotation(true);
 
     private final boolean shared;
 
-    private ConfigDirAnnotation(boolean shared) {
+    private DefaultConfigAnnotation(boolean shared) {
         this.shared = shared;
     }
 
@@ -48,7 +47,7 @@ public class ConfigDirAnnotation implements ConfigDir {
 
     @Override
     public Class<? extends Annotation> annotationType() {
-        return ConfigDir.class;
+        return DefaultConfig.class;
     }
 
     @Override
@@ -56,11 +55,11 @@ public class ConfigDirAnnotation implements ConfigDir {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof ConfigDir)) {
+        if (!(o instanceof DefaultConfig)) {
             return false;
         }
 
-        ConfigDir that = (ConfigDir) o;
+        DefaultConfig that = (DefaultConfig) o;
         return sharedRoot() == that.sharedRoot();
     }
 
