@@ -242,7 +242,7 @@ public class SpongeEventManager implements EventManager {
 
         // getMethods() doesn't return private methods. Do another check to warn
         // about those.
-        for (Class<?> handleParent = handle; handleParent != Object.class; handleParent = handle.getSuperclass()) {
+        for (Class<?> handleParent = handle; handleParent != Object.class; handleParent = handleParent.getSuperclass()) {
             for (Method method : handleParent.getDeclaredMethods()) {
                 if (method.getAnnotation(Listener.class) != null && !methodErrors.containsKey(method)) {
                     String error = getHandlerErrorOrNull(method);
