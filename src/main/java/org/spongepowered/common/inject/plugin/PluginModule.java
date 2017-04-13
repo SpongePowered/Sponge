@@ -31,6 +31,8 @@ import com.google.inject.Scopes;
 import org.slf4j.Logger;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelId;
+import org.spongepowered.api.asset.Asset;
+import org.spongepowered.api.asset.AssetId;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.AsynchronousExecutor;
 import org.spongepowered.api.scheduler.Scheduler;
@@ -38,6 +40,7 @@ import org.spongepowered.api.scheduler.SpongeExecutorService;
 import org.spongepowered.api.scheduler.SynchronousExecutor;
 import org.spongepowered.common.inject.InjectionPointProvider;
 import org.spongepowered.common.inject.provider.ChannelBindingProvider;
+import org.spongepowered.common.inject.provider.PluginAssetProvider;
 
 public class PluginModule extends AbstractModule {
 
@@ -71,6 +74,8 @@ public class PluginModule extends AbstractModule {
 
         this.bind(ChannelBinding.IndexedMessageChannel.class).annotatedWith(ChannelId.class).toProvider(new ChannelBindingProvider<>((registrar, channel) -> registrar.getOrCreate(PluginModule.this.container, channel)));
         this.bind(ChannelBinding.RawDataChannel.class).annotatedWith(ChannelId.class).toProvider(new ChannelBindingProvider<>((registrar, channel) -> registrar.getOrCreateRaw(this.container, channel)));
+
+        this.bind(Asset.class).annotatedWith(AssetId.class).toProvider(PluginAssetProvider.class);
 
         this.install(new PluginConfigurationModule(this.container));
         this.install(new InjectionPointProvider());
