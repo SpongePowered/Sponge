@@ -29,139 +29,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameState;
-import org.spongepowered.api.Platform;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.asset.AssetManager;
-import org.spongepowered.api.command.CommandManager;
-import org.spongepowered.api.config.ConfigManager;
-import org.spongepowered.api.data.DataManager;
-import org.spongepowered.api.data.property.PropertyRegistry;
-import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.network.ChannelRegistrar;
-import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.scheduler.Scheduler;
-import org.spongepowered.api.service.ServiceManager;
-import org.spongepowered.api.world.TeleportHelper;
-import org.spongepowered.common.config.SpongeConfigManager;
-import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.data.property.SpongePropertyRegistry;
-import org.spongepowered.common.registry.RegistryHelper;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 
 import java.nio.file.Path;
 
 public abstract class SpongeGame implements Game {
 
-    private final Platform platform;
-
-    private final PluginManager pluginManager;
-    private final EventManager eventManager;
-    private final AssetManager assetManager;
-    private final SpongeGameRegistry gameRegistry;
-    private final ServiceManager serviceManager;
-    private final TeleportHelper teleportHelper;
-    private final ConfigManager configManager;
-    private final CommandManager commandManager;
-    private final ChannelRegistrar channelRegistrar;
-    private final Scheduler scheduler;
-
     private GameState state = GameState.CONSTRUCTION;
-
-    protected SpongeGame(Platform platform, PluginManager pluginManager, EventManager eventManager, AssetManager assetManager,
-            ServiceManager serviceManager, TeleportHelper teleportHelper, ChannelRegistrar channelRegistrar,
-            SpongeGameRegistry gameRegistry, Scheduler scheduler, CommandManager commandManager) {
-        RegistryHelper.setFinalStatic(Sponge.class, "game", this);
-
-        this.platform = checkNotNull(platform, "platform");
-        this.pluginManager = checkNotNull(pluginManager, "pluginManager");
-        this.eventManager = checkNotNull(eventManager, "eventManager");
-        this.assetManager = assetManager;
-        this.gameRegistry = checkNotNull(gameRegistry, "gameRegistry");
-        this.serviceManager = checkNotNull(serviceManager, "serviceManager");
-        this.teleportHelper = checkNotNull(teleportHelper, "teleportHelper");
-        this.channelRegistrar = checkNotNull(channelRegistrar, "channelRegistrar");
-        this.scheduler = scheduler;
-        this.configManager = new SpongeConfigManager();
-        this.commandManager = commandManager;
-
-    }
-
-    @Override
-    public Platform getPlatform() {
-        return this.platform;
-    }
-
-    @Override
-    public PluginManager getPluginManager() {
-        return this.pluginManager;
-    }
-
-    @Override
-    public EventManager getEventManager() {
-        return this.eventManager;
-    }
-
-    @Override
-    public AssetManager getAssetManager() {
-        return this.assetManager;
-    }
-
-    @Override
-    public SpongeGameRegistry getRegistry() {
-        return this.gameRegistry;
-    }
-
-    @Override
-    public ServiceManager getServiceManager() {
-        return this.serviceManager;
-    }
-
-    @Override
-    public CommandManager getCommandManager() {
-        return this.commandManager;
-    }
-
-    @Override
-    public TeleportHelper getTeleportHelper() {
-        return this.teleportHelper;
-    }
-
-    @Override
-    public ChannelRegistrar getChannelRegistrar() {
-        return this.channelRegistrar;
-    }
-
-    @Override
-    public ConfigManager getConfigManager() {
-        return this.configManager;
-    }
-
-    @Override
-    public Path getGameDirectory() {
-        return SpongeImpl.getGameDir();
-    }
-
-    @Override
-    public Scheduler getScheduler() {
-        return this.scheduler;
-    }
-
-    @Override
-    public DataManager getDataManager() {
-        return SpongeDataManager.getInstance();
-    }
-
-    @Override
-    public PropertyRegistry getPropertyRegistry() {
-        return SpongePropertyRegistry.getInstance();
-    }
-
-    @Override
-    public String toString() {
-        return Objects.toStringHelper(this)
-                .add("platform", this.platform)
-                .toString();
-    }
 
     @Override
     public GameState getState() {
@@ -170,6 +43,18 @@ public abstract class SpongeGame implements Game {
 
     public void setState(GameState state) {
         this.state = checkNotNull(state);
+    }
+
+    @Override
+    public Path getGameDirectory() {
+        return SpongeImpl.getGameDir();
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("platform", getPlatform())
+                .toString();
     }
 
 }

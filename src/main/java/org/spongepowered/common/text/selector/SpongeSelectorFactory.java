@@ -74,8 +74,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
         ImmutableMap.Builder<String, SelectorType> builder =
                 ImmutableMap.builder();
 
-        for (SelectorType type : SpongeImpl.getGame().getRegistry()
-                .getAllOf(SelectorType.class)) {
+        for (SelectorType type : Sponge.getRegistry().getAllOf(SelectorType.class)) {
             builder.put(type.getId(), type);
         }
 

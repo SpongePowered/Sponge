@@ -28,11 +28,13 @@ import com.google.inject.PrivateModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 import com.google.inject.binder.AnnotatedBindingBuilder;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameRegistry;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.config.ConfigManager;
@@ -54,14 +56,9 @@ import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
-import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.SpongeScheduler;
-import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.world.SpongeTeleportHelper;
-import org.spongepowered.common.world.WorldManager;
-import org.spongepowered.common.world.pregen.SpongeChunkPreGenerateTask;
-import org.spongepowered.common.world.storage.WorldStorageUtil;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 
@@ -70,8 +67,7 @@ public class SpongeImplementationModule extends PrivateModule {
     @Override
     @OverridingMethodsMustInvokeSuper
     protected void configure() {
-        this.bind(SpongeImpl.class);
-
+        //noinspection UninstantiableBinding
         this.bindAndExpose(Game.class).to(SpongeGame.class);
         this.bindAndExpose(MinecraftVersion.class).toInstance(SpongeImpl.MINECRAFT_VERSION);
         this.bindAndExpose(ServiceManager.class).to(SimpleServiceManager.class);
@@ -80,9 +76,9 @@ public class SpongeImplementationModule extends PrivateModule {
         this.bindAndExpose(TeleportHelper.class).to(SpongeTeleportHelper.class);
         this.bindAndExpose(Scheduler.class).to(SpongeScheduler.class);
         this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
-        this.bindAndExpose(DataManager.class).toInstance(SpongeDataManager.getInstance());
+        this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
         this.bindAndExpose(ConfigManager.class).to(SpongeConfigManager.class);
-        this.bindAndExpose(PropertyRegistry.class).toInstance(SpongePropertyRegistry.getInstance());
+        this.bindAndExpose(PropertyRegistry.class).to(SpongePropertyRegistry.class);
 
         // These are bound in implementation-specific modules
         this.expose(Platform.class);
@@ -90,16 +86,12 @@ public class SpongeImplementationModule extends PrivateModule {
         this.expose(EventManager.class);
         this.expose(ChannelRegistrar.class);
 
-        this.bind(Logger.class).toInstance(SpongeImpl.getSlf4jLogger());
-        this.bind(org.apache.logging.log4j.Logger.class).toInstance(SpongeImpl.getLogger());
+        this.bind(Logger.class).toInstance(SpongeImpl.getLogger());
+        this.bind(org.slf4j.Logger.class).toInstance(LoggerFactory.getLogger(SpongeImpl.getLogger().getName()));
 
         this.requestStaticInjection(SpongeImpl.class);
+        this.requestStaticInjection(Sponge.class);
         this.requestStaticInjection(SpongeBootstrap.class);
-        this.requestStaticInjection(SpongeTaskBuilder.class);
-        this.requestStaticInjection(SpongeProfileManager.class);
-        this.requestStaticInjection(SpongeChunkPreGenerateTask.class);
-        this.requestStaticInjection(WorldManager.class);
-        this.requestStaticInjection(WorldStorageUtil.class);
     }
 
     protected <T> AnnotatedBindingBuilder<T> bindAndExpose(final Class<T> type) {

@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.inject.Inject;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 
@@ -37,7 +36,7 @@ import java.util.function.Consumer;
 
 public class SpongeTaskBuilder implements Task.Builder {
 
-    @Inject private static SpongeScheduler scheduler;
+    private final SpongeScheduler scheduler;
     private Consumer<Task> consumer;
     private ScheduledTask.TaskSynchronicity syncType;
     private String name;
@@ -46,7 +45,8 @@ public class SpongeTaskBuilder implements Task.Builder {
     private boolean delayIsTicks;
     private boolean intervalIsTicks;
 
-    public SpongeTaskBuilder() {
+    public SpongeTaskBuilder(SpongeScheduler scheduler) {
+        this.scheduler = scheduler;
         this.syncType = ScheduledTask.TaskSynchronicity.SYNCHRONOUS;
     }
 

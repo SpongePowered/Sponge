@@ -97,7 +97,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
     private void updatePatterns() {
         this.patternLayers.clear();
         if (this.patterns != null) {
-            SpongeGameRegistry registry = SpongeImpl.getGame().getRegistry();
+            SpongeGameRegistry registry = SpongeImpl.getRegistry();
             for (int i = 0; i < this.patterns.tagCount(); i++) {
                 NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
                 String patternId = tagCompound.getString(NbtDataUtil.BANNER_PATTERN_ID);
