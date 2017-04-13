@@ -25,6 +25,7 @@
 package org.spongepowered.common.config;
 
 import com.google.inject.Injector;
+import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.DefaultObjectMapperFactory;
 import ninja.leaping.configurate.objectmapping.GuiceObjectMapperFactory;
 import ninja.leaping.configurate.objectmapping.ObjectMapperFactory;
@@ -40,6 +41,7 @@ import java.util.Optional;
 /**
  * Implementation of service to manage configurations.
  */
+@Singleton
 public class SpongeConfigManager implements ConfigManager {
 
     @Override

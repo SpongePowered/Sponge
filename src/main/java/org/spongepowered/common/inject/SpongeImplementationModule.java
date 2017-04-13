@@ -35,6 +35,9 @@ import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.config.ConfigManager;
+import org.spongepowered.api.data.DataManager;
+import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
@@ -48,6 +51,9 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.asset.SpongeAssetManager;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
 import org.spongepowered.common.command.SpongeCommandManager;
+import org.spongepowered.common.config.SpongeConfigManager;
+import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.SpongeScheduler;
@@ -74,6 +80,9 @@ public class SpongeImplementationModule extends PrivateModule {
         this.bindAndExpose(TeleportHelper.class).to(SpongeTeleportHelper.class);
         this.bindAndExpose(Scheduler.class).to(SpongeScheduler.class);
         this.bindAndExpose(CommandManager.class).to(SpongeCommandManager.class);
+        this.bindAndExpose(DataManager.class).toInstance(SpongeDataManager.getInstance());
+        this.bindAndExpose(ConfigManager.class).to(SpongeConfigManager.class);
+        this.bindAndExpose(PropertyRegistry.class).toInstance(SpongePropertyRegistry.getInstance());
 
         // These are bound in implementation-specific modules
         this.expose(Platform.class);
