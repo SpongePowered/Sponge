@@ -25,46 +25,28 @@
 package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.world.GameRules;
-import com.google.common.collect.ImmutableSet;
-import org.spongepowered.api.world.gamerule.DefaultGameRules;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.IMixinGameRules;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.util.Set;
 import java.util.TreeMap;
 
 @Mixin(GameRules.class)
 public abstract class MixinGameRules implements IMixinGameRules {
 
-    private static final Set<String> DEFAULT;
-
-    static {
-        final ImmutableSet.Builder<String> builder = ImmutableSet.builder();
-        for (Field field : DefaultGameRules.class.getFields()) {
-            if (Modifier.isStatic(field.getModifiers()) && field.getType() == String.class) {
-                try {
-                    builder.add((String) field.get(null));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        DEFAULT = builder.build();
-    }
+    private static final GameRules DEFAULT_GAME_RULES = new GameRules();
 
     @Shadow @Final private TreeMap<String, ?> theGameRules;
 
-    @Shadow public abstract String getString(String name);
+    @Shadow public abstract void setOrCreateGameRule(String key, String ruleValue);
 
     @Override
     public boolean removeGameRule(String gameRule) {
         // Cannot remove default gamerule
-        if (DEFAULT.contains(gameRule)) {
-            return false;
+        if (DEFAULT_GAME_RULES.hasRule(gameRule)) {
+            this.setOrCreateGameRule(gameRule, DEFAULT_GAME_RULES.getString(gameRule));
+            return true;
         }
 
         return this.theGameRules.remove(gameRule) != null;
