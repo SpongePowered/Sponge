@@ -26,40 +26,30 @@ package org.spongepowered.common.inject.provider;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import com.google.inject.spi.InjectionPoint;
-import org.spongepowered.api.network.ChannelBinding;
-import org.spongepowered.api.network.ChannelId;
-import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.api.scheduler.SpongeExecutorService;
 
-import java.lang.reflect.AnnotatedElement;
+public abstract class SpongeExecutorServiceProvider implements Provider<SpongeExecutorService> {
 
-public abstract class ChannelBindingProvider<B extends ChannelBinding> implements Provider<B> {
+    @Inject protected Scheduler scheduler;
+    @Inject protected PluginContainer container;
 
-    @Inject ChannelRegistrar registrar;
-    @Inject PluginContainer container;
-    @Inject private Provider<InjectionPoint> point;
-
-    final String getChannel() {
-        return ((AnnotatedElement) this.point.get().getMember()).getAnnotation(ChannelId.class).value();
-    }
-
-    public static class Indexed extends ChannelBindingProvider<ChannelBinding.IndexedMessageChannel> {
+    public static final class Synchronous extends SpongeExecutorServiceProvider {
 
         @Override
-        public ChannelBinding.IndexedMessageChannel get() {
-            return this.registrar.getOrCreate(this.container, this.getChannel());
+        public SpongeExecutorService get() {
+            return this.scheduler.createSyncExecutor(this.container);
         }
 
     }
 
-    public static class Raw extends ChannelBindingProvider<ChannelBinding.RawDataChannel> {
+    public static final class Asynchronous extends SpongeExecutorServiceProvider {
 
         @Override
-        public ChannelBinding.RawDataChannel get() {
-            return this.registrar.getOrCreateRaw(this.container, this.getChannel());
+        public SpongeExecutorService get() {
+            return this.scheduler.createAsyncExecutor(this.container);
         }
 
     }
-
 }
