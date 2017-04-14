@@ -26,6 +26,7 @@ package org.spongepowered.common.registry;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,10 +34,15 @@ import org.junit.runners.Parameterized;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.text.translation.Translatable;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 @RunWith(LaunchWrapperParameterized.class)
@@ -53,6 +59,8 @@ public class CatalogTypeMethodTest {
     private static final Set<String> ignoredFailures = ImmutableSet.<String>builder()
             .add("org.spongepowered.common.statistic.SpongeEntityStatistic#getEntityType()")
             .add("org.spongepowered.common.world.gen.SpongePopulatorType#getTranslation()")
+            .add("net.minecraft.util.EnumHand#getTranslation()")
+            // AbstractMethodErrors
             .add("net.minecraft.block.BlockDirt$DirtType#getTranslation()")
             .add("net.minecraft.block.BlockPistonExtension$EnumPistonType#getTranslation()")
             .add("net.minecraft.block.BlockPrismarine$EnumType#getTranslation()")
@@ -64,7 +72,17 @@ public class CatalogTypeMethodTest {
             .add("net.minecraft.block.BlockStoneSlab$EnumType#getTranslation()")
             .add("net.minecraft.block.BlockStoneSlabNew$EnumType#getTranslation()")
             .add("net.minecraft.item.ItemArmor$ArmorMaterial#getRepairItemType()")
-            .add("net.minecraft.util.EnumHand#getTranslation()")
+            .build();
+
+    // Ignored translation prefixes + whether it was provided by sponge
+    private static final Map<String, Boolean> ignoredTranslationPrefixes = ImmutableMap.<String, Boolean>builder()
+            .put("sponge.statistic.type.", true)
+            .put("item.", false)
+            .put("entity.", false)
+            .put("stat.", false)
+            .put("tile.", false)
+            .put("potion.effect.", false)
+            .put("gameMode.", false)
             .build();
 
     @Parameterized.Parameter(0)
@@ -86,7 +104,7 @@ public class CatalogTypeMethodTest {
     public void testCatalogMethodImpl() throws Throwable {
         try {
             try {
-                checkNotNull(this.method.invoke(this.catalogType), "return value");
+                testResult(checkNotNull(this.method.invoke(this.catalogType), "return value"));
             } catch (InvocationTargetException e) {
                 // Unwrap exception to avoid useless stacktrace entries
                 if (e.getCause() != null) {
@@ -102,6 +120,50 @@ public class CatalogTypeMethodTest {
                 return;
             }
             throw t;
+        }
+    }
+
+    private void testResult(Object object) {
+        checkNotNull(object, "contained value");
+        if (object instanceof Optional) {
+            ((Optional<?>) object).ifPresent(this::testResult);
+        }
+        if (object instanceof Iterable) {
+            int index = 0;
+            for (Object elem : (Iterable<?>) object) {
+                try {
+                    testResult(elem);
+                    index++;
+                } catch (Throwable t) {
+                    throw new RuntimeException("Failed on sub-element: " + index, t);
+                }
+            }
+        }
+        if (object instanceof Translatable) {
+            testResult(((Translatable) object).getTranslation());
+        }
+        if (object instanceof Translation) {
+            Translation translation = (Translation) object;
+            String translationId = checkNotNull(translation.getId(), "translationId");
+            String translated = checkNotNull(translation.get(), "translated");
+            if (translationId.equals(translated)) {
+                boolean ignore = false;
+                boolean silent = false;
+                for (Entry<String, Boolean> entry : ignoredTranslationPrefixes.entrySet()) {
+                    if (translationId.startsWith(entry.getKey())) {
+                        ignore = true;
+                        silent = entry.getValue();
+                    }
+                }
+                if (silent) {
+                    // Do nothing
+                } else if (ignore) {
+                    LOG.warn("Catalog Type: {} Id : {} fails to provide translation: '{}' in {} ({})",
+                            this.name, this.catalogId, translationId, this.methodName, this.implementationClass);
+                } else {
+                    throw new RuntimeException("No translation present for " + translationId);
+                }
+            }
         }
     }
 
