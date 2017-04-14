@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.potion;
 
+import com.google.common.base.CaseFormat;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
@@ -81,7 +82,8 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
     public Translation getPotionTranslation() {
         // Maybe move this to a @Inject at the end of the constructor
         if (this.potionTranslation == null) {
-            this.potionTranslation = new SpongeTranslation(shadow$getName() + ".postfix");
+            String name = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, shadow$getName());
+            this.potionTranslation = new SpongeTranslation("potion." + name);
         }
         return this.potionTranslation;
     }

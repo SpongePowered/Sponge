@@ -28,9 +28,12 @@ import org.spongepowered.api.statistic.StatisticType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import javax.annotation.Nullable;
+
 public final class SpongeStatisticType implements StatisticType {
 
     private final String id;
+    @Nullable private Translation translation;
 
     public SpongeStatisticType(String id) {
         this.id = id;
@@ -38,7 +41,10 @@ public final class SpongeStatisticType implements StatisticType {
 
     @Override
     public Translation getTranslation() {
-        return new SpongeTranslation(this.id);
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("sponge.statistic.type." + this.id);
+        }
+        return this.translation;
     }
 
     @Override
