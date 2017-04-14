@@ -38,6 +38,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @Mixin(ItemArmor.ArmorMaterial.class)
 public abstract class MixinItemArmorMaterial implements ArmorType {
 
@@ -47,6 +49,9 @@ public abstract class MixinItemArmorMaterial implements ArmorType {
     // at dev time. Since it's capitalized, the client becomes unable to retrieve
     // the texture, as the resource location is wrong.
     private String capitalizedName;
+
+    @Nullable
+    private Optional<ItemType> repairItemType;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(CallbackInfo ci) {
@@ -65,18 +70,20 @@ public abstract class MixinItemArmorMaterial implements ArmorType {
 
     @Override
     public Optional<ItemType> getRepairItemType() {
-        switch (name) {
-            case "diamond":
-                return Optional.of(ItemTypes.DIAMOND);
-            case "gold":
-                return Optional.of(ItemTypes.GOLD_INGOT);
-            case "leather":
-                return Optional.of(ItemTypes.LEATHER);
-            case "iron":
-                return Optional.of(ItemTypes.IRON_INGOT);
-            default:
-                return Optional.empty();
+        if (this.repairItemType == null) {
+            if ("diamond".equals(this.name)) {
+                this.repairItemType = Optional.of(ItemTypes.DIAMOND);
+            } else if ("gold".equals(this.name)) {
+                this.repairItemType = Optional.of(ItemTypes.GOLD_INGOT);
+            } else if ("leather".equals(this.name)) {
+                this.repairItemType = Optional.of(ItemTypes.LEATHER);
+            } else if ("iron".equals(this.name)) {
+                this.repairItemType = Optional.of(ItemTypes.IRON_INGOT);
+            } else {
+                this.repairItemType = Optional.empty();
+            }
         }
+        return this.repairItemType;
     }
 
 }
