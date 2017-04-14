@@ -7,6 +7,7 @@ import org.spongepowered.api.resource.ResourceLoader;
 import org.spongepowered.api.resource.ResourceLocation;
 import org.spongepowered.api.resource.ResourceManager;
 import org.spongepowered.api.util.Priority;
+import org.spongepowered.common.SpongeImpl;
 
 import java.nio.file.Path;
 import java.nio.file.ProviderNotFoundException;
@@ -57,6 +58,11 @@ public class SpongeResourceManager implements ResourceManager {
         return res;
     }
 
+    /**
+     * The reload lock prevents needless reloads. For example during startup, plugins may add
+     * or be added as a resource provider. If the reload wasn't prevented
+     * @param lock
+     */
     public void setReloadLock(boolean lock) {
         boolean reload = !lock && reloadLock && reloadDirty;
         this.reloadLock = lock;
@@ -106,7 +112,7 @@ public class SpongeResourceManager implements ResourceManager {
             registerResourceLoader(res, priority);
             return Optional.of(res);
         } catch (ProviderNotFoundException e) {
-            e.printStackTrace();
+            SpongeImpl.getLogger().warn("Unable to create resource loader from {}", path, e);
         }
         return Optional.empty();
     }

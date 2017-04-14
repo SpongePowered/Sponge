@@ -6,6 +6,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.resource.Resource;
 import org.spongepowered.api.resource.ResourceLoader;
 import org.spongepowered.api.resource.ResourceLocation;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.util.persistence.JsonTranslator;
 
 import java.io.IOException;
@@ -23,9 +24,11 @@ import javax.annotation.Nullable;
 public class FileResourceLoader implements ResourceLoader {
 
     private final FileSystem fs;
+    private final Path base;
 
     public FileResourceLoader(Path base) {
         fs = FileSystems.getFileSystem(base.toUri());
+        this.base = base;
     }
 
     @Override
@@ -34,7 +37,7 @@ public class FileResourceLoader implements ResourceLoader {
         if (Files.exists(path)) {
             return Optional.of(new Resource() {
 
-                @Nullable DataView meta;
+                @Nullable Optional<DataView> meta;
 
                 @Override
                 public ResourceLocation getResourceLocation() {
@@ -44,7 +47,6 @@ public class FileResourceLoader implements ResourceLoader {
                 @Override
                 public InputStream getInputStream() throws IOException {
                     return Files.newInputStream(path, StandardOpenOption.READ);
-                    // close the zip file when the input stream is closed
                 }
 
                 @Override
@@ -55,19 +57,21 @@ public class FileResourceLoader implements ResourceLoader {
                 @Override
                 public Optional<DataView> getMetadata() {
                     if (meta == null) {
+                        meta = Optional.empty();
                         Path metaPath = path.resolveSibling(path.getFileName() + ".mcmeta");
                         if (Files.exists(metaPath)) {
                             try (InputStream in = Files.newInputStream(metaPath, StandardOpenOption.READ)) {
                                 JsonObject obj = new Gson().fromJson(new InputStreamReader(in), JsonObject.class);
-                                meta = JsonTranslator.translateFrom(obj);
+                                meta = Optional.of(JsonTranslator.translateFrom(obj));
                                 // TODO SpongeAPI#1363
                                 // meta = DataFormats.JSON.readFrom(in);
                             } catch (IOException e) {
-                                e.printStackTrace();
+                                SpongeImpl.getLogger().warn("Unable to read metadata for {} from {}. ", location, base, e);
                             }
                         }
                     }
-                    return Optional.ofNullable(meta);
+                    assert meta != null;
+                    return meta;
                 }
             });
         }
