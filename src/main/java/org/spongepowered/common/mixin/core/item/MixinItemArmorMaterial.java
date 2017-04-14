@@ -28,12 +28,15 @@ import net.minecraft.item.ItemArmor;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.data.type.ArmorType;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Optional;
 
 @Mixin(ItemArmor.ArmorMaterial.class)
 public abstract class MixinItemArmorMaterial implements ArmorType {
@@ -59,4 +62,21 @@ public abstract class MixinItemArmorMaterial implements ArmorType {
     public String getName() {
         return this.name;
     }
+
+    @Override
+    public Optional<ItemType> getRepairItemType() {
+        switch (name) {
+            case "diamond":
+                return Optional.of(ItemTypes.DIAMOND);
+            case "gold":
+                return Optional.of(ItemTypes.GOLD_INGOT);
+            case "leather":
+                return Optional.of(ItemTypes.LEATHER);
+            case "iron":
+                return Optional.of(ItemTypes.IRON_INGOT);
+            default:
+                return Optional.empty();
+        }
+    }
+
 }
