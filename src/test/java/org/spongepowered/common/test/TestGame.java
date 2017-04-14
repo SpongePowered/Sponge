@@ -26,6 +26,7 @@ package org.spongepowered.common.test;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.spongepowered.api.Client;
 import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
@@ -61,6 +62,14 @@ public class TestGame extends SpongeGame {
 
     @Override
     public Server getServer() {
+        throw new NoSuchElementException();
+    }
+
+    @Override public boolean isClientAvailable() {
+        return false;
+    }
+
+    @Override public Client getClient() {
         throw new NoSuchElementException();
     }
 
