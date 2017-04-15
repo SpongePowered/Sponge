@@ -81,7 +81,7 @@ public class CatalogTypeMethodTest {
             .put("entity.", false)
             .put("stat.", false)
             .put("tile.", false)
-            .put("potion.effect.", false)
+            .put("potion.effect.missing", false) // Needs API changes
             .put("gameMode.", false)
             .build();
 
