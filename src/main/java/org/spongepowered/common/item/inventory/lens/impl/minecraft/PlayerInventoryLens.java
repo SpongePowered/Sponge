@@ -29,6 +29,7 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.ArmorEquipable;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.EquipmentInventoryLens;
@@ -53,7 +54,7 @@ public class PlayerInventoryLens extends MinecraftLens {
     private HotbarLensImpl hotbar;
     private GridInventoryLensImpl main;
     private EquipmentInventoryLensImpl equipment;
-    private SlotLensImpl offhand;
+    private SlotLens<IInventory, ItemStack> offhand;
 
     public PlayerInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
         super(0, adapter.getInventory().getSize(), adapter, slots);
@@ -63,13 +64,19 @@ public class PlayerInventoryLens extends MinecraftLens {
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
+        // Adding slots
+        for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
+            this.addChild(slots.getSlot(slot), new SlotIndex(ord));
+        }
+
         int base = 0;
         this.hotbar = new HotbarLensImpl(base, InventoryPlayer.getHotbarSize(), slots);
         base += INVENTORY_WIDTH * HOTBAR;
         this.main = new GridInventoryLensImpl(base, INVENTORY_WIDTH, MAIN_INVENTORY_HEIGHT, INVENTORY_WIDTH, slots);
         base += INVENTORY_WIDTH * MAIN_INVENTORY_HEIGHT;
         this.equipment = new EquipmentInventoryLensImpl((ArmorEquipable) player, base, EQUIPMENT, 1, slots);
-        this.offhand = new SlotLensImpl(base + EQUIPMENT);
+        this.offhand = slots.getSlot(base + EQUIPMENT);
+                new SlotLensImpl(base + EQUIPMENT);
 
         // TODO Hotbar in Vanilla is part of the main inventory (first 9 slots) ; maybe wrap it in a Lens?
         this.addSpanningChild(this.hotbar);
