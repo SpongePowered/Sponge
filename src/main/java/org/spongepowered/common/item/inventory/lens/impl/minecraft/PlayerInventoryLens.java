@@ -76,7 +76,6 @@ public class PlayerInventoryLens extends MinecraftLens {
         base += INVENTORY_WIDTH * MAIN_INVENTORY_HEIGHT;
         this.equipment = new EquipmentInventoryLensImpl((ArmorEquipable) player, base, EQUIPMENT, 1, slots);
         this.offhand = slots.getSlot(base + EQUIPMENT);
-                new SlotLensImpl(base + EQUIPMENT);
 
         // TODO Hotbar in Vanilla is part of the main inventory (first 9 slots) ; maybe wrap it in a Lens?
         this.addSpanningChild(this.hotbar);
