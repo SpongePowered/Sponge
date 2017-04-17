@@ -170,14 +170,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                     final ItemStackSnapshot newItem = itemstack == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
 
-                    SlotAdapter adapter = this.adapters.get(i);
-
-                    // TODO If slotid is not in adapters map, either no lens is known and we didn't cache or this is a newly added slot. The
-                    // TODO following is fallback code until a fallback container lens is added which would be sensitive to these changes.
-                    if (adapter == null) {
-                        adapter = new SlotAdapter(slot);
-                        this.adapters.put(i, adapter);
-                    }
+                    SlotAdapter adapter = this.getSlotAdapter(i);
 
                     this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
                     // This flag is set only when the client sends an invalid CPacketWindowClickItem packet.
@@ -212,15 +205,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 ItemStackSnapshot newItem =
                         itemstack == null ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
 
-                SlotAdapter adapter = this.adapters.get(slotId);
-
-                // TODO If slotid is not in adapters map, either no lens is known and we didn't cache or this is a newly added slot. The
-                // TODO following is fallback code until a fallback container lens is added which would be sensitive to these changes.
-                if (adapter == null) {
-                    adapter = new SlotAdapter(slot);
-                    this.adapters.put(slotId, adapter);
-                }
-
+                SlotAdapter adapter = this.getSlotAdapter(slotId);
                 this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));
             }
         }
@@ -270,6 +255,11 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Override
     public Optional<Carrier> getCarrier() {
         return this.carrier;
+    }
+
+    @Override
+    public SlotAdapter getSlotAdapter(int slot) {
+        return this.adapters.get(slot);
     }
 }
 

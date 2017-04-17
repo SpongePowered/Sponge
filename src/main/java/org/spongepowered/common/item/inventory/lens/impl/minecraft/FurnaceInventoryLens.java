@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
@@ -40,17 +41,23 @@ public class FurnaceInventoryLens extends OrderedInventoryLensImpl {
     private OutputSlotLensImpl output;
 
     public FurnaceInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super(0, adapter.getInventory().getSize(), 1, adapter.getClass(), slots);
+        this(0, adapter, slots);
+    }
+
+    public FurnaceInventoryLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+        super(base, adapter.getInventory().getSize(), 1, adapter.getClass(), slots);
     }
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
+        super.init(slots); // Set spanning SlotAdapters
+
         this.input = new InputSlotLensImpl(0, (i) -> true, (i) -> true);
         this.fuel = new FuelSlotLensImpl(1, (i) -> true, (i) -> true);       // TODO SlotFurnaceFuel
         this.output = new OutputSlotLensImpl(2, (i) -> false, (i) -> false); // SlotFurnaceOutput
 
-        this.addSpanningChild(this.input);
-        this.addSpanningChild(this.fuel);
-        this.addSpanningChild(this.output);
+        this.addChild(this.input, new SlotIndex(0));
+        this.addChild(this.fuel, new SlotIndex(1));
+        this.addChild(this.output, new SlotIndex(2));
     }
 }

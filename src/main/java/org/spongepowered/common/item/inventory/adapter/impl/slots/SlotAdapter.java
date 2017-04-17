@@ -30,13 +30,13 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Builder;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.common.interfaces.inventory.IMixinSlot;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
@@ -45,8 +45,6 @@ import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 
 public class SlotAdapter extends Adapter implements Slot {
@@ -62,8 +60,19 @@ public class SlotAdapter extends Adapter implements Slot {
     public int slotNumber = -1;
 
     public SlotAdapter(net.minecraft.inventory.Slot slot) {
-        this(MinecraftFabric.of(slot), ((IMixinSlot)slot).getSlotIndex() >= 0 ? new SlotLensImpl(((IMixinSlot)slot).getSlotIndex()) : new FakeSlotLensImpl(slot), slot.inventory instanceof Inventory ? (Inventory) slot.inventory : null);
+        this(MinecraftFabric.of(slot), getLens(slot), slot.inventory instanceof Inventory ? (Inventory) slot.inventory : null);
         this.slotNumber = slot.slotNumber;
+    }
+
+    private static SlotLens<IInventory, net.minecraft.item.ItemStack> getLens(net.minecraft.inventory.Slot slot) {
+        if (((IMixinSlot) slot).getSlotIndex() >= 0) { // Normal Slot?
+            if (slot.inventory instanceof InventoryAdapter) { // If the inventory is an adapter we can get the existing SlotLens
+                return ((InventoryAdapter) slot.inventory).getSlotProvider().getSlot(((IMixinSlot) slot).getSlotIndex());
+            }
+            // otherwise fallback to a new SlotLens
+            return new SlotLensImpl(((IMixinSlot) slot).getSlotIndex());
+        }
+        return new FakeSlotLensImpl(slot);
     }
 
     public SlotAdapter(Fabric<IInventory> inventory, SlotLens<IInventory, net.minecraft.item.ItemStack> lens, Inventory parent) {

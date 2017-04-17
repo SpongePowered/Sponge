@@ -868,8 +868,8 @@ public interface PacketFunction {
 
         ItemStackSnapshot sourceSnapshot = ItemStackUtil.snapshotOf(sourceSlot.getStack());
         ItemStackSnapshot targetSnapshot = ItemStackUtil.snapshotOf(targetSlot.getStack());
-        SlotTransaction sourceTransaction = new SlotTransaction(new SlotAdapter(sourceSlot), sourceSnapshot, sourceSnapshot);
-        SlotTransaction targetTransaction = new SlotTransaction(new SlotAdapter(targetSlot), targetSnapshot, targetSnapshot);
+        SlotTransaction sourceTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, sourceSlot.slotIndex), sourceSnapshot, sourceSnapshot);
+        SlotTransaction targetTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, targetSlot.slotIndex), targetSnapshot, targetSnapshot);
         ImmutableList<SlotTransaction>
                 transactions =
                 new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();

@@ -66,10 +66,9 @@ public class CustomLens extends MinecraftLens {
 
         if (size != null) {
             this.addLensFor(size, 0, slots);
-            return;
+        } else {
+            this.addLensFor(this.archetype, 0, slots); // recursively get archetype sizes
         }
-
-        this.addLensFor(this.archetype, 0, slots); // recursively get archetype sizes
 
         // Adding slots
         for (int ord = 0, slot = this.base; ord < this.size; ord++, slot++) {
