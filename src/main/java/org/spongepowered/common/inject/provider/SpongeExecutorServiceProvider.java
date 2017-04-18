@@ -22,39 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.inject.provider;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.api.scheduler.SpongeExecutorService;
 
-import com.google.common.base.Objects;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.GameState;
+public abstract class SpongeExecutorServiceProvider implements Provider<SpongeExecutorService> {
 
-import java.nio.file.Path;
+    @Inject protected Scheduler scheduler;
+    @Inject protected PluginContainer container;
 
-public abstract class SpongeGame implements Game {
+    public static final class Synchronous extends SpongeExecutorServiceProvider {
 
-    private GameState state = GameState.CONSTRUCTION;
+        @Override
+        public SpongeExecutorService get() {
+            return this.scheduler.createSyncExecutor(this.container);
+        }
 
-    @Override
-    public GameState getState() {
-        return this.state;
     }
 
-    public void setState(GameState state) {
-        this.state = checkNotNull(state);
-    }
+    public static final class Asynchronous extends SpongeExecutorServiceProvider {
 
-    @Override
-    public Path getGameDirectory() {
-        return SpongeImpl.getGameDir();
-    }
+        @Override
+        public SpongeExecutorService get() {
+            return this.scheduler.createAsyncExecutor(this.container);
+        }
 
-    @Override
-    public String toString() {
-        return Objects.toStringHelper(this)
-                .add("platform", getPlatform())
-                .toString();
     }
-
 }

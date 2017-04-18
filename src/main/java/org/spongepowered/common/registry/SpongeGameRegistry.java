@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityList;
@@ -132,9 +133,7 @@ public class SpongeGameRegistry implements GameRegistry {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(TextTemplate.class), new TextTemplateConfigSerializer());
     }
 
-    public final RegistrationPhase getPhase() {
-        return this.phase;
-    }
+    private final SpongePropertyRegistry propertyRegistry;
 
     private RegistrationPhase phase = RegistrationPhase.PRE_REGISTRY; // Needed for module phase registrations
 
@@ -144,7 +143,13 @@ public class SpongeGameRegistry implements GameRegistry {
     private final Map<Class<?>, Supplier<?>> builderSupplierMap = new IdentityHashMap<>();
     private final Set<RegistryModule> registryModules = new HashSet<>();
 
-    public SpongeGameRegistry() {
+    @Inject
+    public SpongeGameRegistry(SpongePropertyRegistry propertyRegistry) {
+        this.propertyRegistry = propertyRegistry;
+    }
+
+    public final RegistrationPhase getPhase() {
+        return this.phase;
     }
 
     public void preRegistryInit() {
@@ -164,7 +169,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
         registerModulePhase();
         SpongeVillagerRegistry.registerVanillaTrades();
-        DataRegistrar.setupSerialization(SpongeImpl.getGame());
+        DataRegistrar.setupSerialization();
         final List<Tuple<Class<? extends CatalogType>, CatalogRegistryModule<?>>> modules = new ArrayList<>();
         for (Map.Entry<Class<? extends CatalogType>, CatalogRegistryModule<?>> entry : this.catalogRegistryMap.entrySet()) {
             modules.add(new Tuple<>(entry.getKey(), entry.getValue()));
@@ -522,7 +527,7 @@ public class SpongeGameRegistry implements GameRegistry {
     public void postInit() {
         this.phase = RegistrationPhase.POST_INIT;
         registerModulePhase();
-        SpongePropertyRegistry.completeRegistration();
+        propertyRegistry.completeRegistration();
         SpongeDataManager.finalizeRegistration();
         this.phase = RegistrationPhase.LOADED;
     }

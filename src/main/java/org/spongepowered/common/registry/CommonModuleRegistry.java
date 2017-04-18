@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -271,7 +272,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(RangeAgentAITask.Builder.class, SpongeRangeAgentAIBuilder::new)
             .registerBuilderSupplier(LookIdleAITask.Builder.class, SpongeLookIdleAIBuilder::new)
             .registerBuilderSupplier(PatternLayer.Builder.class, SpongePatternLayerBuilder::new)
-            .registerBuilderSupplier(Task.Builder.class, SpongeTaskBuilder::new)
+            .registerBuilderSupplier(Task.Builder.class, () -> Sponge.getScheduler().createTaskBuilder())
             .registerBuilderSupplier(BigMushroom.Builder.class, BigMushroomBuilder::new)
             .registerBuilderSupplier(BlockBlob.Builder.class, BlockBlobBuilder::new)
             .registerBuilderSupplier(ChorusFlower.Builder.class, ChorusFlowerBuilder::new)

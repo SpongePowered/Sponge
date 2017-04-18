@@ -35,6 +35,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
+import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
@@ -80,12 +81,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+@Singleton
 public final class SpongeDataManager implements DataManager {
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(DataSerializable.class), new DataSerializableTypeSerializer());
     }
 
-    private static final SpongeDataManager instance = new SpongeDataManager();
     private final Map<Class<?>, DataBuilder<?>> builders = Maps.newHashMap();
     private final Map<Class<? extends ImmutableDataHolder<?>>, ImmutableDataBuilder<?, ?>> immutableDataBuilderMap = new MapMaker().concurrencyLevel(4).makeMap();
 
@@ -131,10 +132,8 @@ public final class SpongeDataManager implements DataManager {
 
     private static boolean allowRegistrations = true;
     public static SpongeDataManager getInstance() {
-        return instance;
+        return SpongeImpl.getDataManager();
     }
-
-    private SpongeDataManager() {}
 
     @Override
     public <T extends DataSerializable> void registerBuilder(Class<T> clazz, DataBuilder<T> builder) {
@@ -244,7 +243,7 @@ public final class SpongeDataManager implements DataManager {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void finalizeRegistration() {
         allowRegistrations = false;
-        final SpongeDataManager registry = instance;
+        final SpongeDataManager registry = SpongeImpl.getDataManager();
         registry.valueProcessorMap.entrySet().forEach( entry -> {
             ImmutableList.Builder<ValueProcessor<?, ?>> valueListBuilder = ImmutableList.builder();
             Collections.sort(entry.getValue(), ComparatorUtil.VALUE_PROCESSOR_COMPARATOR);

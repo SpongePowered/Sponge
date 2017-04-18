@@ -22,30 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject;
+package org.spongepowered.common.inject.provider;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
-import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.inject.provider.config.ConfigDirAnnotation;
-import org.spongepowered.common.inject.provider.PathAsFileProvider;
+import com.google.inject.spi.InjectionPoint;
+import org.spongepowered.api.network.ChannelBinding;
+import org.spongepowered.api.network.ChannelId;
+import org.spongepowered.api.network.ChannelRegistrar;
+import org.spongepowered.api.plugin.PluginContainer;
 
-import java.io.File;
-import java.nio.file.Path;
+import java.lang.reflect.AnnotatedElement;
 
-public class SpongeModule extends AbstractModule {
+public abstract class ChannelBindingProvider<B extends ChannelBinding> implements Provider<B> {
 
-    @Override
-    protected void configure() {
-        this.bind(Path.class).annotatedWith(ConfigDirAnnotation.SHARED).toInstance(SpongeImpl.getPluginConfigDir());
-        this.bind(File.class).annotatedWith(ConfigDirAnnotation.SHARED).toProvider(new PathAsFileProvider() {
-            @Inject
-            void init(@ConfigDir(sharedRoot = true) Provider<Path> path) {
-                this.path = path;
-            }
-        });
+    @Inject ChannelRegistrar registrar;
+    @Inject PluginContainer container;
+    @Inject private Provider<InjectionPoint> point;
+
+    final String getChannel() {
+        return ((AnnotatedElement) this.point.get().getMember()).getAnnotation(ChannelId.class).value();
+    }
+
+    public static class Indexed extends ChannelBindingProvider<ChannelBinding.IndexedMessageChannel> {
+
+        @Override
+        public ChannelBinding.IndexedMessageChannel get() {
+            return this.registrar.getOrCreate(this.container, this.getChannel());
+        }
+
+    }
+
+    public static class Raw extends ChannelBindingProvider<ChannelBinding.RawDataChannel> {
+
+        @Override
+        public ChannelBinding.RawDataChannel get() {
+            return this.registrar.getOrCreateRaw(this.container, this.getChannel());
+        }
+
     }
 
 }

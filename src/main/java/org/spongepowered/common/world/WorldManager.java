@@ -32,7 +32,6 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.MapMaker;
-import com.google.inject.Inject;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectIterator;
@@ -76,7 +75,6 @@ import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.DataInputStream;
@@ -109,7 +107,6 @@ import javax.annotation.Nullable;
 
 public final class WorldManager {
 
-    @Inject private static SpongeScheduler scheduler;
     public static final DirectoryStream.Filter<Path> LEVEL_AND_SPONGE =
             entry -> Files.isDirectory(entry) && Files.exists(entry.resolve("level.dat")) && Files.exists(entry.resolve("level_sponge.dat"));
 
@@ -1011,7 +1008,7 @@ public final class WorldManager {
             ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(false);
         }
 
-        final CompletableFuture<Optional<WorldProperties>> future = scheduler.submitAsyncTask(new CopyWorldTask(info, copyName));
+        final CompletableFuture<Optional<WorldProperties>> future = SpongeImpl.getScheduler().submitAsyncTask(new CopyWorldTask(info, copyName));
         if (worldServer != null) { // World was loaded
             future.thenRun(() -> ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(true));
         }
@@ -1050,7 +1047,7 @@ public final class WorldManager {
         checkNotNull(worldProperties);
         checkArgument(worldPropertiesByWorldUuid.containsKey(worldProperties.getUniqueId()), "World properties not registered!");
         checkState(!worldByDimensionId.containsKey(((IMixinWorldInfo) worldProperties).getDimensionId()), "World not unloaded!");
-        return scheduler.submitAsyncTask(new DeleteWorldTask(worldProperties));
+        return SpongeImpl.getScheduler().submitAsyncTask(new DeleteWorldTask(worldProperties));
     }
 
     private static class CopyWorldTask implements Callable<Optional<WorldProperties>> {

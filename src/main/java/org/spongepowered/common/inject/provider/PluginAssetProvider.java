@@ -22,39 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.common.inject.provider;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.spi.InjectionPoint;
+import org.spongepowered.api.asset.Asset;
+import org.spongepowered.api.asset.AssetId;
+import org.spongepowered.api.asset.AssetManager;
+import org.spongepowered.api.plugin.PluginContainer;
 
-import com.google.common.base.Objects;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.GameState;
+import java.lang.reflect.AnnotatedElement;
+import java.util.NoSuchElementException;
 
-import java.nio.file.Path;
+public class PluginAssetProvider implements Provider<Asset> {
 
-public abstract class SpongeGame implements Game {
-
-    private GameState state = GameState.CONSTRUCTION;
-
-    @Override
-    public GameState getState() {
-        return this.state;
-    }
-
-    public void setState(GameState state) {
-        this.state = checkNotNull(state);
-    }
+    @Inject private PluginContainer container;
+    @Inject private AssetManager assetManager;
+    @Inject private InjectionPoint point;
 
     @Override
-    public Path getGameDirectory() {
-        return SpongeImpl.getGameDir();
-    }
-
-    @Override
-    public String toString() {
-        return Objects.toStringHelper(this)
-                .add("platform", getPlatform())
-                .toString();
+    public Asset get() {
+        String name = ((AnnotatedElement) this.point.getMember()).getAnnotation(AssetId.class).value();
+        return this.assetManager.getAsset(this.container, name)
+                .orElseThrow(() -> new NoSuchElementException("Cannot find asset " + name));
     }
 
 }

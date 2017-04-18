@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.inject.Inject;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -39,19 +38,18 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.world.ChunkPreGenerationEvent;
+import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.ChunkPreGenerate;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
-import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -61,7 +59,6 @@ import javax.annotation.Nullable;
 
 public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Task> {
 
-    @Inject private static SpongeScheduler scheduler;
     private static final int DEFAULT_TICK_INTERVAL = 4;
     private static final float DEFAULT_TICK_PERCENT = 0.8f;
 
@@ -71,6 +68,8 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
             Vector3i.UNIT_Z.mul(2),
             Vector3i.UNIT_X.negate().mul(2)
     };
+
+    private final Scheduler scheduler;
 
     private final World world;
     private final Predicate<Vector3i> doesChunkExistCheck;
@@ -105,6 +104,7 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
             World world, Vector3d center, double diameter, int chunkCount, float tickPercent, int tickInterval, Cause cause,
             List<Consumer<ChunkPreGenerationEvent>> eventListeners) {
 
+        this.scheduler = Sponge.getScheduler();
         int preferredTickInterval = scheduler.getPreferredTickInterval();
 
         this.plugin = plugin;
