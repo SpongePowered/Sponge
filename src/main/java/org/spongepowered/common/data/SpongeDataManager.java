@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.logging.log4j.Level;
@@ -94,14 +95,14 @@ public final class SpongeDataManager implements DataManager {
     private final Map<Class<? extends DataSerializable>, List<DataContentUpdater>> updatersMap = new IdentityHashMap<>();
 
 
-    private static final SpongeDataManager instance = new SpongeDataManager();
-
     static boolean allowRegistrations = true;
 
 
     public static SpongeDataManager getInstance() {
         return SpongeImpl.getDataManager();
     }
+
+    @Inject
     private SpongeDataManager() {}
 
     @Override
