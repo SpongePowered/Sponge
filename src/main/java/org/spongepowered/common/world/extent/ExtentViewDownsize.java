@@ -604,4 +604,10 @@ public class ExtentViewDownsize implements DefaultedExtent {
         return this.extent.getBlockDigTimeWith(x, y, z, itemStack, cause);
     }
 
+    @Override
+    public int getHighestYAt(int x, int z) {
+        checkBlockRange(x, 0, z);
+        return this.extent.getHighestYAt(x, z);
+    }
+
 }

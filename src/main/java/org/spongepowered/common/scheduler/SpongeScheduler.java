@@ -63,7 +63,7 @@ public class SpongeScheduler implements Scheduler {
 
     @Override
     public Task.Builder createTaskBuilder() {
-        return new SpongeTaskBuilder();
+        return new SpongeTaskBuilder(this);
     }
 
     @Override

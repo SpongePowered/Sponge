@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import net.minecraft.world.GameType;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
@@ -58,12 +57,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
-import org.spongepowered.common.util.persistence.JsonTranslator;
 
+import java.io.IOException;
 import java.util.Collection;
 
 @NonnullByDefault
@@ -138,8 +138,8 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
         // Parse the world generator settings as JSON
         DataContainer settings = null;
         try {
-            settings = JsonTranslator.translateFrom(new JsonParser().parse(generatorOptions).getAsJsonObject());
-        } catch (JsonParseException | IllegalStateException ignored) {
+            settings = JsonDataFormat.INSTANCE.read(generatorOptions);
+        } catch (JsonParseException | IOException ignored) {
         }
         // If null, assume custom
         if (settings == null) {

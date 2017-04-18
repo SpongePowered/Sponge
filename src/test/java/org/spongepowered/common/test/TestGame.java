@@ -24,35 +24,16 @@
  */
 package org.spongepowered.common.test;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.GameDictionary;
-import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.asset.AssetManager;
-import org.spongepowered.api.command.CommandManager;
-import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.network.ChannelRegistrar;
-import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.scheduler.Scheduler;
-import org.spongepowered.api.service.ServiceManager;
-import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.SpongeGame;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 
 import java.nio.file.Path;
 import java.util.NoSuchElementException;
 
 @Singleton
 public class TestGame extends SpongeGame {
-
-    @Inject
-    public TestGame(Platform platform, PluginManager pluginManager, EventManager eventManager, AssetManager assetManager,
-            ServiceManager serviceManager, TeleportHelper teleportHelper, ChannelRegistrar channelRegistrar, SpongeGameRegistry gameRegistry,
-            Scheduler scheduler, CommandManager commandManager) {
-        super(platform, pluginManager, eventManager, assetManager, serviceManager, teleportHelper, channelRegistrar, gameRegistry, scheduler,
-                commandManager);
-    }
 
     @Override
     public boolean isServerAvailable() {

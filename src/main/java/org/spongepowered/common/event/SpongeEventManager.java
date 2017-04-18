@@ -27,7 +27,6 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import co.aikar.timings.TimingsManager;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
@@ -52,14 +51,18 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -130,16 +133,34 @@ public class SpongeEventManager implements EventManager {
         return new RegisteredListener.Cache(handlers);
     }
 
-    private static boolean isValidHandler(Method method) {
+    @Nullable
+    private static String getHandlerErrorOrNull(Method method) {
         int modifiers = method.getModifiers();
-        if (Modifier.isStatic(modifiers) || !Modifier.isPublic(modifiers) || Modifier.isAbstract(modifiers)
-                || method.getDeclaringClass().isInterface()
-                || method.getReturnType() != void.class) {
-            return false;
+        List<String> errors = new ArrayList<>();
+        if (Modifier.isStatic(modifiers)) {
+            errors.add("method must not be static");
+        }
+        if (!Modifier.isPublic(modifiers)) {
+            errors.add("method must be public");
+        }
+        if (Modifier.isAbstract(modifiers)) {
+            errors.add("method must not be abstract");
+        }
+        if (method.getDeclaringClass().isInterface()) {
+            errors.add("interfaces cannot declare listeners");
+        }
+        if (method.getReturnType() != void.class) {
+            errors.add("method must return void");
+        }
+        Class<?>[] parameters = method.getParameterTypes();
+        if (parameters.length == 0 || !Event.class.isAssignableFrom(parameters[0])) {
+            errors.add("method must have an Event as its first parameter");
         }
 
-        Class<?>[] parameters = method.getParameterTypes();
-        return parameters.length >= 1 && Event.class.isAssignableFrom(parameters[0]);
+        if (errors.isEmpty()) {
+            return null;
+        }
+        return String.join(", ", errors);
     }
 
     private void register(RegisteredListener<? extends Event> handler) {
@@ -195,12 +216,14 @@ public class SpongeEventManager implements EventManager {
         }
 
         List<RegisteredListener<? extends Event>> handlers = Lists.newArrayList();
+        Map<Method, String> methodErrors = new HashMap<>();
 
         Class<?> handle = listenerObject.getClass();
         for (Method method : handle.getMethods()) {
             Listener listener = method.getAnnotation(Listener.class);
             if (listener != null) {
-                if (isValidHandler(method)) {
+                String error = getHandlerErrorOrNull(method);
+                if (error == null) {
                     @SuppressWarnings("unchecked")
                     Class<? extends Event> eventClass = (Class<? extends Event>) method.getParameterTypes()[0];
                     AnnotatedEventListener handler;
@@ -213,10 +236,27 @@ public class SpongeEventManager implements EventManager {
 
                     handlers.add(createRegistration(plugin, eventClass, listener, handler));
                 } else {
-                    this.logger.warn("The method {} on {} has @{} but has the wrong signature", method, handle.getName(),
-                            Listener.class.getName());
+                    methodErrors.put(method, error);
                 }
             }
+        }
+
+        // getMethods() doesn't return private methods. Do another check to warn
+        // about those.
+        for (Class<?> handleParent = handle; handleParent != Object.class; handleParent = handleParent.getSuperclass()) {
+            for (Method method : handleParent.getDeclaredMethods()) {
+                if (method.getAnnotation(Listener.class) != null && !methodErrors.containsKey(method)) {
+                    String error = getHandlerErrorOrNull(method);
+                    if (error != null) {
+                        methodErrors.put(method, error);
+                    }
+                }
+            }
+        }
+
+        for (Map.Entry<Method, String> method : methodErrors.entrySet()) {
+            this.logger.warn("Invalid listener method {} in {}: {}", method.getKey(),
+                    method.getKey().getDeclaringClass().getName(), method.getValue());
         }
 
         this.registeredListeners.add(listenerObject);
@@ -303,7 +343,9 @@ public class SpongeEventManager implements EventManager {
             CauseTracker.getInstance().getCurrentContext().activeContainer(handler.getPlugin());
             try {
                 handler.getTimingsHandler().startTimingIfSync();
-                ((AbstractEvent) event).currentOrder = handler.getOrder();
+                if (event instanceof AbstractEvent) {
+                    ((AbstractEvent) event).currentOrder = handler.getOrder();
+                }
                 handler.handle(event);
             } catch (Throwable e) {
                 this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
@@ -312,7 +354,9 @@ public class SpongeEventManager implements EventManager {
                 CauseTracker.getInstance().getCurrentContext().activeContainer(null);
             }
         }
-        ((AbstractEvent) event).currentOrder = null;
+        if (event instanceof AbstractEvent) {
+            ((AbstractEvent) event).currentOrder = null;
+        }
 
         return event instanceof Cancellable && ((Cancellable) event).isCancelled();
     }

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data;
 
-import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.*;
@@ -105,7 +105,6 @@ import org.spongepowered.common.data.processor.value.entity.*;
 import org.spongepowered.common.data.processor.value.item.*;
 import org.spongepowered.common.data.processor.value.tileentity.*;
 import org.spongepowered.common.data.processor.value.*;
-import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.property.store.block.*;
 import org.spongepowered.common.data.property.store.entity.*;
 import org.spongepowered.common.data.property.store.item.*;
@@ -120,7 +119,7 @@ import org.spongepowered.common.world.storage.SpongePlayerData;
 public class DataRegistrar {
 
     @SuppressWarnings("unchecked")
-    public static void setupSerialization(Game game) {
+    public static void setupSerialization() {
         SpongeDataManager dataManager = SpongeDataManager.getInstance();
 
         // TileEntities
@@ -344,6 +343,9 @@ public class DataRegistrar {
 
         DataUtil.registerDualProcessor(GameModeData.class, SpongeGameModeData.class, ImmutableGameModeData.class,
                 ImmutableSpongeGameModeData.class, new GameModeDataProcessor());
+
+        DataUtil.registerDualProcessor(AbsorptionData.class, SpongeAbsorptionData.class, ImmutableAbsorptionData.class,
+                ImmutableSpongeAbsorptionData.class, new AbsorptionDataProcessor());
 
         DataUtil.registerDualProcessor(AggressiveData.class, SpongeAggressiveData.class, ImmutableAggressiveData.class,
                 ImmutableSpongeAggressiveData.class, new AggressiveDataProcessor());
@@ -808,7 +810,7 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.POTION_EFFECTS, new AreaEffectCloudPotionEffectsProcessor());
 
         // Properties
-        final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
+        final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();
 
         // Blocks
         propertyRegistry.register(BlastResistanceProperty.class, new BlastResistancePropertyStore());

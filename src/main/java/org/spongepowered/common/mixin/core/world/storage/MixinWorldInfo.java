@@ -32,7 +32,6 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonParser;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -71,12 +70,14 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.WorldConfig;
+import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.interfaces.world.IMixinGameRules;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
@@ -85,9 +86,9 @@ import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.FunctionalUtil;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.persistence.JsonTranslator;
 import org.spongepowered.common.world.WorldManager;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -511,6 +512,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public Optional<String> getGameRule(String gameRule) {
+        checkNotNull(gameRule, "The gamerule cannot be null!");
         if (this.theGameRules.hasRule(gameRule)) {
             return Optional.of(this.theGameRules.getString(gameRule));
         }
@@ -528,7 +530,15 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public void setGameRule(String gameRule, String value) {
+        checkNotNull(gameRule, "The gamerule cannot be null!");
+        checkNotNull(value, "The gamerule value cannot be null!");
         this.theGameRules.setOrCreateGameRule(gameRule, value);
+    }
+
+    @Override
+    public boolean removeGameRule(String gameRule) {
+        checkNotNull(gameRule, "The gamerule cannot be null!");
+        return ((IMixinGameRules) this.theGameRules).removeGameRule(gameRule);
     }
 
     @Override
@@ -705,8 +715,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         // Minecraft uses a String, we want to return a fancy DataContainer
         // Parse the world generator settings as JSON
         try {
-            return JsonTranslator.translateFrom(new JsonParser().parse(this.generatorOptions).getAsJsonObject());
-        } catch (JsonParseException | IllegalStateException ignored) {
+            return JsonDataFormat.INSTANCE.read(this.generatorOptions);
+        } catch (JsonParseException | IOException ignored) {
         }
         return new MemoryDataContainer().set(DataQueries.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
     }

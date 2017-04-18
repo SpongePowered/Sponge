@@ -377,6 +377,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         return this.sponge_world.restoreSnapshot((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), snapshot, force, flag, cause);
     }
 
+    public double getHighestYAt(double x, double z) {
+        return this.sponge_world.getHighestYAt(this.xPosition << 4 + ((int)x & 15), this.zPosition << 4 + ((int)z & 15));
+    }
+
     @Override
     public Vector3i getBiomeMin() {
         return this.biomeMin;

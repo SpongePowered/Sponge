@@ -165,6 +165,8 @@ public final class DataConstants {
 
     public static final class Entity {
 
+        public static final double DEFAULT_ABSORPTION = 0.0f;
+
         public static final class Item {
 
             public static final int MIN_PICKUP_DELAY = Short.MIN_VALUE;

@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
+import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.data.DataManager;
@@ -41,7 +42,6 @@ import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.ImmutableDataBuilder;
 import org.spongepowered.api.data.ImmutableDataHolder;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -49,23 +49,14 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataTranslator;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataManipulatorBuilder;
-import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
-import org.spongepowered.common.data.nbt.NbtDataType;
-import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
-import org.spongepowered.common.data.nbt.validation.RawDataValidator;
-import org.spongepowered.common.data.nbt.validation.ValidationType;
-import org.spongepowered.common.data.nbt.value.NbtValueProcessor;
 import org.spongepowered.common.data.persistence.DataTranslatorTypeSerializer;
 import org.spongepowered.common.data.util.ComparatorUtil;
-import org.spongepowered.common.data.util.DataProcessorDelegate;
-import org.spongepowered.common.data.util.ValueProcessorDelegate;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 
@@ -77,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@Singleton
 public final class SpongeDataManager implements DataManager {
     static {
         TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(DataSerializable.class), new DataSerializableTypeSerializer());
@@ -108,7 +100,7 @@ public final class SpongeDataManager implements DataManager {
 
 
     public static SpongeDataManager getInstance() {
-        return instance;
+        return SpongeImpl.getDataManager();
     }
     private SpongeDataManager() {}
 
@@ -257,10 +249,10 @@ public final class SpongeDataManager implements DataManager {
                         + "the id for future registrations.")
             .trace();
         DataRegistration<T, I> registration = DataRegistration.<T, I>builder()
-            .setDataClass((Class<T>) manipulatorClass)
-            .setImmutableDataClass((Class<I>) immutableManipulatorClass)
-            .setManipulatorId(finalId)
-            .setBuilder(builder)
+            .dataClass((Class<T>) manipulatorClass)
+            .immutableClass((Class<I>) immutableManipulatorClass)
+            .manipulatorId(finalId)
+            .builder(builder)
             .buildAndRegister(pluginContainer);
         SpongeManipulatorRegistry.getInstance().registerLegacyId(registration);
     }

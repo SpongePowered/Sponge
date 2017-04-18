@@ -36,6 +36,7 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
@@ -91,7 +92,7 @@ public final class PacketPhaseUtil {
             final Slot slot = openContainer.getSlot(slotId);
             if (slot != null) {
                 ItemStackSnapshot snapshot = slot.getHasStack() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
-                final SlotTransaction slotTransaction = new SlotTransaction(new SlotAdapter(slot), snapshot, snapshot);
+                final SlotTransaction slotTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(openContainer, slotId), snapshot, snapshot);
                 capturedTransactions.add(slotTransaction);
             }
         }

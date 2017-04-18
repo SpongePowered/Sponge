@@ -22,16 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.entity.projectile;
 
-import com.google.common.base.Predicate;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.world.Location;
 
-public class GuavaJavaUtils {
-    public static <T> Predicate<T> asGuavaPredicate(java.util.function.Predicate<T> predicate) {
-        return predicate::test;
-    }
+import java.util.Optional;
 
-    public static <T> java.util.function.Predicate<T> asJavaPredicate(Predicate<T> predicate) {
-        return predicate::apply;
+public interface ProjectileLogic<T extends Projectile> {
+
+    Optional<T> launch(ProjectileSource source);
+
+    default Optional<T> createProjectile(ProjectileSource source, Class<T> projectileClass, Location<?> loc) {
+        return ProjectileLauncher.defaultLaunch(source, projectileClass, loc);
     }
 }

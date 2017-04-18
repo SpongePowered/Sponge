@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataHolder;
@@ -47,7 +48,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.property.SpongePropertyRegistry;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
 import java.util.ArrayList;
@@ -60,10 +61,9 @@ import java.util.Set;
 @Mixin(net.minecraft.world.World.class)
 public abstract class MixinWorld_Data implements World {
 
-
     @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Class<T> propertyClass) {
-        final Optional<PropertyStore<T>> optional = SpongePropertyRegistry.getInstance().getStore(propertyClass);
+        final Optional<PropertyStore<T>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
         if (optional.isPresent()) {
             return optional.get().getFor(new Location<>(this, x, y, z));
         }
@@ -72,7 +72,7 @@ public abstract class MixinWorld_Data implements World {
 
     @Override
     public <T extends Property<?, ?>> Optional<T> getProperty(int x, int y, int z, Direction direction, Class<T> propertyClass) {
-        final Optional<PropertyStore<T>> optional = SpongePropertyRegistry.getInstance().getStore(propertyClass);
+        final Optional<PropertyStore<T>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
         if (optional.isPresent()) {
             return optional.get().getFor(new Location<>(this, x, y, z), direction);
         }
@@ -81,12 +81,12 @@ public abstract class MixinWorld_Data implements World {
 
     @Override
     public Collection<Property<?, ?>> getProperties(int x, int y, int z) {
-        return SpongePropertyRegistry.getInstance().getPropertiesFor(new Location<World>(this, x, y, z));
+        return SpongeImpl.getPropertyRegistry().getPropertiesFor(new Location<World>(this, x, y, z));
     }
 
     @Override
     public Collection<Direction> getFacesWithProperty(int x, int y, int z, Class<? extends Property<?, ?>> propertyClass) {
-        final Optional<? extends PropertyStore<? extends Property<?, ?>>> optional = SpongePropertyRegistry.getInstance().getStore(propertyClass);
+        final Optional<? extends PropertyStore<? extends Property<?, ?>>> optional = Sponge.getPropertyRegistry().getStore(propertyClass);
         if (!optional.isPresent()) {
             return Collections.emptyList();
         }

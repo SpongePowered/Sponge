@@ -27,11 +27,11 @@ package org.spongepowered.common.mixin.core.entity.ai;
 import net.minecraft.entity.ai.EntityAIAvoidEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
+import org.spongepowered.api.util.Functional;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.GuavaJavaUtils;
 
 import java.util.function.Predicate;
 
@@ -47,12 +47,12 @@ public abstract class MixinEntityAIAvoidEntity extends MixinEntityAIBase impleme
     @SuppressWarnings("unchecked")
     @Override
     public Predicate<Entity> getTargetSelector() {
-        return GuavaJavaUtils.asJavaPredicate(this.avoidTargetSelector);
+        return Functional.guavaToJava8(this.avoidTargetSelector);
     }
 
     @Override
     public AvoidEntityAITask setTargetSelector(Predicate<Entity> predicate) {
-        this.avoidTargetSelector = GuavaJavaUtils.asGuavaPredicate(predicate);
+        this.avoidTargetSelector = Functional.java8ToGuava(predicate);
         return this;
     }
 

@@ -22,57 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.inject.config;
+package org.spongepowered.common.mixin.core.world;
 
-import com.google.common.base.Objects;
-import org.spongepowered.api.config.DefaultConfig;
+import net.minecraft.world.GameRules;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.world.IMixinGameRules;
 
-import java.lang.annotation.Annotation;
+import java.util.TreeMap;
 
-public class DefaultConfigAnnotation implements DefaultConfig {
+@Mixin(GameRules.class)
+public abstract class MixinGameRules implements IMixinGameRules {
 
-    public static final DefaultConfig NON_SHARED = new DefaultConfigAnnotation(false);
-    public static final DefaultConfig SHARED = new DefaultConfigAnnotation(true);
+    private static final GameRules DEFAULT_GAME_RULES = new GameRules();
 
-    private final boolean shared;
+    @Shadow @Final private TreeMap<String, ?> theGameRules;
 
-    private DefaultConfigAnnotation(boolean shared) {
-        this.shared = shared;
-    }
-
-    @Override
-    public boolean sharedRoot() {
-        return this.shared;
-    }
+    @Shadow public abstract void setOrCreateGameRule(String key, String ruleValue);
 
     @Override
-    public Class<? extends Annotation> annotationType() {
-        return DefaultConfig.class;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
+    public boolean removeGameRule(String gameRule) {
+        // Cannot remove default gamerule
+        if (DEFAULT_GAME_RULES.hasRule(gameRule)) {
+            this.setOrCreateGameRule(gameRule, DEFAULT_GAME_RULES.getString(gameRule));
             return true;
         }
-        if (!(o instanceof DefaultConfig)) {
-            return false;
-        }
 
-        DefaultConfig that = (DefaultConfig) o;
-        return sharedRoot() == that.sharedRoot();
+        return this.theGameRules.remove(gameRule) != null;
     }
-
-    @Override
-    public int hashCode() {
-        return (127 * "sharedRoot".hashCode()) ^ Boolean.valueOf(sharedRoot()).hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return Objects.toStringHelper('@' + getClass().getName())
-                .add("shared", this.shared)
-                .toString();
-    }
-
 }

@@ -26,7 +26,6 @@ package org.spongepowered.common.world.storage;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
-import com.google.inject.Inject;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.WorldServer;
@@ -34,10 +33,10 @@ import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.chunk.storage.RegionFile;
 import net.minecraft.world.chunk.storage.RegionFileCache;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
-import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -51,15 +50,13 @@ import java.util.concurrent.CompletableFuture;
 
 public class WorldStorageUtil {
 
-    @Inject private static SpongeScheduler scheduler;
-
     public static CompletableFuture<Boolean> doesChunkExist(WorldServer world, IChunkLoader chunkLoader, Vector3i chunkCoords) {
         int x = chunkCoords.getX();
         int z = chunkCoords.getZ();
         if (!(chunkLoader instanceof IMixinAnvilChunkLoader) || !SpongeChunkLayout.instance.isValidChunk(x, chunkCoords.getY(), z)) {
             return CompletableFuture.completedFuture(false);
         }
-        return scheduler.submitAsyncTask(() -> ((IMixinAnvilChunkLoader) chunkLoader).chunkExists(world, x, z));
+        return SpongeImpl.getScheduler().submitAsyncTask(() -> ((IMixinAnvilChunkLoader) chunkLoader).chunkExists(world, x, z));
     }
 
     public static CompletableFuture<Optional<DataContainer>> getChunkData(WorldServer world, IChunkLoader chunkLoader, Vector3i chunkCoords) {
@@ -70,7 +67,7 @@ public class WorldStorageUtil {
             return CompletableFuture.completedFuture(Optional.empty());
         }
         File worldDir = ((IMixinAnvilChunkLoader) chunkLoader).getWorldDir().toFile();
-        return scheduler.submitAsyncTask(() -> {
+        return SpongeImpl.getScheduler().submitAsyncTask(() -> {
             DataInputStream stream = RegionFileCache.getChunkInputStream(worldDir, x, z);
             return Optional.ofNullable(readDataFromRegion(stream));
         });

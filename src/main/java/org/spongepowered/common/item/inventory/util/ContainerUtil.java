@@ -70,6 +70,7 @@ import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.CraftingOutputAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomContainer;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
@@ -89,6 +90,7 @@ import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.Con
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.mixin.core.inventory.MixinInventoryHelper;
+import org.spongepowered.common.mixin.core.item.inventory.MixinContainer;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
@@ -428,5 +430,9 @@ public final class ContainerUtil {
             return (Carrier) inventory;
         }
         return null;
+    }
+
+    public static SlotAdapter getSlotAdapter(net.minecraft.inventory.Container container, int slot) {
+        return ((IMixinContainer) container).getSlotAdapter(slot);
     }
 }

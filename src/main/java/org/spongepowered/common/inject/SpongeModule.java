@@ -26,9 +26,10 @@ package org.spongepowered.common.inject;
 
 import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import org.spongepowered.api.config.ConfigDir;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.inject.config.ConfigDirAnnotation;
+import org.spongepowered.common.inject.provider.config.ConfigDirAnnotation;
 import org.spongepowered.common.inject.provider.PathAsFileProvider;
 
 import java.io.File;
@@ -41,7 +42,7 @@ public class SpongeModule extends AbstractModule {
         this.bind(Path.class).annotatedWith(ConfigDirAnnotation.SHARED).toInstance(SpongeImpl.getPluginConfigDir());
         this.bind(File.class).annotatedWith(ConfigDirAnnotation.SHARED).toProvider(new PathAsFileProvider() {
             @Inject
-            void init(@ConfigDir(sharedRoot = true) Path path) {
+            void init(@ConfigDir(sharedRoot = true) Provider<Path> path) {
                 this.path = path;
             }
         });
