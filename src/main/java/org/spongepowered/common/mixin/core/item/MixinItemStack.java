@@ -50,6 +50,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.translation.Translation;
@@ -352,6 +353,11 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     public void addFailedData(ImmutableList<DataView> failedData) {
         this.failedData.addAll(failedData);
         resyncCustomToTag();
+    }
+
+    @Override
+    public List<DataView> getFailedData() {
+        return this.failedData;
     }
 
     @SuppressWarnings("unchecked")
