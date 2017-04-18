@@ -1101,6 +1101,7 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("structure_show_air", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("StructureShowAir"), "sponge:structure_show_air", "Structure Show Air"));
         this.fieldMap.put("structure_show_bounding_box", makeSingleKey(BOOLEAN_TOKEN, BOOLEAN_VALUE_TOKEN, of("StructureShowBoundingBox"), "sponge:structure_show_bounding_box", "Structure Show Bounding Box"));
         this.fieldMap.put("structure_size", makeSingleKey(VECTOR_3I_TOKEN, VECTOR_3I_VALUE_TOKEN, of("StructureSize"), "sponge:structure_size", "Structure Size"));
+        this.fieldMap.put("absorption", makeSingleKey(DOUBLE_TOKEN, DOUBLE_VALUE_TOKEN, of("Absorption"), "sponge:absorption", "Absorption"));
 
         this.fieldMap.put("area_effect_cloud_radius", makeSingleKey(DOUBLE_TOKEN, BOUNDED_DOUBLE_VALUE_TOKEN, of("CloudRadius"), "sponge:area_effect_cloud_radius", "AreaEffectCloud Radius"));
 
