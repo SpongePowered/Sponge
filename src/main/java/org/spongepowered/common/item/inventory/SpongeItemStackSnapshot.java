@@ -195,7 +195,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         if (optional.isPresent()) {
             return optional;
         } else {
-            Optional<DataProcessor> processorOptional = SpongeDataManager.getInstance().getWildImmutableProcessor(containerClass);
+            Optional<DataProcessor> processorOptional = DataUtil.getWildImmutableProcessor(containerClass);
             if (processorOptional.isPresent()) {
                 final Optional<DataManipulator<?, ?>> manipulatorOptional =  processorOptional.get().createFrom(this.privateStack);
                 if (manipulatorOptional.isPresent()) {
@@ -260,7 +260,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public Optional<ItemStackSnapshot> without(Class<? extends ImmutableDataManipulator<?, ?>> containerClass) {
         final ItemStack copiedStack = this.privateStack.copy();
-        Optional<DataProcessor> processorOptional = SpongeDataManager.getInstance().getWildImmutableProcessor(containerClass);
+        Optional<DataProcessor> processorOptional = DataUtil.getWildImmutableProcessor(containerClass);
         if (processorOptional.isPresent()) {
             processorOptional.get().remove(copiedStack);
             return Optional.of(copiedStack.createSnapshot());

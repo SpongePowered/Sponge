@@ -32,6 +32,7 @@ import co.aikar.timings.TimingsManager;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.tracking.CauseTracker;
 
 import java.util.Map;
 import java.util.Optional;
@@ -178,6 +179,9 @@ abstract class SchedulerBase {
     protected void startTask(final ScheduledTask task) {
         this.executeTaskRunnable(task, () -> {
             task.setState(ScheduledTask.ScheduledTaskState.RUNNING);
+            if (!task.isAsynchronous()) {
+                CauseTracker.getInstance().getCurrentContext().activeContainer(task.getOwner());
+            }
             task.getTimingsHandler().startTimingIfSync();
             try {
                 task.getConsumer().accept(task);
@@ -186,6 +190,9 @@ abstract class SchedulerBase {
                                              task.getOwner(), t);
             }
             task.getTimingsHandler().stopTimingIfSync();
+            if (!task.isAsynchronous()) {
+                CauseTracker.getInstance().getCurrentContext().activeContainer(null);
+            }
         });
     }
 

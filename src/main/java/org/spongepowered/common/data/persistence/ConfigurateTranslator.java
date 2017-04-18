@@ -69,15 +69,7 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
     private static DataContainer translateFromNode(ConfigurationNode node) {
         checkNotNull(node, "node");
         DataContainer dataContainer = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
-        Object value = node.getValue();
-        Object key = node.getKey();
-        if (value != null) {
-            if (key == null || value instanceof Map || value instanceof List) {
-                translateMapOrList(node, dataContainer);
-            } else {
-                dataContainer.set(of('.', key.toString()), value);
-            }
-        }
+        ConfigurateTranslator.instance().addTo(node, dataContainer);
         return dataContainer;
     }
 
@@ -122,6 +114,20 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
     @Override
     public DataContainer translate(ConfigurationNode obj) throws InvalidDataException {
         return ConfigurateTranslator.translateFromNode(obj);
+    }
+
+    @Override
+    public DataView addTo(ConfigurationNode node, DataView dataView) {
+        Object value = node.getValue();
+        Object key = node.getKey();
+        if (value != null) {
+            if (key == null || value instanceof Map || value instanceof List) {
+                translateMapOrList(node, dataView);
+            } else {
+                dataView.set(of('.', key.toString()), value);
+            }
+        }
+        return dataView;
     }
 
     @Override

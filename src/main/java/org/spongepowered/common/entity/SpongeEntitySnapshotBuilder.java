@@ -151,7 +151,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     @Override
     public SpongeEntitySnapshotBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
-        final Optional<DataProcessor<?, ?>> optional = SpongeDataManager.getInstance().getImmutableProcessor((Class) manipulator.getClass());
+        final Optional<DataProcessor<?, ?>> optional = DataUtil.getImmutableProcessor((Class) manipulator.getClass());
         if (optional.isPresent()) {
             if (optional.get().supports(this.entityType)) {
                 addManipulator(manipulator);

@@ -47,6 +47,7 @@ import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
@@ -121,7 +122,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     public EntityArchetype.Builder entityData(DataView view) {
         checkNotNull(view, "Provided DataView cannot be null!");
         final DataContainer copy = view.copy();
-        SpongeDataManager.getInstance().getValidators(Validations.ENTITY).validate(copy);
+        DataUtil.getValidators(Validations.ENTITY).validate(copy);
         this.entityData = copy;
         return this;
     }
@@ -132,7 +133,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         if (this.entityData == null) {
             this.entityData = new MemoryDataContainer();
         }
-        SpongeDataManager.getInstance().getRawNbtProcessor(NbtDataTypes.ENTITY, manipulator.getClass())
+        DataUtil.getRawNbtProcessor(NbtDataTypes.ENTITY, manipulator.getClass())
                 .ifPresent(processor -> processor.storeToView(this.entityData, manipulator));
         return this;
     }
@@ -143,7 +144,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         if (this.entityData == null) {
             this.entityData = new MemoryDataContainer();
         }
-        SpongeDataManager.getInstance().getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, value.getKey())
+        DataUtil.getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, value.getKey())
                 .ifPresent(processor -> processor.offer(this.entityData, value));
         return this;
     }
@@ -154,7 +155,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         if (this.entityData == null) {
             this.entityData = new MemoryDataContainer();
         }
-        SpongeDataManager.getInstance().getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, key)
+        DataUtil.getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, key)
                 .ifPresent(processor -> processor.offer(this.entityData, value));
         return this;
     }

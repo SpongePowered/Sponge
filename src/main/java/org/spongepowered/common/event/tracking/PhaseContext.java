@@ -40,6 +40,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.event.InternalNamedCauses;
@@ -80,6 +81,7 @@ public class PhaseContext {
     @Nullable private CaptureBlockPos captureBlockPos;
     @Nullable protected User owner;
     @Nullable protected User notifier;
+    @Nullable protected PluginContainer activeContainer;
 
     private Object source;
 
@@ -259,6 +261,17 @@ public class PhaseContext {
 
     public Optional<Explosion> getExplosion() {
         return getCaptureExplosion().getExplosion();
+    }
+
+    // This section is added to be able to pinpoint active containers when and wherever they're being used
+    // for various systems. Including when custom Data is being registered.
+    public PhaseContext activeContainer(@Nullable PluginContainer container) {
+        this.activeContainer = container;
+        return this;
+    }
+
+    public Optional<PluginContainer> getActiveContainer() {
+        return Optional.ofNullable(this.activeContainer);
     }
 
     public PhaseContext complete() {

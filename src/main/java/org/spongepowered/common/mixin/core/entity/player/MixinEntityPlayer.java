@@ -392,6 +392,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * @param p_184816_1_ The entity item to spawn
      * @return The itemstack
      */
+    @SuppressWarnings("OverwriteModifiers") // This is a MinecraftDev thing, since forge elevates the modifier to public
     @Overwrite
     @Nullable
     public ItemStack dropItemAndGetStack(EntityItem p_184816_1_) {
