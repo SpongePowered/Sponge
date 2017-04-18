@@ -272,6 +272,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Nullable private net.minecraft.tileentity.TileEntity getPendingTileEntityAt(BlockPos p_189508_1_) {
         return null; // Shadowed
     }
+    @Shadow public abstract int getHeight(int x, int z);
 
     // @formatter:on
 
@@ -337,6 +338,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
             return Optional.ofNullable((Chunk) worldserver.getChunkProvider().loadChunk(x, z));
         }
         return Optional.ofNullable((Chunk) worldserver.getChunkProvider().provideChunk(x, z));
+    }
+
+    @Override
+    public int getHighestYAt(int x, int z) {
+        return this.getHeight(x, z);
     }
 
     @Override
