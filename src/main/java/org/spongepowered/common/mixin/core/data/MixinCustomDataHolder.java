@@ -26,10 +26,12 @@ package org.spongepowered.common.mixin.core.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
@@ -49,6 +51,7 @@ import javax.annotation.Nullable;
 public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
 
     private List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
+    private List<DataView> failedData = Lists.newArrayList();
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -166,4 +169,8 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
         return DataTransactionResult.failNoData();
     }
 
+    @Override
+    public void addFailedData(ImmutableList<DataView> failedData) {
+        this.failedData.addAll(failedData);
+    }
 }

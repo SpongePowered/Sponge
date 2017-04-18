@@ -58,6 +58,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -227,12 +228,35 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
                     }
                 }
                 try {
-                    final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(builder.build());
+                    final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(builder.build());
+                    final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
                     for (DataManipulator<?, ?> manipulator : manipulators) {
                         offer(manipulator);
                     }
+                    if (!transaction.failedData.isEmpty()) {
+                        ((IMixinCustomDataHolder) this).addFailedData(transaction.failedData);
+                    }
                 } catch (InvalidDataException e) {
                     SpongeImpl.getLogger().error("Could not translate custom plugin data! ", e);
+                }
+            }
+            if (compound.hasKey(NbtDataUtil.FAILED_CUSTOM_DATA, NbtDataUtil.TAG_LIST)) {
+                final NBTTagList list = compound.getTagList(NbtDataUtil.FAILED_CUSTOM_DATA, NbtDataUtil.TAG_COMPOUND);
+                final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
+                if (list != null && list.tagCount() != 0) {
+                    for (int i = 0; i < list.tagCount(); i++) {
+                        final NBTTagCompound internal = list.getCompoundTagAt(i);
+                        builder.add(NbtTranslator.getInstance().translateFrom(internal));
+                    }
+                }
+                // Re-attempt to deserialize custom data
+                final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(builder.build());
+                final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
+                for (DataManipulator<?, ?> manipulator : manipulators) {
+                    offer(manipulator);
+                }
+                if (!transaction.failedData.isEmpty()) {
+                    ((IMixinCustomDataHolder) this).addFailedData(transaction.failedData);
                 }
             }
         }
@@ -246,12 +270,23 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         if (this instanceof IMixinCustomDataHolder) {
-            final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(((IMixinCustomDataHolder) this).getCustomManipulators());
-            final NBTTagList manipulatorTagList = new NBTTagList();
-            for (DataView dataView : manipulatorViews) {
-                manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
+            final List<DataManipulator<?, ?>> customManipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
+            if (!customManipulators.isEmpty()) {
+                final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(customManipulators);
+                final NBTTagList manipulatorTagList = new NBTTagList();
+                for (DataView dataView : manipulatorViews) {
+                    manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
+                }
+                compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
             }
-            compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
+            final List<DataView> failedData = ((IMixinCustomDataHolder) this).getFailedData();
+            if (!failedData.isEmpty()) {
+                final NBTTagList failedList = new NBTTagList();
+                for (DataView failedDatum : failedData) {
+                    failedList.appendTag(NbtTranslator.getInstance().translateData(failedDatum));
+                }
+                compound.setTag(NbtDataUtil.FAILED_CUSTOM_DATA, failedList);
+            }
         }
     }
 
@@ -291,7 +326,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     public LocatableBlock getLocatableBlock() {
         if (this.locatableBlock == null) {
             this.locatableBlock = LocatableBlock.builder()
-                    .location(new Location<World>((World) this.world, pos.getX(), pos.getY(), pos.getZ()))
+                    .location(new Location<World>((World) this.world, this.pos.getX(), this.pos.getY(), this.pos.getZ()))
                     .state(this.getBlock())
                     .build();
         }

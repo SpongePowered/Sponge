@@ -27,6 +27,7 @@ package org.spongepowered.common.data.manipulator;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.SpongeManipulatorRegistry;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
@@ -57,9 +58,9 @@ final class DataTestUtil {
 
     @SuppressWarnings("unchecked")
     private static Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> getDelegateMap() throws Exception {
-        final Field delegateField = SpongeDataManager.class.getDeclaredField("processorMap");
+        final Field delegateField = SpongeManipulatorRegistry.class.getDeclaredField("dataProcessorDelegates");
         delegateField.setAccessible(true);
-        return (Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>>) delegateField.get(SpongeDataManager.getInstance());
+        return (Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>>) delegateField.get(SpongeManipulatorRegistry.getInstance());
 
     }
 

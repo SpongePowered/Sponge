@@ -60,6 +60,7 @@ public final class NbtDataUtil {
     public static final String CUSTOM_DATA = "ManipulatorData";
     public static final String BANNER_BASE = "Base";
     public static final String BANNER_PATTERNS = "Patterns";
+    public static final String FAILED_CUSTOM_DATA = "FailedData";
 
     private NbtDataUtil() {
     }

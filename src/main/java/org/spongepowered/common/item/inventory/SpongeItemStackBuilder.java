@@ -50,6 +50,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -178,7 +179,8 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         }
         if (container.contains(DataQueries.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
-            final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(views);
+            final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
+            final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
             this.itemDataSet = new HashSet<>();
             manipulators.forEach(this.itemDataSet::add);
         }
@@ -275,7 +277,8 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         }
         if (container.contains(DataQueries.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
-            final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(views);
+            final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
+            final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
             this.itemDataSet = new HashSet<>();
             manipulators.forEach(this.itemDataSet::add);
         }

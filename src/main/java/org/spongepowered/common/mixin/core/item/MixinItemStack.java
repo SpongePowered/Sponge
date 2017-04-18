@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.item;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -61,6 +62,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -85,6 +87,8 @@ import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.item.ItemStack.class)
 public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMixinCustomDataHolder {
+
+    private List<DataView> failedData;
 
     @Shadow public abstract int getCount();
     @Shadow public abstract void setCount(int size); // Do not use field directly as Minecraft tracks the empty state
@@ -271,9 +275,13 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
                     final NBTTagCompound dataCompound = list.getCompoundTagAt(i);
                     views.add(NbtTranslator.getInstance().translateFrom(dataCompound));
                 }
-                final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(views);
+                final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(views);
+                final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
                 for (DataManipulator<?, ?> manipulator : manipulators) {
                     offerCustom(manipulator, MergeFunction.IGNORE_ALL);
+                }
+                if (!transaction.failedData.isEmpty()) {
+                    addFailedData(transaction.failedData);
                 }
             } else {
                 compound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
@@ -281,6 +289,25 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
                     getTagCompound().removeTag(NbtDataUtil.SPONGE_DATA);
                     return;
                 }
+            }
+        }
+        if (compound.hasKey(NbtDataUtil.FAILED_CUSTOM_DATA, NbtDataUtil.TAG_LIST)) {
+            final NBTTagList list = compound.getTagList(NbtDataUtil.FAILED_CUSTOM_DATA, NbtDataUtil.TAG_COMPOUND);
+            final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
+            if (list != null && list.tagCount() != 0) {
+                for (int i = 0; i < list.tagCount(); i++) {
+                    final NBTTagCompound internal = list.getCompoundTagAt(i);
+                    builder.add(NbtTranslator.getInstance().translateFrom(internal));
+                }
+            }
+            // Re-attempt to deserialize custom data
+            final SerializedDataTransaction transaction = DataUtil.deserializeManipulatorList(builder.build());
+            final List<DataManipulator<?, ?>> manipulators = transaction.deserializedManipulators;
+            for (DataManipulator<?, ?> manipulator : manipulators) {
+                offer(manipulator);
+            }
+            if (!transaction.failedData.isEmpty()) {
+                this.addFailedData(transaction.failedData);
             }
         }
         if (compound.hasNoTags()) {
@@ -321,6 +348,12 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
             .build();
     }
 
+    @Override
+    public void addFailedData(ImmutableList<DataView> failedData) {
+        this.failedData.addAll(failedData);
+        resyncCustomToTag();
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> getCustom(Class<T> customClass) {
@@ -341,6 +374,13 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
             }
             final NBTTagCompound spongeCompound = getOrCreateSubCompound(NbtDataUtil.SPONGE_DATA);
             spongeCompound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, newList);
+        } else if (!this.failedData.isEmpty()) {
+            final NBTTagList newList = new NBTTagList();
+            for (DataView failedDatum : this.failedData) {
+                newList.appendTag(NbtTranslator.getInstance().translateData(failedDatum));
+            }
+            final NBTTagCompound spongeCompound = getOrCreateSubCompound(NbtDataUtil.SPONGE_DATA);
+            spongeCompound.setTag(NbtDataUtil.FAILED_CUSTOM_DATA, newList);
         } else {
             if (hasTagCompound()) {
                 this.getTagCompound().removeTag(NbtDataUtil.SPONGE_DATA);

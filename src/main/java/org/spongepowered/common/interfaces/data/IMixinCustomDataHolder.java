@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.interfaces.data;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
@@ -82,4 +84,6 @@ public interface IMixinCustomDataHolder {
         }
     }
 
+    void addFailedData(ImmutableList<DataView> failedData);
+    List<DataView> getFailedData();
 }

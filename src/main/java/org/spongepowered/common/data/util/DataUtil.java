@@ -62,13 +62,16 @@ import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.RawDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.value.NbtValueProcessor;
+import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
@@ -78,6 +81,8 @@ public final class DataUtil {
     public static final int DATA_VERSION = 1;
     public static final DataFixer spongeDataFixer = new DataFixer(DATA_VERSION);
     private static final Supplier<InvalidDataException> INVALID_DATA_EXCEPTION_SUPPLIER = InvalidDataException::new;
+
+    private static final Set<String> FAILED_DESERIALIZATION = new ConcurrentSkipListSet<>();
 
     static {
         spongeDataFixer.registerFix(FixTypes.LEVEL, new SpongeLevelFixer());
@@ -146,9 +151,9 @@ public final class DataUtil {
     }
 
     @SuppressWarnings("rawtypes")
-    public static ImmutableList<DataManipulator<?, ?>> deserializeManipulatorList(List<DataView> containers) {
+    public static SerializedDataTransaction deserializeManipulatorList(List<DataView> containers) {
         checkNotNull(containers);
-        final ImmutableList.Builder<DataManipulator<?, ?>> builder = ImmutableList.builder();
+        final SerializedDataTransaction.Builder builder = SerializedDataTransaction.builder();
         for (DataView view : containers) {
             updateDataViewForDataManipulator(view);
             final String dataId = view.getString(DataQueries.DATA_ID).get();
@@ -156,13 +161,34 @@ public final class DataUtil {
             try {
                 final Optional<DataRegistration<?, ?>> registration = getRegistrationFor(dataId);
                 final Optional<DataManipulatorBuilder<?, ?>> optional = registration.map(DataRegistration::getDataManipulatorBuilder);
-                optional.ifPresent(dataManipulatorBuilder ->
-                    dataManipulatorBuilder.build(manipulatorView)
-                        .ifPresent(builder::add)
-                );
+                if (optional.isPresent()) {
+                    final DataManipulatorBuilder<?, ?> dataManipulatorBuilder = optional.get();
+                    final Optional<DataManipulator<?, ?>> build = (Optional<DataManipulator<?, ?>>) dataManipulatorBuilder.build(manipulatorView);
+                    if (build.isPresent()) {
+                        builder.successfulData(build.get());
+                    } else {
+                        if (!FAILED_DESERIALIZATION.contains(dataId)) {
+                            new InvalidDataException("Could not deserialize " + dataId
+                                                     + "! Don't worry though, we'll mute future attempts until next restart.").printStackTrace();
+                            FAILED_DESERIALIZATION.add(dataId);
+                        }
+                        builder.failedData(view);
+                    }
+                } else {
+                    if (!FAILED_DESERIALIZATION.contains(dataId)) {
+                        new InvalidDataException("Could not deserialize " + dataId
+                                                 + "! Don't worry though, we'll mute future attempts until next restart.").printStackTrace();
+                        FAILED_DESERIALIZATION.add(dataId);
+                    }
+                    builder.failedData(view);
+                }
             } catch (Exception e) {
-                new InvalidDataException("Could not translate " + dataId
-                                         + "! Don't worry though, we'll try to translate the rest of the data.", e).printStackTrace();
+                if (!FAILED_DESERIALIZATION.contains(dataId)) {
+                    new InvalidDataException("Could not translate " + dataId
+                                             + "! Don't worry though, we'll mute future attempts until next restart.").printStackTrace();
+                    FAILED_DESERIALIZATION.add(dataId);
+                }
+                builder.failedData(view);
             }
         }
         return builder.build();
