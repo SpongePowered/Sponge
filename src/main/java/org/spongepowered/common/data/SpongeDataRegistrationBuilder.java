@@ -125,7 +125,7 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
         checkState(this.manipulatorClass != null, "DataManipulator class cannot be null!");
         checkState(this.immutableClass != null, "ImmutableDataManipulator class cannot be null!");
         checkState(this.id != null, "Data ID cannot be null!");
-
+        this.container = container;
         SpongeManipulatorRegistry.getInstance().validateRegistration(this);
         SpongeDataManager.getInstance().validateRegistration(this);
         final SpongeDataRegistration<M, I> registration = new SpongeDataRegistration<>(this);

@@ -1,5 +1,7 @@
 package org.spongepowered.common.data;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -18,12 +20,12 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
     private final String name;
 
     SpongeDataRegistration(SpongeDataRegistrationBuilder<M, I> builder) {
-        this.manipulatorClass = builder.manipulatorClass;
-        this.immutableClass = builder.immutableClass;
-        this.manipulatorBuilder = builder.manipulatorBuilder;
-        this.container = builder.container;
-        this.id = builder.id;
-        this.name = builder.name;
+        this.manipulatorClass = checkNotNull(builder.manipulatorClass, "DataManipulator class is null!");
+        this.immutableClass = checkNotNull(builder.immutableClass, "ImmutableDataManipulator class is null!");
+        this.manipulatorBuilder = checkNotNull(builder.manipulatorBuilder, "DataManipulatorBuilder is null!");
+        this.container = checkNotNull(builder.container, "PluginContainer is null!");
+        this.id = this.container.getId() + ":" + checkNotNull(builder.id, "Data ID is null!");
+        this.name = checkNotNull(builder.name, "Data name is null!");
     }
 
     @Override
