@@ -132,7 +132,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
      * their ids 1:1, this is a safe change that ensures a mixup can't happen.
      */
     @Overwrite
-    public static DimensionType getById(int dimensionId) {
-        return WorldManager.getDimensionType(dimensionId).orElseThrow(() -> new IllegalArgumentException("Invalid dimension id " + dimensionId));
+    public static DimensionType getById(int dimensionTypeId) {
+        return WorldManager.getDimensionTypeByTypeId(dimensionTypeId).orElseThrow(() -> new IllegalArgumentException("Invalid dimension id " + dimensionTypeId));
     }
 }
