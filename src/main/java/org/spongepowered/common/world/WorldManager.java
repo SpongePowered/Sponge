@@ -233,6 +233,10 @@ public final class WorldManager {
         return Optional.ofNullable(dimensionTypeByDimensionId.get(dimensionId));
     }
 
+    public static Optional<DimensionType> getDimensionTypeByTypeId(int dimensionTypeId) {
+        return Optional.ofNullable(dimensionTypeByTypeId.get(dimensionTypeId));
+    }
+
     public static Optional<DimensionType> getDimensionType(Class<? extends WorldProvider> providerClass) {
         checkNotNull(providerClass);
         for (Object rawDimensionType : dimensionTypeByTypeId.values()) {
@@ -257,7 +261,7 @@ public final class WorldManager {
     }
 
     public static int[] getRegisteredDimensionIds() {
-        return dimensionTypeByTypeId.keySet().toIntArray();
+        return dimensionTypeByDimensionId.keySet().toIntArray();
     }
 
     public static Path getWorldFolder(DimensionType dimensionType, int dimensionId) {
