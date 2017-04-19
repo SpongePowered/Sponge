@@ -33,7 +33,8 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.plugin.PluginContainer;
 
-public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataRegistration<M, I> {
+public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+    implements DataRegistration<M, I>, Comparable<SpongeDataRegistration<?, ?>> {
 
 
     private final Class<M> manipulatorClass;
@@ -113,5 +114,10 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
             .add("manipulatorBuilder", this.manipulatorBuilder)
             .add("container", this.container)
             .toString();
+    }
+
+    @Override
+    public int compareTo(SpongeDataRegistration<?, ?> o) {
+        return this.getId().compareTo(o.getId());
     }
 }

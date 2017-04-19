@@ -58,6 +58,7 @@ import org.spongepowered.common.data.util.ValueProcessorDelegate;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,7 +125,8 @@ public class SpongeManipulatorRegistry {
             .concurrencyLevel(4)
             .makeMap();
 
-        private final ConcurrentSkipListSet<DataRegistration<?, ?>> registrations = new ConcurrentSkipListSet<>();
+        private final ConcurrentSkipListSet<DataRegistration<?, ?>> registrations = new ConcurrentSkipListSet<>(
+            Comparator.comparing(DataRegistration::getId));
 
     }
 

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.util;
 
-import org.spongepowered.api.data.DataAlreadyRegisteredException;
+import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataRegistrationNotFoundException;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
@@ -47,8 +47,10 @@ public class LegacyCustomDataClassContentUpdater implements DataContentUpdater{
     public DataView update(DataView content) {
         final String className = content.getString(DataQueries.DATA_CLASS).get();
 
-        SpongeManipulatorRegistry.getInstance().getRegistrationForLegacyId(className).orElseThrow(() -> new DataRegistrationNotFoundException(className));
+        final DataRegistration<?, ?> registration = SpongeManipulatorRegistry.getInstance().getRegistrationForLegacyId(className)
+                .orElseThrow(() -> new DataRegistrationNotFoundException(className));
+        content.set(DataQueries.DATA_ID, registration.getId());
         content.remove(DataQueries.DATA_CLASS);
-        return null;
+        return content;
     }
 }

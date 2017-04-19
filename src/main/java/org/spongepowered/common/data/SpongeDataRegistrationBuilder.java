@@ -57,14 +57,16 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
     private List<Key<?>> keys = new ArrayList<>();
     private AbstractSingleDataSingleTargetProcessor<?, ?, ?, M, I> dualProcessor;
 
+    @SuppressWarnings("unchecked")
     @Override
-    public SpongeDataRegistrationBuilder<M, I> dataClass(Class<M> manipulatorClass) {
-        this.manipulatorClass = checkNotNull(manipulatorClass, "DataManipulator class cannot be null!");
-        return this;
+    public  <D extends DataManipulator<D, C>, C extends ImmutableDataManipulator<C, D>> SpongeDataRegistrationBuilder<D, C> dataClass(Class<D> manipulatorClass) {
+        this.manipulatorClass = (Class<M>) checkNotNull(manipulatorClass, "DataManipulator class cannot be null!");
+        return (SpongeDataRegistrationBuilder<D, C>) this;
     }
 
     @Override
     public SpongeDataRegistrationBuilder<M, I> immutableClass(Class<I> immutableDataClass) {
+        checkState(this.manipulatorClass != null, "DataManipulator class must be set prior to setting the immutable variant!");
         this.immutableClass = checkNotNull(immutableDataClass, "ImmutableDataManipulator class cannot be null!");
         return this;
     }
