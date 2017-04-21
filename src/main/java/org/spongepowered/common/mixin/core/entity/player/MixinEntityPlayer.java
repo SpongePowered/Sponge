@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.ImmutableList;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -74,6 +75,8 @@ import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -101,6 +104,7 @@ import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -223,6 +227,24 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     public void setFlying(boolean flying) {
         this.capabilities.isFlying = flying;
+    }
+
+    @Inject(method = "func_146097_a", at = @At("HEAD"), cancellable = true) // dropItem, but the mixin reobfuscator chose the wrong one
+    public void onDropItem(@Nullable ItemStack droppedItem, boolean dropAround, boolean traceItem, CallbackInfoReturnable<EntityItem> ci) {
+        ItemStackSnapshot itemCopy = ItemStackUtil.snapshotOf(droppedItem);
+        DropItemEvent.Pre event = SpongeEventFactory.createDropItemEventPre(
+                Cause.of(NamedCause.source(this)), ImmutableList.of(itemCopy), Arrays.asList(itemCopy));
+        SpongeImpl.postEvent(event);
+
+        if (event.isCancelled() || event.getDroppedItems().isEmpty()) {
+            ci.setReturnValue(null);
+            return;
+        }
+
+        ItemStackSnapshot arrayCopy = event.getDroppedItems().get(0);
+        if (arrayCopy != itemCopy) {
+            droppedItem = ItemStackUtil.fromSnapshotToNative(arrayCopy);
+        }
     }
 
     /**
