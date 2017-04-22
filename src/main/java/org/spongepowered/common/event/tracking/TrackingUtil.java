@@ -744,7 +744,7 @@ public final class TrackingUtil {
         final Vector3i position = oldBlockSnapshot.getPosition();
         final List<ItemStackSnapshot> itemSnapshots = itemStacks.stream()
                 .map(ItemDropData::getStack)
-                .map(ItemStackUtil::createSnapshot)
+                .map(ItemStackUtil::snapshotOf)
                 .collect(Collectors.toList());
         final ImmutableList<ItemStackSnapshot> originalSnapshots = ImmutableList.copyOf(itemSnapshots);
         final Cause cause = Cause.source(oldBlockSnapshot).build();

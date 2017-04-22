@@ -27,6 +27,7 @@ package org.spongepowered.common.item.inventory.util;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
 import java.util.Optional;
 
@@ -55,7 +56,7 @@ public abstract class ItemStackUtil {
 
     public static net.minecraft.item.ItemStack toNative(@Nullable ItemStack stack) {
         if (stack instanceof net.minecraft.item.ItemStack || stack == null) {
-            return stack == null ? net.minecraft.item.ItemStack.EMPTY : (net.minecraft.item.ItemStack) stack;
+            return stack == null ? emptyNative() : (net.minecraft.item.ItemStack) stack;
         }
         throw new NativeStackException("The supplied item stack was not native to the current platform");
     }
@@ -96,11 +97,11 @@ public abstract class ItemStackUtil {
     }
 
     public static Optional<ItemStack> cloneDefensiveOptional(net.minecraft.item.ItemStack stack) {
-        return Optional.<ItemStack>ofNullable(ItemStackUtil.cloneDefensive(stack));
+        return Optional.<ItemStack>of(ItemStackUtil.cloneDefensive(stack));
     }
 
     public static Optional<ItemStack> cloneDefensiveOptional(net.minecraft.item.ItemStack stack, int withdraw) {
-        return Optional.<ItemStack>ofNullable(ItemStackUtil.cloneDefensive(stack));
+        return Optional.<ItemStack>of(ItemStackUtil.cloneDefensive(stack));
     }
 
     public static boolean compareIgnoreQuantity(net.minecraft.item.ItemStack stack1, net.minecraft.item.ItemStack stack2) {
@@ -119,25 +120,27 @@ public abstract class ItemStackUtil {
         return ItemStackUtil.compareIgnoreQuantity(ItemStackUtil.toNative(stack1), stack2);
     }
 
-    public static ItemStackSnapshot createSnapshot(net.minecraft.item.ItemStack item) {
-        return ItemStackUtil.fromNative(item).createSnapshot();
-    }
-
     public static ItemStackSnapshot snapshotOf(net.minecraft.item.ItemStack itemStack) {
         return itemStack.isEmpty() ? ItemStackSnapshot.NONE : fromNative(itemStack).createSnapshot();
     }
 
     public static ItemStackSnapshot snapshotOf(@Nullable ItemStack itemStack) {
-        return itemStack == null ? ItemStackSnapshot.NONE : itemStack.createSnapshot();
+        return itemStack == null ? ItemStackSnapshot.NONE : itemStack.isEmpty() ? ItemStackSnapshot.NONE : itemStack.createSnapshot();
     }
 
-    @Nullable
     public static net.minecraft.item.ItemStack fromSnapshotToNative(@Nullable ItemStackSnapshot snapshot) {
-        return snapshot == null ? net.minecraft.item.ItemStack.EMPTY : snapshot == ItemStackSnapshot.NONE ? net.minecraft.item.ItemStack.EMPTY: toNative(snapshot.createStack());
+        return snapshot == null ? emptyNative() : snapshot == ItemStackSnapshot.NONE ? emptyNative() : toNative(snapshot.createStack());
     }
 
-    @Nullable
     public static ItemStack fromSnapshot(@Nullable ItemStackSnapshot snapshot) {
-        return snapshot == null ? null : snapshot == ItemStackSnapshot.NONE ? null : snapshot.createStack();
+        return snapshot == null ? empty() : snapshot.isEmpty() ? empty() : snapshot.createStack();
+    }
+
+    public static ItemStack empty() {
+        return fromNative(net.minecraft.item.ItemStack.EMPTY);
+    }
+
+    public static net.minecraft.item.ItemStack emptyNative() {
+        return net.minecraft.item.ItemStack.EMPTY;
     }
 }

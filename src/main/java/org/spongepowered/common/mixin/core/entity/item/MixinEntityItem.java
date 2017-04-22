@@ -225,12 +225,12 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
 
     @Override
     public RepresentedItemData getItemData() {
-        return new SpongeRepresentedItemData(ItemStackUtil.createSnapshot(getEntityItem()));
+        return new SpongeRepresentedItemData(ItemStackUtil.snapshotOf(getEntityItem()));
     }
 
     @Override
     public Value<ItemStackSnapshot> item() {
-        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.createSnapshot(getEntityItem()));
+        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(getEntityItem()));
     }
 
     @Override

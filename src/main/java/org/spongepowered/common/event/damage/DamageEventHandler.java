@@ -401,7 +401,7 @@ public class DamageEventHandler {
                 @Override
                 public ItemStackSnapshot get() {
                     if (this.snapshot == null) {
-                        this.snapshot = ItemStackUtil.createSnapshot(heldItem);
+                        this.snapshot = ItemStackUtil.snapshotOf(heldItem);
                     }
                     return this.snapshot;
                 }

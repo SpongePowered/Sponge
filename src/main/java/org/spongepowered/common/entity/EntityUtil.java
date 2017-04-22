@@ -900,7 +900,7 @@ public final class EntityUtil {
             return null;
         }
         // FIRST we want to throw the DropItemEvent.PRE
-        final ItemStackSnapshot snapshot = ItemStackUtil.createSnapshot(itemStack);
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         final List<ItemStackSnapshot> original = new ArrayList<>();
         original.add(snapshot);
         final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(entity)),
@@ -974,7 +974,7 @@ public final class EntityUtil {
         final ItemStack item;
 
         // FIRST we want to throw the DropItemEvent.PRE
-        final ItemStackSnapshot snapshot = ItemStackUtil.createSnapshot(droppedItem);
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(droppedItem);
         final List<ItemStackSnapshot> original = new ArrayList<>();
         original.add(snapshot);
         final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(player)),

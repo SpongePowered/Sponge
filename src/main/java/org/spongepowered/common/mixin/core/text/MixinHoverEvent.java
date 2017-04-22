@@ -72,7 +72,7 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
                         setHandle(TextActions.showAchievement((Achievement) checkNotNull(StatList.getOneShotStat(stat), "Unknown statistic: %s", stat)));
                         break;
                     case SHOW_ITEM:
-                        setHandle(TextActions.showItem(ItemStackUtil.createSnapshot(new net.minecraft.item.ItemStack(loadNbt()))));
+                        setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(new net.minecraft.item.ItemStack(loadNbt()))));
                         break;
                     case SHOW_ENTITY:
                         NBTTagCompound nbt = loadNbt();
