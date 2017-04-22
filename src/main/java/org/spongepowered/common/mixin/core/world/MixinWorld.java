@@ -192,6 +192,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tickableTileEntities;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tileEntitiesToBeRemoved;
     @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
+    @Shadow @Final protected ISaveHandler saveHandler;
     @Shadow protected List<IWorldEventListener> eventListeners;
     @Shadow public int[] lightUpdateBlockList;
     @Shadow public int skylightSubtracted;

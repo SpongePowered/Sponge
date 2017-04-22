@@ -191,7 +191,9 @@ import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.type.SpongeWorldType;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -391,6 +393,20 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public boolean isLoaded() {
         return WorldManager.getWorldByDimensionId(getDimensionId()).isPresent();
+    }
+
+    @Override
+    public Path getDirectory() {
+        final File worldDirectory = this.saveHandler.getWorldDirectory();
+        if (worldDirectory == null) {
+            new PrettyPrinter(60).add("A Server World has a null save directory!").centre().hr()
+                .add("%s : %s", "World Name", this.getName())
+                .add("%s : %s", "Dimension", this.getProperties().getDimensionType())
+                .add("Please report this to sponge developers so they may potentially fix this")
+                .trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+            return null;
+        }
+        return worldDirectory.toPath();
     }
 
     @Override
