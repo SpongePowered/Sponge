@@ -34,6 +34,7 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
@@ -57,7 +58,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
@@ -138,7 +138,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
         // Parse the world generator settings as JSON
         DataContainer settings = null;
         try {
-            settings = JsonDataFormat.INSTANCE.read(generatorOptions);
+            settings = DataFormats.JSON.read(generatorOptions);
         } catch (JsonParseException | IOException ignored) {
         }
         // If null, assume custom

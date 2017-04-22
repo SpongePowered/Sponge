@@ -45,6 +45,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
@@ -70,7 +71,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -715,7 +715,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         // Minecraft uses a String, we want to return a fancy DataContainer
         // Parse the world generator settings as JSON
         try {
-            return JsonDataFormat.INSTANCE.read(this.generatorOptions);
+            return DataFormats.JSON.read(this.generatorOptions);
         } catch (JsonParseException | IOException ignored) {
         }
         return new MemoryDataContainer().set(DataQueries.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
