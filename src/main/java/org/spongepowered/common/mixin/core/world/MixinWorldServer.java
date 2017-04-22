@@ -35,7 +35,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.BlockPistonBase;
@@ -83,7 +82,6 @@ import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
 import net.minecraft.world.storage.WorldInfo;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
@@ -147,7 +145,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.data.persistence.ConfigurateTranslator;
+import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -193,9 +191,7 @@ import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.type.SpongeWorldType;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -448,16 +444,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return this.createWorldGenerator(optCustomSettings.get());
         }
 
-        final StringWriter writer = new StringWriter();
+        String jsonSettings = "";
         try {
-            HoconConfigurationLoader.builder().setRenderOptions(ConfigRenderOptions.concise().setJson(true))
-                    .setSink(() -> new BufferedWriter(writer)).build().save(ConfigurateTranslator.instance().translateData(settings));
+            jsonSettings = JsonDataFormat.INSTANCE.write(settings);
         } catch (Exception e) {
             SpongeImpl.getLogger().warn("Failed to convert settings from [{}] for GeneratorType [{}] used by World [{}].", settings,
                     ((net.minecraft.world.World) (Object) this).getWorldType(), this, e);
         }
 
-        return this.createWorldGenerator(writer.toString());
+        return this.createWorldGenerator(jsonSettings);
     }
 
     @Override
