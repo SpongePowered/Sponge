@@ -215,6 +215,12 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(HealthData.class, SpongeHealthData.class, ImmutableHealthData.class,
                 ImmutableSpongeHealthData.class, new HealthDataProcessor());
 
+        DataUtil.registerDataProcessorAndImpl(AgeableData.class, SpongeAgeableData.class, ImmutableAgeableData.class,
+                ImmutableSpongeAgeableData.class, new AgeableDataProcessor());
+
+        DataUtil.registerDataProcessorAndImpl(AgeableData.class, SpongeAgeableData.class, ImmutableAgeableData.class,
+                ImmutableSpongeAgeableData.class, new ZombieAgeableDataProcessor());
+
         DataUtil.registerDataProcessorAndImpl(IgniteableData.class, SpongeIgniteableData.class, ImmutableIgniteableData.class,
                 ImmutableSpongeIgniteableData.class, new IgniteableDataProcessor());
 
@@ -808,6 +814,9 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_RADIUS_ON_USE, new AreaEffectCloudRadiusOnUseProcessor());
         DataUtil.registerValueProcessor(Keys.AREA_EFFECT_CLOUD_WAIT_TIME, new AreaEffectCloudWaitTimeProcessor());
         DataUtil.registerValueProcessor(Keys.POTION_EFFECTS, new AreaEffectCloudPotionEffectsProcessor());
+        DataUtil.registerValueProcessor(Keys.IS_ADULT, new IsAdultValueProcessor());
+        DataUtil.registerValueProcessor(Keys.IS_ADULT, new IsAdultZombieValueProcessor());
+        DataUtil.registerValueProcessor(Keys.AGE, new AgeableAgeValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = Sponge.getPropertyRegistry();

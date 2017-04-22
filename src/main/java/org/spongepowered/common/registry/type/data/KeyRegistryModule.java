@@ -590,6 +590,10 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("wire_attachment_north", makeSingleKey(TypeTokens.WIRE_ATTACHMENT_TYPE_TOKEN, TypeTokens.WIRE_ATTACHMENT_TYPE_VALUE_TOKEN, of("WireAttachmentNorth"), "sponge:wire_attachment_north", "Wire Attachment North"));
         this.fieldMap.put("wire_attachment_west", makeSingleKey(TypeTokens.WIRE_ATTACHMENT_TYPE_TOKEN, TypeTokens.WIRE_ATTACHMENT_TYPE_VALUE_TOKEN, of("WireAttachmentWest"), "sponge:wire_attachment_west", "Wire Attachment West"));
 
+        this.fieldMap.put("age", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("Age"), "sponge:age", "Age"));
+        this.fieldMap.put("is_adult", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsAdult"), "sponge:is_adult", "Is Adult"));
+        this.fieldMap.put("is_baby", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("IsBaby"), "sponge:is_baby", "Is Baby"));
+
         for (Key<?> key : this.fieldMap.values()) {
             this.keyMap.put(key.getId().toLowerCase(Locale.ENGLISH), key);
         }
