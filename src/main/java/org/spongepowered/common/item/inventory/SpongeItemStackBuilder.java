@@ -91,7 +91,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
 
     @Override
     public ItemStack.Builder quantity(int quantity) throws IllegalArgumentException {
-        checkArgument(quantity > 0, "Quantity must be greater than 0");
+        checkArgument(quantity >= 0, "Quantity must not be smaller than 0");
         this.quantity = quantity;
         return this;
     }
@@ -299,9 +299,12 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     @Override
     public ItemStack build() throws IllegalStateException {
         checkState(this.type != null, "Item type has not been set");
-        int max = this.type.getMaxStackQuantity();
-        // This should be enabled, but for some reason, people are getting this in some forge environments.
-//        checkState(this.quantity <= max, "Quantity cannot be greater than the max quantity (%s)", max);
+
+        if (type == ItemTypes.NONE || quantity <= 0) {
+            // If either type is none(air) or quantity is 0 return the vanilla EMPTY item
+            return ((ItemStack) net.minecraft.item.ItemStack.EMPTY);
+        }
+
         final ItemStack stack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.type, this.quantity, this.damageValue);
         if (this.compound != null) {
             ((net.minecraft.item.ItemStack) stack).setTagCompound(this.compound.copy());

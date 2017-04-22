@@ -44,6 +44,7 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.DataProcessor;
@@ -140,6 +141,11 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public int getCount() {
         return this.count;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.privateStack.isEmpty();
     }
 
     @Override

@@ -54,6 +54,9 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -78,6 +81,7 @@ import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -87,18 +91,20 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.item.ItemStack.class)
+@Implements(@Interface(iface = ItemStack.class, prefix = "itemstack$"))
 public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMixinCustomDataHolder {
 
-    private List<DataView> failedData;
+    private List<DataView> failedData = new ArrayList<>();
 
     @Shadow public abstract int getCount();
     @Shadow public abstract void setCount(int size); // Do not use field directly as Minecraft tracks the empty state
     @Shadow public abstract void setItemDamage(int meta);
-    @Shadow public abstract void setTagCompound(NBTTagCompound compound);
+    @Shadow public abstract void setTagCompound(@Nullable NBTTagCompound compound);
     @Shadow public abstract void setTagInfo(String key, NBTBase nbtBase);
     @Shadow public abstract int getItemDamage();
     @Shadow public abstract int getMaxStackSize();
     @Shadow public abstract boolean hasTagCompound();
+    @Shadow public abstract boolean shadow$isEmpty();
     @Shadow public abstract NBTTagCompound getTagCompound();
     @Shadow public abstract NBTTagCompound getOrCreateSubCompound(String key);
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
@@ -158,8 +164,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
 
     @Override
     public ItemType getItem() {
-        final Item item = shadow$getItem();
-        return item == null ? (ItemType) ItemTypeRegistryModule.NONE_ITEM : (ItemType) item;
+        return (ItemType) shadow$getItem();
     }
 
     @Override
@@ -218,7 +223,8 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
                 container.set(DataQueries.UNSAFE_NBT, unsafeNbt);
             }
         }
-        final Collection<DataManipulator<?, ?>> manipulators = getContainers();
+        // We only need to include the custom data, not vanilla manipulators supported by sponge implementation
+        final Collection<DataManipulator<?, ?>> manipulators = getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }
@@ -243,15 +249,20 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
         );
     }
 
+    @Intrinsic
+    public boolean itemstack$isEmpty() {
+        return this.shadow$isEmpty();
+    }
+
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
         final List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
         final Item item = this.shadow$getItem();
-        if (item == null) {
+        if (this.shadow$isEmpty()) {
             final PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Null Item found!").centre().hr();
-            printer.add("An ItemStack has a null ItemType! This is usually not supported as it will likely have issues elsewhere.");
-            printer.add("Please ask help for seeing if this is an issue with a mod and report it!");
+            printer.add("An ItemStack is empty! This is usually indicating that a plugin is not validating emptiness of items.");
+            printer.add("Please ask help for seeing if this is an issue with a plugin and report it!");
             printer.add("Printing a Stacktrace:");
             printer.add(new Exception());
             printer.log(SpongeImpl.getLogger(), Level.WARN);
@@ -295,7 +306,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
         if (compound.hasKey(NbtDataUtil.FAILED_CUSTOM_DATA, NbtDataUtil.TAG_LIST)) {
             final NBTTagList list = compound.getTagList(NbtDataUtil.FAILED_CUSTOM_DATA, NbtDataUtil.TAG_COMPOUND);
             final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
-            if (list != null && list.tagCount() != 0) {
+            if (list.tagCount() != 0) {
                 for (int i = 0; i < list.tagCount(); i++) {
                     final NBTTagCompound internal = list.getCompoundTagAt(i);
                     builder.add(NbtTranslator.getInstance().translateFrom(internal));
@@ -462,9 +473,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Override
     public boolean supportsCustom(Key<?> key) {
         return this.manipulators.stream()
-                .filter(manipulator -> manipulator.supports(key))
-                .findFirst()
-                .isPresent();
+                .anyMatch(manipulator -> manipulator.supports(key));
     }
 
     @Override
