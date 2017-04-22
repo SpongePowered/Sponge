@@ -68,7 +68,7 @@ public class DataFormatRegistryModule implements AdditionalCatalogRegistryModule
     @Override
     public void registerDefaults() {
         this.dataFormatMappings.put("nbt", new NbtDataFormat("nbt"));
-        this.dataFormatMappings.put("json", JsonDataFormat.INSTANCE);
+        this.dataFormatMappings.put("json", new JsonDataFormat());
         this.dataFormatMappings.put("hocon", new HoconDataFormat("hocon"));
     }
 }

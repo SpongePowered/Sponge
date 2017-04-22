@@ -35,7 +35,8 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.persistence.DataFormat;
+import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.StringDataFormat;
 import org.spongepowered.common.SpongeCatalogType;
 
 import java.io.BufferedReader;
@@ -45,8 +46,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,11 +57,9 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-public final class JsonDataFormat extends SpongeCatalogType implements DataFormat {
+public final class JsonDataFormat extends SpongeCatalogType implements StringDataFormat {
 
-    public static final JsonDataFormat INSTANCE = new JsonDataFormat();
-
-    private JsonDataFormat() {
+    public JsonDataFormat() {
         super("json");
     }
 
@@ -73,8 +74,14 @@ public final class JsonDataFormat extends SpongeCatalogType implements DataForma
         return writer.getResult();
     }
 
+    @Override
     public DataContainer read(String input) throws IOException {
-        try (JsonReader reader = new JsonReader(new StringReader(input))) {
+        return readFrom(new StringReader(input));
+    }
+
+    @Override
+    public DataContainer readFrom(Reader input) throws InvalidDataException, IOException {
+        try (JsonReader reader = new JsonReader(input)) {
             return readFrom(reader);
         }
     }
@@ -86,17 +93,17 @@ public final class JsonDataFormat extends SpongeCatalogType implements DataForma
         }
     }
 
-    public DataContainer readFrom(JsonReader reader) throws IOException {
+    private static DataContainer readFrom(JsonReader reader) throws IOException {
         return createContainer(reader);
     }
 
-    private DataContainer createContainer(JsonReader reader) throws IOException {
+    private static DataContainer createContainer(JsonReader reader) throws IOException {
         DataContainer container = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
         readView(reader, container);
         return container;
     }
 
-    private void readView(JsonReader reader, DataView view) throws IOException {
+    private static void readView(JsonReader reader, DataView view) throws IOException {
         reader.beginObject();
 
         while (reader.hasNext()) {
@@ -114,7 +121,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements DataForma
     }
 
     @Nullable
-    private Object read(JsonReader reader) throws IOException {
+    private static Object read(JsonReader reader) throws IOException {
         JsonToken token = reader.peek();
         switch (token) {
             case BEGIN_OBJECT:
@@ -152,7 +159,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements DataForma
         return nextDouble;
     }
 
-    private List<?> readArray(JsonReader reader) throws IOException {
+    private static List<?> readArray(JsonReader reader) throws IOException {
         reader.beginArray();
 
         List<Object> result = new ArrayList<>();
@@ -171,15 +178,21 @@ public final class JsonDataFormat extends SpongeCatalogType implements DataForma
         }
     }
 
+    @Override
     public String write(DataView data) throws IOException {
         StringWriter writer = new StringWriter();
-        try (JsonWriter jsonWriter = new JsonWriter(writer)) {
-            writeView(jsonWriter, data);
-        }
+        writeTo(writer, data);
         return writer.toString();
     }
 
-    private void writeView(JsonWriter writer, DataView view) throws IOException {
+    @Override
+    public void writeTo(Writer output, DataView data) throws IOException {
+        try (JsonWriter writer = new JsonWriter(output)) {
+            writeView(writer, data);
+        }
+    }
+
+    private static void writeView(JsonWriter writer, DataView view) throws IOException {
         writer.beginObject();
 
         for (Map.Entry<DataQuery, Object> entry : view.getValues(false).entrySet()) {
@@ -190,7 +203,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements DataForma
         writer.endObject();
     }
 
-    private void write(JsonWriter writer, @Nullable Object value) throws IOException {
+    private static void write(JsonWriter writer, @Nullable Object value) throws IOException {
         if (value == null) {
             writer.nullValue();
         } else if (value instanceof Boolean) {
@@ -212,7 +225,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements DataForma
         }
     }
 
-    private void writeArray(JsonWriter writer, Iterable<?> iterable) throws IOException {
+    private static void writeArray(JsonWriter writer, Iterable<?> iterable) throws IOException {
         writer.beginArray();
         for (Object value : iterable) {
             write(writer, value);
@@ -220,7 +233,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements DataForma
         writer.endArray();
     }
 
-    private void writeMap(JsonWriter writer, Map<?, ?> map) throws IOException {
+    private static void writeMap(JsonWriter writer, Map<?, ?> map) throws IOException {
         writer.beginObject();
 
         for (Map.Entry<?, ?> entry : map.entrySet()) {

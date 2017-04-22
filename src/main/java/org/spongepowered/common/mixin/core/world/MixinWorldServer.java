@@ -91,6 +91,7 @@ import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -145,7 +146,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.WorldConfig;
-import org.spongepowered.common.data.persistence.JsonDataFormat;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -446,7 +446,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         String jsonSettings = "";
         try {
-            jsonSettings = JsonDataFormat.INSTANCE.write(settings);
+            jsonSettings = DataFormats.JSON.write(settings);
         } catch (Exception e) {
             SpongeImpl.getLogger().warn("Failed to convert settings from [{}] for GeneratorType [{}] used by World [{}].", settings,
                     ((net.minecraft.world.World) (Object) this).getWorldType(), this, e);
