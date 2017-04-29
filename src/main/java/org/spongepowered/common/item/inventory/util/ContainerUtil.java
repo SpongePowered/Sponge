@@ -85,6 +85,7 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensI
 import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.Inventory2DLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.FurnaceInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
@@ -252,7 +253,7 @@ public final class ContainerUtil {
                 // TODO the lenses in "slots" are not used in this lens and thus cannot be found later
                 Lens<IInventory, ItemStack> adapterLens = ((InventoryAdapter) subInventory).getRootLens();
                 if (adapterLens != null) {
-                    lens = copyLens(index, adapterLens, slots);
+                    lens = copyLens(index, ((InventoryAdapter) subInventory), adapterLens, slots);
                     if (adapterLens instanceof PlayerInventoryLens) {
                         playerLens = true;
                     }
@@ -292,8 +293,11 @@ public final class ContainerUtil {
         return new ContainerLens((InventoryAdapter<IInventory, ItemStack>) container, slots, lenses);
     }
 
-    private static Lens<IInventory, ItemStack> copyLens(int base, Lens<IInventory, ItemStack> lens, SlotCollection slots)
+    private static Lens<IInventory, ItemStack> copyLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, Lens<IInventory, ItemStack> lens, SlotCollection slots)
     {
+        if (lens instanceof FurnaceInventoryLens) {
+            return new FurnaceInventoryLens(base, adapter, slots);
+        }
         if (lens instanceof CraftingInventoryLens) {
             return new CraftingInventoryLensImpl(base,
                     ((GridInventoryLens) lens).getWidth(),

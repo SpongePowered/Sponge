@@ -40,7 +40,11 @@ public class FurnaceInventoryLens extends OrderedInventoryLensImpl {
     private OutputSlotLensImpl output;
 
     public FurnaceInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super(0, adapter.getInventory().getSize(), 1, adapter.getClass(), slots);
+        this(0, adapter, slots);
+    }
+
+    public FurnaceInventoryLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
+        super(base, adapter.getInventory().getSize(), 1, adapter.getClass(), slots);
     }
 
     @Override
