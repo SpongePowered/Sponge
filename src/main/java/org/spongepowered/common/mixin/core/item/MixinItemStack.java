@@ -258,11 +258,12 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     public Collection<DataManipulator<?, ?>> getContainers() {
         final List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
         final Item item = this.shadow$getItem();
-        if (this.shadow$isEmpty()) {
+        // Null items should be impossible to create
+        if (item == null) {
             final PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Null Item found!").centre().hr();
-            printer.add("An ItemStack is empty! This is usually indicating that a plugin is not validating emptiness of items.");
-            printer.add("Please ask help for seeing if this is an issue with a plugin and report it!");
+            printer.add("An ItemStack has a null ItemType! This is usually not supported as it will likely have issues elsewhere.");
+            printer.add("Please ask help for seeing if this is an issue with a mod and report it!");
             printer.add("Printing a Stacktrace:");
             printer.add(new Exception());
             printer.log(SpongeImpl.getLogger(), Level.WARN);
