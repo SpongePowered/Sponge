@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
@@ -49,12 +50,14 @@ public class FurnaceInventoryLens extends OrderedInventoryLensImpl {
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
+        super.init(slots); // Set spanning SlotAdapters
+
         this.input = new InputSlotLensImpl(0, (i) -> true, (i) -> true);
         this.fuel = new FuelSlotLensImpl(1, (i) -> true, (i) -> true);       // TODO SlotFurnaceFuel
         this.output = new OutputSlotLensImpl(2, (i) -> false, (i) -> false); // SlotFurnaceOutput
 
-        this.addSpanningChild(input);
-        this.addSpanningChild(fuel);
-        this.addSpanningChild(output);
+        this.addChild(input, new SlotIndex(0));
+        this.addChild(fuel, new SlotIndex(1));
+        this.addChild(output, new SlotIndex(2));
     }
 }
