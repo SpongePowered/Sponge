@@ -54,6 +54,7 @@ public class MixinWorldGenFire implements NetherFire {
     @Inject(method = "<init>()V", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(10);
+        this.cluster = VariableAmount.fixed(64);
     }
 
     @Override
