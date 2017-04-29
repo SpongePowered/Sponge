@@ -116,14 +116,14 @@ public class SpongeConversationManager implements ConversationManager {
                                 break;
                             default:
                                 // Should not occur
-                                SpongeImpl.getLogger().error("For some reason the question result type did not match any.");
+                                this.logger.error("For some reason the question result type did not match any.");
                                 conversation.end(ConversationEndTypes.ERROR, Cause.of(NamedCause.source(SpongeImpl.getPlugin())));
                         }
                     } catch (ArgumentParseException e) {
                         conversant.sendThroughMessage(Text.of("Failed to parse your specified arguments. Restarting question."));
                         conversation.setQuestion(question);
-                        SpongeImpl.getLogger().error("Failed to parse the arguments passed into " + conversant.getName() +
-                            "'s conversation." + " Sending them the same question again.");
+                        this.logger.error(
+                                "Failed to parse the arguments passed into {}'s conversation. Sending them the same question again.", conversant.getName(), e);
                         e.printStackTrace();
                     }
                 }
@@ -138,7 +138,7 @@ public class SpongeConversationManager implements ConversationManager {
         final ConversationOpenEvent.Starting startingEvent = SpongeEventFactory
             .createConversationOpenEventStarting(Cause.of(NamedCause.source(plugin)), archetype, Sets.newHashSet(conversants));
 
-        if (SpongeImpl.postEvent(startingEvent) || startingEvent.isCancelled()) {
+        if (SpongeImpl.postEvent(startingEvent)) {
             return Optional.empty();
         }
 
