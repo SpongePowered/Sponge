@@ -93,25 +93,21 @@ public class SpongeConversationArchetype implements ConversationArchetype {
         }
     }
 
-    @Nonnull
     @Override
     public String getId() {
         return this.id;
     }
 
-    @Nonnull
     @Override
     public Optional<Text> getStartingMessage() {
         return Optional.ofNullable(this.startingMessage);
     }
 
-    @Nonnull
     @Override
     public String getExitString() {
         return this.exit;
     }
 
-    @Nonnull
     @Override
     public Question getFirstQuestion() {
         return this.question;
@@ -127,13 +123,11 @@ public class SpongeConversationArchetype implements ConversationArchetype {
         return this.allowCommands;
     }
 
-    @Nonnull
     @Override
     public ExternalChatHandler getDefaultChatHandler() {
         return this.defaultChatHandler;
     }
 
-    @Nonnull
     @Override
     public ImmutableSet<EndingHandler> getEndingHandlers() {
         return ImmutableSet.copyOf(this.endingHandlers);

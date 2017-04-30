@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.conversation;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
@@ -56,21 +58,24 @@ import javax.inject.Singleton;
 
 /**
  * An implementation of {@link ConversationManager} where all active conversations
- * are stored. Where processing and conversation creation occurs.
+ * are stored. Conversation creation and processing occurs here as well.
  */
 @Singleton
 public class SpongeConversationManager implements ConversationManager {
 
-    private Multimap<String, Conversation> conversations = HashMultimap.create();
+    private final Multimap<String, Conversation> conversations;
     private final Logger logger;
 
     @Inject
     public SpongeConversationManager(Logger logger) {
         this.logger = logger;
+        this.conversations = HashMultimap.create();
     }
 
     @Override
     public Collection<Conversation> getConversation(PluginContainer plugin, String id) {
+        checkNotNull("The specified plugin container cannot be null!");
+        checkNotNull("The specified id cannot be null!");
         return this.conversations.get(plugin.getId() + ":" + id.toLowerCase());
     }
 
@@ -81,6 +86,8 @@ public class SpongeConversationManager implements ConversationManager {
 
     @Override
     public boolean process(Conversant conversant, String message) {
+        checkNotNull(conversant, "The specified conversant cannot be null!");
+        checkNotNull(message, "The specified message cannot be null!");
         final Optional<Conversation> optionalConversation = conversant.getConversation();
         if (optionalConversation.isPresent()) {
             final Conversation conversation = optionalConversation.get();
@@ -135,6 +142,7 @@ public class SpongeConversationManager implements ConversationManager {
 
     @Override
     public Optional<Conversation> start(ConversationArchetype archetype, PluginContainer plugin, Conversant... conversants) {
+        checkNotNull(plugin, "The specified plugin container cannot be null!");
         final ConversationOpenEvent.Starting startingEvent = SpongeEventFactory
             .createConversationOpenEventStarting(Cause.of(NamedCause.source(plugin)), archetype, Sets.newHashSet(conversants));
 
@@ -188,5 +196,4 @@ public class SpongeConversationManager implements ConversationManager {
             c.end(endType, cause);
         }
     }
-
 }

@@ -38,6 +38,14 @@ public class SpongeQuestion implements Question {
     private final AnswerHandler handler;
     private final CommandElement arguments;
 
+    /**
+     * Creates a new {@link Question} to be used within a conversation.
+     *
+     * @param id The id of the question
+     * @param prompt The prompt of the question
+     * @param handler The answer handler
+     * @param arguments The arguments of the question
+     */
     SpongeQuestion(String id, Text prompt, AnswerHandler handler, CommandElement arguments) {
         this.id = id;
         this.prompt = prompt;

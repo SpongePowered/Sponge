@@ -165,5 +165,4 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
         return new SpongeConversationArchetype(this.firstQuestion, this.catchesOutput, this.allowCommands, this.defaultHandler,
             this.endingHandlers, this.startingMessage, this.id, this.exit, this.title, this.padding);
     }
-
 }

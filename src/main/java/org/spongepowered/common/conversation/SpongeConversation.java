@@ -22,17 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.conversation;
+package org.spongepowered.common.text.conversation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.conversation.Conversant;
-import org.spongepowered.api.conversation.Conversation;
-import org.spongepowered.api.conversation.ConversationArchetype;
-import org.spongepowered.api.conversation.EndingHandler;
-import org.spongepowered.api.conversation.ExternalChatHandler;
-import org.spongepowered.api.conversation.Question;
+import org.spongepowered.api.event.cause.conversation.ConversationEndTypes;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.text.conversation.Conversant;
+import org.spongepowered.api.text.conversation.Conversation;
+import org.spongepowered.api.text.conversation.ConversationArchetype;
+import org.spongepowered.api.text.conversation.EndingHandler;
+import org.spongepowered.api.text.conversation.ExternalChatHandler;
+import org.spongepowered.api.text.conversation.Question;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -44,12 +46,16 @@ import org.spongepowered.api.event.conversation.ConversationCloseEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
@@ -58,7 +64,8 @@ public class SpongeConversation implements Conversation {
     private final PluginContainer creator;
     private final ConversationArchetype archetype;
 
-    private final Map<Conversant, ExternalChatHandler> externalChatHandlers = new ConcurrentHashMap<>();
+    private final Map<WeakReference<Conversant>, ExternalChatHandler> handlers = new ConcurrentHashMap<>();
+    private final Map<Conversant, ExternalChatHandler> externalChatHandlers;
     private final DataContainer context = new MemoryDataContainer();
     private final Set<EndingHandler> endingHandlers;
     @Nullable private Question currentQuestion;
@@ -76,12 +83,26 @@ public class SpongeConversation implements Conversation {
      */
     SpongeConversation(ConversationArchetype archetype, Collection<Conversant> conversants, PluginContainer creator) {
         this.archetype = archetype;
-        conversants.forEach(c -> addConversant(c, archetype.getDefaultChatHandler()));
         this.creator = creator;
         this.endingHandlers = new HashSet<>(archetype.getEndingHandlers());
         this.catchesOutput = archetype.catchesOutput();
         this.allowCommands = archetype.allowsCommands();
         this.currentQuestion = archetype.getFirstQuestion();
+        this.externalChatHandlers = Collections.synchronizedMap(new WeakHashMap<>());
+
+        conversants.forEach(c -> this.externalChatHandlers.put(c, archetype.getDefaultChatHandler()));
+
+        Task.builder()
+                .async()
+                .interval(5, TimeUnit.MINUTES)
+                .execute(() -> {
+                    if (this.externalChatHandlers.size() == 0) {
+                        SpongeImpl.getLogger().error("A " + creator.getId() + ":" + getId().toLowerCase() + " conversation has ended due to being "
+                                + "empty for an extended period of time.");
+                    }
+                    end(ConversationEndTypes.TIMED_OUT, SpongeImpl.getImplementationCause());
+                })
+                .submit(creator);
     }
 
     @Override
@@ -113,8 +134,11 @@ public class SpongeConversation implements Conversation {
     public void setQuestion(@Nullable Question question) {
         this.currentQuestion = question;
         if (question != null) {
-            this.archetype.getHeader().ifPresent(text -> getConversants().forEach(c -> c.sendThroughMessage(text)));
-            getConversants().forEach(c -> c.sendThroughMessage(question.getPrompt()));
+            synchronized (this.externalChatHandlers) {
+                final Set<Conversant> conversants = this.externalChatHandlers.keySet();
+                this.archetype.getHeader().ifPresent(text -> conversants.forEach(c -> c.sendThroughMessage(text)));
+                conversants.forEach(c -> c.sendThroughMessage(question.getPrompt()));
+            }
         }
     }
 
@@ -123,7 +147,7 @@ public class SpongeConversation implements Conversation {
         cause = cause.with(NamedCause.of(endType.getName(), ConversationEndCause.builder().type(endType).build()));
         final ConversationCloseEvent.Ending endingEvent = SpongeEventFactory.createConversationCloseEventEnding(cause, this);
 
-        if (SpongeImpl.postEvent(endingEvent) || endingEvent.isCancelled()) {
+        if (SpongeImpl.postEvent(endingEvent)) {
             return false;
         }
 
@@ -133,7 +157,9 @@ public class SpongeConversation implements Conversation {
             e.handle(this, this.context, endType);
         }
 
-        removeAllConversants();
+        if (!endType.equals(ConversationEndTypes.TIMED_OUT)) {
+            removeAllConversants();
+        }
 
         this.currentQuestion = null;
 
@@ -149,12 +175,21 @@ public class SpongeConversation implements Conversation {
     public void addConversant(Conversant conversant, ExternalChatHandler externalChatHandler) {
         this.externalChatHandlers.put(checkNotNull(conversant, "The conversant you specify cannot be null!"),
             checkNotNull(externalChatHandler, "The external chat handler you specify for this conversant cannot be null!"));
+        if (this.currentQuestion != null) {
+            this.archetype.getHeader().ifPresent(conversant::sendThroughMessage);
+            conversant.sendThroughMessage(this.currentQuestion.getPrompt());
+        }
     }
 
     @Override
     public void removeConversant(Conversant conversant) {
-        this.externalChatHandlers.remove(conversant).finish(conversant);
-        conversant.removeFromConversation();
+        checkNotNull(conversant, "The conversant you input to remove cannot be null!");
+        synchronized (this.externalChatHandlers) {
+            if (this.externalChatHandlers.containsKey(conversant)) {
+                this.externalChatHandlers.remove(conversant).finish(conversant);
+                conversant.removeFromConversation();
+            }
+        }
     }
 
     @Override
@@ -165,7 +200,11 @@ public class SpongeConversation implements Conversation {
     @Override
     public void setChatHandler(Conversant conversant, ExternalChatHandler externalChatHandler) {
         checkNotNull(externalChatHandler, "The external chat handler you specify cannot be null!");
-        if (this.externalChatHandlers.keySet().contains(conversant)) {
+        synchronized (this.externalChatHandlers) {
+            if (!this.externalChatHandlers.containsKey(conversant)) {
+                SpongeImpl.getLogger().error("A conversant must be in the conversation for you to modify their external chat handler!");
+                return;
+            }
             this.externalChatHandlers.put(conversant, externalChatHandler);
         }
     }
@@ -192,7 +231,6 @@ public class SpongeConversation implements Conversation {
 
     @Override
     public void allowCommands(boolean allow) {
-        // TODO Stop their commands if not allowed
         this.allowCommands = allow;
     }
 
@@ -215,5 +253,4 @@ public class SpongeConversation implements Conversation {
     public boolean removeEndingHandler(EndingHandler endingHandler) {
         return this.endingHandlers.remove(endingHandler);
     }
-
 }

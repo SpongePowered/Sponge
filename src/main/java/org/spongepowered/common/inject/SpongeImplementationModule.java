@@ -46,6 +46,7 @@ import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.service.SimpleServiceManager;
+import org.spongepowered.api.text.conversation.ConversationManager;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeGame;
@@ -58,6 +59,7 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.SpongeScheduler;
+import org.spongepowered.common.text.conversation.SpongeConversationManager;
 import org.spongepowered.common.world.SpongeTeleportHelper;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
@@ -79,6 +81,7 @@ public class SpongeImplementationModule extends PrivateModule {
         this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
         this.bindAndExpose(ConfigManager.class).to(SpongeConfigManager.class);
         this.bindAndExpose(PropertyRegistry.class).to(SpongePropertyRegistry.class);
+        this.bindAndExpose(ConversationManager.class).to(SpongeConversationManager.class);
 
         // These are bound in implementation-specific modules
         this.expose(Platform.class);

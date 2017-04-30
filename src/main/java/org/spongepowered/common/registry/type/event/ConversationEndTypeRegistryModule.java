@@ -50,7 +50,7 @@ public class ConversationEndTypeRegistryModule implements AlternateCatalogRegist
     @Override
     public void registerAdditionalCatalog(ConversationEndType extraCatalog) {
         final String id = checkNotNull(extraCatalog).getId().toLowerCase(Locale.ENGLISH);
-        checkArgument(!this.endTypeMap.containsKey(id), "ConversationEndType with the same id is already registered: {}", extraCatalog.getId());
+        checkArgument(!this.endTypeMap.containsKey(id), "A ConversationEndType with the same id is already registered: {}", extraCatalog.getId());
         this.endTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
@@ -69,6 +69,7 @@ public class ConversationEndTypeRegistryModule implements AlternateCatalogRegist
         this.endTypeMap.put("sponge:finished", new SpongeConversationEndType("sponge:finished", "Finished"));
         this.endTypeMap.put("sponge:forced", new SpongeConversationEndType("sponge:forced", "Forced"));
         this.endTypeMap.put("sponge:quit", new SpongeConversationEndType("sponge:quit", "Quit"));
+        this.endTypeMap.put("sponge:timed_out", new SpongeConversationEndType("sponge:timed_out", "Timed Out"));
     }
 
     @Override

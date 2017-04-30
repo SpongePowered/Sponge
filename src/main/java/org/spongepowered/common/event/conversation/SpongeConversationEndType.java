@@ -77,5 +77,4 @@ public class SpongeConversationEndType implements ConversationEndType {
             .add("name", this.name)
             .toString();
     }
-
 }
