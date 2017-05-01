@@ -356,7 +356,7 @@ public final class TrackingUtil {
     public static void performBlockDrop(Block block, IMixinWorldServer mixinWorld, BlockPos pos, IBlockState state, float chance, int fortune) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState currentState = causeTracker.getCurrentState();
-        final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState);
+        final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState) && !currentState.getPhase().isWorldGeneration(currentState);
         if (shouldEnterBlockDropPhase) {
             PhaseContext context = PhaseContext.start()
                     .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
