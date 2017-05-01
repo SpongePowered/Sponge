@@ -31,7 +31,6 @@ import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Careers;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeCareerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongeCareerData extends AbstractSingleCatalogData<Career, CareerData, ImmutableCareerData> implements CareerData {
 

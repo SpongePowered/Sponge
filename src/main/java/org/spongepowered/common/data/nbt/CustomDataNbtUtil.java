@@ -30,7 +30,6 @@ import net.minecraft.nbt.NBTTagList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -106,12 +105,12 @@ public class CustomDataNbtUtil {
     @SuppressWarnings("unchecked")
     public static DataTransactionResult apply(DataView view, DataManipulator<?, ?> manipulator) {
         if (!view.contains(DataQueries.Compatibility.Forge.ROOT)) {
-            view.set(DataQueries.Compatibility.Forge.ROOT, new MemoryDataContainer());
+            view.set(DataQueries.Compatibility.Forge.ROOT, DataContainer.createNew());
         }
 
         final DataView forgeCompound = view.getView(DataQueries.Compatibility.Forge.ROOT).orElseThrow(DataUtil.dataNotFound());
         if (!forgeCompound.contains(DataQueries.General.SPONGE_ROOT)) {
-            forgeCompound.set(DataQueries.General.SPONGE_ROOT, new MemoryDataContainer());
+            forgeCompound.set(DataQueries.General.SPONGE_ROOT, DataContainer.createNew());
         }
         final DataView spongeTag = forgeCompound.getView(DataQueries.General.SPONGE_ROOT).orElseThrow(DataUtil.dataNotFound());
 
@@ -136,7 +135,7 @@ public class CustomDataNbtUtil {
 
             }
             // We are now adding to the list, not replacing
-            final MemoryDataContainer container = new MemoryDataContainer();
+            final DataContainer container = DataContainer.createNew();
             container.set(DataQueries.DATA_ID, DataUtil.getRegistrationFor(manipulator).getId());
             container.set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
             customData.add(container);
@@ -144,7 +143,7 @@ public class CustomDataNbtUtil {
             return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).success(manipulator.getValues()).build();
         } else {
             final List<DataView> dataViews = new ArrayList<>();
-            final MemoryDataContainer container = new MemoryDataContainer();
+            final DataContainer container = DataContainer.createNew();
             container.set(DataQueries.DATA_ID, DataUtil.getRegistrationFor(manipulator).getId())
                     .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
             dataViews.add(container);

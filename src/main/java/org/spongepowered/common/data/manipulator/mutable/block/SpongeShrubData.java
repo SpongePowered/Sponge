@@ -33,7 +33,6 @@ import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeShrubData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongeShrubData extends AbstractSingleCatalogData<ShrubType, ShrubData, ImmutableShrubData> implements ShrubData {
 

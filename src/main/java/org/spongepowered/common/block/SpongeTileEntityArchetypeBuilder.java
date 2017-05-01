@@ -36,7 +36,6 @@ import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -45,7 +44,6 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -138,7 +136,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     @Override
     public TileEntityArchetype.Builder setData(DataManipulator<?, ?> manipulator) {
         if (this.tileData == null) {
-            this.tileData = new MemoryDataContainer();
+            this.tileData = DataContainer.createNew();
         }
         DataUtil.getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, manipulator.getClass())
                 .ifPresent(processor -> processor.storeToView(this.tileData, manipulator));
@@ -149,7 +147,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     @Override
     public <E, V extends BaseValue<E>> TileEntityArchetype.Builder set(V value) {
         if (this.tileData == null) {
-            this.tileData = new MemoryDataContainer();
+            this.tileData = DataContainer.createNew();
         }
         DataUtil.getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, value.getKey())
                 .ifPresent(processor -> processor.offer(this.tileData, value));
@@ -160,7 +158,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     @Override
     public <E, V extends BaseValue<E>> TileEntityArchetype.Builder set(Key<V> key, E value) {
         if (this.tileData == null) {
-            this.tileData = new MemoryDataContainer();
+            this.tileData = DataContainer.createNew();
         }
         DataUtil.getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, key)
                 .ifPresent(processor -> processor.offer(this.tileData, value));
@@ -172,7 +170,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
         checkState(this.blockState != null, "BlockState cannot be null!");
         checkState(this.tileEntityType != null, "TileEntityType cannot be null!");
         if (this.tileData == null) {
-            this.tileData = new MemoryDataContainer();
+            this.tileData = DataContainer.createNew();
         }
         return new SpongeTileEntityArchetype(this);
     }

@@ -28,10 +28,8 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableFireworkRocketData;
 import org.spongepowered.api.data.manipulator.mutable.FireworkRocketData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkRocketData;
-import org.spongepowered.common.data.util.ComparatorUtil;
 
 public class ImmutableSpongeFireworkRocketData extends AbstractImmutableIntData<ImmutableFireworkRocketData, FireworkRocketData>
     implements ImmutableFireworkRocketData {

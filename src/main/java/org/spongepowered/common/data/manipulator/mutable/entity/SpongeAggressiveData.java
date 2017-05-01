@@ -30,7 +30,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.AggressiveData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAggressiveData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongeAggressiveData extends AbstractBooleanData<AggressiveData, ImmutableAggressiveData> implements AggressiveData {
 

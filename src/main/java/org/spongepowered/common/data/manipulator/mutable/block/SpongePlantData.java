@@ -33,7 +33,6 @@ import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePlantData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongePlantData extends AbstractSingleCatalogData<PlantType, PlantData, ImmutablePlantData> implements PlantData {
 

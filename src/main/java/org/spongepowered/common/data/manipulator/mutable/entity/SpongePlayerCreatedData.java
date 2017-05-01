@@ -30,7 +30,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.PlayerCreatedData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePlayerCreatedData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongePlayerCreatedData extends AbstractBooleanData<PlayerCreatedData, ImmutablePlayerCreatedData> implements PlayerCreatedData {
 

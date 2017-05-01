@@ -36,7 +36,6 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -401,7 +400,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer();
+        return DataContainer.createNew();
     }
 
     @Override

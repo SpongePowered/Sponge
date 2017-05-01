@@ -26,16 +26,11 @@ package org.spongepowered.common.data.persistence;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.io.ByteStreams;
-import com.google.common.io.CharStreams;
 import com.google.gson.stream.JsonWriter;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
-import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -65,7 +60,7 @@ public final class DataViewJsonWriter extends JsonWriter {
 
     private final List<Object> stack = new ArrayList<>();
     @Nullable private DataQuery pendingKey;
-    private DataContainer result = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
+    private DataContainer result = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
 
     public DataViewJsonWriter() {
         super(UNWRITABLE_WRITER);
@@ -123,7 +118,7 @@ public final class DataViewJsonWriter extends JsonWriter {
             return this;
         }
 
-        put(new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED));
+        put(DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED));
         return this;
     }
 

@@ -33,7 +33,6 @@ import org.junit.Test;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.common.data.persistence.ConfigurateTranslator;
 
 import java.util.Collections;
@@ -58,7 +57,7 @@ public class ConfigurateDataViewTest {
         }
         node.getNode("foo", "nested", "Data").setValue(dataList);
 
-        DataContainer manual = new MemoryDataContainer();
+        DataContainer manual = DataContainer.createNew();
         manual.set(DataQuery.of("foo", "int"), 1)
                 .set(DataQuery.of("foo", "double"), 10.0D)
                 .set(DataQuery.of("foo", "long"), Long.MAX_VALUE)

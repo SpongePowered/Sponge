@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.block;
 
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableWireAttachmentData;
 import org.spongepowered.api.data.manipulator.mutable.block.WireAttachmentData;
@@ -42,7 +40,6 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<ImmutableWireAttachmentData, WireAttachmentData> implements ImmutableWireAttachmentData {

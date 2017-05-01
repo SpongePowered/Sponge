@@ -30,7 +30,6 @@ import static org.spongepowered.api.data.Queries.POSITION_Y;
 import static org.spongepowered.api.data.Queries.POSITION_Z;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataContainer;
@@ -44,7 +43,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeBodyPartRotationalData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 

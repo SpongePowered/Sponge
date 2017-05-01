@@ -468,6 +468,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      *
      * @param targetEntity The target entity
      */
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
     public void attackTargetEntityWithCurrentItem(Entity targetEntity) {
         // Sponge Start - Add SpongeImpl hook to override in forge as necessary

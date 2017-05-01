@@ -32,7 +32,6 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 
@@ -68,7 +67,7 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
 
     private static DataContainer translateFromNode(ConfigurationNode node) {
         checkNotNull(node, "node");
-        DataContainer dataContainer = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
+        DataContainer dataContainer = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
         ConfigurateTranslator.instance().addTo(node, dataContainer);
         return dataContainer;
     }

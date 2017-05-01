@@ -33,7 +33,6 @@ import org.spongepowered.api.data.type.QuartzType;
 import org.spongepowered.api.data.type.QuartzTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeQuartzData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongeQuartzData extends AbstractSingleCatalogData<QuartzType, QuartzData, ImmutableQuartzData> implements QuartzData {
 

@@ -31,7 +31,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.PassengerData;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongePassengerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 import java.util.ArrayList;
 import java.util.List;

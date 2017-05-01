@@ -212,7 +212,7 @@ public final class SpongeDataManager implements DataManager {
         SpongeManipulatorRegistry.getInstance().bake();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void register(Class<? extends T> manipulatorClass,
             Class<? extends I> immutableManipulatorClass, DataManipulatorBuilder<T, I> builder) {

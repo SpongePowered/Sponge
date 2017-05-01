@@ -33,7 +33,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -42,7 +41,6 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.nbt.NbtDataTypes;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -131,7 +129,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     @Override
     public EntityArchetype.Builder setData(DataManipulator<?, ?> manipulator) {
         if (this.entityData == null) {
-            this.entityData = new MemoryDataContainer();
+            this.entityData = DataContainer.createNew();
         }
         DataUtil.getRawNbtProcessor(NbtDataTypes.ENTITY, manipulator.getClass())
                 .ifPresent(processor -> processor.storeToView(this.entityData, manipulator));
@@ -142,7 +140,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     @Override
     public <E, V extends BaseValue<E>> EntityArchetype.Builder set(V value) {
         if (this.entityData == null) {
-            this.entityData = new MemoryDataContainer();
+            this.entityData = DataContainer.createNew();
         }
         DataUtil.getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, value.getKey())
                 .ifPresent(processor -> processor.offer(this.entityData, value));
@@ -153,7 +151,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     @Override
     public <E, V extends BaseValue<E>> EntityArchetype.Builder set(Key<V> key, E value) {
         if (this.entityData == null) {
-            this.entityData = new MemoryDataContainer();
+            this.entityData = DataContainer.createNew();
         }
         DataUtil.getRawNbtProcessor(NbtDataTypes.TILE_ENTITY, key)
                 .ifPresent(processor -> processor.offer(this.entityData, value));
@@ -165,7 +163,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         checkNotNull(this.entityType);
         checkState(this.entityType != UNKNOWN);
         if(this.entityData == null) {
-            this.entityData = new MemoryDataContainer();
+            this.entityData = DataContainer.createNew();
         } else {
             this.entityData.remove(DataQuery.of("Pos"));
             this.entityData.remove(DataQuery.of("UUID"));

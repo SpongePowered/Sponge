@@ -28,7 +28,6 @@ import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.common.SpongeCatalogType;
 
 public class SpongeEntityMeta extends SpongeCatalogType {
@@ -41,7 +40,7 @@ public class SpongeEntityMeta extends SpongeCatalogType {
     }
 
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("id"), this.type).set(of("name"), getId());
+        return DataContainer.createNew().set(of("id"), this.type).set(of("name"), getId());
     }
 
     @Override

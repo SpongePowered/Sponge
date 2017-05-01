@@ -31,7 +31,6 @@ import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeOcelotData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongeOcelotData extends AbstractSingleCatalogData<OcelotType, OcelotData, ImmutableOcelotData> implements OcelotData {
 

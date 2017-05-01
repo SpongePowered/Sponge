@@ -33,7 +33,6 @@ import org.spongepowered.api.data.type.SandstoneType;
 import org.spongepowered.api.data.type.SandstoneTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSandstoneData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongeSandstoneData extends AbstractSingleCatalogData<SandstoneType, SandstoneData, ImmutableSandstoneData> implements SandstoneData {
 

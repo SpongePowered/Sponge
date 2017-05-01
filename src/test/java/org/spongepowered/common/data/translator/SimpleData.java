@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.MemoryDataContainer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -71,7 +70,7 @@ class SimpleData implements DataSerializable {
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer();
+        DataContainer container = DataContainer.createNew();
         container.set(DataQuery.of("myInt"), this.testInt);
         container.set(DataQuery.of("myDouble"), this.testDouble);
         container.set(DataQuery.of("myString"), this.testString);

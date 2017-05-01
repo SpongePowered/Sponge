@@ -32,7 +32,6 @@ import net.minecraft.world.LockCode;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
@@ -89,7 +88,7 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
             ItemStack stack = getStackInSlot(i);
             if (!stack.isEmpty()) {
                 // todo make a helper object for this
-                DataContainer stackView = new MemoryDataContainer()
+                DataContainer stackView = DataContainer.createNew()
                     .set(Queries.CONTENT_VERSION, 1)
                     .set(DataQueries.BLOCK_ENTITY_SLOT, i)
                     .set(DataQueries.BLOCK_ENTITY_SLOT_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).toContainer());

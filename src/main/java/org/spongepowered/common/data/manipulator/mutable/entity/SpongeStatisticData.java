@@ -34,7 +34,6 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeStatisticData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractMappedData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 import java.util.Map;
 import java.util.Optional;

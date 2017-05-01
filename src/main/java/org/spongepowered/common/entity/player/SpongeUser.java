@@ -35,7 +35,6 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.ArmorEquipable;
@@ -167,7 +166,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     @Override
     public DataContainer toContainer() {
         // TODO More data
-        return new MemoryDataContainer()
+        return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
                 .set(DataQueries.USER_UUID, this.profile.getId())
                 .set(DataQueries.USER_NAME, this.profile.getName())

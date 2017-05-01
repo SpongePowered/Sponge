@@ -33,7 +33,6 @@ import org.spongepowered.api.data.type.SlabType;
 import org.spongepowered.api.data.type.SlabTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSlabData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongeSlabData extends AbstractSingleCatalogData<SlabType, SlabData, ImmutableSlabData> implements SlabData {
 

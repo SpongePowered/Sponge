@@ -33,20 +33,19 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Implements;
@@ -84,7 +83,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     private DimensionType dimensionType = DimensionTypes.OVERWORLD;
     private Difficulty difficulty = Difficulties.NORMAL;
     private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
-    private DataContainer generatorSettings = new MemoryDataContainer();
+    private DataContainer generatorSettings = DataContainer.createNew();
     private boolean isEnabled = true;
     private boolean loadOnStartup = true;
     private boolean keepSpawnLoaded = true;
@@ -143,7 +142,7 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
         }
         // If null, assume custom
         if (settings == null) {
-            settings = new MemoryDataContainer().set(DataQueries.WORLD_CUSTOM_SETTINGS, generatorOptions);
+            settings = DataContainer.createNew().set(DataQueries.WORLD_CUSTOM_SETTINGS, generatorOptions);
         }
         this.generatorSettings = settings;
     }

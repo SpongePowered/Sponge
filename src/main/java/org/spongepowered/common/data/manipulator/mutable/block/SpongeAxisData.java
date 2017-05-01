@@ -31,7 +31,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAxisData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleEnumData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongeAxisData extends AbstractSingleEnumData<Axis, AxisData, ImmutableAxisData> implements AxisData {
 

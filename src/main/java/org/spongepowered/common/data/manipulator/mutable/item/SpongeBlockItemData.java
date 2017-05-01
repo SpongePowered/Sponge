@@ -33,7 +33,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBlockItemData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SpongeBlockItemData extends AbstractSingleData<BlockState, BlockItemData, ImmutableBlockItemData> implements BlockItemData {

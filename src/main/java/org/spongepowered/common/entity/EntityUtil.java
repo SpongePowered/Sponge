@@ -1116,6 +1116,15 @@ public final class EntityUtil {
         return Optional.of(EntityTypeRegistryModule.getInstance().getForClass((Class<? extends Entity>) clazz));
     }
 
+    @SuppressWarnings("unchecked")
+    public static Optional<EntityType> fromLocationToType(ResourceLocation location) {
+        Class<?> clazz = SpongeImplHooks.getEntityClass(location);
+        if (clazz == null) {
+            return Optional.empty();
+        }
+        return Optional.of(EntityTypeRegistryModule.getInstance().getForClass((Class<? extends Entity>) clazz));
+    }
+
     // I'm lazy, but this is better than using the convenience method
     public static EntityArchetype archetype(EntityType type) {
         return new SpongeEntityArchetypeBuilder().type(type).build();

@@ -34,7 +34,6 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 
@@ -47,7 +46,7 @@ public class NBTTranslationTest {
         DataManager service = Mockito.mock(DataManager.class);
         DataBuilder<FakeSerializable> builder = new FakeBuilder();
         when(service.getBuilder(FakeSerializable.class)).thenReturn(Optional.of(builder));
-        DataContainer container = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
+        DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
         container.set(DataQuery.of("foo"), "bar");
         FakeSerializable temp = new FakeSerializable("bar", 7, 10.0D, "nested");
         container.set(DataQuery.of("myFake"), temp);
@@ -58,7 +57,7 @@ public class NBTTranslationTest {
 
     @Test
     public void testDotContainerKeys() {
-        final DataContainer container = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED).set(DataQuery.of("my.key.to.data"), 1);
+        final DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED).set(DataQuery.of("my.key.to.data"), 1);
         NBTTagCompound compound = NbtTranslator.getInstance().translateData(container);
         DataView translatedContainer = NbtTranslator.getInstance().translateFrom(compound);
         assertEquals(container, translatedContainer);

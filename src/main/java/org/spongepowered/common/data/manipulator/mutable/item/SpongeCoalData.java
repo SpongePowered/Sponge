@@ -31,7 +31,6 @@ import org.spongepowered.api.data.type.CoalType;
 import org.spongepowered.api.data.type.CoalTypes;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeCoalData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongeCoalData extends AbstractSingleCatalogData<CoalType, CoalData, ImmutableCoalData> implements CoalData {
 

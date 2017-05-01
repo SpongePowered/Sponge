@@ -62,6 +62,7 @@ public class SlotAdapter extends Adapter implements Slot {
         this.slotNumber = slot.slotNumber;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private static SlotLens<IInventory, net.minecraft.item.ItemStack> getLens(net.minecraft.inventory.Slot slot) {
         if (((IMixinSlot) slot).getSlotIndex() >= 0) { // Normal Slot?
             if (slot.inventory instanceof InventoryAdapter) { // If the inventory is an adapter we can get the existing SlotLens
@@ -78,7 +79,7 @@ public class SlotAdapter extends Adapter implements Slot {
         this.slot = lens;
         this.ordinal = lens.getOrdinal(inventory);
         this.slots = ImmutableList.of(this);
-        this.slotNumber = ordinal; // TODO this is used in events
+        this.slotNumber = this.ordinal; // TODO this is used in events
     }
 
     public int getOrdinal() {

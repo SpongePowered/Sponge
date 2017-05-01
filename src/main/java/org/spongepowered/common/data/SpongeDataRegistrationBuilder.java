@@ -128,6 +128,7 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public SpongeDataRegistrationBuilder<M, I> from(DataRegistration<M, I> value) throws UnsupportedOperationException {
         throw new UnsupportedOperationException("Cannot set a builder with already created DataRegistrations!");
     }

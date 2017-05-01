@@ -32,7 +32,6 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.registry.CatalogTypeAlreadyRegisteredException;
@@ -293,7 +292,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.loadOnStartup = true;
         this.keepSpawnLoaded = true;
         this.generateSpawnOnLoad = true;
-        this.generatorSettings = new MemoryDataContainer();
+        this.generatorSettings = DataContainer.createNew();
         this.generatorModifiers = ImmutableList.of();
         this.pvpEnabled = true;
         this.commandsAllowed = true;

@@ -69,7 +69,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings({"SuspiciousMethodCalls", "unchecked"})
+@SuppressWarnings({"SuspiciousMethodCalls", "unchecked", "rawtypes"})
 public class SpongeManipulatorRegistry {
 
     private static final SpongeManipulatorRegistry INSTANCE = new SpongeManipulatorRegistry();

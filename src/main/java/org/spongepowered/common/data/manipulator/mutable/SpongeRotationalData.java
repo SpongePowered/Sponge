@@ -31,7 +31,6 @@ import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRotationalData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongeRotationalData extends AbstractSingleCatalogData<Rotation, RotationalData, ImmutableRotationalData> implements RotationalData {
 

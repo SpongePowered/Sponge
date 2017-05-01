@@ -34,7 +34,6 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
@@ -178,7 +177,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @Override
     public DataContainer toContainer() {
         final List<DataView> dataList = DataUtil.getSerializedImmutableManipulatorList(this.manipulators);
-        final DataContainer container = new MemoryDataContainer()
+        final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, getContentVersion())
             .set(Queries.WORLD_ID, this.worldUuid.toString())
             .set(DataQueries.ENTITY_TYPE, this.entityType.getId())

@@ -30,9 +30,9 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.world.extent.ArchetypeVolume;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -132,7 +132,7 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
             size = this.view.getBlockSize();
         }
         if (this.metadata == null) {
-            this.metadata = new MemoryDataContainer();
+            this.metadata = DataContainer.createNew();
         }
         for (Map.Entry<String, Object> entry : this.metaValues.entrySet()) {
             this.metadata.set(DataQuery.of(".", entry.getKey()), entry.getValue());

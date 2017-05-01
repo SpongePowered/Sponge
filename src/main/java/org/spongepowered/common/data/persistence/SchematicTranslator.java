@@ -37,7 +37,6 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -188,7 +187,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
 
     @Override
     public DataContainer translate(Schematic schematic) throws InvalidDataException {
-        DataContainer data = new MemoryDataContainer(DataView.SafetyMode.NO_DATA_CLONED);
+        DataContainer data = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
         addTo(schematic, data);
         return data;
     }

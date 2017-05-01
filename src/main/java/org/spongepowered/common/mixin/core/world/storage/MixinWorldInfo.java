@@ -44,7 +44,6 @@ import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -718,7 +717,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             return DataFormats.JSON.read(this.generatorOptions);
         } catch (JsonParseException | IOException ignored) {
         }
-        return new MemoryDataContainer().set(DataQueries.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
+        return DataContainer.createNew().set(DataQueries.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
     }
 
     @Override

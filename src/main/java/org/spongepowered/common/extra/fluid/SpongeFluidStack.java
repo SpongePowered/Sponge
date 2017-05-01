@@ -31,7 +31,6 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
@@ -182,7 +181,7 @@ public class SpongeFluidStack implements FluidStack {
 
     @Override
     public DataContainer toContainer() {
-        DataContainer container = new MemoryDataContainer()
+        DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
             .set(DataQueries.FLUID_TYPE, this.fluidType.getId())
             .set(DataQueries.FLUID_VOLUME, this.volume);

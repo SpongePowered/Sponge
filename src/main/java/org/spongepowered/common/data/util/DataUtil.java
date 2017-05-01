@@ -37,7 +37,6 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -128,7 +127,7 @@ public final class DataUtil {
         checkNotNull(manipulators);
         final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
         for (DataManipulator<?, ?> manipulator : manipulators) {
-            final DataContainer container = new MemoryDataContainer();
+            final DataContainer container = DataContainer.createNew();
             container.set(Queries.CONTENT_VERSION, DataVersions.Data.CURRENT_CUSTOM_DATA);
             container.set(DataQueries.DATA_ID, getRegistrationFor(manipulator).getId())
                 .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());
@@ -141,7 +140,7 @@ public final class DataUtil {
         checkNotNull(manipulators);
         final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
         for (ImmutableDataManipulator<?, ?> manipulator : manipulators) {
-            final DataContainer container = new MemoryDataContainer();
+            final DataContainer container = DataContainer.createNew();
             container.set(Queries.CONTENT_VERSION, DataVersions.Data.CURRENT_CUSTOM_DATA);
             container.set(DataQueries.DATA_ID, getRegistrationFor(manipulator).getId())
                 .set(DataQueries.INTERNAL_DATA, manipulator.toContainer());

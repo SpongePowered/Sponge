@@ -26,7 +26,6 @@ package org.spongepowered.common.data.manipulator.mutable;
 
 import com.google.common.collect.Multimap;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
@@ -62,7 +61,7 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
 
         @Override
         public DataContainer toContainer() {
-            return new MemoryDataContainer();
+            return DataContainer.createNew();
         }
 
         @Override

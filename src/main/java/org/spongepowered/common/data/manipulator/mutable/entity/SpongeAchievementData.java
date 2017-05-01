@@ -33,7 +33,6 @@ import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeAchievementData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleSetData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 import java.util.Set;
 

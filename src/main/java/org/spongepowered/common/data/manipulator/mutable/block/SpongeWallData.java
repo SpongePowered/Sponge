@@ -33,7 +33,6 @@ import org.spongepowered.api.data.type.WallType;
 import org.spongepowered.api.data.type.WallTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeWallData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongeWallData extends AbstractSingleCatalogData<WallType, WallData, ImmutableWallData> implements WallData {
 

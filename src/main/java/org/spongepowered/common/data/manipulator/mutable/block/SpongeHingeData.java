@@ -33,7 +33,6 @@ import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.Hinges;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeHingeData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 public class SpongeHingeData extends AbstractSingleCatalogData<Hinge, HingeData, ImmutableHingeData> implements HingeData {
 
