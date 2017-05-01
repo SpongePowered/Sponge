@@ -25,8 +25,13 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -35,6 +40,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 
@@ -112,6 +118,11 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
+    public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
+        return true;
+    }
+
+    @Override
     public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
         return phaseData.state != GenerationPhase.State.WORLD_SPAWNER_SPAWNING;
     }
@@ -124,7 +135,18 @@ public final class GenerationPhase extends TrackingPhase {
     @Override
     public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
             int chunkZ) {
-        return context.getCapturedEntities().add(entity);
+        final ArrayList<Entity> entities = new ArrayList<>(1);
+        entities.add(entity);
+        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(InternalSpawnTypes.CauseImpl.WORLD_SPAWNER,
+                entities);
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled() && event.getEntities().size() > 0) {
+            for (Entity item : event.getEntities()) {
+                ((IMixinWorldServer) item.getWorld()).forceSpawnEntity(item);
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -142,5 +164,7 @@ public final class GenerationPhase extends TrackingPhase {
     public boolean appendPreBlockProtectedCheck(Cause.Builder builder, IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker) {
         return false;
     }
+
+
 
 }
