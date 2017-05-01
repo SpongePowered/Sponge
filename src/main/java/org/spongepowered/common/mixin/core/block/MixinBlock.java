@@ -258,7 +258,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
             final CauseTracker causeTracker = CauseTracker.getInstance();
             final IPhaseState currentState = causeTracker.getCurrentState();
-            final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState);
+            final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState) && !currentState.getPhase().isWorldGeneration(currentState);
             if (shouldEnterBlockDropPhase) {
                 // TODO: Change source to LocatableBlock
                 PhaseContext context = PhaseContext.start()
@@ -289,7 +289,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         if (!worldIn.isRemote && worldIn instanceof IMixinWorldServer) {
             final CauseTracker causeTracker = CauseTracker.getInstance();
             final IPhaseState currentState = causeTracker.getCurrentState();
-            final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState);
+            final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState) && !currentState.getPhase().isWorldGeneration(currentState);
             if (shouldEnterBlockDropPhase) {
                 causeTracker.completePhase(BlockPhase.State.BLOCK_DROP_ITEMS);
             }
