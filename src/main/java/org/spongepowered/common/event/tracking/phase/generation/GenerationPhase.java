@@ -138,7 +138,7 @@ public final class GenerationPhase extends TrackingPhase {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
         final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(InternalSpawnTypes.CauseImpl.WORLD_SPAWNER,
-                entities);
+                entities, entity.getWorld());
         SpongeImpl.postEvent(event);
         if (!event.isCancelled() && event.getEntities().size() > 0) {
             for (Entity item : event.getEntities()) {
