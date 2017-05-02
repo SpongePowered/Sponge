@@ -316,6 +316,20 @@ public class SpongeCommonEventFactory {
             .map(block -> new Location<>((World) world, block.getX(), block.getY(), block.getZ()))
             .collect(Collectors.toCollection(() -> locations)); // SUPER efficient code!
 
+        // If the piston is extending and there are no blocks to destroy, add the offset location for protection purposes
+        if (extending && movedBlocks.getBlocksToDestroy().isEmpty()) {
+            final List<BlockPos> movedPositions = movedBlocks.getBlocksToMove();
+            BlockPos offsetPos;
+            // If there are no blocks to move, add the offset of piston
+            if (movedPositions.isEmpty()) {
+                offsetPos = pos.offset(direction);
+            } else {
+                // Add the offset of last block set to move
+                offsetPos = movedPositions.get(movedPositions.size() - 1).offset(direction);
+            }
+            locations.add(new Location<>((World) world, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ()));
+        }
+
         String namedCause = extending ? NamedCause.PISTON_EXTEND : NamedCause.PISTON_RETRACT;
         return SpongeCommonEventFactory.callChangeBlockEventPre(world, ImmutableList.copyOf(locations), NamedCause.of(namedCause, world), locatable).isCancelled();
     }
