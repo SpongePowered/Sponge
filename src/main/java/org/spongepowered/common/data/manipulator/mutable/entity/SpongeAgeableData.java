@@ -71,12 +71,6 @@ public class SpongeAgeableData extends AbstractData<AgeableData, ImmutableAgeabl
                 .build();
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public Value<Boolean> baby() {
-        return new SpongeValue<>(Keys.IS_BABY, !this.adult);
-    }
-
     @Override
     public Value<Boolean> adult() {
         return new SpongeValue<>(Keys.IS_ADULT, this.adult);

@@ -67,12 +67,6 @@ public class ImmutableSpongeAgeableData extends AbstractImmutableData<ImmutableA
         return this.ageValue;
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public ImmutableValue<Boolean> baby() {
-        return ImmutableSpongeValue.cachedOf(Keys.IS_BABY, false, !this.adult);
-    }
-
     @Override
     public ImmutableValue<Boolean> adult() {
         return ImmutableSpongeValue.cachedOf(Keys.IS_ADULT, true, this.adult);

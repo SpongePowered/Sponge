@@ -25,20 +25,11 @@
 package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.EntityDonkey;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Donkey;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 @SuppressWarnings("deprecation")
 @Mixin(EntityDonkey.class)
 public abstract class MixinEntityDonkey extends MixinAbstractHorse implements Donkey {
 
-    @Override
-    public Value<org.spongepowered.api.data.type.HorseVariant> variant() {
-        printDeprecatedHorseUsage("HorseVariant is no longer applicable to all horses! HorseVariants cannot be changed!");
-        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT, org.spongepowered.api.data.type.HorseVariants.DONKEY);
-    }
 }

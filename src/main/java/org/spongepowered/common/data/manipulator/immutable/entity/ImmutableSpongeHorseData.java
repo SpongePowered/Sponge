@@ -42,21 +42,17 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
 
     private final HorseColor horseColor;
     private final HorseStyle horseStyle;
-    private final org.spongepowered.api.data.type.HorseVariant horseVariant;
 
     private final ImmutableValue<HorseColor> colorValue;
     private final ImmutableValue<HorseStyle> styleValue;
-    private final ImmutableValue<org.spongepowered.api.data.type.HorseVariant> variantValue;
 
-    public ImmutableSpongeHorseData(HorseColor horseColor, HorseStyle horseStyle, org.spongepowered.api.data.type.HorseVariant horseVariant) {
+    public ImmutableSpongeHorseData(HorseColor horseColor, HorseStyle horseStyle) {
         super(ImmutableHorseData.class);
         this.horseColor = horseColor;
         this.horseStyle = horseStyle;
-        this.horseVariant = horseVariant;
 
         this.colorValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_COLOR, HorseColors.BLACK, this.horseColor);
         this.styleValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_STYLE, HorseStyles.NONE, this.horseStyle);
-        this.variantValue = ImmutableSpongeValue.cachedOf(Keys.HORSE_VARIANT, org.spongepowered.api.data.type.HorseVariants.HORSE, this.horseVariant);
 
         registerGetters();
     }
@@ -69,8 +65,6 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
         registerFieldGetter(Keys.HORSE_STYLE, ImmutableSpongeHorseData.this::getHorseStyle);
         registerKeyValue(Keys.HORSE_STYLE, ImmutableSpongeHorseData.this::style);
 
-        registerFieldGetter(Keys.HORSE_VARIANT, ImmutableSpongeHorseData.this::getHorseVariant);
-        registerKeyValue(Keys.HORSE_VARIANT, ImmutableSpongeHorseData.this::variant);
     }
 
     @Override
@@ -84,21 +78,15 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
     }
 
     @Override
-    public ImmutableValue<org.spongepowered.api.data.type.HorseVariant> variant() {
-        return this.variantValue;
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.HORSE_COLOR.getQuery(), this.horseColor.getId())
-                .set(Keys.HORSE_STYLE.getQuery(), this.horseStyle.getId())
-                .set(Keys.HORSE_VARIANT.getQuery(), this.horseVariant.getId());
+                .set(Keys.HORSE_STYLE.getQuery(), this.horseStyle.getId());
     }
 
     @Override
     public HorseData asMutable() {
-        return new SpongeHorseData(this.horseColor, this.horseStyle, this.horseVariant);
+        return new SpongeHorseData(this.horseColor, this.horseStyle);
     }
 
     private HorseColor getHorseColor() {
@@ -109,7 +97,4 @@ public class ImmutableSpongeHorseData extends AbstractImmutableData<ImmutableHor
         return this.horseStyle;
     }
 
-    private org.spongepowered.api.data.type.HorseVariant getHorseVariant() {
-        return this.horseVariant;
-    }
 }

@@ -45,29 +45,6 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 @Implements(@Interface(iface = Horse.class, prefix = "horse$", unique = true))
 public abstract class MixinAbstractHorse extends MixinEntityAnimal implements Horse {
 
-    @Override
-    public HorseData getHorseData() {
-        printDeprecatedHorseUsage("HorseData is not applicable to Horse, only Rideable Horse!");
-        return new SpongeHorseData(DataConstants.Horse.DEFAULT_COLOR, DataConstants.Horse.DEFAULT_STYLE, DataConstants.Horse.DEFAULT_VARIANT);
-    }
-
-    @Override
-    public Value<org.spongepowered.api.data.type.HorseVariant> variant() {
-        printDeprecatedHorseUsage("HorseVariant is no longer applicable to all horses! HorseVariants cannot be changed!");
-        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT);
-    }
-
-    @Override
-    public Value<HorseStyle> style() {
-        printDeprecatedHorseUsage("HorseStyle is only applicable to RideableHorses!");
-        return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Horse.DEFAULT_STYLE);
-    }
-
-    @Override
-    public Value<HorseColor> color() {
-        printDeprecatedHorseUsage("HorseColor is only applicable to RideableHorses!");
-        return new SpongeValue<>(Keys.HORSE_COLOR, DataConstants.Horse.DEFAULT_COLOR);
-    }
 
     @Unique
     protected void printDeprecatedHorseUsage(String specificSubHeader) {

@@ -22,29 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.entity;
+package org.spongepowered.common.mixin.api.data;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeElderData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.common.data.MemoryDataContainer;
 
-@SuppressWarnings("deprecation")
-public class SpongeElderData extends AbstractBooleanData<org.spongepowered.api.data.manipulator.mutable.entity.ElderData,
-    org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData>
-    implements org.spongepowered.api.data.manipulator.mutable.entity.ElderData {
+@Mixin(value = DataContainer.class, remap = false)
+public interface MixinDataContainer {
 
-    public SpongeElderData() {
-        this(false);
+    /**
+     * @author gabizou - May 1st, 2017
+     * @reason Short hand implementation, avoids having to use the data manager.
+     *
+     * @return The new data container
+     */
+    @Overwrite
+    static DataContainer createNew() {
+        return new MemoryDataContainer();
     }
 
-    public SpongeElderData(boolean value) {
-        super(org.spongepowered.api.data.manipulator.mutable.entity.ElderData.class, value,
-            Keys.ELDER_GUARDIAN, ImmutableSpongeElderData.class, false);
-    }
-
-    @Override
-    public Value<Boolean> elder() {
-        return getValueGetter();
+    /**
+     * @author gabizou - May 1st, 2017
+     * @reason Short hand implementation, avoids having to use the data manager.
+     *
+     * @param safety The safety to use
+     * @return The new data container
+     */
+    @Overwrite
+    static DataContainer createNew(DataView.SafetyMode safety) {
+        return new MemoryDataContainer(safety);
     }
 }

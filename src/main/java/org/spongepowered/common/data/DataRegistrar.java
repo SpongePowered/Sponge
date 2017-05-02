@@ -257,9 +257,6 @@ public class DataRegistrar {
         DataUtil.registerDualProcessor(SlimeData.class, SpongeSlimeData.class, ImmutableSlimeData.class, ImmutableSpongeSlimeData.class,
                 new SlimeDataProcessor());
 
-        DataUtil.registerDataProcessorAndImpl(ZombieData.class, SpongeZombieData.class, ImmutableZombieData.class,
-                ImmutableSpongeZombieData.class, new ZombieDataProcessor());
-
         DataUtil.registerDualProcessor(PlayingData.class, SpongePlayingData.class, ImmutablePlayingData.class,
                 ImmutableSpongePlayingData.class, new PlayingDataProcessor());
 
@@ -280,9 +277,6 @@ public class DataRegistrar {
 
         DataUtil.registerDualProcessor(WetData.class, SpongeWetData.class, ImmutableWetData.class, ImmutableSpongeWetData.class,
                 new WolfWetDataProcessor());
-
-        DataUtil.registerDualProcessor(ElderData.class, SpongeElderData.class, ImmutableElderData.class, ImmutableSpongeElderData.class,
-                new ElderDataProcessor());
 
         DataUtil.registerDualProcessor(AgentData.class, SpongeAgentData.class, ImmutableAgentData.class,
                 ImmutableSpongeAgentData.class, new AgentDataProcessor());
@@ -310,9 +304,6 @@ public class DataRegistrar {
 
         DataUtil.registerDataProcessorAndImpl(FallingBlockData.class, SpongeFallingBlockData.class, ImmutableFallingBlockData.class,
                 ImmutableSpongeFallingBlockData.class, new FallingBlockDataProcessor());
-
-        DataUtil.registerDualProcessor(SkeletonData.class, SpongeSkeletonData.class, ImmutableSkeletonData.class,
-                ImmutableSpongeSkeletonData.class, new SkeletonDataProcessor());
 
         DataUtil.registerDualProcessor(RabbitData.class, SpongeRabbitData.class, ImmutableRabbitData.class,
                 ImmutableSpongeRabbitData.class, new RabbitDataProcessor());
@@ -723,7 +714,6 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.REMAINING_AIR, new RemainingAirValueProcessor());
         DataUtil.registerValueProcessor(Keys.HORSE_COLOR, new HorseColorValueProcessor());
         DataUtil.registerValueProcessor(Keys.HORSE_STYLE, new HorseStyleValueProcessor());
-        DataUtil.registerValueProcessor(Keys.HORSE_VARIANT, new HorseVariantValueProcessor());
         DataUtil.registerValueProcessor(Keys.EXPERIENCE_LEVEL, new ExperienceLevelValueProcessor());
         DataUtil.registerValueProcessor(Keys.TOTAL_EXPERIENCE, new TotalExperienceValueProcessor());
         DataUtil.registerValueProcessor(Keys.EXPERIENCE_SINCE_LEVEL, new ExperienceSinceLevelValueProcessor());
@@ -790,8 +780,6 @@ public class DataRegistrar {
         DataUtil.registerValueProcessor(Keys.ARMOR_STAND_MARKER, new ArmorStandMarkerValueProcessor());
         DataUtil.registerValueProcessor(Keys.ARMOR_STAND_IS_SMALL, new ArmorStandSmallValueProcessor());
         DataUtil.registerValueProcessor(Keys.ARMOR_STAND_HAS_ARMS, new ArmorStandArmsValueProcessor());
-        DataUtil.registerValueProcessor(Keys.ZOMBIE_TYPE, new ZombieTypeValueProcessor());
-        DataUtil.registerValueProcessor(Keys.VILLAGER_ZOMBIE_PROFESSION, new VillagerZombieProfessionValueProcessor());
         DataUtil.registerValueProcessor(Keys.PICKUP_DELAY, new PickupDelayValueProcessor());
         DataUtil.registerValueProcessor(Keys.INFINITE_PICKUP_DELAY, new InfinitePickupDelayValueProcessor());
         DataUtil.registerValueProcessor(Keys.DESPAWN_DELAY, new DespawnDelayValueProcessor());

@@ -206,8 +206,6 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("horse_style", makeSingleKey(TypeTokens.HORSE_STYLE_TOKEN, TypeTokens.HORSE_STYLE_VALUE_TOKEN, of("HorseStyle"), "sponge:horse_style", "Horse Style"));
 
-        this.fieldMap.put("horse_variant", makeSingleKey(TypeTokens.HORSE_VARIANT_TOKEN, TypeTokens.HORSE_VARIANT_VALUE_TOKEN, of("HorseVariant"), "sponge:horse_variant", "Horse Variant"));
-
         this.fieldMap.put("item_lore", makeListKey(TypeTokens.LIST_TEXT_TOKEN, TypeTokens.LIST_TEXT_VALUE_TOKEN, of("ItemLore"), "sponge:item_lore", "Item Lore"));
 
         this.fieldMap.put("book_pages", makeListKey(TypeTokens.LIST_TEXT_TOKEN, TypeTokens.LIST_TEXT_VALUE_TOKEN, of("BookPages"), "sponge:book_pages", "Book Pages"));
@@ -377,8 +375,6 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
 
         this.fieldMap.put("item_blockstate", makeSingleKey(TypeTokens.BLOCK_TOKEN, TypeTokens.BLOCK_VALUE_TOKEN, of("ItemBlockState"), "sponge:item_block_state", "Item Block State"));
 
-        this.fieldMap.put("skeleton_type", makeSingleKey(TypeTokens.SKELETON_TOKEN, TypeTokens.SKELETON_VALUE_TOKEN, of("SkeletonType"), "sponge:skeleton_type", "Skeleton Type"));
-
         this.fieldMap.put("ocelot_type", makeSingleKey(TypeTokens.OCELOT_TOKEN, TypeTokens.OCELOT_VALUE_TOKEN, of("OcelotType"), "sponge:ocelot_type", "Ocelot Type"));
 
         this.fieldMap.put("rabbit_type", makeSingleKey(TypeTokens.RABBIT_TOKEN, TypeTokens.RABBIT_VALUE_TOKEN, of("RabbitType"), "sponge:rabbit_type", "Rabbit Type"));
@@ -498,8 +494,6 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("invulnerability_ticks", makeSingleKey(TypeTokens.INTEGER_TOKEN, TypeTokens.BOUNDED_INTEGER_VALUE_TOKEN, of("HurtTime"), "sponge:invulnerability_ticks", "Invulnerability Ticks"));
 
         this.fieldMap.put("has_gravity", makeSingleKey(TypeTokens.BOOLEAN_TOKEN, TypeTokens.BOOLEAN_VALUE_TOKEN, of("HasGravity"), "sponge:has_gravity", "Has Gravity"));
-
-        this.fieldMap.put("zombie_type", makeSingleKey(TypeTokens.ZOMBIE_TYPE_TOKEN, TypeTokens.ZOMBIE_TYPE_VALUE_TOKEN, of("ZombieType"), "sponge:zombie_type", "Zombie Type"));
 
         this.fieldMap.put("achievements", makeSingleKey(TypeTokens.ACHIEVEMENT_SET_TOKEN, TypeTokens.ACHIEVEMENT_SET_VALUE_TOKEN, of("Achievements"), "sponge:achievements", "Achievements"));
 

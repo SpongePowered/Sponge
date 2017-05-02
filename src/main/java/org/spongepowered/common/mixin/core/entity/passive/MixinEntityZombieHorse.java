@@ -25,24 +25,14 @@
 package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.EntityZombieHorse;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.ZombieHorse;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 @SuppressWarnings("deprecation")
 @Mixin(EntityZombieHorse.class)
 @Implements(@Interface(iface = ZombieHorse.class, prefix = "zombie$", unique = true))
 public abstract class MixinEntityZombieHorse extends MixinAbstractHorse implements ZombieHorse {
-
-    @Override
-    public Value<org.spongepowered.api.data.type.HorseVariant> variant() {
-        printDeprecatedHorseUsage("HorseVariant is no longer applicable to all horses! HorseVariants cannot be changed!");
-        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT, org.spongepowered.api.data.type.HorseVariants.UNDEAD_HORSE);
-    }
 
 }

@@ -253,10 +253,6 @@ public final class EntityUtil {
         return entityPlayerMP;
     }
 
-    /*public static boolean isNative(org.spongepowered.api.data.type.ZombieType type, @Nullable Profession profession) {
-        // No profession means native, husk means native, otherwise check the map (forge uses NORMAL + Profession for its types)
-        return profession == null || type == ZombieTypes.HUSK || ZOMBIE_TYPE_MAP.containsKey(profession);
-    }*/
 
     public static boolean isEntityDead(org.spongepowered.api.entity.Entity entity) {
         return isEntityDead((net.minecraft.entity.Entity) entity);

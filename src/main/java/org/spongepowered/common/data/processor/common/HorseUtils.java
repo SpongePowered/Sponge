@@ -61,11 +61,4 @@ public class HorseUtils {
         return SpongeImpl.getRegistry().getType(HorseStyle.class, getData(container, Keys.HORSE_STYLE, String.class)).get();
     }
 
-    public static org.spongepowered.api.data.type.HorseVariant getHorseVariant(Class<? extends AbstractHorse> type) {
-        return SpongeEntityConstants.HORSE_VARIANT_IDMAP.get(type);
-    }
-
-    public static org.spongepowered.api.data.type.HorseVariant getHorseVariant(DataView container) {
-        return SpongeImpl.getRegistry().getType(org.spongepowered.api.data.type.HorseVariant.class, getData(container, Keys.HORSE_VARIANT, String.class)).get();
-    }
 }

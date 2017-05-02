@@ -25,14 +25,9 @@
 package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.monster.EntityZombie;
-import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.monster.Zombie;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeZombieData;
-
-import java.util.List;
-import java.util.Optional;
 
 @SuppressWarnings("deprecation")
 @Mixin(EntityZombie.class)
@@ -46,14 +41,5 @@ public abstract class MixinEntityZombie extends MixinEntityMob implements Zombie
         this.setChildSize(this.isChild());
     }
 
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getZombieData());
-    }
 
-    @Override
-    public org.spongepowered.api.data.manipulator.mutable.entity.ZombieData getZombieData() {
-        return new SpongeZombieData(org.spongepowered.api.data.type.ZombieTypes.VILLAGER, Optional.empty());
-    }
 }

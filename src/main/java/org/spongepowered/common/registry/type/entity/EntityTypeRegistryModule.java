@@ -226,7 +226,6 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("minecraft:ozelot", this.entityTypeMappings.get("minecraft:ocelot"));
 
         RegistryHelper.mapFields(HorseColors.class, SpongeEntityConstants.HORSE_COLORS);
-        RegistryHelper.mapFields(org.spongepowered.api.data.type.HorseVariants.class, SpongeEntityConstants.HORSE_VARIANTS);
         RegistryHelper.mapFields(HorseStyles.class, SpongeEntityConstants.HORSE_STYLES);
         RegistryHelper.mapFields(OcelotTypes.class, SpongeEntityConstants.OCELOT_TYPES);
         RegistryHelper.mapFields(RabbitTypes.class, SpongeEntityConstants.RABBIT_TYPES);

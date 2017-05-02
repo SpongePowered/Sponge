@@ -49,12 +49,6 @@ public abstract class MixinEntityLlama extends MixinAbstractHorse implements Lla
     @Shadow public abstract void setVariant(int p_190710_1_);
 
     @Override
-    public Value<org.spongepowered.api.data.type.HorseVariant> variant() {
-        printDeprecatedHorseUsage("HorseVariant is no longer applicable to all horses! HorseVariants cannot be changed!");
-        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT, org.spongepowered.api.data.type.HorseVariants.LLAMA);
-    }
-
-    @Override
     public Value<LlamaVariant> llamaVariant() {
         final int i = getVariant();
         final LlamaVariant variant;

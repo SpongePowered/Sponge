@@ -40,23 +40,20 @@ import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-@SuppressWarnings("deprecation")
 public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData> implements HorseData {
 
     private HorseColor horseColor;
     private HorseStyle horseStyle;
-    private org.spongepowered.api.data.type.HorseVariant horseVariant;
 
-    public SpongeHorseData(HorseColor horseColor, HorseStyle horseStyle, org.spongepowered.api.data.type.HorseVariant horseVariant) {
+    public SpongeHorseData(HorseColor horseColor, HorseStyle horseStyle) {
         super(HorseData.class);
         this.horseColor = checkNotNull(horseColor, "The Horse Color was null!");
         this.horseStyle = checkNotNull(horseStyle, "The Horse Style was null!");
-        this.horseVariant = checkNotNull(horseVariant, "The Horse Variant was null!");
         registerGettersAndSetters();
     }
 
     public SpongeHorseData() {
-        this(HorseColors.WHITE, HorseStyles.NONE, org.spongepowered.api.data.type.HorseVariants.HORSE);
+        this(HorseColors.WHITE, HorseStyles.NONE);
     }
 
     @Override
@@ -69,9 +66,6 @@ public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData>
         registerFieldSetter(Keys.HORSE_STYLE, this::setHorseStyle);
         registerKeyValue(Keys.HORSE_STYLE, SpongeHorseData.this::style);
 
-        registerFieldGetter(Keys.HORSE_VARIANT, SpongeHorseData.this::getHorseVariant);
-        registerFieldSetter(Keys.HORSE_VARIANT, SpongeHorseData.this::setHorseVariant);
-        registerKeyValue(Keys.HORSE_VARIANT, SpongeHorseData.this::variant);
     }
 
     @Override
@@ -85,26 +79,20 @@ public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData>
     }
 
     @Override
-    public Value<org.spongepowered.api.data.type.HorseVariant> variant() {
-        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT, this.horseVariant);
-    }
-
-    @Override
     public HorseData copy() {
-        return new SpongeHorseData(this.horseColor, this.horseStyle, this.horseVariant);
+        return new SpongeHorseData(this.horseColor, this.horseStyle);
     }
 
     @Override
     public ImmutableHorseData asImmutable() {
-        return new ImmutableSpongeHorseData(this.horseColor, this.horseStyle, this.horseVariant);
+        return new ImmutableSpongeHorseData(this.horseColor, this.horseStyle);
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
                 .set(Keys.HORSE_COLOR.getQuery(), this.horseColor.getId())
-                .set(Keys.HORSE_STYLE.getQuery(), this.horseStyle.getId())
-                .set(Keys.HORSE_VARIANT.getQuery(), this.horseVariant.getId());
+                .set(Keys.HORSE_STYLE.getQuery(), this.horseStyle.getId());
 
     }
 
@@ -124,11 +112,4 @@ public class SpongeHorseData extends AbstractData<HorseData, ImmutableHorseData>
         this.horseStyle = horseStyle;
     }
 
-    private org.spongepowered.api.data.type.HorseVariant getHorseVariant() {
-        return this.horseVariant;
-    }
-
-    private void setHorseVariant(org.spongepowered.api.data.type.HorseVariant horseVariant) {
-        this.horseVariant = horseVariant;
-    }
 }

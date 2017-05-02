@@ -49,18 +49,6 @@ import java.util.List;
 public abstract class MixinEntityHorse extends MixinAbstractHorse implements RideableHorse {
 
     @Override
-    public Translation getTranslation() {
-        final HorseData horseData = getHorseData();
-        final org.spongepowered.api.data.type.HorseVariant horseVariant = horseData.variant().get();
-        return horseVariant.getTranslation();
-    }
-
-    @Override
-    public Value<org.spongepowered.api.data.type.HorseVariant> variant() {
-        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT);
-    }
-
-    @Override
     public Value<HorseStyle> style() {
         return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Horse.DEFAULT_STYLE, HorseUtils.getHorseStyle((EntityHorse) (Object) this));
     }
@@ -72,8 +60,7 @@ public abstract class MixinEntityHorse extends MixinAbstractHorse implements Rid
 
     @Override
     public HorseData getHorseData() {
-        return new SpongeHorseData(HorseUtils.getHorseColor((EntityHorse) (Object) this), HorseUtils.getHorseStyle((EntityHorse) (Object) this),
-            org.spongepowered.api.data.type.HorseVariants.HORSE);
+        return new SpongeHorseData(HorseUtils.getHorseColor((EntityHorse) (Object) this), HorseUtils.getHorseStyle((EntityHorse) (Object) this));
     }
 
     @Override

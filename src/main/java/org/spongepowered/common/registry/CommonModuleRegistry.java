@@ -440,9 +440,7 @@ public final class CommonModuleRegistry {
             .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
             .registerModule(DismountType.class, new DismountTypeRegistryModule())
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
-            .registerModule(org.spongepowered.api.data.type.ZombieType.class, ZombieTypeRegistryModule.getInstance())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
-            .registerModule(org.spongepowered.api.data.type.SkeletonType.class, new SkeletonTypeRegistryModule())
             .registerModule(StructureMode.class, new StructureModeRegistryModule())
 
             // Miscellaneous Registries

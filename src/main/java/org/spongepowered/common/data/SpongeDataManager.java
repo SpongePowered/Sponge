@@ -37,6 +37,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DataSerializable;
@@ -212,53 +213,6 @@ public final class SpongeDataManager implements DataManager {
         SpongeManipulatorRegistry.getInstance().bake();
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
-    @Override
-    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void register(Class<? extends T> manipulatorClass,
-            Class<? extends I> immutableManipulatorClass, DataManipulatorBuilder<T, I> builder) {
-        checkState(allowRegistrations, "Registrations are no longer allowed!");
-        final Optional<PluginContainer> activeContainer = CauseTracker.getInstance().getCurrentContext().getActiveContainer();
-        if (!activeContainer.isPresent()) {
-            new PrettyPrinter(60).centre().add("Unknown Plugin registering custom data!").hr()
-                .addWrapped("Sponge's Custom Data system must know what plugin container is registering"
-                            + "what custom data to assign a \"legacy\" id for the custom data! It is not"
-                            + "recommended for developers to continue using the old registration methods"
-                            + "as they will be removed in future API versions! Please notify the developer"
-                            + "of the offending plugin to update!")
-                .addWrapped("Since the plugin id cannot be determined, custom data will not be registered! The following custom data was attempted")
-                .add("%s : %s", "DataManipulator", manipulatorClass.getName())
-                .add("%s : %s", "ImmutableManipulator", immutableManipulatorClass.getName())
-                .add("%s : %s", "ManipulatorBuilder", builder.getClass().getName())
-                .add(new Exception())
-                .trace();
-            return;
-        }
-        SpongeImpl.getLogger().log(Level.WARN, "Detected $1 being registered with the old way! Please notify the developer", builder);
-        final String manipulatorSimpleNamePriorToProcessing = manipulatorClass.getSimpleName().replace("data", "").replace("Data", "");
-        final String generatedManipulatorId = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, manipulatorSimpleNamePriorToProcessing);
-        final PluginContainer pluginContainer = activeContainer.get();
-        final String finalId = pluginContainer.getId() + ":" + generatedManipulatorId;
-        // Print the warning, this is VERY important and should NEVER be ignored as the plugin developer must be made aware of this
-        new PrettyPrinter(60).add("Legacy Data Registration").centre().hr()
-            .addWrapped("Sponge's Custom Data Registration is changing! Plugin developers are strongly advised to update their data registrations!"
-                        + "However, because of this, Sponge is automatically applying an upgrade policy for their old registrations that will persist"
-                        + "until an unknown future time. Likely for the next few Minecraft versions.").hr()
-            .add("%s: %s", "Plugin registering custom data", pluginContainer.getId())
-            .add("%s: %s", "Custom Data Class", manipulatorClass.getSimpleName())
-            .add("%s: %s", "Generated Manipulator Id", finalId)
-            .addWrapped("The generated Id is already registered with Sponge, and is likely advisable for the plugin developer to utilize"
-                        + "the id for future registrations.")
-            .trace();
-        DataRegistration<T, I> registration = DataRegistration.<T, I>builder()
-            .dataClass((Class<T>) manipulatorClass)
-            .immutableClass((Class<I>) immutableManipulatorClass)
-            .manipulatorId(finalId)
-            .builder(builder)
-            .buildAndRegister(pluginContainer);
-        SpongeManipulatorRegistry.getInstance().registerLegacyId(registration);
-    }
-
-
     @Override
     public void registerLegacyManipulatorIds(String legacyId, DataRegistration<?, ?> registration) {
         checkState(allowRegistrations);
@@ -316,6 +270,16 @@ public final class SpongeDataManager implements DataManager {
     @Override
     public Collection<Class<? extends DataManipulator<?, ?>>> getAllRegistrationsFor(PluginContainer container) {
         return SpongeManipulatorRegistry.getInstance().getRegistrations(container);
+    }
+
+    @Override
+    public DataContainer createContainer() {
+        return new MemoryDataContainer();
+    }
+
+    @Override
+    public DataContainer createContainer(DataView.SafetyMode safety) {
+        return new MemoryDataContainer(safety);
     }
 
     public Optional<DataManipulatorBuilder<?, ?>> getWildManipulatorBuilder(Class<? extends DataManipulator<?, ?>> manipulatorClass) {

@@ -36,7 +36,6 @@ import org.spongepowered.api.entity.living.monster.Guardian;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElderData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.List;
@@ -47,23 +46,6 @@ public abstract class MixinEntityGuardian extends MixinEntityMob implements Guar
 
     @Shadow @Final private static DataParameter<Integer> TARGET_ENTITY;
     @Shadow private void setTargetedEntity(int entityId) { } // setTargetedEntity
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public org.spongepowered.api.data.manipulator.mutable.entity.ElderData getElderData() {
-        return new SpongeElderData((Object) this instanceof EntityElderGuardian);
-    }
-
-    @Override
-    public Value<Boolean> elder() {
-        return new SpongeValue<>(Keys.ELDER_GUARDIAN, false, (Object) this instanceof EntityElderGuardian);
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getElderData());
-    }
 
     @Override
     public Optional<Living> getBeamTarget() {
