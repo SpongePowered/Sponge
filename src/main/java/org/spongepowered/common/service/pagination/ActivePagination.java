@@ -197,7 +197,7 @@ abstract class ActivePagination {
             }
             ret.append(Text.of("»"));
         }
-        if (this.title != null) {
+        if (this.padding != null) {
             ret.color(this.padding.getColor());
             ret.style(this.padding.getStyle());
         }
