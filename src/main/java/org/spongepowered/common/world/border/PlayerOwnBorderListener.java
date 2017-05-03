@@ -29,7 +29,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
+import org.spongepowered.api.entity.living.player.Player;
 
 public class PlayerOwnBorderListener implements IBorderListener {
 
@@ -76,7 +76,7 @@ public class PlayerOwnBorderListener implements IBorderListener {
      * This method is for cleaning up the player reference once they disconnect.
      */
     public void onPlayerDisconnect() {
-        ((IMixinEntityPlayerMP) this.player).getWorldBorder().ifPresent(border -> ((WorldBorder) border).listeners.remove(this));
+        ((Player) this.player).getWorldBorder().ifPresent(border -> ((WorldBorder) border).listeners.remove(this));
     }
 
     private void sendBorderPacket(Packet<?> packet) {

@@ -65,8 +65,6 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
 
     void refreshExp();
 
-    Optional<WorldBorder> getWorldBorder();
-
     PlayerOwnBorderListener getWorldBorderListener();
 
 }

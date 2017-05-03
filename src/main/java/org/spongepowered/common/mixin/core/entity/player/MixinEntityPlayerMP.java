@@ -230,7 +230,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Nullable private Vector3d velocityOverride = null;
 
     @Nullable private WorldBorder worldBorder;
-    public final PlayerOwnBorderListener borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
+    private final PlayerOwnBorderListener borderListener = new PlayerOwnBorderListener((EntityPlayerMP) (Object) this);
 
     @Inject(method = "removeEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V"))
