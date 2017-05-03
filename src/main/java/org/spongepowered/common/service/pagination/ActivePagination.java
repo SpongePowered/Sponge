@@ -199,7 +199,9 @@ abstract class ActivePagination {
         }
         if (this.padding != null) {
             ret.color(this.padding.getColor());
-            ret.style(this.padding.getStyle());
+        }
+        if (this.title != null) {
+            ret.style(this.title.getStyle());
         }
         return ret.build();
     }
