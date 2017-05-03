@@ -932,9 +932,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             }
             this.worldBorder = border;
             if (this.worldBorder != null) {
-                if (!((net.minecraft.world.border.WorldBorder) this.worldBorder).listeners.contains(this.borderListener)) {
-                    ((net.minecraft.world.border.WorldBorder) this.worldBorder).addListener(this.borderListener);
-                }
+                ((net.minecraft.world.border.WorldBorder) this.worldBorder).addListener(this.borderListener);
                 this.connection.sendPacket(new SPacketWorldBorder((net.minecraft.world.border.WorldBorder) (Object) this.worldBorder, SPacketWorldBorder.Action.INITIALIZE));
             } else { //unset the border if null
                 this.connection.sendPacket(new SPacketWorldBorder(this.world.getWorldBorder(), SPacketWorldBorder.Action.INITIALIZE));
