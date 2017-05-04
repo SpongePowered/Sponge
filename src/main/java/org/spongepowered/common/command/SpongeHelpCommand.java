@@ -77,7 +77,8 @@ public class SpongeHelpCommand {
                 }
 
                 PaginationList.Builder builder = SpongeImpl.getGame().getServiceManager().provide(PaginationService.class).get().builder();
-                builder.title(Text.builder("Available commands:").color(TextColors.DARK_GREEN).build());
+                builder.title(Text.of(TextColors.DARK_GREEN, "Available commands:"));
+                builder.padding(Text.of(TextColors.DARK_GREEN, "="));
 
                 TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);
                 commands.addAll(Collections2.filter(SpongeImpl.getGame().getCommandManager().getAll().values(), input -> input.getCallable()
