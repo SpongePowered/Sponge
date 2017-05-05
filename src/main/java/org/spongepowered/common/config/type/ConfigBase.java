@@ -56,7 +56,8 @@ public abstract class ConfigBase {
     private GeneralCategory general = new GeneralCategory();
     @Setting
     private LoggingCategory logging = new LoggingCategory();
-    @Setting
+    @Setting(value = "spawner", comment = "Used to control spawn limits around players.\n"
+            + "Note: The radius uses the lower value of mob spawn range and server's view distance.")
     private SpawnerCategory spawner = new SpawnerCategory();
     @Setting
     protected WorldCategory world = new WorldCategory();

@@ -301,7 +301,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Inject(method = "getCollisionBoxes", at = @At("HEAD"), cancellable = true)
     public void onGetCollisionBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis,
             CallbackInfoReturnable<List> cir) {
-        if (this.isRemote) {
+        if (this.isRemote || entity == null) {
             return;
         }
         if (entity.worldObj != null && !entity.worldObj.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {

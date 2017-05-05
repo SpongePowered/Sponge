@@ -30,21 +30,21 @@ import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
 @ConfigSerializable
 public class SpawnerCategory extends ConfigCategory {
 
-    @Setting(value = "spawn-limit-ambient")
+    @Setting(value = "spawn-limit-ambient", comment = "The number of ambients the spawner can potentially spawn around a player.")
     private int spawnLimitAmbient = 15;
-    @Setting(value = "spawn-limit-animal")
+    @Setting(value = "spawn-limit-animal", comment = "The number of animals the spawner can potentially spawn around a player.")
     private int spawnLimitAnimal = 15;
-    @Setting(value = "spawn-limit-aquatic")
+    @Setting(value = "spawn-limit-aquatic", comment = "The number of aquatics the spawner can potentially spawn around a player.")
     private int spawnLimitAquatic = 5;
-    @Setting(value = "spawn-limit-monster")
+    @Setting(value = "spawn-limit-monster", comment = "The number of monsters the spawner can potentially spawn around a player.")
     private int spawnLimitMonster = 70;
-    @Setting(value = "tick-rate-ambient")
+    @Setting(value = "tick-rate-ambient", comment = "The ambient spawning tick rate. Default: 400")
     private int tickRateAmbient = 400;
-    @Setting(value = "tick-rate-animal")
+    @Setting(value = "tick-rate-animal", comment = "The animal spawning tick rate. Default: 400")
     private int tickRateAnimal = 400;
-    @Setting(value = "tick-rate-aquatic")
+    @Setting(value = "tick-rate-aquatic", comment = "The aquatic spawning tick rate. Default: 400")
     private int tickRateAquatic = 400;
-    @Setting(value = "tick-rate-monster")
+    @Setting(value = "tick-rate-monster", comment = "The monster spawning tick rate. Default: 1")
     private int tickRateMonster = 1;
 
     public SpawnerCategory() {
