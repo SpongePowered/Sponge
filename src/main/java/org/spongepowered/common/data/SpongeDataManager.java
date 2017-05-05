@@ -245,6 +245,8 @@ public final class SpongeDataManager implements DataManager {
                         + "until an unknown future time. Likely for the next few Minecraft versions.").hr()
             .add("%s: %s", "Plugin registering custom data", pluginContainer.getId())
             .add("%s: %s", "Custom Data Class", manipulatorClass.getSimpleName())
+            .add("%s: %s", "Generated id to use for registration", generatedManipulatorId)
+            .addWrapped(60, "This generated id is what the developer should use provided their plugin id has not changed.")
             .add("%s: %s", "Generated Manipulator Id", finalId)
             .addWrapped("The generated Id is already registered with Sponge, and is likely advisable for the plugin developer to utilize"
                         + "the id for future registrations.")
@@ -252,7 +254,7 @@ public final class SpongeDataManager implements DataManager {
         DataRegistration<T, I> registration = DataRegistration.<T, I>builder()
             .dataClass((Class<T>) manipulatorClass)
             .immutableClass((Class<I>) immutableManipulatorClass)
-            .manipulatorId(finalId)
+            .manipulatorId(generatedManipulatorId)
             .builder(builder)
             .buildAndRegister(pluginContainer);
         SpongeManipulatorRegistry.getInstance().registerLegacyId(registration);
