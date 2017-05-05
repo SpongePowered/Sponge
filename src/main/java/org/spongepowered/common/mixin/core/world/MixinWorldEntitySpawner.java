@@ -47,10 +47,8 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -88,8 +86,6 @@ public abstract class MixinWorldEntitySpawner {
     private static EntityType spawnerEntityType;
     private List<Chunk> eligibleSpawnChunks = new ArrayList<>();
 
-    @Shadow @Final private static int MOB_COUNT_DIV;
-
     /**
      * @author blood - February 18th, 2017
      * @reason Refactor entire method for optimizations and spawn limits.
@@ -125,6 +121,12 @@ public abstract class MixinWorldEntitySpawner {
         spongeWorld.getTimingsHandler().mobSpawn.startTiming();
 
         int chunkSpawnCandidates = 0;
+        final int mobSpawnRange = Math.min(((IMixinWorldServer) worldServerIn).getActiveConfig().getConfig().getWorld().getMobSpawnRange(),
+                SpongeImpl.getServer().getPlayerList().getViewDistance());
+        // Vanilla uses a div count of 289 (17x17) which assumes the view distance is 8.
+        // Since we allow for custom ranges, we need to adjust the div count based on the 
+        // mob spawn range set by server.
+        final int MOB_SPAWN_COUNT_DIV = (2 * mobSpawnRange + 1)*(2 * mobSpawnRange + 1);
 
         for (EntityPlayer entityplayer : worldServerIn.playerEntities) {
             // We treat players who do not affect spawning as "spectators"
@@ -134,8 +136,6 @@ public abstract class MixinWorldEntitySpawner {
 
             int playerPosX = MathHelper.floor(entityplayer.posX / 16.0D);
             int playerPosZ = MathHelper.floor(entityplayer.posZ / 16.0D);
-            int mobSpawnRange = Math.min(((IMixinWorldServer) worldServerIn).getActiveConfig().getConfig().getWorld().getMobSpawnRange(),
-                        SpongeImpl.getServer().getPlayerList().getViewDistance());
 
             for (int i = -mobSpawnRange; i <= mobSpawnRange; ++i) {
                 for (int j = -mobSpawnRange; j <= mobSpawnRange; ++j) {
@@ -198,13 +198,13 @@ public abstract class MixinWorldEntitySpawner {
 
             if ((!enumCreatureType.getPeacefulCreature() || spawnPeacefulMobs) && (enumCreatureType.getPeacefulCreature() || spawnHostileMobs)) {
                 int entityCount = SpongeImplHooks.countEntities(worldServerIn, enumCreatureType, true);
-                int maxCount = limit * chunkSpawnCandidates / MOB_COUNT_DIV;
+                int maxCount = limit * chunkSpawnCandidates / MOB_SPAWN_COUNT_DIV;
                 if (entityCount > maxCount) {
                     continue labelOuterLoop;
                 }
 
                 chunkIterator = this.eligibleSpawnChunks.iterator();
-                int mobLimit = (limit * chunkSpawnCandidates / 256) - entityCount + 1;
+                int mobLimit = maxCount - entityCount + 1;
                 labelChunkStart:
                 while (chunkIterator.hasNext() && mobLimit > 0) {
                     final Chunk chunk = chunkIterator.next();
