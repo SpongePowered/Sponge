@@ -25,12 +25,16 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityEnderPearl;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.EnderPearl;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.mixin.core.entity.projectile.MixinEntityThrowable;
 
 @Mixin(EntityEnderPearl.class)
@@ -43,6 +47,20 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable impleme
         )
     private float onAttackEntityFrom(float damage) {
         return (float) this.damageAmount;
+    }
+
+    @Redirect(method = "onImpact", at = @At(value = "INVOKE", args="log=true", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isPlayerSleeping()Z"))
+    private boolean onEnderPearlImpact(EntityPlayerMP player) {
+        if (player.isPlayerSleeping()) {
+            return true;
+        }
+
+        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(player, this.getLocation());
+        if (event.isCancelled()) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
