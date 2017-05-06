@@ -48,6 +48,7 @@ import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.client.CPacketVehicleMove;
+import net.minecraft.network.play.server.SPacketMoveVehicle;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
@@ -110,7 +111,6 @@ import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.WorldManager;
 
 import java.net.InetSocketAddress;
 import java.util.Deque;
@@ -130,6 +130,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow @Final private MinecraftServer serverController;
     @Shadow @Final private IntHashMap<Short> pendingTransactions;
     @Shadow public EntityPlayerMP player;
+    @Shadow private Entity lowestRiddenEnt;
     @Shadow private int itemDropThreshold;
     @Shadow private double firstGoodX;
     @Shadow private double firstGoodY;
@@ -487,6 +488,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
     /**
      * @author gabizou - June 22nd, 2016
+     * @author blood - May 6th, 2017
      * @reason Redirects the {@link Entity#getLowestRidingEntity()} call to throw our
      * {@link MoveEntityEvent}. The peculiarity of this redirect is that the entity
      * returned is perfectly valid to be {@link this#player} since, if the player
@@ -500,7 +502,29 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
      */
     @Redirect(method = "processVehicleMove", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;getLowestRidingEntity()Lnet/minecraft/entity/Entity;"))
     private Entity processVehicleMoveEvent(EntityPlayerMP playerMP, CPacketVehicleMove packetIn) {
-        return playerMP.getLowestRidingEntity();
+        final Entity ridingEntity = this.player.getLowestRidingEntity();
+        if (ridingEntity == this.player || ridingEntity.getControllingPassenger() != this.player || ridingEntity != this.lowestRiddenEnt) {
+            return ridingEntity;
+        }
+
+        // Sponge Start - Movement event
+        org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) ridingEntity;
+        Vector3d fromrot = spongeEntity.getRotation();
+
+        Location<World> from = spongeEntity.getLocation();
+        Vector3d torot = new Vector3d(packetIn.getPitch(), packetIn.getYaw(), 0);
+        Location<World> to = new Location<>(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
+        Transform<World> fromTransform = spongeEntity.getTransform().setLocation(from).setRotation(fromrot);
+        Transform<World> toTransform = spongeEntity.getTransform().setLocation(to).setRotation(torot);
+        MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Cause.of(NamedCause.source(ridingEntity)), fromTransform, toTransform, this.getPlayer());
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            // There is no need to change the current riding entity position as it hasn't changed yet.
+            // Send packet to client in order to update rider position.
+            this.netManager.sendPacket(new SPacketMoveVehicle(ridingEntity));
+            return this.player;
+        }
+        return ridingEntity;
     }
 
 
