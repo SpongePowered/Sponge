@@ -196,6 +196,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow protected List<IWorldEventListener> eventListeners;
     @Shadow public int[] lightUpdateBlockList;
     @Shadow public int skylightSubtracted;
+    @Shadow public int seaLevel;
 
     @Shadow public boolean processingLoadedTiles;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
@@ -1616,6 +1617,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     protected void entityActivationCheck() {
         // Overridden in MixinWorldServer_Activation
+    }
+
+    @Override
+    public int getSeaLevel() {
+        return this.seaLevel;
     }
 
     /**
