@@ -31,6 +31,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
@@ -72,10 +73,8 @@ public class SpongeEventManager implements EventManager {
     private final Object lock = new Object();
     protected final Logger logger;
     private final PluginManager pluginManager;
-    private final DefineableClassLoader classLoader = new DefineableClassLoader(getClass().getClassLoader());
-    private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
-            new FilterFactory("org.spongepowered.common.event.filters", this.classLoader), this.classLoader);
     private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent = HashMultimap.create();
+    private final Map<ClassLoader, AnnotatedEventListener.Factory> classLoaders = Maps.newHashMap();
     private final Set<Object> registeredListeners = Sets.newHashSet();
 
     public final ListenerChecker checker = new ListenerChecker(ShouldFire.class);
@@ -204,7 +203,7 @@ public class SpongeEventManager implements EventManager {
         return !this.handlersCache.get(clazz).getListeners().isEmpty();
     }
 
-    public void registerListener(PluginContainer plugin, Object listenerObject) {
+    public void registerListeners(PluginContainer plugin, Object listenerObject) {
         checkNotNull(plugin, "plugin");
         checkNotNull(listenerObject, "listener");
 
@@ -219,6 +218,16 @@ public class SpongeEventManager implements EventManager {
         Map<Method, String> methodErrors = new HashMap<>();
 
         Class<?> handle = listenerObject.getClass();
+        ClassLoader handleLoader = handle.getClassLoader();
+
+        AnnotatedEventListener.Factory handlerFactory = classLoaders.get(handleLoader);
+        if (handlerFactory == null) {
+            final DefineableClassLoader classLoader = new DefineableClassLoader(handleLoader);
+            handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
+                    new FilterFactory("org.spongepowered.common.event.filters", classLoader), classLoader);
+            classLoaders.put(handleLoader, handlerFactory);
+        }
+
         for (Method method : handle.getMethods()) {
             Listener listener = method.getAnnotation(Listener.class);
             if (listener != null) {
@@ -228,7 +237,7 @@ public class SpongeEventManager implements EventManager {
                     Class<? extends Event> eventClass = (Class<? extends Event>) method.getParameterTypes()[0];
                     AnnotatedEventListener handler;
                     try {
-                        handler = this.handlerFactory.create(listenerObject, method);
+                        handler = handlerFactory.create(listenerObject, method);
                     } catch (Exception e) {
                         this.logger.error("Failed to create handler for {} on {}", method, handle, e);
                         continue;
@@ -281,7 +290,7 @@ public class SpongeEventManager implements EventManager {
 
     @Override
     public void registerListeners(Object plugin, Object listener) {
-        registerListener(getPlugin(plugin), listener);
+        registerListeners(getPlugin(plugin), listener);
     }
 
     @Override

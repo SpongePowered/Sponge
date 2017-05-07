@@ -61,6 +61,7 @@ public final class PacketPhaseUtil {
             final int slotNumber = slot.slotNumber;
             ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
             final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(snapshot);
+            final ItemStack defaultStack = ItemStackUtil.fromSnapshotToNative(slotTransaction.getDefault());
 
             // TODO: fix below
             /*if (originalStack == null) {
@@ -71,7 +72,12 @@ public final class PacketPhaseUtil {
 
             final Slot nmsSlot = openContainer.getSlot(slotNumber);
             if (nmsSlot != null) {
-                nmsSlot.putStack(originalStack);
+                ItemStack slotStack = nmsSlot.getStack();
+                // Don't replace the stack if it changed during the event
+                if ((slotStack.isEmpty() && defaultStack.isEmpty()) ||
+                        slotStack.isItemEqual(defaultStack)) {
+                    nmsSlot.putStack(originalStack);
+                }
             }
         }
         openContainer.detectAndSendChanges();
