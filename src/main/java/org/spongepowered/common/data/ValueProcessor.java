@@ -101,7 +101,7 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * second case will use the same {@link ValueProcessor} but be retrieving
      * the values directly from the {@link HealthData} {@link DataManipulator}.
      * This differs with object creation as the second method will result in an
-     * unecessary {@link DataManipulator} to be created, and then finally a
+     * unnecessary {@link DataManipulator} to be created, and then finally a
      * {@link ValueProcessor} method call for the {@link DataManipulator}
      * instead of the {@link Entity} having a direct call.</p>
      *

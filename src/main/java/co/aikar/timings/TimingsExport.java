@@ -117,9 +117,8 @@ class TimingsExport extends Thread {
                 .add("cpu", runtime.availableProcessors())
                 .add("runtime", ManagementFactory.getRuntimeMXBean().getUptime())
                 .add("flags", RUNTIME_FLAG_JOINER.join(runtimeBean.getInputArguments()))
-                .add("gc", JSONUtil.mapArrayToObject(ManagementFactory.getGarbageCollectorMXBeans(), (input) -> {
-                    return JSONUtil.singleObjectPair(input.getName(), JSONUtil.arrayOf(input.getCollectionCount(), input.getCollectionTime()));
-                })));
+                .add("gc", JSONUtil.mapArrayToObject(ManagementFactory.getGarbageCollectorMXBeans(), (input) ->
+                        JSONUtil.singleObjectPair(input.getName(), JSONUtil.arrayOf(input.getCollectionCount(), input.getCollectionTime())))));
 
         Set<BlockType> blockTypeSet = Sets.newHashSet();
         Set<EntityType> entityTypeSet = Sets.newHashSet();
@@ -150,16 +149,13 @@ class TimingsExport extends Thread {
         }
 
         builder.add("idmap", JSONUtil.objectBuilder()
-                .add("groups", JSONUtil.mapArrayToObject(TimingIdentifier.GROUP_MAP.values(), (group) -> {
-                    return JSONUtil.singleObjectPair(group.id, group.name);
-                }))
+                .add("groups", JSONUtil.mapArrayToObject(TimingIdentifier.GROUP_MAP.values(),
+                        (group) -> JSONUtil.singleObjectPair(group.id, group.name)))
                 .add("handlers", handlersBuilder)
-                .add("worlds", JSONUtil.mapArrayToObject(TimingHistory.worldMap.entrySet(), (entry) -> {
-                    return JSONUtil.singleObjectPair(entry.getValue(), entry.getKey());
-                }))
-                .add("tileentity", JSONUtil.mapArrayToObject(blockTypeSet, (blockType) -> {
-                    return JSONUtil.singleObjectPair(Block.getIdFromBlock((Block) blockType), blockType.getId());
-                }))
+                .add("worlds", JSONUtil.mapArrayToObject(TimingHistory.worldMap.entrySet(),
+                        (entry) -> JSONUtil.singleObjectPair(entry.getValue(), entry.getKey())))
+                .add("tileentity", JSONUtil.mapArrayToObject(blockTypeSet,
+                        (blockType) -> JSONUtil.singleObjectPair(Block.getIdFromBlock((Block) blockType), blockType.getId())))
                 .add("entity", JSONUtil.mapArrayToObject(entityTypeSet, (entityType) -> {
                     if (entityType == EntityTypes.UNKNOWN) {
                         return null;

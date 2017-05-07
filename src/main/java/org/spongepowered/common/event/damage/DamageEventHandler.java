@@ -47,18 +47,17 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -92,8 +91,7 @@ public class DamageEventHandler {
         return damage -> -(damage - ((damage * (float) modifier) / 25.0F));
     }
 
-    public static Optional<DamageFunction> createHardHatModifier(EntityLivingBase entityLivingBase,
-                                                                                                          DamageSource damageSource) {
+    public static Optional<DamageFunction> createHardHatModifier(EntityLivingBase entityLivingBase, DamageSource damageSource) {
         if ((damageSource instanceof FallingBlockDamageSource) && !entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD).isEmpty()) {
             DamageModifier modifier = DamageModifier.builder()
                 .cause(
@@ -136,7 +134,7 @@ public class DamageEventHandler {
             double ratio = 0;
 
             for (DamageObject prop : damageObjects) {
-                EquipmentType type = resolveEquipment(prop.slot);
+                final EquipmentType type = resolveEquipment(prop.slot);
 
                 final DamageObject object = new DamageObject();
                 object.ratio = ratio;
@@ -259,7 +257,7 @@ public class DamageEventHandler {
                     final Enchantment enchantment = Enchantment.getEnchantmentByID(enchantmentId);
                     final int temp = enchantment.calcModifierDamage(level, damageSource);
                     if (temp != 0) {
-                        ItemStackSnapshot snapshot = ((ItemStack) itemStack).createSnapshot();
+                        final ItemStackSnapshot snapshot = ((ItemStack) itemStack).createSnapshot();
                         // Now we can actually consider this as a modifier!
 
                         final DamageObject object = new DamageObject();
@@ -393,7 +391,7 @@ public class DamageEventHandler {
         }
     }
 
-    public static List<DamageFunction> createAttackEnchamntmentFunction(
+    public static List<DamageFunction> createAttackEnchantmentFunction(
             @Nullable net.minecraft.item.ItemStack heldItem, EnumCreatureAttribute creatureAttribute, float attackStrength) {
         final List<DamageFunction> damageModifierFunctions = new ArrayList<>();
         if (heldItem != null) {

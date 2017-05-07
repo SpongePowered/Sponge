@@ -85,9 +85,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
         try {
 
             phaseContext.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blockSnapshots -> {
-                        TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
-                    });
+                    .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
             phaseContext.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(entities -> {
                         final Cause cause = Cause.source(LocatableBlockSpawnCause.builder()
@@ -113,7 +111,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
                         }
                     });
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Exception occured while processing tile entity %s at %s",
+            throw new RuntimeException(String.format("Exception occurred while processing tile entity %s at %s",
                     tickingTile, tickingTile.getLocation()), e);
         }
     }

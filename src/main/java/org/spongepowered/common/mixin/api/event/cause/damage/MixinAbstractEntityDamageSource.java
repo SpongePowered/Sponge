@@ -25,15 +25,12 @@
 package org.spongepowered.common.mixin.api.event.cause.damage;
 
 import net.minecraft.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.event.damage.SpongeCommonDamageSource;
 import org.spongepowered.common.event.damage.SpongeCommonEntityDamageSource;
 
 /*

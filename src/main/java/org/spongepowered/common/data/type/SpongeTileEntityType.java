@@ -30,7 +30,6 @@ import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.common.SpongeCatalogType;
-import org.spongepowered.common.SpongeImplHooks;
 
 public class SpongeTileEntityType extends SpongeCatalogType implements TileEntityType {
 

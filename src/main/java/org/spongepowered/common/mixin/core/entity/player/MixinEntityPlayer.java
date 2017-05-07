@@ -78,7 +78,6 @@ import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -107,7 +106,6 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -498,7 +496,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 final EnumCreatureAttribute creatureAttribute = targetEntity instanceof EntityLivingBase
                                                                 ? ((EntityLivingBase) targetEntity).getCreatureAttribute()
                                                                 : EnumCreatureAttribute.UNDEFINED;
-                final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchamntmentFunction(this.getHeldItemMainhand(), creatureAttribute, attackStrength);
+                final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchantmentFunction(this.getHeldItemMainhand(), creatureAttribute, attackStrength);
                 // This is kept for the post-damage event handling
                 final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream()
                         .map(ModifierFunction::getModifier)

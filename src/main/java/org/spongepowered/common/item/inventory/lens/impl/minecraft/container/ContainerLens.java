@@ -47,7 +47,7 @@ public class ContainerLens extends MinecraftLens {
     }
 
     /**
-     * Do not forget to call init when using this constructor!
+     * Do not forget to call init when using this constructor.
      */
     public ContainerLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
         super(0, adapter.getInventory().getSize(), adapter, slots);

@@ -35,18 +35,16 @@ import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalog
 public final class SlabTypeRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<BlockStoneSlab.EnumType, SlabType> {
 
     public SlabTypeRegistryModule() {
-        super(new String[] {"minecraft"}, // TODO - This needs to play into our alias system.
-                id -> id.equals("nether_brick")
-                      ? "netherbrick"
-                      : id.equals("sandstone")
+        super(new String[] {"minecraft"}, id -> id.equals("nether_brick") // TODO - This needs to play into our alias system.
+                ? "netherbrick"
+                : id.equals("sandstone")
                         ? "sand"
                         : id.equals("stone_brick")
-                          ? "smooth_brick"
-                          : id.equals("wood_old")
-                            ? "wood"
-                            : id.equals("red_sandstone")
-                                ? "red_sand"
-                                : id);
+                                ? "smooth_brick"
+                                : id.equals("wood_old")
+                                        ? "wood"
+                                        : id.equals("red_sandstone")
+                                                ? "red_sand" : id);
     }
 
     @Override

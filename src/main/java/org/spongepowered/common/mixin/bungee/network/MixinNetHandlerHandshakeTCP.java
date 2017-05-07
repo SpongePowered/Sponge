@@ -53,7 +53,8 @@ public abstract class MixinNetHandlerHandshakeTCP {
 
     @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true)
     public void onProcessHandshakeStart(C00Handshake packetIn, CallbackInfo ci) {
-        if (SpongeImpl.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding() && packetIn.getRequestedState().equals(EnumConnectionState.LOGIN)) {
+        if (SpongeImpl.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding()
+                && packetIn.getRequestedState().equals(EnumConnectionState.LOGIN)) {
             String[] split = packetIn.ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
             if (split.length == 3 || split.length == 4) {
@@ -66,10 +67,10 @@ public abstract class MixinNetHandlerHandshakeTCP {
                     ((IMixinNetworkManager) this.networkManager).setSpoofedProfile(gson.fromJson(split[3], Property[].class));
                 }
             } else {
-                TextComponentString chatcomponenttext =
+                TextComponentString chatComponentText =
                         new TextComponentString("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!");
-                this.networkManager.sendPacket(new SPacketDisconnect(chatcomponenttext));
-                this.networkManager.closeChannel(chatcomponenttext);
+                this.networkManager.sendPacket(new SPacketDisconnect(chatComponentText));
+                this.networkManager.closeChannel(chatComponentText);
             }
         }
     }

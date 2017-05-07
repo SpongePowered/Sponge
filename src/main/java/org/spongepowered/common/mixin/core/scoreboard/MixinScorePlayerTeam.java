@@ -29,7 +29,6 @@ import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.text.Text;
@@ -49,7 +48,6 @@ import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;

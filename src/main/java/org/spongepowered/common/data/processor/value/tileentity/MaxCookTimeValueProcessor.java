@@ -52,7 +52,7 @@ public class MaxCookTimeValueProcessor extends AbstractSpongeValueProcessor<Tile
 
     @Override
     protected boolean set(TileEntityFurnace container, Integer value) {
-        if(container.getStackInSlot(0) == null) {
+        if (container.getStackInSlot(0) == null) {
             return false; //Item cannot be null, the time depends on it
         }
 

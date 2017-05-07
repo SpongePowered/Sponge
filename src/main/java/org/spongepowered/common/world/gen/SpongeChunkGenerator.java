@@ -434,22 +434,29 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Nullable
     @Override
     public BlockPos getStrongholdGen(World worldIn, String structureName, BlockPos position, boolean p_180513_4_) {
-        Class<? extends MapGenStructure> target = null;
-        if ("Stronghold".equals(structureName)) {
-            target = MapGenStronghold.class;
-        } else if ("Mansion".equals(structureName)) {
-            target = WoodlandMansion.class;
-        } else if ("Monument".equals(structureName)) {
-            target = StructureOceanMonument.class;
-        } else if ("Village".equals(structureName)) {
-            target = MapGenVillage.class;
-        } else if ("Mineshaft".equals(structureName)) {
-            target = MapGenMineshaft.class;
-        } else if ("Temple".equals(structureName)) {
-            target = MapGenScatteredFeature.class;
-        }
-        if (target == null) {
-            return null;
+        final Class<? extends MapGenStructure> target;
+        switch (structureName) {
+            case "Stronghold": {
+                target = MapGenStronghold.class;
+                break;
+            } case "Mansion": {
+                target = WoodlandMansion.class;
+                break;
+            } case "Monument": {
+                target = StructureOceanMonument.class;
+                break;
+            } case "Village": {
+                target = MapGenVillage.class;
+                break;
+            } case "Mineshaft": {
+                target = MapGenMineshaft.class;
+                break;
+            } case "Temple": {
+                target = MapGenScatteredFeature.class;
+                break;
+            } default: {
+                return null;
+            }
         }
         for (GenerationPopulator gen : this.genpop) {
             if (target.isInstance(gen)) {
@@ -491,8 +498,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     }
 
     public void generateBiomeTerrain(World worldIn, Random rand, ChunkPrimer chunk, int x, int z, double stoneNoise,
-            List<GroundCoverLayer> groundcover) {
-        if (groundcover.isEmpty()) {
+            List<GroundCoverLayer> groundCoverLayers) {
+        if (groundCoverLayers.isEmpty()) {
             return;
         }
         int seaLevel = worldIn.getSeaLevel();
@@ -507,12 +514,12 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                 layerProgress = -1;
             } else if (nextBlock.getBlock() == Blocks.STONE) {
                 if (layerProgress == -1) {
-                    if (groundcover.isEmpty()) {
+                    if (groundCoverLayers.isEmpty()) {
                         layerProgress = 0;
                         continue;
                     }
                     layerDepth = 0;
-                    GroundCoverLayer layer = groundcover.get(layerDepth);
+                    GroundCoverLayer layer = groundCoverLayers.get(layerDepth);
                     currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
                     layerProgress = layer.getDepth().getFlooredAmount(rand, stoneNoise);
                     if (layerProgress <= 0) {
@@ -522,8 +529,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                     if (currentY >= seaLevel - 1) {
                         chunk.setBlockState(relativeX, currentY, relativeZ, currentPlacement);
                         ++layerDepth;
-                        if (layerDepth < groundcover.size()) {
-                            layer = groundcover.get(layerDepth);
+                        if (layerDepth < groundCoverLayers.size()) {
+                            layer = groundCoverLayers.get(layerDepth);
                             layerProgress = layer.getDepth().getFlooredAmount(rand, stoneNoise);
                             currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
                         }
@@ -532,8 +539,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                         chunk.setBlockState(relativeX, currentY, relativeZ, Blocks.GRAVEL.getDefaultState());
                     } else {
                         ++layerDepth;
-                        if (layerDepth < groundcover.size()) {
-                            layer = groundcover.get(layerDepth);
+                        if (layerDepth < groundCoverLayers.size()) {
+                            layer = groundCoverLayers.get(layerDepth);
                             layerProgress = layer.getDepth().getFlooredAmount(rand, stoneNoise);
                             currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
                             chunk.setBlockState(relativeX, currentY, relativeZ, currentPlacement);
@@ -545,8 +552,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
                     if (layerProgress == 0) {
                         ++layerDepth;
-                        if (layerDepth < groundcover.size()) {
-                            GroundCoverLayer layer = groundcover.get(layerDepth);
+                        if (layerDepth < groundCoverLayers.size()) {
+                            GroundCoverLayer layer = groundCoverLayers.get(layerDepth);
                             layerProgress = layer.getDepth().getFlooredAmount(rand, stoneNoise);
                             currentPlacement = (IBlockState) layer.getBlockState().apply(stoneNoise);
                         }

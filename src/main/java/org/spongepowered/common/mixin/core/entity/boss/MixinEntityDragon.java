@@ -43,8 +43,6 @@ import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 @Mixin(EntityDragon.class)
 public abstract class MixinEntityDragon extends MixinEntityLiving implements EnderDragon {
 

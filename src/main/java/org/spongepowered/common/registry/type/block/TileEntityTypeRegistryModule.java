@@ -38,7 +38,6 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
-import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
 import java.util.Locale;
 import java.util.Map;
@@ -122,15 +121,13 @@ public final class TileEntityTypeRegistryModule extends AbstractPrefixAlternateC
     }
 
     TileEntityTypeRegistryModule() {
-        super("minecraft",
-                new String[] {"minecraft:"},
-                string -> string.equals("noteblock")
-                          ? "note"
-                          : string.equals("enchanting_table")
-                            ? "enchantment_table"
-                            : string.equals("structure_block")
-                              ? "structure"
-                              : string);
+        super("minecraft", new String[] {"minecraft:"}, string -> string.equals("noteblock")
+                ? "note"
+                : string.equals("enchanting_table")
+                        ? "enchantment_table"
+                        : string.equals("structure_block")
+                                ? "structure"
+                                : string);
     }
 
     private static final class Holder {

@@ -121,7 +121,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         // TODO - delegate this to NbtProcessors when schematics are merged.
         final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> tileBuilder = ImmutableMap.builder();
         this.extraData = builder.manipulators == null
-                ? ImmutableList.<ImmutableDataManipulator<?, ?>>of() : ImmutableList.copyOf(builder.manipulators);
+                ? ImmutableList.<ImmutableDataManipulator<?, ?>>of()
+                : ImmutableList.copyOf(builder.manipulators);
         for (ImmutableDataManipulator<?, ?> manipulator : this.extraData) {
             for (ImmutableValue<?> value : manipulator.getValues()) {
                 tileBuilder.put(value.getKey(), value);

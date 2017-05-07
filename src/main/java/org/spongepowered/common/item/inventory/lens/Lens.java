@@ -75,7 +75,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
     /**
      * Returns the display name of this lens.
      */
-    public abstract Translation getName(Fabric<TInventory> inv);
+    Translation getName(Fabric<TInventory> inv);
     
     /**
      * Get the number of slots referenced by this lens.
@@ -104,7 +104,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * {@link #slotCount()}.
      * 
      * @param inv inventory
-     * @param ordinal 
+     * @param ordinal The slot ordinal
      * @return the "real" slot index (ordinal), or -1 for invalid indices
      */
     int getRealIndex(Fabric<TInventory> inv, int ordinal);
@@ -121,7 +121,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
     TStack getStack(Fabric<TInventory> inv, int ordinal);
     
     /**
-     * Get the maximum stack size from the target inventory
+     * Get the maximum stack size from the target inventory.
      * 
      * @param inv
      * @return
@@ -129,21 +129,21 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
     int getMaxStackSize(Fabric<TInventory> inv);
 
     /**
-     * Get child lenses of this lens
+     * Get child lenses of this lens.
      * 
      * @return
      */
     List<Lens<TInventory, TStack>> getChildren();
     
     /**
-     * Get child lenses of this lens
+     * Get child lenses of this lens.
      * 
      * @return
      */
     List<Lens<TInventory, TStack>> getSpanningChildren();
     
     /**
-     * Set the stack at the specified offset 
+     * Set the stack at the specified offset.
      * 
      * @param inv
      * @param ordinal
@@ -153,7 +153,8 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
     boolean setStack(Fabric<TInventory> inv, int ordinal, TStack stack);
     
     /**
-     * Invalidate this lens for the supplied inventory, notify all observers
+     * Invalidate this lens for the supplied inventory,
+     * and notify all observers.
      * 
      * @param inv inventory
      */

@@ -169,7 +169,8 @@ public final class CauseTracker {
      */
     public void abortCurrentPhase(Throwable t) {
         PhaseData data = this.stack.peek();
-        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", data.state, data.context, t);
+        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase",
+                data.state, data.context, t);
 
         // Since an exception occured during the main phase code, we don't know what state we're in.
         // Therefore, we skip running the normal unwind functions that completePhase calls,
@@ -227,11 +228,13 @@ public final class CauseTracker {
                 try {
                     completePhase(GeneralPhase.Post.UNWINDING);
                 } catch (Exception | NoClassDefFoundError e) {
-                    printMessageWithCaughtException("Exception attempting to capture or spawn an Entity!", "Something happened trying to unwind", state, context, e);
+                    printMessageWithCaughtException("Exception attempting to capture or spawn an Entity!", "Something happened trying to unwind",
+                            state, context, e);
                 }
             }
         } catch (Exception | NoClassDefFoundError e) {
-            printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
+            printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state",
+                    state, context, e);
         }
     }
 
@@ -366,7 +369,7 @@ public final class CauseTracker {
      * Replacement of {@link net.minecraft.world.World#neighborChanged(BlockPos, Block, BlockPos)}
      * that adds tracking into play.
      *
-     * @param mixinWorld
+     * @param mixinWorld The mixin world
      * @param notifyPos The original notification position
      * @param sourceBlock The source block type
      * @param sourcePos The source block position
@@ -603,7 +606,7 @@ public final class CauseTracker {
                         if (!(owner instanceof EntityPlayer)) {
                             user = ((IMixinEntity) owner).getCreatorUser().orElse(null);
                         } else {
-                           user = (User) owner;
+                            user = (User) owner;
                         }
                         if (user != null) {
                             context.owner = user;

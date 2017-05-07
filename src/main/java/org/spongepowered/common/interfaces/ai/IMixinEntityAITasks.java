@@ -28,7 +28,6 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAITasks;
 import org.spongepowered.api.entity.ai.GoalType;
 
-import java.util.List;
 import java.util.Set;
 
 public interface IMixinEntityAITasks {

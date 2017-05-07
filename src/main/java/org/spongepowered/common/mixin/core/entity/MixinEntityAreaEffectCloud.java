@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAreaEffectCloud;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.potion.PotionType;
@@ -48,7 +47,6 @@ import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @SuppressWarnings("unchecked")

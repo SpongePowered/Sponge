@@ -26,7 +26,6 @@ package org.spongepowered.common.registry;
 
 import static org.junit.Assume.assumeFalse;
 
-import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

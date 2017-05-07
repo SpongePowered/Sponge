@@ -109,7 +109,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
 
     @Override
     public boolean supports(Class<? extends DataManipulator<?, ?>> holderClass) {
-        // By default, if there is a processor, we can check compatibilty with that
+        // By default, if there is a processor, we can check compatibility with that
         // Otherwise, it's true because of custom data.
         return DataUtil.getRawNbtProcessor(this.getDataType(), holderClass)
                 .map(processor -> processor.isCompatible(this.data))

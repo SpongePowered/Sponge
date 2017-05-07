@@ -53,7 +53,7 @@ public class InventoryEventArgs extends EventArgs {
         
         /**
          * InventoryView in this scope was invalidated (<tt>invalidate</tt>
-         * was called) 
+         * was called).
          */
         LENS_INVALIDATED, //(false),
         

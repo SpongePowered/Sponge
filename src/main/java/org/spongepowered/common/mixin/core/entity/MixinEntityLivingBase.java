@@ -801,7 +801,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     /**
      * @author gabizou - January 4th, 2016
-     * @reason This allows invisiblity to ignore entity collisions.
+     * @reason This allows invisibility to ignore entity collisions.
      */
     @Overwrite
     public boolean canBeCollidedWith() {

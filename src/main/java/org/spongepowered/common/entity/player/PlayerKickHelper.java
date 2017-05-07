@@ -28,7 +28,6 @@ import com.google.common.util.concurrent.Futures;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.play.server.SPacketDisconnect;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 
 

@@ -27,7 +27,6 @@ package org.spongepowered.common.weather;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.weather.Weather;
 
 public class SpongeWeather implements Weather {

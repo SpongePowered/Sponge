@@ -132,7 +132,7 @@ public class SpongeScheduler implements Scheduler {
 
     @Override
     public SpongeExecutorService createSyncExecutor(Object plugin) {
-        return new TaskExecutorService(() -> createTaskBuilder(), this.syncScheduler, checkPluginInstance(plugin));
+        return new TaskExecutorService(this::createTaskBuilder, this.syncScheduler, checkPluginInstance(plugin));
     }
 
     @Override

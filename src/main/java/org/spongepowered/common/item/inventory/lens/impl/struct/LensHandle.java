@@ -74,7 +74,7 @@ public final class LensHandle<TInventory, TStack> {
     public LensHandle(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
         this.lens = lens;
         if (properties != null && properties.length > 0) {
-            this.properties = new ArrayList<InventoryProperty<?, ?>>();
+            this.properties = new ArrayList<>();
             for (InventoryProperty<?, ?> property : properties) {
                 this.properties.add(property);
             }

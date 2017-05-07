@@ -47,9 +47,10 @@ public class EquipmentPropertyStore extends AbstractItemStackPropertyStore<Equip
                     return Optional.of(new EquipmentProperty(EquipmentTypes.LEGGINGS));
                 } case HEAD: {
                     return Optional.of(new EquipmentProperty(EquipmentTypes.BOOTS));
+                } default: {
+                    return Optional.empty();
                 }
             }
-
         }
         return Optional.empty();
     }

@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.type.world.gen;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
@@ -56,12 +55,6 @@ import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorObjects;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 
 @RegisterCatalog(PopulatorObjects.class)
 public class PopulatorObjectRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<PopulatorObject>

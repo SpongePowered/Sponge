@@ -30,7 +30,8 @@ import org.spongepowered.api.entity.ai.GoalType;
 
 public final class SpongeGoalType implements GoalType {
 
-    private final String id, name;
+    private final String id;
+    private final String name;
     private final Class<? extends Goal<?>> goalClass;
 
     public SpongeGoalType(String id, String name, Class<? extends Goal<?>> goalClass) {
@@ -46,20 +47,20 @@ public final class SpongeGoalType implements GoalType {
 
     @Override
     public String getId() {
-        return id;
+        return this.id;
     }
 
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .addValue(id)
-                .addValue(name)
-                .add("goalClass", goalClass)
+                .addValue(this.id)
+                .addValue(this.name)
+                .add("goalClass", this.goalClass)
                 .toString();
     }
 }

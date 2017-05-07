@@ -122,7 +122,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
 
             } catch (Exception e) {
                 LogManager.getLogger("Sponge").warn("An exception was thrown while trying to resolve the property "
-                                                    + property.getName() +"'s owning class, assigning "
+                                                    + property.getName() + "'s owning class, assigning "
                                                     + "fallback id: " + lastAttemptId, e);
                 instance.register(property, lastAttemptId);
                 return lastAttemptId;

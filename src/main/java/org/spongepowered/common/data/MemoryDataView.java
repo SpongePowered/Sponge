@@ -380,15 +380,15 @@ public class MemoryDataView implements DataView {
     @SuppressWarnings("rawtypes")
     private ImmutableMap<?, ?> ensureSerialization(Map<?, ?> map) {
         ImmutableMap.Builder<Object, Object> builder = ImmutableMap.builder();
-        map.entrySet().forEach(entry -> {
-            if (entry.getValue() instanceof Map) {
-                builder.put(entry.getKey(), ensureSerialization((Map) entry.getValue()));
-            } else if (entry.getValue() instanceof DataSerializable) {
-                builder.put(entry.getKey(), ((DataSerializable) entry.getValue()).toContainer());
-            } else if (entry.getValue() instanceof Collection) {
-                builder.put(entry.getKey(), ensureSerialization((Collection) entry.getValue()));
+        map.forEach((key, value) -> {
+            if (value instanceof Map) {
+                builder.put(key, ensureSerialization((Map) value));
+            } else if (value instanceof DataSerializable) {
+                builder.put(key, ((DataSerializable) value).toContainer());
+            } else if (value instanceof Collection) {
+                builder.put(key, ensureSerialization((Collection) value));
             } else {
-                builder.put(entry.getKey(), entry.getValue());
+                builder.put(key, value);
             }
         });
         return builder.build();

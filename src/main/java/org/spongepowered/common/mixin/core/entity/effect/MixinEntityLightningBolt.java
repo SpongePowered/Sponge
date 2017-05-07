@@ -57,7 +57,6 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableD
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.mixin.core.block.state.MixinStateImplementation;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;

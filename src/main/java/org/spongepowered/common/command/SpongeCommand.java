@@ -614,10 +614,8 @@ public class SpongeCommand {
                         src.sendMessage(title("Others:"));
                         all.stream()
                                 .filter(map -> !map.equals(primary))
-                                .forEach(mapping -> {
-                                    src.sendMessage(Text.of(LIST_ITEM_TEXT, "Aliases ", hl(mapping.getAllAliases().toString()), " owned by ",
-                                            hl(mgr.getOwner(mapping).map(PluginContainer::getName).orElse("unknown"))));
-                                });
+                                .forEach(mapping -> src.sendMessage(Text.of(LIST_ITEM_TEXT, "Aliases ", hl(mapping.getAllAliases().toString()),
+                                        " owned by ", hl(mgr.getOwner(mapping).map(PluginContainer::getName).orElse("unknown")))));
                     }
 
                     return CommandResult.success();

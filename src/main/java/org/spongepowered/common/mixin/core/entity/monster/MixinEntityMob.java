@@ -83,7 +83,7 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
 
         if (targetEntity instanceof EntityLivingBase) {
             // Sponge Start - Gather modifiers
-            originalFunctions.addAll(DamageEventHandler.createAttackEnchamntmentFunction(this.getHeldItemMainhand(), ((EntityLivingBase) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
+            originalFunctions.addAll(DamageEventHandler.createAttackEnchantmentFunction(this.getHeldItemMainhand(), ((EntityLivingBase) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
             // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
             knockbackModifier += EnchantmentHelper.getKnockbackModifier((EntityMob) (Object) this);
         }
@@ -160,7 +160,7 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
             //int i = this.worldObj.getLightFromNeighbors(blockpos);
             boolean passes; // Sponge
             if (this.world.isThundering()) {
-                int j = this.world.getSkylightSubtracted();;
+                int j = this.world.getSkylightSubtracted();
                 this.world.setSkylightSubtracted(10);
                 passes = !((IMixinWorldServer) this.world).isLightLevel(chunk, blockpos, this.rand.nextInt(9));
                 this.world.setSkylightSubtracted(j);

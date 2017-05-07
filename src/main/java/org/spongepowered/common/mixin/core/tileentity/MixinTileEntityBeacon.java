@@ -29,7 +29,6 @@ import static org.spongepowered.api.data.DataQuery.of;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
-import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.block.tileentity.carrier.Beacon;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;

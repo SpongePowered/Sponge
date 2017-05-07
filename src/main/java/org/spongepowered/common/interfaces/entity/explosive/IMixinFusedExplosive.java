@@ -57,7 +57,7 @@ public interface IMixinFusedExplosive extends IMixinExplosive {
     default void postPrime(@Nullable Cause cause) {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_POST) {
             PrimeExplosiveEvent.Post event = SpongeEventFactory
-                    .createPrimeExplosiveEventPost(cause != null ? cause: Cause.of(NamedCause.source(this)), (FusedExplosive) this);
+                    .createPrimeExplosiveEventPost(cause != null ? cause : Cause.of(NamedCause.source(this)), (FusedExplosive) this);
             Sponge.getEventManager().post(event);
         }
     }

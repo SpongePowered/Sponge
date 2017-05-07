@@ -53,7 +53,6 @@ import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.FilteredPopulator;
 
-import java.util.List;
 import java.util.Map;
 
 @Mixin(ChunkProviderFlat.class)

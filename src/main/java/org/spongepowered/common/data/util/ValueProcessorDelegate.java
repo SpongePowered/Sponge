@@ -29,15 +29,14 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ValueProcessor;
 
 import java.util.Optional;
 
 /**
- * This is really just a lazy class to handle processing on multiple
- * {@link ValueProcessor} registrations.
+ * This is really just a lazy class to handle processing on
+ * multiple {@link ValueProcessor} registrations.
  *
  * @param <E>
  * @param <V>

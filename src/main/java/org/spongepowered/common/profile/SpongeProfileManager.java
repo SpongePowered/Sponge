@@ -67,9 +67,7 @@ public final class SpongeProfileManager implements GameProfileManager {
 
             try {
                 Sponge.getServer().getGameProfileManager().get(checkNotNull(uuid, "uniqueId")).get();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
+            } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
 

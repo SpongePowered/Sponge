@@ -145,8 +145,8 @@ public final class EntityUtil {
         }
     });
 
-    public static final Function<Humanoid, EntityPlayer> HUMANOID_TO_PLAYER =
-            (humanoid) -> humanoid instanceof EntityPlayer ? (EntityPlayer) humanoid : null;
+    public static final Function<Humanoid, EntityPlayer> HUMANOID_TO_PLAYER = (humanoid) ->
+            humanoid instanceof EntityPlayer ? (EntityPlayer) humanoid : null;
 
     /**
      * Called specifically from {@link MixinEntity#changeDimension(int)}
@@ -890,10 +890,11 @@ public final class EntityUtil {
     /**
      * A simple redirected static util method for {@link Entity#entityDropItem(ItemStack, float)}
      * for easy debugging.
-     * @param entity
-     * @param itemStack
-     * @param offsetY
-     * @return
+     *
+     * @param entity The entity dropping the item
+     * @param itemStack The itemstack being dropped
+     * @param offsetY The Y offset to drop with
+     * @return The entity version of the dropped item
      */
     public static EntityItem entityOnDropItem(Entity entity, ItemStack itemStack, float offsetY) {
         final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);

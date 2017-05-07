@@ -303,12 +303,13 @@ public final class DataUtil {
         SpongeManipulatorRegistry.getInstance().register(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
     }
 
-    public static <E, V extends BaseValue<E>, T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
-    registerDualProcessor(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
-        Class<? extends I> implImClass, AbstractSingleDataSingleTargetProcessor<?, E, V, T, I> processor) {
+    public static <E, V extends BaseValue<E>, T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void registerDualProcessor(
+            Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator, Class<? extends I> implImClass,
+            AbstractSingleDataSingleTargetProcessor<?, E, V, T, I> processor) {
         registerDataProcessorAndImpl(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
         registerValueProcessor(processor.getKey(), processor);
     }
+
     /**
      * Gets the {@link DataProcessorDelegate} for the provided
      * {@link DataManipulator} class.

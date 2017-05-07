@@ -33,7 +33,6 @@ import org.spongepowered.api.effect.potion.PotionEffectTypes;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.mixin.core.potion.MixinPotion;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.ArrayList;

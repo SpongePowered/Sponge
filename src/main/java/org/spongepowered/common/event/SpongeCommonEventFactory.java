@@ -161,7 +161,8 @@ public class SpongeCommonEventFactory {
         }
 
         if (pickupDelay <= 0 && slot != null) {
-            ItemStackSnapshot sourceSnapshot = slot.getStack().isEmpty() ? ItemStackSnapshot.NONE
+            ItemStackSnapshot sourceSnapshot = slot.getStack().isEmpty()
+                    ? ItemStackSnapshot.NONE
                     : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
             ItemStackSnapshot targetSnapshot;
             if (sourceSnapshot != ItemStackSnapshot.NONE) {
@@ -586,8 +587,8 @@ public class SpongeCommonEventFactory {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         RayTraceResult.Type movingObjectType = movingObjectPosition.typeOfHit;
         final Cause.Builder builder = Cause.source(projectile).named("ProjectileSource", projectileSource == null
-                                                                                         ? ProjectileSource.UNKNOWN
-                                                                                         : projectileSource);
+                ? ProjectileSource.UNKNOWN
+                : projectileSource);
         final Optional<User> owner = causeTracker.getCurrentPhaseData()
                 .context
                 .firstNamed(NamedCause.OWNER, User.class);
@@ -664,7 +665,8 @@ public class SpongeCommonEventFactory {
 
     public static boolean callInteractInventoryOpenEvent(Cause cause, EntityPlayerMP player) {
         ItemStackSnapshot newCursor =
-                player.inventory.getItemStack().isEmpty() ? ItemStackSnapshot.NONE
+                player.inventory.getItemStack().isEmpty()
+                        ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.NONE, newCursor);
         InteractInventoryEvent.Open event =
@@ -688,8 +690,8 @@ public class SpongeCommonEventFactory {
     public static InteractInventoryEvent.Close callInteractInventoryCloseEvent(Cause cause, Container container, EntityPlayerMP player,
             ItemStackSnapshot lastCursor, ItemStackSnapshot newCursor, boolean clientSource) {
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-        final InteractInventoryEvent.Close event
-                = SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction, ContainerUtil.fromNative(container));
+        final InteractInventoryEvent.Close event =
+                SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction, ContainerUtil.fromNative(container));
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             if (clientSource && container.getSlot(0) != null) {
@@ -801,7 +803,7 @@ public class SpongeCommonEventFactory {
             return size % 9 == 0 && size / 9 <= 6 && size != 0; // Divisible by 9 AND less than 6 rows of 9 slots
         }
         if (InventoryArchetypes.HOPPER.equals(archetype)) {
-            return inventory.getSizeInventory() == 5 * 1;
+            return inventory.getSizeInventory() == 5;
         }
         if (InventoryArchetypes.DISPENSER.equals(archetype)) {
             return inventory.getSizeInventory() == 3 * 3;

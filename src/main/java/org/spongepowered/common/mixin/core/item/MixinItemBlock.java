@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.block.Block;
-import net.minecraft.item.ItemAir;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;

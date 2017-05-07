@@ -57,7 +57,6 @@ import org.spongepowered.common.scoreboard.SpongeScoreboardConstants;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;

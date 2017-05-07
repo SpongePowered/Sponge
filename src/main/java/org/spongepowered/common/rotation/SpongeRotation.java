@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.rotation;
 
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.rotation.Rotation;
 
 public class SpongeRotation implements Rotation {

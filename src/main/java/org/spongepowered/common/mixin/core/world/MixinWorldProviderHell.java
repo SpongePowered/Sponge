@@ -33,7 +33,8 @@ public abstract class MixinWorldProviderHell extends MixinWorldProvider {
 
     /**
      * Since each World has a WorldBorder in Sponge, let the Nether
-     * based worlds use local coordinates, not adjusted ones based on Overworld's.
+     * based worlds use local coordinates, not adjusted ones based
+     * on the Overworld's like usual.
      *
      * @return The server world border
      */

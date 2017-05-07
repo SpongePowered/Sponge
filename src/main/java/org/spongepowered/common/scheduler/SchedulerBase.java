@@ -195,7 +195,7 @@ abstract class SchedulerBase {
     }
 
     /**
-     * Actually run the runnable that will begin the task
+     * Actually run the runnable that will begin the task.
      *
      * @param runnable The runnable to run
      */

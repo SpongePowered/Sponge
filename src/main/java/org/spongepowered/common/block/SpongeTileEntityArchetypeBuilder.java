@@ -54,7 +54,8 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<org.spongepowered.api.block.tileentity.TileEntityArchetype> implements org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder {
+public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<org.spongepowered.api.block.tileentity.TileEntityArchetype>
+        implements org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder {
 
     BlockState     blockState;    // -These two fields can never be null
     @Nullable

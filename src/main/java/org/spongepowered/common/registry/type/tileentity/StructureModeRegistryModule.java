@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.registry.type.tileentity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.minecraft.tileentity.TileEntityStructure;
@@ -37,8 +39,6 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class StructureModeRegistryModule implements CatalogRegistryModule<StructureMode> {
 

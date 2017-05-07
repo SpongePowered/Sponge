@@ -127,9 +127,12 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
     /**
-     * @param snapshotsToProcess
-     * @param unwindingState
-     * @param unwinding
+     * Processes all block transactions after post.
+     *
+     * @param postContext The post phase context
+     * @param snapshotsToProcess The block snapshots to process
+     * @param unwindingState The unwinding phase state
+     * @param unwinding The unwinding phase context
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void processBlockTransactionListsPost(PhaseContext postContext, List<BlockSnapshot> snapshotsToProcess,

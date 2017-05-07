@@ -145,7 +145,7 @@ public final class SpongeImplHooks {
 
     public static int getChunkPosLight(IBlockState blockState, World world, BlockPos pos) {
         return blockState.getLightValue();
-	}
+    }
 
     // Tile entity
 

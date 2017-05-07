@@ -149,8 +149,8 @@ public final class RegistryModuleLoader {
                 try {
                     field.setAccessible(true);
                     Map<String, ?> map = (Map<String, ?>) field.get(module);
-                    checkState(!map.isEmpty(), "The registered module: "+ module.getClass().getSimpleName()
-                                               + " cannot have an empty mapping during registration!");
+                    checkState(!map.isEmpty(), "The registered module: " + module.getClass().getSimpleName()
+                            + " cannot have an empty mapping during registration!");
                     return checkNotNull(map);
                 } catch (Exception e) {
                     SpongeImpl.getLogger().error("Failed to retrieve a registry field from module: " + module.getClass().getCanonicalName());

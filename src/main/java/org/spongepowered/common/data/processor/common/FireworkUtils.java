@@ -100,7 +100,7 @@ public class FireworkUtils {
         if (effectNbt.hasKey("Colors")) {
             List<Color> colors = Lists.newArrayList();
             int[] colorsRaw = effectNbt.getIntArray("Colors");
-            for(int color : colorsRaw) {
+            for (int color : colorsRaw) {
                 colors.add(Color.ofRgb(color));
             }
             builder.colors(colors);
@@ -146,7 +146,9 @@ public class FireworkUtils {
         if (object instanceof EntityFireworkRocket) {
             item = getItem((EntityFireworkRocket) object);
         }
-        if (item.isEmpty()) return false;
+        if (item.isEmpty()) {
+            return false;
+        }
 
         if (item.getItem() == Items.FIREWORK_CHARGE) {
             if (effects.size() != 0) {
@@ -181,11 +183,13 @@ public class FireworkUtils {
         List<FireworkEffect> effects;
         if (item.getItem() == Items.FIREWORKS) {
             NBTTagCompound fireworks = item.getSubCompound("Fireworks");
-            if(fireworks == null || !fireworks.hasKey("Explosions")) return Optional.empty();
+            if (fireworks == null || !fireworks.hasKey("Explosions")) {
+                return Optional.empty();
+            }
 
             NBTTagList effectsNbt = fireworks.getTagList("Explosions", NbtDataUtil.TAG_COMPOUND);
             effects = Lists.newArrayList();
-            for(int i = 0; i < effectsNbt.tagCount(); i++) {
+            for (int i = 0; i < effectsNbt.tagCount(); i++) {
                 NBTTagCompound effectNbt = effectsNbt.getCompoundTagAt(i);
                 effects.add(fromNbt(effectNbt));
             }
@@ -208,7 +212,9 @@ public class FireworkUtils {
         if (object instanceof EntityFireworkRocket) {
             item = FireworkUtils.getItem((EntityFireworkRocket) object);
         }
-        if (item.isEmpty()) return false;
+        if (item.isEmpty()) {
+            return false;
+        }
 
         if (item.getItem() == Items.FIREWORK_CHARGE) {
             NbtDataUtil.getOrCreateCompound(item).removeTag("Explosion");

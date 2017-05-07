@@ -156,8 +156,8 @@ public class KeyRegistryModule implements AdditionalCatalogRegistryModule<Key<?>
         this.fieldMap.put("spawner_maximum_delay", makeSingleKey(TypeTokens.SHORT_TOKEN, TypeTokens.BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerMaximumDelay"),
                 "sponge:spawner_maximum_delay", "Spawner Maximum Delay"));
 
-        this.fieldMap.put("spawner_maximum_nearby_entities", makeSingleKey(TypeTokens.SHORT_TOKEN, TypeTokens.BOUNDED_SHORT_VALUE_TOKEN, of
-                ("SpawnerMaximumNearbyEntities"), "sponge:spawner_maximum_nearby_entities", "Spawner Maximum Nearby Entities"));
+        this.fieldMap.put("spawner_maximum_nearby_entities", makeSingleKey(TypeTokens.SHORT_TOKEN, TypeTokens.BOUNDED_SHORT_VALUE_TOKEN,
+                of("SpawnerMaximumNearbyEntities"), "sponge:spawner_maximum_nearby_entities", "Spawner Maximum Nearby Entities"));
 
         this.fieldMap.put("spawner_minimum_delay", makeSingleKey(TypeTokens.SHORT_TOKEN, TypeTokens.BOUNDED_SHORT_VALUE_TOKEN, of("SpawnerMinimumDelay"),
                 "sponge:spawner_minimum_delay", "Spawner Minimum Delay"));

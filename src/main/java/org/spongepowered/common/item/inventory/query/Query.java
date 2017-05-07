@@ -26,7 +26,6 @@ package org.spongepowered.common.item.inventory.query;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.spongepowered.api.item.ItemType;
@@ -53,6 +52,7 @@ import org.spongepowered.common.item.inventory.query.strategy.expression.Express
 
 import java.lang.reflect.Constructor;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Query<TInventory, TStack> {
@@ -94,8 +94,7 @@ public class Query<TInventory, TStack> {
 
     }
 
-    private static final Map<String, Class<? extends QueryStrategy<?, ?, ?>>> strategies
-            = Maps.<String, Class<? extends QueryStrategy<?, ?, ?>>>newHashMap();
+    private static final Map<String, Class<? extends QueryStrategy<?, ?, ?>>> strategies = new HashMap<>();
 
     private static ResultAdapterProvider<?, ?> defaultResultProvider;
 

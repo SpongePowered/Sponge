@@ -27,9 +27,6 @@ package org.spongepowered.common.mixin.core.block.properties;
 import net.minecraft.block.properties.PropertyInteger;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-
-import java.util.Collection;
 
 @Mixin(value = PropertyInteger.class)
 public abstract class MixinPropertyInteger extends MixinPropertyHelper<Integer> implements IntegerTrait {

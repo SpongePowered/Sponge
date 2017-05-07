@@ -852,7 +852,9 @@ public final class TrackingUtil {
     }
 
     public static void splitAndSpawnEntities(Cause cause, List<Entity> entities) {
-        splitAndSpawnEntities(cause, entities, (entity) -> {});
+        splitAndSpawnEntities(cause, entities, (entity) -> {
+
+        });
     }
 
     public static void splitAndSpawnEntities(Cause cause, List<Entity> entities, Consumer<IMixinEntity> mixinEntityConsumer) {

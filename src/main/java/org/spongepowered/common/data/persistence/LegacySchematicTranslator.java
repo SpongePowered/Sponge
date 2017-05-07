@@ -229,7 +229,8 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 if (this.extraIds == null) {
                     this.extraIds = new byte[(this.blockData.length >> 2) + 1];
                 }
-                this.extraIds[index >> 1] = (byte) (((index & 1) == 0) ? this.extraIds[index >> 1] & 0xF0 | (blockId >> 8) & 0xF
+                this.extraIds[index >> 1] = (byte) (((index & 1) == 0)
+                        ? this.extraIds[index >> 1] & 0xF0 | (blockId >> 8) & 0xF
                         : this.extraIds[index >> 1] & 0xF | ((blockId >> 8) & 0xF) << 4);
             }
             this.blockData[index] = (byte) dataId;

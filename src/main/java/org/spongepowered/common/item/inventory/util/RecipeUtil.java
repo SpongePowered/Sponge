@@ -39,7 +39,7 @@ public class RecipeUtil {
     public static Optional<Recipe> findMatchingRecipe(Fabric<IInventory> inventory, GridInventoryLens<IInventory, ItemStack> craftingGrid,
             SlotLens<IInventory, ItemStack> outputSlot) {
         // TODO Auto-generated method stub
-        return null;
+        return Optional.empty();
     }
 
 }

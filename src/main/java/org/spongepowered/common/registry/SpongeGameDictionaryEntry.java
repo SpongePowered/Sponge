@@ -35,7 +35,7 @@ public interface SpongeGameDictionaryEntry extends GameDictionary.Entry {
 
     ItemStack createDictionaryStack(int wildcardValue);
 
-    public static final class Specific implements SpongeGameDictionaryEntry {
+    final class Specific implements SpongeGameDictionaryEntry {
 
         private final Item type;
         private final int damage;
@@ -102,7 +102,7 @@ public interface SpongeGameDictionaryEntry extends GameDictionary.Entry {
         }
     }
 
-    public static SpongeGameDictionaryEntry of(ItemStack stack, int wildcardValue) {
+    static SpongeGameDictionaryEntry of(ItemStack stack, int wildcardValue) {
         if (stack.getItemDamage() == wildcardValue) {
             return (SpongeGameDictionaryEntry) stack.getItem();
         }

@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.tileentity.BannerPattern;
-import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.registry.CatalogRegistryModule;

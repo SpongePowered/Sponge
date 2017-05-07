@@ -86,7 +86,7 @@ public class SpongeEventManager implements EventManager {
      * removed.</p>
      */
     private final LoadingCache<Class<? extends Event>, RegisteredListener.Cache> handlersCache =
-            Caffeine.newBuilder().initialCapacity(150).build((eventClass) -> bakeHandlers(eventClass));
+            Caffeine.newBuilder().initialCapacity(150).build(this::bakeHandlers);
 
     @Inject
     public SpongeEventManager(Logger logger, PluginManager pluginManager) {

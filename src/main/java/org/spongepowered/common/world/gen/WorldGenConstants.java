@@ -76,21 +76,14 @@ public final class WorldGenConstants {
 
     };
 
-    public static final Predicate<BlockState> DIRT_OR_GRASS = (input) -> {
-        return input.getType().equals(BlockTypes.DIRT) || input.getType().equals(BlockTypes.GRASS);
-    };
+    public static final Predicate<BlockState> DIRT_OR_GRASS =
+            (input) -> input.getType().equals(BlockTypes.DIRT) || input.getType().equals(BlockTypes.GRASS);
 
-    public static final Predicate<BlockState> DIRT = (input) -> {
-        return input.getType().equals(BlockTypes.DIRT);
-    };
+    public static final Predicate<BlockState> DIRT = (input) -> input.getType().equals(BlockTypes.DIRT);
 
-    public static final Predicate<BlockState> STONE = (input) -> {
-        return input.getType().equals(BlockTypes.STONE);
-    };
+    public static final Predicate<BlockState> STONE = (input) -> input.getType().equals(BlockTypes.STONE);
 
-    public static final Predicate<Location<World>> STONE_LOCATION = (input) -> {
-        return input.getBlock().getType().equals(BlockTypes.STONE);
-    };
+    public static final Predicate<Location<World>> STONE_LOCATION = (input) -> input.getBlock().getType().equals(BlockTypes.STONE);
 
     public static final Predicate<Location<World>> CAVE_LIQUIDS = (input) -> {
         if (input.getBlockY() <= 0 || input.getBlockY() >= 255) {

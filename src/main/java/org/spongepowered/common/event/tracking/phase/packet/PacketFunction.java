@@ -83,7 +83,6 @@ import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
@@ -342,10 +341,7 @@ public interface PacketFunction {
 
             });
         }
-        context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(snapshots ->
-                        TrackingUtil.processBlockCaptures(snapshots, state, context)
-                );
+        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, state, context));
     };
 
     @SuppressWarnings("unchecked") PacketFunction ACTION = (packet, state, player, context) -> {
@@ -747,12 +743,12 @@ public interface PacketFunction {
                     }
                 });
         context.getCapturedBlockSupplier().ifPresentAndNotEmpty(originalBlocks -> {
-                    boolean success = TrackingUtil.processBlockCaptures(originalBlocks, state, context);
-                    if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
-                        EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
-                        PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
-                    }
-                });
+            boolean success = TrackingUtil.processBlockCaptures(originalBlocks, state, context);
+            if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
+                EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
+                PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
+            }
+        });
         context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(drops -> {
             final List<EntityItem> items = drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
             final Cause cause = Cause.source(
@@ -948,10 +944,8 @@ public interface PacketFunction {
             }
         }
     };
-    PacketFunction MOVEMENT = (packet, state, player, context) -> {
-        context.getCapturedBlockSupplier()
+    PacketFunction MOVEMENT = (packet, state, player, context) -> context.getCapturedBlockSupplier()
             .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, state, context));
-    };
 
     PacketFunction UNKNOWN_PACKET = (packet, state, player, context) -> {
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.getServerWorld();

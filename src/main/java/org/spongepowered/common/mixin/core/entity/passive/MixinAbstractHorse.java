@@ -25,26 +25,17 @@
 package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.AbstractHorse;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
-import org.spongepowered.api.data.type.HorseColor;
-import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 @Mixin(AbstractHorse.class)
 @SuppressWarnings("deprecation")
 @Implements(@Interface(iface = Horse.class, prefix = "horse$", unique = true))
 public abstract class MixinAbstractHorse extends MixinEntityAnimal implements Horse {
-
 
     @Unique
     protected void printDeprecatedHorseUsage(String specificSubHeader) {

@@ -48,8 +48,8 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
     }
 
     /**
-     * Builds a {@link Value} of the type produced by this processor from an
-     * input, actual value.
+     * Builds a {@link Value} of the type produced by this
+     * processor from an input, actual value.
      *
      * @param actualValue The actual value
      * @return The constructed {@link Value}
@@ -97,7 +97,7 @@ public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>>
     @Override
     public Optional<V> getApiValueFromContainer(ValueContainer<?> container) {
         final Optional<E> optionalValue = getValueFromContainer(container);
-        if(optionalValue.isPresent()) {
+        if (optionalValue.isPresent()) {
             return Optional.of(constructValue(optionalValue.get()));
         } else {
             return Optional.empty();

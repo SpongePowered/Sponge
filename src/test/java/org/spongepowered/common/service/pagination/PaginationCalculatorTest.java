@@ -26,12 +26,7 @@ package org.spongepowered.common.service.pagination;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
-import org.spongepowered.api.text.format.TextStyles;
-
-import java.util.Collections;
-import java.util.Iterator;
 
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;

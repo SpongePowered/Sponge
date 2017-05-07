@@ -1154,7 +1154,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * @reason Optimizes several blockstate lookups for getting raw light.
      *
      * @param pos The position to get the light for
-     * @param lightType The light type
+     * @param enumSkyBlock The light type
      * @return The raw light
      */
     @Inject(method = "getRawLight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState" +

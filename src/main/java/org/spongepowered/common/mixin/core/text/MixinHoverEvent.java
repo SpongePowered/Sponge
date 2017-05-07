@@ -34,7 +34,6 @@ import net.minecraft.stats.StatList;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;

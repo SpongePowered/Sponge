@@ -38,6 +38,7 @@ public final class SkullTypeRegistryModule extends AbstractPrefixAlternateCatalo
     public SkullTypeRegistryModule() {
         super("minecraft");
     }
+
     @Override
     public void registerDefaults() {
         register(new SpongeSkullType((byte) 0, "minecraft:skeleton", "skeleton"));

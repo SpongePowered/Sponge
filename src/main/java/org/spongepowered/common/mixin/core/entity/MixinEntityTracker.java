@@ -27,21 +27,17 @@ package org.spongepowered.common.mixin.core.entity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 @Mixin(EntityTracker.class)
 public abstract class MixinEntityTracker {
@@ -60,11 +56,15 @@ public abstract class MixinEntityTracker {
     }
 
 
-    @Redirect(method = "track(Lnet/minecraft/entity/Entity;IIZ)V", at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
-    private IllegalStateException reportEntityAlreadyTrackedWithWorld(String string, Entity entityIn, int trackingRange, final int updateFrequency, boolean sendVelocityUpdates) {
-        IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn, ((World) this.world).getName()));;
+    @Redirect(method = "track(Lnet/minecraft/entity/Entity;IIZ)V",
+            at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
+    private IllegalStateException reportEntityAlreadyTrackedWithWorld(String string, Entity entityIn, int trackingRange, final int updateFrequency,
+            boolean sendVelocityUpdates) {
+        IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s",
+                entityIn, ((World) this.world).getName()));
         if (CauseTracker.ENABLED && CauseTracker.getInstance().verboseErrors) {
-            CauseTracker.getInstance().printMessageWithCaughtException("Exception tracking entity", "An entity that was already tracked was added to the tracker!", exception);
+            CauseTracker.getInstance().printMessageWithCaughtException("Exception tracking entity",
+                    "An entity that was already tracked was added to the tracker!", exception);
         }
         return exception;
     }

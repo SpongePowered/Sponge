@@ -314,7 +314,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         }
 
         if (this.keyValues != null) {
-            this.keyValues.entrySet().forEach(entry -> stack.offer((Key) entry.getKey(), entry.getValue()));
+            this.keyValues.forEach((key, value) -> stack.offer((Key) key, value));
         }
 
         return stack;

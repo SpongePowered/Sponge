@@ -128,9 +128,9 @@ public class WorldMigrator {
      * Determines if a Bukkit nether or end is valid for the
      * server's world container.
      *
-     * If the server's world name is "world" and we are being given
+     * <p>If the server's world name is "world" and we are being given
      * a "world_nether" and "world_the_end", we need to rename these to
-     * "DIM-1/DIM1" (if possible).
+     * "DIM-1/DIM1" (if possible).</p>
      *
      * @param worldContainer The world container
      * @param oldWorldPath The old path to the incoming world
@@ -163,8 +163,8 @@ public class WorldMigrator {
      * Renames the world at the provided path to the proper
      * Vanilla naming for Nether and The_End, if needed.
      *
-     * Generally this is DIM-1 and DIM1 for Nether and
-     * The_End respectively.
+     * <p>Generally this is DIM-1 and DIM1 for Nether and
+     * The_End respectively.</p>
      *
      * @param worldPath The path to rename
      * @return The corrected path or the original path if un-needed
@@ -220,7 +220,9 @@ public class WorldMigrator {
         // We successfully copied the region folder elsewhere so now delete the DIM-1/DIM1 inside
         try {
             Files.delete(worldPath.resolve("DIM-1"));
-        } catch (IOException ignore) {}
+        } catch (IOException ignore) {
+
+        }
 
         try {
             Files.delete(worldPath.resolve("DIM1"));

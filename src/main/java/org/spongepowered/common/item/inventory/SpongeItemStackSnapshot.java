@@ -148,7 +148,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     @Override
     public ItemStack createStack() {
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(ItemStackUtil.toNative(this.privateStack.copy()));
-        if(this.compound != null) {
+        if (this.compound != null) {
             nativeStack.setTagCompound(this.compound.copy());
         }
         return ItemStackUtil.fromNative(nativeStack);
@@ -375,11 +375,11 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             return false;
         }
         SpongeItemStackSnapshot that = (SpongeItemStackSnapshot) o;
-        return count == that.count &&
-               damageValue == that.damageValue &&
-               Objects.equal(itemType, that.itemType) &&
-               Objects.equal(compound, that.compound) &&
-               Objects.equal(creatorUniqueId, that.creatorUniqueId);
+        return count == that.count
+                && damageValue == that.damageValue
+                && Objects.equal(itemType, that.itemType)
+                && Objects.equal(compound, that.compound)
+                && Objects.equal(creatorUniqueId, that.creatorUniqueId);
     }
 
     @Override

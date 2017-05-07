@@ -33,7 +33,6 @@ import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import net.minecraft.world.gen.feature.WorldGenBigTree;
 import net.minecraft.world.gen.feature.WorldGenBirchTree;
 import net.minecraft.world.gen.feature.WorldGenBlockBlob;
-import net.minecraft.world.gen.feature.WorldGeneratorBonusChest;
 import net.minecraft.world.gen.feature.WorldGenBush;
 import net.minecraft.world.gen.feature.WorldGenCactus;
 import net.minecraft.world.gen.feature.WorldGenClay;
@@ -70,6 +69,7 @@ import net.minecraft.world.gen.feature.WorldGenTallGrass;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 import net.minecraft.world.gen.feature.WorldGenVines;
 import net.minecraft.world.gen.feature.WorldGenWaterlily;
+import net.minecraft.world.gen.feature.WorldGeneratorBonusChest;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -99,9 +99,8 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
     public Function<Class<?>, PopulatorType> customTypeFunction;
 
     PopulatorTypeRegistryModule() {
-        this.customTypeFunction = (type) -> {
-            return new SpongePopulatorType(type.getSimpleName(), type.getName().contains("net.minecraft.") ? "minecraft" : "unknown");
-        };
+        this.customTypeFunction = (type) ->
+                new SpongePopulatorType(type.getSimpleName(), type.getName().contains("net.minecraft.") ? "minecraft" : "unknown");
     }
 
     @Override

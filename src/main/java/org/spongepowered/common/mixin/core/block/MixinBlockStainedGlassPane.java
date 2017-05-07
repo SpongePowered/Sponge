@@ -24,10 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockStainedGlassPane;
-import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

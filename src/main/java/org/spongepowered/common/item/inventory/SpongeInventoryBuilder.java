@@ -42,7 +42,7 @@ import java.util.function.Consumer;
 
 public class SpongeInventoryBuilder implements Inventory.Builder {
 
-    private final static Map<Class<?>, InventoryArchetype> inventoryTypes = new HashMap<>();
+    private static final Map<Class<?>, InventoryArchetype> inventoryTypes = new HashMap<>();
 
     public static void registerInventory(Class<? extends IInventory> inventory, InventoryArchetype archetype) {
         inventoryTypes.put(inventory, archetype);
@@ -93,7 +93,9 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
         }
 
         InventoryArchetype archetype = inventoryTypes.get(value.getClass());
-        if (archetype == null) throw new UnsupportedOperationException("Currently not supported for all inventories");
+        if (archetype == null) {
+            throw new UnsupportedOperationException("Currently not supported for all inventories");
+        }
         // TODO how to get Archetype from inventory?
         this.archetype = archetype;
         this.properties = new HashMap<>();
@@ -107,7 +109,9 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
 
     @Override
     public Inventory.Builder forCarrier(Class<? extends Carrier> carrier) {
-        if (true) throw new UnsupportedOperationException();
+        if (true) {
+            throw new UnsupportedOperationException();
+        }
         this.archetype = null; // TODO get Archetype for Carrier
         return null;
     }

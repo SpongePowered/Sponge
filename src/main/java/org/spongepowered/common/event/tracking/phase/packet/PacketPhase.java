@@ -301,8 +301,7 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
-            int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         return ((IPacketState) phaseState).shouldCaptureEntity()
                ? context.getCapturedEntities().add(entity)
                : ((IPacketState) phaseState).spawnEntity(context, entity, chunkX, chunkZ);

@@ -130,7 +130,7 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
     /**
      * Initialise children.
      * 
-     * @param slots
+     * @param slots The child slots
      */
     protected abstract void init(SlotProvider<TInventory, TStack> slots);
     

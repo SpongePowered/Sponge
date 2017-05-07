@@ -89,9 +89,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
     @Inject(method = "recheckGaps", at = @At("HEAD"), cancellable = true)
     private void onRecheckGaps(boolean onlyOnce, CallbackInfo ci) {
         if (!this.world.isRemote) {
-            ((IMixinWorldServer) this.world).getLightingExecutor().execute(() -> {
-                this.recheckGapsAsync(onlyOnce);
-            });
+            ((IMixinWorldServer) this.world).getLightingExecutor().execute(() -> this.recheckGapsAsync(onlyOnce));
             ci.cancel();
         }
     }

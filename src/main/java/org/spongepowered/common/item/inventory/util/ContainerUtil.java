@@ -91,7 +91,6 @@ import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.Con
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.mixin.core.inventory.MixinInventoryHelper;
-import org.spongepowered.common.mixin.core.item.inventory.MixinContainer;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
@@ -173,8 +172,7 @@ public final class ContainerUtil {
                         float f1 = RANDOM.nextFloat() * 0.8F + 0.1F;
                         float f2 = RANDOM.nextFloat() * 0.8F + 0.1F;
 
-                        while (!itemStack.isEmpty())
-                        {
+                        while (!itemStack.isEmpty()) {
                             int i = RANDOM.nextInt(21) + 10;
 
                             EntityItem entityitem = new EntityItem(worldServer, x + (double)f, y + (double)f1,
@@ -262,8 +260,7 @@ public final class ContainerUtil {
                     }
                 }
             }
-            if (lens == null && subInventory instanceof LensProvider) // Check if sub-inventory is LensProvider
-            {
+            if (lens == null && subInventory instanceof LensProvider) { // Check if sub-inventory is LensProvider
                 Fabric<IInventory> keyFabric = MinecraftFabric.of(subInventory);
                 lens = ((LensProvider) subInventory).getRootLens(keyFabric, new Adapter(keyFabric));
             }

@@ -77,7 +77,8 @@ public final class SpongeImmutableDataManipulatorBuilder<T extends DataManipulat
 
     @Override
     public Optional<I> createFrom(ImmutableDataHolder<?> dataHolder) {
-        return null;
+        // TODO ?
+        return Optional.empty();
     }
 
     @Override

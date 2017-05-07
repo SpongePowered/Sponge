@@ -63,61 +63,61 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
 
     @Override
     public Optional<ItemStack> poll(EquipmentSlotType equipmentType) {
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public Optional<ItemStack> poll(EquipmentSlotType equipmentType, int limit) {
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public Optional<ItemStack> poll(EquipmentType equipmentType) {
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public Optional<ItemStack> poll(EquipmentType equipmentType, int limit) {
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentSlotType equipmentType) {
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentSlotType equipmentType, int limit) {
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentType equipmentType) {
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public Optional<ItemStack> peek(EquipmentType equipmentType, int limit) {
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public InventoryTransactionResult set(EquipmentSlotType equipmentType, ItemStack stack) {
-        return null;
+        return InventoryTransactionResult.failNoTransactions();
     }
 
     @Override
     public InventoryTransactionResult set(EquipmentType equipmentType, ItemStack stack) {
-        return null;
+        return InventoryTransactionResult.failNoTransactions();
     }
 
     @Override
     public Optional<Slot> getSlot(EquipmentSlotType equipmentType) {
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public Optional<Slot> getSlot(EquipmentType equipmentType) {
-        return null;
+        return Optional.empty();
     }
 }

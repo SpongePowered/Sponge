@@ -52,13 +52,13 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.GoalType;
 import org.spongepowered.api.entity.ai.task.AITaskType;
+import org.spongepowered.api.entity.ai.task.builtin.LookIdleAITask;
 import org.spongepowered.api.entity.ai.task.builtin.SwimmingAITask;
+import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AvoidEntityAITask;
-import org.spongepowered.api.entity.ai.task.builtin.LookIdleAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.RangeAgentAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.WanderAITask;
-import org.spongepowered.api.entity.ai.task.builtin.WatchClosestAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -98,8 +98,8 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.api.statistic.StatisticType;
+import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextStyle;
@@ -111,9 +111,9 @@ import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldArchetype;
-import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.VirtualBiomeType;
@@ -123,8 +123,7 @@ import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.gen.populator.*;
-import org.spongepowered.api.world.gen.type.BiomeTreeType;
-import org.spongepowered.api.world.gen.type.MushroomType;
+import org.spongepowered.api.world.gen.type.*;
 import org.spongepowered.api.world.schematic.BlockPaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.weather.Weather;
@@ -199,7 +198,6 @@ import org.spongepowered.common.registry.type.world.gen.BiomeTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.DungeonMobRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.PopulatorObjectRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryModule;
-import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
@@ -208,8 +206,8 @@ import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettingsBuilder;
 import org.spongepowered.common.world.biome.SpongeVirtualBiomeTypeBuilder;
-import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import org.spongepowered.common.world.gen.builders.*;
+import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -256,7 +254,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(DamageSource.Builder.class, SpongeDamageSourceBuilder::new)
             .registerBuilderSupplier(EntityDamageSource.Builder.class, SpongeEntityDamageSourceBuilder::new)
             .registerBuilderSupplier(IndirectEntityDamageSource.Builder.class, SpongeIndirectEntityDamageSourceBuilder::new)
-            .registerBuilderSupplier(FallingBlockDamageSource.Builder.class, SpongeFallingBlockDamgeSourceBuilder::new)
+            .registerBuilderSupplier(FallingBlockDamageSource.Builder.class, SpongeFallingBlockDamageSourceBuilder::new)
             .registerBuilderSupplier(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
             .registerBuilderSupplier(WorldArchetype.Builder.class, SpongeWorldArchetypeBuilder::new)
             .registerBuilderSupplier(Explosion.Builder.class, SpongeExplosionBuilder::new)

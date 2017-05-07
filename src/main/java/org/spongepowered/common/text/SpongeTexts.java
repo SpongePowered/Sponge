@@ -36,7 +36,6 @@ import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public final class SpongeTexts {
 

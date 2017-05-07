@@ -33,14 +33,12 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableMap;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.h2.engine.ConnectionInfo;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfigManager;
-import org.spongepowered.common.config.SpongeConfigRoot;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -147,12 +145,9 @@ public class SqlServiceImpl implements SqlService, Closeable {
         jdbcConnection = getConnectionUrlFromAlias(jdbcConnection).orElse(jdbcConnection);
         PluginContainer container = null;
         if (plugin != null) {
-            container = Sponge.getPluginManager().fromInstance(plugin).orElseThrow(() -> {
-                return new IllegalArgumentException(
-                        "The provided plugin object does not have an associated plugin container "
-                                + "(in other words, is 'plugin' actually your plugin object?");
-
-            });
+            container = Sponge.getPluginManager().fromInstance(plugin).orElseThrow(() -> new IllegalArgumentException(
+                    "The provided plugin object does not have an associated plugin container "
+                            + "(in other words, is 'plugin' actually your plugin object?"));
         }
         ConnectionInfo info = ConnectionInfo.fromUrl(container, jdbcConnection);
         try {

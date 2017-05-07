@@ -28,13 +28,11 @@ import net.minecraft.block.BlockMagma;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
-import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.util.VecHelper;
 

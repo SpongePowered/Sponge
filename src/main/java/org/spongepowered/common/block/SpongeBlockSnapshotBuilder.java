@@ -37,11 +37,11 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.world.Location;
@@ -254,7 +254,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         }
         if (container.contains(DataQueries.SNAPSHOT_TILE_DATA)) {
             final List<DataView> dataViews = container.getViewList(DataQueries.SNAPSHOT_TILE_DATA).get();
-            DataUtil.deserializeImmutableManipulatorList(dataViews).stream().forEach(builder::add);
+            DataUtil.deserializeImmutableManipulatorList(dataViews).forEach(builder::add);
         }
         return Optional.of(new SpongeBlockSnapshot(builder));
     }

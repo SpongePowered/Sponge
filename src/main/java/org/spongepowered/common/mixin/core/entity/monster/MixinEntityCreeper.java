@@ -49,7 +49,6 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Optional;
 

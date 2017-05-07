@@ -350,8 +350,8 @@ public class EntityActivationRange {
             if (living.hurtTime > 0 || living.getActivePotionEffects().size() > 0) {
                 return true;
             }
-            if (entity instanceof EntityLiving &&
-                    (((EntityLiving) entity).getAITarget() != null || ((EntityLiving) entity).getAttackTarget() != null)) {
+            if (entity instanceof EntityLiving
+                    && (((EntityLiving) entity).getAITarget() != null || ((EntityLiving) entity).getAttackTarget() != null)) {
                 return true;
             }
             if (entity instanceof EntityVillager && ((EntityVillager) entity).isMating()) {
@@ -407,7 +407,8 @@ public class EntityActivationRange {
         // Make sure not on edge of unloaded chunk
         int x = MathHelper.floor(entity.posX);
         int z = MathHelper.floor(entity.posZ);
-        IMixinChunk spongeChunk = isActive ? (IMixinChunk)((IMixinChunkProviderServer) entity.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
+        IMixinChunk spongeChunk = isActive ? (IMixinChunk)((IMixinChunkProviderServer) entity.world.getChunkProvider())
+                .getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4) : null;
         if (isActive && (spongeChunk == null || !spongeChunk.areNeighborsLoaded())) {
             isActive = false;
         }

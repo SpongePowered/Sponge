@@ -36,7 +36,6 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -74,7 +73,7 @@ final class DropItemWithHotkeyState extends BasicInventoryPacketState {
         for (Entity currentEntity : capturedEntities) {
             currentEntity.setCreator(playerMP.getUniqueID());
         }
-        final World spongeWorld = (World) playerMP.world;
+        //final World spongeWorld = (World) playerMP.world;
 
         // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding 'control')
         return usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID

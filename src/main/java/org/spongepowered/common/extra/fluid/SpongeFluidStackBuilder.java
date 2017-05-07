@@ -79,7 +79,7 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<FluidStack> imp
 
     @Override
     public FluidStack build() {
-        checkNotNull(this.fluidType, "Fluidtype cannot be null!");
+        checkNotNull(this.fluidType, "Fluid type cannot be null!");
         checkState(this.volume >= 0, "Volume must be at least zero!");
         return new SpongeFluidStack(this);
     }

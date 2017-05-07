@@ -275,8 +275,10 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
          */
         PackedBackingData(int size, int highestValue) {
             this.arraySize = size;
-            int bits;
-            for (bits = 0; 1 << bits <= highestValue; bits++);
+            int bits = 0;
+            while (1 << bits <= highestValue) {
+                bits++;
+            }
             this.bits = bits;
 
             this.maxValue = (1 << bits) - 1;

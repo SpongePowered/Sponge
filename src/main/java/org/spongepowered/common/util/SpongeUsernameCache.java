@@ -208,7 +208,9 @@ public final class SpongeUsernameCache {
      */
     public static void load() {
         loaded = true;
-        if (!saveFile.exists()) return;
+        if (!saveFile.exists()) {
+            return;
+        }
 
         try {
             String json = Files.toString(saveFile, charset);

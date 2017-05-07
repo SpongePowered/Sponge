@@ -31,7 +31,7 @@ import java.util.Collection;
 public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInventory, TStack>> {
     
     /**
-     * Gets the lens at the specified index in this collection
+     * Gets the lens at the specified index in this collection.
      * 
      * @param index
      * @return
@@ -60,8 +60,8 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
     /**
      * A strongly-typed {@link java.util.Collection#contains}.
      * 
-     * @param lens
-     * @return
+     * @param lens The lens to check for
+     * @return If the collection contains the lens
      */
     boolean has(Lens<TInventory, TStack> lens);
 
@@ -72,7 +72,7 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
      * of the supplied collection).
      * 
      * @param c Collection to inspect
-     * @return
+     * @return If the collection contains all members of the lens
      */
     boolean isSubsetOf(Collection<Lens<TInventory, TStack>> c);
     

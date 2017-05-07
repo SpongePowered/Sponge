@@ -56,7 +56,6 @@ public interface MixinMerchant extends Merchant {
         return this.getCustomer().map(EntityUtil.HUMANOID_TO_PLAYER).orElse(null);
     }
 
-
     @Nullable
     default MerchantRecipeList imerchant$getRecipes(EntityPlayer player) {
         final MerchantRecipeList merchantRecipes = new MerchantRecipeList();

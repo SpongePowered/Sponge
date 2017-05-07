@@ -59,7 +59,7 @@ public class FireworkShapeRegistryModule implements CatalogRegistryModule<Firewo
     @Override
     public void registerDefaults() {
         this.fireworkShapeMap.putAll(FireworkUtils.shapeMapping.values()
-        .stream()
-        .collect(Collectors.toMap(shape -> shape.getId().toLowerCase(Locale.ENGLISH), Function.identity())));
+                .stream()
+                .collect(Collectors.toMap(shape -> shape.getId().toLowerCase(Locale.ENGLISH), Function.identity())));
     }
 }

@@ -39,6 +39,7 @@ public class LocaleRegistryModule implements RegistryModule {
             try {
                 LocaleCache.preload((Locale) field.get(null));
             } catch (IllegalAccessException ignored) {
+                // Ignored
             }
         }
     }

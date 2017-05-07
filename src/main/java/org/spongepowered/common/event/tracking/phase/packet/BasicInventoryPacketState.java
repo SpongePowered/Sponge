@@ -33,7 +33,6 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.IMixinContainer;
 
@@ -71,7 +70,7 @@ public class BasicInventoryPacketState extends BasicPacketState {
     }
 
     /**
-     * We care about some things
+     * We care about some things.
      *
      * @param stateId Flags we care about
      * @param stateMask The care mask

@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.command.multiworld;
 import net.minecraft.command.CommandTime;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;

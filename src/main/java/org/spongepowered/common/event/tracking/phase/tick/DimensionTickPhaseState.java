@@ -32,7 +32,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -55,9 +54,7 @@ class DimensionTickPhaseState extends TickPhaseState {
     @Override
     public void processPostTick(PhaseContext phaseContext) {
         phaseContext.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blockSnapshots -> {
-                    TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
-                });
+                .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
 
         phaseContext.getCapturedEntitySupplier()
                 .ifPresentAndNotEmpty(entities -> {

@@ -767,8 +767,8 @@ public final class WorldManager {
             // Step 7 - Finally, we can create the world and tell it to load
             final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, worldInfo, worldSettings);
 
-            SpongeImpl.getLogger().info("Loading world [{}] ({})", ((org.spongepowered.api.world.World) worldServer).getName(), getDimensionType
-                    (dimensionId).get().getName());
+            SpongeImpl.getLogger().info("Loading world [{}] ({})", ((org.spongepowered.api.world.World) worldServer).getName(),
+                    getDimensionType(dimensionId).get().getName());
         }
     }
 
@@ -882,7 +882,7 @@ public final class WorldManager {
             if (Files.notExists(uidPath)) {
                 uuid = UUID.randomUUID();
             } else {
-                try(final DataInputStream dis = new DataInputStream(Files.newInputStream(uidPath))) {
+                try (DataInputStream dis = new DataInputStream(Files.newInputStream(uidPath))) {
                     uuid = new UUID(dis.readLong(), dis.readLong());
                 } catch (IOException e) {
                     SpongeImpl.getLogger()
@@ -955,8 +955,8 @@ public final class WorldManager {
                 }
 
                 dimensionTypeId = fixDimensionTypeId(dimensionTypeId);
-                org.spongepowered.api.world.DimensionType dimensionType
-                        = Sponge.getRegistry().getType(org.spongepowered.api.world.DimensionType.class, dimensionTypeId).orElse(null);
+                org.spongepowered.api.world.DimensionType dimensionType =
+                        Sponge.getRegistry().getType(org.spongepowered.api.world.DimensionType.class, dimensionTypeId).orElse(null);
                 if (dimensionType == null) {
                     SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Skipping...",
                             worldFolderName, dimensionId);

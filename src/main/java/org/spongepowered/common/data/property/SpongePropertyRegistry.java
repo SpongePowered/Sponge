@@ -56,7 +56,7 @@ public class SpongePropertyRegistry implements PropertyRegistry {
         this.allowRegistrations = false;
         for (Map.Entry<Class<? extends Property<?, ?>>, List<PropertyStore<?>>> entry : this.propertyStoreMap.entrySet()) {
             ImmutableList.Builder<PropertyStore<?>> propertyStoreBuilder = ImmutableList.builder();
-            Collections.sort(entry.getValue(), ComparatorUtil.PROPERTY_STORE_COMPARATOR);
+            entry.getValue().sort(ComparatorUtil.PROPERTY_STORE_COMPARATOR);
             propertyStoreBuilder.addAll(entry.getValue());
             final PropertyStoreDelegate<?> delegate = new PropertyStoreDelegate(propertyStoreBuilder.build());
             this.delegateMap.put(entry.getKey(), delegate);

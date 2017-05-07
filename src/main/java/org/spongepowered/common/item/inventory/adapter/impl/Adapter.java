@@ -166,7 +166,7 @@ public class Adapter implements MinecraftInventoryAdapter {
             try {
                 return Logic.insertStack(inv, lens, stack);
             } catch (Exception ex) {
-               return InventoryTransactionResult.builder().type(Type.ERROR).reject(ItemStackUtil.cloneDefensive(stack)).build();
+                return InventoryTransactionResult.builder().type(Type.ERROR).reject(ItemStackUtil.cloneDefensive(stack)).build();
             }
         }
 

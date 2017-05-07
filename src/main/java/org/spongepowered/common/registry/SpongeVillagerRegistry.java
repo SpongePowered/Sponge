@@ -45,12 +45,15 @@ import java.util.List;
 import java.util.Map;
 
 /*
- * Basically, until Forge figures out their VillagerRegistry stuff, we can only hope to
- * make this useful by enforcing generic villager registrations ourselves.
- * The related Forge PR: https://github.com/MinecraftForge/MinecraftForge/pull/2337
+ * Basically, until Forge figures out their VillagerRegistry stuff, we
+ * can only hope to make this useful by enforcing generic villager
+ * registrations ourselves.
  *
- * Note: This registry is being used by MixinVillager in common as Forge doesn't
- * currently change it.
+ * The related Forge PR:
+ * https://github.com/MinecraftForge/MinecraftForge/pull/2337'
+ *
+ * Note: This registry is being used by MixinVillager in common as
+ * Forge doesn't currently change it.
  */
 public final class SpongeVillagerRegistry implements VillagerRegistry {
 
@@ -163,6 +166,6 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
     }
 
     static final class Holder {
-         static final SpongeVillagerRegistry INSTANCE = new SpongeVillagerRegistry();
+        static final SpongeVillagerRegistry INSTANCE = new SpongeVillagerRegistry();
     }
 }

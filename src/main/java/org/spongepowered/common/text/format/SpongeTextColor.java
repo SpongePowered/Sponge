@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 
 public class SpongeTextColor implements TextColor {

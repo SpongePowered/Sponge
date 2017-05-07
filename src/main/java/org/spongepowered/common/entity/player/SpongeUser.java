@@ -64,13 +64,17 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 /**
- * Implements things that are not implemented by mixins into this class. <p>This
- * class is concrete in order to create instances of User.</p>
+ * Implements things that are not implemented by mixins into this class.
  *
- * <p>List of mixins mixing into this class:<ul>
- * <li>MixinSpongeUser</li>
- * <li>MixinDataHolder</li>
- * <li>MixinSubject</li></ul></p>
+ * <p>This class is concrete in order to create instances of User.</p>
+ *
+ * <p>List of mixins mixing into this class:
+ * <ul>
+ *     <li>MixinSpongeUser</li>
+ *     <li>MixinDataHolder</li>
+ *     <li>MixinSubject</li>
+ * </ul>
+ * </p>
  *
  * TODO Future note about data: The following data manipulators are always
  * applicable to User: BanData, WhitelistData, JoinData
