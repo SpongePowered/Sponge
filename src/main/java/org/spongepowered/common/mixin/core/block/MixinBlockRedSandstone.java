@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockRedSandstone;
-import net.minecraft.block.BlockRedSandstone.EnumType;
 import net.minecraft.block.BlockSandStone;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
@@ -78,11 +77,11 @@ public abstract class MixinBlockRedSandstone extends MixinBlock {
                convertType(blockState.getValue(BlockRedSandstone.TYPE)));
     }
     
-    private SandstoneType convertType(BlockRedSandstone.EnumType type){
+    private SandstoneType convertType(BlockRedSandstone.EnumType type) {
         return (SandstoneType) (Object) BlockSandStone.EnumType.byMetadata(type.getMetadata());
     }
     
-    private BlockRedSandstone.EnumType convertType(BlockSandStone.EnumType type){
+    private BlockRedSandstone.EnumType convertType(BlockSandStone.EnumType type) {
         return BlockRedSandstone.EnumType.byMetadata(type.getMetadata());
     }
 }

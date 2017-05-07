@@ -35,11 +35,12 @@ import org.spongepowered.common.event.damage.SpongeCommonDamageSource;
 /*
  * @author gabizou
  *
- * This is absolutely required for the abstract damage sources to have the correct
- * strings at runtime, this is the ultimate combination of the superclass class
- * transformer to force {@link AbstractDamageSource} extend {@link SpongeCommonDamageSource}
- * but still retain the sanity of the proper "damage type" for mods and native
- * Minecraft damage source.
+ * This is absolutely required for the abstract damage sources to
+ * have the correct strings at runtime, this is the ultimate
+ * combination of the superclass class transformer to force
+ * {@link AbstractDamageSource} extend {@link SpongeCommonDamageSource}
+ * but still retain the sanity of the proper "damage type" for mods
+ * and native Minecraft damage source.
  */
 @Mixin(AbstractDamageSource.class)
 public abstract class MixinAbstractDamageSource implements DamageSource {

@@ -39,12 +39,14 @@ import javax.annotation.Nullable;
 
 @Mixin(EntityTameable.class)
 public abstract class MixinEntityTameable_Cached_Owner extends MixinEntityAnimal {
+
     @Shadow @Final protected static DataParameter<Optional<UUID>> OWNER_UNIQUE_ID;
     @Nullable private Optional<UUID> cachedOwnerId;
 
     /**
      * @author gabizou - July 26th, 2016
-     * @reason Uses the cached owner id to save constant lookups from the data watcher
+     * @reason Uses the cached owner id to save constant lookups
+     *     from the data watcher
      *
      * @return The owner id string
      */
@@ -59,7 +61,7 @@ public abstract class MixinEntityTameable_Cached_Owner extends MixinEntityAnimal
 
     /**
      * @author gabizou - July 26th, 2016
-     * @reason stores the cached owner id
+     * @reason Stores the cached owner id
      *
      * @param ownerUuid The owner id to set
      */

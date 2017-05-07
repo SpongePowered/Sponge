@@ -73,6 +73,7 @@ public abstract class MixinBlockSilverfish extends MixinBlock {
     }
 
     private ImmutableDisguisedBlockData getSilverfishTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisguisedBlockData.class, (DisguisedBlockType) blockState.getValue(BlockSilverfish.VARIANT));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisguisedBlockData.class,
+                (DisguisedBlockType) blockState.getValue(BlockSilverfish.VARIANT));
     }
 }

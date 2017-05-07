@@ -69,6 +69,7 @@ public abstract class MixinBlockPressurePlateWeighted extends MixinBlock {
     }
 
     private ImmutableRedstonePoweredData getPowerFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.getValue(BlockPressurePlateWeighted.POWER));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class,
+                blockState.getValue(BlockPressurePlateWeighted.POWER));
     }
 }

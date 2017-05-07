@@ -46,20 +46,20 @@ import java.util.Optional;
 @Mixin(BlockFenceGate.class)
 public abstract class MixinBlockFenceGate extends MixinBlock {
 
-        @Override
-        public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-            return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
-                    .addAll(super.getManipulators(blockState))
-                    .add(getIsOpenFor(blockState))
-                    .add(getIsPoweredFor(blockState))
-                    .add(getInWallFor(blockState))
-                    .build();
+    @Override
+    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
+                .addAll(super.getManipulators(blockState))
+                .add(getIsOpenFor(blockState))
+                .add(getIsPoweredFor(blockState))
+                .add(getInWallFor(blockState))
+                .build();
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return super.supports(immutable) || ImmutableOpenData.class.isAssignableFrom(immutable) || ImmutablePoweredData.class.isAssignableFrom(immutable)
-                || ImmutableInWallData.class.isAssignableFrom(immutable);
+        return super.supports(immutable) || ImmutableOpenData.class.isAssignableFrom(immutable)
+                || ImmutablePoweredData.class.isAssignableFrom(immutable) || ImmutableInWallData.class.isAssignableFrom(immutable);
     }
 
     @Override

@@ -82,7 +82,8 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
     }
 
     // So that any additional optimizations can be added in succession.
-    private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean >> builder()
+    private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings =
+            ImmutableMap.<String, Function<OptimizationCategory, Boolean>> builder()
             .put("org.spongepowered.common.mixin.optimization.MixinExplosion_Explosion",
                     (module) -> true) // TODO the velocity changes need to be sent to the client
             .put("org.spongepowered.common.mixin.optimization.MixinSpongeImplHooks_Item_Pre_Merge",

@@ -48,9 +48,11 @@ import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive
 public abstract class MixinBlockTNT extends MixinBlock {
 
     private static final String TARGET_PRIME = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z";
-    private static final String TARGET_PRIME_SOUND = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
+    private static final String TARGET_PRIME_SOUND =
+            "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
     private static final String TARGET_REMOVE = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z";
-    private static final String TARGET_REMOVE_BLOCK = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z";
+    private static final String TARGET_REMOVE_BLOCK =
+            "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z";
 
     private EntityLivingBase igniter;
     private boolean primeCancelled;

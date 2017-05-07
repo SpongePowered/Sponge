@@ -145,7 +145,8 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
     /**
      * @author blood - February 20th, 2017
-     * @reason Since lighting updates run async, we need to always return true to send client updates.
+     * @reason Since lighting updates run async, we need to always
+     *     return true to send client updates.
      *
      * @return Whether block position can see sky
      */

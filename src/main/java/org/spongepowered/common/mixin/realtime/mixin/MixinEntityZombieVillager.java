@@ -34,7 +34,8 @@ import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
 @Mixin(EntityZombieVillager.class)
 public abstract class MixinEntityZombieVillager {
 
-    private static final String ENTITY_ZOMBIE_GET_CONVERSION_BOOST_METHOD = "Lnet/minecraft/entity/monster/EntityZombieVillager;getConversionProgress()I";
+    private static final String ENTITY_ZOMBIE_GET_CONVERSION_BOOST_METHOD =
+            "Lnet/minecraft/entity/monster/EntityZombieVillager;getConversionProgress()I";
 
     @Shadow protected abstract int getConversionProgress();
 

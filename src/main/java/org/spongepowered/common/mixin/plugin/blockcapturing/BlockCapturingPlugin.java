@@ -45,7 +45,7 @@ public class BlockCapturingPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-       return SpongeImpl.getGlobalConfig().getConfig().getModules().usesBlockCapturing();
+        return SpongeImpl.getGlobalConfig().getConfig().getModules().usesBlockCapturing();
     }
 
     @Override

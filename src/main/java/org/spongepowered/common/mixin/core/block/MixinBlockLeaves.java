@@ -60,8 +60,8 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.List;
@@ -103,12 +103,13 @@ public abstract class MixinBlockLeaves extends MixinBlock {
 
     /**
      * @author gabizou - August 2nd, 2016
-     * @reason Rewrite to handle both drops and the change state for leaves
-     * that are considered to be decaying, so the drops do not leak into
-     * whatever previous phase is being handled in. Since the issue is that
-     * the block change takes place in a different phase (more than likely),
-     * the drops are either "lost" or not considered for drops because the
-     * blocks didn't change according to whatever previous phase.
+     * @reason Rewrite to handle both drops and the change state for
+     *     leaves that are considered to be decaying, so the drops do
+     *     not leak into whatever previous phase is being handled in.
+     *     Since the issue is that the block change takes place in a
+     *     different phase (more than likely), the drops are either
+     *     "lost" or not considered for drops because the blocks
+     *     didn't change according to whatever previous phase.
      *
      * @param worldIn The world in
      * @param pos The position
@@ -177,10 +178,10 @@ public abstract class MixinBlockLeaves extends MixinBlock {
             final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
             final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
             if (blockState.getBlock() instanceof BlockOldLeaf) {
-                if (treeType.equals(TreeTypes.OAK) ||
-                        treeType.equals(TreeTypes.BIRCH) ||
-                        treeType.equals(TreeTypes.SPRUCE) ||
-                        treeType.equals(TreeTypes.JUNGLE)) {
+                if (treeType.equals(TreeTypes.OAK)
+                        || treeType.equals(TreeTypes.BIRCH)
+                        || treeType.equals(TreeTypes.SPRUCE)
+                        || treeType.equals(TreeTypes.JUNGLE)) {
                     return Optional.of((BlockState) blockState.withProperty(BlockOldLeaf.VARIANT, type));
                 }
             } else if (blockState.getBlock() instanceof BlockNewLeaf) {

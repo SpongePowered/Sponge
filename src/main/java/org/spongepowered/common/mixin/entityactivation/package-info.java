@@ -22,22 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.entityactivation;
-
-import net.minecraft.entity.projectile.EntityArrow;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-
-@Mixin(EntityArrow.class)
-public abstract class MixinEntityArrow_Activation extends MixinEntity_Activation {
-
-    @Shadow private int ticksInGround;
-
-    @Override
-    public void inactiveTick() {
-        if (this.onGround) {
-            this.ticksInGround += 1;
-        }
-        super.inactiveTick();
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.entityactivation;

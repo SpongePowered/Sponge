@@ -27,12 +27,10 @@ package org.spongepowered.common.mixin.entityactivation;
 import net.minecraft.entity.EntityAgeable;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.world.World;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.SoftOverride;
 
-@NonnullByDefault
 @Mixin(EntityAgeable.class)
 public abstract class MixinEntityAgeable_Activation extends EntityCreature {
 
