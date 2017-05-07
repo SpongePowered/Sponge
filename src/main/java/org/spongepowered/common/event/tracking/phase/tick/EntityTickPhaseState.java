@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.IProjectile;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.item.EntityXPOrb;
@@ -276,6 +277,12 @@ class EntityTickPhaseState extends TickPhaseState {
     }
 
     private void fireMovementEvents(net.minecraft.entity.Entity entity, Cause cause) {
+        // Ignore movement event if entity is dead, a projectile, or item.
+        // Note: Projectiles are handled with CollideBlockEvent.Impact
+        if (entity.isDead || entity instanceof IProjectile || entity instanceof EntityItem) {
+            return;
+        }
+
         Entity spongeEntity = (Entity) entity;
 
         if (entity.lastTickPosX != entity.posX
