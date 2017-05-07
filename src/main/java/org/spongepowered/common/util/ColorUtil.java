@@ -101,8 +101,7 @@ public final class ColorUtil {
 
     public static boolean hasColor(ItemStack stack) {
         final Item item = stack.getItem();
-        return item instanceof ItemArmor &&
-                ((ItemArmor) item).getArmorMaterial() == ArmorMaterial.LEATHER;
+        return item instanceof ItemArmor && ((ItemArmor) item).getArmorMaterial() == ArmorMaterial.LEATHER;
     }
 
     private ColorUtil() {

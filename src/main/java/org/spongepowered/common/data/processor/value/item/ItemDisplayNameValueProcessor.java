@@ -110,5 +110,6 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
-        return DataTransactionResult.failNoData();    }
+        return DataTransactionResult.failNoData();
+    }
 }

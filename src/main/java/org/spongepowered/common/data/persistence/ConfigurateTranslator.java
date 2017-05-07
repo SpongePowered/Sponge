@@ -39,8 +39,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A translator for translating {@link DataView}s into {@link ConfigurationNode}
- * s.
+ * A translator for translating {@link DataView}s into
+ * {@link ConfigurationNode}s.
  */
 public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> {
 
@@ -138,4 +138,5 @@ public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> 
     public String getName() {
         return "ConfigurationNodeTranslator";
     }
+
 }

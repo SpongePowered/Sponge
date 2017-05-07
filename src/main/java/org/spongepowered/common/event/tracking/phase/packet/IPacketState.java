@@ -72,10 +72,14 @@ public interface IPacketState extends IPhaseState {
     default boolean doBlockCapturing() {
         return true;
     }
+
     /**
-     * A defaulted method to handle entities that are spawned due to packet placement during post processing.
-     * Examples can include a player placing a redstone block priming a TNT explosive.
-     *  @param phaseContext The phase context
+     * A defaulted method to handle entities that are spawned
+     * due to packet placement during post processing.
+     * <p>Examples can include a player placing a redstone
+     * block priming a TNT explosive.</p>
+     *
+     * @param phaseContext The phase context
      * @param entities The list of entities to spawn
      */
     default void postSpawnEntities(PhaseContext phaseContext, ArrayList<Entity> entities) {
@@ -100,11 +104,11 @@ public interface IPacketState extends IPhaseState {
      * customarily with contexts and such. Captured entities are handled in
      * their respective {@link PacketFunction}s.
      *
-     * @param context
-     * @param entity
-     * @param chunkX
-     * @param chunkZ
-     * @return True if the entity was spawned
+     * @param context The context of the phase
+     * @param entity The entity to spawn
+     * @param chunkX The chunk to spawn in's X
+     * @param chunkZ The chunk to spawn in's Y
+     * @return If the entity was spawned
      */
     default boolean spawnEntity(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;

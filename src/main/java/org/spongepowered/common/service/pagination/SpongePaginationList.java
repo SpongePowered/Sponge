@@ -51,7 +51,8 @@ public class SpongePaginationList implements PaginationList {
     private Text paginationSpacer;
     private int linesPerPage;
 
-    public SpongePaginationList(SpongePaginationService service, Iterable<Text> contents, Text title, Text header, Text footer, Text paginationSpacer, int linesPerPage) {
+    public SpongePaginationList(SpongePaginationService service, Iterable<Text> contents, Text title, Text header,
+            Text footer, Text paginationSpacer, int linesPerPage) {
         this.service = service;
         this.contents = contents;
         this.title = Optional.ofNullable(title);
@@ -116,9 +117,11 @@ public class SpongePaginationList implements PaginationList {
 
         ActivePagination pagination;
         if (this.contents instanceof List) { // If it started out as a list, it's probably reasonable to copy it to another list
-            pagination = new ListPagination(receiver, calculator, ImmutableList.copyOf(counts), title, this.header.orElse(null), this.footer.orElse(null), this.paginationSpacer);
+            pagination = new ListPagination(receiver, calculator, ImmutableList.copyOf(counts), title, this.header.orElse(null),
+                    this.footer.orElse(null), this.paginationSpacer);
         } else {
-            pagination = new IterablePagination(receiver, calculator, counts, title, this.header.orElse(null), this.footer.orElse(null), this.paginationSpacer);
+            pagination = new IterablePagination(receiver, calculator, counts, title, this.header.orElse(null),
+                    this.footer.orElse(null), this.paginationSpacer);
         }
 
         this.service.getPaginationState(receiver, true).put(pagination);

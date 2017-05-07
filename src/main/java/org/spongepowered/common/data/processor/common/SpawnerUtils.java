@@ -69,7 +69,7 @@ public class SpawnerUtils {
     @SuppressWarnings("unchecked")
     public static void setNextEntity(MobSpawnerBaseLogic logic, WeightedSerializableObject<EntityArchetype> value) {
         NBTTagCompound compound = NbtTranslator.getInstance().translateData(value.get().getEntityData());
-        if(!compound.hasKey(NbtDataUtil.ENTITY_TYPE_ID)) {
+        if (!compound.hasKey(NbtDataUtil.ENTITY_TYPE_ID)) {
             final ResourceLocation resource = EntityList.REGISTRY.getNameForObject(
                     (Class<? extends Entity>) value.get().getType().getEntityClass());
             compound.setString(NbtDataUtil.ENTITY_TYPE_ID, resource == null ? "" : resource.toString());
@@ -107,7 +107,7 @@ public class SpawnerUtils {
             WeightedObject<EntityArchetype> object = (WeightedObject<EntityArchetype>) entry;
 
             NBTTagCompound compound = NbtTranslator.getInstance().translateData(object.get().getEntityData());
-            if(!compound.hasKey(NbtDataUtil.ENTITY_TYPE_ID)) {
+            if (!compound.hasKey(NbtDataUtil.ENTITY_TYPE_ID)) {
                 compound.setString(NbtDataUtil.ENTITY_TYPE_ID, EntityList.REGISTRY.getNameForObject(
                         (Class<? extends Entity>) object.get().getType().getEntityClass()).toString());
             }

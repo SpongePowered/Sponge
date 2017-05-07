@@ -149,8 +149,7 @@ public class SpongeObjective implements Objective {
         String name = score.scorePlayerName;
         Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap = (Map)scoreboard.entitiesScoreObjectives.get(name);
 
-        if (scoreMap == null)
-        {
+        if (scoreMap == null) {
             scoreMap = Maps.newHashMap();
             scoreboard.entitiesScoreObjectives.put(name, scoreMap);
         }

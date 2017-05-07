@@ -284,7 +284,7 @@ public final class NbtDataUtil {
     }
 
     public static void removeLoreFromNBT(ItemStack stack) {
-        if(stack.getSubCompound(ITEM_DISPLAY) == null) {
+        if (stack.getSubCompound(ITEM_DISPLAY) == null) {
             return;
         }
         stack.getSubCompound(ITEM_DISPLAY).removeTag(ITEM_LORE);
@@ -296,9 +296,9 @@ public final class NbtDataUtil {
     }
 
     public static boolean hasColorFromNBT(ItemStack stack) {
-        return stack.hasTagCompound() &&
-                stack.getTagCompound().hasKey(ITEM_DISPLAY) &&
-                stack.getTagCompound().getCompoundTag(ITEM_DISPLAY).hasKey(ITEM_COLOR);
+        return stack.hasTagCompound()
+                && stack.getTagCompound().hasKey(ITEM_DISPLAY)
+                && stack.getTagCompound().getCompoundTag(ITEM_DISPLAY).hasKey(ITEM_COLOR);
     }
 
     public static Optional<Color> getColorFromNBT(NBTTagCompound subCompound) {
@@ -309,7 +309,7 @@ public final class NbtDataUtil {
     }
 
     public static void removeColorFromNBT(ItemStack stack) {
-        if(stack.getSubCompound(ITEM_DISPLAY) == null) {
+        if (stack.getSubCompound(ITEM_DISPLAY) == null) {
             return;
         }
         stack.getSubCompound(ITEM_DISPLAY).removeTag(ITEM_COLOR);
@@ -336,7 +336,7 @@ public final class NbtDataUtil {
         stack.getTagCompound().setTag(ITEM_BOOK_PAGES, list);
     }
 
-    public static void setPagesToNBT(ItemStack stack, List<Text> pages){
+    public static void setPagesToNBT(ItemStack stack, List<Text> pages) {
         final NBTTagList list = SpongeTexts.asJsonNBT(pages);
         final NBTTagCompound compound = getOrCreateCompound(stack);
         compound.setTag(ITEM_BOOK_PAGES, list);

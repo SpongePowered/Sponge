@@ -30,7 +30,6 @@ import com.google.common.collect.Maps;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.selector.ArgumentType;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
@@ -38,7 +37,6 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.function.Function;
 
-@NonnullByDefault
 public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>> implements ArgumentType<T> {
 
     private static final Map<String, Function<String, ?>> converters = Maps.newHashMap();

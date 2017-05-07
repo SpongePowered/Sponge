@@ -33,8 +33,9 @@ import java.util.Collections;
 import java.util.Iterator;
 
 /**
- * A relationship between a lens and properties for the lens when viewed through
- * another, primarily used as elements in lens collections.
+ * A relationship between a lens and properties for the lens
+ * when viewed through another, primarily used as elements in
+ * lens collections.
  *  
  * @param <TInventory>
  * @param <TStack>
@@ -42,22 +43,22 @@ import java.util.Iterator;
 public final class LensHandle<TInventory, TStack> {
 
     /**
-     * The lens
+     * The lens.
      */
     public Lens<TInventory, TStack> lens;
     
     /**
-     * Ordinal, when required 
+     * Ordinal, when required.
      */
     public int ordinal = -1;
     
     /**
-     * Properties for the lens when viewed through the parent lens
+     * Properties for the lens when viewed through the parent lens.
      */
     private Collection<InventoryProperty<?, ?>> properties;
     
     /**
-     * Create an "empty" lens handle
+     * Create an "empty" lens handle.
      */
     public LensHandle() {
         this(null);
@@ -65,10 +66,10 @@ public final class LensHandle<TInventory, TStack> {
     
     /**
      * Create a lens handle containing the specified lens, and define the
-     * supplied properties
+     * supplied properties.
      * 
-     * @param lens
-     * @param properties
+     * @param lens Then lens
+     * @param properties The inventory properties
      */
     public LensHandle(Lens<TInventory, TStack> lens, InventoryProperty<?, ?>... properties) {
         this.lens = lens;
@@ -82,10 +83,10 @@ public final class LensHandle<TInventory, TStack> {
 
     /**
      * Create a lens handle containing the specified lens, and define the
-     * supplied properties
+     * supplied properties.
      * 
-     * @param lens
-     * @param properties
+     * @param lens The lens
+     * @param properties The inventory properties
      */
     public LensHandle(Lens<TInventory, TStack> lens, Collection<InventoryProperty<?, ?>> properties) {
         this.lens = lens;

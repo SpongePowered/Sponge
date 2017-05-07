@@ -70,13 +70,13 @@ public class BeaconDataProcessor extends AbstractTileEntityDataProcessor<TileEnt
     @Override
     protected Map<Key<?>, ?> getValues(TileEntityBeacon dataHolder) {
         ImmutableMap.Builder<Key<?>, Object> builder = ImmutableMap.builder();
-        int primaryID = dataHolder.getField(1);
-        int secondaryID = dataHolder.getField(2);
-        if (primaryID > 0) {
-            builder.put(Keys.BEACON_PRIMARY_EFFECT, Optional.ofNullable(Potion.getPotionById(primaryID)));
+        int primaryId = dataHolder.getField(1);
+        int secondaryId = dataHolder.getField(2);
+        if (primaryId > 0) {
+            builder.put(Keys.BEACON_PRIMARY_EFFECT, Optional.ofNullable(Potion.getPotionById(primaryId)));
         }
-        if (secondaryID > 0 && dataHolder.getField(0) == 4) {
-            builder.put(Keys.BEACON_SECONDARY_EFFECT, Optional.ofNullable(Potion.getPotionById(secondaryID)));
+        if (secondaryId > 0 && dataHolder.getField(0) == 4) {
+            builder.put(Keys.BEACON_SECONDARY_EFFECT, Optional.ofNullable(Potion.getPotionById(secondaryId)));
         }
         return builder.build();
     }

@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.scheduler;
 
+import co.aikar.timings.TimingsManager;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-
-import co.aikar.timings.TimingsManager;
-
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;

@@ -245,25 +245,29 @@ public class FilterGenerator {
 
     private static Object filterFromAnnotation(Class<? extends Annotation> cls) {
         Object filter;
-        if ((filter = SubtypeFilter.valueOf(cls)) != null)
+        if ((filter = SubtypeFilter.valueOf(cls)) != null) {
             return filter;
-        if ((filter = EventTypeFilter.valueOf(cls)) != null)
+        }
+        if ((filter = EventTypeFilter.valueOf(cls)) != null) {
             return filter;
-        if ((filter = ParameterSource.valueOf(cls)) != null)
+        }
+        if ((filter = ParameterSource.valueOf(cls)) != null) {
             return filter;
-        if ((filter = ParameterFilter.valueOf(cls)) != null)
+        }
+        if ((filter = ParameterFilter.valueOf(cls)) != null) {
             return filter;
+        }
         return null;
     }
 
-    private static enum SubtypeFilter {
+    private enum SubtypeFilter {
         INCLUDE(Include.class),
         EXCLUDE(Exclude.class),
         ;
 
         private final Class<? extends Annotation> cls;
 
-        private SubtypeFilter(Class<? extends Annotation> cls) {
+        SubtypeFilter(Class<? extends Annotation> cls) {
             this.cls = cls;
         }
 
@@ -286,13 +290,13 @@ public class FilterGenerator {
         }
     }
 
-    private static enum EventTypeFilter {
+    private enum EventTypeFilter {
         CANCELLATION(IsCancelled.class),
         ;
 
         private final Class<? extends Annotation> cls;
 
-        private EventTypeFilter(Class<? extends Annotation> cls) {
+        EventTypeFilter(Class<? extends Annotation> cls) {
             this.cls = cls;
         }
 
@@ -313,7 +317,7 @@ public class FilterGenerator {
         }
     }
 
-    private static enum ParameterSource {
+    private enum ParameterSource {
         CAUSE_FIRST(First.class),
         CAUSE_LAST(Last.class),
         CAUSE_BEFORE(Before.class),
@@ -326,7 +330,7 @@ public class FilterGenerator {
 
         private final Class<? extends Annotation> cls;
 
-        private ParameterSource(Class<? extends Annotation> cls) {
+        ParameterSource(Class<? extends Annotation> cls) {
             this.cls = cls;
         }
 
@@ -368,14 +372,14 @@ public class FilterGenerator {
         }
     }
 
-    private static enum ParameterFilter {
+    private enum ParameterFilter {
         SUPPORTS(Supports.class),
         HAS(Has.class),
         ;
 
         private final Class<? extends Annotation> cls;
 
-        private ParameterFilter(Class<? extends Annotation> cls) {
+        ParameterFilter(Class<? extends Annotation> cls) {
             this.cls = cls;
         }
 

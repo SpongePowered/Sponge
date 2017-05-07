@@ -119,10 +119,10 @@ public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEn
 
     @Override
     public Optional<FurnaceData> fill(DataContainer container, FurnaceData furnaceData) {
-        if (!container.contains(Keys.PASSED_BURN_TIME.getQuery()) ||
-                !container.contains(Keys.MAX_BURN_TIME.getQuery()) ||
-                !container.contains(Keys.PASSED_COOK_TIME.getQuery()) ||
-                !container.contains(Keys.MAX_COOK_TIME.getQuery())) {
+        if (!container.contains(Keys.PASSED_BURN_TIME.getQuery())
+                || !container.contains(Keys.MAX_BURN_TIME.getQuery())
+                || !container.contains(Keys.PASSED_COOK_TIME.getQuery())
+                || !container.contains(Keys.MAX_COOK_TIME.getQuery())) {
             return Optional.empty();
         }
 

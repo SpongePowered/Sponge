@@ -58,7 +58,9 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected Optional<BlockState> getVal(EntityMinecart container) {
-        if(!container.hasDisplayTile()) return Optional.empty();
+        if (!container.hasDisplayTile()) {
+            return Optional.empty();
+        }
         return Optional.of((BlockState) container.getDisplayTile());
     }
 
@@ -69,7 +71,7 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if(container instanceof EntityMinecart) {
+        if (container instanceof EntityMinecart) {
             EntityMinecart cart = (EntityMinecart) container;
             ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
             cart.setHasDisplayTile(false);

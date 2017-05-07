@@ -47,9 +47,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.function.BiFunction;
 
-/**
- *
- */
 public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolumeWorker<V> {
 
     protected final V volume;

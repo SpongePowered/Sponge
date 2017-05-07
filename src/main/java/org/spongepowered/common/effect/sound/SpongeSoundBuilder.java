@@ -45,5 +45,5 @@ public class SpongeSoundBuilder implements SoundType.Builder {
     @Override
     public SoundType build(String id) throws IllegalStateException {
         return (SoundType) new SoundEvent(new ResourceLocation(checkNotNull(id)));
-   }
+    }
 }

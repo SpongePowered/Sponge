@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * A generalized
+ * A generalized generation phase state.
  */
 class GeneralGenerationPhaseState implements IPhaseState {
 

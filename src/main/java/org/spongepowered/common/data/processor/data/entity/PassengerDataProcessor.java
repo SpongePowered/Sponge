@@ -47,8 +47,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<net.minecraft.entity.Entity, List<UUID>, ListValue<UUID>,
-        PassengerData, ImmutablePassengerData> {
+public class PassengerDataProcessor
+        extends AbstractEntitySingleDataProcessor<net.minecraft.entity.Entity, List<UUID>, ListValue<UUID>, PassengerData, ImmutablePassengerData> {
 
     public PassengerDataProcessor() {
         super(net.minecraft.entity.Entity.class, Keys.PASSENGERS);
@@ -105,7 +105,10 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
                         .map(Entity::getUniqueId)
                         .collect(GuavaCollectors.toImmutableList());
                 entity.removePassengers();
-                return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(constructImmutableValue(passengers)).build();
+                return DataTransactionResult.builder()
+                        .result(DataTransactionResult.Type.SUCCESS)
+                        .replace(constructImmutableValue(passengers))
+                        .build();
             }
             return DataTransactionResult.successNoData();
         }

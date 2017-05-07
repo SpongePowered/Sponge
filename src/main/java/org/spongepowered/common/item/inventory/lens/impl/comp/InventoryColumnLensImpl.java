@@ -33,7 +33,6 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
 
-
 public class InventoryColumnLensImpl extends Inventory2DLensImpl implements InventoryColumnLens<IInventory, net.minecraft.item.ItemStack> {
 
     public InventoryColumnLensImpl(int base, int height, int stride, SlotProvider<IInventory, ItemStack> slots) {

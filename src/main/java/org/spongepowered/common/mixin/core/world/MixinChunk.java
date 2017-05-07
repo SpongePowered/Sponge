@@ -100,7 +100,6 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinCachable;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -882,7 +881,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         checkNotNull(box, "box");
         checkNotNull(filter, "filter");
         final List<Entity> entities = new ArrayList<>();
-        getEntitiesOfTypeWithinAAAB(net.minecraft.entity.Entity.class, VecHelper.toMC(box), entities,
+        getEntitiesOfTypeWithinAAAB(net.minecraft.entity.Entity.class, VecHelper.toMinecraft(box), entities,
             entity -> filter.test((org.spongepowered.api.entity.Entity) entity));
         return entities.stream().map(entity -> (org.spongepowered.api.entity.Entity) entity).collect(Collectors.toSet());
     }

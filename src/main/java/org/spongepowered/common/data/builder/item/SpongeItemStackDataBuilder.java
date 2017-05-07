@@ -32,12 +32,12 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.persistence.SerializedDataTransaction;
 import org.spongepowered.common.data.util.DataQueries;
@@ -56,8 +56,8 @@ public class SpongeItemStackDataBuilder extends AbstractDataBuilder<ItemStack> i
     @Override
     protected Optional<ItemStack> buildContent(DataView container) throws InvalidDataException {
         checkNotNull(container);
-        if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT) || !container.contains(
-                DataQueries.ITEM_DAMAGE_VALUE)) {
+        if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT)
+                || !container.contains(DataQueries.ITEM_DAMAGE_VALUE)) {
             return Optional.empty();
         }
         final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);

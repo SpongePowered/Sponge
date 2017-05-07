@@ -71,8 +71,8 @@ public final class SpongeItemStackGenerator implements ItemStackGenerator {
             return false;
         }
         SpongeItemStackGenerator that = (SpongeItemStackGenerator) o;
-        return Objects.equal(this.baseType, that.baseType) &&
-               Objects.equal(this.biConsumers, that.biConsumers);
+        return Objects.equal(this.baseType, that.baseType)
+                && Objects.equal(this.biConsumers, that.biConsumers);
     }
 
     @Override

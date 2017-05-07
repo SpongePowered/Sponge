@@ -102,7 +102,8 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
         checkNotNull(this.contents, "contents");
 
         if (this.paginationList == null) {
-            this.paginationList = new SpongePaginationList(this.service, this.contents, this.title, this.header, this.footer, this.paginationSpacer, this.linesPerPage);
+            this.paginationList = new SpongePaginationList(this.service, this.contents, this.title, this.header,
+                    this.footer, this.paginationSpacer, this.linesPerPage);
         }
         return this.paginationList;
     }

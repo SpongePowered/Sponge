@@ -159,7 +159,7 @@ final class DeathPhase extends EntityPhaseState {
             SpongeImpl.postEvent(destruct);
             if (!destruct.isCancelled()) {
                 for (Entity entity : destruct.getEntities()) {
-                   EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
+                    EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                 }
             }
 

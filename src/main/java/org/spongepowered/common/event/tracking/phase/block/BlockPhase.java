@@ -73,8 +73,7 @@ public final class BlockPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
-            int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         return this.allowEntitySpawns(phaseState)
                ? context.getCapturedEntities().add(entity)
                : super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);

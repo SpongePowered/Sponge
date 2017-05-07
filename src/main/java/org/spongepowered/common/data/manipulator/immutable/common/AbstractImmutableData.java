@@ -53,13 +53,15 @@ import java.util.stream.Collectors;
 /**
  * So, considering this is the root of the immutable variants of
  * {@link DataManipulator}, otherwise known as {@link ImmutableDataManipulator}s.
- * The advantage of these types of {@link DataManipulator}s is that they can not be
- * mutated once created. In other words, it's safe to pass around these immutable
- * variants across threads without worry of the underlying values being changed.
+ * The advantage of these types of {@link DataManipulator}s is that they can
+ * not be mutated once created. In other words, it's safe to pass around
+ * these immutable variants across threads without worry of the underlying
+ * values being changed.
  *
- * It may be possible that some commonly used {@link ImmutableDataManipulator}s
- * may be cached for better performance when processing obtaining new
- * {@link ImmutableDataManipulator}s with different values.
+ * <p>It may be possible that some commonly used
+ * {@link ImmutableDataManipulator}s may be cached for better performance
+ * when processing obtaining new {@link ImmutableDataManipulator}s
+ * with different values.</p>
  *
  * <p>Note: It is ABSOLUTELY REQUIRED to {@link #registerKeyValue(Key, Supplier)}
  * and {@link #registerFieldGetter(Key, Supplier)} for all possible

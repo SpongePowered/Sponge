@@ -37,6 +37,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -46,7 +47,6 @@ import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -70,7 +70,6 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     Vector3i coords;
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable NBTTagCompound compound;
-
 
     public SpongeBlockSnapshotBuilder() {
         super(BlockSnapshot.class, 1);
@@ -167,7 +166,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         checkNotNull(key, "key");
         checkState(this.blockState != null);
         this.blockState = this.blockState.with(key, value).orElse(this.blockState);
-        if(this.extendedState != null) {
+        if (this.extendedState != null) {
             this.extendedState = this.extendedState.with(key, value).orElse(this.extendedState);
         }
         return this;
@@ -224,8 +223,6 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         final UUID worldUuid = UUID.fromString(container.getString(Queries.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);
-        Optional<String> creatorUuid = container.getString(Queries.CREATOR_ID);
-        Optional<String> notifierUuid = container.getString(Queries.NOTIFIER_ID);
 
         // We now reconstruct the custom data and all extra data.
         final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class).get();
@@ -240,6 +237,10 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
                 .extendedState(extendedState)
                 .position(coordinate)
                 .worldId(worldUuid);
+
+        Optional<String> creatorUuid = container.getString(Queries.CREATOR_ID);
+        Optional<String> notifierUuid = container.getString(Queries.NOTIFIER_ID);
+
         if (creatorUuid.isPresent()) {
             builder.creator(UUID.fromString(creatorUuid.get()));
         }

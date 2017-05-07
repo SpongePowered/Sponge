@@ -96,6 +96,7 @@ class DimensionTickPhaseState extends TickPhaseState {
                     }
                 });
     }
+
     @Override
     public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
 

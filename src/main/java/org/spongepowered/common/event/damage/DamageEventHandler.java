@@ -48,11 +48,11 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -181,9 +181,11 @@ public class DamageEventHandler {
 
     /**
      * Only used in Vanilla. The Forge version is much different.
-     * Basically, this accepts the various "objects" needed to work for an armor piece to be "damaged".
+     * Basically, this accepts the various "objects" needed
+     * to work for an armor piece to be "damaged".
      *
-     * This is also where we can likely throw a damage item event.
+     * <p>This is also where we can likely throw
+     * a damage item event.</p>
      *
      * @param entity The entity who has the armor
      * @param damageSource The source of the damage
@@ -316,7 +318,7 @@ public class DamageEventHandler {
         final float absorptionAmount = entityLivingBase.getAbsorptionAmount();
         if (absorptionAmount > 0) {
             DoubleUnaryOperator function = damage ->
-                -(Math.max(damage - Math.max(damage - absorptionAmount, 0.0F), 0.0F));
+                - (Math.max(damage - Math.max(damage - absorptionAmount, 0.0F), 0.0F));
             DamageModifier modifier = DamageModifier.builder()
                 .cause(Cause.of(NamedCause.of(DamageEntityEvent.ABSORPTION, entityLivingBase),
                                 NamedCause.of(DamageEntityEvent.CREATOR, entityLivingBase)))

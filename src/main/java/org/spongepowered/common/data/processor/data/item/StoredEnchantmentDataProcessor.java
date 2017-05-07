@@ -66,7 +66,8 @@ public class StoredEnchantmentDataProcessor extends AbstractItemSingleDataProces
         NBTTagList list = new NBTTagList();
         for (ItemEnchantment enchantment : value) {
             NBTTagCompound tag = new NBTTagCompound();
-            tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) enchantment.getEnchantment()));
+            tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment
+                    .getEnchantmentID((net.minecraft.enchantment.Enchantment) enchantment.getEnchantment()));
             tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, (short) enchantment.getLevel());
             list.appendTag(tag);
         }

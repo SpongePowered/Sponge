@@ -30,7 +30,6 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -38,6 +37,7 @@ import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -82,7 +82,8 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
     @Override
     public SubjectCollection getContainingCollection() {
-        SpongePermissionService permission = (SpongePermissionService) SpongeImpl.getGame().getServiceManager().provide(PermissionService.class).get();
+        SpongePermissionService permission =
+                (SpongePermissionService) SpongeImpl.getGame().getServiceManager().provide(PermissionService.class).get();
         return permission.getSubjects(SpongePermissionService.SUBJECTS_SYSTEM);
     }
 

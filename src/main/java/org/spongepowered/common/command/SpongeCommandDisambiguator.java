@@ -29,13 +29,13 @@ import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
 import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.List;
@@ -72,8 +72,8 @@ public class SpongeCommandDisambiguator implements Disambiguator {
                     final List<CommandMapping> ownedMatchingCommands = ImmutableList.copyOf(Iterables.filter(availableOptions,
                             Predicates.in(ownedCommands)));
                     if (ownedMatchingCommands.isEmpty()) {
-                        SpongeImpl.getGame().getServer().getConsole().sendMessage(t("Plugin " + container.get().getName() + " was specified as the "
-                                                                                    + "preferred owner for " + aliasUsed + ", but does not have any such command!"));
+                        SpongeImpl.getGame().getServer().getConsole().sendMessage(t("Plugin " + container.get().getName() + " was specified as"
+                                + " the preferred owner for " + aliasUsed + ", but does not have any such command!"));
                     } else if (ownedMatchingCommands.size() > 1) {
                         throw new IllegalStateException("Plugin " + container.get().getName() + " seems to have multiple commands registered as "
                                 + aliasUsed + "! This is a programming error!");

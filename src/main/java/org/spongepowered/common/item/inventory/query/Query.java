@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
@@ -227,7 +227,8 @@ public class Query<TInventory, TStack> {
         return new Query<TInventory, TStack>(adapter, strategy);
     }
 
-    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, InventoryProperty<?, ?>... props) {
+    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter,
+            InventoryProperty<?, ?>... props) {
         QueryStrategy<TInventory, TStack, InventoryProperty<?, ?>> strategy = Query.<TInventory, TStack, InventoryProperty<?, ?>>getStrategy(Type.PROPERTIES).with(props);
         return new Query<TInventory, TStack>(adapter, strategy);
     }

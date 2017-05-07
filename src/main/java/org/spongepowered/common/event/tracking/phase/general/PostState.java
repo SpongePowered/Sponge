@@ -44,6 +44,7 @@ final class PostState extends GeneralState {
     public boolean tracksBlockRestores() {
         return false; // TODO - check that this really is needed.
     }
+
     @Override
     void unwind(PhaseContext context) {
         final IPhaseState unwindingState = context.firstNamed(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class)

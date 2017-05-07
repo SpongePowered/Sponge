@@ -60,6 +60,7 @@ class WeatherTickPhaseState extends TickPhaseState {
             TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
         });
     }
+
     @Override
     public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
 

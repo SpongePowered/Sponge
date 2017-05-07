@@ -57,7 +57,7 @@ public final class ReflectionUtil {
         if (args == null) {
             args = new Object[] {null};
         }
-        final Constructor<T>tConstructor = findConstructor(objectClass, args);
+        final Constructor<T> tConstructor = findConstructor(objectClass, args);
         try {
             return tConstructor.newInstance(args);
         } catch (Exception e) {

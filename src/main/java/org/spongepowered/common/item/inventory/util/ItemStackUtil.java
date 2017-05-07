@@ -38,8 +38,9 @@ public abstract class ItemStackUtil {
     }
 
     /**
-     * Gets the {@link NBTTagCompound} for the provided {@link net.minecraft.item.ItemStack}
-     * such that if the stack does not have an existing tag, the tag will be created and set.
+     * Gets the {@link NBTTagCompound} for the provided
+     * {@link net.minecraft.item.ItemStack} such that if the stack
+     * does not have an existing tag, the tag will be created and set.
      *
      * @param itemStack The itemstack to get the tag compound from
      * @return The non-null compound

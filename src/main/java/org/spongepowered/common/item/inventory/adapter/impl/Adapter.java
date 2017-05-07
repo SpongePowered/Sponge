@@ -61,7 +61,7 @@ import java.util.stream.Collectors;
 
 public class Adapter implements MinecraftInventoryAdapter {
 
-    public static abstract class Logic {
+    public abstract static class Logic {
 
         private Logic() {}
 
@@ -121,7 +121,8 @@ public class Adapter implements MinecraftInventoryAdapter {
             return Optional.empty();
         }
 
-        private static Optional<ItemStack> findStacks(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, int limit, boolean remove) {
+        private static Optional<ItemStack> findStacks(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens,
+                int limit, boolean remove) {
             ItemStack result = null;
 
             for (int ord = 0; ord < lens.slotCount(); ord++) {
@@ -152,11 +153,13 @@ public class Adapter implements MinecraftInventoryAdapter {
             return Optional.ofNullable(result);
         }
 
-        public static InventoryTransactionResult insertSequential(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter, ItemStack stack) {
+        public static InventoryTransactionResult insertSequential(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter,
+                ItemStack stack) {
             return Logic.insertSequential(adapter.getInventory(), adapter.getRootLens(), stack);
         }
 
-        public static InventoryTransactionResult insertSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, ItemStack stack) {
+        public static InventoryTransactionResult insertSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens,
+                ItemStack stack) {
             if (lens == null) {
                 return InventoryTransactionResult.builder().type(Type.FAILURE).reject(ItemStackUtil.cloneDefensive(stack)).build();
             }
@@ -167,7 +170,8 @@ public class Adapter implements MinecraftInventoryAdapter {
             }
         }
 
-        private static InventoryTransactionResult insertStack(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, ItemStack stack) {
+        private static InventoryTransactionResult insertStack(Fabric<IInventory> inv, Lens<IInventory,
+                net.minecraft.item.ItemStack> lens, ItemStack stack) {
             InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
             net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
@@ -190,11 +194,13 @@ public class Adapter implements MinecraftInventoryAdapter {
             return result.build();
         }
 
-        public static InventoryTransactionResult appendSequential(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter, ItemStack stack) {
+        public static InventoryTransactionResult appendSequential(InventoryAdapter<IInventory, net.minecraft.item.ItemStack> adapter,
+                ItemStack stack) {
             return Logic.appendSequential(adapter.getInventory(), adapter.getRootLens(), stack);
         }
 
-        public static InventoryTransactionResult appendSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, ItemStack stack) {
+        public static InventoryTransactionResult appendSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens,
+                ItemStack stack) {
             InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
             net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
@@ -295,7 +301,8 @@ public class Adapter implements MinecraftInventoryAdapter {
          * @param lens The lens to search with
          * @param stack The stack to search with
          * @param quantity The quantity to find
-         * @return true if at least <code>quantity</code> of given stack has been found in given inventory
+         * @return True if at least <code>quantity</code> of
+         *     given stack has been found in given inventory
          */
         public static boolean contains(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, ItemStack stack, int quantity) {
             net.minecraft.item.ItemStack nonNullStack = ItemStackUtil.toNative(stack); // Handle null as empty
@@ -379,7 +386,8 @@ public class Adapter implements MinecraftInventoryAdapter {
     protected SlotCollection initSlots(Fabric<IInventory> inventory, Lens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
         if (parent instanceof InventoryAdapter) {
             @SuppressWarnings("unchecked")
-            SlotProvider<IInventory, net.minecraft.item.ItemStack> slotProvider = ((InventoryAdapter<IInventory, net.minecraft.item.ItemStack>)parent).getSlotProvider();
+            SlotProvider<IInventory, net.minecraft.item.ItemStack> slotProvider =
+                    ((InventoryAdapter<IInventory, net.minecraft.item.ItemStack>)parent).getSlotProvider();
             if (slotProvider instanceof SlotCollection) {
                 return (SlotCollection) slotProvider;
             }

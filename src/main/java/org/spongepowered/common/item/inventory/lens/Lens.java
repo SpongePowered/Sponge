@@ -50,31 +50,35 @@ import java.util.List;
 public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TStack> {
     
     /**
-     * Returns the <em>primary</em> parent lens of this lens. Can be null. 
+     * Returns the <em>primary</em> parent lens of this lens.
+     *
+     * <p>Can be null.</p>
      */
     Lens<TInventory, TStack> getParent();
     
     /**
-     * Get the corresponding adapter type for this lens
+     * Get the corresponding adapter type for this lens.
      * 
-     * @return class of the adapter which corresponds to this specific lens type
+     * @return Class of the adapter which corresponds to
+     *     this specific lens type
      */
     Class<? extends Inventory> getAdapterType();
     
     /**
-     * Get an instance of the corresponding adapter type for this lens
+     * Get an instance of the corresponding adapter type
+     * for this lens.
      * 
-     * @return adapter for this lens
+     * @return Adapter for this lens
      */
     InventoryAdapter<TInventory, TStack> getAdapter(Fabric<TInventory> inv, Inventory parent);
     
     /**
-     * Returns the display name of this lens 
+     * Returns the display name of this lens.
      */
     public abstract Translation getName(Fabric<TInventory> inv);
     
     /**
-     * Get the number of slots referenced by this lens
+     * Get the number of slots referenced by this lens.
      * 
      * @return The number of slots referenced
      */
@@ -85,7 +89,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * whether this lens has access to a slot with the specified absolute index.
      *
      * @param index Absolute slot index
-     * @return true if this lens has a path to the specified slot index
+     * @return True if this lens has a path to the specified slot index
      */
 //    @Deprecated // TODO deprecate
     boolean hasSlot(int index); //TInventory inv, int index);

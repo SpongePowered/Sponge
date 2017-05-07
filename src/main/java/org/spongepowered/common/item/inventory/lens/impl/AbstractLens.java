@@ -128,7 +128,7 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
     }
 
     /**
-     * Initialise children
+     * Initialise children.
      * 
      * @param slots
      */

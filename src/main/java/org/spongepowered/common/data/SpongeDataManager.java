@@ -158,8 +158,8 @@ public final class SpongeDataManager implements DataManager {
         }
         if (version < toVersion || version > toVersion) { // There wasn't a registered updater for the version being requested
             Exception e = new IllegalStateException("The requested content version for: " + clazz.getSimpleName() + " was requested, "
-                                                    + "\nhowever, the versions supplied: from "+ fromVersion + " to " + toVersion + " is impossible"
-                                                    + "\nas the latest version registered is: " + version+". Please notify the developer of"
+                                                    + "\nhowever, the versions supplied: from " + fromVersion + " to " + toVersion + " is impossible"
+                                                    + "\nas the latest version registered is: " + version + ". Please notify the developer of"
                                                     + "\nthe requested consumed DataSerializable of this error.");
             e.printStackTrace();
             return Optional.empty();
@@ -235,14 +235,14 @@ public final class SpongeDataManager implements DataManager {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>>
-    getManipulatorBuilder(Class<T> manipulatorClass) {
+        getManipulatorBuilder(Class<T> manipulatorClass) {
         return Optional.ofNullable((DataManipulatorBuilder<T, I>) this.builderMap.get(checkNotNull(manipulatorClass)));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>>
-    getImmutableManipulatorBuilder(Class<I> immutableManipulatorClass) {
+        getImmutableManipulatorBuilder(Class<I> immutableManipulatorClass) {
         return Optional.ofNullable((DataManipulatorBuilder<T, I>) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
     }
 

@@ -64,14 +64,18 @@ import javax.sql.DataSource;
 /**
  * Implementation of a SQL-using service.
  *
- * <p>This implementation does a few interesting things<br>
- *     - It's thread-safe
- *     - It allows applying additional driver-specific connection
- *     properties -- this allows us to do some light performance tuning in
- *     cases where we don't want to be as conservative as the driver developers
- *     - Caches DataSources. This cache is currently never cleared of stale entries
- *     -- if some plugin makes database connections to a ton of different databases
- *     we may want to implement this, but it is kinda unimportant.
+ * <p>This implementation does a few interesting things:</p>
+ *
+ * <br>
+ *
+ * <p><ul>
+ *     <li>It's thread safe.</li>
+ *     <li>It allows apply addition driver specific connection properties</li>
+ *     <li>Has light weight performance tuning</li>
+ *     <li>Caches {@link DataSource}s and never clears stale entries</li>
+ *     <li>We may want to implement the above if plugins want to connect
+ *     to many data sources.</li>
+ * </ul></p>
  */
 @NonnullByDefault
 public class SqlServiceImpl implements SqlService, Closeable {
@@ -82,9 +86,8 @@ public class SqlServiceImpl implements SqlService, Closeable {
     static {
         ImmutableMap.Builder<String, Properties> build = ImmutableMap.builder();
         final Properties mySqlProps = new Properties();
-        mySqlProps.setProperty("useConfigs",
-                "maxPerformance"); // Config options based on http://assets.en.oreilly
-                // .com/1/event/21/Connector_J%20Performance%20Gems%20Presentation.pdf
+        mySqlProps.setProperty("useConfigs", "maxPerformance");
+        // Config options based on http://assets.en.oreilly.com/1/event/21/Connector_J%20Performance%20Gems%20Presentation.pdf
         build.put("com.mysql.jdbc.Driver", mySqlProps);
         build.put("org.mariadb.jdbc.Driver", mySqlProps);
 
@@ -174,12 +177,17 @@ public class SqlServiceImpl implements SqlService, Closeable {
         private final String fullUrl;
 
         /**
-         * Create a new ConnectionInfo with the give parameters
-         * @param user The username to use when connecting to th database
-         * @param password The password to connect with. If user is not null, password must not be null
-         * @param driverClassName The class name of the driver to use for this connection
-         * @param authlessUrl A JDBC url for this driver not containing authentication information
-         * @param fullUrl The full jdbc url containing user, password, and database info
+         * Create a new ConnectionInfo with the give parameters.
+         *
+         * @param user The username to use when connecting to the database
+         * @param password The password to connect with. If user is not null,
+         *     password must not be null
+         * @param driverClassName The class name of the driver to use for
+         *     this connection
+         * @param authlessUrl A JDBC url for this driver not containing
+         *     authentication information
+         * @param fullUrl The full jdbc url containing user, password,
+         *     and database info
          */
         public ConnectionInfo(@Nullable String user, @Nullable String password, String driverClassName, String authlessUrl, String fullUrl) {
             this.user = user;
@@ -234,12 +242,14 @@ public class SqlServiceImpl implements SqlService, Closeable {
         }
 
         /**
-         * Extracts the connection info from a JDBC url with additional authentication information as specified in {@link SqlService}.
+         * Extracts the connection info from a JDBC url with additional
+         * authentication information as specified in {@link SqlService}.
          *
          *
          * @param container The plugin to put a path relative to
          * @param fullUrl The full JDBC URL as specified in SqlService
-         * @return A constructed ConnectionInfo object using the info from the provided URL
+         * @return A constructed ConnectionInfo object using the info from
+         *     the provided URL
          * @throws SQLException If the driver for the given URL is not present
          */
         public static ConnectionInfo fromUrl(@Nullable PluginContainer container, String fullUrl) throws SQLException {

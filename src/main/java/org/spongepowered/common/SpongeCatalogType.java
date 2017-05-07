@@ -78,7 +78,7 @@ public abstract class SpongeCatalogType implements CatalogType {
                 .add("name", getName());
     }
 
-    public static abstract class Translatable extends SpongeCatalogType implements org.spongepowered.api.text.translation.Translatable {
+    public abstract static class Translatable extends SpongeCatalogType implements org.spongepowered.api.text.translation.Translatable {
 
         private final Translation translation;
 

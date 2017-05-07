@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world;
 
-
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;

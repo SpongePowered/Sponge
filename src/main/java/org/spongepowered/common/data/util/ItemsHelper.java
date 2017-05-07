@@ -61,7 +61,6 @@ public final class ItemsHelper {
             }
         } else if (((Item) type).getHasSubtypes()) {
             // TODO we need a better way to represent identifiable damage values
-
         } else {
 
         }

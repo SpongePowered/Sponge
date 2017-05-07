@@ -49,7 +49,9 @@ public class OffsetValueProcessor extends AbstractSpongeValueProcessor<EntityMin
 
     @Override
     protected boolean set(EntityMinecart container, Integer value) {
-        if(!container.hasDisplayTile()) return false;
+        if (!container.hasDisplayTile()) {
+            return false;
+        }
         container.setDisplayTileOffset(value);
         return true;
     }
@@ -68,4 +70,5 @@ public class OffsetValueProcessor extends AbstractSpongeValueProcessor<EntityMin
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
 }

@@ -78,9 +78,12 @@ public class SpongeManipulatorRegistry {
         return INSTANCE;
     }
 
-    private final Map<Class<? extends DataManipulator<?, ?>>, Class<? extends DataManipulator<?, ?>>> interfaceToImplDataManipulatorClasses = new IdentityHashMap<>();
-    private final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> dataProcessorDelegates =  new IdentityHashMap<>();
-    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> immutableDataProcessorDelegates =  new IdentityHashMap<>();
+    private final Map<Class<? extends DataManipulator<?, ?>>, Class<? extends DataManipulator<?, ?>>> interfaceToImplDataManipulatorClasses =
+            new IdentityHashMap<>();
+    private final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> dataProcessorDelegates =
+            new IdentityHashMap<>();
+    private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> immutableDataProcessorDelegates =
+            new IdentityHashMap<>();
     private ImmutableTable<Class<? extends DataManipulator<?, ?>>, NbtDataType, NbtDataProcessor<?, ?>> nbtProcessorTable = ImmutableTable.of();
     private ImmutableTable<Key<?>, NbtDataType, NbtValueProcessor<?, ?>> nbtValueTable = ImmutableTable.of();
     private final Map<Key<? extends BaseValue<?>>, ValueProcessorDelegate<?, ?>> valueDelegates = new IdentityHashMap<>();
@@ -175,7 +178,8 @@ public class SpongeManipulatorRegistry {
         return Optional.ofNullable((DataRegistration<M, I>) dataRegistration);
     }
 
-    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void validateRegistration(SpongeDataRegistrationBuilder<M, I> builder) {
+    <M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> void
+        validateRegistration(SpongeDataRegistrationBuilder<M, I> builder) {
         checkState(this.tempRegistry != null);
         final String dataId = builder.id;
         this.tempRegistry.registrations.stream()
@@ -359,12 +363,12 @@ public class SpongeManipulatorRegistry {
         ImmutableMap.Builder<String, DataRegistration<?, ?>> idBuilder = ImmutableMap.builder();
         ImmutableMultimap.Builder<PluginContainer, DataRegistration<?, ?>> pluginBuilder = ImmutableMultimap.builder();
         this.tempRegistry.registrations.forEach(registration -> {
-                registrationBuilder.add(registration);
-                manipulatorBuilder.put(registration.getManipulatorClass(), registration);
-                immutableBuilder.put(registration.getImmutableManipulatorClass(), registration);
-                idBuilder.put(registration.getId(), registration);
-                pluginBuilder.put(registration.getPluginContainer(), registration);
-            });
+            registrationBuilder.add(registration);
+            manipulatorBuilder.put(registration.getManipulatorClass(), registration);
+            immutableBuilder.put(registration.getImmutableManipulatorClass(), registration);
+            idBuilder.put(registration.getId(), registration);
+            pluginBuilder.put(registration.getPluginContainer(), registration);
+        });
 
         this.registrations = registrationBuilder.build();
         this.manipulatorRegistrationMap = manipulatorBuilder.build();

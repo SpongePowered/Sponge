@@ -38,7 +38,8 @@ public class ImmutableSpongeRepresentedItemData
         extends AbstractImmutableSingleData<ItemStackSnapshot, ImmutableRepresentedItemData, RepresentedItemData>
         implements ImmutableRepresentedItemData {
 
-    private final ImmutableValue<ItemStackSnapshot> immutableValue = new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, this.value);
+    private final ImmutableValue<ItemStackSnapshot> immutableValue =
+            new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, this.value);
 
     public ImmutableSpongeRepresentedItemData(ItemStackSnapshot itemStack) {
         super(ImmutableRepresentedItemData.class, itemStack, Keys.REPRESENTED_ITEM);

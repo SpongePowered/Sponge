@@ -25,10 +25,8 @@
 package org.spongepowered.common.text.selector;
 
 import org.spongepowered.api.text.selector.SelectorType;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeCatalogType;
 
-@NonnullByDefault
 public class SpongeSelectorType extends SpongeCatalogType implements SelectorType {
 
     private String name;

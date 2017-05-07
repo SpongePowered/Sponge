@@ -67,7 +67,7 @@ public class FallingBlockDataProcessor extends AbstractEntityDataProcessor<Entit
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityFallingBlock entity) {
-        return ImmutableMap.<Key<?>, Object> builder()
+        return ImmutableMap.<Key<?>, Object>builder()
                 .put(Keys.FALL_DAMAGE_PER_BLOCK, (double)entity.fallHurtAmount)
                 .put(Keys.MAX_FALL_DAMAGE, (double)entity.fallHurtMax)
                 .put(Keys.FALLING_BLOCK_STATE, entity.fallTile)

@@ -52,7 +52,7 @@ public class PassedBurnTimeValueProcessor extends AbstractSpongeValueProcessor<T
 
     @Override
     protected boolean set(TileEntityFurnace container, Integer value) {
-        if(value > container.getField(1)){ //value cannot be higher than the maximum
+        if (value > container.getField(1)) { //value cannot be higher than the maximum
             return false;
         }
         container.setField(0, container.getField(1) - value);

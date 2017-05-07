@@ -29,9 +29,6 @@ import org.spongepowered.api.world.extent.MutableBiomeVolume;
 import org.spongepowered.api.world.extent.worker.MutableBiomeVolumeWorker;
 import org.spongepowered.api.world.extent.worker.procedure.BiomeVolumeFiller;
 
-/**
- *
- */
 public class SpongeMutableBiomeVolumeWorker<V extends MutableBiomeVolume> extends SpongeBiomeVolumeWorker<V> implements MutableBiomeVolumeWorker<V> {
 
     public SpongeMutableBiomeVolumeWorker(V volume) {

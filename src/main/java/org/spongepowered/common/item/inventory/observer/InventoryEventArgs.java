@@ -32,7 +32,7 @@ import org.spongepowered.common.util.observer.EventArgs;
 public class InventoryEventArgs extends EventArgs {
     
     /**
-     * Type of thing what did properly happen
+     * Type of thing what did properly happen.
      */
     public enum Type {
         
@@ -47,7 +47,7 @@ public class InventoryEventArgs extends EventArgs {
         SLOT_PROPERTY_CHANGED, //(false),
         
         /**
-         * InventoryView added to scope 
+         * InventoryView added to scope.
          */
         LENS_ADDED, //(false),
         
@@ -58,7 +58,7 @@ public class InventoryEventArgs extends EventArgs {
         LENS_INVALIDATED, //(false),
         
         /**
-         * InventoryView in the scope was removed 
+         * InventoryView in the scope was removed.
          */
         LENS_REMOVED; //(false);
         

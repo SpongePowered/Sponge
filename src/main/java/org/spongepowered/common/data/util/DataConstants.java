@@ -37,9 +37,9 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 
 /**
  * A standard class where all various "constants" for various data are stored.
@@ -50,8 +50,8 @@ import org.spongepowered.api.util.weighted.WeightedSerializableObject;
  * IS ABSOLUTELY FORBIDDEN UNTIL THE GAME IS DURING THE POST-INIT PHASE DUE
  * TO REGISTRATION OF CATALOG TYPES. UNTIL THE REGISTRATION IS HANDLED WHERE
  * THE PROVIDED CATALOG TYPES ARE PROPERLY REGISTERED AND NOT <code>null</code>,
- * ANY USE OF THIS CLASS WILL RESULT IN A GLORIOUS FAIL INDESCRIBABLE MAGNITUDES.
- * </p>
+ * ANY USE OF THIS CLASS WILL RESULT IN A GLORIOUS FAIL OF INDESCRIBABLE
+ * MAGNITUDES.</p>
  */
 public final class DataConstants {
 
@@ -133,8 +133,8 @@ public final class DataConstants {
     public static final short DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES = 6;
     public static final short DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE = 16;
     public static final short DEFAULT_SPAWNER_SPAWN_RANGE = 4;
-    public static final WeightedSerializableObject<EntityArchetype> DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN = new WeightedSerializableObject<>
-            (EntityUtil.archetype(Catalog.DEFAULT_SPAWNER_ENTITY), 1);
+    public static final WeightedSerializableObject<EntityArchetype> DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN =
+            new WeightedSerializableObject<>(EntityUtil.archetype(Catalog.DEFAULT_SPAWNER_ENTITY), 1);
 
 
     @SuppressWarnings("deprecation")
@@ -187,6 +187,7 @@ public final class DataConstants {
 
         public static final HorseStyle DEFAULT_STYLE = HorseStyles.NONE;
         public static final HorseColor DEFAULT_COLOR = HorseColors.WHITE;
+
         private Horse() {
         }
     }

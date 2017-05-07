@@ -67,29 +67,23 @@ public class CustomContainer extends Container {
         ItemStack itemstack = ItemStack.EMPTY;
         Slot slot = this.inventorySlots.get(index);
 
-        if (slot != null && slot.getHasStack())
-        {
+        if (slot != null && slot.getHasStack()) {
             ItemStack itemstack1 = slot.getStack();
             itemstack = itemstack1.copy();
 
-            if (index < inv.getSizeInventory())
-            {
-                if (!this.mergeItemStack(itemstack1, inv.getSizeInventory(), this.inventorySlots.size(), true))
-                {
+            if (index < inv.getSizeInventory()) {
+                if (!this.mergeItemStack(itemstack1, inv.getSizeInventory(), this.inventorySlots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
             }
-            else if (!this.mergeItemStack(itemstack1, 0, inv.getSizeInventory(), false))
-            {
+            else if (!this.mergeItemStack(itemstack1, 0, inv.getSizeInventory(), false)) {
                 return ItemStack.EMPTY;
             }
 
-            if (itemstack1.getCount() == 0)
-            {
+            if (itemstack1.getCount() == 0) {
                 slot.putStack(ItemStack.EMPTY);
             }
-            else
-            {
+            else {
                 slot.onSlotChanged();
             }
         }

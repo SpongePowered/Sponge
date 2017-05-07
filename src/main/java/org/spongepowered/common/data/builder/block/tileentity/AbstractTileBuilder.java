@@ -56,11 +56,10 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 
@@ -73,7 +72,8 @@ import java.util.Optional;
  *
  * @param <T> The type of sponge tile entity
  */
-public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.tileentity.TileEntity> extends AbstractDataBuilder<T> implements DataBuilder<T> {
+public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.tileentity.TileEntity> extends AbstractDataBuilder<T>
+        implements DataBuilder<T> {
 
     private static final Map<Class<? extends TileEntity>, BlockType> classToTypeMap = Maps.newHashMap();
 

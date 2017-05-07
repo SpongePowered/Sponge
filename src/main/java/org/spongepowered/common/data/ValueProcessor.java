@@ -110,11 +110,11 @@ public interface ValueProcessor<E, V extends BaseValue<E>> {
      * values found for {@link MobSpawnerData} and {@link CommandData}. Using
      * the {@link ValueContainer#get(Key)} and
      * {@link DataManipulator#set(Key, Object)} remains to be the optimal methods
-     * to use as they do not rely on the implementation attempting to guess which
-     * {@link Key}, {@link Value} and {@link ValueProcessor} is needed to
-     * manipulate the data.</p>
+     * to use as they do not rely on the implementation attempting to guess
+     * which {@link Key}, {@link Value} and {@link ValueProcessor} is
+     * needed to manipulate the data.</p>
      *
-     * @param container The value container to retrieve the value froms
+     * @param container The value container to retrieve the value from
      * @return The value, if available and compatible
      */
     Optional<E> getValueFromContainer(ValueContainer<?> container);

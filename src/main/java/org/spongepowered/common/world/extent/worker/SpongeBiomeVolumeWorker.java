@@ -39,9 +39,6 @@ import org.spongepowered.api.world.extent.worker.procedure.BiomeVolumeVisitor;
 
 import java.util.function.BiFunction;
 
-/**
- *
- */
 public class SpongeBiomeVolumeWorker<V extends BiomeVolume> implements BiomeVolumeWorker<V> {
 
     protected final V volume;

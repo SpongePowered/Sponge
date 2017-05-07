@@ -67,8 +67,7 @@ public class SpongeWeather implements Weather {
             return false;
         }
         SpongeWeather that = (SpongeWeather) o;
-        return Objects.equal(id, that.id) &&
-               Objects.equal(name, that.name);
+        return Objects.equal(id, that.id) && Objects.equal(name, that.name);
     }
 
     @Override

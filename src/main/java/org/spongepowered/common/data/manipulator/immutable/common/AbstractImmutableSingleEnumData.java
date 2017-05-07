@@ -45,7 +45,8 @@ public abstract class AbstractImmutableSingleEnumData<E extends Enum<E>, I exten
     private final E defaultValue;
     private final ImmutableValue<E> cachedValue;
 
-    protected AbstractImmutableSingleEnumData(Class<I> immutableClass, E value, E defaultValue, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
+    protected AbstractImmutableSingleEnumData(Class<I> immutableClass, E value, E defaultValue, Key<? extends BaseValue<E>> usedKey,
+            Class<? extends M> mutableClass) {
         super(immutableClass, value, usedKey);
         checkArgument(!Modifier.isAbstract(mutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(mutableClass.getModifiers()), "The immutable class cannot be an interface!");

@@ -46,6 +46,7 @@ public class FakeSlotLensImpl extends SlotLensImpl {
 
     @Override
     public boolean setStack(Fabric<IInventory> inv, ItemStack stack) {
-        throw new IllegalStateException(String.format("Cannot set stack for invalid slot %s with id %s!", this.slot, ((IMixinSlot) this.slot).getSlotIndex()));
+        throw new IllegalStateException(
+                String.format("Cannot set stack for invalid slot %s with id %s!", this.slot, ((IMixinSlot) this.slot).getSlotIndex()));
     }
 }

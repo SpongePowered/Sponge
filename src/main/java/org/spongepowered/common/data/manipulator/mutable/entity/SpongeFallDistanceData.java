@@ -32,7 +32,8 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 import org.spongepowered.common.data.util.ComparatorUtil;
 
-public class SpongeFallDistanceData extends AbstractBoundedComparableData<Float, FallDistanceData, ImmutableFallDistanceData> implements FallDistanceData {
+public class SpongeFallDistanceData extends AbstractBoundedComparableData<Float, FallDistanceData, ImmutableFallDistanceData>
+        implements FallDistanceData {
 
     public SpongeFallDistanceData() {
         this(0F);

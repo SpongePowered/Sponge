@@ -69,8 +69,7 @@ public final class SpongePlayerDataHandler {
             return;
         }
         handlerInstance.playerDataMap = new ConcurrentHashMap<>();
-        final Path filePath = WorldManager.getCurrentSavesDirectory().get().resolve("data").resolve
-                (SPONGE_DATA);
+        final Path filePath = WorldManager.getCurrentSavesDirectory().get().resolve("data").resolve(SPONGE_DATA);
 
         try {
             handlerInstance.playerDir = filePath;
@@ -88,7 +87,7 @@ public final class SpongePlayerDataHandler {
                 if (Files.isReadable(playerFile)) {
                     NBTTagCompound compound;
 
-                    try (final InputStream stream = Files.newInputStream(playerFile)) {
+                    try (InputStream stream = Files.newInputStream(playerFile)) {
                         compound = CompressedStreamTools.readCompressed(stream);
                     }
 

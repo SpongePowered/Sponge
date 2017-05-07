@@ -38,7 +38,7 @@ import java.util.List;
 
 final class SecondaryInventoryClickState extends BasicInventoryPacketState {
 
-    public SecondaryInventoryClickState() {
+    SecondaryInventoryClickState() {
         super(PacketPhase.MODE_CLICK | PacketPhase.BUTTON_SECONDARY | PacketPhase.CLICK_INSIDE_WINDOW);
     }
 

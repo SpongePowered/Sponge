@@ -198,7 +198,8 @@ public final class DataUtil {
         if (version != DataVersions.Data.CURRENT_CUSTOM_DATA) {
             final DataContentUpdater contentUpdater = SpongeDataManager.getInstance()
                 .getWrappedContentUpdater(DataManipulator.class, version, DataVersions.Data.CURRENT_CUSTOM_DATA)
-                .orElseThrow(() -> new IllegalArgumentException("Could not find a content updater for DataManipulator information with version: " +version));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Could not find a content updater for DataManipulator information with version: " + version));
             contentUpdater.update(dataView);
         }
     }
@@ -269,8 +270,6 @@ public final class DataUtil {
         return INVALID_DATA_EXCEPTION_SUPPLIER;
     }
 
-
-
     /**
      * Registers a {@link DataManipulator} class and the
      * {@link ImmutableDataManipulator} class along with the implemented
@@ -285,9 +284,9 @@ public final class DataUtil {
      * @param <T> The type of data manipulator
      * @param <I> The type of immutable data manipulator
      */
-    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
-    registerDataProcessorAndImpl(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
-        Class<? extends I> implImClass, DataProcessor<T, I> processor) {
+    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void registerDataProcessorAndImpl(
+            Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
+            Class<? extends I> implImClass, DataProcessor<T, I> processor) {
         checkState(!SpongeDataManager.areRegistrationsComplete(),
                 "Registrations are no longer allowed!");
         checkArgument(!Modifier.isAbstract(implClass.getModifiers()),
@@ -321,7 +320,7 @@ public final class DataUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>> getProcessor(
-        Class<T> mutableClass) {
+            Class<T> mutableClass) {
         return Optional.ofNullable((DataProcessor<T, I>) SpongeManipulatorRegistry.getInstance().getDelegate(mutableClass));
     }
 
@@ -358,8 +357,8 @@ public final class DataUtil {
      * @return The data processor
      */
     @SuppressWarnings("unchecked")
-    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>>
-    getImmutableProcessor(Class<I> immutableClass) {
+    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataProcessor<T, I>> getImmutableProcessor(
+            Class<I> immutableClass) {
         return Optional.ofNullable((DataProcessor<T, I>) SpongeManipulatorRegistry.getInstance().getDelegate(immutableClass));
     }
 
@@ -404,7 +403,8 @@ public final class DataUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<NbtDataProcessor<T, I>> getNbtProcessor(NbtDataType dataType, Class<T> clazz) {
+    public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<NbtDataProcessor<T, I>> getNbtProcessor(
+            NbtDataType dataType, Class<T> clazz) {
         return Optional.ofNullable((NbtDataProcessor<T, I>) SpongeManipulatorRegistry.getInstance().getNbtDelegate(dataType, clazz));
     }
 

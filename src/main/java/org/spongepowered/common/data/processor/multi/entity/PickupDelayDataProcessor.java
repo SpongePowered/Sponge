@@ -64,7 +64,7 @@ public final class PickupDelayDataProcessor extends AbstractEntityDataProcessor<
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityItem container) {
-        return ImmutableMap.<Key<?>, Object> builder()
+        return ImmutableMap.<Key<?>, Object>builder()
                 .put(Keys.PICKUP_DELAY, ((IMixinEntityItem) container).getPickupDelay())
                 .put(Keys.INFINITE_PICKUP_DELAY, ((IMixinEntityItem) container).infinitePickupDelay())
                 .build();

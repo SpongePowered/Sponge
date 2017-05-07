@@ -52,8 +52,8 @@ import java.util.Optional;
  * or {@link UserListIPBans}, while the original methods have been changed
  * to delegate to the registered {@link BanService}. This allows bans to
  * function normally when the default {@link BanService} has not been replaced,
- * while allowing plugin-provided {@link BanService}s to be used for all aspects
- * of Vanilla bans.</p>
+ * while allowing plugin-provided {@link BanService}s to be used for
+ * all aspects of Vanilla bans.</p>
  */
 public class SpongeBanService implements BanService {
 

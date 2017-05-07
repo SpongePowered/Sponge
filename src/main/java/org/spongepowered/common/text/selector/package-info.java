@@ -22,33 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.config.category;
-
-import ninja.leaping.configurate.objectmapping.Setting;
-import ninja.leaping.configurate.objectmapping.serialize.ConfigSerializable;
-
-import java.util.ArrayList;
-import java.util.List;
-
-@ConfigSerializable
-public class BlockTrackingCategory extends ConfigCategory {
-
-    @Setting(value = "enabled", comment = "If enabled, adds player tracking support for block positions. Note: This should only be disabled if you do not care who caused a block to change.")
-    private boolean enabled = true;
-
-    @Setting(value = "block-blacklist", comment = "Add block ids you wish to blacklist for player block placement tracking.")
-    private List<String> blockBlacklist = new ArrayList<>();
-
-    public boolean isEnabled() {
-        return this.enabled;
-    }
-
-    public void setEnabled(boolean flag) {
-        this.enabled = flag;
-    }
-
-    public List<String> getBlockBlacklist() {
-        return this.blockBlacklist;
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.text.selector;

@@ -29,6 +29,7 @@ import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.GoalType;
 
 public final class SpongeGoalType implements GoalType {
+
     private final String id, name;
     private final Class<? extends Goal<?>> goalClass;
 

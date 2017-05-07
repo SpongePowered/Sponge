@@ -31,9 +31,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalListener;
-import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
@@ -41,6 +39,7 @@ import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.text.Text;
 
 import java.util.List;
 import java.util.Optional;
@@ -61,12 +60,8 @@ public class SpongeCallbackHolder {
     static final ConcurrentMap<UUID, Consumer<CommandSource>> reverseMap = new ConcurrentHashMap<>();
     private static final LoadingCache<Consumer<CommandSource>, UUID> callbackCache =
             CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES)
-            .removalListener(new RemovalListener<Consumer<CommandSource>, UUID>() {
-                @Override
-                public void onRemoval(RemovalNotification<Consumer<CommandSource>, UUID> notification) {
-                    reverseMap.remove(notification.getValue(), notification.getKey());
-                }
-            })
+            .removalListener((RemovalListener<Consumer<CommandSource>, UUID>) notification ->
+                    reverseMap.remove(notification.getValue(), notification.getKey()))
             .build(new CacheLoader<Consumer<CommandSource>, UUID>() {
                 @Override
                 public UUID load(Consumer<CommandSource> key) throws Exception {
@@ -86,7 +81,7 @@ public class SpongeCallbackHolder {
         return callbackCache.getUnchecked(checkNotNull(callback, "callback"));
     }
 
-    public Optional<Consumer<CommandSource>> getCallbackForUUID(UUID id) {
+    public Optional<Consumer<CommandSource>> getCallbackForUniqueId(UUID id) {
         return Optional.of(reverseMap.get(id));
     }
 

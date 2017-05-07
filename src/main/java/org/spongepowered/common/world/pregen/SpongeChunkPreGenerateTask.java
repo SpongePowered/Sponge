@@ -297,8 +297,10 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
     }
 
     private boolean areAllChunksLoaded(Vector3i chunk1, Vector3i chunk2, Vector3i chunk3, Vector3i chunk4) {
-        return this.doesChunkExistCheck.test(chunk1) && this.doesChunkExistCheck.test(chunk2) &&
-                this.doesChunkExistCheck.test(chunk3) && this.doesChunkExistCheck.test(chunk4);
+        return this.doesChunkExistCheck.test(chunk1)
+                && this.doesChunkExistCheck.test(chunk2)
+                && this.doesChunkExistCheck.test(chunk3)
+                && this.doesChunkExistCheck.test(chunk4);
     }
 
     private void unregisterListener() {

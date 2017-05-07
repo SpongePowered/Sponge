@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.management.UserListOps;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -37,7 +38,6 @@ import org.spongepowered.api.service.permission.PermissionDescription.Builder;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.service.permission.base.FixedParentMemorySubjectData;
 import org.spongepowered.common.service.permission.base.GlobalMemorySubjectData;
@@ -53,11 +53,13 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 /**
- * Permission service representing the vanilla operator permission structure.
+ * Permission service representing the vanilla operator
+ * permission structure.
  *
- * <p>Really doesn't do much else. Don't use this guys.
+ * <p>Really doesn't do much else. Don't use this guys.</p>
  */
 public class SpongePermissionService implements PermissionService {
+
     private static final String SUBJECTS_DEFAULT = "default";
     private static final Function<String, CommandSource> NO_COMMAND_SOURCE = s -> null;
 
@@ -74,11 +76,11 @@ public class SpongePermissionService implements PermissionService {
         this.subjects.put(SUBJECTS_USER, new UserCollection(this));
         this.subjects.put(SUBJECTS_GROUP, new OpLevelCollection(this));
 
-        this.subjects.put(SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(SUBJECTS_COMMAND_BLOCK, this,
-                s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(2)), NO_COMMAND_SOURCE));
+        this.subjects.put(SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(SUBJECTS_COMMAND_BLOCK, this, s ->
+                new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(2)), NO_COMMAND_SOURCE));
 
-        this.subjects.put(SUBJECTS_SYSTEM, new DataFactoryCollection(SUBJECTS_SYSTEM, this,
-                s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(4)),
+        this.subjects.put(SUBJECTS_SYSTEM, new DataFactoryCollection(SUBJECTS_SYSTEM, this, s ->
+                new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(4)),
                 s -> {
                     if (s.equals("Server")) {
                         return SpongeImpl.getGame().getServer().getConsole();
@@ -86,7 +88,7 @@ public class SpongePermissionService implements PermissionService {
                         // TODO: Implement RCON API?
                     }
                     return null;
-                }));
+        }));
 
         this.defaultData = getDefaultCollection().get(SUBJECTS_DEFAULT);
     }

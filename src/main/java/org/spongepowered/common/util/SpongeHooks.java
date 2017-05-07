@@ -56,8 +56,8 @@ import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.WorldConfig;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.blockcapturing.IModData_BlockCapturing;
+import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;
@@ -390,7 +390,7 @@ public class SpongeHooks {
         public BlockPos blockPos;
         public int dimensionId;
 
-        public CollisionWarning(World world, Entity entity) {
+        CollisionWarning(World world, Entity entity) {
             this.dimensionId = ((IMixinWorldServer) world).getDimensionId();
             this.blockPos = new BlockPos(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ);
         }
@@ -532,11 +532,10 @@ public class SpongeHooks {
         } else if (rootCause instanceof EntityItem) {
             EntityItem item = (EntityItem) rootCause;
             causedBy = item.getEntityItem().getDisplayName();
-        }
-        else if (rootCause instanceof Entity) {
+        } else if (rootCause instanceof Entity) {
             Entity causeEntity = (Entity) rootCause;
             causedBy = causeEntity.getName();
-        }else if (rootCause instanceof BlockSnapshot) {
+        } else if (rootCause instanceof BlockSnapshot) {
             BlockSnapshot snapshot = (BlockSnapshot) rootCause;
             causedBy = snapshot.getState().getType().getId();
         } else if (rootCause instanceof CatalogType) {

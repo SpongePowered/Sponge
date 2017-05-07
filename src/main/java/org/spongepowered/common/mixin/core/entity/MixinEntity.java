@@ -310,12 +310,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public boolean dismountRidingEntity(DismountType type) {
         if (!this.world.isRemote && ShouldFire.RIDE_ENTITY_EVENT_DISMOUNT) {
-            if (SpongeImpl.postEvent(SpongeEventFactory
-                    .createRideEntityEventDismount(Cause
-                            .of(NamedCause.source(this), NamedCause.of("DismountType", type)),
-                            type,
-                            (Entity) this.getRidingEntity()))
-                    ) {
+            if (SpongeImpl.postEvent(SpongeEventFactory.createRideEntityEventDismount(Cause.of(NamedCause.source(this),
+                    NamedCause.of("DismountType", type)), type, (Entity) this.getRidingEntity()))) {
                 return false;
             }
         }

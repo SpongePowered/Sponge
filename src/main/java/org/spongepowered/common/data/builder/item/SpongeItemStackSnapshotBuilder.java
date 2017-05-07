@@ -47,7 +47,7 @@ import javax.annotation.Nullable;
 
 public class SpongeItemStackSnapshotBuilder extends AbstractDataBuilder<ItemStackSnapshot> implements DataBuilder<ItemStackSnapshot> {
 
-    private final static int SUPPORTED_VERSION = 1;
+    private static final int SUPPORTED_VERSION = 1;
 
     public SpongeItemStackSnapshotBuilder() {
         super(ItemStackSnapshot.class, SUPPORTED_VERSION);

@@ -54,7 +54,6 @@ public class JukeboxDataProcessor extends AbstractTileEntitySingleDataProcessor<
 
     @Override
     protected boolean set(BlockJukebox.TileEntityJukebox jukebox, ItemStackSnapshot stackSnapshot) {
-        IBlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
         if (stackSnapshot == ItemStackSnapshot.NONE) {
             if (jukebox.getRecord() == null) {
                 return true;
@@ -65,7 +64,7 @@ public class JukeboxDataProcessor extends AbstractTileEntitySingleDataProcessor<
             return false;
         }
         ((Jukebox) jukebox).insertRecord(stackSnapshot.createStack());
-        block = jukebox.getWorld().getBlockState(jukebox.getPos());
+        IBlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
         return block.getBlock() instanceof BlockJukebox && block.getValue(BlockJukebox.HAS_RECORD);
     }
 

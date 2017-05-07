@@ -26,5 +26,6 @@ package org.spongepowered.common.interfaces.entity.projectile;
 
 public interface IMixinEntityArrow {
 
-    public boolean isInGround();
+    boolean isInGround();
+
 }

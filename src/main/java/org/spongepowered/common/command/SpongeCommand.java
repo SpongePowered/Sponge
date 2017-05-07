@@ -67,7 +67,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -97,8 +96,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Function;
 
-@NonnullByDefault
 public class SpongeCommand {
+
     static final String INDENT = "    ";
     static final String LONG_INDENT = INDENT + INDENT;
 
@@ -109,6 +108,7 @@ public class SpongeCommand {
     static final Text UNKNOWN = Text.of("UNKNOWN");
 
     private static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
+
     /**
      * Create a new instance of the Sponge command structure.
      *
@@ -170,8 +170,8 @@ public class SpongeCommand {
             }
             if (args.hasAny("dimension")) {
                 for (DimensionType dimensionType : args.<DimensionType>getAll("dimension")) {
-                    src.sendMessage(Text.of("Dimension ", dimensionType.getName(), ": ", processDimension(((IMixinDimensionType) dimensionType).
-                            getDimensionConfig(), dimensionType, src, args)));
+                    src.sendMessage(Text.of("Dimension ", dimensionType.getName(), ": ",
+                            processDimension(((IMixinDimensionType) dimensionType).getDimensionConfig(), dimensionType, src, args)));
                     ++successes;
                 }
             }
@@ -181,8 +181,8 @@ public class SpongeCommand {
                     if (!world.isPresent() && this.requireWorldLoaded) {
                         throw new CommandException(Text.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
                     }
-                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorldInfo) properties).getOrCreateWorldConfig(),
-                            world.orElse(null), src, args)));
+                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ",
+                            processWorld(((IMixinWorldInfo) properties).getOrCreateWorldConfig(), world.orElse(null), src, args)));
                     ++successes;
                 }
             }
@@ -368,8 +368,8 @@ public class SpongeCommand {
                     Text.Builder builder = Text.builder().append(IMPLEMENTATION_NAME);
 
                     for (PluginContainer container : SpongeImpl.getInternalPlugins()) {
-                        builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + container.getName(), ": "), container.getVersion().isPresent
-                                () ? Text.of(container.getVersion().get()) : UNKNOWN);
+                        builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + container.getName(), ": "),
+                                container.getVersion().isPresent() ? Text.of(container.getVersion().get()) : UNKNOWN);
                     }
 
                     src.sendMessage(builder.build());
@@ -399,9 +399,12 @@ public class SpongeCommand {
                     final IMixinChunk mixinChunk = (IMixinChunk) chunk;
                     final IBlockState blockState = worldServer.getBlockState(rayTraceResult.getBlockPos());
                     final BlockState spongeState = BlockUtil.fromNative(blockState);
-                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Type: ", TextColors.BLUE, TextStyles.RESET, spongeState.getId()));
-                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Owner: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.getBlockOwner(rayTraceResult.getBlockPos())));
-                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Notifier: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.getBlockNotifier(rayTraceResult.getBlockPos())));
+                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Type: ", TextColors.BLUE,
+                            TextStyles.RESET, spongeState.getId()));
+                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Owner: ", TextColors.BLUE,
+                            TextStyles.RESET, mixinChunk.getBlockOwner(rayTraceResult.getBlockPos())));
+                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Notifier: ", TextColors.BLUE,
+                            TextStyles.RESET, mixinChunk.getBlockNotifier(rayTraceResult.getBlockPos())));
                     return CommandResult.success();
                 })
                 .build();
@@ -455,6 +458,7 @@ public class SpongeCommand {
     static Text title(String title) {
         return Text.of(TextColors.GREEN, title);
     }
+
     static Text hl(String toHighlight) {
         return Text.of(TextColors.DARK_GREEN, toHighlight);
     }
@@ -642,16 +646,15 @@ public class SpongeCommand {
                     final double serverMeanTickTime = mean(SpongeImpl.getServer().tickTimeArray) * 1.0e-6d;
                     src.sendMessage(Text.of("Overall TPS: ", TextColors.LIGHT_PURPLE,
                             THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (serverMeanTickTime), 20)),
-                            TextColors.RESET, ", Mean: ", TextColors.RED, THREE_DECIMAL_DIGITS_FORMATTER.
-                                    format(serverMeanTickTime), "ms"));
+                            TextColors.RESET, ", Mean: ", TextColors.RED, THREE_DECIMAL_DIGITS_FORMATTER.format(serverMeanTickTime), "ms"));
                     return CommandResult.success();
                 })
                 .build();
     }
 
     private static void printWorldTickTime(CommandSource src, World world) {
-        final long[] worldTickTimes = ((IMixinMinecraftServer) SpongeImpl.getServer()).
-                getWorldTickTimes(((IMixinWorldServer) world).getDimensionId());
+        final long[] worldTickTimes =
+                ((IMixinMinecraftServer) SpongeImpl.getServer()).getWorldTickTimes(((IMixinWorldServer) world).getDimensionId());
         final double worldMeanTickTime = mean(worldTickTimes) * 1.0e-6d;
         final double worldTps = Math.min(1000.0 / worldMeanTickTime, 20);
         src.sendMessage(Text.of("World [", TextColors.DARK_GREEN, world.getName(), TextColors.RESET, "] (DIM",

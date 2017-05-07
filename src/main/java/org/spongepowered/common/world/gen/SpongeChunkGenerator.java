@@ -47,7 +47,6 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.ChunkProviderOverworld;
-import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenScatteredFeature;
@@ -350,8 +349,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             if (Timings.isTimingsEnabled()) {
                 timing = this.populatorTimings.get(populator.getType().getId());
                 if (timing == null) {
-                    timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getId());// ,
-                                                                                                      // this.chunkGeneratorTiming);
+                    timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getId());// , this.chunkGeneratorTiming);
                     this.populatorTimings.put(populator.getType().getId(), timing);
                 }
                 timing.startTimingIfSync();
@@ -437,17 +435,17 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Override
     public BlockPos getStrongholdGen(World worldIn, String structureName, BlockPos position, boolean p_180513_4_) {
         Class<? extends MapGenStructure> target = null;
-        if("Stronghold".equals(structureName)) {
+        if ("Stronghold".equals(structureName)) {
             target = MapGenStronghold.class;
-        } else if("Mansion".equals(structureName)) {
+        } else if ("Mansion".equals(structureName)) {
             target = WoodlandMansion.class;
-        } else if("Monument".equals(structureName)) {
+        } else if ("Monument".equals(structureName)) {
             target = StructureOceanMonument.class;
-        } else if("Village".equals(structureName)) {
+        } else if ("Village".equals(structureName)) {
             target = MapGenVillage.class;
-        } else if("Mineshaft".equals(structureName)) {
+        } else if ("Mineshaft".equals(structureName)) {
             target = MapGenMineshaft.class;
-        } else if("Temple".equals(structureName)) {
+        } else if ("Temple".equals(structureName)) {
             target = MapGenScatteredFeature.class;
         }
         if (target == null) {
@@ -459,8 +457,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             }
         }
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
-            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).getStrongholdGen(worldIn, structureName, position,
-                    p_180513_4_);
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world)
+                    .getStrongholdGen(worldIn, structureName, position, p_180513_4_);
         }
         return null;
     }

@@ -42,7 +42,8 @@ import javax.annotation.Nullable;
  * A {@link JsonWriter} that serializes to a {@link DataContainer}
  * instead of a JSON string.
  *
- * Inspired by GSON's {@link com.google.gson.internal.bind.JsonTreeWriter}.
+ * <p>Inspired by GSON's
+ * {@link com.google.gson.internal.bind.JsonTreeWriter}.</p>
  */
 public final class DataViewJsonWriter extends JsonWriter {
 
@@ -50,9 +51,11 @@ public final class DataViewJsonWriter extends JsonWriter {
         @Override public void write(char[] buffer, int offset, int counter) {
             throw new AssertionError();
         }
+
         @Override public void flush() throws IOException {
             throw new AssertionError();
         }
+
         @Override public void close() throws IOException {
             throw new AssertionError();
         }

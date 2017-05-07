@@ -457,14 +457,14 @@ public class PhaseContext {
 
     public CapturePlayer getCapturedPlayerSupplier() throws IllegalStateException {
         return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_PLAYER, CapturePlayer.class)
-                .orElseThrow(
-                        TrackingUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this));
+                .orElseThrow(TrackingUtil.throwWithContext(
+                        "Expected to be capturing a Player from an event listener, but we're not capturing them!", this));
     }
 
     public Optional<Player> getCapturedPlayer() throws IllegalStateException {
         return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_PLAYER, CapturePlayer.class)
-                .orElseThrow(
-                        TrackingUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this))
+                .orElseThrow(TrackingUtil.throwWithContext(
+                                "Expected to be capturing a Player from an event listener, but we're not capturing them!", this))
                 .getPlayer();
     }
 

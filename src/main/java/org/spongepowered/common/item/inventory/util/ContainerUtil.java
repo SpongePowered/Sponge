@@ -133,12 +133,13 @@ public final class ContainerUtil {
 
     /**
      * Replacement helper method for {@link MixinInventoryHelper#spongeDropInventoryItems(World, double, double, double, IInventory)}
-     * to perform cause tracking related drops. This is specific for blocks, not for any other cases.
+     * to perform cause tracking related drops. This is specific
+     * for blocks, not for any other cases.
      *
      * @param worldServer The world server
-     * @param x the x position
-     * @param y the y position
-     * @param z the z position
+     * @param x The x position
+     * @param y The y position
+     * @param z The z position
      * @param inventory The inventory to drop items from
      */
     public static void performBlockInventoryDrops(WorldServer worldServer, double x, double y, double z, IInventory inventory) {
@@ -233,7 +234,7 @@ public final class ContainerUtil {
     }
 
     /**
-     * Generates a fallback lens for given Container
+     * Generates a fallback lens for given Container.
      *
      * @param container The Container to generate a lens for
      * @param slots The slots of the Container
@@ -296,8 +297,7 @@ public final class ContainerUtil {
     }
 
     private static Lens<IInventory, ItemStack> copyLens(int base, InventoryAdapter<IInventory, ItemStack> adapter,
-            Lens<IInventory, ItemStack> lens, SlotCollection slots)
-    {
+            Lens<IInventory, ItemStack> lens, SlotCollection slots) {
         if (lens instanceof FurnaceInventoryLens) {
             return new FurnaceInventoryLens(base, adapter, slots);
         }

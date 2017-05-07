@@ -41,8 +41,8 @@ import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import java.util.Optional;
 import java.util.UUID;
 
-public class HorseTameableDataProcessor extends AbstractEntitySingleDataProcessor<EntityHorse, Optional<UUID>, OptionalValue<UUID>,
-        TameableData, ImmutableTameableData> {
+public class HorseTameableDataProcessor
+        extends AbstractEntitySingleDataProcessor<EntityHorse, Optional<UUID>, OptionalValue<UUID>, TameableData, ImmutableTameableData> {
 
     public HorseTameableDataProcessor() {
         super(EntityHorse.class, Keys.TAMED_OWNER);
@@ -62,8 +62,8 @@ public class HorseTameableDataProcessor extends AbstractEntitySingleDataProcesso
         if (uuid.equals("none")) {
             return Optional.of(tameableData);
         } else {
-            final UUID ownerUUID = UUID.fromString(uuid);
-            return Optional.of(tameableData.set(Keys.TAMED_OWNER, Optional.of(ownerUUID)));
+            final UUID ownerUniqueId = UUID.fromString(uuid);
+            return Optional.of(tameableData.set(Keys.TAMED_OWNER, Optional.of(ownerUniqueId)));
         }
     }
 

@@ -33,7 +33,7 @@ public class EntityCategory extends ConfigCategory {
     @Setting(value = "max-bounding-box-size", comment = "Max size of an entity's bounding box before removing it. Set to 0 to disable")
     private int maxBoundingBoxSize = 1000;
     @Setting(value = "collision-warn-size",
-    comment = "Number of colliding entities in one spot before logging a warning. Set to 0 to disable")
+            comment = "Number of colliding entities in one spot before logging a warning. Set to 0 to disable")
     private int maxCollisionSize = 200;
     @Setting(value = "max-speed", comment = "Square of the max speed of an entity before removing it. Set to 0 to disable")
     private int maxSpeed = 100;
@@ -52,7 +52,8 @@ public class EntityCategory extends ConfigCategory {
     private int softDespawnRange = 32;
     @Setting(value = "living-hard-despawn-range", comment = "The upper bounded range where living entities farther from a player will likely despawn")
     private int hardDespawnRange = 128;
-    @Setting(value = "living-soft-despawn-minimum-life", comment = "The amount of seconds before a living entity between the soft and hard despawn ranges from a player to be considered for despawning")
+    @Setting(value = "living-soft-despawn-minimum-life",
+            comment = "The amount of seconds before a living entity between the soft and hard despawn ranges from a player to be considered for despawning")
     private int minimumLife = 30;
 
     public int getMaxSpeed() {

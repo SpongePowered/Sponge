@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.boss;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
 import net.minecraft.world.BossInfo;
 import net.minecraft.world.BossInfoServer;
 import org.spongepowered.api.boss.BossBarColor;
@@ -33,10 +37,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.common.text.SpongeTexts;
 
 import javax.annotation.Nullable;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 public final class ServerBossBarBuilder implements ServerBossBar.Builder {
 

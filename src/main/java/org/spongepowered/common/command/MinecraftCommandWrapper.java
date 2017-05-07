@@ -128,7 +128,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
             } catch (net.minecraft.command.CommandException e) {
                 Throwables.propagate(e);
             }
-            String previousNameVal = splitArgs[usernameIndex];
+            final String previousNameVal = splitArgs[usernameIndex];
             affectedEntities = list.size();
 
             ((IMixinCommandHandler) handler).setExpandedSelector(true);

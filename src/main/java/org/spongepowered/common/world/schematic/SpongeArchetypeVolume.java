@@ -71,6 +71,7 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
     public Map<Vector3i, TileEntityArchetype> getTileEntityArchetypes() {
         return this.tiles;
     }
+
     @Override
     public MutableBlockVolumeWorker<? extends ArchetypeVolume> getBlockWorker(Cause cause) {
         return new SpongeMutableBlockVolumeWorker<>(this, cause);

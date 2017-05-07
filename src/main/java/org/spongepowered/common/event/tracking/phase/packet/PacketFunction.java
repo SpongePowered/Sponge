@@ -355,10 +355,7 @@ public interface PacketFunction {
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
         if (state == PacketPhase.Inventory.DROP_ITEM_WITH_HOTKEY) {
-            context.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blocks ->
-                            TrackingUtil.processBlockCaptures(blocks, state, context)
-                    );
+            context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, state, context));
             context.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
                         final Cause cause = Cause.source(EntitySpawnCause.builder()
@@ -652,8 +649,8 @@ public interface PacketFunction {
         if (state instanceof BasicInventoryPacketState) {
             inventoryEvent =
                     ((BasicInventoryPacketState) state)
-                            .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction, Lists.newArrayList(slotTransactions), capturedItems,
-                                    cause, usedButton);
+                            .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction, Lists.newArrayList(slotTransactions),
+                                    capturedItems, cause, usedButton);
         } else {
             inventoryEvent = null;
         }
@@ -749,33 +746,28 @@ public interface PacketFunction {
 
                     }
                 });
-        context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(
-                        originalBlocks -> {
-                            boolean success = TrackingUtil.processBlockCaptures(originalBlocks, state,
-                                    context);
-                            if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
-                                EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
-                                PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
-                            }
-                        });
+        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(originalBlocks -> {
+                    boolean success = TrackingUtil.processBlockCaptures(originalBlocks, state, context);
+                    if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
+                        EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
+                        PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
+                    }
+                });
         context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(drops -> {
-            final List<EntityItem>
-                    items =
-                    drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
+            final List<EntityItem> items = drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
             final Cause cause = Cause.source(
                     EntitySpawnCause.builder()
                             .entity((Entity) player)
                             .type(InternalSpawnTypes.PLACEMENT)
-                            .build()
-            ).named(NamedCause.notifier(player))
+                            .build())
+                    .named(NamedCause.notifier(player))
                     .build();
             final List<Entity> entities = items
                     .stream()
                     .map(EntityUtil::fromNative)
                     .collect(Collectors.toList());
             if (!entities.isEmpty()) {
-                DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities);
+                final DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     for (Entity droppedItem : event.getEntities()) {

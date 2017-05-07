@@ -243,7 +243,7 @@ public final class TrackingUtil {
             BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state, pos, 0);
             final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(Cause.of(NamedCause.source(minecraftWorld)), snapshot);
             SpongeImpl.postEvent(event);
-            if(event.isCancelled()) {
+            if (event.isCancelled()) {
                 return;
             }
         }
@@ -279,7 +279,7 @@ public final class TrackingUtil {
             final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state, pos, 0);
             final TickBlockEvent event = SpongeEventFactory.createTickBlockEventRandom(Cause.of(NamedCause.source(minecraftWorld)), currentTickBlock);
             SpongeImpl.postEvent(event);
-            if(event.isCancelled()) {
+            if (event.isCancelled()) {
                 return;
             }
         }
@@ -490,16 +490,18 @@ public final class TrackingUtil {
     }
 
     /**
-     * Processes the given list of {@link BlockSnapshot}s and creates and throws and processes
-     * the {@link ChangeBlockEvent}s as appropriately determined based on the {@link BlockChange}
-     * for each snapshot. If any transactions are invalid or events cancelled, this event
-     * returns {@code false} to signify a transaction was cancelled. This return value
-     * is used for portal creation.
+     * Processes the given list of {@link BlockSnapshot}s and creates
+     * and throws and processes the {@link ChangeBlockEvent}s as
+     * appropriately determined based on the {@link BlockChange}
+     * for each snapshot. If any transactions are invalid or events
+     * cancelled, this event returns {@code false} to signify a transaction
+     * was cancelled. This return value is used for portal creation.
      *
      * @param snapshots The snapshots to process
-     * @param state The phase state that is being processed, used to handle marking notifiers
-     *  and block owners
-     * @param context The phase context, only used by the phase for handling processes.
+     * @param state The phase state that is being processed, used to handle
+     *     marking notifiers and block owners
+     * @param context The phase context, only used by the phase
+     *     for handling processes
      * @return True if no events or transactions were cancelled
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -771,18 +773,18 @@ public final class TrackingUtil {
         final WorldServer worldServer = (WorldServer) world;
         // Now we can spawn the entity items appropriately
         final List<Entity> itemDrops = itemStacks.stream().map(itemStack -> {
-                    final net.minecraft.item.ItemStack minecraftStack = itemStack.getStack();
-                    float f = 0.5F;
-                    double offsetX = (double) (worldServer.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-                    double offsetY = (double) (worldServer.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-                    double offsetZ = (double) (worldServer.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
-                    final double x = (double) position.getX() + offsetX;
-                    final double y = (double) position.getY() + offsetY;
-                    final double z = (double) position.getZ() + offsetZ;
-                    EntityItem entityitem = new EntityItem(worldServer, x, y, z, minecraftStack);
-                    entityitem.setDefaultPickupDelay();
-                    return entityitem;
-                })
+            final net.minecraft.item.ItemStack minecraftStack = itemStack.getStack();
+            float f = 0.5F;
+            double offsetX = (double) (worldServer.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+            double offsetY = (double) (worldServer.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+            double offsetZ = (double) (worldServer.rand.nextFloat() * f) + (double) (1.0F - f) * 0.5D;
+            final double x = (double) position.getX() + offsetX;
+            final double y = (double) position.getY() + offsetY;
+            final double z = (double) position.getZ() + offsetZ;
+            EntityItem entityitem = new EntityItem(worldServer, x, y, z, minecraftStack);
+            entityitem.setDefaultPickupDelay();
+            return entityitem;
+        })
                 .map(EntityUtil::fromNative)
                 .collect(Collectors.toList());
         final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
@@ -830,6 +832,7 @@ public final class TrackingUtil {
             }
         }
     }
+
     public static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays,
         List<ChangeBlockEvent> blockEvents,
         ChangeBlockEvent[] mainEvents, Cause.Builder builder) {

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -37,7 +37,6 @@ import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.OrderedInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
-import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 

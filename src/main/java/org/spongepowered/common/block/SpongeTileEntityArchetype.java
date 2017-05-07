@@ -50,7 +50,8 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType, BlockSnapshot, org.spongepowered.api.block.tileentity.TileEntity> implements TileEntityArchetype {
+public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType, BlockSnapshot, org.spongepowered.api.block.tileentity.TileEntity>
+        implements TileEntityArchetype {
 
     final BlockState blockState;
 

@@ -31,7 +31,7 @@ import javax.annotation.Nullable;
 
 public interface IMixinServerWorldEventHandler {
 
-    void playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, String soundIn, SoundCategory category, double x, double y, double z,
-float volume, float pitch);
+    void playCustomSoundToAllNearExcept(@Nullable EntityPlayer player, String soundIn, SoundCategory category,
+            double x, double y, double z, float volume, float pitch);
 
 }

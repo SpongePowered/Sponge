@@ -148,11 +148,11 @@ public class ArmorStandBodyPartRotationalDataProcessor
      * Creates a map whose keys and values are both provided by collections that
      * are passed to this method.
      *
-     * The collections that are passed must be of the same size, otherwise the
-     * iterator on the smaller collection will throw a
+     * <p></p>The collections that are passed must be of the same size, otherwise
+     * the iterator on the smaller collection will throw a
      * {@link NoSuchElementException} since it would have finished iterating
      * over its elements (as per {@link Iterator#next()}'s contract), whereas,
-     * the iterator for the larger collection would still be iterating.
+     * the iterator for the larger collection would still be iterating.</p>
      *
      * @param keys The keys to be used in the new map
      * @param values The values to be used in the new map

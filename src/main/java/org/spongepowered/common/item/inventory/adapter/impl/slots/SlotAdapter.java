@@ -213,7 +213,7 @@ public class SlotAdapter extends Adapter implements Slot {
 
     @Override
     public int size() {
-        return !this.slot.getStack(this.inventory).isEmpty()? 1 : 0;
+        return !this.slot.getStack(this.inventory).isEmpty() ? 1 : 0;
     }
 
     @Override

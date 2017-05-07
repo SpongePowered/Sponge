@@ -46,9 +46,12 @@ import org.spongepowered.common.world.schematic.GlobalPalette;
 public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
 
     /**
-     * If the area is lower than this amount, a global palette will be used.<br/>
-     * Example: If its only a 4 block area why allocate a local palette that
-     * by its self will take up more space in memory than it saves.
+     * If the area is lower than this amount, a global
+     * palette will be used.
+     *
+     * <p>Example: If its only a 4 block area why allocate
+     * a local palette that by its self will take up
+     * more space in memory than it saves.</p>
      */
     private static final int SMALL_AREA_THRESHOLD = 256;
 
@@ -59,8 +62,8 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     private BackingData data;
 
     public ArrayMutableBlockBuffer(Vector3i start, Vector3i size) {
-        this(size.getX() * size.getY() * size.getZ() > SMALL_AREA_THRESHOLD ?
-                new BimapPalette() : GlobalPalette.instance, start, size);
+        this(size.getX() * size.getY() * size.getZ() > SMALL_AREA_THRESHOLD
+                ? new BimapPalette() : GlobalPalette.instance, start, size);
     }
 
     public ArrayMutableBlockBuffer(BlockPalette palette, Vector3i start, Vector3i size) {
@@ -86,12 +89,12 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
     }
 
     /**
-     * Does not clone!
+     * Does not clone.
      * 
      * @param palette The palette
+     * @param blocks The backing data
      * @param start The start block position
      * @param size The block size
-     * @param data The backing data
      */
     ArrayMutableBlockBuffer(BlockPalette palette, BackingData blocks, Vector3i start, Vector3i size) {
         super(start, size);
@@ -201,12 +204,12 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
         void set(int index, int val);
 
         /**
-         * Creates a copy of this BackingData
+         * Creates a copy of this BackingData.
          */
         BackingData copyOf();
 
         /**
-         * Gets the maximum id supported by this BackingData
+         * Gets the maximum id supported by this BackingData.
          */
         int getMax();
     }
@@ -215,7 +218,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
 
         private final char[] data;
 
-        public CharBackingData(char[] data) {
+        CharBackingData(char[] data) {
             this.data = data;
         }
 
@@ -241,25 +244,36 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Muta
 
     static class PackedBackingData implements BackingData {
 
-        /** A long array used to store the packed values */
+        /**
+         * A long array used to store the packed values.
+         * */
         private long[] longArray;
-        /** Number of bits a single entry takes up */
+        /**
+         * Number of bits a single entry takes up.
+         * */
         private final int bits;
         /**
-         * The maximum value for a single entry. This also asks as a bitmask for a single entry.
-         * For instance, if bits were 5, this value would be 31 (ie, {@code 0b00011111}).
+         * The maximum value for a single entry. This also
+         * asks as a bit mask for a single entry.
+         *
+         * <p>For instance, if bits were 5, this value
+         * would be 31 (ie, {@code 0b00011111}).</p>
          */
         private final long maxValue;
-        /** Number of entries in this array (<b>not</b> the length of the long array that internally backs this array) */
+        /**
+         * Number of entries in this array (<b>not</b> the length
+         * of the long array that internally backs this array).
+         * */
         private final int arraySize;
 
         /**
-         * Creates a new PackedBackingData starting out with enough bits to store values of {@code highestValue}.
+         * Creates a new PackedBackingData starting out with enough
+         * bits to store values of {@code highestValue}.
          *
          * @param size The number of elements
          * @param highestValue The highest value to prepare for
          */
-        public PackedBackingData(int size, int highestValue) {
+        PackedBackingData(int size, int highestValue) {
             this.arraySize = size;
             int bits;
             for (bits = 0; 1 << bits <= highestValue; bits++);

@@ -42,6 +42,7 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 public class DataFactoryCollection extends SpongeSubjectCollection {
+
     private final ConcurrentMap<String, SpongeSubject> subjects = new ConcurrentHashMap<>();
     private final Function<String, MemorySubjectData> dataFactory;
     final Function<String, CommandSource> commandSourceFunction;

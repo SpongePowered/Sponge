@@ -61,11 +61,10 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 
@@ -97,8 +96,8 @@ public class PacketUtil {
             //
             // This is done in order to sync client inventory to server and would be fine if the C10 packet
             // included an Enum of some sort that defined what type of sync was happening.
-            if (packetPlayer.interactionManager.isCreative() && (packetIn instanceof CPacketClientStatus &&
-                    ((CPacketClientStatus) packetIn).getStatus() == CPacketClientStatus.State.OPEN_INVENTORY_ACHIEVEMENT)) {
+            if (packetPlayer.interactionManager.isCreative() && (packetIn instanceof CPacketClientStatus
+                    && ((CPacketClientStatus) packetIn).getStatus() == CPacketClientStatus.State.OPEN_INVENTORY_ACHIEVEMENT)) {
                 lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
             } else if (creativeCheck(packetIn, packetPlayer)) {
 
@@ -199,7 +198,7 @@ public class PacketUtil {
                     final BlockPos pos = packet.getPosition();
                     Vector3d interactionPoint = VecHelper.toVector3d(pos);
                     BlockSnapshot blockSnapshot = new Location<>((World) playerMP.world, interactionPoint).createSnapshot();
-                    if(SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, stack, EnumHand.MAIN_HAND,
+                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(playerMP, stack, EnumHand.MAIN_HAND,
                             Optional.of(interactionPoint), blockSnapshot).isCancelled()) {
                         ((IMixinEntityPlayerMP) playerMP).sendBlockChange(pos, playerMP.world.getBlockState(pos));
                         return true;
@@ -210,7 +209,7 @@ public class PacketUtil {
                     double d2 = playerMP.posZ - ((double)pos.getZ() + 0.5D);
                     double d3 = d0 * d0 + d1 * d1 + d2 * d2;
 
-                    double dist = SpongeImplHooks.getBlockReachDistance(playerMP)+ 1;
+                    double dist = SpongeImplHooks.getBlockReachDistance(playerMP) + 1;
                     dist *= dist;
 
                     if (d3 > dist) {
@@ -254,7 +253,7 @@ public class PacketUtil {
             boolean isCancelled = SpongeCommonEventFactory.callInteractItemEventSecondary(playerMP, playerMP.getHeldItem(packet.getHand()),
                     packet.getHand(), Optional.of(interactionPoint), blockSnapshot).isCancelled();
             lastTryBlockPacketItemResult = isCancelled;
-            if(isCancelled) {
+            if (isCancelled) {
                 // update client
                 BlockPos pos = packet.getPos();
                 playerMP.connection.sendPacket(new SPacketBlockChange(playerMP.world, pos));

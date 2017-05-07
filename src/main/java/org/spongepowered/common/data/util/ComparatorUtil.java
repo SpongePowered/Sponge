@@ -53,9 +53,10 @@ public class ComparatorUtil {
             .compare(o2.getInputVersion(), o1.getInputVersion())
             .compare(o2.getOutputVersion(), o1.getOutputVersion())
             .result();
-    public static final Comparator<? super NbtDataProcessor<?, ?>>
-            NBT_PROCESSOR_COMPARATOR =
-            (o1, o2) -> ComparisonChain.start().compare(o2.getPriority(), o1.getPriority()).result();
+    public static final Comparator<? super NbtDataProcessor<?, ?>> NBT_PROCESSOR_COMPARATOR =
+        (o1, o2) -> ComparisonChain.start()
+                .compare(o2.getPriority(), o1.getPriority())
+                .result();
 
     public static Comparator<Integer> intComparator() {
         return Integer::compareTo;

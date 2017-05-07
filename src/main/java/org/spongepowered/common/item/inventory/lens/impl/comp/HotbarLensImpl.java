@@ -35,7 +35,6 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.HotbarLens;
 
-
 public class HotbarLensImpl extends InventoryRowLensImpl implements HotbarLens<IInventory, net.minecraft.item.ItemStack> {
 
     public HotbarLensImpl(int base, int width, SlotProvider<IInventory, ItemStack> slots) {

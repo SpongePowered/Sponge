@@ -30,12 +30,12 @@ import org.spongepowered.api.data.DataSerializable;
  * A common utility class for various versions of various
  * {@link DataSerializable}s that are implemented in Sponge.
  *
- * Note that the organization is by groups, where a
+ * <p>Note that the organization is by groups, where a
  * {@link org.spongepowered.api.block.BlockState} may have
  * previous values based on damage values and a newer version
  * eliminates the need for those damage values and uses
  * the block state id. It helps to keep the constant names
- * organized.
+ * organized.</p>
  */
 public final class DataVersions {
 

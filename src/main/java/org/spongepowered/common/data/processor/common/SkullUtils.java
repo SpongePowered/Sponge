@@ -48,7 +48,10 @@ import javax.annotation.Nullable;
 public class SkullUtils {
 
     /**
-     * There's not really a meaningful default value for this, since it's a CatalogType. However, the Vanilla give command defaults the skeleton type (index 0), so it's used as the default here.
+     * There's not really a meaningful default value for this,
+     * since it's a CatalogType. However, the Vanilla give
+     * command defaults the skeleton type (index 0), so it's
+     * used as the default here.
      */
     public static final SkullType DEFAULT_TYPE = SkullTypes.SKELETON;
 

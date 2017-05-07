@@ -33,7 +33,7 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableD
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public class ImmutableSpongeExpirableData extends AbstractImmutableIntData<ImmutableExpirableData, ExpirableData>
-    implements ImmutableExpirableData{
+    implements ImmutableExpirableData {
 
     public ImmutableSpongeExpirableData(int value, int upperBound) {
         super(ImmutableExpirableData.class, value, Keys.EXPIRATION_TICKS, SpongeExpirableData.class, 0, upperBound, 0);

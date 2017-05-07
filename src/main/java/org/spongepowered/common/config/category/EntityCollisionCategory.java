@@ -35,7 +35,8 @@ public class EntityCollisionCategory extends ConfigCategory {
 
     @Setting(value = "auto-populate", comment = "If enabled, newly discovered entities/blocks will be added to this config with a default value.")
     private boolean autoPopulate = false;
-    @Setting(value = "max-entities-within-aabb", comment = "Max amount of entities any given entity or block can collide with. This improves performance when there are more than 8 entities on top of eachother such as a 1x1 spawn pen. Set to 0 to disable.")
+    @Setting(value = "max-entities-within-aabb",
+            comment = "Max amount of entities any given entity or block can collide with. This improves performance when there are more than 8 entities on top of eachother such as a 1x1 spawn pen. Set to 0 to disable.")
     private int maxEntitiesWithinAABB = 8;
     @Setting(value = "defaults", comment = "Default max collisions used for all entities/blocks unless overridden.")
     private Map<String, Integer> defaultMaxCollisions = new HashMap<>();

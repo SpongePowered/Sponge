@@ -32,7 +32,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SpongePersistingData extends AbstractBooleanData<PersistingData, ImmutablePersistingData> implements PersistingData{
+public class SpongePersistingData extends AbstractBooleanData<PersistingData, ImmutablePersistingData> implements PersistingData {
 
     public SpongePersistingData() {
         this(false);

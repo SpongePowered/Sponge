@@ -800,11 +800,8 @@ public class MemoryDataView implements DataView {
     @Override
     public DataContainer copy() {
         final DataContainer container = new MemoryDataContainer(this.safety);
-        getKeys(false)
-            .forEach(query ->
-                get(query).ifPresent(obj ->
-                        container.set(query, obj)
-                )
+        getKeys(false).forEach(query ->
+                get(query).ifPresent(obj -> container.set(query, obj))
         );
         return container;
     }
@@ -812,11 +809,8 @@ public class MemoryDataView implements DataView {
     @Override
     public DataContainer copy(SafetyMode safety) {
         final DataContainer container = new MemoryDataContainer(safety);
-        getKeys(false)
-            .forEach(query ->
-                get(query).ifPresent(obj ->
-                        container.set(query, obj)
-                )
+        getKeys(false).forEach(query ->
+                get(query).ifPresent(obj -> container.set(query, obj))
         );
         return container;
     }

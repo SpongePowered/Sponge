@@ -36,9 +36,10 @@ import java.util.function.Predicate;
 
 public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Builder {
 
-    Predicate<Entity> targetSelector;
-    float searchDistance;
-    double closeRangeSpeed, farRangeSpeed;
+    private Predicate<Entity> targetSelector;
+    private float searchDistance;
+    private double closeRangeSpeed;
+    private double farRangeSpeed;
 
     public SpongeAvoidEntityAIBuilder() {
         this.reset();

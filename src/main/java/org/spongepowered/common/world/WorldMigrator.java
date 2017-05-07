@@ -39,12 +39,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Used to migrate Worlds from Bukkit -> Sponge
+ * Used to migrate Worlds from Bukkit to Sponge.
  */
 public class WorldMigrator {
 
     /**
-     * Gets the old world container used when this server used to be running Bukkit.
+     * Gets the old world container used when this
+     * server used to be running Bukkit.
      *
      * @return The world container
      */
@@ -87,8 +88,9 @@ public class WorldMigrator {
             return;
         }
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(oldWorldContainer,
-                entry -> !entry.getFileName().equals(worldContainer.getFileName()) && Files.exists(entry.resolve("level.dat"))
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(oldWorldContainer, entry ->
+                !entry.getFileName().equals(worldContainer.getFileName())
+                        && Files.exists(entry.resolve("level.dat"))
                         && !Files.exists(entry.resolve("level_sponge.dat")))) {
             for (Path oldWorldPath : stream) {
                 Path worldPath = worldContainer.resolve(getVanillaNetherOrEndName(oldWorldPath));
@@ -111,7 +113,9 @@ public class WorldMigrator {
                             oldWorldContainer, worldPath);
                 }
             }
-        } catch (Exception ignore) {}
+        } catch (Exception ignore) {
+
+        }
 
         if (migrated.size() > 0) {
             SpongeImpl.getLogger().info("[{}] worlds have been migrated back to Vanilla's format.", migrated.size());
@@ -121,9 +125,11 @@ public class WorldMigrator {
     }
 
     /**
-     * Determines if a Bukkit nether or end is valid for the server's world container.
+     * Determines if a Bukkit nether or end is valid for the
+     * server's world container.
      *
-     * If the server's world name is "world" and we are being given a "world_nether" and "world_the_end", we need to rename these to
+     * If the server's world name is "world" and we are being given
+     * a "world_nether" and "world_the_end", we need to rename these to
      * "DIM-1/DIM1" (if possible).
      *
      * @param worldContainer The world container
@@ -136,7 +142,8 @@ public class WorldMigrator {
     }
 
     /**
-     * Gets the name we should rename the incoming world folder to. Either "DIM-1" or "DIM1".
+     * Gets the name we should rename the incoming world
+     * folder to. Either "DIM-1" or "DIM1".
      *
      * @param worldPath The world path to check
      * @return The rename or the same name otherwise
@@ -153,9 +160,11 @@ public class WorldMigrator {
     }
 
     /**
-     * Renames the world at the provided path to the proper Vanilla naming for Nether and The_End, if needed.
+     * Renames the world at the provided path to the proper
+     * Vanilla naming for Nether and The_End, if needed.
      *
-     * Generally this is DIM-1 and DIM1 for Nether and The_End respectively.
+     * Generally this is DIM-1 and DIM1 for Nether and
+     * The_End respectively.
      *
      * @param worldPath The path to rename
      * @return The corrected path or the original path if un-needed
@@ -179,9 +188,10 @@ public class WorldMigrator {
     }
 
     /**
-     * Fix Bukkit's desire to have a folder name the same as Vanilla's dimension name INSIDE this folder's name.
+     * Fix Bukkit's desire to have a folder name the same as
+     * Vanilla's dimension name INSIDE this folder's name.
      *
-     * ex. world_nether/DIM-1 world_the_end/DIM1
+     * <p>ex. world_nether/DIM-1 world_the_end/DIM1</p>
      *
      * @param oldWorldPath The path to the old world data
      */
@@ -194,11 +204,15 @@ public class WorldMigrator {
         try {
             // Copy region within DIM1 to world root
             com.google.common.io.Files.move(oldWorldPath.resolve("DIM1").resolve("region").toFile(), oldWorldPath.resolve("region").toFile());
-        } catch (IOException ignore) {}
+        } catch (IOException ignore) {
+
+        }
     }
 
     /**
-     * The last step of migration involves cleaning up folders within the world folders that match Vanilla dimension names (DIM-1/DIM1).
+     * The last step of migration involves cleaning up
+     * folders within the world folders that match Vanilla
+     * dimension names (DIM-1/DIM1).
      *
      * @param worldPath The path to inspect
      */
@@ -210,6 +224,8 @@ public class WorldMigrator {
 
         try {
             Files.delete(worldPath.resolve("DIM1"));
-        } catch (IOException ignore) {}
+        } catch (IOException ignore) {
+
+        }
     }
 }

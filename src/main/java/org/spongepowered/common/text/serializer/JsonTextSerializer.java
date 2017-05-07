@@ -29,8 +29,8 @@ import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextParseException;
 import org.spongepowered.api.text.serializer.TextSerializer;
-import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 
 /**
  * TextSerializer implementation for the json format.

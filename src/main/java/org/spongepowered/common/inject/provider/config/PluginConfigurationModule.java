@@ -156,7 +156,7 @@ public final class PluginConfigurationModule extends AbstractModule {
 
     }
 
-    static abstract class CommentedConfigurationNodeProvider implements Provider<ConfigurationLoader<CommentedConfigurationNode>> {
+    abstract static class CommentedConfigurationNodeProvider implements Provider<ConfigurationLoader<CommentedConfigurationNode>> {
 
         @Inject protected PluginContainer container;
 

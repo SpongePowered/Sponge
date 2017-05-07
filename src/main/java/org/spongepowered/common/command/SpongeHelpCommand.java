@@ -29,18 +29,18 @@ import static org.spongepowered.api.command.args.GenericArguments.string;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.service.pagination.PaginationList;
-import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.service.pagination.PaginationList;
+import org.spongepowered.api.service.pagination.PaginationService;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Comparator;
@@ -49,7 +49,7 @@ import java.util.TreeSet;
 
 public class SpongeHelpCommand {
 
-    private static final Comparator<CommandMapping> COMMAND_COMPARATOR = (o1, o2) -> o1.getPrimaryAlias().compareTo(o2.getPrimaryAlias());
+    private static final Comparator<CommandMapping> COMMAND_COMPARATOR = Comparator.comparing(CommandMapping::getPrimaryAlias);
 
     public static CommandSpec create() {
         return CommandSpec

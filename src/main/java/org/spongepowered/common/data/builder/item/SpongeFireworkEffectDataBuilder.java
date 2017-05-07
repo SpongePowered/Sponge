@@ -39,7 +39,8 @@ import java.util.List;
 import java.util.Optional;
 
 public class SpongeFireworkEffectDataBuilder extends AbstractDataBuilder<FireworkEffect> implements DataBuilder<FireworkEffect> {
-    private final static int SUPPORTED_VERSION = 1;
+
+    private static final int SUPPORTED_VERSION = 1;
 
     public SpongeFireworkEffectDataBuilder() {
         super(FireworkEffect.class, 1);

@@ -30,8 +30,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * A type of Lens collection whose members are fully mutable and also supports
- * all aspects of the {@link Collection} interface.
+ * A type of Lens collection whose members are fully mutable and
+ * also supports all aspects of the {@link Collection} interface.
  *
  * @param <TInventory>
  * @param <TStack>

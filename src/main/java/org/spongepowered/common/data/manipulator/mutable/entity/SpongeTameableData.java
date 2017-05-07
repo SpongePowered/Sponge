@@ -38,7 +38,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public class SpongeTameableData extends AbstractData<TameableData, ImmutableTameableData> implements TameableData  {
+public class SpongeTameableData extends AbstractData<TameableData, ImmutableTameableData> implements TameableData {
 
     @Nullable private UUID owner;
 
@@ -74,7 +74,7 @@ public class SpongeTameableData extends AbstractData<TameableData, ImmutableTame
                 .set(Keys.TAMED_OWNER.getQuery(), uuid);
     }
 
-    public Optional<UUID> getOwner(){
+    public Optional<UUID> getOwner() {
         return Optional.ofNullable(this.owner);
     }
 

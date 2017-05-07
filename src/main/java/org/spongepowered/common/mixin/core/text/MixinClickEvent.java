@@ -68,7 +68,7 @@ public abstract class MixinClickEvent implements IMixinClickEvent {
                         if (this.value.startsWith(SpongeCallbackHolder.CALLBACK_COMMAND_QUALIFIED)) {
                             try {
                                 UUID callbackId = UUID.fromString(this.value.substring(SpongeCallbackHolder.CALLBACK_COMMAND_QUALIFIED.length() + 1));
-                                Optional<Consumer<CommandSource>> callback = SpongeCallbackHolder.getInstance().getCallbackForUUID(callbackId);
+                                Optional<Consumer<CommandSource>> callback = SpongeCallbackHolder.getInstance().getCallbackForUniqueId(callbackId);
                                 if (callback.isPresent()) {
                                     setHandle(TextActions.executeCallback(callback.get()));
                                     break;

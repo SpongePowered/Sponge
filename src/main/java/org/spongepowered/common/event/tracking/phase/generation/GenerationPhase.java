@@ -45,19 +45,25 @@ import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import java.util.ArrayList;
 
 /**
- * A specific {@link TrackingPhase} to handle any point in which world or chunk
- * terrain generation/population is taking place. Note that while {@link State#CHUNK_LOADING}
- * is included here, it is still treated as terrain generation due to the fact that
- * a chunk load should not capture any block changes and populators may be re-ran.
- * Virtually, no capturing takes place during generation, withstanding capturing
- * entities as those can be captured safely to allow plugins final say in whether
- * the entities spawn. Likewise, Forge requires the entities to still throw
- * spawn events, so we must oblige in both Forge's requirements and Plugins requirements.
- * Note that {@link State#TERRAIN_GENERATION} and {@link State#POPULATOR_RUNNING} are
- * re-entrant and should allow for re-entrance. Re-entrance is defined in this case when
- * while a chunk is being generated/populated, the generator and/or populator require
- * a neighboring chunk to be generated/populated, which requires a re-entrance of the
- * very same state, with different chunk coordinates.
+ * A specific {@link TrackingPhase} to handle any point in
+ * which world or chunk terrain generation/population is taking
+ * place. Note that while {@link State#CHUNK_LOADING} is included
+ * here, it is still treated as terrain generation due to the fact
+ * that a chunk load should not capture any block changes and
+ * populators may be re-ran. Virtually, no capturing takes place
+ * during generation, withstanding capturing entities as those can
+ * be captured safely to allow plugins final say in whether the
+ * entities spawn. Likewise, Forge requires the entities to still
+ * throw spawn events, so we must oblige in both Forge's
+ * requirements and plugins' requirements.
+ *
+ * <p>Note that {@link State#TERRAIN_GENERATION} and
+ * {@link State#POPULATOR_RUNNING} are re-entrant and should allow
+ * for re-entrance. Re-entrance is defined in this case when while
+ * a chunk is being generated/populated, the generator and/or
+ * populator require a neighboring chunk to be generated/populated,
+ * which requires a re-entrance of the very same state, with
+ * different chunk coordinates.</p>
  */
 public final class GenerationPhase extends TrackingPhase {
 

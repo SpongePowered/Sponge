@@ -56,7 +56,6 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.ReportedException;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -75,7 +74,6 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -762,7 +760,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Set<Entity> getIntersectingEntities(AABB box, Predicate<Entity> filter) {
         checkNotNull(box, "box");
         checkNotNull(filter, "filter");
-        return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMC(box), entity -> filter.test((Entity) entity))
+        return getEntitiesWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMinecraft(box), entity -> filter.test((Entity) entity))
                 .stream()
                 .map(entity -> (Entity) entity)
                 .collect(Collectors.toSet());
@@ -771,7 +769,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
         checkNotNull(box, "box");
-        return getCollisionBoxes(null, VecHelper.toMC(box)).stream()
+        return getCollisionBoxes(null, VecHelper.toMinecraft(box)).stream()
                 .map(VecHelper::toSponge)
                 .collect(Collectors.toSet());
     }
@@ -780,7 +778,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
         checkNotNull(owner, "owner");
         checkNotNull(box, "box");
-        return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMC(box)).stream()
+        return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMinecraft(box)).stream()
                 .map(VecHelper::toSponge)
                 .collect(Collectors.toSet());
     }

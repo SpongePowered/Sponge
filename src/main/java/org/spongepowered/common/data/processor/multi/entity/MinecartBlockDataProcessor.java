@@ -79,7 +79,7 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Enti
 
     @Override
     public Optional<MinecartBlockData> fill(DataContainer container, MinecartBlockData data) {
-        if(!container.contains(Keys.REPRESENTED_BLOCK.getQuery())
+        if (!container.contains(Keys.REPRESENTED_BLOCK.getQuery())
             || !container.contains(Keys.OFFSET.getQuery())) {
             return Optional.empty();
         }
@@ -95,10 +95,10 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Enti
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        if(dataHolder instanceof EntityMinecart) {
+        if (dataHolder instanceof EntityMinecart) {
             EntityMinecart cart = (EntityMinecart) dataHolder;
             DataTransactionResult.Builder builder = DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS);
-            if(cart.hasDisplayTile()) {
+            if (cart.hasDisplayTile()) {
                 ImmutableValue<BlockState> block = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) cart.getDisplayTile());
                 ImmutableValue<Integer> offset = new ImmutableSpongeValue<>(Keys.OFFSET, cart.getDisplayTileOffset());
                 cart.setHasDisplayTile(false);

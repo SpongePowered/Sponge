@@ -30,13 +30,13 @@ import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAd
 public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter {
     
     /**
-     * Set the current hotbar item and optionally notify the client
+     * Set the current hotbar item and optionally notify the client.
      * 
      * @param itemIndex Hotbar index to set
-     * @param notify True to send an update packet to the client if this is a
-     *      server
+     * @param notify True to send an update packet to the client
+     *     if this is a server
      */
-    public abstract void setSelectedItem(int itemIndex, boolean notify);
+    void setSelectedItem(int itemIndex, boolean notify);
 
     /**
      * Gets the first available slot id for itemstack.

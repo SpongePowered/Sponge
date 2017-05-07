@@ -29,8 +29,8 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableWeightedCollectionValue;
 import org.spongepowered.api.data.value.mutable.WeightedCollectionValue;
-import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.util.weighted.TableEntry;
+import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.value.mutable.SpongeWeightedCollectionValue;
 
 import java.util.List;

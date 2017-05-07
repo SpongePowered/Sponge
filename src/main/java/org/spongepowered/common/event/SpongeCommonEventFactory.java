@@ -296,8 +296,10 @@ public class SpongeCommonEventFactory {
     }
 
     /**
-     * This simulates the blocks a piston moves and calls the event for saner debugging.
-     * @return if the event was cancelled
+     * This simulates the blocks a piston moves and calls the
+     * event for saner debugging.
+     *
+     * @return If the event was cancelled
      */
     public static boolean handlePistonEvent(IMixinWorldServer world, WorldServer.ServerBlockEventList list, Object obj, BlockPos pos,
             Block blockIn, int eventId, int eventParam) {
@@ -486,7 +488,8 @@ public class SpongeCommonEventFactory {
     }
 
     public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(Cause cause, Tristate originalUseBlockResult, Tristate useBlockResult,
-            Tristate originalUseItemResult, Tristate useItemResult, Optional<Vector3d> interactionPoint, BlockSnapshot targetBlock, Direction targetSide, EnumHand hand) {
+            Tristate originalUseItemResult, Tristate useItemResult, Optional<Vector3d> interactionPoint, BlockSnapshot targetBlock,
+            Direction targetSide, EnumHand hand) {
         InteractBlockEvent.Secondary event;
         if (hand == EnumHand.MAIN_HAND) {
             event = SpongeEventFactory.createInteractBlockEventSecondaryMainHand(cause, originalUseBlockResult, useBlockResult, originalUseItemResult,
@@ -505,7 +508,6 @@ public class SpongeCommonEventFactory {
         MessageChannel channel;
         Text originalMessage;
         Optional<User> sourceCreator = Optional.empty();
-        boolean messageCancelled = false;
 
         if (entity instanceof EntityPlayerMP) {
             originalChannel = channel = ((IMixinEntityPlayerMP) entity).getDeathMessageChannel();
@@ -528,6 +530,8 @@ public class SpongeCommonEventFactory {
         if (sourceCreator.isPresent()) {
             causes.add(NamedCause.owner(sourceCreator.get()));
         }
+
+        boolean messageCancelled = false;
 
         Cause cause = Cause.of(causes);
         DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause, originalChannel, Optional.of(channel), formatter,

@@ -124,7 +124,8 @@ public class SpongeInvisibilityData extends AbstractData<InvisibilityData, Immut
 
     @Override
     public ImmutableInvisibilityData asImmutable() {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeInvisibilityData.class, this.vanish, this.collision, this.untargetable, this.invisible);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeInvisibilityData.class, this.vanish, this.collision,
+                this.untargetable, this.invisible);
     }
 
 }

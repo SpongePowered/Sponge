@@ -36,4 +36,5 @@ public class BungeeCordCategory extends ConfigCategory {
     public boolean getIpForwarding() {
         return this.ipForwarding;
     }
+
 }

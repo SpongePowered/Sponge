@@ -167,7 +167,7 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
     @Override
     public Optional<V> getApiValueFromContainer(ValueContainer<?> container) {
         final Optional<T> optionalValue = getValueFromContainer(container);
-        if(optionalValue.isPresent()) {
+        if (optionalValue.isPresent()) {
             return Optional.of(constructValue(optionalValue.get()));
         } else {
             return Optional.empty();

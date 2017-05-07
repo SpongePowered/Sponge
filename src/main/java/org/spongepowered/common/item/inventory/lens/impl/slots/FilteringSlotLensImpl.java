@@ -44,7 +44,8 @@ public class FilteringSlotLensImpl extends SlotLensImpl implements FilteringSlot
         this(index, FilteringSlotAdapter.class, stackFilter, typeFilter);
     }
 
-    public FilteringSlotLensImpl(int index, Class<? extends Inventory> adapterType, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
+    public FilteringSlotLensImpl(int index, Class<? extends Inventory> adapterType,
+            Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
         super(index, adapterType);
 
         this.stackFilter = stackFilter;

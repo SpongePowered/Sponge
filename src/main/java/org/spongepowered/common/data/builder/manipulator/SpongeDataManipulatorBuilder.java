@@ -50,7 +50,8 @@ public final class SpongeDataManipulatorBuilder<T extends DataManipulator<T, I>,
     private final Constructor<T> constructor;
     private final DataFunction<DataContainer, T, Optional<T>> buildFunction;
 
-    public SpongeDataManipulatorBuilder(DataProcessorDelegate<T, I> delegate, Class<T> manipulatorClass, DataFunction<DataContainer, T, Optional<T>> buildFunction) {
+    public SpongeDataManipulatorBuilder(DataProcessorDelegate<T, I> delegate, Class<T> manipulatorClass, DataFunction<DataContainer, T,
+            Optional<T>> buildFunction) {
         this.delegate = checkNotNull(delegate);
         checkNotNull(manipulatorClass);
         checkArgument(!Modifier.isAbstract(manipulatorClass.getModifiers()));

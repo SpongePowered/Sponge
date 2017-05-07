@@ -55,7 +55,7 @@ public final class WorldGenConstants {
                 // then its a custom chunk provider which is extending one of the vanilla classes but if we
                 // use it as a generation populator directly then we would lose the custom logic of the
                 // extending class so we wrap it instead so that the provideChunk method is called.
-                if(mixind.isInstance(cp)) {
+                if (mixind.isInstance(cp)) {
                     // TODO We could do a check here to see if the chunk provider directly implements
                     // GenerationPopulator despite extending a vanilla chunk provider so that a mod could
                     // implement our genpop interface and use the vanilla provider.

@@ -99,13 +99,13 @@ public final class SpongeProfileManager implements GameProfileManager {
     }
 
     @Override
-    public CompletableFuture<Collection<GameProfile>> getAllById(Iterable<UUID> uniqueIds, boolean useCache) {
-        return this.submitTask(new UniqueIdQuery.MultiGet(this.cache, checkNotNull(uniqueIds, "unique ids"), useCache));
+    public CompletableFuture<GameProfile> get(String name, boolean useCache) {
+        return this.submitTask(new NameQuery.SingleGet(this.cache, checkNotNull(name, "name"), useCache));
     }
 
     @Override
-    public CompletableFuture<GameProfile> get(String name, boolean useCache) {
-        return this.submitTask(new NameQuery.SingleGet(this.cache, checkNotNull(name, "name"), useCache));
+    public CompletableFuture<Collection<GameProfile>> getAllById(Iterable<UUID> uniqueIds, boolean useCache) {
+        return this.submitTask(new UniqueIdQuery.MultiGet(this.cache, checkNotNull(uniqueIds, "unique ids"), useCache));
     }
 
     @Override

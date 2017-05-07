@@ -176,9 +176,9 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
         data.set(DataQueries.Schematic.LEGACY_OFFSET_Z, -zMin);
         SaveIterator itr = new SaveIterator(width, height, length);
         schematic.getBlockWorker(this.cause).iterate(itr);
-        byte[] blockids = itr.blockids;
-        byte[] extraids = itr.extraids;
-        byte[] blockdata = itr.blockdata;
+        byte[] blockids = itr.blockIds;
+        byte[] extraids = itr.extraIds;
+        byte[] blockdata = itr.blockData;
         data.set(DataQueries.Schematic.LEGACY_BLOCKS, blockids);
         data.set(DataQueries.Schematic.LEGACY_BLOCK_DATA, blockdata);
         if (extraids != null) {
@@ -202,17 +202,17 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
         private final int width;
         private final int length;
 
-        public byte[] blockids;
-        public byte[] extraids;
-        public byte[] blockdata;
+        byte[] blockIds;
+        byte[] extraIds;
+        byte[] blockData;
 
-        public SaveIterator(int width, int height, int length) {
+        SaveIterator(int width, int height, int length) {
             this.width = width;
             this.length = length;
 
-            this.blockids = new byte[width * height * length];
-            this.extraids = null;
-            this.blockdata = new byte[width * height * length];
+            this.blockIds = new byte[width * height * length];
+            this.extraIds = null;
+            this.blockData = new byte[width * height * length];
         }
 
         @Override
@@ -221,18 +221,18 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
             int y0 = y - volume.getBlockMin().getY();
             int z0 = z - volume.getBlockMin().getZ();
             int id = GlobalPalette.instance.get(volume.getBlock(x, y, z)).get();
-            int blockid = id >> 4;
-            int dataid = id & 0xF;
+            int blockId = id >> 4;
+            int dataId = id & 0xF;
             int index = (y0 * this.length + z0) * this.width + x0;
-            this.blockids[index] = (byte) (blockid & 0xFF);
-            if (blockid > 0xFF) {
-                if (this.extraids == null) {
-                    this.extraids = new byte[(this.blockdata.length >> 2) + 1];
+            this.blockIds[index] = (byte) (blockId & 0xFF);
+            if (blockId > 0xFF) {
+                if (this.extraIds == null) {
+                    this.extraIds = new byte[(this.blockData.length >> 2) + 1];
                 }
-                this.extraids[index >> 1] = (byte) (((index & 1) == 0) ? this.extraids[index >> 1] & 0xF0 | (blockid >> 8) & 0xF
-                        : this.extraids[index >> 1] & 0xF | ((blockid >> 8) & 0xF) << 4);
+                this.extraIds[index >> 1] = (byte) (((index & 1) == 0) ? this.extraIds[index >> 1] & 0xF0 | (blockId >> 8) & 0xF
+                        : this.extraIds[index >> 1] & 0xF | ((blockId >> 8) & 0xF) << 4);
             }
-            this.blockdata[index] = (byte) dataid;
+            this.blockData[index] = (byte) dataId;
         }
 
     }

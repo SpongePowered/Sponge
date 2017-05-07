@@ -64,7 +64,7 @@ public final class DespawnDelayDataProcessor extends AbstractEntityDataProcessor
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityItem container) {
-        return ImmutableMap.<Key<?>, Object> builder()
+        return ImmutableMap.<Key<?>, Object>builder()
                 .put(Keys.DESPAWN_DELAY, ((IMixinEntityItem) container).getDespawnDelay())
                 .put(Keys.INFINITE_DESPAWN_DELAY, ((IMixinEntityItem) container).infiniteDespawnDelay())
                 .build();

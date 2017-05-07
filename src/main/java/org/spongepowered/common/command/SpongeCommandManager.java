@@ -105,7 +105,8 @@ public class SpongeCommandManager implements CommandManager {
      * Construct a simple {@link CommandManager}.
      *
      * @param logger The logger to log error messages to
-     * @param disambiguator The function to resolve a single command when multiple options are available
+     * @param disambiguator The function to resolve a single
+     *     command when multiple options are available
      */
     public SpongeCommandManager(Logger logger, Disambiguator disambiguator) {
         this.log = logger;

@@ -28,9 +28,9 @@ import com.google.inject.AbstractModule;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import org.spongepowered.api.config.ConfigDir;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.inject.provider.config.ConfigDirAnnotation;
 import org.spongepowered.common.inject.provider.PathAsFileProvider;
+import org.spongepowered.common.SpongeImpl;
 
 import java.io.File;
 import java.nio.file.Path;

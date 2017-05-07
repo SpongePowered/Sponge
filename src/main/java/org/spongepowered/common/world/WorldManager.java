@@ -107,8 +107,8 @@ import javax.annotation.Nullable;
 
 public final class WorldManager {
 
-    public static final DirectoryStream.Filter<Path> LEVEL_AND_SPONGE =
-            entry -> Files.isDirectory(entry) && Files.exists(entry.resolve("level.dat")) && Files.exists(entry.resolve("level_sponge.dat"));
+    public static final DirectoryStream.Filter<Path> LEVEL_AND_SPONGE = entry ->
+            Files.isDirectory(entry) && Files.exists(entry.resolve("level.dat")) && Files.exists(entry.resolve("level_sponge.dat"));
 
     private static final Int2ObjectMap<DimensionType> dimensionTypeByTypeId = new Int2ObjectOpenHashMap<>(3);
     private static final Int2ObjectMap<DimensionType> dimensionTypeByDimensionId = new Int2ObjectOpenHashMap<>(3);
@@ -121,18 +121,15 @@ public final class WorldManager {
     private static final BitSet dimensionBits = new BitSet(Long.SIZE << 4);
     private static final Map<WorldServer, WorldServer> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
     private static final Queue<WorldServer> unloadQueue = new ArrayDeque<>();
-    private static final Comparator<WorldServer>
-            WORLD_SERVER_COMPARATOR =
-            (world1, world2) -> {
-                final Integer world1DimId = ((IMixinWorldServer) world1).getDimensionId();
+    private static final Comparator<WorldServer> WORLD_SERVER_COMPARATOR = (world1, world2) -> {
+        final Integer world1DimId = ((IMixinWorldServer) world1).getDimensionId();
+        if (world2 == null) {
+            return world1DimId;
+        }
 
-                if (world2 == null) {
-                    return world1DimId;
-                }
-
-                final Integer world2DimId = ((IMixinWorldServer) world2).getDimensionId();
-                return world1DimId - world2DimId;
-            };
+        final Integer world2DimId = ((IMixinWorldServer) world2).getDimensionId();
+        return world1DimId - world2DimId;
+    };
 
     private static boolean isVanillaRegistered = false;
 
@@ -207,8 +204,7 @@ public final class WorldManager {
     }
 
     public static void unregisterDimension(int dimensionId) {
-        if (!dimensionTypeByDimensionId.containsKey(dimensionId))
-        {
+        if (!dimensionTypeByDimensionId.containsKey(dimensionId)) {
             throw new IllegalArgumentException("Failed to unregister dimension [" + dimensionId + "] as it is not registered!");
         }
         dimensionTypeByDimensionId.remove(dimensionId);
@@ -531,7 +527,7 @@ public final class WorldManager {
         checkState(optCurrentSavesDir.isPresent(), "Attempt made to get unloaded worlds too early!");
 
         final List<WorldProperties> worlds = new ArrayList<>();
-        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(optCurrentSavesDir.get(), LEVEL_AND_SPONGE)) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(optCurrentSavesDir.get(), LEVEL_AND_SPONGE)) {
             for (Path worldFolder : stream) {
                 final String worldFolderName = worldFolder.getFileName().toString();
                 final WorldInfo worldInfo = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName,
@@ -626,11 +622,10 @@ public final class WorldManager {
         final int dimensionId = ((IMixinWorldInfo) properties).getDimensionId();
         registerDimension(dimensionId, (DimensionType) (Object) properties.getDimensionType());
         registerDimensionPath(dimensionId, worldFolder);
-        SpongeImpl.getLogger().info("Loading world [{}] ({})", properties.getWorldName(), getDimensionType
-                (dimensionId).get().getName());
+        SpongeImpl.getLogger().info("Loading world [{}] ({})", properties.getWorldName(), getDimensionType(dimensionId).get().getName());
 
-        final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, new WorldSettings((WorldInfo)
-                        properties));
+        final WorldServer worldServer =
+                createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, new WorldSettings((WorldInfo) properties));
 
         return Optional.of(worldServer);
     }
@@ -777,10 +772,8 @@ public final class WorldManager {
         }
     }
 
-    public static WorldInfo createWorldInfoFromSettings(Path currentSaveRoot, org.spongepowered.api.world.DimensionType dimensionType, int
-            dimensionId, String worldFolderName, WorldSettings worldSettings, String generatorOptions) {
-        final MinecraftServer server = SpongeImpl.getServer();
-
+    public static WorldInfo createWorldInfoFromSettings(Path currentSaveRoot, org.spongepowered.api.world.DimensionType dimensionType,
+            int dimensionId, String worldFolderName, WorldSettings worldSettings, String generatorOptions) {
         worldSettings.setGeneratorOptions(generatorOptions);
 
         ((IMixinWorldSettings) (Object) worldSettings).setDimensionType(dimensionType);
@@ -789,6 +782,7 @@ public final class WorldManager {
         final WorldInfo worldInfo = new WorldInfo(worldSettings, worldFolderName);
         setUuidOnProperties(dimensionId == 0 ? currentSaveRoot.getParent() : currentSaveRoot, (WorldProperties) worldInfo);
         ((IMixinWorldInfo) worldInfo).setDimensionId(dimensionId);
+        final MinecraftServer server = SpongeImpl.getServer();
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(server)),
                 (WorldArchetype) (Object) worldSettings, (WorldProperties) worldInfo));
 
@@ -873,15 +867,16 @@ public final class WorldManager {
     }
 
     /**
-     * Parses a {@link UUID} from disk from other known plugin platforms and sets it on the
-     * {@link WorldProperties}. Currently only Bukkit is supported.
+     * Parses a {@link UUID} from disk from other known plugin platforms
+     * and sets it on the {@link WorldProperties}.
+     *
+     * <p>Currently only Bukkit is supported.</p>
      */
     public static UUID setUuidOnProperties(Path savesRoot, WorldProperties properties) {
         checkNotNull(properties);
 
         UUID uuid;
-        if (properties.getUniqueId() == null || properties.getUniqueId().equals
-                (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
+        if (properties.getUniqueId() == null || properties.getUniqueId().equals(UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
             // Check if Bukkit's uid.dat file is here and use it
             final Path uidPath = savesRoot.resolve(properties.getWorldName()).resolve("uid.dat");
             if (Files.notExists(uidPath)) {
@@ -905,10 +900,11 @@ public final class WorldManager {
     }
 
     /**
-     * Handles registering existing Sponge dimensions that are not the root dimension (known as overworld).
+     * Handles registering existing Sponge dimensions that
+     * are not the root dimension (known as overworld).
      */
     private static void registerExistingSpongeDimensions(Path rootPath) {
-        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, LEVEL_AND_SPONGE)) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, LEVEL_AND_SPONGE)) {
             for (Path worldPath : stream) {
                 final Path spongeLevelPath = worldPath.resolve("level_sponge.dat");
                 final String worldFolderName = worldPath.getFileName().toString();
@@ -1064,7 +1060,7 @@ public final class WorldManager {
         private final WorldInfo oldInfo;
         private final String newName;
 
-        public CopyWorldTask(WorldInfo info, String newName) {
+        CopyWorldTask(WorldInfo info, String newName) {
             this.oldInfo = info;
             this.newName = newName;
         }
@@ -1116,7 +1112,7 @@ public final class WorldManager {
 
         private final WorldProperties props;
 
-        public DeleteWorldTask(WorldProperties props) {
+        DeleteWorldTask(WorldProperties props) {
             this.props = props;
         }
 
@@ -1158,7 +1154,7 @@ public final class WorldManager {
     }
 
     public static NBTTagCompound saveDimensionDataMap() {
-        int[] data = new int[(dimensionBits.length() + Integer.SIZE - 1 )/ Integer.SIZE];
+        int[] data = new int[(dimensionBits.length() + Integer.SIZE - 1 ) / Integer.SIZE];
         NBTTagCompound dimMap = new NBTTagCompound();
         for (int i = 0; i < data.length; i++) {
             int val = 0;

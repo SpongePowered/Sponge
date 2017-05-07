@@ -79,12 +79,10 @@ public final class CauseTracker {
 
     public static final boolean ENABLED = Booleans.parseBoolean(System.getProperty("sponge.causeTracking"), true);
 
-    static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) ->
-            context.forEach(namedCause -> {
-                        printer.add("        - Name: %s", namedCause.getName());
-                        printer.addWrapped(100, "          Object: %s", namedCause.getCauseObject());
-                    }
-            );
+    static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) -> context.forEach(namedCause -> {
+        printer.add("        - Name: %s", namedCause.getName());
+        printer.addWrapped(100, "          Object: %s", namedCause.getCauseObject());
+    });
 
     private static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
         printer.add("  - Phase: %s", data.state);
@@ -149,6 +147,7 @@ public final class CauseTracker {
      * <p>This method ensures that the necessary cleanup is performed if
      * an exception is thrown by phaseBody - i.e. logging a message,
      * and calling completePhase</p>
+     *
      * @param state
      * @param context
      * @param phaseBody
@@ -382,7 +381,8 @@ public final class CauseTracker {
             if (CauseTracker.ENABLED) {
                 final PhaseData peek = this.stack.peek();
                 final IPhaseState state = peek.state;
-                state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
+                state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos,
+                        ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
             }
             // Sponge End
 
@@ -549,10 +549,12 @@ public final class CauseTracker {
 
     /**
      * This is the replacement of {@link WorldServer#spawnEntity(net.minecraft.entity.Entity)}
-     * where it captures into phases. The causes and relations are processed by the phases.
+     * where it captures into phases. The causes and relations
+     * are processed by the phases.
      *
-     * The difference between {@link #spawnEntityWithCause(Entity, Cause)} is that it bypasses
-     * any phases and directly throws a spawn entity event.
+     * <p>The difference between {@link #spawnEntityWithCause(Entity, Cause)}
+     * is that it bypasses any phases and directly throws a
+     * spawn entity event.</p>
      *
      * @param entity The entity
      * @return True if the entity spawn was successful
@@ -658,11 +660,12 @@ public final class CauseTracker {
 
     /**
      * The core implementation of {@link World#spawnEntity(Entity, Cause)} that
-     * bypasses any sort of cause tracking and throws an event directly
+     * bypasses any sort of cause tracking and throws an event directly.
      *
-     * @param entity
-     * @param cause
-     * @return
+     * @param entity The entity to spawn
+     * @param cause The cause to use
+     * @return If the chunk is not loaded, so the
+     *     entity does not spawn
      */
     public boolean spawnEntityWithCause(Entity entity, Cause cause) {
         checkNotNull(entity, "Entity cannot be null!");
