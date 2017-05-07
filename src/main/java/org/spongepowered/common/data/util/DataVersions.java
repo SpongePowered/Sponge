@@ -48,11 +48,11 @@ public final class DataVersions {
         }
     }
 
-    public static final class TileEntitArchetype {
+    public static final class TileEntityArchetype {
 
         public static final int BASE_VERSION = 1;
 
-        private TileEntitArchetype() {
+        private TileEntityArchetype() {
         }
     }
 

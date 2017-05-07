@@ -32,7 +32,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
@@ -49,13 +48,13 @@ import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.util.DataVersions;
+import org.spongepowered.common.data.util.DataVersions.TileEntityArchetype;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEntityArchetype> implements TileEntityArchetype.Builder {
+public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<org.spongepowered.api.block.tileentity.TileEntityArchetype> implements org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder {
 
     BlockState     blockState;    // -These two fields can never be null
     @Nullable
@@ -63,11 +62,11 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     DataContainer  tileData;      // This can be empty, but cannot be null.
 
     public SpongeTileEntityArchetypeBuilder() {
-        super(TileEntityArchetype.class, DataVersions.TileEntitArchetype.BASE_VERSION);
+        super(org.spongepowered.api.block.tileentity.TileEntityArchetype.class, TileEntityArchetype.BASE_VERSION);
     }
 
     @Override
-    public TileEntityArchetype.Builder reset() {
+    public org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder reset() {
         this.blockState = null;
         this.tileEntityType = null;
         this.tileData = null;
@@ -75,7 +74,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     }
 
     @Override
-    public TileEntityArchetype.Builder from(TileEntityArchetype value) {
+    public org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder from(org.spongepowered.api.block.tileentity.TileEntityArchetype value) {
         this.tileEntityType = value.getTileEntityType();
         this.blockState = value.getState();
         this.tileData = value.getTileData();
@@ -83,7 +82,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     }
 
     @Override
-    public TileEntityArchetype.Builder state(BlockState state) {
+    public org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder state(BlockState state) {
         final IBlockState blockState = BlockUtil.toNative(state);
         if (!SpongeImplHooks.hasBlockTileEntity(blockState.getBlock(), blockState)) {
             throw new IllegalArgumentException("BlockState does not provide TileEntities!");
@@ -96,13 +95,13 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     }
 
     @Override
-    public TileEntityArchetype.Builder tile(TileEntityType tileEntityType) {
+    public org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder tile(TileEntityType tileEntityType) {
         this.tileEntityType = checkNotNull(tileEntityType, "TileEntityType cannot be null!");
         return this;
     }
 
     @Override
-    public TileEntityArchetype.Builder from(Location<World> location) {
+    public org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder from(Location<World> location) {
         final TileEntity tileEntity = location.getTileEntity()
                 .orElseThrow(() -> new IllegalArgumentException("There is no tile entity available at the provided location: " + location));
 
@@ -110,7 +109,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     }
 
     @Override
-    public TileEntityArchetype.Builder tile(TileEntity tileEntity) {
+    public org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder tile(TileEntity tileEntity) {
         checkArgument(tileEntity instanceof net.minecraft.tileentity.TileEntity, "TileEntity is not compatible with this implementation!");
         NBTTagCompound nbttagcompound = new NBTTagCompound();
         ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(nbttagcompound);
@@ -124,7 +123,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     }
 
     @Override
-    public TileEntityArchetype.Builder tileData(DataView dataView) {
+    public org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder tileData(DataView dataView) {
         checkNotNull(dataView, "Provided DataView cannot be null!");
         final DataContainer copy = dataView.copy();
         DataUtil.getValidators(Validations.TILE_ENTITY).validate(copy);
@@ -134,7 +133,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
 
     @SuppressWarnings("unchecked")
     @Override
-    public TileEntityArchetype.Builder setData(DataManipulator<?, ?> manipulator) {
+    public org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder setData(DataManipulator<?, ?> manipulator) {
         if (this.tileData == null) {
             this.tileData = DataContainer.createNew();
         }
@@ -145,7 +144,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E, V extends BaseValue<E>> TileEntityArchetype.Builder set(V value) {
+    public <E, V extends BaseValue<E>> org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder set(V value) {
         if (this.tileData == null) {
             this.tileData = DataContainer.createNew();
         }
@@ -156,7 +155,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
 
     @SuppressWarnings("unchecked")
     @Override
-    public <E, V extends BaseValue<E>> TileEntityArchetype.Builder set(Key<V> key, E value) {
+    public <E, V extends BaseValue<E>> org.spongepowered.api.block.tileentity.TileEntityArchetype.Builder set(Key<V> key, E value) {
         if (this.tileData == null) {
             this.tileData = DataContainer.createNew();
         }
@@ -166,7 +165,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     }
 
     @Override
-    public TileEntityArchetype build() {
+    public org.spongepowered.api.block.tileentity.TileEntityArchetype build() {
         checkState(this.blockState != null, "BlockState cannot be null!");
         checkState(this.tileEntityType != null, "TileEntityType cannot be null!");
         if (this.tileData == null) {
@@ -176,7 +175,7 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
     }
 
     @Override
-    protected Optional<TileEntityArchetype> buildContent(DataView container) throws InvalidDataException {
+    protected Optional<org.spongepowered.api.block.tileentity.TileEntityArchetype> buildContent(DataView container) throws InvalidDataException {
         final SpongeTileEntityArchetypeBuilder builder = new SpongeTileEntityArchetypeBuilder();
         if (container.contains(DataQueries.TileEntityArchetype.TILE_TYPE, DataQueries.TileEntityArchetype.BLOCK_STATE)) {
             builder.tile(container.getCatalogType(DataQueries.TileEntityArchetype.TILE_TYPE, TileEntityType.class)

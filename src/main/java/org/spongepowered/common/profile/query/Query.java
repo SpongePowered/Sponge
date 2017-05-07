@@ -89,11 +89,11 @@ public abstract class Query<V> implements Callable<V> {
 
         Optional<GameProfile> result = this.cache.fillProfile(profile, signed);
         if (result.isPresent() && result.get().isFilled()) {
-            GameProfile t = result.get();
+            GameProfile filledProfile = result.get();
 
-            this.cache.add(t, true, null);
+            this.cache.add(filledProfile, true, null);
 
-            return t;
+            return filledProfile;
         } else {
             throw new ProfileNotFoundException("Profile: " + profile);
         }
