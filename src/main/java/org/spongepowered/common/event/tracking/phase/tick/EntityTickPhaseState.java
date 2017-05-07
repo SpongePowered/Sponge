@@ -311,7 +311,6 @@ class EntityTickPhaseState extends TickPhaseState {
                 entity.posZ = entity.lastTickPosZ;
                 entity.rotationPitch = entity.prevRotationPitch;
                 entity.rotationYaw = entity.prevRotationYaw;
-
             } else {
                 Vector3d newPosition = event.getToTransform().getPosition();
                 if (!newPosition.equals(currentPositionVector)) {

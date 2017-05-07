@@ -97,11 +97,6 @@ public abstract class MixinEntityThrowable extends MixinEntity implements Projec
 
         if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.getShooter(), movingObjectPosition)) {
             this.onImpact(movingObjectPosition);
-        } else {
-            // Kill off projectile to avoid falling through world
-            // Entities such as EnderPearls call setDead during onImpact. However, if the event is cancelled
-            // setDead will never be called resulting in a bad state.
-            projectile.setDead();
         }
     }
 }

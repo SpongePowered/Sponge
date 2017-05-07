@@ -595,6 +595,11 @@ public class SpongeCommonEventFactory {
             return SpongeImpl.postEvent(event);
         }
 
+        if (cancelled) {
+            // Entities such as EnderPearls call setDead during onImpact. However, if the event is cancelled
+            // setDead will never be called resulting in a bad state such as falling through world.
+            projectile.setDead();
+        }
         return cancelled;
     }
 
