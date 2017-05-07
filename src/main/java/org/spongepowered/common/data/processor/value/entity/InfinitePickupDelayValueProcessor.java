@@ -28,13 +28,10 @@ import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 
@@ -53,7 +50,8 @@ public class InfinitePickupDelayValueProcessor extends AbstractSpongeValueProces
 
     @Override
     protected boolean set(EntityItem container, Boolean value) {
-        ((IMixinEntityItem) container).setPickupDelay(value ? DataConstants.Entity.Item.MAGIC_NO_PICKUP : DataConstants.Entity.Item.DEFAULT_PICKUP_DELAY, value);
+        ((IMixinEntityItem) container)
+                .setPickupDelay(value ? DataConstants.Entity.Item.MAGIC_NO_PICKUP : DataConstants.Entity.Item.DEFAULT_PICKUP_DELAY, value);
         return true;
     }
 

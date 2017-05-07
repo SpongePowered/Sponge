@@ -30,8 +30,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 final class NoCaptureUseItemPacketState extends UseItemPacketState {
 
     @Override
-    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext,
-        BlockPos pos) {
+    public boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext, BlockPos pos) {
         return false;
     }
 

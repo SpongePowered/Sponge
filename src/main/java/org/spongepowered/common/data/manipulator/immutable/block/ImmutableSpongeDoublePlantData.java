@@ -32,8 +32,8 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDoublePlantData;
 import org.spongepowered.common.data.util.DataConstants;
 
-public class ImmutableSpongeDoublePlantData extends AbstractImmutableSingleCatalogData<DoublePlantType, ImmutableDoublePlantData,
-    DoublePlantData> implements ImmutableDoublePlantData {
+public class ImmutableSpongeDoublePlantData extends AbstractImmutableSingleCatalogData<DoublePlantType, ImmutableDoublePlantData, DoublePlantData>
+        implements ImmutableDoublePlantData {
 
     public ImmutableSpongeDoublePlantData(DoublePlantType value) {
         super(ImmutableDoublePlantData.class, value, DataConstants.Catalog.DEFAULT_DOUBLE_PLANT, Keys.DOUBLE_PLANT_TYPE, SpongeDoublePlantData.class);

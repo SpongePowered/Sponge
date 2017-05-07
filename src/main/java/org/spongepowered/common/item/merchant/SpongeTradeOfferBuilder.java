@@ -99,7 +99,8 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
     public TradeOffer build() throws IllegalStateException {
         checkState(this.firstItem != null, "Trading item has not been set");
         checkState(this.sellingItem != null, "Selling item has not been set");
-        checkState(this.useCount <= this.maxUses, "Usage count cannot be greater than the max usage count (%s)", this.maxUses);
+        checkState(this.useCount <= this.maxUses,
+                "Usage count cannot be greater than the max usage count (%s)", this.maxUses);
         final ItemStack first = this.firstItem.createStack();
         final ItemStack second = this.secondItem == null ? null : this.secondItem.createStack();
         final ItemStack selling = this.sellingItem.createStack();

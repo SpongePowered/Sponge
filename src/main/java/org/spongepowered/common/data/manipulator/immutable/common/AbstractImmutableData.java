@@ -75,7 +75,8 @@ import java.util.stream.Collectors;
  * @param <M> The mutable manipulator type
  */
 @SuppressWarnings("unchecked")
-public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>> implements ImmutableDataManipulator<I, M> {
+public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
+        implements ImmutableDataManipulator<I, M> {
 
     private final Class<I> immutableClass;
 
@@ -140,8 +141,8 @@ public abstract class AbstractImmutableData<I extends ImmutableDataManipulator<I
         // We actually need to check that the processor is available, otherwise
         // we throw an IllegalArgumentException, because people don't check for
         // support!!
-        checkArgument(processor.isPresent(), "Invalid Key for " + this.immutableClass.getCanonicalName() + ". Use supports(Key) to avoid "
-                + "exceptions!");
+        checkArgument(processor.isPresent(), "Invalid Key for " + this.immutableClass.getCanonicalName()
+                + ". Use supports(Key) to avoid exceptions!");
         // Then we pass it to the processor :)
         return processor.get().with(checkNotNull(key), checkNotNull(value), (I) this);
     }

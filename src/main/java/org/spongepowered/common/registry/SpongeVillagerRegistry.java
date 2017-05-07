@@ -65,7 +65,8 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
 
     @Override
     public Multimap<Integer, TradeOfferListMutator> getTradeOfferLevelMap(Career career) {
-        final Multimap<Integer, TradeOfferListMutator> multimap = this.careerGeneratorMap.get(checkNotNull(career, "Career cannot be null!"));
+        final Multimap<Integer, TradeOfferListMutator> multimap = this.careerGeneratorMap.get(
+                checkNotNull(career, "Career cannot be null!"));
         if (multimap == null) {
             return ImmutableMultimap.of();
         } else {
@@ -142,7 +143,8 @@ public final class SpongeVillagerRegistry implements VillagerRegistry {
         for (Career career: CareerRegistryModule.getInstance().getAll()) {
             SpongeCareer spongeCareer = (SpongeCareer) career;
 
-            EntityVillager.ITradeList[][] careerLevels = EntityVillager.DEFAULT_TRADE_LIST_MAP[((SpongeProfession) spongeCareer.getProfession()).type][spongeCareer.type];
+            EntityVillager.ITradeList[][] careerLevels =
+                    EntityVillager.DEFAULT_TRADE_LIST_MAP[((SpongeProfession) spongeCareer.getProfession()).type][spongeCareer.type];
             for (int level = 0; level < careerLevels.length; level++) {
                 EntityVillager.ITradeList[] offers = careerLevels[level];
                 ImmutableList.Builder<TradeOfferListMutator> builder = ImmutableList.builder();

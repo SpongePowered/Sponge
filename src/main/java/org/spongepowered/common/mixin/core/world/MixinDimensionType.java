@@ -133,6 +133,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
      */
     @Overwrite
     public static DimensionType getById(int dimensionTypeId) {
-        return WorldManager.getDimensionTypeByTypeId(dimensionTypeId).orElseThrow(() -> new IllegalArgumentException("Invalid dimension id " + dimensionTypeId));
+        return WorldManager.getDimensionTypeByTypeId(dimensionTypeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid dimension id " + dimensionTypeId));
     }
 }

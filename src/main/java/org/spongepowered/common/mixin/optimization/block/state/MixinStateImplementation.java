@@ -74,7 +74,8 @@ public abstract class MixinStateImplementation extends BlockStateBase {
         } else {
             final IBlockState blockState = this.propertyValueTable.get(property, value);
             if (blockState == null) {
-                throw new IllegalArgumentException("No mapping found for the blockstate: " + Block.REGISTRY.getNameForObject(this.block) + " of property: " + property.getName() + " and value: " + value);
+                throw new IllegalArgumentException("No mapping found for the blockstate: " +
+                        Block.REGISTRY.getNameForObject(this.block) + " of property: " + property.getName() + " and value: " + value);
             }
             return blockState;
         }

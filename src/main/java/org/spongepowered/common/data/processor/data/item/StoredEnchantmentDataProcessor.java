@@ -46,8 +46,8 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import java.util.List;
 import java.util.Optional;
 
-public class StoredEnchantmentDataProcessor extends
-        AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, StoredEnchantmentData, ImmutableStoredEnchantmentData> {
+public class StoredEnchantmentDataProcessor extends AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>,
+        StoredEnchantmentData, ImmutableStoredEnchantmentData> {
 
     public StoredEnchantmentDataProcessor() {
         super(stack -> stack.getItem().equals(Items.ENCHANTED_BOOK), Keys.STORED_ENCHANTMENTS);

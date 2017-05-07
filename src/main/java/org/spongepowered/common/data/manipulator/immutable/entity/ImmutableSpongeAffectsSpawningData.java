@@ -31,7 +31,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAffectsSpawningData;
 
-public class ImmutableSpongeAffectsSpawningData extends AbstractImmutableBooleanData<ImmutableAffectsSpawningData, AffectsSpawningData> implements ImmutableAffectsSpawningData {
+public class ImmutableSpongeAffectsSpawningData extends AbstractImmutableBooleanData<ImmutableAffectsSpawningData, AffectsSpawningData>
+        implements ImmutableAffectsSpawningData {
 
     public ImmutableSpongeAffectsSpawningData(boolean value) {
         super(ImmutableAffectsSpawningData.class, value, Keys.AFFECTS_SPAWNING, SpongeAffectsSpawningData.class, false);

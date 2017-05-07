@@ -34,7 +34,8 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeStatisticD
 
 import java.util.Map;
 
-public class ImmutableSpongeStatisticData extends AbstractImmutableMappedData<Statistic, Long, ImmutableStatisticData, StatisticData> implements ImmutableStatisticData {
+public class ImmutableSpongeStatisticData extends AbstractImmutableMappedData<Statistic, Long, ImmutableStatisticData, StatisticData>
+        implements ImmutableStatisticData {
 
     public ImmutableSpongeStatisticData(Map<Statistic, Long> value) {
         super(ImmutableStatisticData.class, value, Keys.STATISTICS, SpongeStatisticData.class);

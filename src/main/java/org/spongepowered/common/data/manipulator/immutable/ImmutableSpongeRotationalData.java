@@ -32,7 +32,8 @@ import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRotationalData;
 
-public class ImmutableSpongeRotationalData extends AbstractImmutableSingleCatalogData<Rotation, ImmutableRotationalData, RotationalData> implements ImmutableRotationalData {
+public class ImmutableSpongeRotationalData extends AbstractImmutableSingleCatalogData<Rotation, ImmutableRotationalData, RotationalData>
+        implements ImmutableRotationalData {
 
     public ImmutableSpongeRotationalData(Rotation value) {
         super(ImmutableRotationalData.class, value, Rotations.BOTTOM, Keys.ROTATION, SpongeRotationalData.class);

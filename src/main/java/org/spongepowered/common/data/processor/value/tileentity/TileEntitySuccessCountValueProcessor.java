@@ -35,7 +35,8 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class TileEntitySuccessCountValueProcessor extends AbstractSpongeValueProcessor<TileEntityCommandBlock, Integer, MutableBoundedValue<Integer>> {
+public class TileEntitySuccessCountValueProcessor
+        extends AbstractSpongeValueProcessor<TileEntityCommandBlock, Integer, MutableBoundedValue<Integer>> {
 
     public TileEntitySuccessCountValueProcessor() {
         super(TileEntityCommandBlock.class, Keys.SUCCESS_COUNT);

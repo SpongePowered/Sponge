@@ -44,8 +44,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RegisterCatalog(BooleanTraits.class)
-public final class BooleanTraitRegistryModule
-        extends AbstractPrefixAlternateCatalogTypeRegistryModule<BooleanTrait>
+public final class BooleanTraitRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<BooleanTrait>
         implements SpongeAdditionalCatalogRegistryModule<BooleanTrait>{
 
     public static BooleanTraitRegistryModule getInstance() {

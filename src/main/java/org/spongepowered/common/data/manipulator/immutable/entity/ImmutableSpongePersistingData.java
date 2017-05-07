@@ -31,7 +31,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePersistingData;
 
-public class ImmutableSpongePersistingData extends AbstractImmutableBooleanData<ImmutablePersistingData, PersistingData> implements ImmutablePersistingData {
+public class ImmutableSpongePersistingData extends AbstractImmutableBooleanData<ImmutablePersistingData, PersistingData>
+        implements ImmutablePersistingData {
 
     public ImmutableSpongePersistingData(Boolean value) {
         super(ImmutablePersistingData.class, value, Keys.PERSISTS, SpongePersistingData.class, false);

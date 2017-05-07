@@ -84,7 +84,8 @@ public abstract class MixinMapGenStructure implements Populator {
         if (generatingStructures) {
             return false;
         }
-        Chunk chunk = ((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
+        Chunk chunk = ((IMixinChunkProviderServer) worldIn.getChunkProvider())
+                .getLoadedChunkWithoutMarkingActive(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
         if (chunk == null) {
             return false;
         }
@@ -97,7 +98,8 @@ public abstract class MixinMapGenStructure implements Populator {
         generatingStructures = true;
         for (StructureStart structurestart : this.structureMap.values())
         {
-            if (structurestart.isSizeableStructure() && structurestart.isValidForPostProcess(chunkCoord) && structurestart.getBoundingBox().intersectsWith(i, j, i + 15, j + 15))
+            if (structurestart.isSizeableStructure() && structurestart
+                    .isValidForPostProcess(chunkCoord) && structurestart.getBoundingBox().intersectsWith(i, j, i + 15, j + 15))
             {
                 structurestart.generateStructure(worldIn, randomIn, new StructureBoundingBox(i, j, i + 15, j + 15));
                 structurestart.notifyPostProcessAt(chunkCoord);

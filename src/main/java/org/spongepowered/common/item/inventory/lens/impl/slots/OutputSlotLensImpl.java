@@ -35,7 +35,6 @@ import org.spongepowered.common.item.inventory.lens.slots.OutputSlotLens;
 
 import java.util.function.Predicate;
 
-
 public class OutputSlotLensImpl extends FilteringSlotLensImpl implements OutputSlotLens<IInventory, net.minecraft.item.ItemStack> {
 
     public OutputSlotLensImpl(int index, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {

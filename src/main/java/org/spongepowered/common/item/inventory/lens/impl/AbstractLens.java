@@ -84,7 +84,8 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
         this(base, size, null, checkNotNull(adapterType, "adapterType"), slots);
     }
 
-    public AbstractLens(int base, int size, InventoryAdapter<TInventory, TStack> adapter, Class<? extends Inventory> adapterType, SlotProvider<TInventory, TStack> slots) {
+    public AbstractLens(int base, int size, InventoryAdapter<TInventory, TStack> adapter, Class<? extends Inventory> adapterType,
+            SlotProvider<TInventory, TStack> slots) {
         checkArgument(base >= 0, "Invalid offset: %s", base);
         checkArgument(size > 0, "Invalid size: %s", size);
         
@@ -113,7 +114,8 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
                 this.init((SlotProvider<TInventory, TStack>) adapter);
             } else {
                 this.init(index -> {
-                    throw new NoSuchElementException("Attempted to fetch slot at index " + index + " but no provider was available instancing " + AbstractLens.this);
+                    throw new NoSuchElementException("Attempted to fetch slot at index " + index
+                            + " but no provider was available instancing " + AbstractLens.this);
                 });
             }
         } catch (NoSuchElementException ex) {
@@ -203,7 +205,8 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
             Constructor<InventoryAdapter<TInventory, TStack>> ctor = this.getAdapterCtor();
             return ctor.newInstance(inv, this, parent);
         } catch (Exception ex) {
-            throw new InvalidAdapterException("Adapter class for " + this.getClass().getSimpleName() + " does not have a constructor which accepts this lens", ex);
+            throw new InvalidAdapterException("Adapter class for " + this.getClass().getSimpleName()
+                    + " does not have a constructor which accepts this lens", ex);
         }
     }
 

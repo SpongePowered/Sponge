@@ -35,7 +35,6 @@ import java.util.Locale;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 public class SpongeTextStyle extends TextStyle.Base {
 
     private final TextFormatting handle;

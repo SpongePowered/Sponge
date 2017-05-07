@@ -511,9 +511,7 @@ public class SpongeCommand {
     }
 
     private static void appendPluginMeta(Text.Builder builder, String key, Optional<String> value) {
-        if (value.isPresent()) {
-            appendPluginMeta(builder, key, value.get());
-        }
+        value.ifPresent(s -> appendPluginMeta(builder, key, s));
     }
 
     private static void appendPluginMeta(Text.Builder builder, String key, String value) {

@@ -34,7 +34,8 @@ import org.spongepowered.api.data.type.PrismarineTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePrismarineData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 
-public class SpongePrismarineData extends AbstractSingleCatalogData<PrismarineType, PrismarineData, ImmutablePrismarineData> implements PrismarineData {
+public class SpongePrismarineData extends AbstractSingleCatalogData<PrismarineType, PrismarineData, ImmutablePrismarineData>
+        implements PrismarineData {
 
     public SpongePrismarineData(PrismarineType variant) {
         super(PrismarineData.class, checkNotNull(variant), Keys.PRISMARINE_TYPE, ImmutableSpongePrismarineData.class);

@@ -76,15 +76,14 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
     /**
      * Get the number of slots referenced by this lens
      * 
-     * @return
+     * @return The number of slots referenced
      */
     int slotCount();
     
     /**
      * Used by parent lenses when marshalling their spanning tree, queries
      * whether this lens has access to a slot with the specified absolute index.
-     * 
-     * @param inv Inventory
+     *
      * @param index Absolute slot index
      * @return true if this lens has a path to the specified slot index
      */

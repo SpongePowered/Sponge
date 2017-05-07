@@ -98,7 +98,10 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
             if (optional.isPresent()) {
                 try {
                     ((ItemStack) container).clearCustomName();
-                    return builder.replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();
+                    return builder
+                            .replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, optional.get()))
+                            .result(DataTransactionResult.Type.SUCCESS)
+                            .build();
                 } catch (Exception e) {
                     SpongeImpl.getLogger().error("There was an issue removing the displayname from an itemstack!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();

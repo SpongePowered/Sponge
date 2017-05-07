@@ -43,21 +43,21 @@ import java.util.Optional;
 public final class CoalTypeRegistryModule implements CatalogRegistryModule<CoalType> {
 
     @RegisterCatalog(CoalTypes.class)
-    public final Map<String, CoalType> coaltypeMappings = Maps.newHashMap();
+    public final Map<String, CoalType> coalTypeMappings = Maps.newHashMap();
 
     @Override
     public Optional<CoalType> getById(String id) {
-        return Optional.ofNullable(this.coaltypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+        return Optional.ofNullable(this.coalTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
     public Collection<CoalType> getAll() {
-        return ImmutableList.copyOf(this.coaltypeMappings.values());
+        return ImmutableList.copyOf(this.coalTypeMappings.values());
     }
 
     @Override
     public void registerDefaults() {
-        this.coaltypeMappings.put("coal", new SpongeCoalType(0, "COAL", new SpongeTranslation("item.coal.name")));
-        this.coaltypeMappings.put("charcoal", new SpongeCoalType(1, "CHARCOAL", new SpongeTranslation("item.charcoal.name")));
+        this.coalTypeMappings.put("coal", new SpongeCoalType(0, "COAL", new SpongeTranslation("item.coal.name")));
+        this.coalTypeMappings.put("charcoal", new SpongeCoalType(1, "CHARCOAL", new SpongeTranslation("item.charcoal.name")));
     }
 }

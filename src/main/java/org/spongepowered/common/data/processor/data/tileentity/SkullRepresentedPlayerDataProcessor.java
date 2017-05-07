@@ -42,8 +42,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class SkullRepresentedPlayerDataProcessor extends
-        AbstractTileEntitySingleDataProcessor<TileEntitySkull, GameProfile, Value<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
+public class SkullRepresentedPlayerDataProcessor extends AbstractTileEntitySingleDataProcessor<TileEntitySkull, GameProfile, Value<GameProfile>,
+        RepresentedPlayerData, ImmutableRepresentedPlayerData> {
 
     public SkullRepresentedPlayerDataProcessor() {
         super(TileEntitySkull.class, Keys.REPRESENTED_PLAYER);

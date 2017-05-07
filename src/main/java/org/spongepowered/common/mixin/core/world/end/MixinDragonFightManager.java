@@ -145,7 +145,8 @@ public abstract class MixinDragonFightManager {
                     .add(NamedCause.of("RespawnState", this.respawnState))
                     .complete());
                 // Sponge End
-                this.respawnState.process(this.world, (DragonFightManager) (Object) this, this.crystals, this.respawnStateTicks++, this.exitPortalLocation);
+                this.respawnState.process(this.world, (DragonFightManager) (Object) this,
+                        this.crystals, this.respawnStateTicks++, this.exitPortalLocation);
                 causeTracker.completePhase(DragonPhase.State.RESPAWN_DRAGON); // Sponge - Complete cause tracker
             }
 

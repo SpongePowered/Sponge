@@ -84,7 +84,8 @@ public abstract class MixinBiomeMesa extends MixinBiome {
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Cactus.class));
         Cactus cactus = Cactus.builder()
                 .cactiPerChunk(VariableAmount.baseWithOptionalAddition(0,
-                        VariableAmount.baseWithRandomAddition(1, VariableAmount.baseWithOptionalAddition(2, 3, 0.25)), 0.4))
+                        VariableAmount.baseWithRandomAddition(1,
+                                VariableAmount.baseWithOptionalAddition(2, 3, 0.25)), 0.4))
                 .build();
         gensettings.getPopulators().add(cactus);
     }
@@ -93,7 +94,8 @@ public abstract class MixinBiomeMesa extends MixinBiome {
      * Cancel the call to place the terrain blocks as this is instead handled
      * through our custom genpop.
      */
-    @Inject(method = "genTerrainBlocks(Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/world/chunk/ChunkPrimer;IID)V", at = @At("HEAD") , cancellable = true)
+    @Inject(method = "genTerrainBlocks(Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/world/chunk/ChunkPrimer;IID)V",
+            at = @At("HEAD") , cancellable = true)
     public void genTerrainBlocks(World world, Random rand, ChunkPrimer chunk, int x, int z, double stoneNoise, CallbackInfo ci) {
         ci.cancel();
     }

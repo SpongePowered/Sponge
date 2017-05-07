@@ -46,8 +46,8 @@ import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
 
 import java.util.Optional;
 
-public class FireworkRocketDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityFireworkRocket, Integer, MutableBoundedValue<Integer>, FireworkRocketData, ImmutableFireworkRocketData> {
+public class FireworkRocketDataProcessor extends AbstractEntitySingleDataProcessor<EntityFireworkRocket, Integer, MutableBoundedValue<Integer>,
+        FireworkRocketData, ImmutableFireworkRocketData> {
 
     public FireworkRocketDataProcessor() {
         super(EntityFireworkRocket.class, Keys.FIREWORK_FLIGHT_MODIFIER);

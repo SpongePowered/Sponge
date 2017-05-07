@@ -45,7 +45,8 @@ public class SpongeRedstonePoweredData extends AbstractBoundedComparableData<Int
     }
 
     public SpongeRedstonePoweredData(int value, int minimum, int maximum) {
-        super(RedstonePoweredData.class, value, Keys.POWER, intComparator(), ImmutableSpongeRedstonePoweredData.class, minimum, maximum, 0);
+        super(RedstonePoweredData.class, value, Keys.POWER, intComparator(), ImmutableSpongeRedstonePoweredData.class,
+                minimum, maximum, 0);
     }
 
     @Override

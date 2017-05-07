@@ -59,7 +59,8 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
         this(base, width, height, rowStride, 0, 0, GridInventoryAdapter.class, slots);
     }
 
-    public GridInventoryLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public GridInventoryLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider<IInventory,
+            ItemStack> slots) {
         this(base, width, height, rowStride, 0, 0, adapterType, slots);
     }
 
@@ -67,7 +68,8 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
         this(base, width, height, rowStride, xBase, yBase, GridInventoryAdapter.class, slots);
     }
 
-    public GridInventoryLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public GridInventoryLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType,
+            SlotProvider<IInventory, ItemStack> slots) {
         super(base, width, height, rowStride, xBase, yBase, adapterType, slots);
     }
 

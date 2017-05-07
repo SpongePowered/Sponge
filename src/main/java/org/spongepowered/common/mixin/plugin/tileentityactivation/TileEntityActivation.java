@@ -63,7 +63,8 @@ public class TileEntityActivation {
             return true;
         }
 
-        TileEntityActivationCategory config = ((IMixinWorldServer) tileEntity.getWorld()).getActiveConfig().getConfig().getTileEntityActivationRange();
+        TileEntityActivationCategory config =
+                ((IMixinWorldServer) tileEntity.getWorld()).getActiveConfig().getConfig().getTileEntityActivationRange();
         TileEntityType type = ((org.spongepowered.api.block.tileentity.TileEntity) tileEntity).getType();
 
         IModData_Activation spongeEntity = (IModData_Activation) tileEntity;

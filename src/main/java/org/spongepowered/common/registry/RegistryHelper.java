@@ -48,7 +48,8 @@ public class RegistryHelper {
     }
 
     public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction) {
-        return mapFields(apiClass, mapFunction, null, false);
+        return mapFields(apiClass, mapFunction,
+                null, false);
     }
 
     public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction, Set<String> ignoredFields) {

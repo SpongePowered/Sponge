@@ -54,7 +54,8 @@ public class LargeChestInventoryLens extends MinecraftLens {
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
         this.addSpanningChild(new GridInventoryLensImpl(0, 9, this.upperChest.getSizeInventory() / 9, 9, slots));
-        this.addSpanningChild(new GridInventoryLensImpl(this.upperChest.getSizeInventory(), 9, this.lowerChest.getSizeInventory() / 9, 9, slots));
+        this.addSpanningChild(new GridInventoryLensImpl(this.upperChest.getSizeInventory(), 9,
+                this.lowerChest.getSizeInventory() / 9, 9, slots));
     }
 
     @Override

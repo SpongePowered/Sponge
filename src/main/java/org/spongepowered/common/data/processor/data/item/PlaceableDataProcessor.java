@@ -44,8 +44,8 @@ import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 import java.util.Optional;
 import java.util.Set;
 
-public class PlaceableDataProcessor
-        extends AbstractItemSingleDataProcessor<Set<BlockType>, SetValue<BlockType>, PlaceableData, ImmutablePlaceableData> {
+public class PlaceableDataProcessor extends AbstractItemSingleDataProcessor<Set<BlockType>, SetValue<BlockType>,
+        PlaceableData, ImmutablePlaceableData> {
 
     public PlaceableDataProcessor() {
         super(stack -> true, Keys.PLACEABLE_BLOCKS);

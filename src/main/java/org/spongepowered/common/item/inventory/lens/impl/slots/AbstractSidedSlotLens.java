@@ -32,7 +32,6 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.SidedSlotAdapt
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.slots.SidedSlotLens;
 
-
 public abstract class AbstractSidedSlotLens extends SlotLensImpl implements SidedSlotLens<IInventory, net.minecraft.item.ItemStack> {
 
     public AbstractSidedSlotLens(int index) {

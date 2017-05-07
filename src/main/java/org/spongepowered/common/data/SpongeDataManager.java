@@ -111,7 +111,9 @@ public final class SpongeDataManager implements DataManager {
         checkNotNull(clazz);
         checkNotNull(builder);
         if (!this.builders.containsKey(clazz)) {
-            if (!(builder instanceof AbstractDataBuilder || builder instanceof SpongeDataManipulatorBuilder || builder instanceof SpongeImmutableDataManipulatorBuilder)) {
+            if (!(builder instanceof AbstractDataBuilder
+                    || builder instanceof SpongeDataManipulatorBuilder
+                    || builder instanceof SpongeImmutableDataManipulatorBuilder)) {
                 SpongeImpl.getLogger().warn("A custom DataBuilder is not extending AbstractDataBuilder! It is recommended that "
                                             + "the custom data builder does extend it to gain automated content versioning updates and maintain "
                                             + "simplicity. The offending builder's class is: {}", builder.getClass());
@@ -249,7 +251,8 @@ public final class SpongeDataManager implements DataManager {
         checkState(allowRegistrations, "Registrations are no longer allowed");
         checkNotNull(objectClass, "Target object class cannot be null!");
         checkNotNull(translator, "DataTranslator for : " + objectClass + " cannot be null!");
-        checkArgument(translator.getToken().isAssignableFrom(objectClass), "DataTranslator is not compatible with the target object class: " + objectClass);
+        checkArgument(translator.getToken().isAssignableFrom(objectClass),
+                "DataTranslator is not compatible with the target object class: " + objectClass);
         if (!this.dataSerializerMap.containsKey(checkNotNull(objectClass, "Target class cannot be null!"))) {
             this.dataSerializerMap.put(objectClass, translator);
             DataTranslatorRegistryModule.getInstance().registerAdditionalCatalog(translator);
@@ -264,7 +267,8 @@ public final class SpongeDataManager implements DataManager {
     @SuppressWarnings("unchecked")
     @Override
     public <T> Optional<DataTranslator<T>> getTranslator(Class<T> objectclass) {
-        return Optional.ofNullable((DataTranslator<T>) this.dataSerializerMap.get(checkNotNull(objectclass, "Target class cannot be null!")));
+        return Optional.ofNullable((DataTranslator<T>)
+                this.dataSerializerMap.get(checkNotNull(objectclass, "Target class cannot be null!")));
     }
 
     @Override

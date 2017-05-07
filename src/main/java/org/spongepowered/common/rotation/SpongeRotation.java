@@ -26,9 +26,7 @@ package org.spongepowered.common.rotation;
 
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.rotation.Rotation;
-import org.spongepowered.common.registry.type.block.RotationRegistryModule;
 
-@NonnullByDefault
 public class SpongeRotation implements Rotation {
 
     private final int angle;

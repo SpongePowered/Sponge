@@ -53,7 +53,8 @@ public abstract class AbstractSingleEnumData<E extends Enum<E>, M extends DataMa
     private final Class<? extends I> immutableClass;
     private final E defaultValue;
 
-    protected AbstractSingleEnumData(Class<M> manipulatorClass, E value, Key<? extends BaseValue<E>> usedKey, Class<? extends I> immutableClass, E defaultValue) {
+    protected AbstractSingleEnumData(Class<M> manipulatorClass, E value, Key<? extends BaseValue<E>> usedKey,
+            Class<? extends I> immutableClass, E defaultValue) {
         super(manipulatorClass, value, usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");

@@ -32,8 +32,8 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleEnumData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 
-public class ImmutableSpongeDirectionalData extends AbstractImmutableSingleEnumData<Direction, ImmutableDirectionalData, DirectionalData> implements
-        ImmutableDirectionalData {
+public class ImmutableSpongeDirectionalData extends AbstractImmutableSingleEnumData<Direction, ImmutableDirectionalData, DirectionalData>
+        implements ImmutableDirectionalData {
 
     public ImmutableSpongeDirectionalData(Direction direction) {
         super(ImmutableDirectionalData.class, direction, Direction.NONE, Keys.DIRECTION, SpongeDirectionalData.class);

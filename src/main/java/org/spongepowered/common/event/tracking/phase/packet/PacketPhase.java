@@ -90,7 +90,6 @@ import javax.annotation.Nullable;
 
 public final class PacketPhase extends TrackingPhase {
 
-
     public static final class General {
 
         public static final IPacketState UNKNOWN = new UnknownPacketState();
@@ -260,7 +259,6 @@ public final class PacketPhase extends TrackingPhase {
         return context;
     }
 
-
     // TrackingPhase specific methods overridden for state specific handling
 
     @Override
@@ -425,7 +423,6 @@ public final class PacketPhase extends TrackingPhase {
         this.packetUnwindMap.put(CPacketSpectate.class, PacketFunction.IGNORED);
         this.packetUnwindMap.put(CPacketResourcePackStatus.class, PacketFunction.RESOURCE_PACKET);
     }
-
 
     public void setupPacketToStateMapping() {
         this.packetTranslationMap.put(CPacketKeepAlive.class, packet -> General.IGNORED);

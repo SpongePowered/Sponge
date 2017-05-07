@@ -76,7 +76,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.DoubleUnaryOperator;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -98,7 +97,8 @@ public class DamageEventHandler {
         if ((damageSource instanceof FallingBlockDamageSource) && !entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD).isEmpty()) {
             DamageModifier modifier = DamageModifier.builder()
                 .cause(
-                    Cause.of(NamedCause.of(DamageEntityEvent.HARD_HAT_ARMOR, ((ItemStack) entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD)).createSnapshot())))
+                    Cause.of(NamedCause.of(DamageEntityEvent.HARD_HAT_ARMOR,
+                            ((ItemStack) entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD)).createSnapshot())))
                 .type(DamageModifierTypes.HARD_HAT)
                 .build();
             return Optional.of(new DamageFunction(modifier, HARD_HAT_FUNCTION));
@@ -108,11 +108,11 @@ public class DamageEventHandler {
 
     private static double damageToHandle;
 
-    public static Optional<List<DamageFunction>> createArmorModifiers(EntityLivingBase entityLivingBase,
-                                                                                                               DamageSource damageSource, double damage) {
+    public static Optional<List<DamageFunction>> createArmorModifiers(EntityLivingBase entityLivingBase, DamageSource damageSource, double damage) {
         if (!damageSource.isDamageAbsolute()) {
             damage *= 25;
-            net.minecraft.item.ItemStack[] inventory = Iterables.toArray(entityLivingBase.getArmorInventoryList(), net.minecraft.item.ItemStack.class);
+            net.minecraft.item.ItemStack[] inventory = Iterables.toArray(entityLivingBase.getArmorInventoryList(),
+                    net.minecraft.item.ItemStack.class);
             List<DamageFunction> modifiers = new ArrayList<>();
             List<DamageObject> damageObjects = new ArrayList<>();
 
@@ -185,10 +185,10 @@ public class DamageEventHandler {
      *
      * This is also where we can likely throw a damage item event.
      *
-     * @param entity
-     * @param damageSource
-     * @param modifier
-     * @param damage
+     * @param entity The entity who has the armor
+     * @param damageSource The source of the damage
+     * @param modifier The damage modifier
+     * @param damage The amount of damage
      */
     public static void acceptArmorModifier(EntityLivingBase entity, DamageSource damageSource, DamageModifier modifier, double damage) {
         Optional<DamageObject> property = modifier.getCause().first(DamageObject.class);
@@ -219,8 +219,7 @@ public class DamageEventHandler {
         }
     }
 
-    public static Optional<DamageFunction> createResistanceModifier(EntityLivingBase entityLivingBase,
-                                                                                                             DamageSource damageSource) {
+    public static Optional<DamageFunction> createResistanceModifier(EntityLivingBase entityLivingBase, DamageSource damageSource) {
         if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(MobEffects.RESISTANCE) && damageSource != DamageSource.OUT_OF_WORLD) {
             PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(MobEffects.RESISTANCE));
             return Optional.of(new DamageFunction(DamageModifier.builder()
@@ -313,8 +312,7 @@ public class DamageEventHandler {
 
     }
 
-    public static Optional<DamageFunction> createAbsorptionModifier(EntityLivingBase entityLivingBase,
-                                                                                                             DamageSource damageSource) {
+    public static Optional<DamageFunction> createAbsorptionModifier(EntityLivingBase entityLivingBase, DamageSource damageSource) {
         final float absorptionAmount = entityLivingBase.getAbsorptionAmount();
         if (absorptionAmount > 0) {
             DoubleUnaryOperator function = damage ->

@@ -137,8 +137,8 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     @Override
     @Overwrite
     public void setObjectiveInDisplaySlot(int slot, ScoreObjective objective) {
-        this.scoreboard$updateDisplaySlot(objective == null ? null : ((IMixinScoreObjective) objective).getSpongeObjective(), DisplaySlotRegistryModule
-                .getInstance().getForIndex(slot).get());
+        this.scoreboard$updateDisplaySlot(objective == null ? null : ((IMixinScoreObjective) objective).getSpongeObjective(),
+                DisplaySlotRegistryModule.getInstance().getForIndex(slot).get());
     }
 
     public void scoreboard$updateDisplaySlot(@Nullable Objective objective, DisplaySlot displaySlot) {

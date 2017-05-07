@@ -128,7 +128,8 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState,
+            PhaseContext context, PhaseContext newContext) {
 
     }
 

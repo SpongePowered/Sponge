@@ -55,7 +55,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity> implements EntityArchetype {
+public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity>
+        implements EntityArchetype {
 
     SpongeEntityArchetype(SpongeEntityArchetypeBuilder builder) {
         super(builder.entityType, NbtTranslator.getInstance().translateData(builder.entityData));

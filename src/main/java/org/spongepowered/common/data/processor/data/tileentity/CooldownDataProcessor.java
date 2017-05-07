@@ -38,8 +38,8 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class CooldownDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntityHopper, Integer, MutableBoundedValue<Integer>, CooldownData, ImmutableCooldownData> {
+public class CooldownDataProcessor extends AbstractTileEntitySingleDataProcessor<TileEntityHopper, Integer, MutableBoundedValue<Integer>,
+        CooldownData, ImmutableCooldownData> {
 
     public CooldownDataProcessor() {
         super(TileEntityHopper.class, Keys.COOLDOWN);

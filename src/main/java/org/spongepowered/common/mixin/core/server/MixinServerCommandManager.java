@@ -168,6 +168,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         if (pos != null) {
             targetPos = new Location<>((org.spongepowered.api.world.World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
         }
-        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, targetPos, false);
+        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager())
+                .getSuggestions((CommandSource) sender, input, targetPos, false);
     }
 }

@@ -57,7 +57,8 @@ public class MixinBlockFalling {
                 BlockPos actualPos = pos.add(32, 32, 32);
                 EntityType fallingBlock = EntityTypes.FALLING_BLOCK;
                 Vector3d position = new Vector3d((double)actualPos.getX() + 0.5D, (double)actualPos.getY(), (double)actualPos.getZ() + 0.5D);
-                BlockSnapshot snapshot = ((org.spongepowered.api.world.World) world).createSnapshot(actualPos.getX(), actualPos.getY(), actualPos.getZ());
+                BlockSnapshot snapshot = ((org.spongepowered.api.world.World) world)
+                        .createSnapshot(actualPos.getX(), actualPos.getY(), actualPos.getZ());
                 SpawnCause spawnCause = BlockSpawnCause.builder()
                         .block(snapshot)
                         .type(InternalSpawnTypes.FALLING_BLOCK)

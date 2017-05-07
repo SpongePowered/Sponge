@@ -45,8 +45,8 @@ public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>>
 
     static {
         converters.put(String.class.getName(), Function.<String>identity());
-        converters.put(EntityType.class.getName(),
-                       (Function<String, EntityType>) input -> EntityTypeRegistryModule.getInstance().getById(input.toLowerCase()).orElse(null));
+        converters.put(EntityType.class.getName(), (Function<String, EntityType>) input ->
+                EntityTypeRegistryModule.getInstance().getById(input.toLowerCase()).orElse(null));
     }
 
     @SuppressWarnings("unchecked")

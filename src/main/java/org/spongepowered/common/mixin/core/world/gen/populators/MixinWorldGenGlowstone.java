@@ -101,8 +101,8 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
             // Sponge start
             int a = this.attempts.getFlooredAmount(rand);
             for (int i = 0; i < a; ++i) {
-                BlockPos blockpos1 =
-                        position.add(rand.nextInt(8) - rand.nextInt(8), this.clusterheight.getFlooredAmount(rand), rand.nextInt(8) - rand.nextInt(8));
+                BlockPos blockpos1 = position.add(rand.nextInt(8) - rand.nextInt(8),
+                                this.clusterheight.getFlooredAmount(rand), rand.nextInt(8) - rand.nextInt(8));
 //                if (worldIn.getBlockState(blockpos1).getBlock().getMaterial() == Material.air) {
                 if (isAir(worldIn.getBlockState(blockpos1), worldIn, blockpos1)) {
                     // Sponge end

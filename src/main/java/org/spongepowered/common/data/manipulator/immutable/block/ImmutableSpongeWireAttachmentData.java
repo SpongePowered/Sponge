@@ -42,7 +42,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<ImmutableWireAttachmentData, WireAttachmentData> implements ImmutableWireAttachmentData {
+public class ImmutableSpongeWireAttachmentData extends AbstractImmutableData<ImmutableWireAttachmentData, WireAttachmentData>
+        implements ImmutableWireAttachmentData {
 
     private final ImmutableMap<Direction, WireAttachmentType> wireAttachmentMap;
 

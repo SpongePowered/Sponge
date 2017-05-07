@@ -165,7 +165,8 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         return chunk;
     }
 
-    @Redirect(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;loadChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
+    @Redirect(method = "provideChunk", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/gen/ChunkProviderServer;loadChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
     public Chunk onProvideChunkHead(ChunkProviderServer chunkProviderServer, int x, int z) {
         if (!this.denyChunkRequests) {
             return this.loadChunk(x, z);
@@ -194,14 +195,17 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         }
     }
 
-    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populateChunk(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", shift = Shift.AFTER))
+    @Inject(method = "provideChunk", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/chunk/Chunk;populateChunk(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V",
+            shift = Shift.AFTER))
     public void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
         }
     }
 
-    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;"))
+    @Inject(method = "provideChunk", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;"))
     public void onError(CallbackInfoReturnable<Chunk> ci) {
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);

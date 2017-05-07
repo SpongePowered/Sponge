@@ -134,7 +134,8 @@ public final class TrackingUtil {
     public static void tickEntity(net.minecraft.entity.Entity entityIn) {
         checkArgument(entityIn instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entityIn);
         checkNotNull(entityIn, "Cannot capture on a null ticking entity!");
-        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) entityIn.world).getChunkProvider()).getLoadedChunkWithoutMarkingActive(entityIn.getPosition().getX() >> 4,  entityIn.getPosition().getZ() >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) entityIn.world).getChunkProvider())
+                .getLoadedChunkWithoutMarkingActive(entityIn.getPosition().getX() >> 4,  entityIn.getPosition().getZ() >> 4);
         if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
             // Don't tick entities in chunks queued for unload
             return;
@@ -167,7 +168,8 @@ public final class TrackingUtil {
     public static void tickRidingEntity(net.minecraft.entity.Entity entity) {
         checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
         checkNotNull(entity, "Cannot capture on a null ticking entity!");
-        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) entity.world).getChunkProvider()).getLoadedChunkWithoutMarkingActive(entity.getPosition().getX() >> 4,  entity.getPosition().getZ() >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) ((WorldServer) entity.world).getChunkProvider())
+                .getLoadedChunkWithoutMarkingActive(entity.getPosition().getX() >> 4,  entity.getPosition().getZ() >> 4);
         if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
             // Don't tick entity in chunks queued for unload
             return;
@@ -196,7 +198,8 @@ public final class TrackingUtil {
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
         final WorldServer worldServer = mixinWorldServer.asMinecraftWorld();
         final BlockPos pos = tileEntity.getPos();
-        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) worldServer.getChunkProvider()).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4,  pos.getZ() >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) worldServer.getChunkProvider())
+                .getLoadedChunkWithoutMarkingActive(pos.getX() >> 4,  pos.getZ() >> 4);
         if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
             // Don't tick TE's in chunks queued for unload
             return;
@@ -310,7 +313,8 @@ public final class TrackingUtil {
                 capturingBlock.initializeBlockCapturingState(minecraftWorld);
                 capturingBlock.requiresBlockCapturingRefresh(false);
             }
-            phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.PROCESS_IMMEDIATELY, ((IModData_BlockCapturing) block).processTickChangesImmediately()));
+            phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.PROCESS_IMMEDIATELY,
+                    ((IModData_BlockCapturing) block).processTickChangesImmediately()));
         } else {
             phaseContext.add(NamedCause.of(InternalNamedCauses.Tracker.PROCESS_IMMEDIATELY, false));
         }
@@ -359,7 +363,8 @@ public final class TrackingUtil {
     public static void performBlockDrop(Block block, IMixinWorldServer mixinWorld, BlockPos pos, IBlockState state, float chance, int fortune) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         final IPhaseState currentState = causeTracker.getCurrentState();
-        final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState) && !currentState.getPhase().isWorldGeneration(currentState);
+        final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState)
+                && !currentState.getPhase().isWorldGeneration(currentState);
         if (shouldEnterBlockDropPhase) {
             PhaseContext context = PhaseContext.start()
                     .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
@@ -380,8 +385,8 @@ public final class TrackingUtil {
         }
     }
 
-    static boolean trackBlockChange(CauseTracker causeTracker, IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos, int flags,
-            PhaseContext phaseContext, IPhaseState phaseState) {
+    static boolean trackBlockChange(CauseTracker causeTracker, IMixinWorldServer mixinWorld, Chunk chunk, IBlockState currentState,
+            IBlockState newState, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
         final SpongeBlockSnapshot originalBlockSnapshot;
         final WorldServer minecraftWorld = mixinWorld.asMinecraftWorld();
         if (phaseState.shouldCaptureBlockChangeOrSkip(phaseContext, pos)) {
@@ -417,7 +422,8 @@ public final class TrackingUtil {
         return true;
     }
 
-    private static void associateBlockChangeWithSnapshot(IPhaseState phaseState, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot, List<BlockSnapshot> capturedSnapshots) {
+    private static void associateBlockChangeWithSnapshot(IPhaseState phaseState, Block newBlock, IBlockState currentState,
+            SpongeBlockSnapshot snapshot, List<BlockSnapshot> capturedSnapshots) {
         Block originalBlock = currentState.getBlock();
         if (phaseState == BlockPhase.State.BLOCK_DECAY) {
             if (newBlock == Blocks.AIR) {
@@ -670,14 +676,14 @@ public final class TrackingUtil {
             // Handle item drops captured
             final BlockPos pos = ((IMixinLocation) (Object) oldBlockSnapshot.getLocation().get()).getBlockPos();
             // This is for pre-merged items
-            capturedBlockDrops.ifPresentAndNotEmpty(map -> spawnItemDataForBlockDrops(map.containsKey(pos) ? map.removeAll(pos) : Collections.emptyList(), newBlockSnapshot,
-                phaseContext, phaseState));
+            capturedBlockDrops.ifPresentAndNotEmpty(map -> spawnItemDataForBlockDrops(
+                    map.containsKey(pos) ? map.removeAll(pos) : Collections.emptyList(), newBlockSnapshot, phaseContext, phaseState));
             // And this is for un-pre-merged items, these will be EntityItems, not ItemDropDatas.
-            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.removeAll(pos) : Collections.emptyList(), newBlockSnapshot,
-                phaseContext, phaseState));
+            capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> spawnItemEntitiesForBlockDrops(
+                    map.containsKey(pos) ? map.removeAll(pos) : Collections.emptyList(), newBlockSnapshot, phaseContext, phaseState));
             // This is for entities actually spawned
-            capturedBlockEntitySpawns.ifPresentAndNotEmpty(map -> spawnEntitiesForBlock(map.containsKey(pos) ? map.removeAll(pos) : Collections.emptyList(), newBlockSnapshot,
-                phaseContext, phaseState));
+            capturedBlockEntitySpawns.ifPresentAndNotEmpty(map -> spawnEntitiesForBlock(
+                    map.containsKey(pos) ? map.removeAll(pos) : Collections.emptyList(), newBlockSnapshot, phaseContext, phaseState));
 
             SpongeHooks.logBlockAction(builder, mixinWorldServer.asMinecraftWorld(), oldBlockSnapshot.blockChange, transaction);
             final BlockChangeFlag changeFlag = oldBlockSnapshot.getChangeFlag();

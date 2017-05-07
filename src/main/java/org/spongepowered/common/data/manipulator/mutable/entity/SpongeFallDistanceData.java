@@ -39,7 +39,8 @@ public class SpongeFallDistanceData extends AbstractBoundedComparableData<Float,
     }
 
     public SpongeFallDistanceData(float fallDistance) {
-        super(FallDistanceData.class, fallDistance, Keys.FALL_DISTANCE, ComparatorUtil.floatComparator(), ImmutableSpongeFallDistanceData.class, 0F, Float.MAX_VALUE, 0F);
+        super(FallDistanceData.class, fallDistance, Keys.FALL_DISTANCE, ComparatorUtil.floatComparator(), ImmutableSpongeFallDistanceData.class,
+                0F, Float.MAX_VALUE, 0F);
     }
 
     @Override

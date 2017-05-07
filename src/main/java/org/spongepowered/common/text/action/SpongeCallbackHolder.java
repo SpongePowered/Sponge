@@ -41,8 +41,6 @@ import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 
 import java.util.List;
 import java.util.Optional;
@@ -55,12 +53,14 @@ import java.util.function.Consumer;
 import javax.annotation.Nullable;
 
 public class SpongeCallbackHolder {
+
     public static final String CALLBACK_COMMAND = "callback";
     public static final String CALLBACK_COMMAND_QUALIFIED = "/sponge:" + CALLBACK_COMMAND;
     private static final SpongeCallbackHolder INSTANCE = new SpongeCallbackHolder();
 
     static final ConcurrentMap<UUID, Consumer<CommandSource>> reverseMap = new ConcurrentHashMap<>();
-    private static final LoadingCache<Consumer<CommandSource>, UUID> callbackCache = CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES)
+    private static final LoadingCache<Consumer<CommandSource>, UUID> callbackCache =
+            CacheBuilder.newBuilder().expireAfterAccess(10, TimeUnit.MINUTES)
             .removalListener(new RemovalListener<Consumer<CommandSource>, UUID>() {
                 @Override
                 public void onRemoval(RemovalNotification<Consumer<CommandSource>, UUID> notification) {
@@ -114,8 +114,8 @@ public class SpongeCallbackHolder {
                 UUID id = UUID.fromString(next);
                 Consumer<CommandSource> ret = reverseMap.get(id);
                 if (ret == null) {
-                    throw args.createError(t("The callback you provided was not valid. Keep in mind that callbacks will expire after 10 minutes, so"
-                            + " you might want to consider clicking faster next time!"));
+                    throw args.createError(t("The callback you provided was not valid. Keep in mind that callbacks will expire after 10 minutes,"
+                            + " so you might want to consider clicking faster next time!"));
                 }
                 return ret;
             } catch (IllegalArgumentException ex) {

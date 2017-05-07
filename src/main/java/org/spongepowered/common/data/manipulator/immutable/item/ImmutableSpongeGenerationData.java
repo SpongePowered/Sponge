@@ -36,7 +36,8 @@ public class ImmutableSpongeGenerationData extends AbstractImmutableIntData<Immu
     implements ImmutableGenerationData {
 
     public ImmutableSpongeGenerationData(int value) {
-        super(ImmutableGenerationData.class, value, Keys.GENERATION, SpongeGenerationData.class, 0, DataConstants.MAXIMUM_GENERATION, 0);
+        super(ImmutableGenerationData.class, value, Keys.GENERATION, SpongeGenerationData.class,
+                0, DataConstants.MAXIMUM_GENERATION, 0);
     }
 
     @Override

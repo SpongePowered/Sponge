@@ -43,7 +43,6 @@ import javax.annotation.Nullable;
 
 public class BasicInventoryPacketState extends BasicPacketState {
 
-
     /**
      * Flags we care about
      */

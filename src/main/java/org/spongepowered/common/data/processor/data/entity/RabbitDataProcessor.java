@@ -43,8 +43,8 @@ import org.spongepowered.common.entity.SpongeRabbitType;
 
 import java.util.Optional;
 
-public class RabbitDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityRabbit, RabbitType, Value<RabbitType>, RabbitData, ImmutableRabbitData> {
+public class RabbitDataProcessor extends AbstractEntitySingleDataProcessor<EntityRabbit, RabbitType, Value<RabbitType>,
+        RabbitData, ImmutableRabbitData> {
 
     public RabbitDataProcessor() {
         super(EntityRabbit.class, Keys.RABBIT_TYPE);

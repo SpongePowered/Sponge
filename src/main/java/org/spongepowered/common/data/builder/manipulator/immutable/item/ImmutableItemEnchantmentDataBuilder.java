@@ -38,15 +38,14 @@ import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.DataManager;
-import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;
 import java.util.Optional;
 
-public class ImmutableItemEnchantmentDataBuilder extends AbstractDataBuilder<ImmutableEnchantmentData> implements ImmutableDataManipulatorBuilder<ImmutableEnchantmentData, EnchantmentData> {
+public class ImmutableItemEnchantmentDataBuilder extends AbstractDataBuilder<ImmutableEnchantmentData>
+        implements ImmutableDataManipulatorBuilder<ImmutableEnchantmentData, EnchantmentData> {
 
     public ImmutableItemEnchantmentDataBuilder() {
         super(ImmutableEnchantmentData.class, 1);

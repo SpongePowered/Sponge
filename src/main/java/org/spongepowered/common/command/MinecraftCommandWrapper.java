@@ -209,7 +209,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
         final ICommandSender mcSender = WrapperICommandSender.of(source);
         String usage = this.command.getUsage(mcSender);
         if (usage == null) { // Silly modders
-            return Text.of();
+            return Text.EMPTY;
         }
 
         Translation translation = SpongeImpl.getGame().getRegistry().getTranslationById(usage).get();

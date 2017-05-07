@@ -76,7 +76,8 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
         this.lightUpdateTime = time;
     }
 
-    @Redirect(method = "updateSkylightNeighborHeight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;checkLightFor(Lnet/minecraft/world/EnumSkyBlock;Lnet/minecraft/util/math/BlockPos;)Z"))
+    @Redirect(method = "updateSkylightNeighborHeight", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;checkLightFor(Lnet/minecraft/world/EnumSkyBlock;Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean onCheckLightForSkylight(World world, EnumSkyBlock enumSkyBlock, BlockPos pos) {
         if (world.isRemote) {
             return world.checkLightFor(enumSkyBlock, pos);
@@ -115,7 +116,8 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
 
                         for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)
                         {
-                            j1 = Math.min(j1, this.world.getChunksLowestHorizon(l + enumfacing.getFrontOffsetX(), i1 + enumfacing.getFrontOffsetZ()));
+                            j1 = Math.min(j1, this.world
+                                    .getChunksLowestHorizon(l + enumfacing.getFrontOffsetX(), i1 + enumfacing.getFrontOffsetZ()));
                         }
 
                         this.checkSkylightNeighborHeight(l, i1, j1);
@@ -145,7 +147,6 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
      * @author blood - February 20th, 2017
      * @reason Since lighting updates run async, we need to always return true to send client updates.
      *
-     * @param pos The position to get the light for
      * @return Whether block position can see sky
      */
     @Overwrite

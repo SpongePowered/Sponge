@@ -44,14 +44,14 @@ public class EquipmentInventoryAdapter extends OrderedInventoryAdapter implement
 
     private final ArmorEquipable carrier;
 
-    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric<IInventory> inventory, OrderedInventoryLens<IInventory, net.minecraft.item.ItemStack>
-            root) {
+    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric<IInventory> inventory, OrderedInventoryLens<IInventory,
+            net.minecraft.item.ItemStack> root) {
         super(inventory, root);
         this.carrier = carrier;
     }
 
-    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric<IInventory> inventory, OrderedInventoryLens<IInventory, net.minecraft.item.ItemStack>
-            root, Inventory parent) {
+    public EquipmentInventoryAdapter(ArmorEquipable carrier, Fabric<IInventory> inventory, OrderedInventoryLens<IInventory,
+            net.minecraft.item.ItemStack> root, Inventory parent) {
         super(inventory, root, parent);
         this.carrier = carrier;
     }

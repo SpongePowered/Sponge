@@ -56,7 +56,9 @@ public abstract class MixinBlockRedstoneComparator extends MixinBlock {
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return super.supports(immutable) || ImmutableComparatorData.class.isAssignableFrom(immutable) || ImmutablePoweredData.class.isAssignableFrom(immutable);
+        return super.supports(immutable)
+                || ImmutableComparatorData.class.isAssignableFrom(immutable)
+                || ImmutablePoweredData.class.isAssignableFrom(immutable);
     }
 
     @Override

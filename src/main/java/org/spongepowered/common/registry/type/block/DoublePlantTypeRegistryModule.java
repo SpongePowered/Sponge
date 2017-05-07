@@ -31,8 +31,8 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
 
 @RegisterCatalog(DoublePlantTypes.class)
-public final class DoublePlantTypeRegistryModule extends
-        MinecraftEnumBasedAlternateCatalogTypeRegistryModule<BlockDoublePlant.EnumPlantType, DoublePlantType> {
+public final class DoublePlantTypeRegistryModule
+        extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<BlockDoublePlant.EnumPlantType, DoublePlantType> {
 
     public DoublePlantTypeRegistryModule() {
         super(new String[] {"double_"});

@@ -84,7 +84,8 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
      * @reason Fire interact block event.
      */
     @Overwrite
-    public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float offsetX, float offsetY, float offsetZ) {
+    public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack,
+            EnumHand hand, BlockPos pos, EnumFacing facing, float offsetX, float offsetY, float offsetZ) {
         if (this.gameType == GameType.SPECTATOR) {
             TileEntity tileentity = worldIn.getTileEntity(pos);
 
@@ -157,7 +158,8 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
                 IBlockState iblockstate = (IBlockState) currentSnapshot.getState();
                 Container lastOpenContainer = player.openContainer;
 
-                EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, facing, offsetX, offsetY, offsetZ)
+                EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, facing,
+                        offsetX, offsetY, offsetZ)
                          ? EnumActionResult.SUCCESS
                          : EnumActionResult.PASS;
                 // if itemstack changed, avoid restore

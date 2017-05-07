@@ -140,7 +140,8 @@ public abstract class MixinWorldEntitySpawner {
             for (int i = -mobSpawnRange; i <= mobSpawnRange; ++i) {
                 for (int j = -mobSpawnRange; j <= mobSpawnRange; ++j) {
                     boolean flag = i == -mobSpawnRange || i == mobSpawnRange || j == -mobSpawnRange || j == mobSpawnRange;
-                    final Chunk chunk = ((IMixinChunkProviderServer) worldServerIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
+                    final Chunk chunk = ((IMixinChunkProviderServer) worldServerIn.getChunkProvider())
+                            .getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
                     if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
                         // Don't attempt to spawn in an unloaded chunk
                         continue;

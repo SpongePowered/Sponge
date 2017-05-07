@@ -28,9 +28,7 @@ import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.collect.ImmutableMap;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityAgeable;
-import net.minecraft.entity.monster.EntityZombie;
 
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;

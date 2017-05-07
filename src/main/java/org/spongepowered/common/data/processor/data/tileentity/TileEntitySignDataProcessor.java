@@ -51,8 +51,8 @@ import org.spongepowered.common.text.SpongeTexts;
 import java.util.List;
 import java.util.Optional;
 
-public class TileEntitySignDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntitySign, List<Text>, ListValue<Text>, SignData, ImmutableSignData> {
+public class TileEntitySignDataProcessor extends AbstractTileEntitySingleDataProcessor<TileEntitySign, List<Text>, ListValue<Text>,
+        SignData, ImmutableSignData> {
 
     public TileEntitySignDataProcessor() {
         super(TileEntitySign.class, Keys.SIGN_LINES);

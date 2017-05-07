@@ -62,7 +62,8 @@ import java.util.Map;
 import java.util.Optional;
 
 @SuppressWarnings("deprecation")
-public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<EntityType, Entity>, SpongeAdditionalCatalogRegistryModule<EntityType> {
+public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistryModule<EntityType, Entity>,
+        SpongeAdditionalCatalogRegistryModule<EntityType> {
 
     @RegisterCatalog(EntityTypes.class)
     protected final Map<String, EntityType> entityTypeMappings = Maps.newHashMap();

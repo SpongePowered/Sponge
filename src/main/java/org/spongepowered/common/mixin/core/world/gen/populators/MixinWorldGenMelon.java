@@ -69,7 +69,8 @@ public class MixinWorldGenMelon implements Melon {
         int y = nextInt(random, Math.min(world.getHeight(position.add(x, 0, z)).getY() * 2, 255));
         position = position.add(x, y, z);
         for (int i = 0; i < n; ++i) {
-            BlockPos blockpos1 = position.add(random.nextInt(8) - random.nextInt(8), random.nextInt(4) - random.nextInt(4), random.nextInt(8) - random.nextInt(8));
+            BlockPos blockpos1 = position.add(random.nextInt(8) - random.nextInt(8),
+                    random.nextInt(4) - random.nextInt(4), random.nextInt(8) - random.nextInt(8));
 
             if (Blocks.MELON_BLOCK.canPlaceBlockAt(world, blockpos1) && world.getBlockState(blockpos1.down()).getBlock() == Blocks.GRASS) {
                 world.setBlockState(blockpos1, Blocks.MELON_BLOCK.getDefaultState(), 2);

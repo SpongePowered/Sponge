@@ -55,7 +55,8 @@ public class NamedCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
     protected void insertCauseCall(MethodVisitor mv, Parameter param, Class<?> targetType) {
         mv.visitLdcInsn(this.anno.value());
         mv.visitLdcInsn(Type.getType(targetType));
-        mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Cause.class), "get", "(Ljava/lang/String;Ljava/lang/Class;)Ljava/util/Optional;", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Cause.class), "get",
+                "(Ljava/lang/String;Ljava/lang/Class;)Ljava/util/Optional;", false);
     }
 
     @Override

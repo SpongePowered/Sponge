@@ -37,8 +37,8 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongePassengerD
 import java.util.List;
 import java.util.UUID;
 
-public class ImmutableSpongePassengerData extends AbstractImmutableListData<UUID, ImmutablePassengerData, PassengerData> implements
-        ImmutablePassengerData {
+public class ImmutableSpongePassengerData extends AbstractImmutableListData<UUID, ImmutablePassengerData, PassengerData>
+        implements ImmutablePassengerData {
 
 
     public ImmutableSpongePassengerData(List<UUID> passenger) {

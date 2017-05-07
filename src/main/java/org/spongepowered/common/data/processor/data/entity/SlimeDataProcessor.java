@@ -40,8 +40,8 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class SlimeDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntitySlime, Integer, MutableBoundedValue<Integer>, SlimeData, ImmutableSlimeData> {
+public class SlimeDataProcessor extends AbstractEntitySingleDataProcessor<EntitySlime, Integer, MutableBoundedValue<Integer>,
+        SlimeData, ImmutableSlimeData> {
 
     public SlimeDataProcessor() {
         super(EntitySlime.class, Keys.SLIME_SIZE);

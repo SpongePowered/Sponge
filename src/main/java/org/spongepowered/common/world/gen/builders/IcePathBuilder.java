@@ -31,7 +31,6 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.IcePath;
 import org.spongepowered.api.world.gen.populator.IcePath.Builder;
 
-
 public class IcePathBuilder implements IcePath.Builder {
     
     private VariableAmount radius;

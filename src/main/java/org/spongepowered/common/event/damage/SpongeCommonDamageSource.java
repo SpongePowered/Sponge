@@ -49,7 +49,7 @@ public abstract class SpongeCommonDamageSource extends DamageSource implements o
      * Purely for use with {@link AbstractDamageSource} such that
      * the damage type is set after the super constructor is called.
      *
-     * @param type The damgae type id
+     * @param type The damage type id
      */
     public void setDamageType(String type) {
         this.damageType = type;

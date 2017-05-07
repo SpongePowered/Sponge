@@ -189,7 +189,8 @@ public class ProjectileLauncher {
             @Override
             protected Optional<TippedArrow> createProjectile(EntityLivingBase source, Location<?> loc) {
                 TippedArrow arrow = (TippedArrow) new EntityTippedArrow(source.world, source);
-                ((EntityTippedArrow) arrow).setAim(source, source.rotationPitch, source.rotationYaw, 0.0F, 3.0F, 0);
+                ((EntityTippedArrow) arrow).setAim(source, source.rotationPitch, source.rotationYaw,
+                        0.0F, 3.0F, 0);
                 return doLaunch(loc.getExtent(), arrow, createCause(source));
             }
         });
@@ -198,7 +199,8 @@ public class ProjectileLauncher {
             @Override
             protected Optional<Egg> createProjectile(EntityLivingBase source, Location<?> loc) {
                 Egg egg = (Egg) new EntityEgg(source.world, source);
-                ((EntityThrowable) egg).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
+                ((EntityThrowable) egg).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw,
+                        0.0F, 1.5F, 0);
                 return doLaunch(loc.getExtent(), egg, createCause(source));
             }
         });
@@ -226,7 +228,8 @@ public class ProjectileLauncher {
             @Override
             protected Optional<Snowball> createProjectile(EntityLivingBase source, Location<?> loc) {
                 Snowball snowball = (Snowball) new EntitySnowball(source.world, source);
-                ((EntityThrowable) snowball).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
+                ((EntityThrowable) snowball).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw,
+                        0.0F, 1.5F, 0);
                 return doLaunch(loc.getExtent(), snowball, createCause(source));
             }
         });
@@ -235,7 +238,8 @@ public class ProjectileLauncher {
             @Override
             protected Optional<ThrownExpBottle> createProjectile(EntityLivingBase source, Location<?> loc) {
                 ThrownExpBottle expBottle = (ThrownExpBottle) new EntityExpBottle(source.world, source);
-                ((EntityThrowable) expBottle).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw, -20.0F, 0.7F, 0);
+                ((EntityThrowable) expBottle).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw,
+                        -20.0F, 0.7F, 0);
                 return doLaunch(loc.getExtent(), expBottle, createCause(source));
             }
         });
@@ -245,7 +249,8 @@ public class ProjectileLauncher {
             @Override
             protected Optional<EnderPearl> createProjectile(EntityLivingBase source, Location<?> loc) {
                 EnderPearl pearl = (EnderPearl) new EntityEnderPearl(source.world, source);
-                ((EntityThrowable) pearl).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw, 0.0F, 1.5F, 0);
+                ((EntityThrowable) pearl).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw,
+                        0.0F, 1.5F, 0);
                 return doLaunch(loc.getExtent(), pearl, createCause(source));
             }
         });
@@ -305,7 +310,8 @@ public class ProjectileLauncher {
             @Override
             protected Optional<ThrownPotion> createProjectile(EntityLivingBase source, Location<?> loc) {
                 ThrownPotion potion = (ThrownPotion) new EntityPotion(source.world, source, new ItemStack(Items.SPLASH_POTION, 1));
-                ((EntityThrowable) potion).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw, -20.0F, 0.5F, 0);
+                ((EntityThrowable) potion).setHeadingFromThrower(source, source.rotationPitch, source.rotationYaw,
+                        -20.0F, 0.5F, 0);
                 return doLaunch(loc.getExtent(), potion, createCause(source));
             }
         });

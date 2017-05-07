@@ -251,7 +251,8 @@ public class SpongeHooks {
 
         SpongeConfig<?> config = getActiveConfig((WorldServer) player.world);
         if (config.getConfig().getLogging().logExploitItemStackNameOverflow) {
-            logInfo("[EXPLOIT] Player ''{0}'' attempted to send a creative itemstack update with a display name length of ''{1}'' (Max allowed length is 32767). This has been blocked to avoid server overflow.",
+            logInfo("[EXPLOIT] Player ''{0}'' attempted to send a creative itemstack update with a display name length of ''{1}'' "
+                            + "(Max allowed length is 32767). This has been blocked to avoid server overflow.",
                     player.getName(),
                     length);
             logStack(config);

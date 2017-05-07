@@ -99,8 +99,8 @@ public class SpongeBiomeVolumeWorker<V extends BiomeVolume> implements BiomeVolu
         for (int z = zMin; z <= zMax; z++) {
             for (int y = yMin; y <= yMax; y++) {
                 for (int x = xMin; x <= xMax; x++) {
-                    final BiomeType biome = merger.merge(firstUnmodifiableArea, x, y, z, secondUnmodifiableArea, x + xOffsetSecond, y + yOffsetSecond,
-                            z + zOffsetSecond);
+                    final BiomeType biome = merger.merge(firstUnmodifiableArea, x, y, z, secondUnmodifiableArea,
+                            x + xOffsetSecond, y + yOffsetSecond, z + zOffsetSecond);
                     destination.setBiome(x + xOffsetDestination, y + yOffsetDestination, z + zOffsetDestination, biome);
                 }
             }

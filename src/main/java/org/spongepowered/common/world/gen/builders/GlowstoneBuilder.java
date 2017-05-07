@@ -31,7 +31,6 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Glowstone;
 import org.spongepowered.api.world.gen.populator.Glowstone.Builder;
 
-
 public class GlowstoneBuilder implements Glowstone.Builder {
     
     private VariableAmount count;

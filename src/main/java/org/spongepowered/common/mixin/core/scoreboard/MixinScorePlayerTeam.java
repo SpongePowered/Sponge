@@ -78,7 +78,8 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     private Text suffix;
     private TextColor color;
 
-    private static final String TEAM_UPDATE_SIGNATURE = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
+    private static final String TEAM_UPDATE_SIGNATURE =
+            "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
 
     // Minecraft doesn't do a null check on theScoreboard, so we redirect
     // the call and do it ourselves.

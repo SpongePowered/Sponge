@@ -48,7 +48,8 @@ public class InventoryRowLensImpl extends Inventory2DLensImpl implements Invento
         this(base, width, xBase, yBase, InventoryRowAdapter.class, slots);
     }
     
-    public InventoryRowLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public InventoryRowLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType,
+            SlotProvider<IInventory, ItemStack> slots) {
         super(base, width, 1, width, xBase, yBase, adapterType, slots);
     }
     

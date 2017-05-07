@@ -391,7 +391,8 @@ public final class NbtDataUtil {
         final NBTTagList newList = new NBTTagList(); // construct the enchantment list
         for (Map.Entry<Enchantment, Integer> entry : valueMap.entrySet()) {
             final NBTTagCompound enchantmentCompound = new NBTTagCompound();
-            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
+            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID,
+                    (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
             enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
             newList.appendTag(enchantmentCompound);
         }

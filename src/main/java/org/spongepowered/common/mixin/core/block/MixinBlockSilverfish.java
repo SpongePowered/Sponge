@@ -56,7 +56,8 @@ public abstract class MixinBlockSilverfish extends MixinBlock {
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDisguisedBlockData) {
-            final BlockSilverfish.EnumType disguisedBlockType = (BlockSilverfish.EnumType) (Object) ((ImmutableDisguisedBlockData) manipulator).type().get();
+            final BlockSilverfish.EnumType disguisedBlockType =
+                    (BlockSilverfish.EnumType) (Object) ((ImmutableDisguisedBlockData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockSilverfish.VARIANT, disguisedBlockType));
         }
         return super.getStateWithData(blockState, manipulator);

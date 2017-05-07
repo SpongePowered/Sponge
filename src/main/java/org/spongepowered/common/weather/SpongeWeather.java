@@ -30,7 +30,6 @@ import com.google.common.base.Objects;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.weather.Weather;
 
-@NonnullByDefault
 public class SpongeWeather implements Weather {
 
     private final String id;

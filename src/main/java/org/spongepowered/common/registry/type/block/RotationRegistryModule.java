@@ -35,8 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RegisterCatalog(Rotations.class)
-public final class RotationRegistryModule
-        extends AbstractPrefixAlternateCatalogTypeRegistryModule<Rotation>
+public final class RotationRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<Rotation>
         implements CatalogRegistryModule<Rotation> {
 
     public static RotationRegistryModule getInstance() {

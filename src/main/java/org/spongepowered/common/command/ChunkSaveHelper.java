@@ -42,7 +42,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -146,7 +145,7 @@ public class ChunkSaveHelper {
 
     private static <T> void writeChunkCounts(JsonWriter writer, String name, final Object2IntMap<T> map, int max) throws IOException {
         List<T> sortedCoords = new ArrayList<>(map.keySet());
-        Collections.sort(sortedCoords, (s1, s2) -> map.get(s2) - map.get(s1));
+        sortedCoords.sort((s1, s2) -> map.get(s2) - map.get(s1));
 
         int i = 0;
         writer.name(name).beginArray();

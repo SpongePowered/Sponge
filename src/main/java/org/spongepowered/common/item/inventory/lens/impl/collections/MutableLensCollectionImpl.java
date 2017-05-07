@@ -36,7 +36,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-public class MutableLensCollectionImpl<TInventory, TStack> extends AbstractList<Lens<TInventory, TStack>> implements MutableLensCollection<TInventory, TStack> {
+public class MutableLensCollectionImpl<TInventory, TStack> extends AbstractList<Lens<TInventory, TStack>>
+        implements MutableLensCollection<TInventory, TStack> {
 
     protected final List<LensHandle<TInventory, TStack>> lenses;
     

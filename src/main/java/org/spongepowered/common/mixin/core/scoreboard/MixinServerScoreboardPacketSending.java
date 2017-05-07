@@ -53,7 +53,8 @@ import java.util.Set;
 @Mixin(ServerScoreboard.class)
 public abstract class MixinServerScoreboardPacketSending extends Scoreboard implements IMixinServerScoreboard {
 
-    private static final String SEND_PACKET_METHOD = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
+    private static final String SEND_PACKET_METHOD =
+            "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
     private static final String SET_CONTAINS = "Ljava/util/Set;contains(Ljava/lang/Object;)Z";
 
     @Shadow @Final private MinecraftServer scoreboardMCServer;

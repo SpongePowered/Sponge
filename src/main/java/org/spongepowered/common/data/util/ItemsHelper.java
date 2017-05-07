@@ -39,7 +39,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import java.util.Optional;
 import java.util.Set;
 
-
 public final class ItemsHelper {
 
     private ItemsHelper() { // No sub-classing for you!

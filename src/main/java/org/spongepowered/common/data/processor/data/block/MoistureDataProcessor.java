@@ -32,8 +32,8 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeMoistureDat
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
-public class MoistureDataProcessor
-        extends AbstractBlockOnlyDataProcessor<Integer, MutableBoundedValue<Integer>, MoistureData, ImmutableMoistureData> {
+public class MoistureDataProcessor extends AbstractBlockOnlyDataProcessor<Integer, MutableBoundedValue<Integer>,
+        MoistureData, ImmutableMoistureData> {
 
     public MoistureDataProcessor() {
         super(Keys.MOISTURE);

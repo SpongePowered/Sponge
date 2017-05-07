@@ -33,8 +33,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public abstract class AbstractPrefixAlternateCatalogTypeRegistryModule<T extends CatalogType>
-        extends AbstractPrefixCheckCatalogRegistryModule<T>
+public abstract class AbstractPrefixAlternateCatalogTypeRegistryModule<T extends CatalogType> extends AbstractPrefixCheckCatalogRegistryModule<T>
         implements AlternateCatalogRegistryModule<T> {
 
     private final String[] modIdToFilter;

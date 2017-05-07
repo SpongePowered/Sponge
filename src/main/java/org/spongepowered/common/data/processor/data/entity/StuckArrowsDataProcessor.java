@@ -42,8 +42,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue
 
 import java.util.Optional;
 
-public class StuckArrowsDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityLivingBase, Integer, MutableBoundedValue<Integer>, StuckArrowsData, ImmutableStuckArrowsData> {
+public class StuckArrowsDataProcessor extends AbstractEntitySingleDataProcessor<EntityLivingBase, Integer, MutableBoundedValue<Integer>,
+        StuckArrowsData, ImmutableStuckArrowsData> {
 
     public StuckArrowsDataProcessor() {
         super(EntityLivingBase.class, Keys.STUCK_ARROWS);

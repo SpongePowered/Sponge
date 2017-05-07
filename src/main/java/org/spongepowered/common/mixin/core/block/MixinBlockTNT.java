@@ -75,7 +75,8 @@ public abstract class MixinBlockTNT extends MixinBlock {
     }
 
     @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_PRIME_SOUND))
-    public void onPrimeSound(World world, EntityPlayer player, double x, double y, double z, SoundEvent soundIn, SoundCategory category, float volume, float pitch) {
+    public void onPrimeSound(World world, EntityPlayer player, double x, double y, double z, SoundEvent soundIn, SoundCategory category,
+            float volume, float pitch) {
         if (!this.primeCancelled) {
             world.playSound(null, x, y, z, soundIn, category, volume, pitch);
         }

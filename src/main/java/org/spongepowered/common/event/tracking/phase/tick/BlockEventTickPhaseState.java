@@ -69,7 +69,8 @@ class BlockEventTickPhaseState extends TickPhaseState {
         if (sourcePos == null) {
             LocatableBlock locatableBlock =  context.getSource(LocatableBlock.class).orElse(null);
             if (locatableBlock == null) {
-                TileEntity tileEntity = context.getSource(TileEntity.class).orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a TileEntity!", context));
+                TileEntity tileEntity = context.getSource(TileEntity.class).orElseThrow(TrackingUtil.throwWithContext(
+                        "Expected to be ticking over at a TileEntity!", context));
                 locatableBlock = tileEntity.getLocatableBlock();
             }
             sourcePos = ((IMixinLocation)(Object) locatableBlock.getLocation()).getBlockPos();
@@ -153,7 +154,8 @@ class BlockEventTickPhaseState extends TickPhaseState {
     public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
         LocatableBlock locatable =  context.getSource(LocatableBlock.class).orElse(null);
         if (locatable == null) {
-            TileEntity tileEntity = context.getSource(TileEntity.class).orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a TileEntity!", context));
+            TileEntity tileEntity = context.getSource(TileEntity.class).orElseThrow(TrackingUtil.throwWithContext(
+                    "Expected to be ticking over at a TileEntity!", context));
             locatable = tileEntity.getLocatableBlock();
         }
         builder.named(NamedCause.notifier(locatable));

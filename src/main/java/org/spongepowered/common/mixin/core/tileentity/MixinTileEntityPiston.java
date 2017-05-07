@@ -43,7 +43,8 @@ public abstract class MixinTileEntityPiston extends MixinTileEntity implements P
     @Shadow private IBlockState pistonState;
     @Shadow private EnumFacing pistonFacing;
 
-    private static final String NEIGHBOR_CHANGED = "Lnet/minecraft/world/World;neighborChanged(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;)V";
+    private static final String NEIGHBOR_CHANGED =
+            "Lnet/minecraft/world/World;neighborChanged(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos;)V";
 
     @Inject(method = "update", at = @At(value = "INVOKE", target = NEIGHBOR_CHANGED), cancellable = true)
     public void onUpdate(CallbackInfo ci) {
@@ -62,7 +63,8 @@ public abstract class MixinTileEntityPiston extends MixinTileEntity implements P
             return;
         }
 
-        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent((World) this.world, this.pos, java.util.EnumSet.of(this.pistonFacing.getOpposite()));
+        NotifyNeighborBlockEvent event =
+                SpongeCommonEventFactory.callNotifyNeighborEvent((World) this.world, this.pos, java.util.EnumSet.of(this.pistonFacing.getOpposite()));
         if (event == null || !event.isCancelled() && !event.getNeighbors().isEmpty()) {
             this.world.neighborChanged(this.pos, this.pistonState.getBlock(), this.pos);
         }

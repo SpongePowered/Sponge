@@ -48,8 +48,8 @@ import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import java.util.List;
 import java.util.Optional;
 
-public class ItemFireworkEffectDataProcessor
-        extends AbstractItemSingleDataProcessor<List<FireworkEffect>, ListValue<FireworkEffect>, FireworkEffectData, ImmutableFireworkEffectData> {
+public class ItemFireworkEffectDataProcessor extends AbstractItemSingleDataProcessor<List<FireworkEffect>, ListValue<FireworkEffect>,
+        FireworkEffectData, ImmutableFireworkEffectData> {
 
     public ItemFireworkEffectDataProcessor() {
         super(stack -> stack.getItem() == Items.FIREWORK_CHARGE || stack.getItem() == Items.FIREWORKS, Keys.FIREWORK_EFFECTS);

@@ -68,7 +68,8 @@ public abstract class MixinBlockCactus extends MixinBlock {
         }
     }
 
-    @Inject(method = "onEntityCollidedWithBlock", at = @At(value = "FIELD", target = CACTUS_DAMAGE_FIELD, opcode = Opcodes.GETSTATIC, shift = At.Shift.AFTER))
+    @Inject(method = "onEntityCollidedWithBlock", at = @At(value = "FIELD", target = CACTUS_DAMAGE_FIELD,
+            opcode = Opcodes.GETSTATIC, shift = At.Shift.AFTER))
     public void postSetOnFire(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Entity entityIn, CallbackInfo callbackInfo) {
         if (!worldIn.isRemote) {
             if (this.originalCactus == null) {

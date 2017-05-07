@@ -75,18 +75,18 @@ public class SpongePermissionService implements PermissionService {
         this.subjects.put(SUBJECTS_GROUP, new OpLevelCollection(this));
 
         this.subjects.put(SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(SUBJECTS_COMMAND_BLOCK, this,
-                                                                            s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(2)), NO_COMMAND_SOURCE));
+                s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(2)), NO_COMMAND_SOURCE));
 
         this.subjects.put(SUBJECTS_SYSTEM, new DataFactoryCollection(SUBJECTS_SYSTEM, this,
-                                                                     s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(4)),
-                                                                     s -> {
-                                                                         if (s.equals("Server")) {
-                                                                             return SpongeImpl.getGame().getServer().getConsole();
-                                                                         } else if (s.equals("RCON")) {
-                                                                             // TODO: Implement RCON API?
-                                                                         }
-                                                                         return null;
-                                                                     }));
+                s -> new FixedParentMemorySubjectData(SpongePermissionService.this, getGroupForOpLevel(4)),
+                s -> {
+                    if (s.equals("Server")) {
+                        return SpongeImpl.getGame().getServer().getConsole();
+                    } else if (s.equals("RCON")) {
+                        // TODO: Implement RCON API?
+                    }
+                    return null;
+                }));
 
         this.defaultData = getDefaultCollection().get(SUBJECTS_DEFAULT);
     }
@@ -136,7 +136,8 @@ public class SpongePermissionService implements PermissionService {
     }
 
     private SpongeSubjectCollection newCollection(String identifier) {
-        return new DataFactoryCollection(identifier, this, s -> new GlobalMemorySubjectData(SpongePermissionService.this), NO_COMMAND_SOURCE);
+        return new DataFactoryCollection(identifier, this, s -> new GlobalMemorySubjectData(SpongePermissionService.this),
+                NO_COMMAND_SOURCE);
     }
 
     @Override

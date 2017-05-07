@@ -39,7 +39,8 @@ public class ImmutableSpongeKnockbackData extends AbstractImmutableIntData<Immut
     }
 
     public ImmutableSpongeKnockbackData(Integer value) {
-        super(ImmutableKnockbackData.class, value, Keys.KNOCKBACK_STRENGTH, SpongeKnockbackData.class, 0, Integer.MAX_VALUE, 0);
+        super(ImmutableKnockbackData.class, value, Keys.KNOCKBACK_STRENGTH, SpongeKnockbackData.class,
+                0, Integer.MAX_VALUE, 0);
     }
 
     @Override

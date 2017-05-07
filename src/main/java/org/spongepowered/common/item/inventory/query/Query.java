@@ -253,7 +253,9 @@ public class Query<TInventory, TStack> {
 
     public static <TInventory, TStack, TArgs> QueryStrategy<TInventory, TStack, TArgs> getStrategy(String key) {
         @SuppressWarnings("unchecked")
-        Class<? extends QueryStrategy<TInventory, TStack, TArgs>> strategyClass = (Class<? extends QueryStrategy<TInventory, TStack, TArgs>>) checkNotNull(Query.strategies.get(key), "The specified query strategy [%s], was not registered", key);
+        Class<? extends QueryStrategy<TInventory, TStack, TArgs>> strategyClass =
+                (Class<? extends QueryStrategy<TInventory, TStack, TArgs>>) checkNotNull(Query.strategies.get(key),
+                        "The specified query strategy [%s], was not registered", key);
         try {
             return strategyClass.newInstance();
         } catch (Exception ex) {
@@ -264,7 +266,8 @@ public class Query<TInventory, TStack> {
     public static void registerStrategy(String key, Class<? extends QueryStrategy<?, ?, ?>> strategyClass) {
         try {
             @SuppressWarnings({ "unchecked", "unused" })
-            Constructor<QueryStrategy<?, ?, ?>> ctor = (Constructor<QueryStrategy<?, ?, ?>>) checkNotNull(strategyClass, "strategyClass").getConstructor();
+            Constructor<QueryStrategy<?, ?, ?>> ctor =
+                    (Constructor<QueryStrategy<?, ?, ?>>) checkNotNull(strategyClass, "strategyClass").getConstructor();
         } catch (Exception ex) {
             throw new InvalidQueryStrategyException("The query strategy class %s does not provide a noargs ctor", strategyClass);
         }

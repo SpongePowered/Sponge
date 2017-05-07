@@ -146,7 +146,8 @@ public final class ContainerUtil {
         final IPhaseState currentState = currentPhase.state;
         if (CauseTracker.ENABLED && currentState.tracksBlockSpecificDrops()) {
             final PhaseContext context = currentPhase.context;
-            if (!currentState.getPhase().ignoresItemPreMerging(currentState) && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
+            if (!currentState.getPhase().ignoresItemPreMerging(currentState)
+                    && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().doDropsPreMergeItemDrops()) {
                 // Add itemstack to pre merge list
                 final Multimap<BlockPos, ItemDropData> multimap = context.getBlockDropSupplier().get();
                 final BlockPos pos = new BlockPos(x, y, z);
@@ -175,7 +176,8 @@ public final class ContainerUtil {
                         {
                             int i = RANDOM.nextInt(21) + 10;
 
-                            EntityItem entityitem = new EntityItem(worldServer, x + (double)f, y + (double)f1, z + (double)f2, itemStack.splitStack(i));
+                            EntityItem entityitem = new EntityItem(worldServer, x + (double)f, y + (double)f1,
+                                    z + (double)f2, itemStack.splitStack(i));
 
                             float f3 = 0.05F;
                             entityitem.motionX = RANDOM.nextGaussian() * 0.05000000074505806D;
@@ -293,7 +295,8 @@ public final class ContainerUtil {
         return new ContainerLens((InventoryAdapter<IInventory, ItemStack>) container, slots, lenses);
     }
 
-    private static Lens<IInventory, ItemStack> copyLens(int base, InventoryAdapter<IInventory, ItemStack> adapter, Lens<IInventory, ItemStack> lens, SlotCollection slots)
+    private static Lens<IInventory, ItemStack> copyLens(int base, InventoryAdapter<IInventory, ItemStack> adapter,
+            Lens<IInventory, ItemStack> lens, SlotCollection slots)
     {
         if (lens instanceof FurnaceInventoryLens) {
             return new FurnaceInventoryLens(base, adapter, slots);
@@ -328,7 +331,13 @@ public final class ContainerUtil {
      */
     public static SlotCollection countSlots(net.minecraft.inventory.Container container) {
         if (container instanceof ContainerPlayer) {
-            return new SlotCollection.Builder().add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false)).add(4).add(4, EquipmentSlotAdapter.class).add(36).add(1).build();
+            return new SlotCollection.Builder()
+                    .add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false))
+                    .add(4)
+                    .add(4, EquipmentSlotAdapter.class)
+                    .add(36)
+                    .add(1)
+                    .build();
         }
         return new SlotCollection.Builder().add(((MinecraftInventoryAdapter) container).getInventory().getSize()).build();
     }

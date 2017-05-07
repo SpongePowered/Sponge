@@ -88,8 +88,8 @@ public class WorldMigrator {
         }
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(oldWorldContainer,
-                entry -> !entry.getFileName().equals(worldContainer.getFileName()) && Files.exists(entry.resolve("level.dat")) && !Files.exists(entry
-                        .resolve("level_sponge.dat")))) {
+                entry -> !entry.getFileName().equals(worldContainer.getFileName()) && Files.exists(entry.resolve("level.dat"))
+                        && !Files.exists(entry.resolve("level_sponge.dat")))) {
             for (Path oldWorldPath : stream) {
                 Path worldPath = worldContainer.resolve(getVanillaNetherOrEndName(oldWorldPath));
 
@@ -103,11 +103,12 @@ public class WorldMigrator {
                         removeInnerNameFolder(worldPath);
                         migrated.add(worldPath);
                     } catch (IOException ioe) {
-                        SpongeImpl.getLogger().warn("Failed to migrate [{}] from [{}] to [{}]", oldWorldPath.getFileName(), oldWorldContainer,
-                                worldPath, ioe);
+                        SpongeImpl.getLogger().warn("Failed to migrate [{}] from [{}] to [{}]", oldWorldPath.getFileName(),
+                                oldWorldContainer, worldPath, ioe);
                     }
 
-                    SpongeImpl.getLogger().info("Migrated world [{}] from [{}] to [{}]", oldWorldPath.getFileName(), oldWorldContainer, worldPath);
+                    SpongeImpl.getLogger().info("Migrated world [{}] from [{}] to [{}]", oldWorldPath.getFileName(),
+                            oldWorldContainer, worldPath);
                 }
             }
         } catch (Exception ignore) {}

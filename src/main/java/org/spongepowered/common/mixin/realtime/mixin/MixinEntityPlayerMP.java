@@ -42,7 +42,8 @@ public abstract class MixinEntityPlayerMP extends Entity {
         super(worldIn);
     }
 
-    @Redirect(method = "decrementTimeUntilPortal", at = @At(value = "FIELD", target = ENTITY_PLAYER_MP_PORTAL_COOLDOWN_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
+    @Redirect(method = "decrementTimeUntilPortal",
+            at = @At(value = "FIELD", target = ENTITY_PLAYER_MP_PORTAL_COOLDOWN_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
     public void fixupPortalCooldown(EntityPlayerMP self, int modifier) {
         int ticks = (int) ((IMixinMinecraftServer) self.getEntityWorld().getMinecraftServer()).getRealTimeTicks();
         this.timeUntilPortal = Math.max(0, this.timeUntilPortal - ticks);

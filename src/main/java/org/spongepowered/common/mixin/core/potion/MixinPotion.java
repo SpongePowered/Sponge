@@ -95,7 +95,8 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Redirect(method = "registerPotions", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/RegistryNamespaced;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
+    @Redirect(method = "registerPotions",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/RegistryNamespaced;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
     private static void onPotionRegister(RegistryNamespaced registry, int id, Object location, Object potion) {
         final ResourceLocation resource = (ResourceLocation) location;
         final Potion mcPotion = (Potion) potion;

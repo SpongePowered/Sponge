@@ -31,7 +31,8 @@ import org.spongepowered.common.item.inventory.lens.MutableLensSet;
 import java.util.Spliterator;
 import java.util.Spliterators;
 
-public class MutableLensSetImpl<TInventory, TStack> extends MutableLensCollectionImpl<TInventory, TStack> implements MutableLensSet<TInventory, TStack> {
+public class MutableLensSetImpl<TInventory, TStack> extends MutableLensCollectionImpl<TInventory, TStack>
+        implements MutableLensSet<TInventory, TStack> {
 
     public MutableLensSetImpl(boolean allowRemove) {
         super(0, allowRemove);

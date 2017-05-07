@@ -36,6 +36,7 @@ public class ImmutableSpongeDisguisedBlockData extends AbstractImmutableSingleCa
         DisguisedBlockData> implements ImmutableDisguisedBlockData {
 
     public ImmutableSpongeDisguisedBlockData(DisguisedBlockType value) {
-        super(ImmutableDisguisedBlockData.class, value, DataConstants.Catalog.DEFAULT_DISGUISED_BLOCK, Keys.DISGUISED_BLOCK_TYPE, SpongeDisguisedBlockData.class);
+        super(ImmutableDisguisedBlockData.class, value, DataConstants.Catalog.DEFAULT_DISGUISED_BLOCK,
+                Keys.DISGUISED_BLOCK_TYPE, SpongeDisguisedBlockData.class);
     }
 }

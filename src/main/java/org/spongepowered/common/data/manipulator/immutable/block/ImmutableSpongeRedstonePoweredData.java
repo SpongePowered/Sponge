@@ -31,7 +31,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeRedstonePoweredData;
 
-public class ImmutableSpongeRedstonePoweredData extends AbstractImmutableIntData<ImmutableRedstonePoweredData, RedstonePoweredData> implements ImmutableRedstonePoweredData {
+public class ImmutableSpongeRedstonePoweredData extends AbstractImmutableIntData<ImmutableRedstonePoweredData, RedstonePoweredData>
+        implements ImmutableRedstonePoweredData {
 
     public ImmutableSpongeRedstonePoweredData(int value) {
         this(value, 0, 15);

@@ -36,7 +36,6 @@ import org.spongepowered.common.world.WorldManager;
 @Mixin(ItemMap.class)
 public class MixinItemMap extends ItemMapBase {
 
-
     @Redirect(method = "setupNewMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private static int onCreateMap(World worldIn, String key) {
         return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);

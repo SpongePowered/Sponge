@@ -67,7 +67,8 @@ public class GetterFilterSourceDelegate implements ParameterFilterSourceDelegate
         try {
             targetMethodObj = eventClass.getMethod(targetMethod);
         } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException(String.format("Method %s specified by getter annotation was not found in type %s", targetMethod, eventClass.getName()));
+            throw new IllegalArgumentException(String.format("Method %s specified by getter annotation was not found in type %s",
+                    targetMethod, eventClass.getName()));
         }
 
         if (targetMethodObj.getParameterCount() != 0) {
@@ -84,7 +85,8 @@ public class GetterFilterSourceDelegate implements ParameterFilterSourceDelegate
         mv.visitVarInsn(ALOAD, 1);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(declaringClass));
         int op = declaringClass.isInterface() ? INVOKEINTERFACE : INVOKEVIRTUAL;
-        mv.visitMethodInsn(op, Type.getInternalName(declaringClass), targetMethod, "()" + returnType.getDescriptor(), declaringClass.isInterface());
+        mv.visitMethodInsn(op, Type.getInternalName(declaringClass), targetMethod, "()" + returnType.getDescriptor(),
+                declaringClass.isInterface());
         int paramLocal = local++;
         mv.visitVarInsn(returnType.getOpcode(ISTORE), paramLocal);
         if (!targetMethodObj.getReturnType().isPrimitive()) {

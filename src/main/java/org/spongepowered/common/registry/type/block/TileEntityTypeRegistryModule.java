@@ -44,10 +44,8 @@ import java.util.Locale;
 import java.util.Map;
 
 @RegisterCatalog(TileEntityTypes.class)
-public final class TileEntityTypeRegistryModule
-        extends AbstractPrefixAlternateCatalogTypeRegistryModule<TileEntityType>
-        implements ExtraClassCatalogRegistryModule<TileEntityType, TileEntity>,
-        SpongeAdditionalCatalogRegistryModule<TileEntityType> {
+public final class TileEntityTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<TileEntityType>
+        implements ExtraClassCatalogRegistryModule<TileEntityType, TileEntity>, SpongeAdditionalCatalogRegistryModule<TileEntityType> {
 
 
     private static final Map<String, String> NAME_TO_ID_MAPPING = ImmutableMap.<String, String>builder()

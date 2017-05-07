@@ -27,8 +27,8 @@ package org.spongepowered.common.event.entity.teleport;
 import org.spongepowered.api.event.cause.entity.teleport.EntityTeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.common.AbstractEntityTeleportCauseBuilder;
 
-public class SpongeEntityTeleportCauseBuilder extends AbstractEntityTeleportCauseBuilder<EntityTeleportCause, EntityTeleportCause.Builder> implements
-        EntityTeleportCause.Builder {
+public class SpongeEntityTeleportCauseBuilder extends AbstractEntityTeleportCauseBuilder<EntityTeleportCause, EntityTeleportCause.Builder>
+        implements EntityTeleportCause.Builder {
 
     public SpongeEntityTeleportCauseBuilder() {
     }

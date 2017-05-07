@@ -87,7 +87,8 @@ public abstract class MixinWorldGenDungeons extends WorldGenerator implements Du
 //        this.items.add(new WeightedEnchantmentBook(VariableAmount.fixed(1), 1));
     }
 
-    @Redirect(method = "generate", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/MobSpawnerBaseLogic;setEntityId(Lnet/minecraft/util/ResourceLocation;)V"))
+    @Redirect(method = "generate", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/tileentity/MobSpawnerBaseLogic;setEntityId(Lnet/minecraft/util/ResourceLocation;)V"))
     public void onSetEntityName(MobSpawnerBaseLogic logic, ResourceLocation mobName) {
         if (this.data != null) {
             // Use custom spawner data

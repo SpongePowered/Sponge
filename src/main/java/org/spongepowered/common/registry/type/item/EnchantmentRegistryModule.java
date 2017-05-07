@@ -41,7 +41,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogRegistryModule<Enchantment>, AlternateCatalogRegistryModule<Enchantment> {
+public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogRegistryModule<Enchantment>,
+        AlternateCatalogRegistryModule<Enchantment> {
 
     public static EnchantmentRegistryModule getInstance() {
         return Holder.INSTANCE;

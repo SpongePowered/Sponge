@@ -40,8 +40,8 @@ import org.spongepowered.common.entity.living.human.EntityHuman;
 import java.util.Optional;
 import java.util.UUID;
 
-public class SkinDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityHuman, UUID, Value<UUID>, SkinData, ImmutableSkinData> {
+public class SkinDataProcessor extends AbstractEntitySingleDataProcessor<EntityHuman, UUID, Value<UUID>,
+        SkinData, ImmutableSkinData> {
 
     public SkinDataProcessor() {
         super(EntityHuman.class, Keys.SKIN_UNIQUE_ID);

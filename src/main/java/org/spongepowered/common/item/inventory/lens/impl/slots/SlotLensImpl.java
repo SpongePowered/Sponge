@@ -45,7 +45,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-
 public class SlotLensImpl extends MinecraftLens implements SlotLens<IInventory, ItemStack> {
 
     public static final Translation SLOT_NAME = new SpongeTranslation("slot.name");

@@ -113,7 +113,8 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
                         }
                     });
         } catch (Exception e) {
-            throw new RuntimeException(String.format("Exception occured while processing tile entity %s at %s", tickingTile, tickingTile.getLocation()), e);
+            throw new RuntimeException(String.format("Exception occured while processing tile entity %s at %s",
+                    tickingTile, tickingTile.getLocation()), e);
         }
     }
 

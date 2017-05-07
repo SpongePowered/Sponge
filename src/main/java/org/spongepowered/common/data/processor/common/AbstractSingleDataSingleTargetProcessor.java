@@ -43,8 +43,8 @@ import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
 
-public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-        extends AbstractSingleDataProcessor<T, V, M, I> implements ValueProcessor<T, V> {
+public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V extends BaseValue<T>, M extends DataManipulator<M, I>,
+        I extends ImmutableDataManipulator<I, M>> extends AbstractSingleDataProcessor<T, V, M, I> implements ValueProcessor<T, V> {
 
     protected final Class<Holder> holderClass;
 

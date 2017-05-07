@@ -45,8 +45,8 @@ import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
 import java.util.Optional;
 
-public class JukeboxDataProcessor extends
-        AbstractTileEntitySingleDataProcessor<BlockJukebox.TileEntityJukebox, ItemStackSnapshot, Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
+public class JukeboxDataProcessor extends AbstractTileEntitySingleDataProcessor<BlockJukebox.TileEntityJukebox, ItemStackSnapshot,
+        Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
 
     public JukeboxDataProcessor() {
         super(BlockJukebox.TileEntityJukebox.class, Keys.REPRESENTED_ITEM);

@@ -111,7 +111,8 @@ public class WorldArchetypeRegistryModule implements AdditionalCatalogRegistryMo
 
     @Override
     public Optional<WorldArchetype> getById(String id) {
-        return Optional.ofNullable(this.worldCreationSettingsMap.get(checkNotNull(id, "WorldCreationSettings ID cannot be null!").toLowerCase(Locale.ENGLISH)));
+        return Optional.ofNullable(this.worldCreationSettingsMap.get(checkNotNull(id, "WorldCreationSettings ID cannot be null!")
+                .toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

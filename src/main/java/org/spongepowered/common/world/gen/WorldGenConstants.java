@@ -96,7 +96,8 @@ public final class WorldGenConstants {
         if (input.getBlockY() <= 0 || input.getBlockY() >= 255) {
             return false;
         }
-        if (input.add(0, 1, 0).getBlock().getType() != BlockTypes.STONE || input.add(0, -1, 0).getBlock().getType() != BlockTypes.STONE
+        if (input.add(0, 1, 0).getBlock().getType() != BlockTypes.STONE
+                || input.add(0, -1, 0).getBlock().getType() != BlockTypes.STONE
                 || (input.getBlock().getType() != BlockTypes.STONE && input.getBlock().getType() != BlockTypes.AIR)) {
             return false;
         }

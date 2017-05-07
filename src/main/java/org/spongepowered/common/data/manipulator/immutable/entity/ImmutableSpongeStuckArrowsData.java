@@ -31,7 +31,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeStuckArrowsData;
 
-public class ImmutableSpongeStuckArrowsData extends AbstractImmutableIntData<ImmutableStuckArrowsData, StuckArrowsData> implements ImmutableStuckArrowsData {
+public class ImmutableSpongeStuckArrowsData extends AbstractImmutableIntData<ImmutableStuckArrowsData, StuckArrowsData>
+        implements ImmutableStuckArrowsData {
 
     public ImmutableSpongeStuckArrowsData(int arrows) {
         super(ImmutableStuckArrowsData.class, arrows, Keys.STUCK_ARROWS, SpongeStuckArrowsData.class, 0, Integer.MAX_VALUE, 0);

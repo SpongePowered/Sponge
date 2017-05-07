@@ -34,7 +34,8 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeEndGatewayData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public final class ImmutableSpongeEndGatewayData extends AbstractImmutableData<ImmutableEndGatewayData, EndGatewayData> implements ImmutableEndGatewayData {
+public final class ImmutableSpongeEndGatewayData extends AbstractImmutableData<ImmutableEndGatewayData, EndGatewayData>
+        implements ImmutableEndGatewayData {
 
     private final Vector3i exitPortal;
     private final ImmutableValue<Vector3i> exitPortalValue;

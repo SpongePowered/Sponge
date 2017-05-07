@@ -32,7 +32,8 @@ import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRabbitData;
 
-public class ImmutableSpongeRabbitData extends AbstractImmutableSingleCatalogData<RabbitType, ImmutableRabbitData, RabbitData> implements ImmutableRabbitData {
+public class ImmutableSpongeRabbitData extends AbstractImmutableSingleCatalogData<RabbitType, ImmutableRabbitData, RabbitData>
+        implements ImmutableRabbitData {
 
     public ImmutableSpongeRabbitData(RabbitType type) {
         super(ImmutableRabbitData.class, type, RabbitTypes.BROWN, Keys.RABBIT_TYPE, SpongeRabbitData.class);

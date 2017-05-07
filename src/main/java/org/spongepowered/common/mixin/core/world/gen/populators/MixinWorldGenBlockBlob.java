@@ -135,7 +135,8 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
                 }
 
 //                position = position.add(-(i1 + 1) + rand.nextInt(2 + i1 * 2), 0 - rand.nextInt(2), -(i1 + 1) + rand.nextInt(2 + i1 * 2));
-                position = position.add(-(j + 1) + rand.nextInt(2 + j * 2), 0 - rand.nextInt(2), -(l + 1) + rand.nextInt(2 + l * 2));
+                position = position.add(-(j + 1) + rand.nextInt(2 + j * 2), 0 - rand.nextInt(2), -(l + 1) +
+                        rand.nextInt(2 + l * 2));
                 // SPONGE end
             }
 

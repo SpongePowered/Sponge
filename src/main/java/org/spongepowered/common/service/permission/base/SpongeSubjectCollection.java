@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class SpongeSubjectCollection implements SubjectCollection {
+
     private final String identifier;
     protected final SpongePermissionService service;
 

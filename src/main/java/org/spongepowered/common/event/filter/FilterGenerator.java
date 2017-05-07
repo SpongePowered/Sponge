@@ -106,7 +106,8 @@ public class FilterGenerator {
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         MethodVisitor mv;
 
-        cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });
+        cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null,
+                "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });
 
         SubtypeFilterDelegate sfilter = null;
         List<FilterDelegate> additional = Lists.newArrayList();
@@ -149,7 +150,8 @@ public class FilterGenerator {
             mv.visitEnd();
         }
         {
-            mv = cw.visitMethod(ACC_PUBLIC, "filter", "(" + Type.getDescriptor(Event.class) + ")[Ljava/lang/Object;", null, null);
+            mv = cw.visitMethod(ACC_PUBLIC, "filter", "(" + Type.getDescriptor(Event.class) + ")[Ljava/lang/Object;",
+                    null, null);
             mv.visitCode();
             // index of the next available local variable
             int local = 2;

@@ -42,8 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @RegisterCatalog(IntegerTraits.class)
-public final class IntegerTraitRegistryModule
-    extends AbstractPrefixCheckCatalogRegistryModule<IntegerTrait>
+public final class IntegerTraitRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<IntegerTrait>
         implements SpongeAdditionalCatalogRegistryModule<IntegerTrait>, AlternateCatalogRegistryModule<IntegerTrait> {
 
     public static IntegerTraitRegistryModule getInstance() {

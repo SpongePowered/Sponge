@@ -47,7 +47,8 @@ public class CraftingInventoryAdapter extends GridInventoryAdapter implements Cr
         this(inventory, root, null);
     }
 
-    public CraftingInventoryAdapter(Fabric<IInventory> inventory, CraftingInventoryLens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    public CraftingInventoryAdapter(Fabric<IInventory> inventory, CraftingInventoryLens<IInventory,
+            net.minecraft.item.ItemStack> root, Inventory parent) {
         super(inventory, root, parent);
         this.craftingLens = root;
     }

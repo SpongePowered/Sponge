@@ -42,8 +42,7 @@ import org.spongepowered.common.interfaces.entity.IMixinVillager;
 
 import java.util.Optional;
 
-public class CareerDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityVillager, Career, Value<Career>, CareerData, ImmutableCareerData> {
+public class CareerDataProcessor extends AbstractEntitySingleDataProcessor<EntityVillager, Career, Value<Career>, CareerData, ImmutableCareerData> {
 
     public CareerDataProcessor() {
         super(EntityVillager.class, Keys.CAREER);

@@ -35,8 +35,7 @@ import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogType
 import org.spongepowered.common.world.gen.type.SpongeMushroomType;
 
 @RegisterCatalog(MushroomTypes.class)
-public class MushroomTypeRegistryModule
-        extends AbstractPrefixAlternateCatalogTypeRegistryModule<MushroomType>
+public class MushroomTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<MushroomType>
         implements CatalogRegistryModule<MushroomType> {
 
     public MushroomTypeRegistryModule() {

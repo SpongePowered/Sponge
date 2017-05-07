@@ -43,7 +43,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.event.filter.FilterFactory;
-import org.spongepowered.common.event.gen.DefineableClassLoader;
+import org.spongepowered.common.event.gen.DefinableClassLoader;
 import org.spongepowered.common.event.listener.AllCauseListener;
 import org.spongepowered.common.event.listener.BeforeAfterCauseListener;
 import org.spongepowered.common.event.listener.CancelledListener;
@@ -64,7 +64,7 @@ import java.util.Optional;
 
 public class EventFilterTest {
 
-    private final DefineableClassLoader classLoader = new DefineableClassLoader(getClass().getClassLoader());
+    private final DefinableClassLoader classLoader = new DefinableClassLoader(getClass().getClassLoader());
     private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
             new FilterFactory("org.spongepowered.common.event.filters", this.classLoader), this.classLoader);
 

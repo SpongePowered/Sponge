@@ -32,8 +32,9 @@ import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDam
 
 import java.lang.ref.WeakReference;
 
-public class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourceBuilder<IndirectEntityDamageSource, IndirectEntityDamageSource.Builder>
-    implements IndirectEntityDamageSource.Builder {
+public class SpongeIndirectEntityDamageSourceBuilder
+        extends AbstractDamageSourceBuilder<IndirectEntityDamageSource, IndirectEntityDamageSource.Builder>
+        implements IndirectEntityDamageSource.Builder {
 
     protected WeakReference<Entity> reference = null;
     private WeakReference<Entity> proxy = null;

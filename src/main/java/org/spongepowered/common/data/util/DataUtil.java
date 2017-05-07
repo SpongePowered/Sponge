@@ -288,12 +288,18 @@ public final class DataUtil {
     public static <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
     registerDataProcessorAndImpl(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
         Class<? extends I> implImClass, DataProcessor<T, I> processor) {
-        checkState(!SpongeDataManager.areRegistrationsComplete(), "Registrations are no longer allowed!");
-        checkArgument(!Modifier.isAbstract(implClass.getModifiers()), "The Implemented DataManipulator class cannot be abstract!");
-        checkArgument(!Modifier.isInterface(implClass.getModifiers()), "The Implemented DataManipulator class cannot be an interface!");
-        checkArgument(!Modifier.isAbstract(implImClass.getModifiers()), "The implemented ImmutableDataManipulator class cannot be an interface!");
-        checkArgument(!Modifier.isInterface(implImClass.getModifiers()), "The implemented ImmutableDataManipulator class cannot be an interface!");
-        checkArgument(!(processor instanceof DataProcessorDelegate), "Cannot register DataProcessorDelegates!");
+        checkState(!SpongeDataManager.areRegistrationsComplete(),
+                "Registrations are no longer allowed!");
+        checkArgument(!Modifier.isAbstract(implClass.getModifiers()),
+                "The Implemented DataManipulator class cannot be abstract!");
+        checkArgument(!Modifier.isInterface(implClass.getModifiers()),
+                "The Implemented DataManipulator class cannot be an interface!");
+        checkArgument(!Modifier.isAbstract(implImClass.getModifiers()),
+                "The implemented ImmutableDataManipulator class cannot be an interface!");
+        checkArgument(!Modifier.isInterface(implImClass.getModifiers()),
+                "The implemented ImmutableDataManipulator class cannot be an interface!");
+        checkArgument(!(processor instanceof DataProcessorDelegate),
+                "Cannot register DataProcessorDelegates!");
 
         SpongeManipulatorRegistry.getInstance().register(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
     }

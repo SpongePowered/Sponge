@@ -59,5 +59,4 @@ public abstract class MixinArtType implements Art {
         return this.sizeX / PIXELS_PER_BLOCK;
     }
 
-
 }

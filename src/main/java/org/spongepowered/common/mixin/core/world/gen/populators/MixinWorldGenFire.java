@@ -87,8 +87,8 @@ public class MixinWorldGenFire implements NetherFire {
         int n = this.cluster.getFlooredAmount(rand);
         //END sponge
         for (int i = 0; i < n; ++i) {
-            BlockPos blockpos1 =
-                    pos.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
+            BlockPos blockpos1 = pos.add(rand.nextInt(8) - rand.nextInt(8),
+                            rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
             if (worldIn.isAirBlock(blockpos1) && worldIn.getBlockState(blockpos1.down()).getBlock() == Blocks.NETHERRACK) {
                 worldIn.setBlockState(blockpos1, Blocks.FIRE.getDefaultState(), 2);
             }

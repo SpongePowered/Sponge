@@ -203,8 +203,8 @@ public abstract class TrackingPhase {
         return false;
     }
 
-    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState state, PhaseContext context,
-            CauseTracker causeTracker) {
+    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP,
+            IPhaseState state, PhaseContext context, CauseTracker causeTracker) {
 
     }
 
@@ -224,7 +224,8 @@ public abstract class TrackingPhase {
      * @param context
      * @param newContext
      */
-    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState,
+            PhaseContext context, PhaseContext newContext) {
         final Chunk chunk = mixinWorld.asMinecraftWorld().getChunkFromBlockCoords(pos);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         if (chunk != null && !chunk.isEmpty()) {
@@ -284,7 +285,8 @@ public abstract class TrackingPhase {
         return Optional.empty();
     }
 
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos,
+            IMixinBlockEventData blockEvent) {
 
     }
 

@@ -41,7 +41,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class TextSerializerRegistryModule implements AlternateCatalogRegistryModule<TextSerializer>, AdditionalCatalogRegistryModule<TextSerializer> {
+public final class TextSerializerRegistryModule
+        implements AlternateCatalogRegistryModule<TextSerializer>, AdditionalCatalogRegistryModule<TextSerializer> {
 
     @RegisterCatalog(TextSerializers.class)
     private final Map<String, TextSerializer> textSerializerMappings = new HashMap<>();

@@ -44,7 +44,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.List;
 
-public class ImmutableSpongeAreaEffectCloudData extends AbstractImmutableData<ImmutableAreaEffectCloudData, AreaEffectCloudData> implements ImmutableAreaEffectCloudData {
+public class ImmutableSpongeAreaEffectCloudData extends AbstractImmutableData<ImmutableAreaEffectCloudData, AreaEffectCloudData>
+        implements ImmutableAreaEffectCloudData {
 
     private final Color color;
     private final double radius;

@@ -104,12 +104,14 @@ public final class TickPhase extends TrackingPhase {
     }
 
     @Override
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld,
+            BlockPos pos, IMixinBlockEventData blockEvent) {
         ((TickPhaseState) phaseState).associateBlockEventNotifier(context, pos, blockEvent);
     }
 
     @Override
-    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState,
+            PhaseContext context, PhaseContext newContext) {
         if (currentState == Tick.BLOCK || currentState == Tick.RANDOM_BLOCK) {
 
         }

@@ -42,7 +42,8 @@ public final class ImmutableSpongePickupDelayData extends AbstractImmutableIntDa
     public ImmutableSpongePickupDelayData(int value) {
         super(ImmutablePickupDelayData.class, value, Keys.PICKUP_DELAY, SpongePickupDelayData.class, DataConstants.Entity.Item.MIN_PICKUP_DELAY,
                 DataConstants.Entity.Item.MAX_PICKUP_DELAY, DataConstants.Entity.Item.DEFAULT_PICKUP_DELAY);
-        this.infinite = ImmutableSpongeValue.cachedOf(Keys.INFINITE_PICKUP_DELAY, false, this.getValue() == DataConstants.Entity.Item.MAGIC_NO_PICKUP);
+        this.infinite = ImmutableSpongeValue.cachedOf(Keys.INFINITE_PICKUP_DELAY,
+                false, this.getValue() == DataConstants.Entity.Item.MAGIC_NO_PICKUP);
     }
 
     @Override

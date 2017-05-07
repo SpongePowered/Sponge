@@ -58,7 +58,8 @@ public abstract class MixinEnumChatVisibility implements ChatVisibility, IMixinE
     public void construct(String name, int i, int i2, String s2, CallbackInfo ci) {
         this.visibleChatTypes = Sets.newHashSet();
 
-        this.id = SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + ((EntityPlayer.EnumChatVisibility) (Object) this).name().toLowerCase(Locale.ENGLISH);
+        this.id = SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + ((EntityPlayer.EnumChatVisibility) (Object) this).name()
+                .toLowerCase(Locale.ENGLISH);
         this.translation = new SpongeTranslation(this.resourceKey);
     }
 

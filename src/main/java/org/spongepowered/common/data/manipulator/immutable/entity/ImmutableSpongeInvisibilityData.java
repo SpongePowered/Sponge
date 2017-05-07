@@ -34,7 +34,8 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeInvisibili
 import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeInvisibilityData extends AbstractImmutableData<ImmutableInvisibilityData, InvisibilityData> implements ImmutableInvisibilityData {
+public class ImmutableSpongeInvisibilityData extends AbstractImmutableData<ImmutableInvisibilityData, InvisibilityData>
+        implements ImmutableInvisibilityData {
 
     private final boolean vanish;
     private final boolean collision;

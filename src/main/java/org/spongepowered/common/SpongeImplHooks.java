@@ -208,7 +208,8 @@ public final class SpongeImplHooks {
                 spawnFuzz = 2;
             }
             int spawnFuzzHalf = spawnFuzz / 2;
-            ret = world.getTopSolidOrLiquidBlock(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
+            ret = world.getTopSolidOrLiquidBlock(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0,
+                    world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
         }
 
         return ret;

@@ -78,7 +78,6 @@ final class UnwindingPhaseContext extends PhaseContext {
             return Optional.of((T) this.unwindingState);
         }
         return Optional.ofNullable(super.firstNamed(name, tClass).orElseGet(() -> this.unwindingContext.firstNamed(name, tClass).orElse(null)));
-
     }
 
     @SuppressWarnings("unchecked")

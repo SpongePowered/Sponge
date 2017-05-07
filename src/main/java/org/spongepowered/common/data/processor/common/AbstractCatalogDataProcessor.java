@@ -37,8 +37,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public abstract class AbstractCatalogDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-        extends AbstractItemSingleDataProcessor<T, V, M, I> {
+public abstract class AbstractCatalogDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>,
+        I extends ImmutableDataManipulator<I, M>> extends AbstractItemSingleDataProcessor<T, V, M, I> {
 
     protected AbstractCatalogDataProcessor(Key<V> key, Predicate<ItemStack> predicate) {
         super(predicate, key);

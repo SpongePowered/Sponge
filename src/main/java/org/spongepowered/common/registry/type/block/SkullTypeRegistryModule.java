@@ -32,8 +32,7 @@ import org.spongepowered.common.data.type.SpongeSkullType;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 @RegisterCatalog(SkullTypes.class)
-public final class SkullTypeRegistryModule
-        extends AbstractPrefixAlternateCatalogTypeRegistryModule<SkullType>
+public final class SkullTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<SkullType>
         implements CatalogRegistryModule<SkullType> {
 
     public SkullTypeRegistryModule() {

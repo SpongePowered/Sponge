@@ -42,7 +42,8 @@ public final class ImmutableSpongeDespawnDelayData extends AbstractImmutableIntD
     public ImmutableSpongeDespawnDelayData(int value) {
         super(ImmutableDespawnDelayData.class, value, Keys.DESPAWN_DELAY, SpongeDespawnDelayData.class, DataConstants.Entity.Item.MIN_DESPAWN_DELAY,
                 DataConstants.Entity.Item.MAX_DESPAWN_DELAY, DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY);
-        this.infinite = ImmutableSpongeValue.cachedOf(Keys.INFINITE_DESPAWN_DELAY, false, this.getValue() == DataConstants.Entity.Item.MAGIC_NO_DESPAWN);
+        this.infinite = ImmutableSpongeValue.cachedOf(Keys.INFINITE_DESPAWN_DELAY, false,
+                this.getValue() == DataConstants.Entity.Item.MAGIC_NO_DESPAWN);
     }
 
     @Override

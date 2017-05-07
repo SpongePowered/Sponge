@@ -37,7 +37,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeAuthorData extends AbstractImmutableSingleData<Text, ImmutableAuthorData, AuthorData> implements ImmutableAuthorData {
 
-    final ImmutableSpongeValue<Text> author;
+    private final ImmutableSpongeValue<Text> author;
 
     public ImmutableSpongeAuthorData(Text value) {
         super(ImmutableAuthorData.class, value, Keys.BOOK_AUTHOR);

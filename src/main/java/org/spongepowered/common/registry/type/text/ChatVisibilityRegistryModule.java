@@ -37,7 +37,8 @@ import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalog
 
 @RegisterCatalog(ChatVisibilities.class)
 @RegistrationDependency(ChatTypeRegistryModule.class)
-public final class ChatVisibilityRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<EntityPlayer.EnumChatVisibility, ChatVisibility>{
+public final class ChatVisibilityRegistryModule
+        extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<EntityPlayer.EnumChatVisibility, ChatVisibility> {
 
     @Override
     public void registerDefaults() {

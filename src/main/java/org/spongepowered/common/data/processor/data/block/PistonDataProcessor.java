@@ -46,7 +46,6 @@ public class PistonDataProcessor extends AbstractCatalogDataProcessor<PistonType
     protected int setToMeta(PistonType value) {
         // Not used due to overriding set method
         return -1;
-
     }
 
     @Override

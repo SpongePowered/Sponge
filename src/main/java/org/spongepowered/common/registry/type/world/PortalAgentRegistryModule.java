@@ -45,7 +45,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogRegistryModule<PortalAgentType>, AlternateCatalogRegistryModule<PortalAgentType> {
+public final class PortalAgentRegistryModule
+        implements SpongeAdditionalCatalogRegistryModule<PortalAgentType>, AlternateCatalogRegistryModule<PortalAgentType> {
 
     public static PortalAgentRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -67,7 +68,8 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
 
     @Override
     public void registerAdditionalCatalog(PortalAgentType portalAgentType) {
-        checkArgument(this.portalAgentTypeMappings.get(portalAgentType.getId()) == null, "Cannot re-register a PortalAgent with the same id: " + portalAgentType.getId());
+        checkArgument(this.portalAgentTypeMappings.get(portalAgentType.getId()) == null,
+                "Cannot re-register a PortalAgent with the same id: " + portalAgentType.getId());
         this.portalAgentTypeMappings.put(portalAgentType.getId().toLowerCase(Locale.ENGLISH), portalAgentType);
         this.portalAgentClassToTypeMappings.put(portalAgentType.getPortalAgentClass(), portalAgentType);
     }
@@ -102,10 +104,12 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
                 if (Teleporter.class.isAssignableFrom(clazz)) {
                     return this.validatePortalAgent((Class<? extends Teleporter>) clazz);
                 } else {
-                    SpongeImpl.getLogger().error("Class " + portalAgentTypeClass + " is not a valid PortalAgentType class for world " + worldName +". Falling back to default type...");
+                    SpongeImpl.getLogger().error("Class " + portalAgentTypeClass + " is not a valid PortalAgentType class for world "
+                            + worldName +". Falling back to default type...");
                 }
             } catch (ClassNotFoundException e) {
-                SpongeImpl.getLogger().error("Could not locate PortalAgentType class " + portalAgentTypeClass + " for world " + worldName +". Falling back to default type...");
+                SpongeImpl.getLogger().error("Could not locate PortalAgentType class " + portalAgentTypeClass + " for world "
+                        + worldName +". Falling back to default type...");
             }
         }
 

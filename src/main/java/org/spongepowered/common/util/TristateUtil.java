@@ -45,5 +45,4 @@ public class TristateUtil {
         return map.inverse().get(tristate);
     }
 
-
 }

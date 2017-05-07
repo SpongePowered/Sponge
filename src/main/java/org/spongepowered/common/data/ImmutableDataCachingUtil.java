@@ -83,11 +83,11 @@ public final class ImmutableDataCachingUtil {
                     try {
                         return createUnsafeInstance(immutableClass, args);
                     } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                        SpongeImpl.getLogger().error("Could not construct an ImmutableDataManipulator: " + immutableClass.getCanonicalName() + " with the args: "
-                                                     + Arrays.toString(args), e);
+                        SpongeImpl.getLogger().error("Could not construct an ImmutableDataManipulator: " + immutableClass.getCanonicalName()
+                                + " with the args: " + Arrays.toString(args), e);
                     }
-                    throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName() + " with the args: "
-                                                            + Arrays.toString(args));
+                    throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName()
+                            + " with the args: " + Arrays.toString(args));
             });
         } catch (Throwable e) {
             throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName(), e);

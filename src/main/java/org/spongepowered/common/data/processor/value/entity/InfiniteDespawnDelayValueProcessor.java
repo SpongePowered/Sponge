@@ -50,7 +50,8 @@ public class InfiniteDespawnDelayValueProcessor extends AbstractSpongeValueProce
 
     @Override
     protected boolean set(EntityItem container, Boolean value) {
-        ((IMixinEntityItem) container).setPickupDelay(value ? DataConstants.Entity.Item.MAGIC_NO_DESPAWN : DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY, value);
+        ((IMixinEntityItem) container)
+                .setPickupDelay(value ? DataConstants.Entity.Item.MAGIC_NO_DESPAWN : DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY, value);
         return true;
     }
 

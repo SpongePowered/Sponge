@@ -37,6 +37,7 @@ import java.util.Set;
  * Implementation that forces a single parent to always be part of the parents.
  */
 public class FixedParentMemorySubjectData extends GlobalMemorySubjectData {
+
     private final Subject forcedParent;
 
     /**

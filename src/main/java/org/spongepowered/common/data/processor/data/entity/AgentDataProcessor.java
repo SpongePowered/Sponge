@@ -39,8 +39,7 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class AgentDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityLiving, Boolean, Value<Boolean>, AgentData, ImmutableAgentData> {
+public class AgentDataProcessor extends AbstractEntitySingleDataProcessor<EntityLiving, Boolean, Value<Boolean>, AgentData, ImmutableAgentData> {
 
     public AgentDataProcessor() {
         super(EntityLiving.class, Keys.AI_ENABLED);

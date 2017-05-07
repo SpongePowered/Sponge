@@ -54,7 +54,8 @@ public class BeforeCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
     @Override
     protected void insertCauseCall(MethodVisitor mv, Parameter param, Class<?> targetType) {
         mv.visitLdcInsn(Type.getType(this.anno.value()));
-        mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Cause.class), "before", "(Ljava/lang/Class;)Ljava/util/Optional;", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Cause.class), "before",
+                "(Ljava/lang/Class;)Ljava/util/Optional;", false);
     }
 
     @Override

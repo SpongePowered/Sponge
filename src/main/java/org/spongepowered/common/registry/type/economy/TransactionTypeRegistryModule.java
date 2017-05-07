@@ -32,9 +32,8 @@ import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
 
 @RegisterCatalog(TransactionTypes.class)
-public class TransactionTypeRegistryModule
-    extends AbstractPrefixAlternateCatalogTypeRegistryModule<TransactionType>
-    implements SpongeAdditionalCatalogRegistryModule<TransactionType> {
+public class TransactionTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<TransactionType>
+        implements SpongeAdditionalCatalogRegistryModule<TransactionType> {
 
 
     public TransactionTypeRegistryModule() {

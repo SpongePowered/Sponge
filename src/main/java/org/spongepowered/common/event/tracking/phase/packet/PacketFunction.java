@@ -798,8 +798,10 @@ public interface PacketFunction {
 
         ItemStackSnapshot sourceSnapshot = ItemStackUtil.snapshotOf(sourceSlot.getStack());
         ItemStackSnapshot targetSnapshot = ItemStackUtil.snapshotOf(targetSlot.getStack());
-        SlotTransaction sourceTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, sourceSlot.slotIndex), sourceSnapshot, sourceSnapshot);
-        SlotTransaction targetTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, targetSlot.slotIndex), targetSnapshot, targetSnapshot);
+        SlotTransaction sourceTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, sourceSlot.slotIndex),
+                sourceSnapshot, sourceSnapshot);
+        SlotTransaction targetTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, targetSlot.slotIndex),
+                targetSnapshot, targetSnapshot);
         ImmutableList<SlotTransaction>
                 transactions =
                 new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
@@ -810,7 +812,8 @@ public interface PacketFunction {
         if (changeInventoryEventHeld.isCancelled()) {
             player.connection.sendPacket(new SPacketHeldItemChange(previousSlot));
         } else {
-            PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false, false);
+            PacketPhaseUtil
+                    .handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false, false);
             inventory.currentItem = itemChange.getSlotId();
             player.markPlayerActive();
         }
@@ -822,7 +825,8 @@ public interface PacketFunction {
                 .orElseThrow(TrackingUtil.throwWithContext("Expected a cursor item stack, but had nothing!", context));
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         final Cause cause = Cause.source(player).build();
-        InteractInventoryEvent.Close event = SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, container, player, lastCursor, newCursor, true);
+        InteractInventoryEvent.Close event = SpongeCommonEventFactory
+                .callInteractInventoryCloseEvent(cause, container, player, lastCursor, newCursor, true);
         if (!event.isCancelled()) {
             // Non-merged items
             context.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {

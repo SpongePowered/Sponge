@@ -44,7 +44,8 @@ public class SpongeFluidLevelData extends AbstractBoundedComparableData<Integer,
     }
 
     public SpongeFluidLevelData(int value, int lowerBound, int upperBound) {
-        super(FluidLevelData.class, value, Keys.FLUID_LEVEL, intComparator(), ImmutableSpongeFluidLevelData.class, lowerBound, upperBound, 0);
+        super(FluidLevelData.class, value, Keys.FLUID_LEVEL, intComparator(), ImmutableSpongeFluidLevelData.class,
+                lowerBound, upperBound, 0);
     }
 
     @Override

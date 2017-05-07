@@ -198,8 +198,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
                 for (int j1 = -this.searchRadius; j1 <= this.searchRadius; ++j1) {
                     for (BlockPos blockpos1 =
-                            blockSearchPosition.add(i1, this.worldServerInstance.getActualHeight() - 1 - blockSearchPosition.getY(), j1); blockpos1
-                                    .getY() >= 0; blockpos1 = blockpos2) {
+                            blockSearchPosition.add(i1, this.worldServerInstance.getActualHeight() - 1 - blockSearchPosition.getY(), j1);
+                            blockpos1.getY() >= 0; blockpos1 = blockpos2) {
                         blockpos2 = blockpos1.down();
 
                         if (this.worldServerInstance.getBlockState(blockpos1).getBlock() == Blocks.PORTAL) {
@@ -238,7 +238,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         double zTarget = portalLocation.getZ() + 0.5D;
         BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.PORTAL.createPatternHelper(this.worldServerInstance, blockPos);
         boolean flag1 = blockpattern$patternhelper.getForwards().rotateY().getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE;
-        double d2 = blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X ? (double) blockpattern$patternhelper.getFrontTopLeft().getZ()
+        double d2 = blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X
+                ? (double) blockpattern$patternhelper.getFrontTopLeft().getZ()
                 : (double) blockpattern$patternhelper.getFrontTopLeft().getX();
         yTarget = (double) (blockpattern$patternhelper.getFrontTopLeft().getY() + 1)
                 - entityIn.getLastPortalVec().yCoord * (double) blockpattern$patternhelper.getHeight();
@@ -459,7 +460,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
             }
         }
 
-        IBlockState iblockstate = Blocks.PORTAL.getDefaultState().withProperty(BlockPortal.AXIS, targetDirection != 0 ? EnumFacing.Axis.X : EnumFacing.Axis.Z);
+        IBlockState iblockstate =
+                Blocks.PORTAL.getDefaultState().withProperty(BlockPortal.AXIS, targetDirection != 0 ? EnumFacing.Axis.X : EnumFacing.Axis.Z);
 
         for (int i8 = 0; i8 < 4; ++i8) {
             for (int l8 = 0; l8 < 4; ++l8) {
@@ -468,7 +470,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                     int l11 = yFinalTarget + l9;
                     int k12 = zFinalTarget + (l8 - 1) * targetDirOffset;
                     boolean flag1 = l8 == 0 || l8 == 3 || l9 == -1 || l9 == 3;
-                    this.worldServerInstance.setBlockState(new BlockPos(l10, l11, k12), flag1 ? Blocks.OBSIDIAN.getDefaultState() : iblockstate, 2);
+                    this.worldServerInstance.setBlockState(
+                            new BlockPos(l10, l11, k12), flag1 ? Blocks.OBSIDIAN.getDefaultState() : iblockstate, 2);
                 }
             }
 

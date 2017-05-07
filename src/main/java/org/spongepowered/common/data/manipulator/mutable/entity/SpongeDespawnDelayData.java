@@ -49,7 +49,6 @@ public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayDa
         this(value);
     }
 
-
     @Override
     public MutableBoundedValue<Integer> delay() {
         return SpongeValueFactory.boundedBuilder(Keys.DESPAWN_DELAY) // this.usedKey does not work here
@@ -62,7 +61,8 @@ public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayDa
 
     @Override
     public Value<Boolean> infinite() {
-        return new SpongeValue<>(Keys.INFINITE_DESPAWN_DELAY, false, this.getValue() == DataConstants.Entity.Item.MAGIC_NO_DESPAWN);
+        return new SpongeValue<>(Keys.INFINITE_DESPAWN_DELAY, false,
+                this.getValue() == DataConstants.Entity.Item.MAGIC_NO_DESPAWN);
     }
 
     @Override

@@ -46,7 +46,8 @@ import java.util.Map;
 import java.util.Optional;
 
 @SuppressWarnings("rawtypes")
-public class DataTranslatorRegistryModule implements AlternateCatalogRegistryModule<DataTranslator>, SpongeAdditionalCatalogRegistryModule<DataTranslator> {
+public class DataTranslatorRegistryModule
+        implements AlternateCatalogRegistryModule<DataTranslator>, SpongeAdditionalCatalogRegistryModule<DataTranslator> {
 
     public static DataTranslatorRegistryModule getInstance() {
         return Holder.INSTANCE;

@@ -44,7 +44,8 @@ public class ImmutableSpongeFallDistanceData extends AbstractImmutableBoundedCom
     }
 
     public ImmutableSpongeFallDistanceData(float distance, float minimum, float maximum, float defaultValue) {
-        super(ImmutableFallDistanceData.class, distance, Keys.FALL_DISTANCE, Float::compare, SpongeFallDistanceData.class, minimum, maximum, defaultValue);
+        super(ImmutableFallDistanceData.class, distance, Keys.FALL_DISTANCE, Float::compare, SpongeFallDistanceData.class,
+                minimum, maximum, defaultValue);
     }
 
 

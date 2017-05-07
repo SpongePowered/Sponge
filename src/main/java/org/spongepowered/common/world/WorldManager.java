@@ -398,8 +398,8 @@ public final class WorldManager {
             return optWorldProperties.get();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true, SpongeImpl
-                .getServer().getDataFixer());
+        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true,
+                SpongeImpl.getServer().getDataFixer());
         WorldInfo worldInfo = saveHandler.loadWorldInfo();
 
         if (worldInfo == null) {
@@ -443,8 +443,8 @@ public final class WorldManager {
             worldServer.getSaveHandler().saveWorldInfo((WorldInfo) properties);
             worldServer.getSaveHandler().loadWorldInfo();
         } else {
-            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, SpongeImpl.getServer()
-                    .getDataFixer()).saveWorldInfo((WorldInfo) properties);
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true,
+                    SpongeImpl.getServer().getDataFixer()).saveWorldInfo((WorldInfo) properties);
         }
         ((IMixinWorldInfo) properties).getOrCreateWorldConfig().save();
         // No return values or exceptions so can only assume true.
@@ -488,8 +488,8 @@ public final class WorldManager {
             }
         }
 
-        if (SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
-                worldServer))) {
+        if (SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)),
+                (org.spongepowered.api.world.World) worldServer))) {
             return false;
         }
 
@@ -534,8 +534,8 @@ public final class WorldManager {
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(optCurrentSavesDir.get(), LEVEL_AND_SPONGE)) {
             for (Path worldFolder : stream) {
                 final String worldFolderName = worldFolder.getFileName().toString();
-                final WorldInfo worldInfo = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true,
-                        SpongeImpl.getServer().getDataFixer()).loadWorldInfo();
+                final WorldInfo worldInfo = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName,
+                        true, SpongeImpl.getServer().getDataFixer()).loadWorldInfo();
                 if (worldInfo != null) {
                     worlds.add((WorldProperties) worldInfo);
                 }
@@ -581,7 +581,8 @@ public final class WorldManager {
         }
 
         if (!server.getAllowNether()) {
-            SpongeImpl.getLogger().error("Unable to load world [{}]. Multi-world is disabled via [allow-nether] in [server.properties].", worldName);
+            SpongeImpl.getLogger()
+                    .error("Unable to load world [{}]. Multi-world is disabled via [allow-nether] in [server.properties].", worldName);
             return Optional.empty();
         }
 
@@ -681,8 +682,8 @@ public final class WorldManager {
             // Step 1 - Grab the world's data folder
             final Path worldFolder = getWorldFolder(dimensionType, dimensionId);
             if (worldFolder == null) {
-                SpongeImpl.getLogger().error("An attempt was made to load a world with dimension id [{}] that has no registered world folder!",
-                        dimensionId);
+                SpongeImpl.getLogger().error(
+                        "An attempt was made to load a world with dimension id [{}] that has no registered world folder!", dimensionId);
                 continue;
             }
 
@@ -690,7 +691,8 @@ public final class WorldManager {
 
             // Step 2 - See if we are allowed to load it
             if (dimensionId != 0) {
-                final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((IMixinDimensionType)(Object) dimensionType).getConfigPath(), worldFolderName);
+                final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((IMixinDimensionType)(Object) dimensionType).getConfigPath(),
+                        worldFolderName);
                 if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
                     SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder,
                             dimensionId);
@@ -761,7 +763,8 @@ public final class WorldManager {
             registerWorldProperties((WorldProperties) worldInfo);
 
             if (dimensionId != 0 && !((WorldProperties) worldInfo).loadOnStartup()) {
-                SpongeImpl.getLogger().warn("World [{}] (DIM{}) is set to not load on startup. To load it later, enable [load-on-startup] in config "
+                SpongeImpl.getLogger().warn(
+                        "World [{}] (DIM{}) is set to not load on startup. To load it later, enable [load-on-startup] in config "
                         + "or use a plugin", worldFolder, dimensionId);
                 continue;
             }
@@ -887,7 +890,8 @@ public final class WorldManager {
                 try(final DataInputStream dis = new DataInputStream(Files.newInputStream(uidPath))) {
                     uuid = new UUID(dis.readLong(), dis.readLong());
                 } catch (IOException e) {
-                    SpongeImpl.getLogger().error("World folder [{}] has an existing Bukkit unique identifier for it but we encountered issues parsing "
+                    SpongeImpl.getLogger()
+                            .error("World folder [{}] has an existing Bukkit unique identifier for it but we encountered issues parsing "
                             + "the file. We will have to use a new unique id. Please report this to Sponge ASAP.", properties.getWorldName(), e);
                     uuid = UUID.randomUUID();
                 }
@@ -950,8 +954,8 @@ public final class WorldManager {
                 if (spongeDataCompound.hasKey(NbtDataUtil.DIMENSION_TYPE)) {
                     dimensionTypeId = spongeDataCompound.getString(NbtDataUtil.DIMENSION_TYPE);
                 } else {
-                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has no specified dimension type. Defaulting to [{}}]...", worldFolderName,
-                            dimensionId, DimensionTypes.OVERWORLD.getName());
+                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has no specified dimension type. Defaulting to [{}}]...",
+                            worldFolderName, dimensionId, DimensionTypes.OVERWORLD.getName());
                 }
 
                 dimensionTypeId = fixDimensionTypeId(dimensionTypeId);
@@ -965,7 +969,8 @@ public final class WorldManager {
 
                 spongeDataCompound.setString(NbtDataUtil.DIMENSION_TYPE, dimensionTypeId);
                 if (!spongeDataCompound.hasUniqueId(NbtDataUtil.UUID)) {
-                    SpongeImpl.getLogger().error("World [{}] (DIM{}) has no valid unique identifier. This is a critical error and should be reported"
+                    SpongeImpl.getLogger()
+                            .error("World [{}] (DIM{}) has no valid unique identifier. This is a critical error and should be reported"
                             + " to Sponge ASAP.", worldFolderName, dimensionId);
                     continue;
                 }
@@ -1101,8 +1106,8 @@ public final class WorldManager {
             ((IMixinWorldInfo) info).setUniqueId(UUID.randomUUID());
             ((IMixinWorldInfo) info).createWorldConfig();
             registerWorldProperties((WorldProperties) info);
-            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, SpongeImpl.getServer().getDataFixer())
-                    .saveWorldInfo(info);
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true,
+                    SpongeImpl.getServer().getDataFixer()).saveWorldInfo(info);
             return Optional.of((WorldProperties) info);
         }
     }
@@ -1172,7 +1177,8 @@ public final class WorldManager {
         if (optWorldServer.isPresent()) {
             return Optional.of(optWorldServer.get().getSaveHandler().getWorldDirectory().toPath());
         } else if (SpongeImpl.getGame().getState().ordinal() >= GameState.SERVER_ABOUT_TO_START.ordinal()) {
-            SaveHandler saveHandler = (SaveHandler) SpongeImpl.getServer().getActiveAnvilConverter().getSaveLoader(SpongeImpl.getServer().getFolderName(), false);
+            SaveHandler saveHandler = (SaveHandler) SpongeImpl.getServer().getActiveAnvilConverter().getSaveLoader(
+                    SpongeImpl.getServer().getFolderName(), false);
             return Optional.of(saveHandler.getWorldDirectory().toPath());
         }
 

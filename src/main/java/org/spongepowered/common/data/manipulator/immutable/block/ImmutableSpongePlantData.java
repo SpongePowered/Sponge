@@ -32,8 +32,8 @@ import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePlantData;
 
-public class ImmutableSpongePlantData extends AbstractImmutableSingleCatalogData<PlantType, ImmutablePlantData, PlantData> implements
-        ImmutablePlantData {
+public class ImmutableSpongePlantData extends AbstractImmutableSingleCatalogData<PlantType, ImmutablePlantData, PlantData>
+        implements ImmutablePlantData {
 
     public ImmutableSpongePlantData(PlantType value) {
         super(ImmutablePlantData.class, value, PlantTypes.POPPY, Keys.PLANT_TYPE, SpongePlantData.class);

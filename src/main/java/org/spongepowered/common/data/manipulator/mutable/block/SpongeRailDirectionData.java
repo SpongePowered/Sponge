@@ -34,7 +34,8 @@ import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeRailDirectionData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 
-public class SpongeRailDirectionData extends AbstractSingleCatalogData<RailDirection, RailDirectionData, ImmutableRailDirectionData> implements RailDirectionData {
+public class SpongeRailDirectionData extends AbstractSingleCatalogData<RailDirection, RailDirectionData, ImmutableRailDirectionData>
+        implements RailDirectionData {
 
     public SpongeRailDirectionData(RailDirection variant) {
         super(RailDirectionData.class, checkNotNull(variant), Keys.RAIL_DIRECTION, ImmutableSpongeRailDirectionData.class);

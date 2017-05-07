@@ -50,7 +50,8 @@ public class OrderedInventoryAdapter extends Adapter implements OrderedInventory
         this(inventory, root, null);
     }
 
-    public OrderedInventoryAdapter(Fabric<IInventory> inventory, OrderedInventoryLens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    public OrderedInventoryAdapter(Fabric<IInventory> inventory, OrderedInventoryLens<IInventory,
+            net.minecraft.item.ItemStack> root, Inventory parent) {
         super(inventory, checkNotNull(root), parent);
         this.orderedLens = root;
     }

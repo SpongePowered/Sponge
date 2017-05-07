@@ -39,7 +39,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class AchievementRegistryModule implements SpongeAdditionalCatalogRegistryModule<Achievement>, AlternateCatalogRegistryModule<Achievement> {
+public final class AchievementRegistryModule
+        implements SpongeAdditionalCatalogRegistryModule<Achievement>, AlternateCatalogRegistryModule<Achievement> {
 
     @RegisterCatalog(Achievements.class)
     private final Map<String, Achievement> achievementMappings = Maps.newHashMap();

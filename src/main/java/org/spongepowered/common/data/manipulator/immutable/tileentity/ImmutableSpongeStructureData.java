@@ -36,7 +36,8 @@ import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeStruct
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public final class ImmutableSpongeStructureData extends AbstractImmutableData<ImmutableStructureData, StructureData> implements ImmutableStructureData {
+public final class ImmutableSpongeStructureData extends AbstractImmutableData<ImmutableStructureData, StructureData>
+        implements ImmutableStructureData {
 
     private final String author;
     private final ImmutableValue<String> authorValue;
@@ -59,13 +60,15 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
     private final Vector3i size;
     private final ImmutableValue<Vector3i> sizeValue;
 
-    public ImmutableSpongeStructureData(String author, boolean ignoreEntities, float integrity, StructureMode mode, Vector3i position, boolean powered, boolean showAir, boolean showBoundingBox, long seed, Vector3i size) {
+    public ImmutableSpongeStructureData(String author, boolean ignoreEntities, float integrity, StructureMode mode, Vector3i position,
+            boolean powered, boolean showAir, boolean showBoundingBox, long seed, Vector3i size) {
         super(ImmutableStructureData.class);
 
         this.author = author;
         this.authorValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_AUTHOR, DataConstants.DEFAULT_STRUCTURE_AUTHOR, this.author);
         this.ignoreEntities = ignoreEntities;
-        this.ignoreEntitiesValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_IGNORE_ENTITIES, DataConstants.DEFAULT_STRUCTURE_IGNORE_ENTITIES, this.ignoreEntities);
+        this.ignoreEntitiesValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_IGNORE_ENTITIES,
+                DataConstants.DEFAULT_STRUCTURE_IGNORE_ENTITIES, this.ignoreEntities);
         this.integrity = integrity;
         this.integrityValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_INTEGRITY, DataConstants.DEFAULT_STRUCTURE_INTEGRITY, this.integrity);
         this.mode = mode;
@@ -79,7 +82,8 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
         this.showAir = showAir;
         this.showAirValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SHOW_AIR, DataConstants.DEFAULT_STRUCTURE_SHOW_AIR, this.showAir);
         this.showBoundingBox = showBoundingBox;
-        this.showBoundingBoxValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SHOW_BOUNDING_BOX, DataConstants.DEFAULT_STRUCTURE_SHOW_BOUNDING_BOX, this.showBoundingBox);
+        this.showBoundingBoxValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SHOW_BOUNDING_BOX,
+                DataConstants.DEFAULT_STRUCTURE_SHOW_BOUNDING_BOX, this.showBoundingBox);
         this.size = size;
         this.sizeValue = new ImmutableSpongeValue<>(Keys.STRUCTURE_SIZE, DataConstants.DEFAULT_STRUCTURE_SIZE, this.size);
 
@@ -202,7 +206,8 @@ public final class ImmutableSpongeStructureData extends AbstractImmutableData<Im
 
     @Override
     public StructureData asMutable() {
-        return new SpongeStructureData(this.author, this.ignoreEntities, this.integrity, this.mode, this.position, this.powered, this.showAir, this.showBoundingBox, this.seed, this.size);
+        return new SpongeStructureData(this.author, this.ignoreEntities, this.integrity, this.mode, this.position, this.powered,
+                this.showAir, this.showBoundingBox, this.seed, this.size);
     }
 
     @Override

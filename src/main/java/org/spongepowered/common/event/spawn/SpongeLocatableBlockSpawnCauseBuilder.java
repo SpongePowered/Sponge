@@ -31,7 +31,8 @@ import org.spongepowered.api.event.cause.entity.spawn.LocatableBlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.common.AbstractBlockSpawnCauseBuilder;
 import org.spongepowered.api.event.cause.entity.spawn.common.AbstractLocatableBlockSpawnCauseBuilder;
 
-public class SpongeLocatableBlockSpawnCauseBuilder extends AbstractLocatableBlockSpawnCauseBuilder<LocatableBlockSpawnCause, LocatableBlockSpawnCause.Builder>
+public class SpongeLocatableBlockSpawnCauseBuilder
+        extends AbstractLocatableBlockSpawnCauseBuilder<LocatableBlockSpawnCause, LocatableBlockSpawnCause.Builder>
         implements LocatableBlockSpawnCause.Builder {
 
     @Override

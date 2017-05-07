@@ -48,7 +48,9 @@ import org.spongepowered.common.SpongeImpl;
 @Mixin(ItemFishingRod.class)
 public abstract class MixinItemFishingRod extends Item {
 
-    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"), cancellable = true)
+    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"),
+            cancellable = true)
     private void onThrowEvent(World world, EntityPlayer player, EnumHand hand, CallbackInfoReturnable<ActionResult<ItemStack>> callbackInfoReturnable) {
         EntityFishHook fishHook = new EntityFishHook(world, player);
         EntitySnapshot fishHookSnapshot = ((Entity) fishHook).createSnapshot();

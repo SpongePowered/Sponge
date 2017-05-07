@@ -40,7 +40,8 @@ public class InventoryColumnLensImpl extends Inventory2DLensImpl implements Inve
         this(base, height, stride, 0, 0, InventoryColumnAdapter.class, slots);
     }
 
-    public InventoryColumnLensImpl(int base, int height, int stride, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public InventoryColumnLensImpl(int base, int height, int stride, Class<? extends Inventory> adapterType,
+            SlotProvider<IInventory, ItemStack> slots) {
         this(base, height, stride, 0, 0, adapterType, slots);
     }
     
@@ -48,7 +49,8 @@ public class InventoryColumnLensImpl extends Inventory2DLensImpl implements Inve
         this(base, height, stride, xBase, yBase, InventoryColumnAdapter.class, slots);
     }
     
-    public InventoryColumnLensImpl(int base, int height, int stride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public InventoryColumnLensImpl(int base, int height, int stride, int xBase, int yBase, Class<? extends Inventory> adapterType,
+            SlotProvider<IInventory, ItemStack> slots) {
         super(base, 1, height, stride, xBase, yBase, adapterType, slots);
     }
     

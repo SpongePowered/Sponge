@@ -41,7 +41,8 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.Map;
 import java.util.Optional;
 
-public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<EntityArmorStand, Map<BodyPart, Vector3d>, MapValue<BodyPart, Vector3d>> {
+public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<EntityArmorStand,
+        Map<BodyPart, Vector3d>, MapValue<BodyPart, Vector3d>> {
 
     public BodyRotationsValueProcessor() {
         super(EntityArmorStand.class, Keys.BODY_ROTATIONS);

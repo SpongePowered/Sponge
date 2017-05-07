@@ -32,8 +32,8 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePickupRuleData;
 import org.spongepowered.common.data.util.DataConstants;
 
-public final class ImmutableSpongePickupRuleData extends AbstractImmutableSingleCatalogData<PickupRule, ImmutablePickupRuleData,
-        PickupRuleData> implements ImmutablePickupRuleData {
+public final class ImmutableSpongePickupRuleData extends AbstractImmutableSingleCatalogData<PickupRule, ImmutablePickupRuleData, PickupRuleData>
+        implements ImmutablePickupRuleData {
 
     public ImmutableSpongePickupRuleData(PickupRule value) {
         super(ImmutablePickupRuleData.class, value, DataConstants.Catalog.DEFAULT_PICKUP_RULE, Keys.PICKUP_RULE, SpongePickupRuleData.class);

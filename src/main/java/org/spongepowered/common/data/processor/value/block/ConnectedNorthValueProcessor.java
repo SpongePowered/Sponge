@@ -29,8 +29,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class ConnectedNorthValueProcessor extends
-        AbstractBlockOnlyValueProcessor<Boolean, Value<Boolean>> {
+public class ConnectedNorthValueProcessor extends AbstractBlockOnlyValueProcessor<Boolean, Value<Boolean>> {
 
     public ConnectedNorthValueProcessor() {
         super(Keys.CONNECTED_NORTH);

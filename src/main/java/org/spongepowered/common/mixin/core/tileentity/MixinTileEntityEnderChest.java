@@ -77,7 +77,8 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
             double posY = (double)this.pos.getY() + 0.5D;
             double posZ = (double)this.pos.getZ() + 0.5D;
 
-            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDERCHEST_OPEN, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDERCHEST_OPEN, SoundCategory.BLOCKS,
+                    0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 
@@ -102,7 +103,8 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
             double posZ = (double)this.pos.getZ() + 0.5D;
 
 
-            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDERCHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_ENDERCHEST_CLOSE, SoundCategory.BLOCKS,
+                    0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 }

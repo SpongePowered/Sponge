@@ -42,7 +42,7 @@ public interface Observable<E extends EventArgs> {
      *      already exists in this observer
      * @return fluent
      */
-    public abstract Observable<E> addObserver(Observer<E> observer);
+    Observable<E> addObserver(Observer<E> observer);
 
     /**
      * Remove an observer from this object, removing an observer which is not
@@ -51,21 +51,21 @@ public interface Observable<E extends EventArgs> {
      * @param observer Observer to remove
      * @return fluent
      */
-    public abstract Observable<E> removeObserver(Observer<E> observer);
+    Observable<E> removeObserver(Observer<E> observer);
     
     /**
      * Remove all observers from this object
      * 
      * @return fluent
      */
-    public abstract Observable<E> clearObservers();
+    Observable<E> clearObservers();
     
     /**
      * Get all the observers on this object
      * 
      * @return all observers
      */
-    public abstract Iterable<Observer<E>> getObservers();
+    Iterable<Observer<E>> getObservers();
     
     /**
      * Raise E against all observers 
@@ -73,6 +73,6 @@ public interface Observable<E extends EventArgs> {
      * @param eventArgs argument payload
      * @return fluent
      */
-    public abstract Observable<E> raise(E eventArgs);
+    Observable<E> raise(E eventArgs);
 
 }

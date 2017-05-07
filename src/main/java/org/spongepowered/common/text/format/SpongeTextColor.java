@@ -32,7 +32,6 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 
-@NonnullByDefault
 public class SpongeTextColor implements TextColor {
 
     private final TextFormatting handle;

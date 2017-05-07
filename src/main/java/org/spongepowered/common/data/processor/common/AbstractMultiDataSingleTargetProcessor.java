@@ -41,7 +41,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> extends AbstractMultiDataProcessor<T, I> {
+public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends DataManipulator<T, I>,
+        I extends ImmutableDataManipulator<I, T>> extends AbstractMultiDataProcessor<T, I> {
 
     protected final Class<Holder> holderClass;
 

@@ -30,6 +30,6 @@ import java.util.function.Predicate;
 
 public interface EquipmentSlotLens<TInventory, TStack> extends FilteringSlotLens<TInventory, TStack> {
 
-    public abstract Predicate<EquipmentType> getEquipmentTypeFilter();
+    Predicate<EquipmentType> getEquipmentTypeFilter();
     
 }

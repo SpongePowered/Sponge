@@ -57,7 +57,8 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
         checkState(comparator.compare(maximum, minimum) >= 0);
     }
 
-    public ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, Comparator<E> comparator, E minimum, E maximum) {
+    public ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, Comparator<E> comparator,
+            E minimum, E maximum) {
         super(key, defaultValue, actualValue);
         this.comparator = checkNotNull(comparator);
         this.minimum = checkNotNull(minimum);

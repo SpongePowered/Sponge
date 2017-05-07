@@ -48,7 +48,8 @@ import javax.annotation.Nullable;
 public abstract class MixinBlockCommandBlock {
 
     @Inject(method = "onBlockActivated", at = @At(value = "RETURN", ordinal = 1))
-    public void onOpenCommandBlockFailed(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing side, float hitX, float hitY, float hitZ, CallbackInfoReturnable<Boolean> cir) {
+    public void onOpenCommandBlockFailed(World worldIn, BlockPos pos, IBlockState state, EntityPlayer playerIn, EnumHand hand, EnumFacing side,
+            float hitX, float hitY, float hitZ, CallbackInfoReturnable<Boolean> cir) {
         // In Vanilla, the command block will never even open, since the client will do the permission check.
         // However, when a plugin provides a permission service, we have to force the op level to 0 on the client, since the server can't tell the client to open it.
         // If the server-side permission check fails, we need to forcibly close it, since it will already have opened on the client.
