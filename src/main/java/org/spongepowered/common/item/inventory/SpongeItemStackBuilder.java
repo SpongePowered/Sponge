@@ -97,6 +97,12 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     }
 
     @Override
+    public ItemStack.Builder anySize() {
+        this.quantity = -1;
+        return this;
+    }
+
+    @Override
     public <E> ItemStack.Builder keyValue(Key<? extends BaseValue<E>> key, E value) {
         if (this.keyValues == null) {
             this.keyValues = new LinkedHashMap<>();
