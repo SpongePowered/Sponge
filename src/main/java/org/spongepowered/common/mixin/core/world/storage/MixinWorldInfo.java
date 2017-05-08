@@ -739,13 +739,14 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public int getIndexForUniqueId(UUID uuid) {
-        if (this.playerUniqueIdMap.inverse().get(uuid) == null) {
-            this.playerUniqueIdMap.put(this.trackedUniqueIdCount, uuid);
-            this.pendingUniqueIds.add(uuid);
-            return this.trackedUniqueIdCount++;
-        } else {
-            return this.playerUniqueIdMap.inverse().get(uuid);
+        final Integer index = this.playerUniqueIdMap.inverse().get(uuid);
+        if (index != null) {
+            return index;
         }
+
+        this.playerUniqueIdMap.put(this.trackedUniqueIdCount, uuid);
+        this.pendingUniqueIds.add(uuid);
+        return this.trackedUniqueIdCount++;
     }
 
     @Override
@@ -803,7 +804,12 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             for (int i = 0; i < playerIdList.tagCount(); i++) {
                 final NBTTagCompound playerId = playerIdList.getCompoundTagAt(i);
                 final UUID playerUuid = playerId.getUniqueId(NbtDataUtil.UUID);
-                this.playerUniqueIdMap.put(this.trackedUniqueIdCount++, playerUuid);
+                final Integer playerIndex = this.playerUniqueIdMap.inverse().get(playerUuid);
+                if (playerIndex == null) {
+                    this.playerUniqueIdMap.put(this.trackedUniqueIdCount++, playerUuid);
+                } else {
+                    playerIdList.removeTag(i);
+                }
             }
 
         }

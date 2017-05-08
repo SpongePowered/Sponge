@@ -31,9 +31,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.tileentity.TileEntityChest;
-import net.minecraft.tileentity.TileEntityEnderChest;
-import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -45,7 +42,7 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.Location;
@@ -60,19 +57,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 import java.util.List;
@@ -87,6 +80,9 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
     private Timing timing;
     private LocatableBlock locatableBlock;
+    // caches owner to avoid constant lookups in chunk
+    private User spongeOwner;
+    private boolean hasSetOwner = false;
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World worldObj;
@@ -316,5 +312,21 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         }
 
         return this.locatableBlock;
+    }
+
+    @Override
+    public void setSpongeOwner(User owner) {
+        this.spongeOwner = owner;
+        this.hasSetOwner = true;
+    }
+
+    @Override
+    public User getSpongeOwner() {
+        return this.spongeOwner;
+    }
+
+    @Override
+    public boolean hasSetOwner() {
+        return this.hasSetOwner;
     }
 }
