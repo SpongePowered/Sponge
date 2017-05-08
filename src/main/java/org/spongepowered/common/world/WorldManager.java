@@ -526,24 +526,6 @@ public final class WorldManager {
         }
     }
 
-    public static Collection<WorldProperties> getUnloadedWorlds() throws IOException {
-        final Optional<Path> optCurrentSavesDir = getCurrentSavesDirectory();
-        checkState(optCurrentSavesDir.isPresent(), "Attempt made to get unloaded worlds too early!");
-
-        final List<WorldProperties> worlds = new ArrayList<>();
-        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(optCurrentSavesDir.get(), LEVEL_AND_SPONGE)) {
-            for (Path worldFolder : stream) {
-                final String worldFolderName = worldFolder.getFileName().toString();
-                final WorldInfo worldInfo = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true,
-                        SpongeImpl.getServer().getDataFixer()).loadWorldInfo();
-                if (worldInfo != null) {
-                    worlds.add((WorldProperties) worldInfo);
-                }
-            }
-        }
-        return worlds;
-    }
-
     public static Optional<WorldServer> loadWorld(UUID uuid) {
         checkNotNull(uuid);
         // If someone tries to load loaded world, return it
