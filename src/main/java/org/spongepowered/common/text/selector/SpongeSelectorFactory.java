@@ -75,7 +75,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
                 ImmutableMap.builder();
 
         for (SelectorType type : Sponge.getRegistry().getAllOf(SelectorType.class)) {
-            builder.put(type.getId(), type);
+            builder.put(type.getName(), type);
         }
 
         idToType = builder.build();
