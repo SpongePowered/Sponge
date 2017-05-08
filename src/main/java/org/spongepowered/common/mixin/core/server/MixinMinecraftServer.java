@@ -71,6 +71,7 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.Location;
@@ -116,7 +117,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -127,7 +127,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
@@ -476,11 +475,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Collection<WorldProperties> getUnloadedWorlds() {
-        try {
-            return WorldManager.getUnloadedWorlds();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return WorldManager.getAllWorldProperties().stream()
+                .filter(props -> !this.getWorld(props.getUniqueId()).isPresent())
+                .collect(GuavaCollectors.toImmutableSet());
     }
 
     @Override
