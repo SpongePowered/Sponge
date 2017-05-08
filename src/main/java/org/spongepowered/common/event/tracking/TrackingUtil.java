@@ -210,10 +210,15 @@ public final class TrackingUtil {
         // Add notifier and owner so we don't have to perform lookups during the phases and other processing
         mixinChunk.getBlockNotifier(pos)
                 .ifPresent(phaseContext::notifier);
-        mixinChunk.getBlockOwner(pos)
-                .ifPresent(phaseContext::owner);
 
         final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tile;
+        User blockOwner = mixinTileEntity.getSpongeOwner();
+        if (!mixinTileEntity.hasSetOwner()) {
+            blockOwner = mixinChunk.getBlockOwner(pos).orElse(null);
+            mixinTileEntity.setSpongeOwner(blockOwner);
+        }
+
+        phaseContext.owner = blockOwner;
         // Add the block snapshot of the tile entity for caches to avoid creating multiple snapshots during processing
         // This is a lazy evaluating snapshot to avoid the overhead of snapshot creation
         final CauseTracker causeTracker = CauseTracker.getInstance();
