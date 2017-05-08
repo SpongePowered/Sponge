@@ -91,19 +91,20 @@ public abstract class MixinEntityAIWatchClosest extends EntityAIBase implements 
     }
 
     @Nullable
-    @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;findNearestEntityWithinAABB(Ljava/lang/Class;"
+    @Redirect(method = "shouldExecute", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;findNearestEntityWithinAABB(Ljava/lang/Class;"
             + "Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Lnet/minecraft/entity/Entity;"))
-    public net.minecraft.entity.Entity onFindNearestEntityWithinAABB(World world, Class clazz, AxisAlignedBB aabb, net.minecraft.entity.Entity entity) {
+    public net.minecraft.entity.Entity onFindNearestEntityWithinAABB(World world, Class clazz, AxisAlignedBB aabb,
+            net.minecraft.entity.Entity entity) {
         net.minecraft.entity.Entity entity1 = null;
         double d0 = Double.MAX_VALUE;
 
-        for (net.minecraft.entity.Entity foundEntity: (List< net.minecraft.entity.Entity>) world.getEntities(this.watchedClass,
+        for (net.minecraft.entity.Entity foundEntity: (List<net.minecraft.entity.Entity>) world.getEntities(this.watchedClass,
                 EntitySelectors.NOT_SPECTATING)) {
             if (foundEntity.getEntityBoundingBox().intersectsWith(aabb) && foundEntity != entity) {
                 double d1 = entity.getDistanceSqToEntity(foundEntity);
 
-                if (d1 <= d0)
-                {
+                if (d1 <= d0) {
                     entity1 = foundEntity;
                     d0 = d1;
                 }

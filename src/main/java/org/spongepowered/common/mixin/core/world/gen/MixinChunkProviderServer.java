@@ -44,9 +44,9 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.At.Shift;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
@@ -141,10 +141,8 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
      * @param chunkIn The chunk to queue
      */
     @Overwrite
-    public void queueUnload(Chunk chunkIn)
-    {
-        if (!((IMixinChunk) chunkIn).isPersistedChunk() && this.world.provider.canDropChunk(chunkIn.xPosition, chunkIn.zPosition))
-        {
+    public void queueUnload(Chunk chunkIn) {
+        if (!((IMixinChunk) chunkIn).isPersistedChunk() && this.world.provider.canDropChunk(chunkIn.xPosition, chunkIn.zPosition)) {
             // Sponge - we avoid using the queue and simply check the unloaded flag during unloads
             //this.droppedChunksSet.add(Long.valueOf(ChunkPos.asLong(chunkIn.xPosition, chunkIn.zPosition)));
             chunkIn.unloadQueued = true;
@@ -155,8 +153,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     private Chunk loadChunkForce(int x, int z) {
         Chunk chunk = this.loadChunkFromFile(x, z);
 
-        if (chunk != null)
-        {
+        if (chunk != null) {
             this.id2ChunkMap.put(ChunkPos.asLong(x, z), chunk);
             chunk.onChunkLoad();
             chunk.populateChunk((ChunkProviderServer) (Object) this, this.chunkGenerator);
@@ -282,10 +279,8 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
      * @return true if unload queue was processed
      */
     @Overwrite
-    public boolean tick()
-    {
-        if (!this.world.disableLevelSaving)
-        {
+    public boolean tick() {
+        if (!this.world.disableLevelSaving) {
             ((IMixinWorldServer) this.world).getTimingsHandler().doChunkUnload.startTiming();
             Iterator<Chunk> iterator = this.id2ChunkMap.values().iterator();
             int chunksUnloaded = 0;
@@ -317,7 +312,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     // Copy of getLoadedChunk without marking chunk active.
     // This allows the chunk to unload if currently queued.
     @Override
-    public Chunk getLoadedChunkWithoutMarkingActive(int x, int z){
+    public Chunk getLoadedChunkWithoutMarkingActive(int x, int z) {
         long i = ChunkPos.asLong(x, z);
         Chunk chunk = this.id2ChunkMap.get(i);
         return chunk;

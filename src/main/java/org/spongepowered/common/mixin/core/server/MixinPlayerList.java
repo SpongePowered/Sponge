@@ -195,14 +195,16 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     }
 
     /**
-     * Bridge methods to proxy modified method in Vanilla, nothing in Forge
+     * Bridge methods to proxy modified method in
+     * Vanilla, nothing in Forge.
      */
     public void func_72355_a(NetworkManager netManager, EntityPlayerMP playerIn) {
         initializeConnectionToPlayer(netManager, playerIn, null);
     }
 
     /**
-     * Bridge methods to proxy modified method in Vanilla, nothing in Forge
+     * Bridge methods to proxy modified method in Vanilla,
+     * nothing in Forge.
      */
     public void initializeConnectionToPlayer(NetworkManager netManager, EntityPlayerMP playerIn) {
         initializeConnectionToPlayer(netManager, playerIn, null);
@@ -450,7 +452,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
      * @author gabizou - June 5th, 2016 - Update for teleportation changes to keep the same player.
      *
      * @reason - Direct respawning players to use Sponge events
-     * and process appropriately.
+     *     and process appropriately.
      *
      * @param playerIn The player being respawned/created
      * @param targetDimension The target dimension
@@ -730,7 +732,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     /**
      * @author blood - May 21st, 2016
      *
-     * @reason - overwritten to redirect to our method that accepts a teleporter
+     * @reason - overwritten to redirect to our method that
+     *     accepts a teleporter
      */
     @Overwrite
     public void transferEntityToWorld(Entity entityIn, int p_82448_2_, WorldServer oldWorldIn, WorldServer toWorldIn) {
@@ -740,7 +743,8 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     /**
      * @author blood - May 21st, 2016
      *
-     * @reason - rewritten to capture a plugin or mod that attempts to call this method directly.
+     * @reason - rewritten to capture a plugin or mod that attempts to
+     *     call this method directly.
      *
      * @param entityIn The entity being teleported
      * @param fromDimensionId The origin dimension id
@@ -886,7 +890,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
      * @author simon816 - 14th November, 2016
      *
      * @reason Redirect chat broadcasts to fire an event for the message. Each receiver
-     * (typically a player) will handle the actual sending of the message.
+     *     (typically a player) will handle the actual sending of the message.
      *
      * @param component The message
      * @param isSystem Whether this is a system message

@@ -184,7 +184,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     }
 
     public void team$setDeathMessageVisibility(Visibility visibility) {
-        this.deathMessageVisibility= (EnumVisible) (Object) visibility;
+        this.deathMessageVisibility = (EnumVisible) (Object) visibility;
         this.doTeamUpdate();
     }
 

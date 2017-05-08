@@ -479,12 +479,15 @@ public abstract class MixinEntity implements IMixinEntity {
                     entityPlayerMP.closeContainer();
                 }
             }
-            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(), ((IMixinWorldServer) nmsWorld).getDimensionId());
+            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location, ((IMixinWorldServer) this.world).getDimensionId(),
+                    ((IMixinWorldServer) nmsWorld).getDimensionId());
         } else {
             if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
                 EntityPlayerMP thisPlayer = (EntityPlayerMP) thisEntity;
-                ((WorldServer) location.getExtent()).getChunkProvider().loadChunk(location.getChunkPosition().getX(), location.getChunkPosition().getZ());
-                thisPlayer.connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), thisEntity.rotationYaw, thisEntity.rotationPitch);
+                ((WorldServer) location.getExtent()).getChunkProvider().loadChunk(location.getChunkPosition().getX(),
+                        location.getChunkPosition().getZ());
+                thisPlayer.connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
+                        thisEntity.rotationYaw, thisEntity.rotationPitch);
                 ((IMixinNetHandlerPlayServer) thisPlayer.connection).setLastMoveLocation(null); // Set last move to teleport target
             } else {
                 setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
@@ -505,7 +508,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public void setLocationAndAngles(Location<World> location) {
         if (((Entity) this) instanceof EntityPlayerMP) {
-            ((EntityPlayerMP) (Object) this).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(), this.rotationYaw, this.rotationPitch);
+            ((EntityPlayerMP) (Object) this).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
+                    this.rotationYaw, this.rotationPitch);
         } else {
             this.setPosition(location.getX(), location.getY(), location.getZ());
         }
@@ -522,9 +526,11 @@ public abstract class MixinEntity implements IMixinEntity {
             player = ((EntityPlayerMP) (Object) this);
         }
         if (player != null && player.connection != null) {
-            player.connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
+            player.connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(),
+                    (float) transform.getYaw(), (float) transform.getPitch());
         } else {
-            this.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
+            this.setLocationAndAngles(position.getX(), position.getY(), position.getZ(),
+                    (float) transform.getYaw(), (float) transform.getPitch());
         }
         if (this.world != transform.getExtent()) {
             this.world = (net.minecraft.world.World) transform.getExtent();
@@ -798,7 +804,8 @@ public abstract class MixinEntity implements IMixinEntity {
     public boolean addPassenger(Entity entity) {
         checkNotNull(entity);
         if (entity.getPassengers().contains(this)) {
-            throw new IllegalArgumentException(String.format("Cannot add entity %s as a passenger of %s, because the former already has the latter as a passenger!", entity, this));
+            throw new IllegalArgumentException(String
+                    .format("Cannot add entity %s as a passenger of %s, because the former already has the latter as a passenger!", entity, this));
         }
 
         return ((net.minecraft.entity.Entity) entity).startRiding((net.minecraft.entity.Entity) (Object) this, true);
@@ -857,11 +864,12 @@ public abstract class MixinEntity implements IMixinEntity {
      * <p> This makes it easier for other entity mixins to override writeToNBT
      * without having to specify the <code>@Inject</code> annotation. </p>
      *
-     * @param compound The compound vanilla writes to (unused because we write
-     *        to SpongeData)
+     * @param compound The compound vanilla writes to
+     *     (unused because we write to SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/entity/Entity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
+    @Inject(method = "Lnet/minecraft/entity/Entity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;",
+            at = @At("HEAD"))
     public void onWriteToNBT(NBTTagCompound compound, CallbackInfoReturnable<NBTTagCompound> ci) {
         this.writeToNbt(this.getSpongeData());
     }
@@ -872,8 +880,8 @@ public abstract class MixinEntity implements IMixinEntity {
      * <p> This makes it easier for other entity mixins to override readFromNbt
      * without having to specify the <code>@Inject</code> annotation. </p>
      *
-     * @param compound The compound vanilla reads from (unused because we read
-     *        from SpongeData)
+     * @param compound The compound vanilla reads from
+     *     (unused because we read from SpongeData)
      * @param ci (Unused) callback info
      */
     @Inject(method = "Lnet/minecraft/entity/Entity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
@@ -1097,8 +1105,8 @@ public abstract class MixinEntity implements IMixinEntity {
         return new Vector3d(this.motionX, this.motionY, this.motionZ);
     }
 
-    @Redirect(method = "move",at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;"
-                                                                        + "onEntityWalk(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
+    @Redirect(method = "move",at = @At(value = "INVOKE", target =
+            "Lnet/minecraft/block/Block;onEntityWalk(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
         // if block can't collide, return
         if (!((IMixinBlock) block).hasCollideLogic()) {
@@ -1121,7 +1129,8 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V")) // doBlockCollisions
-    public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
+    public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state,
+            net.minecraft.entity.Entity entity) {
         // if block can't collide, return
         if (!((IMixinBlock) block).hasCollideWithStateLogic()) {
             return;
@@ -1141,8 +1150,10 @@ public abstract class MixinEntity implements IMixinEntity {
         this.setCurrentCollidingBlock(null);
     }
 
-    @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
-    public void onBlockFallenUpon(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity, float fallDistance) {
+    @Redirect(method = "updateFallState", at = @At(value = "INVOKE",
+            target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
+    public void onBlockFallenUpon(Block block, net.minecraft.world.World world, BlockPos pos,
+            net.minecraft.entity.Entity entity, float fallDistance) {
         if (world.isRemote) {
             block.onFallenUpon(world, pos, entity, fallDistance);
             return;

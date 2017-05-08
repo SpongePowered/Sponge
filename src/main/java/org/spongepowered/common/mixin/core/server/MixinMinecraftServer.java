@@ -316,8 +316,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     public void onServerStopping(CallbackInfo ci) {
         ((MinecraftServer) (Object) this).getPlayerProfileCache().save();
 
-        if (this.worlds != null && SpongeImpl.getGlobalConfig().getConfig().getModules().useOptimizations() &&
-                SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
+        if (this.worlds != null && SpongeImpl.getGlobalConfig().getConfig().getModules().useOptimizations()
+                && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
             for (WorldServer world : this.worlds) {
                 ((IMixinWorldServer) world).getLightingExecutor().shutdown();
             }
@@ -338,8 +338,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @author blood - December 23rd, 2015
      * @author Zidane - March 13th, 2016
      *
-     * Sponge re-writes this method because we take control of loading existing Sponge dimensions, migrate old worlds to our standard, and
-     * configuration checks.
+     * Sponge re-writes this method because we take control of loading existing
+     * Sponge dimensions, migrate old worlds to our standard, and configuration
+     * checks.
+     *
      * @reason Add multiworld support
      */
     @Overwrite
@@ -360,7 +362,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @author Zidane - March 13th, 2016
      *
      * @reason Sponge has a config option for determining if we'll
-     * generate spawn on server start. I enforce that here.
+     *     generate spawn on server start. I enforce that here.
      */
     @Overwrite
     public void initialWorldChunkLoad() {
@@ -788,8 +790,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             value = callable.call();
         } catch (Exception e) {
             throw e;
-        }
-        finally {
+        } finally {
             CauseTracker.getInstance().completePhase(PluginPhase.State.SCHEDULED_TASK);
         }
         return value;

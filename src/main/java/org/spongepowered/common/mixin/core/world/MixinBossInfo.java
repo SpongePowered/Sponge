@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.BossInfo;
 import org.spongepowered.api.boss.BossBar;
@@ -38,9 +41,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.UUID;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 @Implements(@Interface(iface = BossBar.class, prefix = "bar$"))
 @Mixin(BossInfo.class)

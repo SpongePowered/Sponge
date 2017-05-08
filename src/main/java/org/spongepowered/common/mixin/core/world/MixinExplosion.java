@@ -160,8 +160,8 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
     /**
      * @author gabizou - September 8th, 2016
-     * @reason Rewrites to use our own hooks that will patch with forge perfectly well,
-     * and allows for maximal capability.
+     * @reason Rewrites to use our own hooks that will patch with
+     * forge perfectly well, and allows for maximal capability.
      */
     @Final
     @Overwrite
@@ -194,8 +194,8 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
                                 if (iblockstate.getMaterial() != Material.AIR) {
                                     float f2 = this.exploder != null
-                                               ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this
-                                            , this.world, blockpos, iblockstate)
+                                               ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this,
+                                            this.world, blockpos, iblockstate)
                                                : iblockstate.getBlock().getExplosionResistance((Entity) null);
                                     f -= (f2 + 0.3F) * 0.3F;
                                 }
@@ -312,11 +312,13 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
     /**
      * @author gabizou - March 26th, 2017
-     * @reason Since forge will attempt to call the normalized method for modded blocks,
-     * we must artificially capture the block position for any block drops or changes during the
-     * explosion phase.
+     * @reason Since forge will attempt to call the normalized
+     *     method for modded blocks, we must artificially capture the
+     *     block position for any block drops or changes during the
+     *     explosion phase.
      *
-     * Does the second part of the explosion (sound, particles, drop spawn)
+     * <p>Does the second part of the explosion
+     * (sound, particles, drop spawn).</p>
      */
     @Overwrite
     public void doExplosionB(boolean spawnParticles) {

@@ -145,7 +145,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
             throw new IllegalStateException("Attempting to set an objective's display slot that does not exist on this scoreboard!");
         }
         int index = ((SpongeDisplaySlot) displaySlot).getIndex();
-        this.objectiveDisplaySlots[index] = objective == null ? null: ((SpongeObjective) objective).getObjectiveFor(this);
+        this.objectiveDisplaySlots[index] = objective == null ? null : ((SpongeObjective) objective).getObjectiveFor(this);
         this.sendToPlayers(new SPacketDisplayObjective(index, this.objectiveDisplaySlots[index]));
     }
 
@@ -181,10 +181,8 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         ScoreObjective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
         this.scoreObjectives.remove(scoreObjective.getName());
 
-        for (int i = 0; i < 19; ++i)
-        {
-            if (this.getObjectiveInDisplaySlot(i) == scoreObjective)
-            {
+        for (int i = 0; i < 19; ++i) {
+            if (this.getObjectiveInDisplaySlot(i) == scoreObjective) {
                 this.setObjectiveInDisplaySlot(i, null);
             }
         }
@@ -193,8 +191,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
 
         List list = (List)this.scoreObjectiveCriterias.get(scoreObjective.getCriteria());
 
-        if (list != null)
-        {
+        if (list != null) {
             list.remove(scoreObjective);
         }
 
@@ -236,7 +233,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         ScorePlayerTeam team = (ScorePlayerTeam) spongeTeam;
 
         if (this.getTeam(spongeTeam.getName()) != null) {
-            throw new IllegalArgumentException("A team with the name \'" +spongeTeam.getName() + "\' already exists!");
+            throw new IllegalArgumentException("A team with the name \'" + spongeTeam.getName() + "\' already exists!");
         }
 
         if (team.theScoreboard != null) {

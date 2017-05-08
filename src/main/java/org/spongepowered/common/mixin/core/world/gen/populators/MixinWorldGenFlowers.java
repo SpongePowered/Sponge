@@ -83,7 +83,9 @@ public abstract class MixinWorldGenFlowers extends WorldGenerator implements Flo
         World world = (World) worldIn;
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
 
-        int x, y, z;
+        int x;
+        int y;
+        int z;
         BlockPos blockpos;
 
         // TODO should we actually do this division or let the x64 just be part

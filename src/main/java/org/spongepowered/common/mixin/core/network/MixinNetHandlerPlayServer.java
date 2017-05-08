@@ -102,8 +102,8 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
@@ -144,7 +144,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow private int movePacketCounter;
     @Shadow private int lastMovePacketCounter;
     @Shadow private boolean floating;
-
 
     @Shadow public abstract void sendPacket(final Packet<?> packetIn);
     @Shadow public abstract void disconnect(String reason);
@@ -266,7 +265,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     /**
      * @author Zidane
      *
-     * Invoke before {@code System.arraycopy(packetIn.getLines(), 0, tileentitysign.signText, 0, 4);} (line 1156 in source) to call SignChangeEvent.
+     * Invoke before {@code System.arraycopy(packetIn.getLines(), 0, tileentitysign.signText, 0, 4);}
+     * (line 1156 in source) to call SignChangeEvent.
+     *
      * @param packetIn Injected packet param
      * @param ci Info to provide mixin on how to handle the callback
      * @param worldserver Injected world param
@@ -274,7 +275,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
      * @param tileentity Injected tilentity param
      * @param tileentitysign Injected tileentitysign param
      */
-    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = UPDATE_SIGN), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = UPDATE_SIGN),
+            cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     public void callSignChangeEvent(CPacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, IBlockState iblockstate,
             TileEntity tileentity, TileEntitySign tileentitysign) {
         ci.cancel();
@@ -308,9 +310,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     /**
      * @author blood - June 6th, 2016
      * @author gabizou - June 20th, 2016 - Update for 1.9.4 and minor refactors.
-     * @reason Since mojang handles creative packets different than survival, we need to
-     * restructure this method to prevent any packets being sent to client as we will
-     * not be able to properly revert them during drops.
+     * @reason Since mojang handles creative packets different than survival,
+     *     we need to restructure this method to prevent any packets being
+     *     sent to client as we will not be able to properly revert
+     *     them during drops.
      *
      * @param packetIn The creative inventory packet
      */
@@ -556,9 +559,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
-    @Redirect(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClickBlock(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;"))
+    @Redirect(method = "processTryUseItemOnBlock", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/server/management/PlayerInteractionManager;processRightClickBlock(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/EnumHand;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Lnet/minecraft/util/EnumActionResult;"))
     public EnumActionResult onProcessRightClickBlock(PlayerInteractionManager interactionManager, EntityPlayer player,
-            net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float hitX, float hitY, float hitZ) {
+            net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing,
+            float hitX, float hitY, float hitZ) {
         EnumActionResult actionResult = interactionManager.processRightClickBlock(this.player, worldIn, stack, hand, pos, facing, hitX, hitY, hitZ);
         // If result is not SUCCESS, we need to avoid throwing an InteractBlockEvent.Secondary for AIR
         // since the client will send the server a CPacketTryUseItem right after this packet is done processing.
@@ -652,7 +657,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     Vec3d hitVec = packetIn.getHitVec();
                     Optional<Vector3d> interactionPoint = hitVec == null ? Optional.empty() : Optional.of(VecHelper.toVector3d(hitVec));
                     // Is interaction allowed with item in hand
-                    if(SpongeCommonEventFactory.callInteractItemEventSecondary(this.player, itemstack, hand, interactionPoint, entity).isCancelled()) {
+                    if (SpongeCommonEventFactory
+                            .callInteractItemEventSecondary(this.player, itemstack, hand, interactionPoint, entity).isCancelled()) {
                         return;
                     }
                     if (!SpongeCommonEventFactory.callInteractEntityEventSecondary(this.player, entity, packetIn.getHand(), interactionPoint)
@@ -666,7 +672,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     hand = EnumHand.MAIN_HAND; // Will be null in the packet during ATTACK
                     itemstack = this.player.getHeldItem(hand);
                     SpongeCommonEventFactory.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
-                    if(SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, itemstack, hand, Optional.empty(), entity).isCancelled()) {
+                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(this.player, itemstack, hand, Optional.empty(), entity).isCancelled()) {
                         return;
                     }
 

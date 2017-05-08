@@ -55,11 +55,8 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
         }
     }
 
-    @Inject(method = "openChest",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"
-            ),
-            cancellable = true)
+    @Inject(method = "openChest", at = @At(value = "INVOKE", target =
+            "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"), cancellable = true)
     public void onOpenChest(CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
@@ -81,11 +78,8 @@ public abstract class MixinTileEntityEnderChest extends MixinTileEntity implemen
         }
     }
 
-    @Inject(method = "closeChest",
-            at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"
-            ),
-            cancellable = true)
+    @Inject(method = "closeChest", at = @At(value = "INVOKE", target =
+            "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"), cancellable = true)
     public void onCloseChest(CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {

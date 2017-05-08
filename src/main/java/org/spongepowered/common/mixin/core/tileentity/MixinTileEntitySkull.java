@@ -78,8 +78,9 @@ public abstract class MixinTileEntitySkull extends MixinTileEntity implements Sk
      * @author windy - March 13th, 2016
      *
      * @reason Overwrite this method to overload to
-     * {@link #setPlayerProfile(GameProfile, boolean)}. This allows to
-     * set the profile from {@link SkullUtils} without invoking another update.
+     *     {@link #setPlayerProfile(GameProfile, boolean)}. This allows
+     *     to set the profile from {@link SkullUtils} without
+     *     invoking another update.
      *
      * @param mcProfile Minecraft GameProfile
      */

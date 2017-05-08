@@ -239,12 +239,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
      * @author blood - May 12th, 2016
      * @author gabizou - June 4th, 2016 - Update for 1.9.4 and Cause Tracker changes
      *
-     * @reason SpongeForge requires an overwrite so we do it here instead. This handles all living entity death events
-     * (except players). Note should be taken that normally, there are lists for drops captured, however, the drops
-     * are retroactively captured by the CauseTracker and associated through the different phases, depending on
-     * how they are handled, so no lists and flags on the entities themselves are needed as they are tracked through
-     * the {@link PhaseContext} of the current {@link IPhaseState} at which this method is called. The compatibility
-     * for Forge's events to throw are handled specially in SpongeForge.
+     * @reason SpongeForge requires an overwrite so we do it here instead. This
+     *     handles all living entity death events (except players). Note should be
+     *     taken that normally, there are lists for drops captured, however, the
+     *     drops are retroactively captured by the CauseTracker and associated
+     *     through the different phases, depending on how they are handled, so no
+     *     lists and flags on the entities themselves are needed as they are tracked
+     *     through the {@link PhaseContext} of the current {@link IPhaseState} at
+     *     which this method is called. The compatibility for Forge's events to throw
+     *     are handled specially in SpongeForge.
      */
     @Overwrite
     public void onDeath(DamageSource cause) {
@@ -258,7 +261,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (!this.world.isRemote) {
             final PhaseData peek = causeTracker.getCurrentPhaseData();
             final IPhaseState state = peek.state;
-            this.tracksEntityDeaths = CauseTracker.ENABLED && !causeTracker.getCurrentState().tracksEntityDeaths() && state != EntityPhase.State.DEATH;
+            this.tracksEntityDeaths = CauseTracker.ENABLED
+                    && !causeTracker.getCurrentState().tracksEntityDeaths()
+                    && state != EntityPhase.State.DEATH;
             if (this.tracksEntityDeaths) {
                 final PhaseContext context = PhaseContext.start()
                         .add(NamedCause.source(this))
@@ -331,7 +336,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
     }
 
-    @Redirect(method = "applyPotionDamageCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;isPotionActive(Lnet/minecraft/potion/Potion;)Z") )
+    @Redirect(method = "applyPotionDamageCalculations", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/EntityLivingBase;isPotionActive(Lnet/minecraft/potion/Potion;)Z") )
     private boolean onIsPotionActive(EntityLivingBase entityIn, Potion potion) {
         return false; // handled in our damageEntityHook
     }
@@ -366,8 +372,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             Thread.dumpStack();
         }
         // Sponge - This hook is for forge use mainly
-        if (!hookModAttack((EntityLivingBase) (Object) this, source, amount))
+        if (!hookModAttack((EntityLivingBase) (Object) this, source, amount)) {
             return false;
+        }
         // Sponge end
         if (this.isEntityInvulnerable(source)) {
             return false;
@@ -527,8 +534,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }
 
 
-                if (!flag) // Sponge - remove 'amount > 0.0F'
-                {
+                if (!flag) { // Sponge - remove 'amount > 0.0F'
                     this.lastDamageSource = source;
                     this.lastDamageStamp = this.world.getTotalWorldTime();
                 }
@@ -813,7 +819,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return this.recentlyHit;
     }
 
-    @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDIDDDD[I)V"))
+    @Redirect(method = "updateFallState", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/WorldServer;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDIDDDD[I)V"))
     private void spongeSpawnParticleForFallState(WorldServer worldServer, EnumParticleTypes particleTypes, double xCoord, double yCoord,
             double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... extraArgs) {
         if (!this.isVanished()) {

@@ -128,29 +128,34 @@ public abstract class MixinCommandTP extends CommandBase {
                     {
                         // Sponge start
                         EntityPlayerMP player = (EntityPlayerMP) entity;
-                        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
+                        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY,
+                                entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
                         if (event.isCancelled()) {
                             return;
                         }
 
                         Vector3d position = event.getToTransform().getPosition();
-                        player.connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                        player.connection.setPlayerLocation(position.getX(), position.getY(), position.getZ(),
+                                (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
                         // Sponge end
                     }
                     else
                     {
                         // Sponge Start - Events
-                        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
+                        MoveEntityEvent.Teleport event = EntityUtil.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY,
+                                entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
                         if (event.isCancelled()) {
                             return;
                         }
 
                         Vector3d position = event.getToTransform().getPosition();
-                        entity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                        entity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(),
+                                (float) event.getToTransform().getPitch());
                         // Sponge End
                     }
 
-                    notifyCommandListener(sender, this, "commands.tp.success", new Object[] {entity.getName(), entity1.getName()});
+                    notifyCommandListener(sender, this, "commands.tp.success",
+                            new Object[] {entity.getName(), entity1.getName()});
                 }
             }
         }
@@ -161,7 +166,8 @@ public abstract class MixinCommandTP extends CommandBase {
      * @reason Muliple modification points are needed, so an overwrite is easier
      */
     @Overwrite
-    private static void teleportEntityToCoordinates(Entity p_189863_0_, CommandBase.CoordinateArg p_189863_1_, CommandBase.CoordinateArg p_189863_2_, CommandBase.CoordinateArg p_189863_3_, CommandBase.CoordinateArg p_189863_4_, CommandBase.CoordinateArg p_189863_5_)
+    private static void teleportEntityToCoordinates(Entity p_189863_0_, CommandBase.CoordinateArg p_189863_1_, CommandBase.CoordinateArg p_189863_2_,
+            CommandBase.CoordinateArg p_189863_3_, CommandBase.CoordinateArg p_189863_4_, CommandBase.CoordinateArg p_189863_5_)
     {
         if (p_189863_0_ instanceof EntityPlayerMP)
         {

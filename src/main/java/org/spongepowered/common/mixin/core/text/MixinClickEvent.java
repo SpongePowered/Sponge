@@ -73,7 +73,7 @@ public abstract class MixinClickEvent implements IMixinClickEvent {
                                     setHandle(TextActions.executeCallback(callback.get()));
                                     break;
                                 }
-                            } catch (IllegalArgumentException ex) {
+                            } catch (IllegalArgumentException ignored) {
                             }
                         }
                         setHandle(TextActions.runCommand(this.value));

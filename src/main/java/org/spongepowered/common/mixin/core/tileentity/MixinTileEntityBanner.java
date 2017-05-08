@@ -103,7 +103,8 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
                 String patternId = tagCompound.getString(NbtDataUtil.BANNER_PATTERN_ID);
                 this.patternLayers.add(new SpongePatternLayer(
                     SpongeImpl.getRegistry().getType(BannerPatternShape.class, patternId).get(),
-                    registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger(NbtDataUtil.BANNER_PATTERN_COLOR)).getName()).get()));
+                    registry.getType(DyeColor.class,
+                            EnumDyeColor.byDyeDamage(tagCompound.getInteger(NbtDataUtil.BANNER_PATTERN_COLOR)).getName()).get()));
             }
         }
         this.markDirtyAndUpdate();

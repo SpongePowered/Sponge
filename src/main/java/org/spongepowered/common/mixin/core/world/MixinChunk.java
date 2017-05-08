@@ -168,10 +168,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Shadow public abstract byte[] getBiomeArray();
     @Shadow public abstract void setBiomeArray(byte[] biomeArray);
     @Shadow public abstract void checkLight();
-    @Shadow public abstract <T extends Entity> void getEntitiesOfTypeWithinAAAB(Class <? extends T > entityClass, AxisAlignedBB aabb,
-    List<T> listToFill, Predicate <? super T > p_177430_4_);
-    @Shadow private void propagateSkylightOcclusion(int x, int z) { };
-    @Shadow private void relightBlock(int x, int y, int z) { };
+    @Shadow public abstract <T extends Entity> void getEntitiesOfTypeWithinAAAB(Class <? extends T> entityClass, AxisAlignedBB aabb,
+    List<T> listToFill, Predicate <? super T> p_177430_4_);
+    @Shadow private void propagateSkylightOcclusion(int x, int z) { }
+    @Shadow private void relightBlock(int x, int y, int z) { }
     // @formatter:on
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
@@ -223,8 +223,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         for (Direction direction : CARDINAL_DIRECTIONS) {
             Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
             IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) this.world.getChunkProvider();
-            net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.getLoadedChunkWithoutMarkingActive
-                    (neighborPosition.getX(), neighborPosition.getZ());
+            net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider
+                    .getLoadedChunkWithoutMarkingActive(neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
                 int neighborIndex = directionToIndex(direction);
                 int oppositeNeighborIndex = directionToIndex(direction.getOpposite());
@@ -243,8 +243,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         for (Direction direction : CARDINAL_DIRECTIONS) {
             Vector3i neighborPosition = this.getPosition().add(direction.asBlockOffset());
             IMixinChunkProviderServer spongeChunkProvider = (IMixinChunkProviderServer) this.world.getChunkProvider();
-            net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider.getLoadedChunkWithoutMarkingActive
-                    (neighborPosition.getX(), neighborPosition.getZ());
+            net.minecraft.world.chunk.Chunk neighbor = spongeChunkProvider
+                    .getLoadedChunkWithoutMarkingActive(neighborPosition.getX(), neighborPosition.getZ());
             if (neighbor != null) {
                 int neighborIndex = directionToIndex(direction);
                 int oppositeNeighborIndex = directionToIndex(direction.getOpposite());
@@ -521,14 +521,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     /**
      * @author blood - November 2015
-     * @author gabizou - updated April 10th, 2016 - Add cause tracking refactor changes
+     * @author gabizou - updated April 10th, 2016 - Add cause tracking
+     * refactor changes
      *
      *
      * @param pos The position changing
      * @param newState The new state
      * @param currentState The current state - passed in from either chunk or world
-     * @param newBlockSnapshot The new snapshot. This can be null when calling {@link MixinChunk#setBlockState(BlockPos, IBlockState)} directly,
-     *      as there's no block snapshot to change.
+     * @param newBlockSnapshot The new snapshot. This can be null when calling
+     *     {@link MixinChunk#setBlockState(BlockPos, IBlockState)} directly,
+     *     as there's no block snapshot to change.
      * @return The changed block state if not null
      */
     @Override
@@ -770,8 +772,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public Collection<org.spongepowered.api.block.tileentity.TileEntity>
-    getTileEntities(java.util.function.Predicate<org.spongepowered.api.block.tileentity.TileEntity> filter) {
+    public Collection<org.spongepowered.api.block.tileentity.TileEntity> getTileEntities(
+            java.util.function.Predicate<org.spongepowered.api.block.tileentity.TileEntity> filter) {
         Set<org.spongepowered.api.block.tileentity.TileEntity> tiles = Sets.newHashSet();
         for (Entry<BlockPos, TileEntity> entry : this.chunkTileEntityMap.entrySet()) {
             if (filter.test((org.spongepowered.api.block.tileentity.TileEntity) entry.getValue())) {

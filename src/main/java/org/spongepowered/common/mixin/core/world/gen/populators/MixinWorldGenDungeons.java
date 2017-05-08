@@ -37,8 +37,8 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.util.weighted.UnmodifiableWeightedTable;
 import org.spongepowered.api.util.weighted.LootTable;
+import org.spongepowered.api.util.weighted.UnmodifiableWeightedTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedSerializableObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
@@ -124,7 +124,9 @@ public abstract class MixinWorldGenDungeons extends WorldGenerator implements Du
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
 
         int n = this.attempts.getFlooredAmount(random);
-        int x, y, z;
+        int x;
+        int y;
+        int z;
 
         for (int i = 0; i < n; ++i) {
             x = random.nextInt(size.getX());

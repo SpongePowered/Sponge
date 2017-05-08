@@ -191,8 +191,7 @@ public abstract class MixinPlayerInteractionManager implements IMixinPlayerInter
         } else if (stack.getItem() instanceof ItemBlock && !player.canUseCommandBlock()) {
             Block block = ((ItemBlock)stack.getItem()).getBlock();
 
-            if (block instanceof BlockCommandBlock || block instanceof BlockStructure)
-            {
+            if (block instanceof BlockCommandBlock || block instanceof BlockStructure) {
                 return EnumActionResult.FAIL;
             }
         } // else if (this.isCreative()) { // Sponge - Rewrite this to handle an isCreative check after the result, since we have a copied stack at the top of this method.

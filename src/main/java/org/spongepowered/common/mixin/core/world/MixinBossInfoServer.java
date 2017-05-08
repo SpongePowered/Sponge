@@ -50,7 +50,7 @@ public abstract class MixinBossInfoServer extends MixinBossInfo {
     @Shadow public abstract void removePlayer(EntityPlayerMP player);
     @Shadow public abstract void setVisible(boolean visibleIn);
     @Shadow public abstract Collection<EntityPlayerMP> getPlayers();
-    @Shadow private void sendUpdate(SPacketUpdateBossInfo.Operation operation) { };
+    @Shadow private void sendUpdate(SPacketUpdateBossInfo.Operation operation) { }
 
     public ServerBossBar sbar$setName(Text name) {
         if (this.name != name) {

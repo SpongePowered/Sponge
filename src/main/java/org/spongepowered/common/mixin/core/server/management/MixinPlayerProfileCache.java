@@ -56,8 +56,8 @@ import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -73,6 +73,7 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
     @Shadow @Final private Map<String, IMixinPlayerProfileCacheEntry> usernameToProfileEntryMap;
     @Shadow @Final private Map<UUID, IMixinPlayerProfileCacheEntry> uuidToProfileEntryMap;
     @Shadow @Final private Deque<com.mojang.authlib.GameProfile> gameProfiles;
+
     @Nullable @Shadow public abstract com.mojang.authlib.GameProfile getProfileByUUID(UUID uniqueId);
     @Shadow public abstract void save();
     @Shadow private void addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry) { }

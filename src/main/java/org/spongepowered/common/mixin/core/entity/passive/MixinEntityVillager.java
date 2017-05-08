@@ -197,10 +197,12 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         }
 
         // Sponge start - use our own registry stuffs
-        checkState(this.careerId <= careers.size(), "The villager career id is out of bounds fo the available Careers! Found: " + this.careerId
-                                                    + " when the current maximum is: " + careers.size());
+        checkState(this.careerId <= careers.size(),
+                "The villager career id is out of bounds fo the available Careers! Found: "
+                        + this.careerId + " when the current maximum is: " + careers.size());
         final Career careerLevel = careers.get(this.careerId - 1);
-        SpongeVillagerRegistry.getInstance().populateOffers(this, (List<TradeOffer>) (List<?>) this.buyingList, careerLevel, this.careerLevel, this.rand);
+        SpongeVillagerRegistry.getInstance().populateOffers(this, (List<TradeOffer>) (List<?>) this.buyingList, careerLevel,
+                this.careerLevel, this.rand);
         // Sponge end
     }
 

@@ -28,12 +28,12 @@ import net.minecraft.network.rcon.IServer;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.network.rcon.RConThreadBase;
 import net.minecraft.network.rcon.RConThreadClient;
+import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.network.rcon.RconConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
-import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -107,7 +107,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
     }
 
     @Inject(method = "closeSocket", at = @At("HEAD"))
-    public void rconLogoutCallback(CallbackInfo ci){
+    public void rconLogoutCallback(CallbackInfo ci) {
         if (this.source == null) {
             initSource();
         }

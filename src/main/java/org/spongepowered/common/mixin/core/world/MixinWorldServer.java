@@ -516,7 +516,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * @author blood - July 1st, 2016
      * @author gabizou - July 1st, 2016 - Update to 1.10 and cause tracking
      *
-     * @reason Added chunk and block tick optimizations, timings, cause tracking, and pre-construction events.
+     * @reason Added chunk and block tick optimizations, timings,
+     *     cause tracking, and pre-construction events.
      */
     @Override
     @Overwrite
@@ -545,8 +546,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         // Sponge: Use SpongeImplHooks for Forge
         for (Iterator<net.minecraft.world.chunk.Chunk> iterator =
-             SpongeImplHooks.getChunkIterator((WorldServer) (Object) this); iterator.hasNext(); ) // this.profiler.endSection()) // Sponge - don't use the profiler
-        {
+             SpongeImplHooks.getChunkIterator((WorldServer) (Object) this); iterator.hasNext();) { // this.profiler.endSection()) // Sponge - don't use the profiler
             // this.profiler.startSection("getChunk"); // Sponge - Don't use the profiler
             net.minecraft.world.chunk.Chunk chunk = iterator.next();
             int j = chunk.xPosition * 16;
@@ -569,8 +569,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.timings.updateBlocksThunder.startTiming();
 
             //if (this.provider.canDoLightning(chunk) && flag && flag1 && this.rand.nextInt(100000) == 0) // Sponge - Add SpongeImplHooks for forge
-            if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.provider, chunk) && flag && flag1 && this.rand.nextInt(100000) == 0)
-            {
+            if (this.weatherThunderEnabled && SpongeImplHooks.canDoLightning(this.provider, chunk)
+                    && flag && flag1 && this.rand.nextInt(100000) == 0) {
                 if (CauseTracker.ENABLED) {
                     causeTracker.switchToPhase(TickPhase.Tick.WEATHER, PhaseContext.start()
                             .addCaptures()
@@ -745,8 +745,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     /**
      * @author blood - August 30th, 2016
      *
-     * @reason Always allow entity cleanup to occur. This prevents issues such as a plugin
-     *         generating chunks with no players causing entities not getting cleaned up.
+     * @reason Always allow entity cleanup to occur. This prevents issues
+     *     such as a plugin generating chunks with no players causing
+     *     entities not getting cleaned up.
      */
     @Override
     @Overwrite
@@ -771,7 +772,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE",
-            target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
+            target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         this.onUpdateTick(block, worldIn, pos, state, rand);
     }
@@ -927,8 +928,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Redirect(method = "saveAllChunks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;canSave()Z"))
     public boolean canChunkProviderSave(ChunkProviderServer chunkProviderServer) {
-        return chunkProviderServer.canSave() &&
-                !Sponge.getEventManager().post(
+        return chunkProviderServer.canSave()
+                && !Sponge.getEventManager().post(
                         SpongeEventFactory.createSaveWorldEventPre(Cause.of(NamedCause.source(SpongeImpl.getServer())), this));
     }
 
@@ -942,7 +943,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
+    @Redirect(method = "sendQueuedBlockEvents",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     private int onGetDimensionIdForBlockEvents(DimensionType dimensionType) {
         return this.getDimensionId();
     }
@@ -1104,14 +1106,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     /**
      * @author gabizou - April 24th, 2016
-     * @reason Needs to redirect the dimension id for the packet being sent to players
-     * so that the dimension is correctly adjusted
+     * @reason Needs to redirect the dimension id for the packet being sent
+     *     to player so that the dimension is correctly adjusted
      *
      * @param id The world provider's dimension id
      * @return True if the spawn was successful and the effect is played.
      */
     // We expect 0 because forge patches it correctly
-    @Redirect(method = "addWeatherEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
+    @Redirect(method = "addWeatherEffect",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     public int getDimensionIdForWeatherEffect(DimensionType id) {
         return this.getDimensionId();
     }
@@ -1579,8 +1582,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 try {
                     te.writeToNBT(nbt);
                     this.builder.unsafeNbt(nbt);
-                }
-                catch(Throwable t) {
+                } catch (Throwable t) {
                     // ignore
                 }
             }
@@ -1590,14 +1592,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     /**
      * @author gabizou - September 10th, 2016
-     * @reason Due to the amount of changes, and to ensure that Forge's events are being properly
-     * thrown, we must overwrite to have our hooks in place where we need them to be and when.
+     * @reason Due to the amount of changes, and to ensure that Forge's
+     *     events are being properly thrown, we must overwrite to have our
+     *     hooks in place where we need them to be and when.
      *
      * @param entityIn The entity that caused the explosion
      * @param x The x position
      * @param y The y position
      * @param z The z position
-     * @param strength The strength of the explosion, determines what blocks can be destroyed
+     * @param strength The strength of the explosion, determines what
+     *     blocks can be destroyed
      * @param isFlaming Whether fire will be caused from the explosion
      * @param isSmoking Whether blocks will break
      * @return The explosion

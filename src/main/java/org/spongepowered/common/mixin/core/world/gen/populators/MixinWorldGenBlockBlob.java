@@ -72,7 +72,8 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
         Vector3i size = extent.getBlockSize();
         World world = (World) worldIn;
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
-        int x, z;
+        int x;
+        int z;
         int n = this.count.getFlooredAmount(random);
 
         for (int i = 0; i < n; ++i) {
@@ -86,7 +87,7 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
      * @author Deamon - December 12th, 2015
      * 
      * @reason This overwrite is to replace the usages of Block with BlockState as well
-     * as to modify the radii calculations to use our VariableAmount.
+     *     as to modify the radii calculations to use our VariableAmount.
      */
     @Overwrite
     public boolean generate(World worldIn, Random rand, BlockPos position) {
@@ -135,8 +136,8 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
                 }
 
 //                position = position.add(-(i1 + 1) + rand.nextInt(2 + i1 * 2), 0 - rand.nextInt(2), -(i1 + 1) + rand.nextInt(2 + i1 * 2));
-                position = position.add(-(j + 1) + rand.nextInt(2 + j * 2), 0 - rand.nextInt(2), -(l + 1) +
-                        rand.nextInt(2 + l * 2));
+                position = position.add(-(j + 1) + rand.nextInt(2 + j * 2), 0 - rand.nextInt(2), -(l + 1)
+                        + rand.nextInt(2 + l * 2));
                 // SPONGE end
             }
 

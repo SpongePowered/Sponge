@@ -252,10 +252,11 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
     /**
      * @author gabizou - February 1st, 2016
      * @author blood - February 6th, 2017 - Only redirect if vanilla generator. 
-     *   This fixes the FuturePack mod as it extends the ChunkProviderOverworld generator.
+     *     This fixes the FuturePack mod as it extends the
+     *     ChunkProviderOverworld generator.
      *
-     * Redirects this method call to just simply return the current biomes, as
-     * necessitated by @Deamon's changes. This avoids an overwrite entirely.
+     * <p>Redirects this method call to just simply return the current biomes, as
+     * necessitated by @Deamon's changes. This avoids an overwrite entirely.</p>
      */
     @Redirect(method = "setBlocksInChunk", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/biome/BiomeProvider;getBiomesForGeneration([Lnet/minecraft/world/biome/Biome;IIII)[Lnet/minecraft/world/biome/Biome;"))

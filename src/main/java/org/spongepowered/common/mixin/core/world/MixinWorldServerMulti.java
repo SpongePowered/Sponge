@@ -68,11 +68,11 @@ public abstract class MixinWorldServerMulti extends WorldServer {
 
     /**
      * @author blood - February 6th, 2017
-     * @reason Since we use a save handler per world, we can safely call super
+     * @reason Since we use a save handler per world, we can
+     *     safely call super.
      */
     @Overwrite
-    public World init()
-    {
+    public World init() {
         /*this.mapStorage = this.delegate.getMapStorage();
         this.worldScoreboard = this.delegate.getScoreboard();
         this.lootTable = this.delegate.getLootTableManager();

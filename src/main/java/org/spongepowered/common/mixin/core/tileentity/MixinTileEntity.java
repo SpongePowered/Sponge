@@ -188,10 +188,12 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     /**
      * Hooks into vanilla's writeToNBT to call {@link #writeToNbt}.
-     * <p>
-     * <p> This makes it easier for other entity mixins to override writeToNBT without having to specify the <code>@Inject</code> annotation. </p>
      *
-     * @param compound The compound vanilla writes to (unused because we write to SpongeData)
+     * <p> This makes it easier for other entity mixins to override
+     * writeToNBT without having to specify the <code>@Inject</code> annotation.</p>
+     *
+     * @param compound The compound vanilla writes to
+     *     (unused because we write to SpongeData)
      * @param ci (Unused) callback info
      */
     @Inject(method = "Lnet/minecraft/tileentity/TileEntity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;",
@@ -202,10 +204,12 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     /**
      * Hooks into vanilla's readFromNBT to call {@link #readFromNbt}.
-     * <p>
-     * <p> This makes it easier for other entity mixins to override readFromNbt without having to specify the <code>@Inject</code> annotation. </p>
      *
-     * @param compound The compound vanilla reads from (unused because we read from SpongeData)
+     * <p> This makes it easier for other entity mixins to override
+     * readFromNbt without having to specify the <code>@Inject</code> annotation.</p>
+     *
+     * @param compound The compound vanilla reads from
+     *    (unused because we read from SpongeData)
      * @param ci (Unused) callback info
      */
     @Inject(method = "Lnet/minecraft/tileentity/TileEntity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))

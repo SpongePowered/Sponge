@@ -234,13 +234,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
     @Shadow protected abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
-    @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
-            boolean isFlaming, boolean isSmoking);
+    @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn,
+            double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
-    @Shadow public abstract <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class <? extends T > clazz, AxisAlignedBB aabb,
-            com.google.common.base.Predicate<? super T > filter);
-    @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
+    @Shadow public abstract <T extends net.minecraft.entity.Entity> List<T> getEntitiesWithinAABB(Class <? extends T> clazz, AxisAlignedBB aabb,
+            com.google.common.base.Predicate<? super T> filter);
+    @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(
+            net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
     @Shadow public abstract MinecraftServer getMinecraftServer();
     // Methods needed for MixinWorldServer & Tracking
     @Shadow public abstract boolean spawnEntity(net.minecraft.entity.Entity entity); // This is overridden in MixinWorldServer
@@ -256,7 +257,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void notifyNeighborsOfStateChange(BlockPos pos, Block blockType, boolean updateObserverBlocks);
     @Shadow public abstract void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
     @Shadow public abstract void updateBlockTick(BlockPos pos, Block blockIn, int delay, int priority); // this is really scheduleUpdate
-    @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
+    @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_,
+            SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
     @Shadow protected abstract void updateBlocks();
     @Shadow public abstract GameRules shadow$getGameRules();
     @Shadow public abstract boolean isRaining();
@@ -289,7 +291,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
             CallbackInfo ci) {
         if (info == null) {
-            SpongeImpl.getLogger().warn("World constructed without a WorldInfo! This will likely cause problems. Subsituting dummy info.",
+            SpongeImpl.getLogger().warn("World constructed without a WorldInfo! This will likely cause problems. Substituting dummy info.",
                     new RuntimeException("Stack trace:"));
             this.worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false,
                     false, WorldType.DEFAULT), "sponge$dummy_world");
@@ -1136,7 +1138,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public boolean canSeeSky(BlockPos pos) {
-        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
+        final net.minecraft.world.chunk.Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider)
+                .getLoadedChunkWithoutMarkingActive(pos.getX() >> 4, pos.getZ() >> 4);
         if (chunk == null || chunk.unloadQueued) {
             return false;
         }
@@ -1157,8 +1160,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * @param enumSkyBlock The light type
      * @return The raw light
      */
-    @Inject(method = "getRawLight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState" +
-            "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"), cancellable = true)
+    @Inject(method = "getRawLight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState"
+            + "(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/state/IBlockState;"), cancellable = true)
     private void onLightGetBlockState(BlockPos pos, EnumSkyBlock enumSkyBlock, CallbackInfoReturnable<Integer> cir) {
         final net.minecraft.world.chunk.Chunk chunk;
         if (!this.isRemote) {
@@ -1229,8 +1232,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     /**
      * @author gabizou
-     * @reason Adds a redirector to use instead of an injector to avoid duplicate chunk area loaded lookups.
-     * This is overridden in MixinWorldServer_Lighting.
+     * @reason Adds a redirector to use instead of an injector to avoid
+     *     duplicate chunk area loaded lookups.
+     *
+     * <p>This is overridden in MixinWorldServer_Lighting.</p>
      *
      * @param thisWorld This world
      * @param pos The block position to check light for
@@ -1380,9 +1385,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     /**
      * @author blood
-     * @author gabizou - Ported to 1.9.4 - replace direct field calls to overriden methods in MixinWorldServer
+     * @author gabizou - Ported to 1.9.4 - replace direct field calls to
+     *     overriden methods in MixinWorldServer
      *
-     * @reason Add timing hooks in various areas. This method shouldn't be touched by mods/forge alike
+     * @reason Add timing hooks in various areas. This method shouldn't
+     *     be touched by mods/forge alike
      */
     @Overwrite
     public void updateEntities() {
@@ -1525,8 +1532,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     //this.getChunkFromBlockCoords(tileentity.getPos()).removeTileEntity(tileentity.getPos());
                     //Forge: Bugfix: If we set the tile entity it immediately sets it in the chunk, so we could be desynced
                     net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(tileentity.getPos());
-                    if (chunk.getTileEntity(tileentity.getPos(), net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK) == tileentity)
+                    if (chunk.getTileEntity(tileentity.getPos(), net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK) == tileentity) {
                         chunk.removeTileEntity(tileentity.getPos());
+                    }
                     // Sponge end
                 }
             }
@@ -1540,7 +1548,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (!this.tileEntitiesToBeRemoved.isEmpty()) {
             // Sponge start - use forge hook
             for (Object tile : this.tileEntitiesToBeRemoved) {
-               SpongeImplHooks.onTileChunkUnload(((net.minecraft.tileentity.TileEntity)tile));
+                SpongeImplHooks.onTileChunkUnload(((net.minecraft.tileentity.TileEntity)tile));
             }
             // Sponge end
 
@@ -1583,7 +1591,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     /**
      * @author blood - July 1st, 2016
-     * @author gabizou - July 1st, 2016 - Update to 1.10 - Previous method was spliced between WorldClient and WorldServer.
+     * @author gabizou - July 1st, 2016 - Update to 1.10 - Previous method was
+     *     spliced between WorldClient and WorldServer.
      *
      * @reason Added chunk and block tick optimizations.
      */

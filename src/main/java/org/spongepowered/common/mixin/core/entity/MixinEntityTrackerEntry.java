@@ -73,7 +73,8 @@ public abstract class MixinEntityTrackerEntry {
         }
     }
 
-    @Redirect(method = "updatePlayerList", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityTrackerEntry;sendPacketToTrackedPlayers(Lnet/minecraft/network/Packet;)V", ordinal = 0))
+    @Redirect(method = "updatePlayerList", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/EntityTrackerEntry;sendPacketToTrackedPlayers(Lnet/minecraft/network/Packet;)V", ordinal = 0))
     public void onSendPassengerPacket(EntityTrackerEntry entityTrackerEntry, Packet<?> packet) {
         // We need to notify a player of their passengers (since that can't normally happen in Vanilla)
         entityTrackerEntry.sendToTrackingAndSelf(packet);

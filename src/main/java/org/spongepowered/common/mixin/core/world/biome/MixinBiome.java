@@ -30,13 +30,12 @@ import net.minecraft.block.BlockStone;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.gen.ChunkProviderSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.data.type.ShrubTypes;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.EmptyObject;
 import org.spongepowered.api.util.weighted.SeededVariableAmount;
@@ -73,7 +72,6 @@ import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.WrappedBiomeDecorator;
 
-@NonnullByDefault
 @Mixin(Biome.class)
 public abstract class MixinBiome implements BiomeType, IMixinBiome {
 

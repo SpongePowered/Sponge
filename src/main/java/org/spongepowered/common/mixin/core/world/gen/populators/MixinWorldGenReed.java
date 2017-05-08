@@ -77,8 +77,8 @@ public class MixinWorldGenReed implements Reed {
     /**
      * @author Deamon - December 12th, 2015
      * 
-     * @reason This is overwritten to use our custom attempt counts and reed
-     * heights.
+     * @reason This is overwritten to use our custom attempt counts
+     *     and reed heights.
      */
     @Overwrite
     public boolean generate(World worldIn, Random rand, BlockPos position) {

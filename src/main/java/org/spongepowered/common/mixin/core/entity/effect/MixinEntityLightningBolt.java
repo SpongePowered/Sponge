@@ -137,7 +137,8 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
             for (Transaction<BlockSnapshot> bt : strike.getTransactions()) {
                 if (bt.isValid()) {
                     BlockSnapshot bs = bt.getFinal();
-                    ((WorldServer) world).setBlockState(((IMixinLocation) (Object) bs.getLocation().get()).getBlockPos(), ((IBlockState) bs.getState()));
+                    ((WorldServer) world).setBlockState(((IMixinLocation) (Object) bs.getLocation().get()).getBlockPos(),
+                            ((IBlockState) bs.getState()));
                 }
             }
             for (Entity e : strike.getEntities()) {

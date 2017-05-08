@@ -79,7 +79,8 @@ public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldS
     @Shadow public abstract WorldType getTerrainType();
     @Shadow public abstract boolean shadow$areCommandsAllowed();
 
-    private String id, name;
+    private String id;
+    private String name;
     private DimensionType dimensionType = DimensionTypes.OVERWORLD;
     private Difficulty difficulty = Difficulties.NORMAL;
     private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;

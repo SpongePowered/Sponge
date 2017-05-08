@@ -79,8 +79,9 @@ public class MixinWorldGenMelon implements Melon {
     }
 
     private int nextInt(Random rand, int i) {
-        if (i <= 1)
+        if (i <= 1) {
             return 0;
+        }
         return rand.nextInt(i);
     }
 

@@ -79,7 +79,8 @@ public abstract class MixinWorldGenCactus implements Cactus {
     /**
      * @author Deamon - December 12th, 2015
      * 
-     * @reason Overwritten to be less random. This method was completely rewritten.
+     * @reason Overwritten to be less random. This method
+     *     was completely rewritten.
      */
     @Overwrite
     public boolean generate(World worldIn, Random rand, BlockPos position) {

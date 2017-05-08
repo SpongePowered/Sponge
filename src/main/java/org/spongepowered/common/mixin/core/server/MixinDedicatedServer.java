@@ -71,9 +71,11 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
 
     /**
      * @author Zidane - April 20th, 2015
-     * @reason At the time of writing, this turns off the default Minecraft Server GUI that exists in non-headless environment.
-     * Reasoning: The GUI console can easily consume a sizable chunk of each CPU core (20% or more is common) on the computer being ran on and has
-     * been proven to cause quite a bit of latency issues.
+     * @reason At the time of writing, this turns off the default
+     *     Minecraft Server GUI that exists in non-headless environment.
+     *     Reasoning: The GUI console can easily consume a sizable chunk
+     *     of each CPU core (20% or more is common) on the computer being
+     *     ran on and has been proven to cause quite a bit of latency issues.
      */
     @Overwrite
     public void setGuiEnabled() {
@@ -88,11 +90,14 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
 
     /**
      * @author zml - March 9th, 2016
-     * @author blood - July 7th, 2016 - Add cause tracker handling for throwing pre change block checks
-     * @author gabizou - July 7th, 2016 - Update for 1.10's cause tracking changes
+     * @author blood - July 7th, 2016 - Add cause tracker handling for
+     *     throwing pre change block checks
+     * @author gabizou - July 7th, 2016 - Update for 1.10's cause
+     *     tracking changes
      *
-     * @reason Change spawn protection to take advantage of Sponge permissions. Rather than affecting only the default world like vanilla, this
-     * will apply to any world. Additionally, fire a spawn protection event
+     * @reason Change spawn protection to take advantage of Sponge permissions.
+     *     Rather than affecting only the default world like vanilla, this will
+     *     apply to any world. Additionally, fire a spawn protection event
      */
     @Overwrite
     @Override

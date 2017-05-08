@@ -51,8 +51,8 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemDa
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -66,10 +66,11 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
     @Shadow private int delayBeforeCanPickup;
     @Shadow private int age;
     @Shadow public abstract ItemStack getEntityItem();
+
     /**
      * A simple cached value of the merge radius for this item.
-     * Since the value is configurable, the first time searching for
-     * other items, this value is cached.
+     * Since the value is configurable, the first time searching
+     * for other items, this value is cached.
      */
     private double cachedRadius = -1;
 
@@ -208,9 +209,11 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
         this.destructCause = Cause.of(NamedCause.of("CombinedItem", other));
     }
 
-    @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
+    @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
     public void onPlayerItemPickup(EntityPlayer entityIn, CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(entityIn, (EntityItem) (Object) this, this.delayBeforeCanPickup, ((Entity) (Object) this).getCreator().orElse(null))) {
+        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(entityIn, (EntityItem) (Object) this, this.delayBeforeCanPickup,
+                ((Entity) (Object) this).getCreator().orElse(null))) {
             ci.cancel();
         }
     }

@@ -120,8 +120,8 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     /**
      * @author bloodmc
      * @reason As we do not create a new player object on respawn, we
-     * need to update the client with changes if listener already
-     * exists.
+     *     need to update the client with changes if listener already
+     *     exists.
      */
     @SuppressWarnings("unchecked")
     @Overwrite
@@ -143,9 +143,8 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     /**
      * @author bloodmc
      * @reason All player fabric changes that need to be synced to
-     * client flow through this method. Overwrite is used as no mod
-     * should be touching this method.
-     *
+     *     client flow through this method. Overwrite is used as no mod
+     *     should be touching this method
      */
     @Overwrite
     public void detectAndSendChanges() {
@@ -204,8 +203,9 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
             if (slot != null) {
                 ItemStackSnapshot originalItem = slot.getStack().isEmpty() ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
-                ItemStackSnapshot newItem =
-                        itemstack.isEmpty() ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
+                ItemStackSnapshot newItem = itemstack.isEmpty()
+                        ? ItemStackSnapshot.NONE
+                        : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
 
                 SlotAdapter adapter = this.getSlotAdapter(slotId);
                 this.capturedSlotTransactions.add(new SlotTransaction(adapter, originalItem, newItem));

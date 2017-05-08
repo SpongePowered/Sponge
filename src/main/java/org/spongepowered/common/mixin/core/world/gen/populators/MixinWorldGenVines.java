@@ -65,7 +65,8 @@ public abstract class MixinWorldGenVines extends WorldGenerator implements Vine 
         Vector3i size = extent.getBlockSize();
         World world = (World) worldIn;
         BlockPos position = new BlockPos(min.getX(), min.getY(), min.getZ());
-        int x, z;
+        int x;
+        int z;
         int n = this.count.getFlooredAmount(random);
         for (int i = 0; i < n; i++) {
             x = random.nextInt(size.getX());

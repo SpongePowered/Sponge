@@ -68,7 +68,8 @@ public abstract class MixinCommandSummon extends CommandBase {
             "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;";
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT))
-    private Entity onAttemptSpawnEntity(NBTTagCompound nbt, World world, double x, double y, double z, boolean b, MinecraftServer server, ICommandSender sender, String[] args) {
+    private Entity onAttemptSpawnEntity(NBTTagCompound nbt, World world, double x, double y, double z, boolean b, MinecraftServer server,
+            ICommandSender sender, String[] args) {
         if ("Minecart".equals(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
             nbt.setString(NbtDataUtil.ENTITY_TYPE_ID,
                     EntityMinecart.Type.values()[nbt.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
@@ -89,13 +90,12 @@ public abstract class MixinCommandSummon extends CommandBase {
         return event.isCancelled() ? null : AnvilChunkLoader.readWorldEntityPos(nbt, world, x, y, z, b);
     }
 
-    @Inject(method = "execute", at = @At(value = "NEW", args = LIGHTNINGBOLT_CLASS), cancellable = true,
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onProcess(MinecraftServer server, ICommandSender sender, String args[], CallbackInfo ci, String s, BlockPos blockpos, Vec3d vec3d,
+    @Inject(method = "execute", at = @At(value = "NEW", args = LIGHTNINGBOLT_CLASS), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    private void onProcess(MinecraftServer server, ICommandSender sender, String[] args, CallbackInfo ci, String s, BlockPos blockpos, Vec3d vec3d,
             double x, double y, double z, World world) {
         Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, new Vector3d(x, y, z));
 
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(getSpawnCause(sender))),
+        final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(getSpawnCause(sender))),
                 EntityTypes.LIGHTNING, transform);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {

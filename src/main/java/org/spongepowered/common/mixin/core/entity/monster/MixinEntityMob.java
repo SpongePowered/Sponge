@@ -63,7 +63,8 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
      * @author gabizou - April 11th, 2016 - Update for 1.9 additions
      * @author Aaro1011 - November 12, 2016 - Update for 1.11
      *
-     * @reason Rewrite this to throw an {@link AttackEntityEvent} and process correctly.
+     * @reason Rewrite this to throw an {@link AttackEntityEvent} and
+     *     process correctly.
      *
      * float f        | baseDamage
      * int i          | knockbackModifier
@@ -83,7 +84,8 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
 
         if (targetEntity instanceof EntityLivingBase) {
             // Sponge Start - Gather modifiers
-            originalFunctions.addAll(DamageEventHandler.createAttackEnchantmentFunction(this.getHeldItemMainhand(), ((EntityLivingBase) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
+            originalFunctions.addAll(DamageEventHandler.createAttackEnchantmentFunction(this.getHeldItemMainhand(),
+                    ((EntityLivingBase) targetEntity).getCreatureAttribute(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
             // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
             knockbackModifier += EnchantmentHelper.getKnockbackModifier((EntityMob) (Object) this);
         }
@@ -146,7 +148,8 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
     protected boolean isValidLightLevel()
     {
         final BlockPos blockpos = new BlockPos(this.posX, this.getEntityBoundingBox().minY, this.posZ);
-        final Chunk chunk = ((IMixinChunkProviderServer) this.world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
+        final Chunk chunk = ((IMixinChunkProviderServer) this.world.getChunkProvider())
+                .getLoadedChunkWithoutMarkingActive(blockpos.getX() >> 4, blockpos.getZ() >> 4);
         if (chunk == null || chunk.unloadQueued) {
             return false;
         }

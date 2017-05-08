@@ -49,7 +49,7 @@ import java.util.Random;
 @Mixin(WorldGenGlowStone1.class)
 public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator implements Glowstone {
 
-    private VariableAmount clusterheight;
+    private VariableAmount clusterHeight;
     private VariableAmount height;
     private VariableAmount count;
     private VariableAmount attempts;
@@ -58,7 +58,7 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.baseWithRandomAddition(1, 10);
         this.attempts = VariableAmount.fixed(1500);
-        this.clusterheight = VariableAmount.baseWithRandomAddition(0, 12);
+        this.clusterHeight = VariableAmount.baseWithRandomAddition(0, 12);
         this.height = VariableAmount.baseWithRandomAddition(4, 120);
     }
 
@@ -88,7 +88,7 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
      * @author Deamon - December 12th, 2015
      * 
      * @reason Change the number of iterations and the height of the cluster
-     * depending on the respective variable amounts.
+     *     depending on the respective variable amounts.
      */
     @Overwrite
     public boolean generate(World worldIn, Random rand, BlockPos position) {
@@ -102,7 +102,7 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
             int a = this.attempts.getFlooredAmount(rand);
             for (int i = 0; i < a; ++i) {
                 BlockPos blockpos1 = position.add(rand.nextInt(8) - rand.nextInt(8),
-                                this.clusterheight.getFlooredAmount(rand), rand.nextInt(8) - rand.nextInt(8));
+                                this.clusterHeight.getFlooredAmount(rand), rand.nextInt(8) - rand.nextInt(8));
 //                if (worldIn.getBlockState(blockpos1).getBlock().getMaterial() == Material.air) {
                 if (isAir(worldIn.getBlockState(blockpos1), worldIn, blockpos1)) {
                     // Sponge end
@@ -154,12 +154,12 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
 
     @Override
     public VariableAmount getClusterHeight() {
-        return this.clusterheight;
+        return this.clusterHeight;
     }
 
     @Override
     public void setClusterHeight(VariableAmount height) {
-        this.clusterheight = height;
+        this.clusterHeight = height;
     }
 
     @Override
@@ -179,7 +179,7 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
                 .add("PerChunk", this.count)
                 .add("PerCluster", this.attempts)
                 .add("Height", this.height)
-                .add("ClusterHeight", this.clusterheight)
+                .add("ClusterHeight", this.clusterHeight)
                 .toString();
     }
 
