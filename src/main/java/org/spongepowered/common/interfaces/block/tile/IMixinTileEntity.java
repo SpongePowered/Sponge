@@ -30,6 +30,7 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -95,4 +96,10 @@ public interface IMixinTileEntity {
     default SpawnType getTickedSpawnType() {
         return InternalSpawnTypes.BLOCK_SPAWNING;
     }
+
+    void setSpongeOwner(User owner);
+
+    User getSpongeOwner();
+
+    boolean hasSetOwner();
 }
