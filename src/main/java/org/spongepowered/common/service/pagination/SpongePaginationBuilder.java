@@ -36,13 +36,18 @@ import javax.annotation.Nullable;
 
 public class SpongePaginationBuilder implements PaginationList.Builder {
     private final SpongePaginationService service;
+    @Nullable
     private Iterable<Text> contents;
+    @Nullable
     private Text title;
+    @Nullable
     private Text header;
+    @Nullable
     private Text footer;
     private Text paginationSpacer = Text.of("=");
     private int linesPerPage = 20;
 
+    @Nullable
     private PaginationList paginationList;
 
     public SpongePaginationBuilder(SpongePaginationService service) {
@@ -86,6 +91,7 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
 
     @Override
     public PaginationList.Builder padding(Text padding) {
+        checkNotNull(padding, "padding");
         this.paginationSpacer = padding;
         this.paginationList = null;
         return this;
