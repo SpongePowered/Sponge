@@ -22,17 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.conversation;
+package org.spongepowered.common.command.conversation;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.conversation.ConversationArchetype;
-import org.spongepowered.api.conversation.ConversationArchetype.Builder;
-import org.spongepowered.api.conversation.EndingHandler;
-import org.spongepowered.api.conversation.ExternalChatHandler;
-import org.spongepowered.api.conversation.ExternalChatHandlers;
-import org.spongepowered.api.conversation.Question;
+import org.spongepowered.api.command.conversation.ConversationArchetype;
+import org.spongepowered.api.command.conversation.ConversationArchetype.Builder;
+import org.spongepowered.api.command.conversation.EndingHandler;
+import org.spongepowered.api.command.conversation.ExternalChatHandler;
+import org.spongepowered.api.command.conversation.ExternalChatHandlers;
+import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.text.Text;
 
 import java.util.HashSet;

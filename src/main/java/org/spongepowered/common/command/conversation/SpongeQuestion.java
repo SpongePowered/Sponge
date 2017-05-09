@@ -22,11 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.conversation;
+package org.spongepowered.common.command.conversation;
 
 import org.spongepowered.api.command.args.CommandElement;
-import org.spongepowered.api.conversation.AnswerHandler;
-import org.spongepowered.api.conversation.Question;
+import org.spongepowered.api.command.conversation.AnswerHandler;
+import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nonnull;
@@ -75,6 +75,11 @@ public class SpongeQuestion implements Question {
     @Override
     public CommandElement getArguments() {
         return this.arguments;
+    }
+
+    @Override
+    public Builder toBuilder() {
+        return Question.builder().from(this);
     }
 
     @Nonnull

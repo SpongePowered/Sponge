@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.conversation;
+package org.spongepowered.common.command.conversation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -34,12 +34,12 @@ import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.parsing.InputTokenizer;
-import org.spongepowered.api.conversation.Conversant;
-import org.spongepowered.api.conversation.Conversation;
-import org.spongepowered.api.conversation.ConversationArchetype;
-import org.spongepowered.api.conversation.ConversationManager;
-import org.spongepowered.api.conversation.Question;
-import org.spongepowered.api.conversation.QuestionResult;
+import org.spongepowered.api.command.conversation.Conversant;
+import org.spongepowered.api.command.conversation.Conversation;
+import org.spongepowered.api.command.conversation.ConversationArchetype;
+import org.spongepowered.api.command.conversation.ConversationManager;
+import org.spongepowered.api.command.conversation.Question;
+import org.spongepowered.api.command.conversation.QuestionResult;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;

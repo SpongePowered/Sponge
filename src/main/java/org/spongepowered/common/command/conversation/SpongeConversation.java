@@ -22,21 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.conversation;
+package org.spongepowered.common.command.conversation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.conversation.ConversationEndTypes;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.text.conversation.Conversant;
-import org.spongepowered.api.text.conversation.Conversation;
-import org.spongepowered.api.text.conversation.ConversationArchetype;
-import org.spongepowered.api.text.conversation.EndingHandler;
-import org.spongepowered.api.text.conversation.ExternalChatHandler;
-import org.spongepowered.api.text.conversation.Question;
+import org.spongepowered.api.command.conversation.Conversant;
+import org.spongepowered.api.command.conversation.Conversation;
+import org.spongepowered.api.command.conversation.ConversationArchetype;
+import org.spongepowered.api.command.conversation.EndingHandler;
+import org.spongepowered.api.command.conversation.ExternalChatHandler;
+import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -66,7 +65,7 @@ public class SpongeConversation implements Conversation {
 
     private final Map<WeakReference<Conversant>, ExternalChatHandler> handlers = new ConcurrentHashMap<>();
     private final Map<Conversant, ExternalChatHandler> externalChatHandlers;
-    private final DataContainer context = new MemoryDataContainer();
+    private final DataContainer context = DataContainer.createNew();
     private final Set<EndingHandler> endingHandlers;
     @Nullable private Question currentQuestion;
     private boolean catchesOutput;

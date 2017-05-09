@@ -49,7 +49,7 @@ import java.util.PrimitiveIterator;
  * Pagination calculator for players. Handles calculation of text widths,
  * centering text, adding padding, adding spacing, and more.
  */
-class PaginationCalculator {
+public class PaginationCalculator {
 
     private static final String NON_UNICODE_CHARS;
     private static final int[] NON_UNICODE_CHAR_WIDTHS;
@@ -63,7 +63,7 @@ class PaginationCalculator {
      *
      * @param linesPerPage The amount of lines per page there should be
      */
-    PaginationCalculator(int linesPerPage) {
+    public PaginationCalculator(int linesPerPage) {
         this.linesPerPage = linesPerPage;
     }
 
@@ -213,7 +213,7 @@ class PaginationCalculator {
      */
     //TODO: Probably should completely rewrite this to not compute padding, but loop until the padding is done, unless
     //we can get accurate computation of padding ahead of time.
-    Text center(Text text, Text padding) {
+    public Text center(Text text, Text padding) {
         int inputLength = getWidth(text);
         //Minecraft breaks lines when the next character would be > then LINE_WIDTH, this seems most graceful way to fail
         if (inputLength >= LINE_WIDTH) {

@@ -22,16 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.conversation;
+package org.spongepowered.common.command.conversation;
 
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.conversation.Conversant;
-import org.spongepowered.api.conversation.Conversation;
-import org.spongepowered.api.conversation.ConversationArchetype;
-import org.spongepowered.api.conversation.EndingHandler;
-import org.spongepowered.api.conversation.ExternalChatHandler;
-import org.spongepowered.api.conversation.Question;
+import org.spongepowered.api.command.conversation.Conversant;
+import org.spongepowered.api.command.conversation.Conversation;
+import org.spongepowered.api.command.conversation.ConversationArchetype;
+import org.spongepowered.api.command.conversation.EndingHandler;
+import org.spongepowered.api.command.conversation.ExternalChatHandler;
+import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.service.pagination.PaginationCalculator;
@@ -40,7 +40,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class SpongeConversationArchetype implements ConversationArchetype {

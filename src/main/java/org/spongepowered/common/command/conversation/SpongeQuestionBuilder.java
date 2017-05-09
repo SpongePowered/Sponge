@@ -22,15 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.conversation;
+package org.spongepowered.common.command.conversation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
-import org.spongepowered.api.conversation.AnswerHandler;
-import org.spongepowered.api.conversation.Question;
-import org.spongepowered.api.conversation.Question.Builder;
+import org.spongepowered.api.command.conversation.AnswerHandler;
+import org.spongepowered.api.command.conversation.Question;
+import org.spongepowered.api.command.conversation.Question.Builder;
 import org.spongepowered.api.text.Text;
 
 import javax.annotation.Nullable;
