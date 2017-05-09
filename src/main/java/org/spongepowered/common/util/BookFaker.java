@@ -44,8 +44,6 @@ public class BookFaker {
     public static final int WINDOW_PLAYER_INVENTORY = 0;
 
     public static void fakeBookView(BookView bookView, Player player) {
-        EntityPlayerMP mcPlayer = (EntityPlayerMP) player;
-        NetHandlerPlayServer receiver = mcPlayer.connection;
 
         // First we need to send a fake a Book ItemStack with the BookView's
         // contents to the player's hand
@@ -54,6 +52,8 @@ public class BookFaker {
         item.offer(Keys.BOOK_AUTHOR, bookView.getAuthor());
         item.offer(Keys.BOOK_PAGES, bookView.getPages());
 
+        EntityPlayerMP mcPlayer = (EntityPlayerMP) player;
+        NetHandlerPlayServer receiver = mcPlayer.connection;
         InventoryPlayer inventory = mcPlayer.inventory;
         int bookSlot = inventory.mainInventory.size() + inventory.currentItem;
         receiver.sendPacket(new SPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));

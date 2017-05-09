@@ -29,7 +29,6 @@ import net.minecraft.block.BlockFarmland;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
@@ -105,7 +104,8 @@ public abstract class MixinBlockFarmland extends MixinBlock {
         this.currentGriefer = null;
     }
 
-    @Redirect(method = "onFallenUpon", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockFarmland;turnToDirt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
+    @Redirect(method = "onFallenUpon", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/block/BlockFarmland;turnToDirt(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V"))
     private void beforeTurnToDirt(BlockFarmland block, World world, BlockPos pos) {
         if (this.currentGriefer instanceof IMixinGriefer && ((IMixinGriefer) this.currentGriefer).canGrief()) {
             this.turnToDirt(world, pos);

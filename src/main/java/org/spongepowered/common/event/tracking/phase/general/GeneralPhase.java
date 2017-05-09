@@ -127,9 +127,12 @@ public final class GeneralPhase extends TrackingPhase {
     }
 
     /**
-     *  @param snapshotsToProcess
-     * @param unwindingState
-     * @param unwinding
+     * Processes all block transactions after post.
+     *
+     * @param postContext The post phase context
+     * @param snapshotsToProcess The block snapshots to process
+     * @param unwindingState The unwinding phase state
+     * @param unwinding The unwinding phase context
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     public static void processBlockTransactionListsPost(PhaseContext postContext, List<BlockSnapshot> snapshotsToProcess,
@@ -240,10 +243,11 @@ public final class GeneralPhase extends TrackingPhase {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldLocation.getExtent();
             final BlockPos pos = ((IMixinLocation) (Object) worldLocation).getBlockPos();
             capturedBlockDrops.ifPresentAndNotEmpty(map -> TrackingUtil
-                    .spawnItemDataForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot, unwindingPhaseContext, unwindingState));
+                    .spawnItemDataForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(),
+                            newBlockSnapshot, unwindingPhaseContext, unwindingState));
             capturedBlockItemEntityDrops.ifPresentAndNotEmpty(map -> TrackingUtil
-                    .spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(), newBlockSnapshot,
-                        unwindingPhaseContext, unwindingState));
+                    .spawnItemEntitiesForBlockDrops(map.containsKey(pos) ? map.get(pos) : Collections.emptyList(),
+                            newBlockSnapshot, unwindingPhaseContext, unwindingState));
 
             final WorldServer worldServer = mixinWorldServer.asMinecraftWorld();
             SpongeHooks.logBlockAction(builder, worldServer, oldBlockSnapshot.blockChange, transaction);
@@ -253,8 +257,9 @@ public final class GeneralPhase extends TrackingPhase {
             final IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
             final CapturedSupplier<BlockSnapshot> capturedBlockSupplier = postContext.getCapturedBlockSupplier();
-            if (changeFlag.performBlockPhysics() && originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.hasBlockTileEntity(newState.getBlock(),
-                    newState)) {
+            if (changeFlag.performBlockPhysics()
+                    && originalState.getBlock() != newState.getBlock()
+                    && !SpongeImplHooks.hasBlockTileEntity(newState.getBlock(), newState)) {
                 newState.getBlock().onBlockAdded(worldServer, pos, newState);
                 postContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
 

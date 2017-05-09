@@ -222,10 +222,10 @@ public class ItemDropData {
                 return false;
             }
             Player player = (Player) o;
-            return this.trace == player.trace &&
-                   this.dropAround == player.dropAround &&
-                   Objects.equal(this.playerName, player.playerName) &&
-                   Objects.equal(this.random, player.random);
+            return this.trace == player.trace
+                    && this.dropAround == player.dropAround
+                    && Objects.equal(this.playerName, player.playerName)
+                    && Objects.equal(this.random, player.random);
         }
 
         @Override

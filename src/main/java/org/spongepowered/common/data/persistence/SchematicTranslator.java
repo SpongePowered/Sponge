@@ -95,7 +95,6 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         if (version != VERSION) {
             throw new InvalidDataException(String.format("Unknown schematic version %d (current version is %d)", version, VERSION));
         }
-        DataView metadata = view.getView(DataQueries.Schematic.METADATA).orElse(null);
 
         // TODO error handling for these optionals
         int width = view.getShort(DataQueries.Schematic.WIDTH).get();
@@ -133,21 +132,21 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         MutableBlockVolume buffer =
                 new ArrayMutableBlockBuffer(palette, new Vector3i(-offset[0], -offset[1], -offset[2]), new Vector3i(width, height, length));
 
-        byte[] blockdata = (byte[]) view.get(DataQueries.Schematic.BLOCK_DATA).get();
+        byte[] blockData = (byte[]) view.get(DataQueries.Schematic.BLOCK_DATA).get();
         int index = 0;
         int i = 0;
         int value = 0;
         int varint_length = 0;
-        while (i < blockdata.length) {
+        while (i < blockData.length) {
             value = 0;
             varint_length = 0;
 
             while (true) {
-                value |= (blockdata[i] & 127) << (varint_length++ * 7);
+                value |= (blockData[i] & 127) << (varint_length++ * 7);
                 if (varint_length > 5) {
                     throw new RuntimeException("VarInt too big (probably corrupted data)");
                 }
-                if ((blockdata[i] & 128) != 128) {
+                if ((blockData[i] & 128) != 128) {
                     i++;
                     break;
                 }
@@ -163,9 +162,9 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             index++;
         }
         Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
-        List<DataView> tiledata = view.getViewList(DataQueries.Schematic.TILEENTITY_DATA).orElse(null);
-        if (tiledata != null) {
-            for (DataView tile : tiledata) {
+        List<DataView> tileData = view.getViewList(DataQueries.Schematic.TILEENTITY_DATA).orElse(null);
+        if (tileData != null) {
+            for (DataView tile : tileData) {
                 int[] pos = (int[]) tile.get(DataQueries.Schematic.TILEENTITY_POS).get();
                 if (offset.length != 3) {
                     throw new InvalidDataException("Schematic tileentity pos was not of length 3");
@@ -180,6 +179,8 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 tiles.put(new Vector3i(pos[0] - offset[0], pos[1] - offset[1], pos[2] - offset[2]), archetype);
             }
         }
+
+        DataView metadata = view.getView(DataQueries.Schematic.METADATA).orElse(null);
 
         Schematic schematic = new SpongeSchematic(buffer, tiles, metadata);
         return schematic;
@@ -250,14 +251,14 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         List<DataView> tileEntities = Lists.newArrayList();
         for (Map.Entry<Vector3i, TileEntityArchetype> entry : schematic.getTileEntityArchetypes().entrySet()) {
             Vector3i pos = entry.getKey();
-            DataContainer tiledata = entry.getValue().getTileData();
-            int[] apos = new int[]{pos.getX() - xMin, pos.getY() - yMin, pos.getZ() - zMin};
-            tiledata.set(DataQueries.Schematic.TILEENTITY_POS, apos);
-            if(!tiledata.contains(DataQueries.CONTENT_VERSION)) {
+            DataContainer tileData = entry.getValue().getTileData();
+            int[] aPos = new int[]{pos.getX() - xMin, pos.getY() - yMin, pos.getZ() - zMin};
+            tileData.set(DataQueries.Schematic.TILEENTITY_POS, aPos);
+            if (!tileData.contains(DataQueries.CONTENT_VERSION)) {
                 // Set a default content version of 1
-                tiledata.set(DataQueries.CONTENT_VERSION, 1);
+                tileData.set(DataQueries.CONTENT_VERSION, 1);
             }
-            tileEntities.add(tiledata);
+            tileEntities.add(tileData);
         }
         data.set(DataQueries.Schematic.TILEENTITY_DATA, tileEntities);
 

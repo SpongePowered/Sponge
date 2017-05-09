@@ -42,8 +42,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class RotationalDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityItemFrame, Rotation, Value<Rotation>, RotationalData, ImmutableRotationalData> {
+public class RotationalDataProcessor extends AbstractEntitySingleDataProcessor<EntityItemFrame, Rotation, Value<Rotation>,
+        RotationalData, ImmutableRotationalData> {
 
     public RotationalDataProcessor() {
         super(EntityItemFrame.class, Keys.ROTATION);

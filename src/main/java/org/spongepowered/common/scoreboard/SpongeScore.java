@@ -49,7 +49,8 @@ public class SpongeScore implements Score {
         this.name = name;
         this.legacyName = SpongeTexts.toLegacy(name);
         if (this.legacyName.length() > SpongeScoreboardConstants.SCORE_NAME_LENGTH) {
-            throw new IllegalArgumentException(String.format("The score name %s is too long! It must be at most %s characters.", this.legacyName, SpongeScoreboardConstants.SCORE_NAME_LENGTH));
+            throw new IllegalArgumentException(String.format("The score name %s is too long! It must be at most %s characters.", this.legacyName,
+                    SpongeScoreboardConstants.SCORE_NAME_LENGTH));
         }
     }
 
@@ -74,8 +75,7 @@ public class SpongeScore implements Score {
             int j = score.scorePoints;
             score.scorePoints = this.score;
 
-            if (j != this.score || score.forceUpdate)
-            {
+            if (j != this.score || score.forceUpdate) {
                 score.forceUpdate = false;
                 score.getScoreScoreboard().onScoreUpdated(score);
             }

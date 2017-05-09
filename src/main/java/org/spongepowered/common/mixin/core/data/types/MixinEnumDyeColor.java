@@ -28,7 +28,6 @@ import net.minecraft.item.EnumDyeColor;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;

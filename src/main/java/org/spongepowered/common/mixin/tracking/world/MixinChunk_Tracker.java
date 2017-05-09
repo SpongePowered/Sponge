@@ -55,7 +55,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.SpongeUsernameCache;
@@ -116,7 +115,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             }
         }
 
-        if (!SpongeHooks.getActiveConfig((WorldServer) this.world).getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
+        if (!SpongeHooks.getActiveConfig((WorldServer) this.world).getConfig().getBlockTracking()
+                .getBlockBlacklist().contains(((BlockType) block).getId())) {
             SpongeHooks.logBlockTrack(this.world, block, pos, user, true);
         } else {
             SpongeHooks.logBlockTrack(this.world, block, pos, user, false);
@@ -334,7 +334,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
      * @param num Integer to modify
      * @param data Bits of data to add
      * @param which Index of nibble to start at
-     * @param bitsToReplace The number of bits to replace starting from nibble index
+     * @param bitsToReplace The number of bits to replace
+     *     starting from nibble index
      * @return The modified integer
      */
     private int setNibble(int num, int data, int which, int bitsToReplace) {
@@ -360,7 +361,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     }
 
     /**
-     * Serialize this BlockPos into a short value
+     * Serialize this BlockPos into a short value.
      */
     private short blockPosToShort(BlockPos pos) {
         short serialized = (short) setNibble(0, pos.getX() & XZ_MASK, 0, NUM_XZ_BITS);
@@ -370,7 +371,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     }
 
     /**
-     * Create a BlockPos from a serialized chunk position
+     * Create a BlockPos from a serialized chunk position.
      */
     private BlockPos blockPosFromShort(short serialized) {
         int x = this.xPosition * 16 + (serialized & XZ_MASK);
@@ -380,7 +381,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     }
 
     /**
-     * Serialize this BlockPos into an int value
+     * Serialize this BlockPos into an int value.
      */
     private int blockPosToInt(BlockPos pos) {
         int serialized = setNibble(0, pos.getX() & XZ_MASK, 0, NUM_XZ_BITS);
@@ -390,7 +391,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     }
 
     /**
-     * Create a BlockPos from a serialized chunk position
+     * Create a BlockPos from a serialized chunk position.
      */
     private BlockPos blockPosFromInt(int serialized) {
         int x = this.xPosition * 16 + (serialized & XZ_MASK);

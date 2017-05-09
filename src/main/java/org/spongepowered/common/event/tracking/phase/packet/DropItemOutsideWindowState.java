@@ -36,7 +36,6 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -75,8 +74,10 @@ final class DropItemOutsideWindowState extends BasicInventoryPacketState {
             currentEntity.setCreator(playerMP.getUniqueID());
         }
         return usedButton == PacketPhase.PACKET_BUTTON_PRIMARY_ID
-               ? SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(spawnCause, transaction, capturedEntities, openContainer, slotTransactions)
-               : SpongeEventFactory.createClickInventoryEventDropOutsideSecondary(spawnCause, transaction, capturedEntities, openContainer, slotTransactions);
+                ? SpongeEventFactory.createClickInventoryEventDropOutsidePrimary(
+                        spawnCause, transaction, capturedEntities, openContainer, slotTransactions)
+                : SpongeEventFactory.createClickInventoryEventDropOutsideSecondary(
+                        spawnCause, transaction, capturedEntities, openContainer, slotTransactions);
     }
 
     @Override

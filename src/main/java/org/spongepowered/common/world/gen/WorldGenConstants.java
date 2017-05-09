@@ -55,7 +55,7 @@ public final class WorldGenConstants {
                 // then its a custom chunk provider which is extending one of the vanilla classes but if we
                 // use it as a generation populator directly then we would lose the custom logic of the
                 // extending class so we wrap it instead so that the provideChunk method is called.
-                if(mixind.isInstance(cp)) {
+                if (mixind.isInstance(cp)) {
                     // TODO We could do a check here to see if the chunk provider directly implements
                     // GenerationPopulator despite extending a vanilla chunk provider so that a mod could
                     // implement our genpop interface and use the vanilla provider.
@@ -76,27 +76,21 @@ public final class WorldGenConstants {
 
     };
 
-    public static final Predicate<BlockState> DIRT_OR_GRASS = (input) -> {
-        return input.getType().equals(BlockTypes.DIRT) || input.getType().equals(BlockTypes.GRASS);
-    };
+    public static final Predicate<BlockState> DIRT_OR_GRASS =
+            (input) -> input.getType().equals(BlockTypes.DIRT) || input.getType().equals(BlockTypes.GRASS);
 
-    public static final Predicate<BlockState> DIRT = (input) -> {
-        return input.getType().equals(BlockTypes.DIRT);
-    };
+    public static final Predicate<BlockState> DIRT = (input) -> input.getType().equals(BlockTypes.DIRT);
 
-    public static final Predicate<BlockState> STONE = (input) -> {
-        return input.getType().equals(BlockTypes.STONE);
-    };
+    public static final Predicate<BlockState> STONE = (input) -> input.getType().equals(BlockTypes.STONE);
 
-    public static final Predicate<Location<World>> STONE_LOCATION = (input) -> {
-        return input.getBlock().getType().equals(BlockTypes.STONE);
-    };
+    public static final Predicate<Location<World>> STONE_LOCATION = (input) -> input.getBlock().getType().equals(BlockTypes.STONE);
 
     public static final Predicate<Location<World>> CAVE_LIQUIDS = (input) -> {
         if (input.getBlockY() <= 0 || input.getBlockY() >= 255) {
             return false;
         }
-        if (input.add(0, 1, 0).getBlock().getType() != BlockTypes.STONE || input.add(0, -1, 0).getBlock().getType() != BlockTypes.STONE
+        if (input.add(0, 1, 0).getBlock().getType() != BlockTypes.STONE
+                || input.add(0, -1, 0).getBlock().getType() != BlockTypes.STONE
                 || (input.getBlock().getType() != BlockTypes.STONE && input.getBlock().getType() != BlockTypes.AIR)) {
             return false;
         }

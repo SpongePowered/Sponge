@@ -28,7 +28,6 @@ import com.google.common.util.concurrent.Futures;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.play.server.SPacketDisconnect;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.text.ITextComponent;
 
 
@@ -37,6 +36,7 @@ import net.minecraft.util.text.ITextComponent;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class PlayerKickHelper {
+
     private PlayerKickHelper() {
     }
 
@@ -48,8 +48,8 @@ public class PlayerKickHelper {
      * @param component The kick message
      */
     public static void kickPlayer(final EntityPlayerMP ply, final ITextComponent component) {
-        ply.connection.getNetworkManager().sendPacket(new SPacketDisconnect(component),
-                                                                  future -> ply.connection.getNetworkManager().closeChannel(component));
+        ply.connection.getNetworkManager().sendPacket(new SPacketDisconnect(component), future ->
+                ply.connection.getNetworkManager().closeChannel(component));
         ply.connection.getNetworkManager().disableAutoRead();
         // fix this getServer.
         Futures.getUnchecked(ply.getServer().addScheduledTask(() -> ply.connection.getNetworkManager().checkDisconnected()));

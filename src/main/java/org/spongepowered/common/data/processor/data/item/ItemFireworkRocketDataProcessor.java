@@ -44,8 +44,8 @@ import org.spongepowered.common.data.value.mutable.SpongeBoundedValue;
 
 import java.util.Optional;
 
-public class ItemFireworkRocketDataProcessor
-        extends AbstractItemSingleDataProcessor<Integer, MutableBoundedValue<Integer>, FireworkRocketData, ImmutableFireworkRocketData> {
+public class ItemFireworkRocketDataProcessor extends AbstractItemSingleDataProcessor<Integer, MutableBoundedValue<Integer>,
+        FireworkRocketData, ImmutableFireworkRocketData> {
 
     public ItemFireworkRocketDataProcessor() {
         super(stack -> stack.getItem().equals(Items.FIREWORKS), Keys.FIREWORK_FLIGHT_MODIFIER);
@@ -91,12 +91,14 @@ public class ItemFireworkRocketDataProcessor
 
     @Override
     protected MutableBoundedValue<Integer> constructValue(Integer value) {
-        return new SpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE, value);
+        return new SpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, 0, ComparatorUtil.intComparator(),
+                0, Integer.MAX_VALUE, value);
     }
 
     @Override
     protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, value, 0, ComparatorUtil.intComparator(), 0, Integer.MAX_VALUE);
+        return new ImmutableSpongeBoundedValue<>(Keys.FIREWORK_FLIGHT_MODIFIER, value, 0, ComparatorUtil.intComparator(),
+                0, Integer.MAX_VALUE);
     }
 
 }

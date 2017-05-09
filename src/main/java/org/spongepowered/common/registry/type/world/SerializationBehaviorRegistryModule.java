@@ -59,8 +59,8 @@ public class SerializationBehaviorRegistryModule implements SpongeAdditionalCata
 
     @Override
     public Optional<SerializationBehavior> getById(String id) {
-        return Optional.ofNullable(this.serializationBehaviorMap.get(checkNotNull(id, "SerializationBehavior ID cannot be null!").toLowerCase(
-                Locale.ENGLISH)));
+        return Optional.ofNullable(this.serializationBehaviorMap.get(checkNotNull(id, "SerializationBehavior ID cannot be null!")
+                .toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

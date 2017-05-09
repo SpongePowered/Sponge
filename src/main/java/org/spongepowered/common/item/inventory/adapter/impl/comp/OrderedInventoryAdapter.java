@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.comp;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -34,9 +34,7 @@ import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.comp.OrderedInventoryLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
@@ -50,7 +48,8 @@ public class OrderedInventoryAdapter extends Adapter implements OrderedInventory
         this(inventory, root, null);
     }
 
-    public OrderedInventoryAdapter(Fabric<IInventory> inventory, OrderedInventoryLens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+    public OrderedInventoryAdapter(Fabric<IInventory> inventory, OrderedInventoryLens<IInventory,
+            net.minecraft.item.ItemStack> root, Inventory parent) {
         super(inventory, checkNotNull(root), parent);
         this.orderedLens = root;
     }

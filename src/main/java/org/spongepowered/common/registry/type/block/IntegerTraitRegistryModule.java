@@ -26,7 +26,6 @@ package org.spongepowered.common.registry.type.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.block.trait.IntegerTraits;
@@ -35,15 +34,12 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 
 @RegisterCatalog(IntegerTraits.class)
-public final class IntegerTraitRegistryModule
-    extends AbstractPrefixCheckCatalogRegistryModule<IntegerTrait>
+public final class IntegerTraitRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<IntegerTrait>
         implements SpongeAdditionalCatalogRegistryModule<IntegerTrait>, AlternateCatalogRegistryModule<IntegerTrait> {
 
     public static IntegerTraitRegistryModule getInstance() {
@@ -81,6 +77,6 @@ public final class IntegerTraitRegistryModule
     }
 
     private static final class Holder {
-        final static IntegerTraitRegistryModule INSTANCE = new IntegerTraitRegistryModule();
+        static final IntegerTraitRegistryModule INSTANCE = new IntegerTraitRegistryModule();
     }
 }

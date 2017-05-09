@@ -101,7 +101,7 @@ public class ProfessionRegistryModule implements AlternateCatalogRegistryModule<
         if (!isRegistered) {
             if (!careers.contains(spongeCareer)) {
                 careers.add(spongeCareer);
-                Collections.sort(careers, CareerRegistryModule.CAREER_COMPARATOR);
+                careers.sort(CareerRegistryModule.CAREER_COMPARATOR);
             }
         }
     }

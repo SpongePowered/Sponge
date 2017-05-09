@@ -37,7 +37,8 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongePlaceableDat
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ImmutableSpongePlaceableData extends AbstractImmutableSingleSetData<BlockType, ImmutablePlaceableData, PlaceableData> implements ImmutablePlaceableData {
+public class ImmutableSpongePlaceableData extends AbstractImmutableSingleSetData<BlockType, ImmutablePlaceableData, PlaceableData>
+        implements ImmutablePlaceableData {
 
     public ImmutableSpongePlaceableData() {
         this(ImmutableSet.of());

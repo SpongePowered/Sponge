@@ -36,7 +36,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
 public class SpongeHoverAction {

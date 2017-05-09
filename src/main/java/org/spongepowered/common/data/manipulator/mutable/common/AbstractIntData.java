@@ -31,7 +31,8 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
-public abstract class AbstractIntData<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends AbstractSingleData<Integer, M, I> {
+public abstract class AbstractIntData<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+        extends AbstractSingleData<Integer, M, I> {
 
     protected AbstractIntData(Class<M> manipulatorClass, int value, Key<? extends BaseValue<Integer>> usedKey) {
         super(manipulatorClass, value, usedKey);

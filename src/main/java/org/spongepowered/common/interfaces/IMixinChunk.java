@@ -61,7 +61,8 @@ public interface IMixinChunk {
     IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot originalBlockSnapshot);
 
     @Nullable
-    IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot originalBlockSnapshot, BlockChangeFlag flag);
+    IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState,
+            @Nullable BlockSnapshot originalBlockSnapshot, BlockChangeFlag flag);
 
     void setBlockNotifier(BlockPos pos, UUID uuid);
 

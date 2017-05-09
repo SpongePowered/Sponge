@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.query;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import org.spongepowered.api.item.ItemType;
@@ -53,6 +52,7 @@ import org.spongepowered.common.item.inventory.query.strategy.expression.Express
 
 import java.lang.reflect.Constructor;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Query<TInventory, TStack> {
@@ -94,8 +94,7 @@ public class Query<TInventory, TStack> {
 
     }
 
-    private static final Map<String, Class<? extends QueryStrategy<?, ?, ?>>> strategies
-            = Maps.<String, Class<? extends QueryStrategy<?, ?, ?>>>newHashMap();
+    private static final Map<String, Class<? extends QueryStrategy<?, ?, ?>>> strategies = new HashMap<>();
 
     private static ResultAdapterProvider<?, ?> defaultResultProvider;
 
@@ -227,7 +226,8 @@ public class Query<TInventory, TStack> {
         return new Query<TInventory, TStack>(adapter, strategy);
     }
 
-    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter, InventoryProperty<?, ?>... props) {
+    public static <TInventory, TStack> Query<TInventory, TStack> compile(InventoryAdapter<TInventory, TStack> adapter,
+            InventoryProperty<?, ?>... props) {
         QueryStrategy<TInventory, TStack, InventoryProperty<?, ?>> strategy = Query.<TInventory, TStack, InventoryProperty<?, ?>>getStrategy(Type.PROPERTIES).with(props);
         return new Query<TInventory, TStack>(adapter, strategy);
     }
@@ -253,7 +253,9 @@ public class Query<TInventory, TStack> {
 
     public static <TInventory, TStack, TArgs> QueryStrategy<TInventory, TStack, TArgs> getStrategy(String key) {
         @SuppressWarnings("unchecked")
-        Class<? extends QueryStrategy<TInventory, TStack, TArgs>> strategyClass = (Class<? extends QueryStrategy<TInventory, TStack, TArgs>>) checkNotNull(Query.strategies.get(key), "The specified query strategy [%s], was not registered", key);
+        Class<? extends QueryStrategy<TInventory, TStack, TArgs>> strategyClass =
+                (Class<? extends QueryStrategy<TInventory, TStack, TArgs>>) checkNotNull(Query.strategies.get(key),
+                        "The specified query strategy [%s], was not registered", key);
         try {
             return strategyClass.newInstance();
         } catch (Exception ex) {
@@ -264,7 +266,8 @@ public class Query<TInventory, TStack> {
     public static void registerStrategy(String key, Class<? extends QueryStrategy<?, ?, ?>> strategyClass) {
         try {
             @SuppressWarnings({ "unchecked", "unused" })
-            Constructor<QueryStrategy<?, ?, ?>> ctor = (Constructor<QueryStrategy<?, ?, ?>>) checkNotNull(strategyClass, "strategyClass").getConstructor();
+            Constructor<QueryStrategy<?, ?, ?>> ctor =
+                    (Constructor<QueryStrategy<?, ?, ?>>) checkNotNull(strategyClass, "strategyClass").getConstructor();
         } catch (Exception ex) {
             throw new InvalidQueryStrategyException("The query strategy class %s does not provide a noargs ctor", strategyClass);
         }

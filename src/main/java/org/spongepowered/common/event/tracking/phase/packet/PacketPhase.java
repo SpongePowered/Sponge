@@ -90,7 +90,6 @@ import javax.annotation.Nullable;
 
 public final class PacketPhase extends TrackingPhase {
 
-
     public static final class General {
 
         public static final IPacketState UNKNOWN = new UnknownPacketState();
@@ -139,11 +138,15 @@ public final class PacketPhase extends TrackingPhase {
         public static final BasicInventoryPacketState SECONDARY_INVENTORY_SHIFT_CLICK = new SecondaryInventoryShiftClickState();
         public static final BasicInventoryPacketState DOUBLE_CLICK_INVENTORY = new DoubleClickInventoryState();
 
-        public static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_START = new DragInventoryStartState("PRIMARY_DRAG_INVENTORY_START", DRAG_MODE_PRIMARY_BUTTON);
-        public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_START = new DragInventoryStartState("SECONDARY_DRAG_INVENTORY_START", DRAG_MODE_SECONDARY_BUTTON);
+        public static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_START =
+                new DragInventoryStartState("PRIMARY_DRAG_INVENTORY_START", DRAG_MODE_PRIMARY_BUTTON);
+        public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_START =
+                new DragInventoryStartState("SECONDARY_DRAG_INVENTORY_START", DRAG_MODE_SECONDARY_BUTTON);
 
-        public static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("PRIMARY_DRAG_INVENTORY_ADD_SLOT", DRAG_MODE_PRIMARY_BUTTON);
-        public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_ADDSLOT = new DragInventoryAddSlotState("SECONDARY_DRAG_INVENTORY_ADD_SLOT", DRAG_MODE_SECONDARY_BUTTON);
+        public static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_ADDSLOT =
+                new DragInventoryAddSlotState("PRIMARY_DRAG_INVENTORY_ADD_SLOT", DRAG_MODE_PRIMARY_BUTTON);
+        public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_ADDSLOT =
+                new DragInventoryAddSlotState("SECONDARY_DRAG_INVENTORY_ADD_SLOT", DRAG_MODE_SECONDARY_BUTTON);
 
         public static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_STOP = new PrimaryDragInventoryStopState();
         public static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_STOP = new SecondaryDragInventoryStopState();
@@ -183,57 +186,57 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     // Inventory static fields
-    public final static int MAGIC_CLICK_OUTSIDE_SURVIVAL = -999;
-    public final static int MAGIC_CLICK_OUTSIDE_CREATIVE = -1;
+    public static final int MAGIC_CLICK_OUTSIDE_SURVIVAL = -999;
+    public static final int MAGIC_CLICK_OUTSIDE_CREATIVE = -1;
 
     // Flag masks
-    public final static int MASK_NONE              = 0x00000;
-    public final static int MASK_OUTSIDE           = 0x30000;
-    public final static int MASK_MODE              = 0x0FE00;
-    public final static int MASK_DRAGDATA          = 0x001F8;
-    public final static int MASK_BUTTON            = 0x00007;
+    public static final int MASK_NONE              = 0x00000;
+    public static final int MASK_OUTSIDE           = 0x30000;
+    public static final int MASK_MODE              = 0x0FE00;
+    public static final int MASK_DRAGDATA          = 0x001F8;
+    public static final int MASK_BUTTON            = 0x00007;
 
     // Mask presets
-    public final static int MASK_ALL               = MASK_OUTSIDE | MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
-    public final static int MASK_NORMAL            = MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
-    public final static int MASK_DRAG              = MASK_OUTSIDE | MASK_NORMAL;
+    public static final int MASK_ALL               = MASK_OUTSIDE | MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
+    public static final int MASK_NORMAL            = MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
+    public static final int MASK_DRAG              = MASK_OUTSIDE | MASK_NORMAL;
 
     // Click location semaphore flags
-    public final static int CLICK_INSIDE_WINDOW    = 0x01 << 16 << 0;
-    public final static int CLICK_OUTSIDE_WINDOW   = 0x01 << 16 << 1;
-    public final static int CLICK_ANYWHERE         = CLICK_INSIDE_WINDOW | CLICK_OUTSIDE_WINDOW;
+    public static final int CLICK_INSIDE_WINDOW    = 0x01 << 16 << 0;
+    public static final int CLICK_OUTSIDE_WINDOW   = 0x01 << 16 << 1;
+    public static final int CLICK_ANYWHERE         = CLICK_INSIDE_WINDOW | CLICK_OUTSIDE_WINDOW;
 
     // Modes flags
-    public final static int MODE_CLICK             = 0x01 << 9 << ClickType.PICKUP.ordinal();
-    public final static int MODE_SHIFT_CLICK       = 0x01 << 9 << ClickType.QUICK_MOVE.ordinal();
-    public final static int MODE_HOTBAR            = 0x01 << 9 << ClickType.SWAP.ordinal();
-    public final static int MODE_PICKBLOCK         = 0x01 << 9 << ClickType.CLONE.ordinal();
-    public final static int MODE_DROP              = 0x01 << 9 << ClickType.THROW.ordinal();
-    public final static int MODE_DRAG              = 0x01 << 9 << ClickType.QUICK_CRAFT.ordinal();
-    public final static int MODE_DOUBLE_CLICK      = 0x01 << 9 << ClickType.PICKUP_ALL.ordinal();
+    public static final int MODE_CLICK             = 0x01 << 9 << ClickType.PICKUP.ordinal();
+    public static final int MODE_SHIFT_CLICK       = 0x01 << 9 << ClickType.QUICK_MOVE.ordinal();
+    public static final int MODE_HOTBAR            = 0x01 << 9 << ClickType.SWAP.ordinal();
+    public static final int MODE_PICKBLOCK         = 0x01 << 9 << ClickType.CLONE.ordinal();
+    public static final int MODE_DROP              = 0x01 << 9 << ClickType.THROW.ordinal();
+    public static final int MODE_DRAG              = 0x01 << 9 << ClickType.QUICK_CRAFT.ordinal();
+    public static final int MODE_DOUBLE_CLICK      = 0x01 << 9 << ClickType.PICKUP_ALL.ordinal();
 
     // Drag mode flags, bitmasked from button and only set if MODE_DRAG
-    public final static int DRAG_MODE_PRIMARY_BUTTON = 0x01 << 6 << 0;
-    public final static int DRAG_MODE_SECONDARY_BUTTON = 0x01 << 6 << 1;
-    public final static int DRAG_MODE_MIDDLE_BUTTON = 0x01 << 6 << 2;
-    public final static int DRAG_MODE_ANY          = DRAG_MODE_PRIMARY_BUTTON | DRAG_MODE_SECONDARY_BUTTON | DRAG_MODE_MIDDLE_BUTTON;
+    public static final int DRAG_MODE_PRIMARY_BUTTON = 0x01 << 6 << 0;
+    public static final int DRAG_MODE_SECONDARY_BUTTON = 0x01 << 6 << 1;
+    public static final int DRAG_MODE_MIDDLE_BUTTON = 0x01 << 6 << 2;
+    public static final int DRAG_MODE_ANY          = DRAG_MODE_PRIMARY_BUTTON | DRAG_MODE_SECONDARY_BUTTON | DRAG_MODE_MIDDLE_BUTTON;
 
     // Drag status flags, bitmasked from button and only set if MODE_DRAG
-    public final static int DRAG_STATUS_STARTED    = 0x01 << 3 << 0;
-    public final static int DRAG_STATUS_ADD_SLOT   = 0x01 << 3 << 1;
-    public final static int DRAG_STATUS_STOPPED    = 0x01 << 3 << 2;
+    public static final int DRAG_STATUS_STARTED    = 0x01 << 3 << 0;
+    public static final int DRAG_STATUS_ADD_SLOT   = 0x01 << 3 << 1;
+    public static final int DRAG_STATUS_STOPPED    = 0x01 << 3 << 2;
 
     // Buttons flags, only set if *not* MODE_DRAG
-    public final static int BUTTON_PRIMARY         = 0x01 << 0 << 0;
-    public final static int BUTTON_SECONDARY       = 0x01 << 0 << 1;
-    public final static int BUTTON_MIDDLE          = 0x01 << 0 << 2;
+    public static final int BUTTON_PRIMARY         = 0x01 << 0 << 0;
+    public static final int BUTTON_SECONDARY       = 0x01 << 0 << 1;
+    public static final int BUTTON_MIDDLE          = 0x01 << 0 << 2;
 
 
     // Only use these with data from the actual packet. DO NOT
     // use them as enum constant values (the 'stateId')
-    public final static int PACKET_BUTTON_PRIMARY_ID = 0;
-    public final static int PACKET_BUTTON_SECONDARY_ID = 0;
-    public final static int PACKET_BUTTON_MIDDLE_ID = 0;
+    public static final int PACKET_BUTTON_PRIMARY_ID = 0;
+    public static final int PACKET_BUTTON_SECONDARY_ID = 0;
+    public static final int PACKET_BUTTON_MIDDLE_ID = 0;
 
     private final Map<Class<? extends Packet<?>>, Function<Packet<?>, IPacketState>> packetTranslationMap = new IdentityHashMap<>();
     private final Map<Class<? extends Packet<?>>, PacketFunction> packetUnwindMap = new IdentityHashMap<>();
@@ -259,7 +262,6 @@ public final class PacketPhase extends TrackingPhase {
         ((IPacketState) state).populateContext(entityPlayerMP, packet, context);
         return context;
     }
-
 
     // TrackingPhase specific methods overridden for state specific handling
 
@@ -299,8 +301,7 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
-            int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         return ((IPacketState) phaseState).shouldCaptureEntity()
                ? context.getCapturedEntities().add(entity)
                : ((IPacketState) phaseState).spawnEntity(context, entity, chunkX, chunkZ);
@@ -318,7 +319,8 @@ public final class PacketPhase extends TrackingPhase {
         final Class<? extends Packet<?>> packetInClass = (Class<? extends Packet<?>>) packetIn.getClass();
 
         final PacketFunction unwindFunction = this.packetUnwindMap.get(packetInClass);
-        checkArgument(phaseState instanceof IPacketState, "PhaseState passed in is not an instance of IPacketState! Got %s", phaseState);
+        checkArgument(phaseState instanceof IPacketState,
+                "PhaseState passed in is not an instance of IPacketState! Got %s", phaseState);
         if (unwindFunction != null) {
             unwindFunction.unwind(packetIn, (IPacketState) phaseState, player, phaseContext);
         } else {
@@ -348,7 +350,8 @@ public final class PacketPhase extends TrackingPhase {
     }
 
     @Override
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos,
+            IMixinBlockEventData blockEvent) {
         ((BasicPacketState) phaseState).associateBlockEventNotifier(context, mixinWorld, pos, blockEvent);
     }
 
@@ -425,7 +428,6 @@ public final class PacketPhase extends TrackingPhase {
         this.packetUnwindMap.put(CPacketSpectate.class, PacketFunction.IGNORED);
         this.packetUnwindMap.put(CPacketResourcePackStatus.class, PacketFunction.RESOURCE_PACKET);
     }
-
 
     public void setupPacketToStateMapping() {
         this.packetTranslationMap.put(CPacketKeepAlive.class, packet -> General.IGNORED);

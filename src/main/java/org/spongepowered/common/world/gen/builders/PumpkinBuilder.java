@@ -32,7 +32,6 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Pumpkin;
 import org.spongepowered.api.world.gen.populator.Pumpkin.Builder;
 
-
 public class PumpkinBuilder implements Pumpkin.Builder {
 
     private VariableAmount count;

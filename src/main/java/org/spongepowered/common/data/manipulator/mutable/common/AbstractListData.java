@@ -53,7 +53,8 @@ public abstract class AbstractListData<E, M extends ListData<E, M, I>, I extends
         extends AbstractSingleData<List<E>, M, I> implements ListData<E, M, I> {
     private final Class<? extends I> immutableClass;
 
-    protected AbstractListData(Class<M> manipulatorClass, List<E> value, Key<? extends BaseValue<List<E>>> usedKey, Class<? extends I> immutableClass) {
+    protected AbstractListData(Class<M> manipulatorClass, List<E> value,
+            Key<? extends BaseValue<List<E>>> usedKey, Class<? extends I> immutableClass) {
         super(manipulatorClass, Lists.newArrayList(value), usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");

@@ -45,10 +45,10 @@ public interface Fabric<TInventory> {
     Collection<TInventory> allInventories();
 
     /**
-     * Return the inventory at the specified index in the fabric.
+     * Gets the inventory at the specified index in the fabric.
      *
-     * @param index
-     * @return
+     * @param index The index in the fabric
+     * @return The inventory at the index
      */
     TInventory get(int index);
 

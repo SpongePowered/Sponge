@@ -37,21 +37,16 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.world.WorldManager;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
-import java.util.concurrent.FutureTask;
 
 @Mixin(DedicatedServer.class)
 public abstract class MixinDedicatedServer extends MinecraftServer implements Server {
@@ -76,9 +71,11 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
 
     /**
      * @author Zidane - April 20th, 2015
-     * @reason At the time of writing, this turns off the default Minecraft Server GUI that exists in non-headless environment.
-     * Reasoning: The GUI console can easily consume a sizable chunk of each CPU core (20% or more is common) on the computer being ran on and has
-     * been proven to cause quite a bit of latency issues.
+     * @reason At the time of writing, this turns off the default
+     *     Minecraft Server GUI that exists in non-headless environment.
+     *     Reasoning: The GUI console can easily consume a sizable chunk
+     *     of each CPU core (20% or more is common) on the computer being
+     *     ran on and has been proven to cause quite a bit of latency issues.
      */
     @Overwrite
     public void setGuiEnabled() {
@@ -93,11 +90,14 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
 
     /**
      * @author zml - March 9th, 2016
-     * @author blood - July 7th, 2016 - Add cause tracker handling for throwing pre change block checks
-     * @author gabizou - July 7th, 2016 - Update for 1.10's cause tracking changes
+     * @author blood - July 7th, 2016 - Add cause tracker handling for
+     *     throwing pre change block checks
+     * @author gabizou - July 7th, 2016 - Update for 1.10's cause
+     *     tracking changes
      *
-     * @reason Change spawn protection to take advantage of Sponge permissions. Rather than affecting only the default world like vanilla, this
-     * will apply to any world. Additionally, fire a spawn protection event
+     * @reason Change spawn protection to take advantage of Sponge permissions.
+     *     Rather than affecting only the default world like vanilla, this will
+     *     apply to any world. Additionally, fire a spawn protection event
      */
     @Overwrite
     @Override
@@ -108,7 +108,8 @@ public abstract class MixinDedicatedServer extends MinecraftServer implements Se
         final PhaseData peek = causeTracker.getCurrentPhaseData();
         final IPhaseState phaseState = peek.state;
         if (phaseState == null || !phaseState.isInteraction()) {
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos, NamedCause.of(NamedCause.BLOCK_PROTECTED, worldIn), playerIn).isCancelled()) {
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) worldIn, pos,
+                    NamedCause.of(NamedCause.BLOCK_PROTECTED, worldIn), playerIn).isCancelled()) {
                 return true;
             }
         }

@@ -84,15 +84,13 @@ public class CustomInventory implements IInventory, IInteractionObject {
         InventoryTitle titleProperty = (InventoryTitle) properties.getOrDefault(TITLE, archetype.getProperty(TITLE).orElse(null));
         boolean isCustom = !(titleProperty != null && titleProperty.getValue() instanceof TranslatableText);
 
-        String title = titleProperty == null ? "" :
-                isCustom ? TextSerializers.LEGACY_FORMATTING_CODE.serialize(titleProperty.getValue())
-                        : ((TranslatableText) titleProperty.getValue()).getTranslation().getId();
+        String title = titleProperty == null ? "" : isCustom
+                ? TextSerializers.LEGACY_FORMATTING_CODE.serialize(titleProperty.getValue())
+                : ((TranslatableText) titleProperty.getValue()).getTranslation().getId();
         this.inv = new InventoryBasic(title, isCustom, count);
 
         // Updates the Inventory for all viewers on any change
-        this.inv.addInventoryChangeListener(i -> this.viewers.forEach(v -> {
-            v.openContainer.detectAndSendChanges();
-        }));
+        this.inv.addInventoryChangeListener(i -> this.viewers.forEach(v -> v.openContainer.detectAndSendChanges()));
 
         for (Map.Entry<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> entry: listeners.entrySet()) {
             Sponge.getEventManager().registerListener(plugin, entry.getKey(), new CustomInventoryListener((Inventory) this, entry.getValue()));

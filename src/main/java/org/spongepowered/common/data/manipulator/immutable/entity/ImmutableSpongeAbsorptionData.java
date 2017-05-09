@@ -33,7 +33,8 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAbsorption
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public final class ImmutableSpongeAbsorptionData extends AbstractImmutableSingleData<Double, ImmutableAbsorptionData, AbsorptionData> implements ImmutableAbsorptionData {
+public final class ImmutableSpongeAbsorptionData extends AbstractImmutableSingleData<Double, ImmutableAbsorptionData, AbsorptionData>
+        implements ImmutableAbsorptionData {
 
     private final ImmutableValue<Double> value;
 

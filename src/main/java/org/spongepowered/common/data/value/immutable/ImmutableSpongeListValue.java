@@ -125,7 +125,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
     public ImmutableListValue<E> with(int index, Iterable<E> values) {
         final ImmutableList.Builder<E> builder = ImmutableList.builder();
         for (final ListIterator<E> iterator = this.actualValue.listIterator(); iterator.hasNext(); ) {
-            if (iterator.nextIndex() -1 == index) {
+            if (iterator.nextIndex() - 1 == index) {
                 builder.addAll(values);
             }
             builder.add(iterator.next());
@@ -148,7 +148,7 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
     public ImmutableListValue<E> set(int index, E element) {
         final ImmutableList.Builder<E> builder = ImmutableList.builder();
         for (final ListIterator<E> iterator = this.actualValue.listIterator(); iterator.hasNext(); ) {
-            if (iterator.nextIndex() -1 == index) {
+            if (iterator.nextIndex() - 1 == index) {
                 builder.add(checkNotNull(element));
                 iterator.next();
             } else {

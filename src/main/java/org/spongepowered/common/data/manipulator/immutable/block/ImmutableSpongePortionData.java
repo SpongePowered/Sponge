@@ -32,8 +32,8 @@ import org.spongepowered.api.data.type.PortionTypes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePortionData;
 
-public class ImmutableSpongePortionData extends AbstractImmutableSingleCatalogData<PortionType, ImmutablePortionData, PortionData> implements
-        ImmutablePortionData {
+public class ImmutableSpongePortionData extends AbstractImmutableSingleCatalogData<PortionType, ImmutablePortionData, PortionData>
+        implements ImmutablePortionData {
 
     public ImmutableSpongePortionData(PortionType value) {
         super(ImmutablePortionData.class, value, PortionTypes.BOTTOM, Keys.PORTION_TYPE, SpongePortionData.class);

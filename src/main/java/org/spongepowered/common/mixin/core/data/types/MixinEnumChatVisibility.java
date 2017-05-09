@@ -28,9 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Sets;
 import net.minecraft.entity.player.EntityPlayer;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Final;
@@ -58,7 +56,8 @@ public abstract class MixinEnumChatVisibility implements ChatVisibility, IMixinE
     public void construct(String name, int i, int i2, String s2, CallbackInfo ci) {
         this.visibleChatTypes = Sets.newHashSet();
 
-        this.id = SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + ((EntityPlayer.EnumChatVisibility) (Object) this).name().toLowerCase(Locale.ENGLISH);
+        this.id = SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + ((EntityPlayer.EnumChatVisibility) (Object) this).name()
+                .toLowerCase(Locale.ENGLISH);
         this.translation = new SpongeTranslation(this.resourceKey);
     }
 

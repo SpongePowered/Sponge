@@ -27,7 +27,6 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.GridInventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -35,12 +34,10 @@ import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryColumnLens;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
-import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
 
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridInventoryLens<IInventory, net.minecraft.item.ItemStack> {
 
@@ -59,7 +56,8 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
         this(base, width, height, rowStride, 0, 0, GridInventoryAdapter.class, slots);
     }
 
-    public GridInventoryLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public GridInventoryLensImpl(int base, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider<IInventory,
+            ItemStack> slots) {
         this(base, width, height, rowStride, 0, 0, adapterType, slots);
     }
 
@@ -67,7 +65,8 @@ public class GridInventoryLensImpl extends Inventory2DLensImpl implements GridIn
         this(base, width, height, rowStride, xBase, yBase, GridInventoryAdapter.class, slots);
     }
 
-    public GridInventoryLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public GridInventoryLensImpl(int base, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType,
+            SlotProvider<IInventory, ItemStack> slots) {
         super(base, width, height, rowStride, xBase, yBase, adapterType, slots);
     }
 

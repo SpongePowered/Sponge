@@ -25,14 +25,14 @@
 package org.spongepowered.common.mixin.core.entity.player;
 
 import com.google.common.base.Objects;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

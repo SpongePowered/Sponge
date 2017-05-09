@@ -33,19 +33,20 @@ import java.util.Map;
 public final class PathTokens {
 
     /**
-     * Token which contains the fully-qualified path to the game directory (profile root)
+     * Token which contains the fully-qualified path to the
+     * game directory (profile root).
      */
     public static final String PATHTOKEN_CANONICAL_GAME_DIR = "CANONICAL_GAME_DIR";
     /**
-     * Token which contains the fully-qualified path to FML's "mods" folder
+     * Token which contains the fully-qualified path to FML's "mods" folder.
      */
     public static final String PATHTOKEN_CANONICAL_MODS_DIR = "CANONICAL_MODS_DIR";
     /**
-     * Token which contains the fully-qualified path to FML's "config" folder
+     * Token which contains the fully-qualified path to FML's "config" folder.
      */
     public static final String PATHTOKEN_CANONICAL_CONFIG_DIR = "CANONICAL_CONFIG_DIR";
     /**
-     * Token which contains the current minecraft version as a string
+     * Token which contains the current minecraft version as a string.
      */
     public static final String PATHTOKEN_MC_VERSION = "MC_VERSION";
 

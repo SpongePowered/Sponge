@@ -35,7 +35,8 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFallingBlo
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<ImmutableFallingBlockData, FallingBlockData> implements ImmutableFallingBlockData  {
+public class ImmutableSpongeFallingBlockData extends AbstractImmutableData<ImmutableFallingBlockData, FallingBlockData>
+        implements ImmutableFallingBlockData  {
 
     private final double fallDamagePerBlock;
     private final double maxFallDamage;

@@ -78,10 +78,10 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
@@ -234,8 +234,10 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return getDefaultBlockState().getTrait(blockTrait);
     }
 
-    @Inject(method = "spawnAsEntity", at = @At(value = "NEW", args = {"class=net/minecraft/entity/item/EntityItem"}), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    private static void checkSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack, CallbackInfo callbackInfo, float chance, double x, double y, double z) {
+    @Inject(method = "spawnAsEntity", at = @At(value = "NEW", args = {"class=net/minecraft/entity/item/EntityItem"}),
+            cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    private static void checkSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack, CallbackInfo callbackInfo,
+            float chance, double x, double y, double z) {
         Transform<World> position = new Transform<>((World) worldIn, new Vector3d(x, y, z));
         final ConstructEntityEvent.Pre
                 eventPre =
@@ -248,7 +250,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     // This method can be called directly by pistons, mods, etc. so the hook must go here
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)
-    public void onDropBlockAsItemWithChanceHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
+    public void onDropBlockAsItemWithChanceHead(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance,
+            int fortune, CallbackInfo ci) {
         if (!worldIn.isRemote && worldIn instanceof IMixinWorldServer) {
             if (CauseTracker.getInstance().getCurrentState() == BlockPhase.State.RESTORING_BLOCKS) {
                 ci.cancel();
@@ -258,7 +261,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
             final CauseTracker causeTracker = CauseTracker.getInstance();
             final IPhaseState currentState = causeTracker.getCurrentState();
-            final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState) && !currentState.getPhase().isWorldGeneration(currentState);
+            final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState)
+                    && !currentState.getPhase().isWorldGeneration(currentState);
             if (shouldEnterBlockDropPhase) {
                 // TODO: Change source to LocatableBlock
                 PhaseContext context = PhaseContext.start()
@@ -285,11 +289,13 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "RETURN"), cancellable = true)
-    public void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
+    public void onDropBlockAsItemWithChanceReturn(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance,
+            int fortune, CallbackInfo ci) {
         if (!worldIn.isRemote && worldIn instanceof IMixinWorldServer) {
             final CauseTracker causeTracker = CauseTracker.getInstance();
             final IPhaseState currentState = causeTracker.getCurrentState();
-            final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState) && !currentState.getPhase().isWorldGeneration(currentState);
+            final boolean shouldEnterBlockDropPhase = !currentState.getPhase().alreadyCapturingItemSpawns(currentState)
+                    && !currentState.getPhase().isWorldGeneration(currentState);
             if (shouldEnterBlockDropPhase) {
                 causeTracker.completePhase(BlockPhase.State.BLOCK_DROP_ITEMS);
             }
@@ -304,7 +310,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Redirect(method = "spawnAsEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private static boolean redirectGameRulesToCaptureItemDrops(GameRules gameRules, String argument, net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack) {
+    private static boolean redirectGameRulesToCaptureItemDrops(GameRules gameRules, String argument, net.minecraft.world.World worldIn,
+            BlockPos pos, ItemStack stack) {
         final boolean allowTileDrops = gameRules.getBoolean(argument);
         if (allowTileDrops && worldIn instanceof IMixinWorldServer) {
             final PhaseData currentPhase = CauseTracker.getInstance().getCurrentPhaseData();

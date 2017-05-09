@@ -43,7 +43,6 @@ import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorFactory;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.GuavaCollectors;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 
 import java.lang.reflect.InvocationTargetException;
@@ -59,7 +58,6 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-@NonnullByDefault
 @SuppressWarnings("deprecation")
 public class SpongeSelectorFactory implements SelectorFactory {
 

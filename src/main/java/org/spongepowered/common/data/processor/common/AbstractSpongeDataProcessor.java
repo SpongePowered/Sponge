@@ -29,7 +29,8 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.data.DataProcessor;
 
-public abstract class AbstractSpongeDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataProcessor<M, I> {
+public abstract class AbstractSpongeDataProcessor<M extends DataManipulator<M, I>,
+        I extends ImmutableDataManipulator<I, M>> implements DataProcessor<M, I> {
 
     @Override
     public int getPriority() {

@@ -28,7 +28,6 @@ import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumHand;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
@@ -131,25 +130,27 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         }
     }
 
-    @Inject(method = "processInitialInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
+    @Inject(method = "processInitialInteract", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
     public void callLeashEvent(EntityPlayer playerIn, EnumHand hand, CallbackInfoReturnable<Boolean> ci) {
         if (!playerIn.world.isRemote) {
             final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Cause.of(NamedCause.source(playerIn)), this);
             SpongeImpl.postEvent(event);
-            if(event.isCancelled()) {
+            if (event.isCancelled()) {
                 ci.setReturnValue(false);
             }
         }
     }
 
-    @Inject(method = "clearLeashed", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z", opcode = Opcodes.PUTFIELD), cancellable = true)
+    @Inject(method = "clearLeashed", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z",
+            opcode = Opcodes.PUTFIELD), cancellable = true)
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
         net.minecraft.entity.Entity entity = getLeashedToEntity();
         if (!this.world.isRemote) {
             UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(entity == null ? Cause.of(NamedCause.of("Self", this))
                 : Cause.of(NamedCause.source(entity)), this);
             SpongeImpl.postEvent(event);
-            if(event.isCancelled()) {
+            if (event.isCancelled()) {
                 ci.cancel();
             }
         }
@@ -214,8 +215,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     /**
      * @author gabizou - January 4th, 2016
      *
-     * This is to instill the check that if the entity is vanish, check whether they're untargetable
-     * as well.
+     * This is to instill the check that if the entity is vanish, check
+     * whether they're untargetable as well.
      *
      * @param entitylivingbaseIn The entity living base coming in
      */
@@ -231,7 +232,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     /**
      * @author gabizou - January 4th, 2016
      * @reason This will still check if the current attack target
-     * is vanish and is untargetable.
+     *     is vanish and is untargetable.
      *
      * @return The current attack target, if not null
      */
@@ -252,7 +253,6 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     }
 
     // Data delegated methods
-
 
     @Override
     public AgentData getAgentData() {

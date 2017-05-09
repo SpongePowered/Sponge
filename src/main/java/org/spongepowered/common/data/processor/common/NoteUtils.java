@@ -33,7 +33,7 @@ import java.util.Map;
 public class NoteUtils {
 
     // Dammit Mojang
-    public final static Map<Byte, SpongeNotePitch> pitchMappings = ImmutableMap.<Byte, SpongeNotePitch>builder()
+    private static final Map<Byte, SpongeNotePitch> pitchMappings = ImmutableMap.<Byte, SpongeNotePitch>builder()
             .put((byte) 0, new SpongeNotePitch((byte) 0, "F_SHARP0"))
             .put((byte) 1, new SpongeNotePitch((byte) 1, "G0"))
             .put((byte) 2, new SpongeNotePitch((byte) 2, "G_SHARP0"))

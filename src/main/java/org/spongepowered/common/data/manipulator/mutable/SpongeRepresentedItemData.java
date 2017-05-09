@@ -36,7 +36,8 @@ import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepres
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SpongeRepresentedItemData extends AbstractSingleData<ItemStackSnapshot, RepresentedItemData, ImmutableRepresentedItemData> implements RepresentedItemData {
+public class SpongeRepresentedItemData extends AbstractSingleData<ItemStackSnapshot, RepresentedItemData, ImmutableRepresentedItemData>
+        implements RepresentedItemData {
 
     public SpongeRepresentedItemData() {
         this(((ItemStack) new net.minecraft.item.ItemStack(Items.STICK, 1)).createSnapshot());

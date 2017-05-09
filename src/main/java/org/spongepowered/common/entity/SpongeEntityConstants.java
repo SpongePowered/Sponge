@@ -25,13 +25,6 @@
 package org.spongepowered.common.entity;
 
 import com.google.common.collect.Maps;
-import net.minecraft.entity.passive.AbstractHorse;
-import net.minecraft.entity.passive.EntityDonkey;
-import net.minecraft.entity.passive.EntityHorse;
-import net.minecraft.entity.passive.EntityLlama;
-import net.minecraft.entity.passive.EntityMule;
-import net.minecraft.entity.passive.EntitySkeletonHorse;
-import net.minecraft.entity.passive.EntityZombieHorse;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.OcelotType;

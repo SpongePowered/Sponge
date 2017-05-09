@@ -44,8 +44,9 @@ import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 import java.util.Random;
 
 /**
- * This mixin is making MapGenStructure be a populator as well as a
- * generationpopulator as the structures are called both from the generation
+ * This mixin is making MapGenStructure be a populator as well as
+ * a {@link org.spongepowered.api.world.gen.GenerationPopulator}
+ * as the structures are called both from the generation
  * phase and the population phase of chunk creation.
  */
 @Mixin(MapGenStructure.class)
@@ -79,12 +80,12 @@ public abstract class MixinMapGenStructure implements Populator {
      * @return true if generation was successful
      */
     @Overwrite
-    public synchronized boolean generateStructure(World worldIn, Random randomIn, ChunkPos chunkCoord)
-    {
+    public synchronized boolean generateStructure(World worldIn, Random randomIn, ChunkPos chunkCoord) {
         if (generatingStructures) {
             return false;
         }
-        Chunk chunk = ((IMixinChunkProviderServer) worldIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
+        Chunk chunk = ((IMixinChunkProviderServer) worldIn.getChunkProvider())
+                .getLoadedChunkWithoutMarkingActive(chunkCoord.chunkXPos, chunkCoord.chunkZPos);
         if (chunk == null) {
             return false;
         }
@@ -95,10 +96,9 @@ public abstract class MixinMapGenStructure implements Populator {
         boolean flag = false;
 
         generatingStructures = true;
-        for (StructureStart structurestart : this.structureMap.values())
-        {
-            if (structurestart.isSizeableStructure() && structurestart.isValidForPostProcess(chunkCoord) && structurestart.getBoundingBox().intersectsWith(i, j, i + 15, j + 15))
-            {
+        for (StructureStart structurestart : this.structureMap.values()) {
+            if (structurestart.isSizeableStructure() && structurestart
+                    .isValidForPostProcess(chunkCoord) && structurestart.getBoundingBox().intersectsWith(i, j, i + 15, j + 15)) {
                 structurestart.generateStructure(worldIn, randomIn, new StructureBoundingBox(i, j, i + 15, j + 15));
                 structurestart.notifyPostProcessAt(chunkCoord);
                 flag = true;

@@ -48,10 +48,11 @@ import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.util.VecHelper;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(ServerCommandManager.class)
@@ -95,7 +96,8 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
      * @author zml
      *
      * Purpose: Reroute MC command handling through Sponge
-     * Reasoning: All commands should go through one system -- we need none of the MC handling code
+     * Reasoning: All commands should go through one system --
+     * we need none of the MC handling code
      */
     @Override
     public ICommand registerCommand(ICommand command) {
@@ -157,9 +159,11 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
      * @author zml
      *
      * Purpose: Reroute MC command handling through Sponge
-     * Reasoning: All commands should go through one system -- we need none of the MC handling code
+     * Reasoning: All commands should go through one system -- we need none
+     * of the MC handling code
      *
-     * We redirect this method in MinecraftServer, to provide the real value of 'usingBlock'. This override is just for mods
+     * We redirect this method in MinecraftServer, to provide the real value
+     * of 'usingBlock'. This override is just for mods
      */
     @Override
     @SuppressWarnings("rawtypes")
@@ -168,6 +172,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         if (pos != null) {
             targetPos = new Location<>((org.spongepowered.api.world.World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
         }
-        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, targetPos, false);
+        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager())
+                .getSuggestions((CommandSource) sender, input, targetPos, false);
     }
 }

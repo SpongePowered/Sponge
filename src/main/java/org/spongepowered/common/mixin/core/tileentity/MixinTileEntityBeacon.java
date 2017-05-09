@@ -29,7 +29,6 @@ import static org.spongepowered.api.data.DataQuery.of;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
-import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.block.tileentity.carrier.Beacon;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
@@ -77,15 +76,15 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     /**
      * @author gabizou - March 4th, 2016
      *
-     * @reason Bypass the vanilla check that sprouted between 1.8 and 1.8.8 such that it
-     * prevented any non-vanilla beacon defined potions from being applied
-     * to a beacon. This method is used for both setfield and when reading from nbt.
+     * @reason Bypass the vanilla check that sprouted between
+     *     1.8 and 1.8.8 such that it prevented any non-vanilla
+     *     beacon defined potions from being applied to a beacon.
+     *     This method is used for both setfield and when reading from nbt.
      */
     @Overwrite
     private static Potion isBeaconEffect(int p_184279_0_) {
         return Potion.getPotionById(p_184279_0_);
     }
-
 
     @Override
     public DataContainer toContainer() {

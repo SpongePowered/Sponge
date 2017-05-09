@@ -28,15 +28,14 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
 /**
- * This class is only used as an adapter when explicitly requested from the API, tyhough
- * {@link Chest#getDoubleChestInventory()}
+ * This class is only used as an adapter when explicitly requested
+ * from the API, through {@link Chest#getDoubleChestInventory()}.
  */
 public class LargeChestInventoryLens extends MinecraftLens {
 
@@ -54,7 +53,8 @@ public class LargeChestInventoryLens extends MinecraftLens {
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
         this.addSpanningChild(new GridInventoryLensImpl(0, 9, this.upperChest.getSizeInventory() / 9, 9, slots));
-        this.addSpanningChild(new GridInventoryLensImpl(this.upperChest.getSizeInventory(), 9, this.lowerChest.getSizeInventory() / 9, 9, slots));
+        this.addSpanningChild(new GridInventoryLensImpl(this.upperChest.getSizeInventory(), 9,
+                this.lowerChest.getSizeInventory() / 9, 9, slots));
     }
 
     @Override

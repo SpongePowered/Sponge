@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.config.type;
 
-import ninja.leaping.configurate.objectmapping.Setting;
-
 public class DimensionConfig extends ConfigBase {
 
     public DimensionConfig() {

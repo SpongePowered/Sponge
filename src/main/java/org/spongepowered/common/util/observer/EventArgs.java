@@ -25,12 +25,12 @@
 package org.spongepowered.common.util.observer;
 
 /**
- * Observer pattern event callback payload base class
+ * Observer pattern event callback payload base class.
  */
 public class EventArgs {
 
     /**
-     * No event arguments
+     * No event arguments.
      */
     public static final EventArgs EMPTY = new EventArgs();
     

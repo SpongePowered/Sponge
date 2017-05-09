@@ -33,6 +33,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
@@ -160,7 +161,7 @@ public final class BlockUtil {
          * Sorts {@code traits} by the trait IDs.
          */
         private List<BlockTrait<?>> sortTraits(Set<BlockTrait<?>> traits) {
-            return traits.stream().sorted((a, b) -> a.getId().compareTo(b.getId())).collect(Collectors.toList());
+            return traits.stream().sorted(Comparator.comparing(CatalogType::getId)).collect(Collectors.toList());
         }
 
     }

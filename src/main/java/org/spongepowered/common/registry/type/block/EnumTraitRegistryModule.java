@@ -39,8 +39,7 @@ import java.util.Locale;
 import java.util.Map;
 
 @RegisterCatalog(EnumTraits.class)
-public final class EnumTraitRegistryModule
-        extends AbstractPrefixCheckCatalogRegistryModule<EnumTrait<?>>
+public final class EnumTraitRegistryModule extends AbstractPrefixCheckCatalogRegistryModule<EnumTrait<?>>
         implements SpongeAdditionalCatalogRegistryModule<EnumTrait<?>>, AlternateCatalogRegistryModule<EnumTrait<?>> {
 
     public static EnumTraitRegistryModule getInstance() {
@@ -79,6 +78,6 @@ public final class EnumTraitRegistryModule
     }
 
     private static final class Holder {
-        final static EnumTraitRegistryModule INSTANCE = new EnumTraitRegistryModule();
+        static final EnumTraitRegistryModule INSTANCE = new EnumTraitRegistryModule();
     }
 }

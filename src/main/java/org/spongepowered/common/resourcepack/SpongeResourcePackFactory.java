@@ -65,8 +65,8 @@ public final class SpongeResourcePackFactory implements ResourcePackFactory {
 
     private static InputStream openStream(URI uri) throws IOException {
         if (uri.toString().startsWith(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL)) {
-            return Files.newInputStream(SpongeImpl.getGameDir().resolve(uri.toString().substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length
-                    ())));
+            return Files.newInputStream(
+                    SpongeImpl.getGameDir().resolve(uri.toString().substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length())));
         }
         return uri.toURL().openStream();
     }

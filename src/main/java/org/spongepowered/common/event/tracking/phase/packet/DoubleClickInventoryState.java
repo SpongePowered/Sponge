@@ -39,7 +39,8 @@ import java.util.List;
 final class DoubleClickInventoryState extends BasicInventoryPacketState {
 
     DoubleClickInventoryState() {
-        super(PacketPhase.MODE_DOUBLE_CLICK | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY, PacketPhase.MASK_MODE | PacketPhase.MASK_BUTTON);
+        super(PacketPhase.MODE_DOUBLE_CLICK | PacketPhase.BUTTON_PRIMARY | PacketPhase.BUTTON_SECONDARY,
+                PacketPhase.MASK_MODE | PacketPhase.MASK_BUTTON);
     }
 
     @Override

@@ -37,10 +37,12 @@ import java.util.Set;
  * Implementation that forces a single parent to always be part of the parents.
  */
 public class FixedParentMemorySubjectData extends GlobalMemorySubjectData {
+
     private final Subject forcedParent;
 
     /**
-     * Creates a new subject data instance, using the provided service to request instances of permission subjects.
+     * Creates a new subject data instance, using the provided service
+     * to request instances of permission subjects.
      *
      * @param service The service to request subjects from
      */

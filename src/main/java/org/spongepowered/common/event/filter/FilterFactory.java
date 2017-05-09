@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.spongepowered.common.event.gen.DefineableClassLoader;
+import org.spongepowered.common.event.gen.DefinableClassLoader;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class FilterFactory {
 
     private final AtomicInteger id = new AtomicInteger();
-    private final DefineableClassLoader classLoader;
+    private final DefinableClassLoader classLoader;
     private final LoadingCache<Method, Class<? extends EventFilter>> cache = CacheBuilder.newBuilder()
             .concurrencyLevel(1).weakValues().build(new CacheLoader<Method, Class<? extends EventFilter>>() {
 
@@ -49,7 +49,7 @@ public class FilterFactory {
             });
     private final String targetPackage;
 
-    public FilterFactory(String targetPackage, DefineableClassLoader classLoader) {
+    public FilterFactory(String targetPackage, DefinableClassLoader classLoader) {
         checkNotNull(targetPackage, "targetPackage");
         checkArgument(!targetPackage.isEmpty(), "targetPackage cannot be empty");
         this.targetPackage = targetPackage + '.';

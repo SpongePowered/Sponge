@@ -36,7 +36,8 @@ import org.spongepowered.common.mixin.core.entity.IMixinAreaEffectCloud;
 
 import java.util.Optional;
 
-public class AreaEffectCloudDurationOnUseProcessor extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Integer, MutableBoundedValue<Integer>> {
+public class AreaEffectCloudDurationOnUseProcessor
+        extends AbstractSpongeValueProcessor<EntityAreaEffectCloud, Integer, MutableBoundedValue<Integer>> {
 
     public AreaEffectCloudDurationOnUseProcessor() {
         super(EntityAreaEffectCloud.class, Keys.AREA_EFFECT_CLOUD_DURATION_ON_USE);

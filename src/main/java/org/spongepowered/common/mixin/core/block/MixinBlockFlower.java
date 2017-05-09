@@ -57,7 +57,7 @@ public abstract class MixinBlockFlower extends MixinBlock {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutablePlantData) {
             final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) (Object) ((ImmutablePlantData) manipulator).type().get();
-            if(flowerType.getBlockType() != ((BlockFlower) blockState.getBlock()).getBlockType()){
+            if (flowerType.getBlockType() != ((BlockFlower) blockState.getBlock()).getBlockType()) {
                 return Optional.empty();
             }
             return Optional.of((BlockState) blockState.withProperty(((BlockFlower) blockState.getBlock()).getTypeProperty(), flowerType));
@@ -69,7 +69,7 @@ public abstract class MixinBlockFlower extends MixinBlock {
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.PLANT_TYPE)) {
             final BlockFlower.EnumFlowerType flowerType = (BlockFlower.EnumFlowerType) value;
-            if(flowerType.getBlockType() != ((BlockFlower) blockState.getBlock()).getBlockType()){
+            if (flowerType.getBlockType() != ((BlockFlower) blockState.getBlock()).getBlockType()) {
                 return Optional.empty();
             }
             return Optional.of((BlockState) blockState.withProperty(((BlockFlower) blockState.getBlock()).getTypeProperty(), flowerType));

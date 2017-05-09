@@ -47,7 +47,8 @@ public abstract class MixinServerWorldEventHandler implements IMixinServerWorldE
     @Shadow @Final private WorldServer world;
     @Shadow @Final private MinecraftServer mcServer;
 
-    @Redirect(method = "playSoundToAllNearExcept", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
+    @Redirect(method = "playSoundToAllNearExcept",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"), expect = 0, require = 0)
     private int getDimensionForPlayingSound(DimensionType dimensionType) {
         return ((IMixinWorldServer) this.world).getDimensionId();
     }

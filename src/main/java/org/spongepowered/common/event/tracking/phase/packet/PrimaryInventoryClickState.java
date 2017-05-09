@@ -38,7 +38,7 @@ import java.util.List;
 
 final class PrimaryInventoryClickState extends BasicInventoryPacketState {
 
-    public PrimaryInventoryClickState() {
+    PrimaryInventoryClickState() {
         super(PacketPhase.MODE_CLICK | PacketPhase.BUTTON_PRIMARY | PacketPhase.CLICK_INSIDE_WINDOW);
     }
 

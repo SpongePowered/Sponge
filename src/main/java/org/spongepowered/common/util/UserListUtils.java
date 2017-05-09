@@ -37,8 +37,7 @@ public class UserListUtils {
 
         try {
             list.writeChanges();
-        }
-        catch (IOException ioexception) {
+        } catch (IOException ioexception) {
             UserList.LOGGER.warn("Could not save the list after adding a user.", ioexception);
         }
     }
@@ -49,9 +48,8 @@ public class UserListUtils {
 
         try {
             list.writeChanges();
-        }
-        catch (IOException ioexception) {
-            UserList.LOGGER.warn("Could not save the list after removing a user.", ioexception);
+        } catch (IOException e) {
+            UserList.LOGGER.warn("Could not save the list after removing a user.", e);
         }
     }
 }

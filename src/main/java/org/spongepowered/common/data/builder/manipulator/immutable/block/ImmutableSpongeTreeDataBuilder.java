@@ -43,7 +43,8 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 
 import java.util.Optional;
 
-public class ImmutableSpongeTreeDataBuilder extends AbstractDataBuilder<ImmutableTreeData> implements ImmutableDataManipulatorBuilder<ImmutableTreeData, TreeData> {
+public class ImmutableSpongeTreeDataBuilder extends AbstractDataBuilder<ImmutableTreeData>
+        implements ImmutableDataManipulatorBuilder<ImmutableTreeData, TreeData> {
 
     public ImmutableSpongeTreeDataBuilder() {
         super(ImmutableTreeData.class, 1);

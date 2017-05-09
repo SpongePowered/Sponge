@@ -42,7 +42,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -84,10 +83,12 @@ public class ChunkSaveHelper {
                     chunkEntityCounts.put(chunkCoords, chunkEntityCounts.getInt(chunkCoords) + 1);
                     classEntityCounts.put(entity.getClass(), classEntityCounts.getInt(entity.getClass()) + 1);
                     if ((entity.getCollisionBoundingBox() != null) && logAll) {
-                        BlockPos coords = new BlockPos(GenericMath.floor(entity.posX), GenericMath.floor(entity.posY), GenericMath.floor(entity.posZ));
+                        BlockPos coords =
+                                new BlockPos(GenericMath.floor(entity.posX), GenericMath.floor(entity.posY), GenericMath.floor(entity.posZ));
                         if (!collidingCoords.contains(coords)) {
                             collidingCoords.add(coords);
-                            int size = entity.world.getEntitiesWithinAABBExcludingEntity(entity, entity.getCollisionBoundingBox().expand(1, 1, 1)).size();
+                            int size = entity.world
+                                    .getEntitiesWithinAABBExcludingEntity(entity, entity.getCollisionBoundingBox().expand(1, 1, 1)).size();
                             if (size < 5) {
                                 continue;
                             }
@@ -146,7 +147,7 @@ public class ChunkSaveHelper {
 
     private static <T> void writeChunkCounts(JsonWriter writer, String name, final Object2IntMap<T> map, int max) throws IOException {
         List<T> sortedCoords = new ArrayList<>(map.keySet());
-        Collections.sort(sortedCoords, (s1, s2) -> map.get(s2) - map.get(s1));
+        sortedCoords.sort((s1, s2) -> map.get(s2) - map.get(s1));
 
         int i = 0;
         writer.name(name).beginArray();

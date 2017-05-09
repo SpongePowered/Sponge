@@ -39,8 +39,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class SittingDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityTameable, Boolean, Value<Boolean>, SittingData, ImmutableSittingData> {
+public class SittingDataProcessor extends AbstractEntitySingleDataProcessor<EntityTameable, Boolean, Value<Boolean>,
+        SittingData, ImmutableSittingData> {
 
     public SittingDataProcessor() {
         super(EntityTameable.class, Keys.IS_SITTING);

@@ -95,7 +95,7 @@ final class BlockDecayPhaseState extends BlockPhaseState {
                     }
                 });
         context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blocks ->TrackingUtil.processBlockCaptures(blocks, this, context));
+                .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, context));
         context.getCapturedItemStackSupplier()
                 .ifPresentAndNotEmpty(drops -> {
                     final List<EntityItem> items = drops.stream()

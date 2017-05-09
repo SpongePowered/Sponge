@@ -50,4 +50,5 @@ public class BlockTrackingCategory extends ConfigCategory {
     public List<String> getBlockBlacklist() {
         return this.blockBlacklist;
     }
+
 }

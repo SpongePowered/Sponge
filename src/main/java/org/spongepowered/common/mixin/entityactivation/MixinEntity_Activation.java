@@ -26,9 +26,7 @@ package org.spongepowered.common.mixin.entityactivation;
 
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,7 +37,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRange;
 import org.spongepowered.common.mixin.plugin.entityactivation.interfaces.IModData_Activation;
 
-@NonnullByDefault
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
 public abstract class MixinEntity_Activation implements Entity, IModData_Activation {
 

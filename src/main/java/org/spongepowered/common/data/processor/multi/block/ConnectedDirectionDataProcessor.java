@@ -41,8 +41,8 @@ import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTar
 import java.util.Map;
 import java.util.Optional;
 
-public class ConnectedDirectionDataProcessor extends
-        AbstractMultiDataSingleTargetProcessor<ItemStack, ConnectedDirectionData, ImmutableConnectedDirectionData> {
+public class ConnectedDirectionDataProcessor
+        extends AbstractMultiDataSingleTargetProcessor<ItemStack, ConnectedDirectionData, ImmutableConnectedDirectionData> {
 
     public ConnectedDirectionDataProcessor() {
         super(ItemStack.class);

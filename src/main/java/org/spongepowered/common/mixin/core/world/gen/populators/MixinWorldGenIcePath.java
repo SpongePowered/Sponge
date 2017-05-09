@@ -85,7 +85,7 @@ public abstract class MixinWorldGenIcePath implements IcePath {
      * @author Deamon - December 12th, 2015
      * 
      * @reason Overwritten to replace the path radius with one dependent on
-     * our variable amount.
+     *     our variable amount.
      */
     @Overwrite
     public boolean generate(World worldIn, Random rand, BlockPos position) {

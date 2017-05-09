@@ -175,7 +175,8 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
                     .chance(1d / this.settings.lavaLakeChance)
                     .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithVariance(0,
-                            VariableAmount.baseWithRandomAddition(8, VariableAmount.baseWithOptionalAddition(55, 193, 0.1))))
+                            VariableAmount.baseWithRandomAddition(8,
+                                    VariableAmount.baseWithOptionalAddition(55, 193, 0.1))))
                     .build();
             FilteredPopulator filtered = new FilteredPopulator(lake);
             filtered.setRequiredFlags(WorldGenConstants.VILLAGE_FLAG);
@@ -231,7 +232,8 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
         // of the biomes that the terrain generator expects. While not an exact
         // reverse of the algorithm this should be accurate 99.997% of the time
         // (based on testing).
-        ObjectArrayMutableBiomeBuffer buffer = new ObjectArrayMutableBiomeBuffer(new Vector3i(x * 16 - 6, 0, z * 16 - 6), new Vector3i(37, 1, 37));
+        ObjectArrayMutableBiomeBuffer buffer = new ObjectArrayMutableBiomeBuffer(new Vector3i(x * 16 - 6, 0, z * 16 - 6),
+                new Vector3i(37, 1, 37));
         this.biomegen.generateBiomes(buffer);
         if (this.biomesForGeneration == null || this.biomesForGeneration.length < 100) {
             this.biomesForGeneration = new Biome[100];
@@ -250,12 +252,14 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
     /**
      * @author gabizou - February 1st, 2016
      * @author blood - February 6th, 2017 - Only redirect if vanilla generator. 
-     *   This fixes the FuturePack mod as it extends the ChunkProviderOverworld generator.
+     *     This fixes the FuturePack mod as it extends the
+     *     ChunkProviderOverworld generator.
      *
-     * Redirects this method call to just simply return the current biomes, as
-     * necessitated by @Deamon's changes. This avoids an overwrite entirely.
+     * <p>Redirects this method call to just simply return the current biomes, as
+     * necessitated by @Deamon's changes. This avoids an overwrite entirely.</p>
      */
-    @Redirect(method = "setBlocksInChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/biome/BiomeProvider;getBiomesForGeneration([Lnet/minecraft/world/biome/Biome;IIII)[Lnet/minecraft/world/biome/Biome;"))
+    @Redirect(method = "setBlocksInChunk", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/biome/BiomeProvider;getBiomesForGeneration([Lnet/minecraft/world/biome/Biome;IIII)[Lnet/minecraft/world/biome/Biome;"))
     private Biome[] onSetBlocksGetBiomesIgnore(BiomeProvider manager, Biome[] biomes, int x, int z, int width, int height) {
         if (this.isVanilla) {
             return biomes;

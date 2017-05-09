@@ -90,9 +90,8 @@ class PlayerTickPhaseState extends TickPhaseState {
                 EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
             }
         });
-        phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
-            TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
-        });
+        phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots ->
+                TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext));
     }
 
     @Override

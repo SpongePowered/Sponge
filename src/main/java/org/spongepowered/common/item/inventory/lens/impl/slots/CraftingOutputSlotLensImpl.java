@@ -35,14 +35,14 @@ import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens
 
 import java.util.function.Predicate;
 
-
 public class CraftingOutputSlotLensImpl extends OutputSlotLensImpl implements CraftingOutputSlotLens<IInventory, net.minecraft.item.ItemStack> {
 
     public CraftingOutputSlotLensImpl(int index, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
         this(index, CraftingOutputAdapter.class, stackFilter, typeFilter);
     }
 
-    public CraftingOutputSlotLensImpl(int index, Class<? extends Inventory> adapterType, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter) {
+    public CraftingOutputSlotLensImpl(int index, Class<? extends Inventory> adapterType, Predicate<ItemStack> stackFilter,
+            Predicate<ItemType> typeFilter) {
         super(index, adapterType, stackFilter, typeFilter);
     }
     

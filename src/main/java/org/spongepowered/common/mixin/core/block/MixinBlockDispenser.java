@@ -73,7 +73,8 @@ public abstract class MixinBlockDispenser extends MixinBlock {
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableDirectionalData) {
-            return Optional.of((BlockState) blockState.withProperty(BlockDispenser.FACING, DirectionResolver.getFor(((ImmutableDirectionalData) manipulator).direction().get())));
+            return Optional.of((BlockState) blockState
+                    .withProperty(BlockDispenser.FACING, DirectionResolver.getFor(((ImmutableDirectionalData) manipulator).direction().get())));
         }
         return super.getStateWithData(blockState, manipulator);
     }

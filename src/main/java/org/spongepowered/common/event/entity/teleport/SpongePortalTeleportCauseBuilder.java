@@ -29,7 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.api.event.cause.entity.teleport.PortalTeleportCause;
 import org.spongepowered.api.event.cause.entity.teleport.common.AbstractPortalTeleportCauseBuilder;
 
-public class SpongePortalTeleportCauseBuilder extends AbstractPortalTeleportCauseBuilder<PortalTeleportCause, PortalTeleportCause.Builder> implements PortalTeleportCause.Builder {
+public class SpongePortalTeleportCauseBuilder extends AbstractPortalTeleportCauseBuilder<PortalTeleportCause, PortalTeleportCause.Builder>
+        implements PortalTeleportCause.Builder {
 
     public SpongePortalTeleportCauseBuilder() {
     }

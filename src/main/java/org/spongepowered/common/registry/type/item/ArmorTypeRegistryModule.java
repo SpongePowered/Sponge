@@ -30,7 +30,6 @@ import org.spongepowered.api.data.type.ArmorTypes;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedAlternateCatalogTypeRegistryModule;
-import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
 @RegisterCatalog(ArmorTypes.class)
 public class ArmorTypeRegistryModule extends MinecraftEnumBasedAlternateCatalogTypeRegistryModule<ItemArmor.ArmorMaterial, ArmorType> {

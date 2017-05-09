@@ -303,8 +303,8 @@ public final class SpongeParticleHelper {
             f2 = velocity.getZ();
 
             Optional<Boolean> slowHorizontalVelocity = type.getDefaultOption(ParticleOptions.SLOW_HORIZONTAL_VELOCITY);
-            if (slowHorizontalVelocity.isPresent() &&
-                    effect.getOption(ParticleOptions.SLOW_HORIZONTAL_VELOCITY).orElse(slowHorizontalVelocity.get())) {
+            if (slowHorizontalVelocity.isPresent()
+                    && effect.getOption(ParticleOptions.SLOW_HORIZONTAL_VELOCITY).orElse(slowHorizontalVelocity.get())) {
                 f0 = 0f;
                 f2 = 0f;
             }

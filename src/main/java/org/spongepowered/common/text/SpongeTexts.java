@@ -32,8 +32,8 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.interfaces.text.IMixinTextComponent;
 
 import java.util.List;
 
@@ -130,7 +130,7 @@ public final class SpongeTexts {
     public static List<Text> fromJson(List<String> json) {
         List<Text> list = Lists.newArrayList();
         for (String line : json) {
-           list.add(TextSerializers.JSON.deserialize(line));
+            list.add(TextSerializers.JSON.deserialize(line));
         }
         return list;
     }

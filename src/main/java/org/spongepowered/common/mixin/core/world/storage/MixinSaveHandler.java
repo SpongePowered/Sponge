@@ -76,14 +76,14 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     @Shadow @Final private File worldDirectory;
     @Shadow @Final private long initializationTime;
 
-    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
-            , ordinal = 0, remap = false))
+    @ModifyArg(method = "checkSessionLock",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V", ordinal = 0, remap = false))
     public String modifyMinecraftExceptionOutputIfNotInitializationTime(String message) {
         return "The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting";
     }
 
-    @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
-            , ordinal = 1, remap = false))
+    @ModifyArg(method = "checkSessionLock",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V", ordinal = 1, remap = false))
     public String modifyMinecraftExceptionOutputIfIOException(String message) {
         return "Failed to check session lock for world " + this.worldDirectory + ", aborting";
     }
@@ -170,8 +170,9 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     @Nullable private Path file;
 
     /**
-     * Redirects the {@link File#exists()} checking that if the file exists, grab
-     * the file for later usage to read the file attributes for pre-existing data.
+     * Redirects the {@link File#exists()} checking that if the file exists,
+     * grab the file for later usage to read the file attributes for
+     * pre-existing data.
      *
      * @param localfile The local file
      * @return True if the file exists
@@ -184,11 +185,14 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     }
 
     /**
-     * Redirects the reader such that since the player file existed already, we can safely assume
-     * we can grab the file attributes and check if the first join time exists in the sponge compound,
-     * if it does not, then we add it to the sponge data part of the compound.
+     * Redirects the reader such that since the player file existed
+     * already, we can safely assume we can grab the file attributes
+     * and check if the first join time exists in the sponge
+     * compound, if it does not, then we add it to the sponge data
+     * part of the compound.
      *
-     * @param inputStream The input stream to direct to compressed stream tools
+     * @param inputStream The input stream to direct to compressed
+     *     stream tools
      * @return The compound that may be modified
      * @throws IOException
      */

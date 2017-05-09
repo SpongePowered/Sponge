@@ -49,23 +49,28 @@ public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements 
         this(outputSlotIndex, gridBase, width, height, width, GridInventoryAdapter.class, slots);
     }
 
-    public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, Class<? extends Inventory> adapterType,
+            SlotProvider<IInventory, ItemStack> slots) {
         this(outputSlotIndex, gridBase, width, height, width, adapterType, slots);
     }
 
-    public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, int rowStride, SlotProvider<IInventory, ItemStack> slots) {
+    public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, int rowStride,
+            SlotProvider<IInventory, ItemStack> slots) {
         this(outputSlotIndex, gridBase, width, height, rowStride, 0, 0, GridInventoryAdapter.class, slots);
     }
 
-    public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, int rowStride, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, int rowStride, Class<? extends Inventory> adapterType,
+            SlotProvider<IInventory, ItemStack> slots) {
         this(outputSlotIndex, gridBase, width, height, rowStride, 0, 0, adapterType, slots);
     }
 
-    public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, int rowStride, int xBase, int yBase, SlotProvider<IInventory, ItemStack> slots) {
+    public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, int rowStride, int xBase, int yBase,
+            SlotProvider<IInventory, ItemStack> slots) {
         this(outputSlotIndex, gridBase, width, height, rowStride, xBase, yBase, GridInventoryAdapter.class, slots);
     }
 
-    public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, int rowStride, int xBase, int yBase,
+            Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
         super(gridBase, width, height, rowStride, xBase, yBase, adapterType, slots);
         this.outputSlotIndex = outputSlotIndex;
         this.outputSlot = (CraftingOutputSlotLens<IInventory, ItemStack>)slots.getSlot(this.outputSlotIndex);

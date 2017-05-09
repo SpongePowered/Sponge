@@ -36,9 +36,10 @@ import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -47,8 +48,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
-import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -255,7 +254,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     @Override
     public EntitySnapshot build() {
         EntitySnapshot snapshot = new SpongeEntitySnapshot(this);
-        if(this.values != null) {
+        if (this.values != null) {
             for (ImmutableValue<?> value : this.values) {
                 snapshot = snapshot.with(value).orElse(snapshot);
             }
@@ -265,7 +264,8 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
 
     @Override
     protected Optional<EntitySnapshot> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(Queries.WORLD_ID, DataQueries.ENTITY_TYPE, DataQueries.ENTITY_ROTATION, DataQueries.ENTITY_SCALE, DataQueries.SNAPSHOT_WORLD_POSITION)) {
+        if (!container.contains(Queries.WORLD_ID, DataQueries.ENTITY_TYPE, DataQueries.ENTITY_ROTATION,
+                DataQueries.ENTITY_SCALE, DataQueries.SNAPSHOT_WORLD_POSITION)) {
             return Optional.empty();
         }
         this.worldId = UUID.fromString(container.getString(Queries.WORLD_ID).get());

@@ -22,17 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.gen;
-
-public class DefineableClassLoader extends ClassLoader {
-
-    public DefineableClassLoader(ClassLoader parent) {
-        super(parent);
-    }
-
-    @SuppressWarnings("unchecked")
-    public <T> Class<T> defineClass(String name, byte[] b) {
-        return (Class<T>) defineClass(name, b, 0, b.length);
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.text.chat;

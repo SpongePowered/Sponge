@@ -35,7 +35,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeStoredEnchan
 import java.util.List;
 
 public class ImmutableSpongeStoredEnchantmentData
-    extends AbstractImmutableListData<ItemEnchantment, ImmutableStoredEnchantmentData, StoredEnchantmentData>
+        extends AbstractImmutableListData<ItemEnchantment, ImmutableStoredEnchantmentData, StoredEnchantmentData>
         implements ImmutableStoredEnchantmentData {
 
     public ImmutableSpongeStoredEnchantmentData(List<ItemEnchantment> value) {

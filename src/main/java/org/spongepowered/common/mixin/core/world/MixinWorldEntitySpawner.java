@@ -32,10 +32,10 @@ import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.IEntityLivingData;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.management.PlayerChunkMapEntry;
+import net.minecraft.util.WeightedRandom;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.WorldServer;
@@ -93,7 +93,8 @@ public abstract class MixinWorldEntitySpawner {
      * @param worldServerIn The world
      * @param spawnHostileMobs If hostile entities can spawn
      * @param spawnPeacefulMobs If passive entities can spawn
-     * @param spawnOnSetTickRate If tickrate has been reached for spawning passives
+     * @param spawnOnSetTickRate If tickrate has been reached for
+     *     spawning passives
      * @return The amount of entities spawned
      */
     @Overwrite
@@ -126,7 +127,7 @@ public abstract class MixinWorldEntitySpawner {
         // Vanilla uses a div count of 289 (17x17) which assumes the view distance is 8.
         // Since we allow for custom ranges, we need to adjust the div count based on the 
         // mob spawn range set by server.
-        final int MOB_SPAWN_COUNT_DIV = (2 * mobSpawnRange + 1)*(2 * mobSpawnRange + 1);
+        final int MOB_SPAWN_COUNT_DIV = (2 * mobSpawnRange + 1) * (2 * mobSpawnRange + 1);
 
         for (EntityPlayer entityplayer : worldServerIn.playerEntities) {
             // We treat players who do not affect spawning as "spectators"
@@ -140,7 +141,8 @@ public abstract class MixinWorldEntitySpawner {
             for (int i = -mobSpawnRange; i <= mobSpawnRange; ++i) {
                 for (int j = -mobSpawnRange; j <= mobSpawnRange; ++j) {
                     boolean flag = i == -mobSpawnRange || i == mobSpawnRange || j == -mobSpawnRange || j == mobSpawnRange;
-                    final Chunk chunk = ((IMixinChunkProviderServer) worldServerIn.getChunkProvider()).getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
+                    final Chunk chunk = ((IMixinChunkProviderServer) worldServerIn.getChunkProvider())
+                            .getLoadedChunkWithoutMarkingActive(i + playerPosX, j + playerPosZ);
                     if (chunk == null || (chunk.unloadQueued && !((IMixinChunk) chunk).isPersistedChunk())) {
                         // Don't attempt to spawn in an unloaded chunk
                         continue;
@@ -301,8 +303,7 @@ public abstract class MixinWorldEntitySpawner {
         return totalSpawned;
     }
 
-    private static BlockPos getRandomChunkPosition(World worldIn, Chunk chunk)
-    {
+    private static BlockPos getRandomChunkPosition(World worldIn, Chunk chunk) {
         int i = chunk.xPosition * 16 + worldIn.rand.nextInt(16);
         int j = chunk.zPosition * 16 + worldIn.rand.nextInt(16);
         int k = MathHelper.roundUp(chunk.getHeight(new BlockPos(i, 0, j)) + 1, 16);
@@ -312,7 +313,8 @@ public abstract class MixinWorldEntitySpawner {
 
     /**
      * @author aikar - February 20th, 2017 - Optimizes light level check.
-     * @author blood - February 20th, 2017 - Avoids checking unloaded chunks and chunks with pending light updates.
+     * @author blood - February 20th, 2017 - Avoids checking unloaded
+     *     chunks and chunks with pending light updates.
      *
      * @reason Avoids checking unloaded chunks and chunks with pending light updates.
      */
@@ -354,8 +356,9 @@ public abstract class MixinWorldEntitySpawner {
     }
 
     /**
-     * Redirects the canCreatureTypeSpawnAtLocation to add our event check after. This requires that the {@link #onGetRandom(Random, List)}
-     * is called before this to actively set the proper entity class.
+     * Redirects the canCreatureTypeSpawnAtLocation to add our event check after.
+     * This requires that the {@link #onGetRandom(Random, List)} is called before
+     * this to actively set the proper entity class.
      * @param type
      * @param worldIn
      * @param pos
@@ -367,8 +370,9 @@ public abstract class MixinWorldEntitySpawner {
     }
 
     /**
-     * Redirects the method call to get the spawn list entry for world gen spawning so that we can
-     * "capture" the {@link net.minecraft.entity.Entity} class that is about to attempt to be spawned.
+     * Redirects the method call to get the spawn list entry for world gen
+     * spawning so that we can "capture" the {@link net.minecraft.entity.Entity}
+     * class that is about to attempt to be spawned.
      *
      * @param random
      * @param collection

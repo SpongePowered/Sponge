@@ -45,7 +45,7 @@ public class SpongeSuperclassTransformer implements IClassTransformer {
         if (superclass != null) {
             ClassNode node = this.readClass(basicClass);
 
-            node.methods.stream().forEach(m -> this.transformMethod(m, name, node.superName, superclass));
+            node.methods.forEach(m -> this.transformMethod(m, name, node.superName, superclass));
             node.superName = superclass;
 
             node.accept(new CheckClassAdapter(new ClassWriter(0)));

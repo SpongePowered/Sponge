@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.concurrentchecks;
 
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ClassInheritanceMultiMap;
 import org.spongepowered.api.Platform;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,7 +39,8 @@ public class MixinClassInheritanceMultiMap {
     @Inject(method = "addForClass", at = @At("HEAD"), cancellable = true)
     public void onAddForClass(Object entity, Class<?> parentClass, CallbackInfo ci) {
         // This class gets used on the client, but we only care about the server
-        if (!(SpongeImpl.getGame().getPlatform().getExecutionType() == Platform.Type.CLIENT) && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+        if (!(SpongeImpl.getGame().getPlatform().getExecutionType() == Platform.Type.CLIENT)
+                && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             Thread.dumpStack();
             SpongeImpl.getLogger().error("Detected attempt to add entity '" + entity + "' to ClassInheritanceMultiMap asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
@@ -51,7 +51,8 @@ public class MixinClassInheritanceMultiMap {
 
     @Inject(method = "remove", at = @At("HEAD"), cancellable = true)
     public void onRemove(Object entity, CallbackInfoReturnable<Boolean> cir) {
-        if (!(SpongeImpl.getGame().getPlatform().getExecutionType() == Platform.Type.CLIENT) && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+        if (!(SpongeImpl.getGame().getPlatform().getExecutionType() == Platform.Type.CLIENT)
+                && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             Thread.dumpStack();
             SpongeImpl.getLogger().error("Detected attempt to remove entity '" + entity + "' from ClassInheritanceMultiMap asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"

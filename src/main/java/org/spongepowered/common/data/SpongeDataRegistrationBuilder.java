@@ -42,7 +42,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> implements DataRegistration.Builder<M, I> {
+public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+        implements DataRegistration.Builder<M, I> {
 
     @Nullable Class<M> manipulatorClass;
     @Nullable Class<I> immutableClass;
@@ -59,7 +60,8 @@ public final class SpongeDataRegistrationBuilder<M extends DataManipulator<M, I>
 
     @SuppressWarnings("unchecked")
     @Override
-    public  <D extends DataManipulator<D, C>, C extends ImmutableDataManipulator<C, D>> SpongeDataRegistrationBuilder<D, C> dataClass(Class<D> manipulatorClass) {
+    public  <D extends DataManipulator<D, C>,
+            C extends ImmutableDataManipulator<C, D>> SpongeDataRegistrationBuilder<D, C> dataClass(Class<D> manipulatorClass) {
         this.manipulatorClass = (Class<M>) checkNotNull(manipulatorClass, "DataManipulator class cannot be null!");
         return (SpongeDataRegistrationBuilder<D, C>) this;
     }

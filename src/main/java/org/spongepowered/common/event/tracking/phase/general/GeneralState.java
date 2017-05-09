@@ -53,19 +53,23 @@ abstract class GeneralState implements IPhaseState {
 
     /**
      * A duplicate of {@link TrackingPhase#spawnEntityOrCapture(IPhaseState, PhaseContext, Entity, int, int)}
-     * such that the general states will not know what to do for entity spawns. Eventually, this is going to be centralized
-     * so that it's not always delegated between the phases and phase states.
+     * such that the general states will not know what to do for
+     * entity spawns. Eventually, this is going to be centralized
+     * so that it's not always delegated between the phases and
+     * phase states.
      *
-     * Basically, for this method, this is included only for the {@link GeneralPhase.State#COMPLETE}, all other
-     * will capture or spawn appropriately. In the case of explosions for example, the entities must be mapped
-     * according to the blocks broken so that the blocks themselves can be cancelled and the entities spawned
-     * are dropped from the game entirely before throwing additional events.
+     * <p>Basically, for this method, this is included only for the
+     * {@link GeneralPhase.State#COMPLETE}, all other will capture or
+     * spawn appropriately. In the case of explosions for example, the
+     * entities must be mapped according to the blocks broken so that the
+     * blocks themselves can be cancelled and the entities spawned are
+     * dropped from the game entirely before throwing additional events.</p>
      *
-     * @param context
-     * @param entity
-     * @param chunkX
-     * @param chunkZ
-     * @return
+     * @param context The phase context
+     * @param entity The entity to spawn or capture
+     * @param chunkX The X of the chunk to spawn in
+     * @param chunkZ The Z of the chunk to spawn in
+     * @return If the entity spawned
      */
     public boolean spawnEntityOrCapture(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));

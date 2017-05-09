@@ -39,8 +39,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class PigSaddleDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityPig, Boolean, Value<Boolean>, PigSaddleData, ImmutablePigSaddleData> {
+public class PigSaddleDataProcessor extends AbstractEntitySingleDataProcessor<EntityPig, Boolean, Value<Boolean>,
+        PigSaddleData, ImmutablePigSaddleData> {
 
     public PigSaddleDataProcessor() {
         super(EntityPig.class, Keys.PIG_SADDLE);

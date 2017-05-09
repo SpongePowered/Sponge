@@ -35,7 +35,8 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAchievemen
 
 import java.util.Set;
 
-public class ImmutableSpongeAchievementData extends AbstractImmutableSingleSetData<Achievement, ImmutableAchievementData, AchievementData> implements ImmutableAchievementData {
+public class ImmutableSpongeAchievementData extends AbstractImmutableSingleSetData<Achievement, ImmutableAchievementData, AchievementData>
+        implements ImmutableAchievementData {
 
     public ImmutableSpongeAchievementData(Set<Achievement> value) {
         super(ImmutableAchievementData.class, value, Keys.ACHIEVEMENTS, SpongeAchievementData.class);

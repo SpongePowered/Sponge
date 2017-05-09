@@ -28,7 +28,6 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockPistonExtension;
 import net.minecraft.block.BlockPistonMoving;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;

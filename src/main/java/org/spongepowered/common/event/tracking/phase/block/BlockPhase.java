@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.block;
 
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
@@ -74,8 +73,7 @@ public final class BlockPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX,
-            int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         return this.allowEntitySpawns(phaseState)
                ? context.getCapturedEntities().add(entity)
                : super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);

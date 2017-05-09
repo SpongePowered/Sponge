@@ -29,7 +29,6 @@ import org.spongepowered.common.SpongeImpl;
 
 public class ServerUtils {
 
-
     public static boolean isCallingFromMainThread() {
         return Sponge.isServerAvailable() && SpongeImpl.getServer().isCallingFromMinecraftThread();
     }

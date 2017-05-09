@@ -66,7 +66,8 @@ public abstract class MixinBlockRailBase extends MixinBlock {
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableRailDirectionData) {
-            final BlockRailBase.EnumRailDirection railDirection = (BlockRailBase.EnumRailDirection) (Object) ((ImmutableRailDirectionData) manipulator).type().get();
+            final BlockRailBase.EnumRailDirection railDirection =
+                    (BlockRailBase.EnumRailDirection) (Object) ((ImmutableRailDirectionData) manipulator).type().get();
             if (blockState.getBlock() instanceof BlockRail) {
                 return Optional.of((BlockState) blockState.withProperty(BlockRail.SHAPE, railDirection));
             } else if (blockState.getBlock() instanceof BlockRailPowered) {
@@ -80,8 +81,8 @@ public abstract class MixinBlockRailBase extends MixinBlock {
                 }
                 return Optional.of((BlockState) blockState.withProperty(BlockRailDetector.SHAPE, railDirection));
             } else { // For mods that extend BlockRailBase
-                for (Map.Entry<IProperty, Comparable> entry : (ImmutableSet<Map.Entry<IProperty, Comparable>>) (Object) blockState.getProperties().entrySet
-                        ()) {
+                for (Map.Entry<IProperty, Comparable> entry
+                        : (ImmutableSet<Map.Entry<IProperty, Comparable>>) (Object) blockState.getProperties().entrySet()) {
                     if (entry.getValue() instanceof BlockRailBase.EnumRailDirection) {
                         if (entry.getKey().getAllowedValues().contains(railDirection)) {
                             return Optional.of((BlockState) blockState.withProperty(entry.getKey(), railDirection));
@@ -127,8 +128,8 @@ public abstract class MixinBlockRailBase extends MixinBlock {
             return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,
                     blockState.getValue(BlockRailDetector.SHAPE));
         } else { // For mods extending BlockRailBase
-            for (Map.Entry<IProperty, Comparable> entry : (ImmutableSet<Map.Entry<IProperty, Comparable>>) (Object) blockState.getProperties().entrySet
-                    ()) {
+            for (Map.Entry<IProperty, Comparable> entry
+                    : (ImmutableSet<Map.Entry<IProperty, Comparable>>) (Object) blockState.getProperties().entrySet()) {
                 if (entry.getValue() instanceof BlockRailBase.EnumRailDirection) {
                     return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,
                         entry.getValue());

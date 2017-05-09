@@ -45,7 +45,6 @@ public class SpongeFurnaceData extends AbstractData<FurnaceData, ImmutableFurnac
     }
 
     public SpongeFurnaceData(int passedBurnTime, int maxBurnTime, int passedCookTime, int maxCookTime) {
-
         super(FurnaceData.class);
 
         this.passedBurnTime = passedBurnTime;

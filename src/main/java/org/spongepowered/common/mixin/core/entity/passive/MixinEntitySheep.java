@@ -29,7 +29,6 @@ import net.minecraft.item.EnumDyeColor;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DyeableData;
-import org.spongepowered.api.data.manipulator.mutable.entity.ShearedData;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Sheep;

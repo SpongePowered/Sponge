@@ -52,7 +52,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
-public class AchievementDataProcessor extends AbstractEntitySingleDataProcessor<EntityPlayerMP, Set<Achievement>, SetValue<Achievement>, AchievementData, ImmutableAchievementData> {
+public class AchievementDataProcessor extends AbstractEntitySingleDataProcessor<EntityPlayerMP, Set<Achievement>, SetValue<Achievement>,
+        AchievementData, ImmutableAchievementData> {
 
     public AchievementDataProcessor() {
         super(EntityPlayerMP.class, Keys.ACHIEVEMENTS);

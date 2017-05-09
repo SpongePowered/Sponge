@@ -38,6 +38,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 
 public class IpSet implements Predicate<InetAddress> {
+
     private final InetAddress addr;
     private final int prefixLen;
 
@@ -75,11 +76,6 @@ public class IpSet implements Predicate<InetAddress> {
         return new IpSet(address, prefixLen);
     }
 
-    /**
-     *
-     * @param spec
-     * @return
-     */
     public static IpSet fromCidr(String spec) {
         String addrString;
         int prefixLen;

@@ -40,7 +40,8 @@ import java.util.Arrays;
  */
 public class ContainerChestInventoryLens extends ContainerLens {
 
-    private GridInventoryLensImpl playerInventory, chestInventory;
+    private GridInventoryLensImpl playerInventory;
+    private GridInventoryLensImpl chestInventory;
 
     private HotbarLensImpl hotbarInventory;
     private int numRows;

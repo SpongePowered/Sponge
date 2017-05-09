@@ -39,7 +39,6 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeFurnaceData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -120,10 +119,10 @@ public class FurnaceDataProcessor extends AbstractTileEntityDataProcessor<TileEn
 
     @Override
     public Optional<FurnaceData> fill(DataContainer container, FurnaceData furnaceData) {
-        if (!container.contains(Keys.PASSED_BURN_TIME.getQuery()) ||
-                !container.contains(Keys.MAX_BURN_TIME.getQuery()) ||
-                !container.contains(Keys.PASSED_COOK_TIME.getQuery()) ||
-                !container.contains(Keys.MAX_COOK_TIME.getQuery())) {
+        if (!container.contains(Keys.PASSED_BURN_TIME.getQuery())
+                || !container.contains(Keys.MAX_BURN_TIME.getQuery())
+                || !container.contains(Keys.PASSED_COOK_TIME.getQuery())
+                || !container.contains(Keys.MAX_COOK_TIME.getQuery())) {
             return Optional.empty();
         }
 

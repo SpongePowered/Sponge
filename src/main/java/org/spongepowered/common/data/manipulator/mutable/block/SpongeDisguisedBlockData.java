@@ -34,8 +34,8 @@ import org.spongepowered.api.data.type.DisguisedBlockTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDisguisedBlockData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 
-public class SpongeDisguisedBlockData extends AbstractSingleCatalogData<DisguisedBlockType, DisguisedBlockData, ImmutableDisguisedBlockData> implements
-        DisguisedBlockData {
+public class SpongeDisguisedBlockData extends AbstractSingleCatalogData<DisguisedBlockType, DisguisedBlockData, ImmutableDisguisedBlockData>
+        implements DisguisedBlockData {
 
     public SpongeDisguisedBlockData(DisguisedBlockType disguisedBlockType) {
         super(DisguisedBlockData.class, checkNotNull(disguisedBlockType), Keys.DISGUISED_BLOCK_TYPE, ImmutableSpongeDisguisedBlockData.class);

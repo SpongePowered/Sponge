@@ -24,29 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockCarpet;
-import net.minecraft.block.BlockColored;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.util.Color;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeColoredData;
 import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
-import org.spongepowered.common.util.ColorUtil;
-
-import java.util.Optional;
 
 @Mixin(BlockCarpet.class)
 public abstract class MixinBlockCarpet extends MixinBlock implements IMixinDyeableBlock {

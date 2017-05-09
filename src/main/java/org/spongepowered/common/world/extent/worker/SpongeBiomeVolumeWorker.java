@@ -39,9 +39,6 @@ import org.spongepowered.api.world.extent.worker.procedure.BiomeVolumeVisitor;
 
 import java.util.function.BiFunction;
 
-/**
- *
- */
 public class SpongeBiomeVolumeWorker<V extends BiomeVolume> implements BiomeVolumeWorker<V> {
 
     protected final V volume;
@@ -99,8 +96,8 @@ public class SpongeBiomeVolumeWorker<V extends BiomeVolume> implements BiomeVolu
         for (int z = zMin; z <= zMax; z++) {
             for (int y = yMin; y <= yMax; y++) {
                 for (int x = xMin; x <= xMax; x++) {
-                    final BiomeType biome = merger.merge(firstUnmodifiableArea, x, y, z, secondUnmodifiableArea, x + xOffsetSecond, y + yOffsetSecond,
-                            z + zOffsetSecond);
+                    final BiomeType biome = merger.merge(firstUnmodifiableArea, x, y, z, secondUnmodifiableArea,
+                            x + xOffsetSecond, y + yOffsetSecond, z + zOffsetSecond);
                     destination.setBiome(x + xOffsetDestination, y + yOffsetDestination, z + zOffsetDestination, biome);
                 }
             }

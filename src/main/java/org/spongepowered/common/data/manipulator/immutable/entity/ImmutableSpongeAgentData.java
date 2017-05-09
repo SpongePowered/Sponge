@@ -36,6 +36,7 @@ public class ImmutableSpongeAgentData extends AbstractImmutableBooleanData<Immut
     public ImmutableSpongeAgentData(Boolean value) {
         super(ImmutableAgentData.class, value, Keys.AI_ENABLED, SpongeAgentData.class, true);
     }
+
     @Override
     public ImmutableValue<Boolean> aiEnabled() {
         return getValueGetter();

@@ -83,8 +83,8 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
                 while (true) {
                     if (blockClass == Object.class) {
                         final String propertyId = modId + ":" + originalClass + "_" + property.getName();
-                        LogManager.getLogger("Sponge").warn("Could not find {} owning class, assigning fallback id: {}", property.getName(),
-                                propertyId);
+                        LogManager.getLogger("Sponge").warn("Could not find {} owning class, assigning fallback id: {}",
+                                property.getName(), propertyId);
                         instance.register(property, propertyId);
                         return propertyId;
                     }
@@ -98,7 +98,8 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
                         if (property != o) {
                             continue;
                         }
-                        final String className = field.getDeclaringClass().getSimpleName().replace("Block", "").replace("block", "");
+                        final String className = field.getDeclaringClass().getSimpleName().replace("Block", "")
+                                .replace("block", "");
                         final String classNameId = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, className);
                         final String propertyClassName = isStatic ? classNameId : originalClass;
                         final String combinedId = modId + ":" + propertyClassName + "_" + propertyName.toLowerCase(Locale.ENGLISH);
@@ -106,8 +107,8 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
                             // in this case, we really do have to fall back on the full block id...
                             if (instance.idPropertyMap.containsKey(lastAttemptId)) {
                                 // we really are screwed...
-                                throw new IllegalArgumentException("Sorry! Someone is trying to re-register a block with the same property instances of"
-                                                                   + "block: " + blockId + " , with property: " + propertyName);
+                                throw new IllegalArgumentException("Sorry! Someone is trying to re-register a block with the same property "
+                                        + "instances of block: " + blockId + " , with property: " + propertyName);
                             } else {
                                 instance.register((IProperty<?>) o, lastAttemptId);
                                 return lastAttemptId;
@@ -121,7 +122,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
 
             } catch (Exception e) {
                 LogManager.getLogger("Sponge").warn("An exception was thrown while trying to resolve the property "
-                                                    + property.getName() +"'s owning class, assigning "
+                                                    + property.getName() + "'s owning class, assigning "
                                                     + "fallback id: " + lastAttemptId, e);
                 instance.register(property, lastAttemptId);
                 return lastAttemptId;

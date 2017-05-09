@@ -40,8 +40,8 @@ public class SpongeBiomeGenerationSettings implements BiomeGenerationSettings {
     private float maxHeight;
 
     private final List<Populator> populators = new NonNullArrayList<>();
-    private final List<GenerationPopulator> genpopulator = Lists.newArrayList();
-    private final List<GroundCoverLayer> groundcover = Lists.newArrayList();
+    private final List<GenerationPopulator> generationPopulators = Lists.newArrayList();
+    private final List<GroundCoverLayer> groundCoverLayers = Lists.newArrayList();
 
     public SpongeBiomeGenerationSettings() {
 
@@ -69,19 +69,17 @@ public class SpongeBiomeGenerationSettings implements BiomeGenerationSettings {
 
     @Override
     public List<GroundCoverLayer> getGroundCoverLayers() {
-        return this.groundcover;
+        return this.groundCoverLayers;
     }
 
     @Override
     public List<GenerationPopulator> getGenerationPopulators() {
-        return this.genpopulator;
+        return this.generationPopulators;
     }
 
     @Override
     public List<GenerationPopulator> getGenerationPopulators(Class<? extends GenerationPopulator> type) {
-        return this.genpopulator.stream().filter((p) -> {
-            return type.isAssignableFrom(p.getClass());
-        }).collect(Collectors.toList());
+        return this.generationPopulators.stream().filter((p) -> type.isAssignableFrom(p.getClass())).collect(Collectors.toList());
     }
 
     @Override
@@ -92,9 +90,7 @@ public class SpongeBiomeGenerationSettings implements BiomeGenerationSettings {
     @Override
     @SuppressWarnings("unchecked")
     public <T extends Populator> List<T> getPopulators(Class<T> type) {
-        return (List<T>) this.populators.stream().filter((p) -> {
-            return type.isAssignableFrom(p.getClass());
-        }).collect(Collectors.toList());
+        return (List<T>) this.populators.stream().filter((p) -> type.isAssignableFrom(p.getClass())).collect(Collectors.toList());
     }
 
     @Override
@@ -102,9 +98,9 @@ public class SpongeBiomeGenerationSettings implements BiomeGenerationSettings {
         SpongeBiomeGenerationSettings settings = new SpongeBiomeGenerationSettings();
         settings.minHeight = this.minHeight;
         settings.maxHeight = this.maxHeight;
-        settings.groundcover.addAll(this.groundcover);
+        settings.groundCoverLayers.addAll(this.groundCoverLayers);
         settings.populators.addAll(this.populators);
-        settings.genpopulator.addAll(this.genpopulator);
+        settings.generationPopulators.addAll(this.generationPopulators);
         return settings;
     }
 

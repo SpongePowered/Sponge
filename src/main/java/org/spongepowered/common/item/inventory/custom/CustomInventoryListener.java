@@ -45,7 +45,8 @@ public class CustomInventoryListener implements EventListener<InteractInventoryE
 
     @Override
     public void handle(InteractInventoryEvent event) throws Exception {
-        if (!(event.getTargetInventory() == this.inventory || (event.getTargetInventory() instanceof CustomContainer && (((CustomContainer) event.getTargetInventory()).inv == this.inventory)))) {
+        if (!(event.getTargetInventory() == this.inventory || (event.getTargetInventory() instanceof CustomContainer
+                && (((CustomContainer) event.getTargetInventory()).inv == this.inventory)))) {
             return;
         }
         for (Consumer<InteractInventoryEvent> consumer: this.consumers) {

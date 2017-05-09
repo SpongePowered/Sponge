@@ -39,8 +39,8 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.category.TileEntityActivationModCategory;
 import org.spongepowered.common.config.category.TileEntityActivationCategory;
+import org.spongepowered.common.config.category.TileEntityActivationModCategory;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -63,7 +63,8 @@ public class TileEntityActivation {
             return true;
         }
 
-        TileEntityActivationCategory config = ((IMixinWorldServer) tileEntity.getWorld()).getActiveConfig().getConfig().getTileEntityActivationRange();
+        TileEntityActivationCategory config =
+                ((IMixinWorldServer) tileEntity.getWorld()).getActiveConfig().getConfig().getTileEntityActivationRange();
         TileEntityType type = ((org.spongepowered.api.block.tileentity.TileEntity) tileEntity).getType();
 
         IModData_Activation spongeEntity = (IModData_Activation) tileEntity;
@@ -189,7 +190,8 @@ public class TileEntityActivation {
         // Make sure not on edge of unloaded chunk
         int x = tileEntity.getPos().getX();
         int z = tileEntity.getPos().getZ();
-        IMixinChunk spongeChunk = (IMixinChunk)((IMixinChunkProviderServer) world.getChunkProvider()).getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
+        IMixinChunk spongeChunk = (IMixinChunk)((IMixinChunkProviderServer) world.getChunkProvider())
+                .getLoadedChunkWithoutMarkingActive(x >> 4, z >> 4);
         if (isActive && (spongeChunk == null || (!spongeChunk.isPersistedChunk() && !spongeChunk.areNeighborsLoaded()))) {
             isActive = false;
         }

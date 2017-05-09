@@ -31,8 +31,8 @@ import java.util.function.Predicate;
 
 public interface FilteringSlotLens<TInventory, TStack> extends SlotLens<TInventory, TStack> {
     
-    public abstract Predicate<ItemStack> getItemStackFilter();
+    Predicate<ItemStack> getItemStackFilter();
     
-    public abstract Predicate<ItemType> getItemTypeFilter();
+    Predicate<ItemType> getItemTypeFilter();
 
 }

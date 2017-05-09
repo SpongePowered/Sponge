@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.slots;
 
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.item.inventory.lens.Fabric;
-import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
-
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.slot.InputSlot;
-
+import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.slots.InputSlotLens;
 
 public class InputSlotAdapter extends FilteringSlotAdapter implements InputSlot {
 

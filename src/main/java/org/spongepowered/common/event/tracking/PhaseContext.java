@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -457,14 +456,14 @@ public class PhaseContext {
 
     public CapturePlayer getCapturedPlayerSupplier() throws IllegalStateException {
         return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_PLAYER, CapturePlayer.class)
-                .orElseThrow(
-                        TrackingUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this));
+                .orElseThrow(TrackingUtil.throwWithContext(
+                        "Expected to be capturing a Player from an event listener, but we're not capturing them!", this));
     }
 
     public Optional<Player> getCapturedPlayer() throws IllegalStateException {
         return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_PLAYER, CapturePlayer.class)
-                .orElseThrow(
-                        TrackingUtil.throwWithContext("Expected to be capturing a Player from an event listener, but we're not capturing them!", this))
+                .orElseThrow(TrackingUtil.throwWithContext(
+                                "Expected to be capturing a Player from an event listener, but we're not capturing them!", this))
                 .getPlayer();
     }
 

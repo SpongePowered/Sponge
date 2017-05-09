@@ -134,7 +134,8 @@ public abstract class AbstractData<M extends DataManipulator<M, I>, I extends Im
      * @param function The function for getting the field
      */
     protected final void registerFieldGetter(Key<?> key, Supplier<?> function) {
-        this.keyFieldGetterMap.put(checkNotNull(key, "The key cannot be null"), checkNotNull(function, "The function cannot be null"));
+        this.keyFieldGetterMap.put(checkNotNull(key, "The key cannot be null"),
+                checkNotNull(function, "The function cannot be null"));
     }
 
     /**

@@ -58,9 +58,7 @@ final class PreWorldTickListenerState extends ListenerPhaseState {
         final Object listener = phaseContext.getSource(Object.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a WorldTickEvent listener!", phaseContext));
 
-        phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> {
-            TrackingUtil.processBlockCaptures(blocks, this, phaseContext);
-        });
+        phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, this, phaseContext));
     }
 
     @Override

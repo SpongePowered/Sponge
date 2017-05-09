@@ -68,7 +68,8 @@ public final class ImmutableDataCachingUtil {
      * equal to each other, but they may not be the same instance, this is due
      * to caching and outside instantiation.</p>
      *
-     * @param immutableClass The immutable manipulator class to get an instance of
+     * @param immutableClass The immutable manipulator class to
+     *     get an instance of
      * @param args The arguments to pass to the constructor
      * @param <T> The type of immutable data manipulator
      * @return The newly created immutable data manipulators
@@ -80,14 +81,14 @@ public final class ImmutableDataCachingUtil {
         try {
             // Let's get the key
             return (T) ImmutableDataCachingUtil.manipulatorCache.get(key, (Callable<ImmutableDataManipulator<?, ?>>) () -> {
-                    try {
-                        return createUnsafeInstance(immutableClass, args);
-                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                        SpongeImpl.getLogger().error("Could not construct an ImmutableDataManipulator: " + immutableClass.getCanonicalName() + " with the args: "
-                                                     + Arrays.toString(args), e);
-                    }
-                    throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName() + " with the args: "
-                                                            + Arrays.toString(args));
+                try {
+                    return createUnsafeInstance(immutableClass, args);
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    SpongeImpl.getLogger().error("Could not construct an ImmutableDataManipulator: " + immutableClass.getCanonicalName()
+                            + " with the args: " + Arrays.toString(args), e);
+                }
+                throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName()
+                        + " with the args: " + Arrays.toString(args));
             });
         } catch (Throwable e) {
             throw new UnsupportedOperationException("Could not construct the ImmutableDataManipulator: " + immutableClass.getName(), e);
@@ -100,16 +101,16 @@ public final class ImmutableDataCachingUtil {
         final String key = getKey(valueClass, usedKey.getQuery().asString('.'), arg.getClass(), arg);
         try {
             return (T) ImmutableDataCachingUtil.valueCache.get(key, (Callable<ImmutableValue<?>>) () -> {
-                    try {
-                        if (extraArgs == null || extraArgs.length == 0) {
-                            return createUnsafeInstance(valueClass, usedKey, defaultArg, arg);
-                        } else {
-                            return createUnsafeInstance(valueClass, usedKey, defaultArg, arg, extraArgs);
-                        }
-                    } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                        SpongeImpl.getLogger().error("Could not construct an ImmutableValue: " + valueClass.getCanonicalName(), e);
+                try {
+                    if (extraArgs == null || extraArgs.length == 0) {
+                        return createUnsafeInstance(valueClass, usedKey, defaultArg, arg);
+                    } else {
+                        return createUnsafeInstance(valueClass, usedKey, defaultArg, arg, extraArgs);
                     }
-                    throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                    SpongeImpl.getLogger().error("Could not construct an ImmutableValue: " + valueClass.getCanonicalName(), e);
+                }
+                throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName());
             });
         } catch (ExecutionException e) {
             throw new UnsupportedOperationException("Could not construct the ImmutableValue: " + valueClass.getName(), e);

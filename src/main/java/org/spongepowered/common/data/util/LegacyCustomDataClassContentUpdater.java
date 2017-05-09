@@ -30,7 +30,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.common.data.SpongeManipulatorRegistry;
 
-public class LegacyCustomDataClassContentUpdater implements DataContentUpdater{
+public class LegacyCustomDataClassContentUpdater implements DataContentUpdater {
 
     @Override
     public int getInputVersion() {

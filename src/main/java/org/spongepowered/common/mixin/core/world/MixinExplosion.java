@@ -160,8 +160,8 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
     /**
      * @author gabizou - September 8th, 2016
-     * @reason Rewrites to use our own hooks that will patch with forge perfectly well,
-     * and allows for maximal capability.
+     * @reason Rewrites to use our own hooks that will patch with
+     * forge perfectly well, and allows for maximal capability.
      */
     @Final
     @Overwrite
@@ -194,8 +194,8 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
                                 if (iblockstate.getMaterial() != Material.AIR) {
                                     float f2 = this.exploder != null
-                                               ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this
-                                            , this.world, blockpos, iblockstate)
+                                               ? this.exploder.getExplosionResistance((net.minecraft.world.Explosion) (Object) this,
+                                            this.world, blockpos, iblockstate)
                                                : iblockstate.getBlock().getExplosionResistance((Entity) null);
                                     f -= (f2 + 0.3F) * 0.3F;
                                 }
@@ -226,8 +226,9 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
         // Sponge Start - Check if this explosion should damage entities
         List<Entity> list = this.shouldDamageEntities
-                            ? this.world.getEntitiesWithinAABBExcludingEntity(this.exploder, new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
-                            : Collections.emptyList();
+                ? this.world.getEntitiesWithinAABBExcludingEntity(this.exploder,
+                new AxisAlignedBB((double) k1, (double) i2, (double) j2, (double) l1, (double) i1, (double) j1))
+                : Collections.emptyList();
         // Now we can throw our Detonate Event
         final List<Location<World>> blockPositions = new ArrayList<>(this.affectedBlockPositions.size());
         final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>(list.size());
@@ -284,7 +285,8 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                         double d14 = (double) this.world.getBlockDensity(vec3d, entity.getEntityBoundingBox());
                         double d10 = (1.0D - d12) * d14;
                         entity.attackEntityFrom(
-                                DamageSource.causeExplosionDamage((net.minecraft.world.Explosion) (Object) this), (float) ((int) ((d10 * d10 + d10) / 2.0D * 7.0D * (double) f3 + 1.0D)));
+                                DamageSource.causeExplosionDamage((net.minecraft.world.Explosion) (Object) this),
+                                (float) ((int) ((d10 * d10 + d10) / 2.0D * 7.0D * (double) f3 + 1.0D)));
                         double d11 = 1.0D;
 
                         if (entity instanceof EntityLivingBase) {
@@ -310,11 +312,13 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
     /**
      * @author gabizou - March 26th, 2017
-     * @reason Since forge will attempt to call the normalized method for modded blocks,
-     * we must artificially capture the block position for any block drops or changes during the
-     * explosion phase.
+     * @reason Since forge will attempt to call the normalized
+     *     method for modded blocks, we must artificially capture the
+     *     block position for any block drops or changes during the
+     *     explosion phase.
      *
-     * Does the second part of the explosion (sound, particles, drop spawn)
+     * <p>Does the second part of the explosion
+     * (sound, particles, drop spawn).</p>
      */
     @Overwrite
     public void doExplosionB(boolean spawnParticles) {
@@ -368,8 +372,8 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                     d3 = d3 * d7;
                     d4 = d4 * d7;
                     d5 = d5 * d7;
-                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.explosionX) / 2.0D, (d1 + this.explosionY) / 2.0D,
-                        (d2 + this.explosionZ) / 2.0D, d3, d4, d5, new int[0]);
+                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.explosionX) / 2.0D,
+                            (d1 + this.explosionY) / 2.0D, (d2 + this.explosionZ) / 2.0D, d3, d4, d5, new int[0]);
                     this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5, new int[0]);
                 }
 

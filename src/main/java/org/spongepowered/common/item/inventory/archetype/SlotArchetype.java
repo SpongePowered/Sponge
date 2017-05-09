@@ -30,7 +30,7 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Base Archetype
+ * Base slot archetype.
  */
 public class SlotArchetype extends CompositeInventoryArchetype {
 

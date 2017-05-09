@@ -46,6 +46,8 @@ import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
 
+import javax.annotation.Nullable;
+
 public class SpongeConfig<T extends ConfigBase> {
 
     public enum Type {
@@ -137,6 +139,7 @@ public class SpongeConfig<T extends ConfigBase> {
         return this.root.getNode(this.modId);
     }
 
+    @Nullable
     public CommentedConfigurationNode getSetting(String key) {
         if (key.equalsIgnoreCase("config-enabled")) {
             return getRootNode().getNode(key);

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.potion;
 
 import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionAttackDamage;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.RegistryNamespaced;
 import org.spongepowered.api.effect.potion.PotionEffectType;
@@ -36,9 +35,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.potion.IMixinPotion;
 import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -95,7 +92,8 @@ public abstract class MixinPotion implements PotionEffectType, IMixinPotion {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Redirect(method = "registerPotions", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/RegistryNamespaced;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
+    @Redirect(method = "registerPotions",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/util/registry/RegistryNamespaced;register(ILjava/lang/Object;Ljava/lang/Object;)V"))
     private static void onPotionRegister(RegistryNamespaced registry, int id, Object location, Object potion) {
         final ResourceLocation resource = (ResourceLocation) location;
         final Potion mcPotion = (Potion) potion;

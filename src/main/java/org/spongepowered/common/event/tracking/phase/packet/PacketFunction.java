@@ -83,7 +83,6 @@ import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
@@ -342,10 +341,7 @@ public interface PacketFunction {
 
             });
         }
-        context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(snapshots ->
-                        TrackingUtil.processBlockCaptures(snapshots, state, context)
-                );
+        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(snapshots -> TrackingUtil.processBlockCaptures(snapshots, state, context));
     };
 
     @SuppressWarnings("unchecked") PacketFunction ACTION = (packet, state, player, context) -> {
@@ -355,10 +351,7 @@ public interface PacketFunction {
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = EntityUtil.fromNative(player);
         if (state == PacketPhase.Inventory.DROP_ITEM_WITH_HOTKEY) {
-            context.getCapturedBlockSupplier()
-                    .ifPresentAndNotEmpty(blocks ->
-                            TrackingUtil.processBlockCaptures(blocks, state, context)
-                    );
+            context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, state, context));
             context.getCapturedItemsSupplier()
                     .ifPresentAndNotEmpty(items -> {
                         final Cause cause = Cause.source(EntitySpawnCause.builder()
@@ -652,8 +645,8 @@ public interface PacketFunction {
         if (state instanceof BasicInventoryPacketState) {
             inventoryEvent =
                     ((BasicInventoryPacketState) state)
-                            .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction, Lists.newArrayList(slotTransactions), capturedItems,
-                                    cause, usedButton);
+                            .createInventoryEvent(player, ContainerUtil.fromNative(openContainer), transaction, Lists.newArrayList(slotTransactions),
+                                    capturedItems, cause, usedButton);
         } else {
             inventoryEvent = null;
         }
@@ -749,33 +742,28 @@ public interface PacketFunction {
 
                     }
                 });
-        context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(
-                        originalBlocks -> {
-                            boolean success = TrackingUtil.processBlockCaptures(originalBlocks, state,
-                                    context);
-                            if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
-                                EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
-                                PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
-                            }
-                        });
+        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(originalBlocks -> {
+            boolean success = TrackingUtil.processBlockCaptures(originalBlocks, state, context);
+            if (!success && snapshot != ItemTypeRegistryModule.NONE_SNAPSHOT) {
+                EnumHand hand = ((CPacketPlayerTryUseItemOnBlock) packet).getHand();
+                PacketPhaseUtil.handlePlayerSlotRestore(player, (net.minecraft.item.ItemStack) itemStack, hand);
+            }
+        });
         context.getCapturedItemStackSupplier().ifPresentAndNotEmpty(drops -> {
-            final List<EntityItem>
-                    items =
-                    drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
+            final List<EntityItem> items = drops.stream().map(drop -> drop.create(player.getServerWorld())).collect(Collectors.toList());
             final Cause cause = Cause.source(
                     EntitySpawnCause.builder()
                             .entity((Entity) player)
                             .type(InternalSpawnTypes.PLACEMENT)
-                            .build()
-            ).named(NamedCause.notifier(player))
+                            .build())
+                    .named(NamedCause.notifier(player))
                     .build();
             final List<Entity> entities = items
                     .stream()
                     .map(EntityUtil::fromNative)
                     .collect(Collectors.toList());
             if (!entities.isEmpty()) {
-                DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities);
+                final DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(cause, entities);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     for (Entity droppedItem : event.getEntities()) {
@@ -798,8 +786,10 @@ public interface PacketFunction {
 
         ItemStackSnapshot sourceSnapshot = ItemStackUtil.snapshotOf(sourceSlot.getStack());
         ItemStackSnapshot targetSnapshot = ItemStackUtil.snapshotOf(targetSlot.getStack());
-        SlotTransaction sourceTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, sourceSlot.slotIndex), sourceSnapshot, sourceSnapshot);
-        SlotTransaction targetTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, targetSlot.slotIndex), targetSnapshot, targetSnapshot);
+        SlotTransaction sourceTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, sourceSlot.slotIndex),
+                sourceSnapshot, sourceSnapshot);
+        SlotTransaction targetTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(inventoryContainer, targetSlot.slotIndex),
+                targetSnapshot, targetSnapshot);
         ImmutableList<SlotTransaction>
                 transactions =
                 new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
@@ -810,7 +800,8 @@ public interface PacketFunction {
         if (changeInventoryEventHeld.isCancelled()) {
             player.connection.sendPacket(new SPacketHeldItemChange(previousSlot));
         } else {
-            PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false, false);
+            PacketPhaseUtil
+                    .handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(), false, false);
             inventory.currentItem = itemChange.getSlotId();
             player.markPlayerActive();
         }
@@ -822,7 +813,8 @@ public interface PacketFunction {
                 .orElseThrow(TrackingUtil.throwWithContext("Expected a cursor item stack, but had nothing!", context));
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         final Cause cause = Cause.source(player).build();
-        InteractInventoryEvent.Close event = SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, container, player, lastCursor, newCursor, true);
+        InteractInventoryEvent.Close event = SpongeCommonEventFactory
+                .callInteractInventoryCloseEvent(cause, container, player, lastCursor, newCursor, true);
         if (!event.isCancelled()) {
             // Non-merged items
             context.getCapturedItemsSupplier().ifPresentAndNotEmpty(items -> {
@@ -952,10 +944,8 @@ public interface PacketFunction {
             }
         }
     };
-    PacketFunction MOVEMENT = (packet, state, player, context) -> {
-        context.getCapturedBlockSupplier()
+    PacketFunction MOVEMENT = (packet, state, player, context) -> context.getCapturedBlockSupplier()
             .ifPresentAndNotEmpty(blocks -> TrackingUtil.processBlockCaptures(blocks, state, context));
-    };
 
     PacketFunction UNKNOWN_PACKET = (packet, state, player, context) -> {
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.getServerWorld();

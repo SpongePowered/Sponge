@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.entity.monster;
 import net.minecraft.entity.monster.EntityBlaze;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.FlammableData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.monster.Blaze;
 import org.spongepowered.asm.mixin.Mixin;

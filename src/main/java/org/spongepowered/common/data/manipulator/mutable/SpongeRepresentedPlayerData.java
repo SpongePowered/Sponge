@@ -46,7 +46,8 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
     /**
      * Really problematic way to create a dummy profile.
      *
-     * Processors must make sure this value never reaches an actual DataHolder
+     * <p>Processors must make sure this value never reaches an
+     * actual {@link org.spongepowered.api.data.DataHolder}.</p>
      */
     public static final GameProfile NULL_PROFILE = new GameProfile() {
         @Override

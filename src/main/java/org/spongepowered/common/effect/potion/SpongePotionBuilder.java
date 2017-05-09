@@ -31,10 +31,10 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.potion.Potion;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;

@@ -49,7 +49,8 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 
-public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<EntityPlayerMP, Map<Statistic, Long>, MapValue<Statistic, Long>, StatisticData, ImmutableStatisticData> {
+public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<EntityPlayerMP, Map<Statistic, Long>, MapValue<Statistic, Long>,
+        StatisticData, ImmutableStatisticData> {
 
     public StatisticDataProcessor() {
         super(EntityPlayerMP.class, Keys.STATISTICS);

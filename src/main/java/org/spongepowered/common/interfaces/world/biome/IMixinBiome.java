@@ -25,7 +25,6 @@
 package org.spongepowered.common.interfaces.world.biome;
 
 import net.minecraft.world.World;
-import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
 public interface IMixinBiome {

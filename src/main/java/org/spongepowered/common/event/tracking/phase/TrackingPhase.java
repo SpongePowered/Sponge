@@ -198,16 +198,14 @@ public abstract class TrackingPhase {
 
     }
 
-
     public boolean isRestoring(IPhaseState state, PhaseContext context, int updateFlag) {
         return false;
     }
 
-    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP, IPhaseState state, PhaseContext context,
-            CauseTracker causeTracker) {
+    public void capturePlayerUsingStackToBreakBlock(@Nullable ItemStack itemStack, EntityPlayerMP playerMP,
+            IPhaseState state, PhaseContext context, CauseTracker causeTracker) {
 
     }
-
 
     /**
      * Associates any notifiers and owners for tracking as to what caused
@@ -224,7 +222,8 @@ public abstract class TrackingPhase {
      * @param context
      * @param newContext
      */
-    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
+    public void appendNotifierPreBlockTick(IMixinWorldServer mixinWorld, BlockPos pos, IPhaseState currentState,
+            PhaseContext context, PhaseContext newContext) {
         final Chunk chunk = mixinWorld.asMinecraftWorld().getChunkFromBlockCoords(pos);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         if (chunk != null && !chunk.isEmpty()) {
@@ -236,14 +235,17 @@ public abstract class TrackingPhase {
     // Actual capture methods
 
     /**
-     * This is Step 3 of entity spawning. It is used for the sole purpose of capturing an entity spawn
-     * and doesn't actually spawn an entity into the world until the current phase is unwound.
-     * The method itself should technically capture entity spawns, however, in the event it
-     * is required that the entity cannot be captured, returning {@code false} will mark it
-     * to spawn into the world, bypassing any of the bulk spawn events or capturing.
+     * This is Step 3 of entity spawning. It is used for the sole
+     * purpose of capturing an entity spawnand doesn't actually spawn
+     * an entity into the world until the current phase is unwound.
+     * The method itself should technically capture entity spawns,
+     * however, in the event it is required that the entity cannot
+     * be captured, returning {@code false} will mark it to spawn into
+     * the world, bypassing any of the bulk spawn events or capturing.
      *
-     * <p>NOTE: This method should only be called and handled if and only if {@link #allowEntitySpawns(IPhaseState)}
-     * returns {@code true}. Violation of this will have unforseen consequences.</p>
+     * <p>NOTE: This method should only be called and handled if and
+     * only if {@link #allowEntitySpawns(IPhaseState)} returns {@code true}.
+     * Violation of this will have unforeseen consequences.</p>
      *
      *
      * @param phaseState The current phase state
@@ -284,7 +286,8 @@ public abstract class TrackingPhase {
         return Optional.empty();
     }
 
-    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos, IMixinBlockEventData blockEvent) {
+    public void addNotifierToBlockEvent(IPhaseState phaseState, PhaseContext context, IMixinWorldServer mixinWorld, BlockPos pos,
+            IMixinBlockEventData blockEvent) {
 
     }
 
@@ -311,7 +314,7 @@ public abstract class TrackingPhase {
     }
 
     /**
-     * Adds a notifier to the builder, if necessasry
+     * Adds a notifier to the builder, if necessary.
      *
      * @return Whether a notifier was added
      */

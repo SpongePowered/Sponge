@@ -62,9 +62,8 @@ public abstract class AbstractImmutableBoundedComparableData<T extends Comparabl
     private final ImmutableBoundedValue<T> immutableBoundedValue;
 
     @SuppressWarnings("unchecked")
-    protected AbstractImmutableBoundedComparableData(Class<I> immutableClass, T value,
-                                                     Key<? extends BaseValue<T>> usedKey,
-                                                     Comparator<T> comparator, Class<? extends M> mutableClass, T lowerBound, T upperBound, T defaultValue) {
+    protected AbstractImmutableBoundedComparableData(Class<I> immutableClass, T value, Key<? extends BaseValue<T>> usedKey, Comparator<T> comparator,
+            Class<? extends M> mutableClass, T lowerBound, T upperBound, T defaultValue) {
         super(immutableClass, value, usedKey);
         this.comparator = comparator;
         checkArgument(!Modifier.isAbstract(mutableClass.getModifiers()), "The immutable class cannot be abstract!");

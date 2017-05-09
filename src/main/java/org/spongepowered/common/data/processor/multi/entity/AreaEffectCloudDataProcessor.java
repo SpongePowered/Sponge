@@ -48,7 +48,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<EntityAreaEffectCloud, AreaEffectCloudData, ImmutableAreaEffectCloudData> {
+public class AreaEffectCloudDataProcessor
+        extends AbstractEntityDataProcessor<EntityAreaEffectCloud, AreaEffectCloudData, ImmutableAreaEffectCloudData> {
 
     public AreaEffectCloudDataProcessor() {
         super(EntityAreaEffectCloud.class);
@@ -122,11 +123,11 @@ public class AreaEffectCloudDataProcessor extends AbstractEntityDataProcessor<En
 
     @Override
     public Optional<AreaEffectCloudData> fill(DataContainer container, AreaEffectCloudData areaEffectCloudData) {
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return null;
+        return DataTransactionResult.failNoData();
     }
 }

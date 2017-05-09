@@ -25,25 +25,22 @@
 package org.spongepowered.common.mixin.api.event.cause.damage;
 
 import net.minecraft.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.event.damage.SpongeCommonDamageSource;
 import org.spongepowered.common.event.damage.SpongeCommonEntityDamageSource;
 
 /*
  * @author gabizou
  *
- * This is absolutely required for the abstract damage sources to have the correct
- * strings at runtime, this is the ultimate combination of the superclass class
- * transformer to force {@link AbstractDamageSource} extend {@link SpongeCommonDamageSource}
- * but still retain the sanity of the proper "damage type" for mods and native
- * Minecraft damage source.
+ * This is absolutely required for the abstract damage sources to have the
+ * correct strings at runtime, this is the ultimate combination of the
+ * superclass class transformer to force {@link AbstractDamageSource} extend
+ * {@link SpongeCommonDamageSource} but still retain the sanity of the proper
+ * "damage type" for mods and native Minecraft damage source.
  */
 @Mixin(AbstractEntityDamageSource.class)
 public abstract class MixinAbstractEntityDamageSource implements EntityDamageSource {

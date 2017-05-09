@@ -49,7 +49,8 @@ public abstract class MixinCriterion implements IScoreCriteria { // Trick to all
 
     public String criterion$getId() {
         if (this.spongeId == null) {
-            this.spongeId = "minecraft:" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.getName().replace("count", "s"));
+            this.spongeId = "minecraft:"
+                    + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.getName().replace("count", "s"));
         }
         return this.spongeId;
     }

@@ -71,16 +71,19 @@ public class ParticleOptionRegistryModule implements CatalogRegistryModule<Parti
         this.registerOption("block_state", BlockState.class);
         this.registerOption("color", Color.class);
         this.registerOption("direction", Direction.class);
-        this.registerOption("firework_effects", List.class,
-                value -> value.isEmpty() ? new IllegalArgumentException("The firework effects list may not be empty") : null);
-        this.registerOption("quantity", Integer.class,
-                value -> value < 1 ? new IllegalArgumentException("Quantity must be at least 1") : null);
+        this.registerOption("firework_effects", List.class, value -> value.isEmpty()
+                ? new IllegalArgumentException("The firework effects list may not be empty")
+                : null);
+        this.registerOption("quantity", Integer.class, value -> value < 1
+                ? new IllegalArgumentException("Quantity must be at least 1")
+                : null);
         this.registerOption("item_stack_snapshot", ItemStackSnapshot.class);
         this.registerOption("note", NotePitch.class);
         this.registerOption("offset", Vector3d.class);
         this.registerOption("potion_effect_type", PotionEffectType.class);
-        this.registerOption("scale", Double.class,
-                value -> value < 0 ? new IllegalArgumentException("Scale may not be negative") : null);
+        this.registerOption("scale", Double.class, value -> value < 0
+                ? new IllegalArgumentException("Scale may not be negative")
+                : null);
         this.registerOption("velocity", Vector3d.class);
         this.registerOption("slow_horizontal_velocity", Boolean.class);
     }

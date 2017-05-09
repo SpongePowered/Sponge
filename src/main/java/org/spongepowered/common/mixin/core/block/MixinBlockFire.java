@@ -42,27 +42,35 @@ import java.util.Random;
 @Mixin(BlockFire.class)
 public abstract class MixinBlockFire extends MixinBlock {
 
-    @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z", ordinal = 1))
+    @Redirect(method = "updateTick", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z",
+            ordinal = 1))
     private boolean onFireSpread(World world, BlockPos pos, IBlockState state, int updateFlag) {
-        if (!world.isRemote && SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos, NamedCause.of(NamedCause.FIRE_SPREAD, world)).isCancelled()) {
+        if (!world.isRemote && SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos,
+                NamedCause.of(NamedCause.FIRE_SPREAD, world)).isCancelled()) {
             return false;
         }
         return world.setBlockState(pos, state, updateFlag);
     }
 
-    @Inject(method = "catchOnFire", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"), require = 0, expect = 0, cancellable = true)
+    @Inject(method = "catchOnFire", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"),
+            require = 0, expect = 0, cancellable = true)
     private void onCatchFirePreCheck(World world, BlockPos pos, int chance, Random random, int age, CallbackInfo callbackInfo) {
         if (!world.isRemote) {
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos, NamedCause.of(NamedCause.FIRE_SPREAD, world)).isCancelled()) {
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos,
+                    NamedCause.of(NamedCause.FIRE_SPREAD, world)).isCancelled()) {
                 callbackInfo.cancel();
             }
         }
     }
 
-    @Inject(method = "catchOnFire", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"), require = 0, expect = 0, cancellable = true)
+    @Inject(method = "catchOnFire", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z"), require = 0, expect = 0, cancellable = true)
     private void onCatchFirePreCheckOther(World world, BlockPos pos, int chance, Random random, int age, CallbackInfo callbackInfo) {
         if (!world.isRemote) {
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos, NamedCause.of(NamedCause.FIRE_SPREAD, world)).isCancelled()) {
+            if (SpongeCommonEventFactory.callChangeBlockEventPre((IMixinWorldServer) world, pos,
+                    NamedCause.of(NamedCause.FIRE_SPREAD, world)).isCancelled()) {
                 callbackInfo.cancel();
             }
         }

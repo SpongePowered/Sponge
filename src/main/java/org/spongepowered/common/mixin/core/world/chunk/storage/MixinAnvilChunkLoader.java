@@ -59,8 +59,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -128,7 +128,8 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
         }
     }
 
-    @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getIntArray(Ljava/lang/String;)[I", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getIntArray(Ljava/lang/String;)[I",
+            shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
     public void onReadChunkFromNBT(World worldIn, NBTTagCompound compound, CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, int chunkX,
             int chunkZ, net.minecraft.world.chunk.Chunk chunkIn) {
         if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
@@ -173,7 +174,8 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
      * @param world
      * @return
      */
-    @Redirect(method = "readChunkFromNBT(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT), require = 0, expect = 0)
+    @Redirect(method = "readChunkFromNBT(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;",
+            at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT), require = 0, expect = 0)
     private Entity onReadEntity(NBTTagCompound compound, World world) {
         if ("Minecart".equals(compound.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
             compound.setString(NbtDataUtil.ENTITY_TYPE_ID,

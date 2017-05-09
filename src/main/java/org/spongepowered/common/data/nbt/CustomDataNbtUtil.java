@@ -202,7 +202,8 @@ public class CustomDataNbtUtil {
                 }
             }
         } catch (Exception e) {
-            new InvalidDataException("Could not translate " + dataClass + "! Don't worry though, we'll try to translate the rest of the data.", e).printStackTrace();
+            new InvalidDataException("Could not translate " + dataClass
+                    + "! Don't worry though, we'll try to translate the rest of the data.", e).printStackTrace();
         }
         return null;
     }

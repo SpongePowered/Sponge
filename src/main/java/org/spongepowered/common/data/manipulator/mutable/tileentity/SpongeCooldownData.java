@@ -35,7 +35,8 @@ import org.spongepowered.common.data.util.ComparatorUtil;
 public class SpongeCooldownData extends AbstractBoundedComparableData<Integer, CooldownData, ImmutableCooldownData> implements CooldownData {
 
     public SpongeCooldownData(int value) {
-        super(CooldownData.class, value, Keys.COOLDOWN, ComparatorUtil.intComparator(), ImmutableSpongeCooldownData.class, 0, Integer.MAX_VALUE, 0);
+        super(CooldownData.class, value, Keys.COOLDOWN, ComparatorUtil.intComparator(), ImmutableSpongeCooldownData.class,
+                0, Integer.MAX_VALUE, 0);
     }
 
     public SpongeCooldownData() {

@@ -64,7 +64,7 @@ public abstract class SpongeNetworkManager implements ChannelRegistrar {
         return (ChannelBuf) (buf instanceof PacketBuffer ? buf : new PacketBuffer(buf));
     }
 
-    public static abstract class AbstractChannelBinding implements ChannelBinding {
+    public abstract static class AbstractChannelBinding implements ChannelBinding {
 
         private final ChannelRegistrar registrar;
         private final String channelName;

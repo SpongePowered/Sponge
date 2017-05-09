@@ -28,8 +28,8 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockCactus;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -68,7 +68,8 @@ public abstract class MixinBlockCactus extends MixinBlock {
         }
     }
 
-    @Inject(method = "onEntityCollidedWithBlock", at = @At(value = "FIELD", target = CACTUS_DAMAGE_FIELD, opcode = Opcodes.GETSTATIC, shift = At.Shift.AFTER))
+    @Inject(method = "onEntityCollidedWithBlock", at = @At(value = "FIELD", target = CACTUS_DAMAGE_FIELD,
+            opcode = Opcodes.GETSTATIC, shift = At.Shift.AFTER))
     public void postSetOnFire(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Entity entityIn, CallbackInfo callbackInfo) {
         if (!worldIn.isRemote) {
             if (this.originalCactus == null) {

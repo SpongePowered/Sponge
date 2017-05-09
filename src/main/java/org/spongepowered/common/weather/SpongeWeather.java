@@ -27,10 +27,8 @@ package org.spongepowered.common.weather;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.weather.Weather;
 
-@NonnullByDefault
 public class SpongeWeather implements Weather {
 
     private final String id;
@@ -68,8 +66,7 @@ public class SpongeWeather implements Weather {
             return false;
         }
         SpongeWeather that = (SpongeWeather) o;
-        return Objects.equal(id, that.id) &&
-               Objects.equal(name, that.name);
+        return Objects.equal(id, that.id) && Objects.equal(name, that.name);
     }
 
     @Override

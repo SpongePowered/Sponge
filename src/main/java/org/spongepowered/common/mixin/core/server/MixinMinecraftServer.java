@@ -120,7 +120,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
@@ -317,8 +316,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     public void onServerStopping(CallbackInfo ci) {
         ((MinecraftServer) (Object) this).getPlayerProfileCache().save();
 
-        if (this.worlds != null && SpongeImpl.getGlobalConfig().getConfig().getModules().useOptimizations() &&
-                SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
+        if (this.worlds != null && SpongeImpl.getGlobalConfig().getConfig().getModules().useOptimizations()
+                && SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useAsyncLighting()) {
             for (WorldServer world : this.worlds) {
                 ((IMixinWorldServer) world).getLightingExecutor().shutdown();
             }
@@ -339,8 +338,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @author blood - December 23rd, 2015
      * @author Zidane - March 13th, 2016
      *
-     * Sponge re-writes this method because we take control of loading existing Sponge dimensions, migrate old worlds to our standard, and
-     * configuration checks.
+     * Sponge re-writes this method because we take control of loading existing
+     * Sponge dimensions, migrate old worlds to our standard, and configuration
+     * checks.
+     *
      * @reason Add multiworld support
      */
     @Overwrite
@@ -361,7 +362,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @author Zidane - March 13th, 2016
      *
      * @reason Sponge has a config option for determining if we'll
-     * generate spawn on server start. I enforce that here.
+     *     generate spawn on server start. I enforce that here.
      */
     @Overwrite
     public void initialWorldChunkLoad() {
@@ -389,7 +390,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
-        LOG.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
+        LOG.info("Preparing start region for level {} ({})",
+                ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
         BlockPos blockpos = worldServer.getSpawnPoint();
         long j = MinecraftServer.getCurrentTimeMillis();
         for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
@@ -620,7 +622,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
     }
 
-    @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getEntityTracker()Lnet/minecraft/entity/EntityTracker;"))
+    @Redirect(method = "updateTimeLightAndEntities",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getEntityTracker()Lnet/minecraft/entity/EntityTracker;"))
     public EntityTracker onUpdateTimeLightAndEntitiesGetEntityTracker(WorldServer worldServer) {
         // Chunk unloads must run after a world tick to guarantee any chunks accessed during the world tick have
         // been marked active and will not unload.
@@ -644,9 +647,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         int lastSecondaryTick = SpongeCommonEventFactory.lastSecondaryPacketTick;
         if (SpongeCommonEventFactory.lastAnimationPlayer != null) {
             EntityPlayerMP player = SpongeCommonEventFactory.lastAnimationPlayer.get();
-            if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
+            if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0
+                    && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
                 if (player.getHeldItemMainhand() != null) {
-                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND, Optional.empty(), BlockSnapshot.NONE).isCancelled()) {
+                    if (SpongeCommonEventFactory.callInteractItemEventPrimary(player, player.getHeldItemMainhand(), EnumHand.MAIN_HAND,
+                            Optional.empty(), BlockSnapshot.NONE).isCancelled()) {
                         SpongeCommonEventFactory.lastAnimationPacketTick = 0;
                         return;
                     }
@@ -661,13 +666,15 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     private int dimensionId;
 
-    @Redirect(method = "addServerStatsToSnooper", at = @At(value = "FIELD", target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;", opcode = Opcodes.GETFIELD))
+    @Redirect(method = "addServerStatsToSnooper", at = @At(value = "FIELD",
+            target = "Lnet/minecraft/world/WorldServer;provider:Lnet/minecraft/world/WorldProvider;", opcode = Opcodes.GETFIELD))
     private WorldProvider onGetWorldProviderForSnooper(WorldServer world) {
         this.dimensionId = WorldManager.getDimensionId(world);
         return world.provider;
     }
 
-    @ModifyArg(method = "addServerStatsToSnooper", at = @At(value = "INVOKE", target = "Ljava/lang/Integer;valueOf(I)Ljava/lang/Integer;", ordinal = 5))
+    @ModifyArg(method = "addServerStatsToSnooper",
+            at = @At(value = "INVOKE", target = "Ljava/lang/Integer;valueOf(I)Ljava/lang/Integer;", ordinal = 5))
     private int onValueOfInteger(int dimensionId) {
         return this.dimensionId;
     }
@@ -783,14 +790,14 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             value = callable.call();
         } catch (Exception e) {
             throw e;
-        }
-        finally {
+        } finally {
             CauseTracker.getInstance().completePhase(PluginPhase.State.SCHEDULED_TASK);
         }
         return value;
     }
 
-    @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;runTask(Ljava/util/concurrent/FutureTask;Lorg/apache/logging/log4j/Logger;)Ljava/lang/Object;"))
+    @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/util/Util;runTask(Ljava/util/concurrent/FutureTask;Lorg/apache/logging/log4j/Logger;)Ljava/lang/Object;"))
     private Object onRun(FutureTask<?> task, Logger logger) {
         return SpongeImplHooks.onUtilRunTask(task, logger);
     }

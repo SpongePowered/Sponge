@@ -39,13 +39,14 @@ import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
 
-public abstract class AbstractBooleanData<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> extends
-        AbstractSingleData<Boolean, M, I> {
+public abstract class AbstractBooleanData<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+        extends AbstractSingleData<Boolean, M, I> {
 
     private final Class<? extends I> immutableClass;
     private final Boolean defaultValue;
 
-    protected AbstractBooleanData(Class<M> manipulatorClass, Boolean value, Key<? extends BaseValue<Boolean>> usedKey, Class<? extends I> immutableClass, Boolean defaultValue) {
+    protected AbstractBooleanData(Class<M> manipulatorClass, Boolean value, Key<? extends BaseValue<Boolean>> usedKey,
+            Class<? extends I> immutableClass, Boolean defaultValue) {
         super(manipulatorClass, value, usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");

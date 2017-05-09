@@ -31,7 +31,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreedableData;
 
-public class ImmutableSpongeBreedableData extends AbstractImmutableBooleanData<ImmutableBreedableData, BreedableData> implements ImmutableBreedableData {
+public class ImmutableSpongeBreedableData extends AbstractImmutableBooleanData<ImmutableBreedableData, BreedableData>
+        implements ImmutableBreedableData {
 
     public ImmutableSpongeBreedableData(boolean value) {
         super(ImmutableBreedableData.class, value, Keys.CAN_BREED, SpongeBreedableData.class, false);

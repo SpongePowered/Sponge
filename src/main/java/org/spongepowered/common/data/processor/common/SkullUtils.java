@@ -34,7 +34,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.data.type.SkullTypes;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -49,7 +48,10 @@ import javax.annotation.Nullable;
 public class SkullUtils {
 
     /**
-     * There's not really a meaningful default value for this, since it's a CatalogType. However, the Vanilla give command defaults the skeleton type (index 0), so it's used as the default here.
+     * There's not really a meaningful default value for this,
+     * since it's a CatalogType. However, the Vanilla give
+     * command defaults the skeleton type (index 0), so it's
+     * used as the default here.
      */
     public static final SkullType DEFAULT_TYPE = SkullTypes.SKELETON;
 
@@ -72,8 +74,8 @@ public class SkullUtils {
     public static void setSkullType(TileEntitySkull tileEntitySkull, int skullType) {
         tileEntitySkull.setType(skullType);
         tileEntitySkull.markDirty();
-        tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
-                .getBlockState(tileEntitySkull.getPos()), 3);
+        tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()),
+                tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), 3);
     }
 
     public static SkullType getSkullType(ItemStack itemStack) {
@@ -89,12 +91,11 @@ public class SkullUtils {
             final GameProfile newProfile = SpongeRepresentedPlayerData.NULL_PROFILE.equals(profile) ? null : resolveProfileIfNecessary(profile);
             tileEntitySkull.setPlayerProfile((com.mojang.authlib.GameProfile) newProfile);
             tileEntitySkull.markDirty();
-            tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
-                    .getBlockState(tileEntitySkull.getPos()), 3);
+            tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()),
+                    tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), 3);
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public static Optional<GameProfile> getProfile(ItemStack skull) {

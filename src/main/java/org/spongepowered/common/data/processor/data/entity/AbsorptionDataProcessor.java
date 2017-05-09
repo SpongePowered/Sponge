@@ -42,7 +42,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityLivingBase, Double, Value<Double>, AbsorptionData, ImmutableAbsorptionData> {
+public final class AbsorptionDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityLivingBase, Double, Value<Double>,
+        AbsorptionData, ImmutableAbsorptionData> {
 
     public AbsorptionDataProcessor() {
         super(Keys.ABSORPTION, EntityLivingBase.class);

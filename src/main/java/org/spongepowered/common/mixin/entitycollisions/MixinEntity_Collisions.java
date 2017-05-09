@@ -158,7 +158,6 @@ public class MixinEntity_Collisions implements IModData_Collisions {
         if (requiresSave && activeConfig.getConfig().getEntityCollisionCategory().autoPopulateData()) {
             activeConfig.save();
         }
-        return;
     }
 
     @Override

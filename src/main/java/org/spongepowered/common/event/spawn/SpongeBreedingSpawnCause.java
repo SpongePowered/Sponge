@@ -31,7 +31,6 @@ import org.spongepowered.api.event.cause.entity.spawn.common.AbstractEntitySpawn
 
 public class SpongeBreedingSpawnCause extends AbstractEntitySpawnCause implements BreedingSpawnCause {
 
-
     private final Entity mate;
 
     public SpongeBreedingSpawnCause(SpongeBreedingSpawnCauseBuilder builder) {

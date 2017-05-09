@@ -44,13 +44,15 @@ import java.util.List;
 
 public final class PacketPhaseUtil {
 
-    public static void handleSlotRestore(EntityPlayerMP player, Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled, Event event) {
+    public static void handleSlotRestore(EntityPlayerMP player, Container openContainer, List<SlotTransaction> slotTransactions,
+            boolean eventCancelled, Event event) {
         // We always need to force resync for shift click events, since a previous event cancellation could have caused a desync
         // (if the event is from a shift double click)c
         handleSlotRestore(player, openContainer, slotTransactions, eventCancelled, event instanceof ClickInventoryEvent.Shift);
     }
 
-    public static void handleSlotRestore(EntityPlayerMP player, Container openContainer, List<SlotTransaction> slotTransactions, boolean eventCancelled, boolean forceResync) {
+    public static void handleSlotRestore(EntityPlayerMP player, Container openContainer, List<SlotTransaction> slotTransactions,
+            boolean eventCancelled, boolean forceResync) {
         for (SlotTransaction slotTransaction : slotTransactions) {
 
             if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
@@ -59,7 +61,8 @@ public final class PacketPhaseUtil {
 
             final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
             final int slotNumber = slot.slotNumber;
-            ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
+            ItemStackSnapshot snapshot =
+                    eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
             final ItemStack originalStack = ItemStackUtil.fromSnapshotToNative(snapshot);
 
             // TODO: fix below
@@ -91,7 +94,9 @@ public final class PacketPhaseUtil {
         if (capturedTransactions.size() == 0 && slotId >= 0 && slotId < openContainer.inventorySlots.size()) {
             final Slot slot = openContainer.getSlot(slotId);
             if (slot != null) {
-                ItemStackSnapshot snapshot = slot.getHasStack() ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
+                ItemStackSnapshot snapshot = slot.getHasStack()
+                        ? ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot()
+                        : ItemStackSnapshot.NONE;
                 final SlotTransaction slotTransaction = new SlotTransaction(ContainerUtil.getSlotAdapter(openContainer, slotId), snapshot, snapshot);
                 capturedTransactions.add(slotTransaction);
             }

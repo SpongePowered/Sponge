@@ -79,12 +79,10 @@ public final class CauseTracker {
 
     public static final boolean ENABLED = Booleans.parseBoolean(System.getProperty("sponge.causeTracking"), true);
 
-    static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) ->
-            context.forEach(namedCause -> {
-                        printer.add("        - Name: %s", namedCause.getName());
-                        printer.addWrapped(100, "          Object: %s", namedCause.getCauseObject());
-                    }
-            );
+    static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) -> context.forEach(namedCause -> {
+        printer.add("        - Name: %s", namedCause.getName());
+        printer.addWrapped(100, "          Object: %s", namedCause.getCauseObject());
+    });
 
     private static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
         printer.add("  - Phase: %s", data.state);
@@ -149,6 +147,7 @@ public final class CauseTracker {
      * <p>This method ensures that the necessary cleanup is performed if
      * an exception is thrown by phaseBody - i.e. logging a message,
      * and calling completePhase</p>
+     *
      * @param state
      * @param context
      * @param phaseBody
@@ -170,7 +169,8 @@ public final class CauseTracker {
      */
     public void abortCurrentPhase(Throwable t) {
         PhaseData data = this.stack.peek();
-        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase", data.state, data.context, t);
+        this.printMessageWithCaughtException("Exception during phase body", "Something happened trying to run the main body of a phase",
+                data.state, data.context, t);
 
         // Since an exception occured during the main phase code, we don't know what state we're in.
         // Therefore, we skip running the normal unwind functions that completePhase calls,
@@ -228,11 +228,13 @@ public final class CauseTracker {
                 try {
                     completePhase(GeneralPhase.Post.UNWINDING);
                 } catch (Exception | NoClassDefFoundError e) {
-                    printMessageWithCaughtException("Exception attempting to capture or spawn an Entity!", "Something happened trying to unwind", state, context, e);
+                    printMessageWithCaughtException("Exception attempting to capture or spawn an Entity!", "Something happened trying to unwind",
+                            state, context, e);
                 }
             }
         } catch (Exception | NoClassDefFoundError e) {
-            printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state", state, context, e);
+            printMessageWithCaughtException("Exception Post Dispatching Phase", "Something happened when trying to post dispatch state",
+                    state, context, e);
         }
     }
 
@@ -261,10 +263,10 @@ public final class CauseTracker {
 
     private void printIncorrectPhaseCompletion(IPhaseState prevState, IPhaseState state) {
         PrettyPrinter printer = new PrettyPrinter(60).add("Completing incorrect phase").centre().hr()
-                .addWrapped(50, "Sponge's tracking system is very dependent on knowing when"
-                        + "a change to any world takes place, however, we are attempting"
-                        + "to complete a \"phase\" other than the one we most recently entered."
-                        + "This is an error usually on Sponge's part, so a report"
+                .addWrapped(50, "Sponge's tracking system is very dependent on knowing when "
+                        + "a change to any world takes place, however, we are attempting "
+                        + "to complete a \"phase\" other than the one we most recently entered. "
+                        + "This is an error usually on Sponge's part, so a report "
                         + "is required on the issue tracker on GitHub.").hr()
                 .add("Expected to exit phase: %s", prevState)
                 .add("But instead found phase: %s", state)
@@ -279,10 +281,10 @@ public final class CauseTracker {
 
     private void printEmptyStackOnCompletion() {
         final PrettyPrinter printer = new PrettyPrinter(60).add("Unexpected ").centre().hr()
-                .addWrapped(50, "Sponge's tracking system is very dependent on knowing when"
-                                + "a change to any world takes place, however, we have been told"
-                                + "to complete a \"phase\" without having entered any phases."
-                                + "This is an error usually on Sponge's part, so a report"
+                .addWrapped(50, "Sponge's tracking system is very dependent on knowing when "
+                                + "a change to any world takes place, however, we have been told "
+                                + "to complete a \"phase\" without having entered any phases. "
+                                + "This is an error usually on Sponge's part, so a report "
                                 + "is required on the issue tracker on GitHub.").hr()
                 .add("StackTrace:")
                 .add(new Exception())
@@ -367,7 +369,7 @@ public final class CauseTracker {
      * Replacement of {@link net.minecraft.world.World#neighborChanged(BlockPos, Block, BlockPos)}
      * that adds tracking into play.
      *
-     * @param mixinWorld
+     * @param mixinWorld The mixin world
      * @param notifyPos The original notification position
      * @param sourceBlock The source block type
      * @param sourcePos The source block position
@@ -382,7 +384,8 @@ public final class CauseTracker {
             if (CauseTracker.ENABLED) {
                 final PhaseData peek = this.stack.peek();
                 final IPhaseState state = peek.state;
-                state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos, ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
+                state.getPhase().associateNeighborStateNotifier(state, peek.context, sourcePos, iblockstate.getBlock(), notifyPos,
+                        ((WorldServer) mixinWorld), PlayerTracker.Type.NOTIFIER);
             }
             // Sponge End
 
@@ -549,10 +552,12 @@ public final class CauseTracker {
 
     /**
      * This is the replacement of {@link WorldServer#spawnEntity(net.minecraft.entity.Entity)}
-     * where it captures into phases. The causes and relations are processed by the phases.
+     * where it captures into phases. The causes and relations
+     * are processed by the phases.
      *
-     * The difference between {@link #spawnEntityWithCause(Entity, Cause)} is that it bypasses
-     * any phases and directly throws a spawn entity event.
+     * <p>The difference between {@link #spawnEntityWithCause(Entity, Cause)}
+     * is that it bypasses any phases and directly throws a
+     * spawn entity event.</p>
      *
      * @param entity The entity
      * @return True if the entity spawn was successful
@@ -601,7 +606,7 @@ public final class CauseTracker {
                         if (!(owner instanceof EntityPlayer)) {
                             user = ((IMixinEntity) owner).getCreatorUser().orElse(null);
                         } else {
-                           user = (User) owner;
+                            user = (User) owner;
                         }
                         if (user != null) {
                             context.owner = user;
@@ -658,11 +663,12 @@ public final class CauseTracker {
 
     /**
      * The core implementation of {@link World#spawnEntity(Entity, Cause)} that
-     * bypasses any sort of cause tracking and throws an event directly
+     * bypasses any sort of cause tracking and throws an event directly.
      *
-     * @param entity
-     * @param cause
-     * @return
+     * @param entity The entity to spawn
+     * @param cause The cause to use
+     * @return If the chunk is not loaded, so the
+     *     entity does not spawn
      */
     public boolean spawnEntityWithCause(Entity entity, Cause cause) {
         checkNotNull(entity, "Entity cannot be null!");

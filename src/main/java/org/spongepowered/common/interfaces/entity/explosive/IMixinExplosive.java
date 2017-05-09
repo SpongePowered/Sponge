@@ -30,7 +30,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.explosive.DetonateExplosiveEvent;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.Optional;

@@ -33,8 +33,8 @@ import org.spongepowered.api.data.value.BaseValue;
 
 import java.util.function.Predicate;
 
-public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-        extends AbstractSingleDataSingleTargetProcessor<ItemStack, T, V, M, I> {
+public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>,
+        I extends ImmutableDataManipulator<I, M>> extends AbstractSingleDataSingleTargetProcessor<ItemStack, T, V, M, I> {
 
     private final Predicate<ItemStack> predicate;
 

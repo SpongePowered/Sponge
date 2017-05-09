@@ -30,7 +30,6 @@ import net.minecraft.entity.ai.EntityAINearestAttackableTarget;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.util.Functional;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 

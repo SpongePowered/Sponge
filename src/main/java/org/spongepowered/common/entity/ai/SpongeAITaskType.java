@@ -30,7 +30,9 @@ import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.living.Agent;
 
 public final class SpongeAITaskType implements AITaskType {
-    private final String id, name;
+
+    private final String id;
+    private final String name;
     private final Class<? extends AITask<? extends Agent>> aiClass;
 
     public SpongeAITaskType(String id, String name, Class<? extends AITask<? extends Agent>> aiClass) {
@@ -46,20 +48,20 @@ public final class SpongeAITaskType implements AITaskType {
 
     @Override
     public String getId() {
-        return id;
+        return this.id;
     }
 
     @Override
     public String getName() {
-        return name;
+        return this.name;
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .addValue(id)
-                .addValue(name)
-                .add("aiClass", aiClass)
+                .addValue(this.id)
+                .addValue(this.name)
+                .add("aiClass", this.aiClass)
                 .toString();
     }
 }

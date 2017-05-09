@@ -33,7 +33,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.command.CommandPermissions;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 
-@Mixin(value = {EntityPlayerMP.class, MinecraftServer.class, RConConsoleSource.class, CommandBlockBaseLogic.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
+@Mixin(value = {EntityPlayerMP.class, MinecraftServer.class, RConConsoleSource.class, CommandBlockBaseLogic.class},
+        targets = IMixinCommandSender.SIGN_CLICK_SENDER)
 public abstract class MixinICommandSender implements ICommandSender, IMixinCommandSender {
 
     @Override

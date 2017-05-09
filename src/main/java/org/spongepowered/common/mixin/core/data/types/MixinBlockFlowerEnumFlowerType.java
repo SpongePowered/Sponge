@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.data.types;
 import net.minecraft.block.BlockFlower;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;

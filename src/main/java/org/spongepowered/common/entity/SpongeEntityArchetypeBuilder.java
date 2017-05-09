@@ -162,7 +162,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     public EntityArchetype build() {
         checkNotNull(this.entityType);
         checkState(this.entityType != UNKNOWN);
-        if(this.entityData == null) {
+        if (this.entityData == null) {
             this.entityData = DataContainer.createNew();
         } else {
             this.entityData.remove(DataQuery.of("Pos"));

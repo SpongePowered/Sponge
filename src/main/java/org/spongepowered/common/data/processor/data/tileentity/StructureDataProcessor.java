@@ -37,7 +37,6 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableStructureData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.StructureData;
 import org.spongepowered.api.data.type.StructureMode;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeStructureData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntityStructure;
@@ -88,9 +87,11 @@ public final class StructureDataProcessor extends AbstractTileEntityDataProcesso
         container.setShowAir((Boolean) map.get(Keys.STRUCTURE_SHOW_AIR));
         container.setShowBoundingBox((Boolean) map.get(Keys.STRUCTURE_SHOW_BOUNDING_BOX));
 
+        /* TODO At the moment this is not used, should we be doing something with it?
         @Nullable Boolean showBoundingBox = (Boolean) map.get(Keys.STRUCTURE_SHOW_BOUNDING_BOX);
         if (showBoundingBox != null) {
         }
+        */
 
         @Nullable Vector3i size = (Vector3i) map.get(Keys.STRUCTURE_SIZE);
         if (size != null) {

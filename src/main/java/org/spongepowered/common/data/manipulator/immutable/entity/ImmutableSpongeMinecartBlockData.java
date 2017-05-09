@@ -36,7 +36,8 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeMinecartBlockData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<ImmutableMinecartBlockData, MinecartBlockData> implements ImmutableMinecartBlockData {
+public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<ImmutableMinecartBlockData, MinecartBlockData>
+        implements ImmutableMinecartBlockData {
 
     private final BlockState block;
     private final int offset;

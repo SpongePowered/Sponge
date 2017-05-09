@@ -33,7 +33,6 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.InventoryRowLens;
 
-
 public class InventoryRowLensImpl extends Inventory2DLensImpl implements InventoryRowLens<IInventory, net.minecraft.item.ItemStack> {
 
     public InventoryRowLensImpl(int base, int width, SlotProvider<IInventory, ItemStack> slots) {
@@ -48,7 +47,8 @@ public class InventoryRowLensImpl extends Inventory2DLensImpl implements Invento
         this(base, width, xBase, yBase, InventoryRowAdapter.class, slots);
     }
     
-    public InventoryRowLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
+    public InventoryRowLensImpl(int base, int width, int xBase, int yBase, Class<? extends Inventory> adapterType,
+            SlotProvider<IInventory, ItemStack> slots) {
         super(base, width, 1, width, xBase, yBase, adapterType, slots);
     }
     

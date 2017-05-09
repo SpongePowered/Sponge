@@ -146,7 +146,7 @@ class PaginationCalculator {
             width = 0;
         }
         //if bolded width gets 1 added.
-        if(isBold && width > 0) {
+        if (isBold && width > 0) {
             width = width + 1;
         }
 
@@ -166,9 +166,9 @@ class PaginationCalculator {
         Iterable<ITextComponent> children = ((IMixinTextComponent) component).withChildren();
         int total = 0;
 
-        for(ITextComponent child : children) {
+        for (ITextComponent child : children) {
             PrimitiveIterator.OfInt i_it;
-            if(child instanceof TextComponentString || child instanceof TextComponentTranslation) {
+            if (child instanceof TextComponentString || child instanceof TextComponentTranslation) {
                 i_it = child.getUnformattedComponentText().codePoints().iterator();
             } else {
                 continue;
@@ -178,7 +178,7 @@ class PaginationCalculator {
 
             Integer cp;
             boolean newLine = false;
-            while(i_it.hasNext()){
+            while (i_it.hasNext()) {
                 cp = i_it.next();
                 if (cp == '\n') {
                     // if the previous character is a '\n'
@@ -230,7 +230,7 @@ class PaginationCalculator {
         final Text.Builder output = Text.builder();
 
         //Using 0 width unicode symbols as padding throws us into an unending loop, replace them with the default padding
-        if(paddingLength < 1) {
+        if (paddingLength < 1) {
             padding = Text.of("=");
             styledPadding = withColor(withStyle(padding, text), text);
             paddingLength = getWidth(styledPadding);
@@ -240,7 +240,7 @@ class PaginationCalculator {
         if (inputLength == 0) {
             addPadding(padding, output, GenericMath.floor((double) LINE_WIDTH / paddingLength));
         } else {
-            if(addSpaces) {
+            if (addSpaces) {
                 text = textWithSpaces;
                 inputLength = getWidth(textWithSpaces);
             }

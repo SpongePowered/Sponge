@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Concrete lens class which implements observable
+ * Concrete lens class which implements observable.
  * 
  * @param <TInventory>
  * @param <TStack>
@@ -41,7 +41,7 @@ import java.util.List;
 public abstract class ObservableLens<TInventory, TStack> implements Lens<TInventory, TStack>, Observable<InventoryEventArgs> {
     
     /**
-     * Observers
+     * Observers.
      */
     private final List<Observer<InventoryEventArgs>> observers = new ArrayList<Observer<InventoryEventArgs>>();
     

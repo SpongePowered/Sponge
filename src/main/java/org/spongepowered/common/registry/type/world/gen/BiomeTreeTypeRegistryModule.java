@@ -63,7 +63,8 @@ public class BiomeTreeTypeRegistryModule extends AbstractPrefixAlternateCatalogT
     @Override
     public void registerDefaults() {
         register(create("oak", new WorldGenTrees(false), new WorldGenBigTree(false)));
-        register(create("birch", new WorldGenBirchTree(false, false), new WorldGenBirchTree(false, true)));
+        register(create("birch", new WorldGenBirchTree(false, false),
+                new WorldGenBirchTree(false, true)));
 
         WorldGenMegaPineTree tall_megapine = new WorldGenMegaPineTree(false, true);
         WorldGenMegaPineTree megapine = new WorldGenMegaPineTree(false, false);

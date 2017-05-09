@@ -47,8 +47,7 @@ public final class PhaseData {
             return false;
         }
         PhaseData phaseData = (PhaseData) o;
-        return Objects.equals(this.context, phaseData.context) &&
-               Objects.equals(this.state, phaseData.state);
+        return Objects.equals(this.context, phaseData.context) && Objects.equals(this.state, phaseData.state);
     }
 
     @Override

@@ -24,17 +24,15 @@
  */
 package org.spongepowered.common.scheduler;
 
-import com.google.common.base.Objects;
-
 import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
-
+import com.google.common.base.Objects;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 /**
  * An internal representation of a {@link Task} created by a plugin.

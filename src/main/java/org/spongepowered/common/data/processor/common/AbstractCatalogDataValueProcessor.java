@@ -34,8 +34,8 @@ import org.spongepowered.api.data.value.mutable.Value;
 
 import java.util.Optional;
 
-public abstract class AbstractCatalogDataValueProcessor<T extends CatalogType, V extends Value<T>> extends
-        AbstractSpongeValueProcessor<ItemStack, T, V> {
+public abstract class AbstractCatalogDataValueProcessor<T extends CatalogType, V extends Value<T>>
+        extends AbstractSpongeValueProcessor<ItemStack, T, V> {
 
     protected AbstractCatalogDataValueProcessor(Key<V> key) {
         super(ItemStack.class, key);

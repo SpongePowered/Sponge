@@ -45,7 +45,8 @@ import javax.inject.Inject;
  */
 public final class PluginConfigurationModule extends AbstractModule {
 
-    private static final TypeLiteral<ConfigurationLoader<CommentedConfigurationNode>> COMMENTED_CONFIGURATION_NODE_LOADER = new TypeLiteral<ConfigurationLoader<CommentedConfigurationNode>>() {};
+    private static final TypeLiteral<ConfigurationLoader<CommentedConfigurationNode>> COMMENTED_CONFIGURATION_NODE_LOADER =
+            new TypeLiteral<ConfigurationLoader<CommentedConfigurationNode>>() {};
 
     @Override
     protected void configure() {
@@ -58,9 +59,11 @@ public final class PluginConfigurationModule extends AbstractModule {
         this.bind(Path.class).annotatedWith(DefaultConfigAnnotation.SHARED).toProvider(SharedDirAsPath.class);
         this.bind(File.class).annotatedWith(DefaultConfigAnnotation.SHARED).toProvider(SharedDirAsFile.class);
         // Loader for shared-directory config file
-        this.bind(COMMENTED_CONFIGURATION_NODE_LOADER).annotatedWith(DefaultConfigAnnotation.SHARED).toProvider(SharedCommentedConfigurationNode.class);
+        this.bind(COMMENTED_CONFIGURATION_NODE_LOADER).annotatedWith(DefaultConfigAnnotation.SHARED)
+                .toProvider(SharedCommentedConfigurationNode.class);
         // Loader for plugin-private directory config file
-        this.bind(COMMENTED_CONFIGURATION_NODE_LOADER).annotatedWith(DefaultConfigAnnotation.NON_SHARED).toProvider(PrivateCommentedConfigurationNode.class);
+        this.bind(COMMENTED_CONFIGURATION_NODE_LOADER).annotatedWith(DefaultConfigAnnotation.NON_SHARED)
+                .toProvider(PrivateCommentedConfigurationNode.class);
     }
 
     /**
@@ -153,7 +156,7 @@ public final class PluginConfigurationModule extends AbstractModule {
 
     }
 
-    static abstract class CommentedConfigurationNodeProvider implements Provider<ConfigurationLoader<CommentedConfigurationNode>> {
+    abstract static class CommentedConfigurationNodeProvider implements Provider<ConfigurationLoader<CommentedConfigurationNode>> {
 
         @Inject protected PluginContainer container;
 

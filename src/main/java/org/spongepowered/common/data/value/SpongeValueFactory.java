@@ -67,7 +67,8 @@ public class SpongeValueFactory implements ValueFactory {
 
     @Override
     public <E> Value<E> createValue(Key<Value<E>> key, E element, E defaultValue) {
-        return new SpongeValue<>(checkNotNull(key, "key"), checkNotNull(defaultValue, "defaultValue"), checkNotNull(element, "element"));
+        return new SpongeValue<>(checkNotNull(key, "key"), checkNotNull(defaultValue, "defaultValue"),
+                checkNotNull(element, "element"));
     }
 
     @Override
@@ -87,7 +88,8 @@ public class SpongeValueFactory implements ValueFactory {
 
     @Override
     public <E> SetValue<E> createSetValue(Key<SetValue<E>> key, Set<E> elements, Set<E> defaults) {
-        return new SpongeSetValue<>(checkNotNull(key, "key"), checkNotNull(defaults, "defaults"), checkNotNull(elements, "elements"));
+        return new SpongeSetValue<>(checkNotNull(key, "key"), checkNotNull(defaults, "defaults"),
+                checkNotNull(elements, "elements"));
     }
 
     @Override
@@ -97,7 +99,8 @@ public class SpongeValueFactory implements ValueFactory {
 
     @Override
     public <K, V> MapValue<K, V> createMapValue(Key<MapValue<K, V>> key, Map<K, V> map, Map<K, V> defaults) {
-        return new SpongeMapValue<>(checkNotNull(key, "key"), checkNotNull(defaults, "defaults"), checkNotNull(map, "map"));
+        return new SpongeMapValue<>(checkNotNull(key, "key"), checkNotNull(defaults, "defaults"),
+                checkNotNull(map, "map"));
     }
 
     @Override

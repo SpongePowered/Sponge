@@ -71,6 +71,7 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
     public Map<Vector3i, TileEntityArchetype> getTileEntityArchetypes() {
         return this.tiles;
     }
+
     @Override
     public MutableBlockVolumeWorker<? extends ArchetypeVolume> getBlockWorker(Cause cause) {
         return new SpongeMutableBlockVolumeWorker<>(this, cause);
@@ -78,10 +79,8 @@ public class SpongeArchetypeVolume extends AbstractBlockBuffer implements Archet
 
     @Override
     public void apply(Location<World> location, BlockChangeFlag changeFlag, Cause cause) {
-        this.backing.getBlockWorker(cause).iterate((v, x, y, z) -> {
-            location.getExtent().setBlock(x + location.getBlockX(), y + location.getBlockY(), z + location.getBlockZ(), v.getBlock(x, y, z), changeFlag,
-                    cause);
-        });
+        this.backing.getBlockWorker(cause).iterate((v, x, y, z) -> location.getExtent().setBlock(x + location.getBlockX(),
+                y + location.getBlockY(), z + location.getBlockZ(), v.getBlock(x, y, z), changeFlag, cause));
         for (Vector3i pos : this.tiles.keySet()) {
             TileEntityArchetype archetype = this.tiles.get(pos);
             archetype.apply(location.add(pos), cause);

@@ -40,10 +40,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.Optional;
-
-import javax.annotation.Nullable;
-
 @Mixin(NextTickListEntry.class)
 public class MixinNextTickListEntry implements ScheduledBlockUpdate, IMixinNextTickListEntry {
 

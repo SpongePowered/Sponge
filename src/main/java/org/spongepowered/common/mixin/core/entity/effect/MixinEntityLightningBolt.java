@@ -57,7 +57,6 @@ import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableD
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.mixin.core.block.state.MixinStateImplementation;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
@@ -138,7 +137,8 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
             for (Transaction<BlockSnapshot> bt : strike.getTransactions()) {
                 if (bt.isValid()) {
                     BlockSnapshot bs = bt.getFinal();
-                    ((WorldServer) world).setBlockState(((IMixinLocation) (Object) bs.getLocation().get()).getBlockPos(), ((IBlockState) bs.getState()));
+                    ((WorldServer) world).setBlockState(((IMixinLocation) (Object) bs.getLocation().get()).getBlockPos(),
+                            ((IBlockState) bs.getState()));
                 }
             }
             for (Entity e : strike.getEntities()) {

@@ -42,8 +42,9 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import javax.annotation.Nullable;
 
 /**
- * A specialized phase for forge event listeners during pre tick, may need to do the same
- * if SpongeAPI adds pre tick events.
+ * A specialized phase for forge event listeners during
+ * pre tick, may need to do the same if SpongeAPI adds
+ * pre tick events.
  */
 abstract class ListenerPhaseState extends PluginPhaseState {
 

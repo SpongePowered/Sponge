@@ -29,7 +29,6 @@ import net.minecraft.item.ItemStack;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
-
 public interface OrderedInventoryLens<TInventory, TStack> extends Lens<TInventory, TStack> {
 
     int getStride();

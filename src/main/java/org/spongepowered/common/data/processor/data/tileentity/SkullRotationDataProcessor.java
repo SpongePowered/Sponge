@@ -43,8 +43,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class SkullRotationDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntitySkull, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
+public class SkullRotationDataProcessor extends AbstractTileEntitySingleDataProcessor<TileEntitySkull, Direction, Value<Direction>,
+        DirectionalData, ImmutableDirectionalData> {
 
     public SkullRotationDataProcessor() {
         super(TileEntitySkull.class, Keys.DIRECTION);

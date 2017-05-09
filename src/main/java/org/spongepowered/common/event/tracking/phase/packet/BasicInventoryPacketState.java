@@ -33,7 +33,6 @@ import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.IMixinContainer;
 
@@ -43,38 +42,38 @@ import javax.annotation.Nullable;
 
 public class BasicInventoryPacketState extends BasicPacketState {
 
-
     /**
-     * Flags we care about
+     * Flags we care about.
      */
     final int stateId;
 
     /**
-     * Mask for flags we care about, the caremask if you will
+     * Mask for flags we care about, the care mask
+     * if you will.
      */
     final int stateMask;
 
     /**
-     * Don't care about anything
+     * Don't care about anything.
      */
     public BasicInventoryPacketState() {
         this(0, PacketPhase.MASK_NONE);
     }
 
     /**
-     * We care a lot
+     * We care a lot.
      *
-     * @param stateId state
+     * @param stateId The state id
      */
     public BasicInventoryPacketState(int stateId) {
         this(stateId, PacketPhase.MASK_ALL);
     }
 
     /**
-     * We care about some things
+     * We care about some things.
      *
-     * @param stateId flags we care about
-     * @param stateMask caring mask
+     * @param stateId Flags we care about
+     * @param stateMask The care mask
      */
     public BasicInventoryPacketState(int stateId, int stateMask) {
         this.stateId = stateId & stateMask;
@@ -85,7 +84,6 @@ public class BasicInventoryPacketState extends BasicPacketState {
     public boolean doBlockCapturing() {
         return false;
     }
-
 
     @Nullable
     public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,

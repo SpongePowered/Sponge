@@ -40,8 +40,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public final class CustomNameVisibleProcessor extends
-        AbstractSingleDataSingleTargetProcessor<Entity, Boolean, Value<Boolean>, CustomNameVisibleData, ImmutableCustomNameVisibleData> {
+public final class CustomNameVisibleProcessor extends AbstractSingleDataSingleTargetProcessor<Entity, Boolean, Value<Boolean>,
+        CustomNameVisibleData, ImmutableCustomNameVisibleData> {
 
     public CustomNameVisibleProcessor() {
         super(Keys.CUSTOM_NAME_VISIBLE, Entity.class);

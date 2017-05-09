@@ -60,7 +60,8 @@ public class HasDataFilterDelegate implements ParameterFilterDelegate {
         mv.visitVarInsn(ALOAD, localParam);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(DataHolder.class));
         mv.visitLdcInsn(Type.getType(this.anno.value()));
-        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(DataHolder.class), "get", "(Ljava/lang/Class;)Ljava/util/Optional;", true);
+        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(DataHolder.class), "get",
+                "(Ljava/lang/Class;)Ljava/util/Optional;", true);
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "isPresent", "()Z", false);
         Label success = new Label();
         if (this.anno.inverse()) {

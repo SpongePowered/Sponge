@@ -38,14 +38,15 @@ import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
 
-public abstract class AbstractImmutableSingleEnumData<E extends Enum<E>, I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>> extends
-        AbstractImmutableSingleData<E, I, M> {
+public abstract class AbstractImmutableSingleEnumData<E extends Enum<E>, I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
+        extends AbstractImmutableSingleData<E, I, M> {
 
     private final Class<? extends M> mutableClass;
     private final E defaultValue;
     private final ImmutableValue<E> cachedValue;
 
-    protected AbstractImmutableSingleEnumData(Class<I> immutableClass, E value, E defaultValue, Key<? extends BaseValue<E>> usedKey, Class<? extends M> mutableClass) {
+    protected AbstractImmutableSingleEnumData(Class<I> immutableClass, E value, E defaultValue, Key<? extends BaseValue<E>> usedKey,
+            Class<? extends M> mutableClass) {
         super(immutableClass, value, usedKey);
         checkArgument(!Modifier.isAbstract(mutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(mutableClass.getModifiers()), "The immutable class cannot be an interface!");

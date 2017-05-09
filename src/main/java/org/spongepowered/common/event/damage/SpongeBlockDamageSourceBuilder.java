@@ -33,7 +33,8 @@ import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDam
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
-public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<BlockDamageSource, BlockDamageSource.Builder> implements BlockDamageSource.Builder {
+public class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<BlockDamageSource, BlockDamageSource.Builder>
+        implements BlockDamageSource.Builder {
 
     private Location<World> location;
     private BlockSnapshot blockSnapshot;

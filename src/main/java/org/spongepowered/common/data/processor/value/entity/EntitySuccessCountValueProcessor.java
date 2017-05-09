@@ -35,7 +35,8 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class EntitySuccessCountValueProcessor extends AbstractSpongeValueProcessor<EntityMinecartCommandBlock, Integer, MutableBoundedValue<Integer>> {
+public class EntitySuccessCountValueProcessor
+        extends AbstractSpongeValueProcessor<EntityMinecartCommandBlock, Integer, MutableBoundedValue<Integer>> {
 
     public EntitySuccessCountValueProcessor() {
         super(EntityMinecartCommandBlock.class, Keys.SUCCESS_COUNT);

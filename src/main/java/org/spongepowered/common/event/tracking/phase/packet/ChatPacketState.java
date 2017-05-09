@@ -27,8 +27,6 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketChatMessage;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
 final class ChatPacketState extends BasicPacketState {

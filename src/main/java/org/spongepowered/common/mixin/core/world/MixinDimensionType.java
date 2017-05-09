@@ -52,7 +52,7 @@ import java.nio.file.Path;
 @Implements(value = @Interface(iface = org.spongepowered.api.world.DimensionType.class, prefix = "dimensionType$"))
 public abstract class MixinDimensionType implements IMixinDimensionType {
 
-    @Shadow @Final private Class <? extends WorldProvider> clazz;
+    @Shadow @Final private Class<? extends WorldProvider> clazz;
     @Shadow public abstract String getName();
 
     private String sanitizedId;
@@ -64,7 +64,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     private boolean generateSpawnOnLoad;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstruct(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class <? extends WorldProvider > clazzIn,
+    public void onConstruct(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class<? extends WorldProvider> clazzIn,
             CallbackInfo ci) {
         String dimName = enumName.toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
         this.enumName = dimName;
@@ -127,12 +127,14 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
 
     /**
      * @author Zidane - March 30th, 2016
-     * @reason This method generally checks dimension type ids (-1 | 0 | 1) in Vanilla. I change this assumption to dimension
-     * instance ids. Since the WorldManager tracks dimension instance ids by dimension type ids and Vanilla keeps
-     * their ids 1:1, this is a safe change that ensures a mixup can't happen.
+     * @reason This method generally checks dimension type ids (-1 | 0 | 1) in Vanilla.
+     *     I change this assumption to dimension instance ids. Since the WorldManager
+     *     tracks dimension instance ids by dimension type ids and Vanilla keeps their
+     *     ids 1:1, this is a safe change that ensures a mixup can't happen.
      */
     @Overwrite
     public static DimensionType getById(int dimensionTypeId) {
-        return WorldManager.getDimensionTypeByTypeId(dimensionTypeId).orElseThrow(() -> new IllegalArgumentException("Invalid dimension id " + dimensionTypeId));
+        return WorldManager.getDimensionTypeByTypeId(dimensionTypeId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid dimension id " + dimensionTypeId));
     }
 }

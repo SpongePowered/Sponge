@@ -93,7 +93,9 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
                 @Override
                 public PropertyMap load(UUID uuid) throws Exception {
-                    return SpongeImpl.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(uuid, ""), true)
+                    return SpongeImpl.getServer()
+                            .getMinecraftSessionService()
+                            .fillProfileProperties(new GameProfile(uuid, ""), true)
                             .getProperties();
                 }
             });
@@ -103,7 +105,8 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
 
     private GameProfile fakeProfile;
     @Nullable private UUID skinUuid;
-    private boolean aiDisabled = false, leftHanded = false;
+    private boolean aiDisabled = false;
+    private boolean leftHanded = false;
 
     public EntityHuman(World worldIn) {
         super(worldIn);
@@ -263,6 +266,7 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     protected SoundEvent getFallSound(int p_184588_1_) {
         return p_184588_1_ > 4 ? SoundEvents.ENTITY_PLAYER_BIG_FALL : SoundEvents.ENTITY_PLAYER_SMALL_FALL;
     }
+
     @Override
     public float getEyeHeight() {
         return 1.62f;
@@ -410,8 +414,9 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     /**
      * Called when a player stops tracking this human.
      *
-     * Removes the player from the packet queue and sends them a REMOVE_PLAYER
-     * tab list packet to make sure the human is not on it.
+     * <p>Removes the player from the packet queue and sends
+     * them a REMOVE_PLAYER tab list packet to make sure the
+     * human is not on it.</p>
      *
      * @param player The player that has stopped tracking this human
      */
@@ -423,8 +428,8 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
     /**
      * Creates a {@link SPacketSpawnPlayer} packet.
      *
-     * Copied directly from the constructor of the packet, because that can't be
-     * used as we're not an EntityPlayer.
+     * <p>Copied directly from the constructor of the packet, because
+     * that can't be used as we're not an EntityPlayer.</p>
      *
      * @return A new spawn packet
      */
@@ -507,11 +512,13 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         double d1 = target.getEntityBoundingBox().minY + (double)(target.height / 3.0F) - entitytippedarrow.posY;
         double d2 = target.posZ - this.posZ;
         double d3 = (double)MathHelper.sqrt(d0 * d0 + d2 * d2);
-        entitytippedarrow.setThrowableHeading(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, (float)(14 - this.world.getDifficulty().getDifficultyId() * 4));
+        entitytippedarrow.setThrowableHeading(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F,
+                (float)(14 - this.world.getDifficulty().getDifficultyId() * 4));
         // These names are wrong
         int i = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.PUNCH, this);
         int j = EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.FLAME, this);
-        entitytippedarrow.setDamage((double)(p_82196_2_ * 2.0F) + this.rand.nextGaussian() * 0.25D + (double)((float)this.world.getDifficulty().getDifficultyId() * 0.11F));
+        entitytippedarrow.setDamage((double)(p_82196_2_ * 2.0F) + this.rand.nextGaussian() * 0.25D
+                + (double)((float)this.world.getDifficulty().getDifficultyId() * 0.11F));
 
         if (i > 0) {
             entitytippedarrow.setDamage(entitytippedarrow.getDamage() + (double)i * 0.5D + 0.5D);

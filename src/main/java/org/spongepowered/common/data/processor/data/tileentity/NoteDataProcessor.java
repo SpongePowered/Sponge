@@ -44,8 +44,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class NoteDataProcessor
-        extends AbstractTileEntitySingleDataProcessor<TileEntityNote, NotePitch, Value<NotePitch>, NoteData, ImmutableNoteData> {
+public class NoteDataProcessor extends AbstractTileEntitySingleDataProcessor<TileEntityNote, NotePitch, Value<NotePitch>,
+        NoteData, ImmutableNoteData> {
 
     public NoteDataProcessor() {
         super(TileEntityNote.class, Keys.NOTE_PITCH);

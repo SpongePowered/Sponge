@@ -39,8 +39,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class ScreamingDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityEnderman, Boolean, Value<Boolean>, ScreamingData, ImmutableScreamingData> {
+public class ScreamingDataProcessor extends AbstractEntitySingleDataProcessor<EntityEnderman, Boolean, Value<Boolean>,
+        ScreamingData, ImmutableScreamingData> {
 
     public ScreamingDataProcessor() {
         super(EntityEnderman.class, Keys.IS_SCREAMING);

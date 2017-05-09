@@ -40,9 +40,9 @@
  * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandExecuteAtSender}
  * </dl>
  *
- * In addition, {@link org.spongepowered.common.mixin.core.command.MixinBlockCommandBlockSender} and
- * {@link org.spongepowered.common.mixin.core.command.MixinMinecartCommandBlockSender} are for inner classes that are separate from the mixin that
+ * In addition, {@link org.spongepowered.common.mixin.core.command.MixinBlockCommandBlockSender}
+ * and {@link org.spongepowered.common.mixin.core.command.MixinMinecartCommandBlockSender} are
+ * for inner classes that are separate from the mixin that
  * actually implements their command source interfaces.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.mixin.core.command;
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.core.command;

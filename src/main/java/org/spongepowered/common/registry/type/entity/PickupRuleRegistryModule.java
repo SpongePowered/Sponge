@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.registry.type.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.projectile.EntityArrow;
@@ -37,8 +39,6 @@ import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public final class PickupRuleRegistryModule implements CatalogRegistryModule<PickupRule> {
 

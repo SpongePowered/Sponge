@@ -70,16 +70,19 @@ public interface IPhaseState {
     }
 
     /**
-     * A simple boolean switch to whether an {@link net.minecraft.entity.EntityLivingBase#onDeath(DamageSource)}
-     * should enter a specific phase to handle the destructed drops until either after this current phase
-     * has completed (if returning {@code true}) or whether the entity is going to enter a specific
-     * phase directly to handle entity drops (if returning {@code false}). Most all phases should
-     * return true, except certain few that require it. The reasoning for a phase to return
-     * {@code false} would be if it's own phase can handle entity drops with appropriate causes
-     * on it's own.
+     * A simple boolean switch to whether an
+     * {@link net.minecraft.entity.EntityLivingBase#onDeath(DamageSource)}
+     * should enter a specific phase to handle the destructed drops until either
+     * after this current phase has completed (if returning {@code true}) or
+     * whether the entity is going to enter a specific phase directly to handle
+     * entity drops (if returning {@code false}). Most all phases should return true,
+     * except certain few that require it. The reasoning for a phase to return
+     * {@code false} would be if it's own phase can handle entity drops with
+     * appropriate causes on it's own.
      *
-     * @return True if this phase is aware enough to handle entity death drops per entity, or will
-     *     cause {@link EntityPhase.State#DEATH} to be entered and handle it's own drops
+     * @return True if this phase is aware enough to handle entity death
+     *     drops per entity, or will cause {@link EntityPhase.State#DEATH}
+     *     to be entered and handle it's own drops
      */
     default boolean tracksEntitySpecificDrops() {
         return false;
@@ -100,13 +103,14 @@ public interface IPhaseState {
     default boolean shouldCaptureBlockChangeOrSkip(PhaseContext phaseContext, BlockPos pos) {
         return true;
     }
+
     default boolean isInteraction() {
         return false;
     }
+
     default void postTrackBlock(BlockSnapshot snapshot, CauseTracker tracker, PhaseContext context) {
 
     }
-
 
     default boolean requiresBlockPosTracking() {
         return false;

@@ -33,7 +33,8 @@ import org.spongepowered.api.data.merge.MergeFunction;
 
 import java.util.Optional;
 
-public abstract class AbstractMultiDataProcessor<T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> extends AbstractSpongeDataProcessor<T, I> {
+public abstract class AbstractMultiDataProcessor<T extends DataManipulator<T, I>,
+        I extends ImmutableDataManipulator<I, T>> extends AbstractSpongeDataProcessor<T, I> {
 
     protected abstract T createManipulator();
 

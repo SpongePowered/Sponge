@@ -36,8 +36,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Optional;
 
-public abstract class AbstractBlockOnlyDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-        extends AbstractItemSingleDataProcessor<T, V, M, I> {
+public abstract class AbstractBlockOnlyDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>,
+        I extends ImmutableDataManipulator<I, M>> extends AbstractItemSingleDataProcessor<T, V, M, I> {
 
     protected AbstractBlockOnlyDataProcessor(Key<V> key) {
         super(input -> false, key);

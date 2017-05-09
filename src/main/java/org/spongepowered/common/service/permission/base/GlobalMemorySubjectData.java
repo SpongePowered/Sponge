@@ -38,7 +38,8 @@ import java.util.Set;
 public class GlobalMemorySubjectData extends MemorySubjectData {
 
     /**
-     * Creates a new subject data instance, using the provided service to request instances of permission subjects.
+     * Creates a new subject data instance, using the provided service
+     * to request instances of permission subjects.
      *
      * @param service The service to request subjects from
      */

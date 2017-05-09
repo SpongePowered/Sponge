@@ -31,9 +31,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCustomNameVisibleData;
 
-public class ImmutableSpongeCustomNameVisibleData extends AbstractImmutableBooleanData<ImmutableCustomNameVisibleData, CustomNameVisibleData> implements
-
-        ImmutableCustomNameVisibleData {
+public class ImmutableSpongeCustomNameVisibleData extends AbstractImmutableBooleanData<ImmutableCustomNameVisibleData, CustomNameVisibleData>
+        implements ImmutableCustomNameVisibleData {
 
     public ImmutableSpongeCustomNameVisibleData(boolean value) {
         super(ImmutableCustomNameVisibleData.class, value, Keys.CUSTOM_NAME_VISIBLE, SpongeCustomNameVisibleData.class, false);

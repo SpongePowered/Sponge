@@ -60,7 +60,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.util.generator.GeneratorUtils;
 import org.spongepowered.common.event.filter.EventFilter;
 import org.spongepowered.common.event.filter.FilterFactory;
-import org.spongepowered.common.event.gen.DefineableClassLoader;
+import org.spongepowered.common.event.gen.DefinableClassLoader;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -68,7 +68,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class ClassEventListenerFactory implements AnnotatedEventListener.Factory {
 
     private final AtomicInteger id = new AtomicInteger();
-    private final DefineableClassLoader classLoader;
+    private final DefinableClassLoader classLoader;
     private final LoadingCache<Method, Class<? extends AnnotatedEventListener>> cache = CacheBuilder.newBuilder()
             .concurrencyLevel(1)
             .weakValues()
@@ -83,7 +83,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
 
     private final String targetPackage;
 
-    public ClassEventListenerFactory(String targetPackage, FilterFactory factory, DefineableClassLoader classLoader) {
+    public ClassEventListenerFactory(String targetPackage, FilterFactory factory, DefinableClassLoader classLoader) {
         checkNotNull(targetPackage, "targetPackage");
         checkArgument(!targetPackage.isEmpty(), "targetPackage cannot be empty");
         this.targetPackage = targetPackage + '.';

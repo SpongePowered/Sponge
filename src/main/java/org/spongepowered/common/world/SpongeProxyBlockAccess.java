@@ -33,11 +33,7 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.util.GuavaCollectors;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinLocation;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.LinkedHashMap;
 import java.util.List;

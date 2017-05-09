@@ -57,7 +57,8 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
         checkState(comparator.compare(maximum, minimum) >= 0);
     }
 
-    public ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, Comparator<E> comparator, E minimum, E maximum) {
+    public ImmutableSpongeBoundedValue(Key<? extends BaseValue<E>> key, E defaultValue, E actualValue, Comparator<E> comparator,
+            E minimum, E maximum) {
         super(key, defaultValue, actualValue);
         this.comparator = checkNotNull(comparator);
         this.minimum = checkNotNull(minimum);
@@ -67,9 +68,9 @@ public class ImmutableSpongeBoundedValue<E> extends ImmutableSpongeValue<E> impl
 
     @Override
     public ImmutableBoundedValue<E> with(E value) {
-        return (this.comparator.compare(checkNotNull(value), this.minimum) > 0 || this.comparator.compare(checkNotNull(value), this.maximum) < 0) ?
-               new ImmutableSpongeBoundedValue<>(getKey(), getDefault(), getComparator(), getMinValue(), getMaxValue()) :
-               new ImmutableSpongeBoundedValue<>(getKey(), value, getDefault(), getComparator(), getMinValue(), getMaxValue());
+        return (this.comparator.compare(checkNotNull(value), this.minimum) > 0 || this.comparator.compare(checkNotNull(value), this.maximum) < 0)
+                ? new ImmutableSpongeBoundedValue<>(getKey(), getDefault(), getComparator(), getMinValue(), getMaxValue())
+                : new ImmutableSpongeBoundedValue<>(getKey(), value, getDefault(), getComparator(), getMinValue(), getMaxValue());
     }
 
     @Override

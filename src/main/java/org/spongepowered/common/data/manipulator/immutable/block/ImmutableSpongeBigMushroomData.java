@@ -36,7 +36,8 @@ public class ImmutableSpongeBigMushroomData extends AbstractImmutableSingleCatal
         implements ImmutableBigMushroomData {
 
     public ImmutableSpongeBigMushroomData(BigMushroomType value) {
-        super(ImmutableBigMushroomData.class, value, DataConstants.Catalog.DEFAULT_BIG_MUSHROOM_TYPE, Keys.BIG_MUSHROOM_TYPE, SpongeBigMushroomData.class);
+        super(ImmutableBigMushroomData.class, value, DataConstants.Catalog.DEFAULT_BIG_MUSHROOM_TYPE,
+                Keys.BIG_MUSHROOM_TYPE, SpongeBigMushroomData.class);
     }
 
 }

@@ -27,7 +27,6 @@ package org.spongepowered.common.registry.type.world.gen;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
@@ -56,12 +55,6 @@ import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorObjects;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 
 @RegisterCatalog(PopulatorObjects.class)
 public class PopulatorObjectRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<PopulatorObject>
@@ -95,8 +88,10 @@ public class PopulatorObjectRegistryModule extends AbstractPrefixAlternateCatalo
         register(new WorldGenMegaPineTree(false, true));
         register(new WorldGenMegaPineTree(false, false));
         IBlockState jlog = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
-        IBlockState jleaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
-        IBlockState leaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IBlockState jleaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE)
+                .withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IBlockState leaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE)
+                .withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
         IWorldGenTrees trees = (IWorldGenTrees) new WorldGenTrees(false, 4, jlog, jleaf, true);
         trees.setId("minecraft:jungle");
         trees.setName("Jungle tree");

@@ -30,12 +30,12 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.village.MerchantRecipe;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -99,7 +99,8 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
     public TradeOffer build() throws IllegalStateException {
         checkState(this.firstItem != null, "Trading item has not been set");
         checkState(this.sellingItem != null, "Selling item has not been set");
-        checkState(this.useCount <= this.maxUses, "Usage count cannot be greater than the max usage count (%s)", this.maxUses);
+        checkState(this.useCount <= this.maxUses,
+                "Usage count cannot be greater than the max usage count (%s)", this.maxUses);
         final ItemStack first = this.firstItem.createStack();
         final ItemStack second = this.secondItem == null ? null : this.secondItem.createStack();
         final ItemStack selling = this.sellingItem.createStack();

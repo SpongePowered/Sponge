@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.damage;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
 
@@ -39,7 +38,8 @@ but it can certainly declare the methods as abstract.
 More notes are geared for abstraction of generating the builders, since those
 will require sending the builders into the ctors.
  */
-public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource implements org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource {
+public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource
+        implements org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource {
 
     public SpongeCommonEntityDamageSource() {
         super("SpongeEntityDamageSource", null);
@@ -49,7 +49,7 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
      * Purely for use with {@link AbstractDamageSource} such that
      * the damage type is set after the super constructor is called.
      *
-     * @param type The damgae type id
+     * @param type The damage type id
      */
     public void setDamageType(String type) {
         this.damageType = type;

@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 
 public abstract class SpongeSubjectCollection implements SubjectCollection {
+
     private final String identifier;
     protected final SpongePermissionService service;
 
@@ -79,12 +80,12 @@ public abstract class SpongeSubjectCollection implements SubjectCollection {
     }
 
     /**
-     * Returns the subject specified. Will not return null.
+     * Returns the subject specified.
      *
-     * @param identifier The identifier to look up a subject by.
-     *                   Case-insensitive
+     * @param identifier The case-insenstive identifier to look up a
+     *     subject by
      * @return A stored subject if present, otherwise a subject that may be
-     * stored if data is changed from defaults
+     *     stored if data is changed from defaults
      */
     @Override
     public abstract SpongeSubject get(String identifier);

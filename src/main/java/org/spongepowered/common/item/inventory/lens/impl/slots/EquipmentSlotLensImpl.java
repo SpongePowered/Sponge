@@ -41,11 +41,13 @@ public class EquipmentSlotLensImpl extends FilteringSlotLensImpl implements Equi
     
     private final Predicate<EquipmentType> equipmentTypeFilter;
 
-    public EquipmentSlotLensImpl(int index, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter, Predicate<EquipmentType> equipmentTypeFilter) {
+    public EquipmentSlotLensImpl(int index, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter,
+            Predicate<EquipmentType> equipmentTypeFilter) {
         this(index, EquipmentSlotAdapter.class, stackFilter, typeFilter, equipmentTypeFilter);
     }
 
-    public EquipmentSlotLensImpl(int index, Class<? extends Inventory> adapterType, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter, Predicate<EquipmentType> equipmentTypeFilter) {
+    public EquipmentSlotLensImpl(int index, Class<? extends Inventory> adapterType, Predicate<ItemStack> stackFilter, Predicate<ItemType> typeFilter,
+            Predicate<EquipmentType> equipmentTypeFilter) {
         super(index, adapterType, stackFilter, typeFilter);
         this.equipmentTypeFilter = equipmentTypeFilter;
     }

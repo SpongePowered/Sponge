@@ -56,8 +56,8 @@ public class SpongeDamageModifierType implements DamageModifierType {
             return false;
         }
         SpongeDamageModifierType that = (SpongeDamageModifierType) o;
-        return Objects.equal(id, that.id) &&
-               Objects.equal(name, that.name);
+        return Objects.equal(id, that.id)
+                && Objects.equal(name, that.name);
     }
 
     @Override

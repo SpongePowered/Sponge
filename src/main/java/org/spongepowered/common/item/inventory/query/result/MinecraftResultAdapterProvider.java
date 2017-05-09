@@ -57,9 +57,11 @@ public class MinecraftResultAdapterProvider implements ResultAdapterProvider<IIn
             @Override
             protected Constructor<InventoryAdapter<IInventory, ItemStack>> getAdapterCtor() throws NoSuchMethodException {
                 try {
-                    return (Constructor<InventoryAdapter<IInventory, ItemStack>>) this.adapterType.getConstructor(Fabric.class, this.getClass(), Inventory.class);
+                    return (Constructor<InventoryAdapter<IInventory, ItemStack>>)
+                            this.adapterType.getConstructor(Fabric.class, this.getClass(), Inventory.class);
                 } catch (Exception ex1) {
-                    return (Constructor<InventoryAdapter<IInventory, ItemStack>>) this.adapterType.getConstructor(Fabric.class, Lens.class, Inventory.class);
+                    return (Constructor<InventoryAdapter<IInventory, ItemStack>>)
+                            this.adapterType.getConstructor(Fabric.class, Lens.class, Inventory.class);
                 }
             }
 
@@ -87,7 +89,8 @@ public class MinecraftResultAdapterProvider implements ResultAdapterProvider<IIn
     private MutableLensSet<IInventory, ItemStack> resultSet;
 
     @Override
-    public QueryResult<IInventory, ItemStack> getResultAdapter(Fabric<IInventory> inventory, MutableLensSet<IInventory, ItemStack> matches, Inventory parent) {
+    public QueryResult<IInventory, ItemStack> getResultAdapter(Fabric<IInventory> inventory,
+            MutableLensSet<IInventory, ItemStack> matches, Inventory parent) {
         this.resultSet = matches;
         return new MinecraftQueryResultAdapter(inventory, parent);
     }

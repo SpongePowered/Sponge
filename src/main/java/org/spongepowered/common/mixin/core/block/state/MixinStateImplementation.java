@@ -68,8 +68,8 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 /**
- * This shares implementation with {@link IMixinBlockState}, since this
- * all relies on Data API implementations.
+ * This shares implementation with {@link IMixinBlockState}, since
+ * this all relies on Data API implementations.
  */
 @Mixin(net.minecraft.block.state.BlockStateContainer.StateImplementation.class)
 public abstract class MixinStateImplementation extends BlockStateBase implements BlockState, IMixinBlockState {
@@ -248,7 +248,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
     @SuppressWarnings("unchecked")
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        if(this.keyMap == null) {
+        if (this.keyMap == null) {
             this.populateKeyValues();
         }
         if (this.keyMap.containsKey(checkNotNull(key))) {

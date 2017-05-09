@@ -65,10 +65,12 @@ public interface IMixinBlock {
     List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState);
 
     /**
-     * A simple check whether the class is supported by the block or not.
+     * A simple check whether the class is supported by
+     * the block or not.
      *
      * @param immutable The immutable class
-     * @return True if the data possibly represented by an instance of the class is supported
+     * @return True if the data possibly represented by
+     *     an instance of the class is supported
      */
     boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable);
 
@@ -125,10 +127,12 @@ public interface IMixinBlock {
     Timing getTimingsHandler();
 
     /**
-     * Used only for Forge's dummy air block that is acting as a surrogate block for missing
-     * mod blocks. Usually when a block is simply marked for replacement when a mod is re-introduced.
+     * Used only for Forge's dummy air block that is acting as
+     * a surrogate block for missing mod blocks. Usually when a
+     * block is simply marked for replacement when a mod is re-introduced.
      *
-     * @return True if this block is a surrogate dummy block. Should only be used for forge blocks.
+     * @return True if this block is a surrogate dummy block.
+     *     Should only be used for forge blocks.
      */
     default boolean isDummy() {
         return false;

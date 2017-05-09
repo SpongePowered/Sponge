@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.border;
 
 import net.minecraft.network.play.server.SPacketWorldBorder;
-import net.minecraft.network.play.server.SPacketWorldBorder;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;

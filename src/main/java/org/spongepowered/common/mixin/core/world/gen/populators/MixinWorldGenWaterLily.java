@@ -64,7 +64,8 @@ public abstract class MixinWorldGenWaterLily extends WorldGenerator implements W
         World world = (World) worldIn;
         int n = this.count.getFlooredAmount(random);
         BlockPos position = new BlockPos(min.getX(), min.getY(), min.getZ());
-        int x, z;
+        int x;
+        int z;
 
         // The generate method makes 10 attempts, so divide the count by 10
         n /= 10;

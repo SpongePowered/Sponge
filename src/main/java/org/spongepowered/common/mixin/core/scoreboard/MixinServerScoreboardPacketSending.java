@@ -45,7 +45,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -53,7 +52,8 @@ import java.util.Set;
 @Mixin(ServerScoreboard.class)
 public abstract class MixinServerScoreboardPacketSending extends Scoreboard implements IMixinServerScoreboard {
 
-    private static final String SEND_PACKET_METHOD = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
+    private static final String SEND_PACKET_METHOD =
+            "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
     private static final String SET_CONTAINS = "Ljava/util/Set;contains(Ljava/lang/Object;)Z";
 
     @Shadow @Final private MinecraftServer scoreboardMCServer;

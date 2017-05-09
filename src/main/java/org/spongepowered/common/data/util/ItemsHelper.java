@@ -39,7 +39,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import java.util.Optional;
 import java.util.Set;
 
-
 public final class ItemsHelper {
 
     private ItemsHelper() { // No sub-classing for you!
@@ -62,7 +61,6 @@ public final class ItemsHelper {
             }
         } else if (((Item) type).getHasSubtypes()) {
             // TODO we need a better way to represent identifiable damage values
-
         } else {
 
         }

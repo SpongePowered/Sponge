@@ -37,7 +37,8 @@ import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidTankDa
 import java.util.List;
 import java.util.Map;
 
-public class ImmutableSpongeFluidTankData extends AbstractImmutableMappedData<Direction, List<FluidStackSnapshot>, ImmutableFluidTankData, FluidTankData>
+public class ImmutableSpongeFluidTankData
+        extends AbstractImmutableMappedData<Direction, List<FluidStackSnapshot>, ImmutableFluidTankData, FluidTankData>
         implements ImmutableFluidTankData {
 
     public ImmutableSpongeFluidTankData() {

@@ -77,7 +77,7 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
     public void onConstructed(Block block, CallbackInfo ci) {
         this.types = new WeightedTable<>();
         this.mushroomsPerChunk = VariableAmount.fixed(1);
-        if(block == Blocks.RED_MUSHROOM_BLOCK) {
+        if (block == Blocks.RED_MUSHROOM_BLOCK) {
             this.id = "minecraft:red";
             this.name = "Red mushroom";
         } else {

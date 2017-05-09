@@ -50,43 +50,46 @@ import java.util.List;
 public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TStack> {
     
     /**
-     * Returns the <em>primary</em> parent lens of this lens. Can be null. 
+     * Returns the <em>primary</em> parent lens of this lens.
+     *
+     * <p>Can be null.</p>
      */
     Lens<TInventory, TStack> getParent();
     
     /**
-     * Get the corresponding adapter type for this lens
+     * Get the corresponding adapter type for this lens.
      * 
-     * @return class of the adapter which corresponds to this specific lens type
+     * @return Class of the adapter which corresponds to
+     *     this specific lens type
      */
     Class<? extends Inventory> getAdapterType();
     
     /**
-     * Get an instance of the corresponding adapter type for this lens
+     * Get an instance of the corresponding adapter type
+     * for this lens.
      * 
-     * @return adapter for this lens
+     * @return Adapter for this lens
      */
     InventoryAdapter<TInventory, TStack> getAdapter(Fabric<TInventory> inv, Inventory parent);
     
     /**
-     * Returns the display name of this lens 
+     * Returns the display name of this lens.
      */
-    public abstract Translation getName(Fabric<TInventory> inv);
+    Translation getName(Fabric<TInventory> inv);
     
     /**
-     * Get the number of slots referenced by this lens
+     * Get the number of slots referenced by this lens.
      * 
-     * @return
+     * @return The number of slots referenced
      */
     int slotCount();
     
     /**
      * Used by parent lenses when marshalling their spanning tree, queries
      * whether this lens has access to a slot with the specified absolute index.
-     * 
-     * @param inv Inventory
+     *
      * @param index Absolute slot index
-     * @return true if this lens has a path to the specified slot index
+     * @return True if this lens has a path to the specified slot index
      */
 //    @Deprecated // TODO deprecate
     boolean hasSlot(int index); //TInventory inv, int index);
@@ -101,7 +104,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
      * {@link #slotCount()}.
      * 
      * @param inv inventory
-     * @param ordinal 
+     * @param ordinal The slot ordinal
      * @return the "real" slot index (ordinal), or -1 for invalid indices
      */
     int getRealIndex(Fabric<TInventory> inv, int ordinal);
@@ -118,7 +121,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
     TStack getStack(Fabric<TInventory> inv, int ordinal);
     
     /**
-     * Get the maximum stack size from the target inventory
+     * Get the maximum stack size from the target inventory.
      * 
      * @param inv
      * @return
@@ -126,21 +129,21 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
     int getMaxStackSize(Fabric<TInventory> inv);
 
     /**
-     * Get child lenses of this lens
+     * Get child lenses of this lens.
      * 
      * @return
      */
     List<Lens<TInventory, TStack>> getChildren();
     
     /**
-     * Get child lenses of this lens
+     * Get child lenses of this lens.
      * 
      * @return
      */
     List<Lens<TInventory, TStack>> getSpanningChildren();
     
     /**
-     * Set the stack at the specified offset 
+     * Set the stack at the specified offset.
      * 
      * @param inv
      * @param ordinal
@@ -150,7 +153,8 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
     boolean setStack(Fabric<TInventory> inv, int ordinal, TStack stack);
     
     /**
-     * Invalidate this lens for the supplied inventory, notify all observers
+     * Invalidate this lens for the supplied inventory,
+     * and notify all observers.
      * 
      * @param inv inventory
      */

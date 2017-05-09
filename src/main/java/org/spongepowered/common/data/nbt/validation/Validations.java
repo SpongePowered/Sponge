@@ -29,5 +29,4 @@ public class Validations {
     public static final ValidationType ENTITY = new SpongeValidationType("sponge:entity", "Entity");
     public static final ValidationType TILE_ENTITY = new SpongeValidationType("sponge:block_entity", "BlockEntity");
 
-
 }

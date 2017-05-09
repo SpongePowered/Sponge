@@ -62,8 +62,8 @@ public class HorseTameableDataProcessor
         if (uuid.equals("none")) {
             return Optional.of(tameableData);
         } else {
-            final UUID ownerUUID = UUID.fromString(uuid);
-            return Optional.of(tameableData.set(Keys.TAMED_OWNER, Optional.of(ownerUUID)));
+            final UUID ownerUniqueId = UUID.fromString(uuid);
+            return Optional.of(tameableData.set(Keys.TAMED_OWNER, Optional.of(ownerUniqueId)));
         }
     }
 

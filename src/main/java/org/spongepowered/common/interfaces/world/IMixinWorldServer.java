@@ -108,7 +108,8 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     void triggerInternalExplosion(Explosion explosion);
 
-    void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, String soundIn, SoundCategory category, float volume, float pitch);
+    void playCustomSound(@Nullable EntityPlayer player, double x, double y, double z, String soundIn, SoundCategory category,
+            float volume, float pitch);
 
     void doChunkGC();
 

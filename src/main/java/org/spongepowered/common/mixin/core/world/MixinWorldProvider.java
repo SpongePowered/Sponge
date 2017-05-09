@@ -50,6 +50,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     @Shadow public abstract boolean doesWaterVaporize();
     @Shadow public abstract WorldBorder createWorldBorder();
     @Shadow public abstract boolean hasNoSky();
+
     @Shadow private String generatorSettings;
 
     @Override

@@ -65,8 +65,8 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     /**
      * Creates a new instance.
      *
-     * @param biomes The biome array. The array is not copied, so changes made
-     * by this object will write through.
+     * @param biomes The biome array. The array is not copied, so changes
+     *     made by this object will write through.
      * @param start The start position
      * @param size The size
      */

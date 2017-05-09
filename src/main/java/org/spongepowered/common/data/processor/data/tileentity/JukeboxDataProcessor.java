@@ -45,8 +45,8 @@ import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
 import java.util.Optional;
 
-public class JukeboxDataProcessor extends
-        AbstractTileEntitySingleDataProcessor<BlockJukebox.TileEntityJukebox, ItemStackSnapshot, Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
+public class JukeboxDataProcessor extends AbstractTileEntitySingleDataProcessor<BlockJukebox.TileEntityJukebox, ItemStackSnapshot,
+        Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
 
     public JukeboxDataProcessor() {
         super(BlockJukebox.TileEntityJukebox.class, Keys.REPRESENTED_ITEM);
@@ -54,7 +54,6 @@ public class JukeboxDataProcessor extends
 
     @Override
     protected boolean set(BlockJukebox.TileEntityJukebox jukebox, ItemStackSnapshot stackSnapshot) {
-        IBlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
         if (stackSnapshot == ItemStackSnapshot.NONE) {
             if (jukebox.getRecord() == null) {
                 return true;
@@ -65,7 +64,7 @@ public class JukeboxDataProcessor extends
             return false;
         }
         ((Jukebox) jukebox).insertRecord(stackSnapshot.createStack());
-        block = jukebox.getWorld().getBlockState(jukebox.getPos());
+        IBlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
         return block.getBlock() instanceof BlockJukebox && block.getValue(BlockJukebox.HAS_RECORD);
     }
 

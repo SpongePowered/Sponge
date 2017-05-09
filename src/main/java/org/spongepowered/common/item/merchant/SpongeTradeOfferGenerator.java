@@ -121,8 +121,10 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
 
         @Override
         public TradeOfferGenerator build() {
-            checkState(this.firstGenerator != null, "First item populators cannot be empty! Populate with some BiConsumers!");
-            checkState(this.sellingGenerator != null, "Selling item populators cannot be empty! Populate with some BiConsumers!");
+            checkState(this.firstGenerator != null,
+                    "First item populators cannot be empty! Populate with some BiConsumers!");
+            checkState(this.sellingGenerator != null,
+                    "Selling item populators cannot be empty! Populate with some BiConsumers!");
             checkState(this.baseUses != null);
             checkState(this.maxUses != null);
             return new SpongeTradeOfferGenerator(this);

@@ -32,7 +32,8 @@ import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableS
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractBoundedComparableData;
 import org.spongepowered.common.data.util.ComparatorUtil;
 
-public class SpongeBrewingStandData extends AbstractBoundedComparableData<Integer, BrewingStandData, ImmutableBrewingStandData> implements BrewingStandData {
+public class SpongeBrewingStandData extends AbstractBoundedComparableData<Integer, BrewingStandData, ImmutableBrewingStandData>
+        implements BrewingStandData {
 
     public SpongeBrewingStandData() {
         this(400);

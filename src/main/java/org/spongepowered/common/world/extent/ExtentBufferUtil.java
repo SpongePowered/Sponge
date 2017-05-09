@@ -47,7 +47,7 @@ public class ExtentBufferUtil {
         for (int z = min.getZ(); z <= max.getZ(); z++) {
             for (int x = min.getX(); x <= max.getX(); x++) {
                 BiomeType type = volume.getBiome(x, 0, z);
-                if(type instanceof VirtualBiomeType) {
+                if (type instanceof VirtualBiomeType) {
                     type = ((VirtualBiomeType) type).getPersistedType();
                 }
                 copy[i++] = (byte) Biome.getIdForBiome((Biome) type);

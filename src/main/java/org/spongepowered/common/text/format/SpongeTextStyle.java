@@ -29,13 +29,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.CaseFormat;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.format.TextStyle;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 
 import java.util.Locale;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 public class SpongeTextStyle extends TextStyle.Base {
 
     private final TextFormatting handle;

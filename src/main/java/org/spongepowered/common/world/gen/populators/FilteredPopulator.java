@@ -85,7 +85,8 @@ public class FilteredPopulator implements IFlaggedPopulator {
     }
 
     @Override
-    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand, ImmutableBiomeVolume virtualBiomes, List<String> flags) {
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand, ImmutableBiomeVolume virtualBiomes,
+            List<String> flags) {
         if (!this.check.test(extent)) {
             return;
         }

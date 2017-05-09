@@ -31,7 +31,6 @@ import com.google.common.collect.Maps;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.data.type.SkinParts;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 

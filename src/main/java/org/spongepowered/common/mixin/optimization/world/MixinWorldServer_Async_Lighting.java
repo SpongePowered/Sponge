@@ -228,9 +228,7 @@ public abstract class MixinWorldServer_Async_Lighting extends MixinWorld impleme
             neighbor.setLightUpdateTime(chunk.getWorld().getTotalWorldTime());
         }
 
-        this.lightExecutorService.execute(() -> {
-            this.checkLightAsync(lightType, pos, chunk, neighbors);
-        });
+        this.lightExecutorService.execute(() -> this.checkLightAsync(lightType, pos, chunk, neighbors));
 
         return true;
     }

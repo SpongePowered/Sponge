@@ -36,8 +36,8 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeDoublePlant
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class DoublePlantDataProcessor extends
-        AbstractCatalogDataProcessor<DoublePlantType, Value<DoublePlantType>, DoublePlantData, ImmutableDoublePlantData> {
+public class DoublePlantDataProcessor extends AbstractCatalogDataProcessor<DoublePlantType, Value<DoublePlantType>,
+        DoublePlantData, ImmutableDoublePlantData> {
 
     public DoublePlantDataProcessor() {
         super(Keys.DOUBLE_PLANT_TYPE, input -> input.getItem() == ItemTypes.DOUBLE_PLANT);

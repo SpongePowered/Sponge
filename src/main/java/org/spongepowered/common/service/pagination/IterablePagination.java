@@ -48,7 +48,7 @@ class IterablePagination extends ActivePagination {
     private final PeekingIterator<Map.Entry<Text, Integer>> countIterator;
     private int lastPage;
 
-    public IterablePagination(MessageReceiver src, PaginationCalculator calc, Iterable<Map.Entry<Text, Integer>> counts, Text title,
+    IterablePagination(MessageReceiver src, PaginationCalculator calc, Iterable<Map.Entry<Text, Integer>> counts, Text title,
             Text header, Text footer, Text padding) {
         super(src, calc, title, header, footer, padding);
         this.countIterator = Iterators.peekingIterator(counts.iterator());

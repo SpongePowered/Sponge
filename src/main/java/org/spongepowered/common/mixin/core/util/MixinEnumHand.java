@@ -28,7 +28,6 @@ import net.minecraft.util.EnumHand;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Locale;
 

@@ -38,7 +38,8 @@ public abstract class MixinChunkProviderServer_Async_Lighting {
 
     @Shadow @Final public WorldServer world;
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lorg/spongepowered/common/interfaces/IMixinChunk;isPersistedChunk()Z", remap = false))
+    @Redirect(method = "tick",
+            at = @At(value = "INVOKE", target = "Lorg/spongepowered/common/interfaces/IMixinChunk;isPersistedChunk()Z", remap = false))
     public boolean onTickIsPersisted(IMixinChunk chunk) {
         if (chunk.isPersistedChunk() || chunk.getPendingLightUpdates().get() > 0
                 || this.world.getTotalWorldTime() - chunk.getLightUpdateTime() < 20) {

@@ -27,9 +27,7 @@ package org.spongepowered.common.text.selector;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.ArgumentType;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 
-@NonnullByDefault
 public class SpongeArgument<T> implements Argument<T> {
 
     public static class Invertible<T> extends SpongeArgument<T> implements Argument.Invertible<T> {

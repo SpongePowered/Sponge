@@ -52,6 +52,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -165,8 +166,10 @@ class UserDiscoverer {
 
         // Add all banned users
         final UserListBans banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
-        profiles.addAll(banList.getValues().values().stream().filter(entry -> entry != null).map(entry -> (org.spongepowered.api.profile.GameProfile)
-                entry.value).collect(Collectors.toList()));
+        profiles.addAll(banList.getValues().values().stream()
+                .filter(Objects::nonNull)
+                .map(entry -> (org.spongepowered.api.profile.GameProfile) entry.value)
+                .collect(Collectors.toList()));
 
         return profiles;
     }

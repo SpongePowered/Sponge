@@ -36,8 +36,9 @@ public class MixinProfiler {
 
     /**
      * @author gabizou - January 22nd, 2017
-     * @reason Clears out the profiler entirely. Since it's used as a debugging tool
-     * for Mojang, it serves no purpose for production servers and clients.
+     * @reason Clears out the profiler entirely. Since it's used
+     *     as a debugging tool for Mojang, it serves no purpose
+     *     for production servers and clients.
      */
     @Overwrite
     public void clearProfiling() {
@@ -45,8 +46,9 @@ public class MixinProfiler {
 
     /**
      * @author gabizou - January 22nd, 2017
-     * @reason Clears out the profiler entirely. Since it's used as a debugging tool
-     * for Mojang, it serves no purpose for production servers and clients.
+     * @reason Clears out the profiler entirely. Since it's used
+     *     as a debugging tool for Mojang, it serves no purpose
+     *     for production servers and clients.
      */
     @Overwrite
     public void startSection(String name) {
@@ -54,8 +56,9 @@ public class MixinProfiler {
 
     /**
      * @author gabizou - January 22nd, 2017
-     * @reason Clears out the profiler entirely. Since it's used as a debugging tool
-     * for Mojang, it serves no purpose for production servers and clients.
+     * @reason Clears out the profiler entirely. Since it's used
+     *     as a debugging tool for Mojang, it serves no purpose
+     *     for production servers and clients.
      */
     @Overwrite
     public void endSection() {
@@ -63,8 +66,9 @@ public class MixinProfiler {
 
     /**
      * @author gabizou - January 22nd, 2017
-     * @reason Clears out the profiler entirely. Since it's used as a debugging tool
-     * for Mojang, it serves no purpose for production servers and clients.
+     * @reason Clears out the profiler entirely. Since it's used
+     *     as a debugging tool for Mojang, it serves no purpose
+     *     for production servers and clients.
      */
     @Overwrite
     public List<Profiler.Result> getProfilingData(String profilerName) {
@@ -73,8 +77,9 @@ public class MixinProfiler {
 
     /**
      * @author gabizou - January 22nd, 2017
-     * @reason Clears out the profiler entirely. Since it's used as a debugging tool
-     * for Mojang, it serves no purpose for production servers and clients.
+     * @reason Clears out the profiler entirely. Since it's used
+     *     as a debugging tool for Mojang, it serves no purpose
+     *     for production servers and clients.
      */
     @Overwrite
     public void endStartSection(String name) {
@@ -82,8 +87,9 @@ public class MixinProfiler {
 
     /**
      * @author gabizou - January 22nd, 2017
-     * @reason Clears out the profiler entirely. Since it's used as a debugging tool
-     * for Mojang, it serves no purpose for production servers and clients.
+     * @reason Clears out the profiler entirely. Since it's used
+     *     as a debugging tool for Mojang, it serves no purpose
+     *     for production servers and clients.
      */
     @Overwrite
     public String getNameOfLastSection() {

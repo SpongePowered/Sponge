@@ -33,8 +33,7 @@ import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 
 import java.util.Set;
 
-public class ConnectedDirectionsValueProcessor extends
-        AbstractBlockOnlyValueProcessor<Set<Direction>, SetValue<Direction>> {
+public class ConnectedDirectionsValueProcessor extends AbstractBlockOnlyValueProcessor<Set<Direction>, SetValue<Direction>> {
 
     public ConnectedDirectionsValueProcessor() {
         super(Keys.CONNECTED_DIRECTIONS);   

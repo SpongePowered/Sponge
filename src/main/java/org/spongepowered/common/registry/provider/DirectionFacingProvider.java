@@ -62,6 +62,5 @@ public final class DirectionFacingProvider implements TypeProvider<Direction, En
 
     private static final class Holder {
         static final DirectionFacingProvider INSTANCE = new DirectionFacingProvider();
-
     }
 }

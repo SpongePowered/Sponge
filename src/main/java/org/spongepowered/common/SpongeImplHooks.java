@@ -38,8 +38,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ReportedException;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -143,9 +143,10 @@ public final class SpongeImplHooks {
         return state.getLightOpacity();
     }
 
-	public static int getChunkPosLight(IBlockState blockState, World world, BlockPos pos) {
-		return blockState.getLightValue();
-	}
+    public static int getChunkPosLight(IBlockState blockState, World world, BlockPos pos) {
+        return blockState.getLightValue();
+    }
+
     // Tile entity
 
     @Nullable
@@ -202,13 +203,13 @@ public final class SpongeImplHooks {
             spawnFuzz = border;
         }
 
-        if (!world.provider.hasNoSky() && !isAdventure && spawnFuzz != 0)
-        {
+        if (!world.provider.hasNoSky() && !isAdventure && spawnFuzz != 0) {
             if (spawnFuzz < 2) {
                 spawnFuzz = 2;
             }
             int spawnFuzzHalf = spawnFuzz / 2;
-            ret = world.getTopSolidOrLiquidBlock(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
+            ret = world.getTopSolidOrLiquidBlock(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0,
+                    world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
         }
 
         return ret;

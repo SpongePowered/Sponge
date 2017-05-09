@@ -90,7 +90,7 @@ public class MixinChunk_Collisions {
             final PhaseContext phaseContext = CauseTracker.getInstance().getCurrentContext();
             LocatableBlock locatable = phaseContext.getSource(LocatableBlock.class).orElse(null);
             if (locatable != null) {
-                BlockType blockType =locatable.getLocation().getBlockType();
+                BlockType blockType = locatable.getLocation().getBlockType();
                 IModData_Collisions spongeBlock = (IModData_Collisions) blockType;
                 if (spongeBlock.requiresCollisionsCacheRefresh()) {
                     spongeBlock.initializeCollisionState(this.world);

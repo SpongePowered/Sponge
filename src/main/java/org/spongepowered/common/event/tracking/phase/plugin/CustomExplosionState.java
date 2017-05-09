@@ -60,6 +60,7 @@ import java.util.List;
 import java.util.Optional;
 
 final class CustomExplosionState extends PluginPhaseState {
+
     @Override
     public boolean canSwitchTo(IPhaseState state) {
         return true;
@@ -83,10 +84,7 @@ final class CustomExplosionState extends PluginPhaseState {
         }
         final Cause cause = context.getSource(Cause.class)
                 .orElseThrow(TrackingUtil.throwWithContext("We seemingly lost the cause for this explosion!", context));
-        context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blocks ->
-                    processBlockCaptures(blocks, explosion.get(), cause, context)
-                );
+        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> processBlockCaptures(blocks, explosion.get(), cause, context));
         context.getCapturedEntitySupplier()
                 .ifPresentAndNotEmpty(entities -> {
                     final Cause.Builder builder = Cause.builder();

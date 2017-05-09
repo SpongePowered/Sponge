@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.damage;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
@@ -50,7 +49,7 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends EntityDamag
      * Purely for use with {@link AbstractDamageSource} such that
      * the damage type is set after the super constructor is called.
      *
-     * @param type The damgae type id
+     * @param type The damage type id
      */
     public void setDamageType(String type) {
         this.damageType = type;

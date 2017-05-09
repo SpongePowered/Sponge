@@ -27,12 +27,12 @@ package org.spongepowered.common.util;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Rotations;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.util.math.AxisAlignedBB;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.Location;
 
@@ -135,7 +135,7 @@ public final class VecHelper {
         return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY() && z >= min.getZ() && z <= max.getZ();
     }
 
-    public static AxisAlignedBB toMC(AABB box) {
+    public static AxisAlignedBB toMinecraft(AABB box) {
         return new AxisAlignedBB(
             box.getMin().getX(), box.getMin().getY(), box.getMin().getZ(),
             box.getMax().getX(), box.getMax().getY(), box.getMax().getZ()

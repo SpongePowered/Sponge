@@ -26,18 +26,19 @@ package org.spongepowered.common.service.pagination;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.command.CommandException;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 /**
  * Holds logic for an active pagination that is occurring.
@@ -62,8 +63,7 @@ abstract class ActivePagination {
     protected final PaginationCalculator calc;
     private final Text padding;
 
-    public ActivePagination(MessageReceiver src, PaginationCalculator calc, Text title,
-            Text header, Text footer, Text padding) {
+    ActivePagination(MessageReceiver src, PaginationCalculator calc, Text title, Text header, Text footer, Text padding) {
         this.src = new WeakReference<>(src);
         this.calc = calc;
         this.title = title;

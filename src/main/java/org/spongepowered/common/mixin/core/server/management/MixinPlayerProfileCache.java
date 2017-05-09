@@ -56,8 +56,8 @@ import org.spongepowered.common.util.SpongeUsernameCache;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -73,6 +73,7 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
     @Shadow @Final private Map<String, IMixinPlayerProfileCacheEntry> usernameToProfileEntryMap;
     @Shadow @Final private Map<UUID, IMixinPlayerProfileCacheEntry> uuidToProfileEntryMap;
     @Shadow @Final private Deque<com.mojang.authlib.GameProfile> gameProfiles;
+
     @Nullable @Shadow public abstract com.mojang.authlib.GameProfile getProfileByUUID(UUID uniqueId);
     @Shadow public abstract void save();
     @Shadow private void addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry) { }
@@ -85,42 +86,50 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
         SpongeUsernameCache.setUsername(profile.getId(), profile.getName());
     }
 
-    @Redirect(method = "addEntry(Lcom/mojang/authlib/GameProfile;Ljava/util/Date;)V", at = @At(value = "INVOKE", target = "Ljava/util/Deque;remove(Ljava/lang/Object;)Z", remap = false))
+    @Redirect(method = "addEntry(Lcom/mojang/authlib/GameProfile;Ljava/util/Date;)V",
+            at = @At(value = "INVOKE", target = "Ljava/util/Deque;remove(Ljava/lang/Object;)Z", remap = false))
     public boolean onAddEntryRemove(Deque<com.mojang.authlib.GameProfile> list, Object obj) {
         return this.profiles.remove(obj);
     }
 
-    @Redirect(method = "addEntry(Lcom/mojang/authlib/GameProfile;Ljava/util/Date;)V", at = @At(value = "INVOKE", target = "Ljava/util/Deque;addFirst(Ljava/lang/Object;)V", remap = false))
+    @Redirect(method = "addEntry(Lcom/mojang/authlib/GameProfile;Ljava/util/Date;)V",
+            at = @At(value = "INVOKE", target = "Ljava/util/Deque;addFirst(Ljava/lang/Object;)V", remap = false))
     public void onAddEntryAdd(Deque<com.mojang.authlib.GameProfile> list, Object obj) {
         this.profiles.add((com.mojang.authlib.GameProfile) obj);
     }
 
-    @Redirect(method = "getGameProfileForUsername", at = @At(value = "INVOKE", target = "Ljava/util/Deque;remove(Ljava/lang/Object;)Z", ordinal = 0, remap = false))
+    @Redirect(method = "getGameProfileForUsername",
+            at = @At(value = "INVOKE", target = "Ljava/util/Deque;remove(Ljava/lang/Object;)Z", ordinal = 0, remap = false))
     public boolean onGetGameProfileForUsernameRemove1(Deque<com.mojang.authlib.GameProfile> list, Object obj) {
         return this.profiles.remove(obj);
     }
 
-    @Redirect(method = "getGameProfileForUsername", at = @At(value = "INVOKE", target = "Ljava/util/Deque;remove(Ljava/lang/Object;)Z", ordinal = 1, remap = false))
+    @Redirect(method = "getGameProfileForUsername",
+            at = @At(value = "INVOKE", target = "Ljava/util/Deque;remove(Ljava/lang/Object;)Z", ordinal = 1, remap = false))
     public boolean onGetGameProfileForUsernameRemove2(Deque<com.mojang.authlib.GameProfile> list, Object obj) {
         return this.profiles.remove(obj);
     }
 
-    @Redirect(method = "getGameProfileForUsername", at = @At(value = "INVOKE", target = "Ljava/util/Deque;addFirst(Ljava/lang/Object;)V", remap = false))
+    @Redirect(method = "getGameProfileForUsername",
+            at = @At(value = "INVOKE", target = "Ljava/util/Deque;addFirst(Ljava/lang/Object;)V", remap = false))
     public void onGetGameProfileForUsernameAdd(Deque<com.mojang.authlib.GameProfile> list, Object obj) {
         this.profiles.add((com.mojang.authlib.GameProfile) obj);
     }
 
-    @Redirect(method = "getByUUID", at = @At(value = "INVOKE", target = "Ljava/util/Deque;remove(Ljava/lang/Object;)Z", remap = false))
+    @Redirect(method = "getByUUID",
+            at = @At(value = "INVOKE", target = "Ljava/util/Deque;remove(Ljava/lang/Object;)Z", remap = false))
     public boolean onGetByUUIDRemove(Deque<com.mojang.authlib.GameProfile> list, Object obj) {
         return this.profiles.remove(obj);
     }
 
-    @Redirect(method = "getByUUID", at = @At(value = "INVOKE", target = "Ljava/util/Deque;addFirst(Ljava/lang/Object;)V", remap = false))
+    @Redirect(method = "getByUUID",
+            at = @At(value = "INVOKE", target = "Ljava/util/Deque;addFirst(Ljava/lang/Object;)V", remap = false))
     public void onGetByUUIDAdd(Deque<com.mojang.authlib.GameProfile> list, Object obj) {
         this.profiles.add((com.mojang.authlib.GameProfile) obj);
     }
 
-    @Redirect(method = "getEntriesWithLimit", at = @At(value = "INVOKE", target = "Ljava/util/Deque;iterator()Ljava/util/Iterator;", remap = false))
+    @Redirect(method = "getEntriesWithLimit",
+            at = @At(value = "INVOKE", target = "Ljava/util/Deque;iterator()Ljava/util/Iterator;", remap = false))
     public Iterator<com.mojang.authlib.GameProfile> onGetEntriesWithLimit(Deque<com.mojang.authlib.GameProfile> list) {
         return this.profiles.iterator();
     }
@@ -254,7 +263,8 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
 
         MinecraftSessionService service = SpongeImpl.getServer().getMinecraftSessionService();
         for (UUID uniqueId : uniqueIds) {
-            com.mojang.authlib.GameProfile profile = service.fillProfileProperties(new com.mojang.authlib.GameProfile(uniqueId, ""), true);
+            com.mojang.authlib.GameProfile profile =
+                    service.fillProfileProperties(new com.mojang.authlib.GameProfile(uniqueId, ""), true);
             if (profile != null && profile.getName() != null && !profile.getName().isEmpty()) {
                 this.addEntry(profile, null);
                 result.put(uniqueId, Optional.of((GameProfile) profile));

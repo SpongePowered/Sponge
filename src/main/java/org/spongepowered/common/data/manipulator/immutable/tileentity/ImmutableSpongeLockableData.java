@@ -33,7 +33,8 @@ import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmuta
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeLockableData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeLockableData extends AbstractImmutableSingleData<String, ImmutableLockableData, LockableData> implements ImmutableLockableData {
+public class ImmutableSpongeLockableData extends AbstractImmutableSingleData<String, ImmutableLockableData, LockableData>
+        implements ImmutableLockableData {
 
     private final ImmutableValue<String> valueObj;
     

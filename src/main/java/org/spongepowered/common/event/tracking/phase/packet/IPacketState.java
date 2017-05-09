@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import com.google.common.collect.HashMultimap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.world.WorldServer;
@@ -35,7 +34,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -46,8 +44,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
 
 public interface IPacketState extends IPhaseState {
 
@@ -72,10 +68,14 @@ public interface IPacketState extends IPhaseState {
     default boolean doBlockCapturing() {
         return true;
     }
+
     /**
-     * A defaulted method to handle entities that are spawned due to packet placement during post processing.
-     * Examples can include a player placing a redstone block priming a TNT explosive.
-     *  @param phaseContext The phase context
+     * A defaulted method to handle entities that are spawned
+     * due to packet placement during post processing.
+     * <p>Examples can include a player placing a redstone
+     * block priming a TNT explosive.</p>
+     *
+     * @param phaseContext The phase context
      * @param entities The list of entities to spawn
      */
     default void postSpawnEntities(PhaseContext phaseContext, ArrayList<Entity> entities) {
@@ -96,15 +96,15 @@ public interface IPacketState extends IPhaseState {
 
     /**
      * Defaulted method for packet phase states to spawn an entity directly.
-     * This should be overridden by all packet phase states that are handling spawns
-     * customarily with contexts and such. Captured entities are handled in
-     * their respective {@link PacketFunction}s.
+     * This should be overridden by all packet phase states that are handling
+     * spawns customarily with contexts and such. Captured entities are
+     * handled in their respective {@link PacketFunction}s.
      *
-     * @param context
-     * @param entity
-     * @param chunkX
-     * @param chunkZ
-     * @return True if the entity was spawned
+     * @param context The context of the phase
+     * @param entity The entity to spawn
+     * @param chunkX The chunk to spawn in's X
+     * @param chunkZ The chunk to spawn in's Y
+     * @return If the entity was spawned
      */
     default boolean spawnEntity(PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;

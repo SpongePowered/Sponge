@@ -38,8 +38,8 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.Optional;
 
-public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData, ImmutableFlyingData> implements
-        NbtDataProcessor<FlyingData, ImmutableFlyingData> {
+public class IsFlyingNbtProcessor extends AbstractSpongeNbtProcessor<FlyingData, ImmutableFlyingData>
+        implements NbtDataProcessor<FlyingData, ImmutableFlyingData> {
 
     public IsFlyingNbtProcessor() {
         super(NbtDataTypes.ENTITY);

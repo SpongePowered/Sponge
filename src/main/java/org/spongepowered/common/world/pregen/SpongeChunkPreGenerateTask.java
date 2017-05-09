@@ -181,7 +181,8 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
 
     @Override
     public Duration getTotalTime() {
-        return Duration.of((isCancelled() ? this.generationEndTime : System.currentTimeMillis()) - this.generationStartTime, ChronoUnit.MILLIS);
+        return Duration.of((isCancelled() ? this.generationEndTime : System.currentTimeMillis())
+                - this.generationStartTime, ChronoUnit.MILLIS);
     }
 
     @Override
@@ -296,8 +297,10 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
     }
 
     private boolean areAllChunksLoaded(Vector3i chunk1, Vector3i chunk2, Vector3i chunk3, Vector3i chunk4) {
-        return this.doesChunkExistCheck.test(chunk1) && this.doesChunkExistCheck.test(chunk2) &&
-                this.doesChunkExistCheck.test(chunk3) && this.doesChunkExistCheck.test(chunk4);
+        return this.doesChunkExistCheck.test(chunk1)
+                && this.doesChunkExistCheck.test(chunk2)
+                && this.doesChunkExistCheck.test(chunk3)
+                && this.doesChunkExistCheck.test(chunk4);
     }
 
     private void unregisterListener() {
@@ -440,7 +443,8 @@ public class SpongeChunkPreGenerateTask implements ChunkPreGenerate, Consumer<Ta
         @Override
         public ChunkPreGenerate start() {
             checkNotNull(plugin, "owner cannot be null");
-            checkArgument(this.chunksPerTick > 0 || this.tickPercent > 0, "Must use at least one of \"chunks per tick\" or \"tick percent limit\"");
+            checkArgument(this.chunksPerTick > 0 || this.tickPercent > 0,
+                    "Must use at least one of \"chunks per tick\" or \"tick percent limit\"");
 
             return new SpongeChunkPreGenerateTask(this.plugin, this.world, this.center, this.diameter, this.chunksPerTick, this.tickPercent,
                     this.tickInterval, Cause.of(NamedCause.owner(this.plugin)), this.eventListeners);

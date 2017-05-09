@@ -51,7 +51,7 @@ public class ArrayImmutableBlockBuffer extends AbstractBlockBuffer implements Im
     private final BackingData data;
 
     /**
-     * Does not clone!
+     * Does not clone.
      * 
      * @param palette The palette
      * @param start The start block position

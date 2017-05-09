@@ -43,8 +43,8 @@ import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Optional;
 
-public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-        extends AbstractSingleDataProcessor<T, V, M, I> implements ValueProcessor<T, V> {
+public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V extends BaseValue<T>, M extends DataManipulator<M, I>,
+        I extends ImmutableDataManipulator<I, M>> extends AbstractSingleDataProcessor<T, V, M, I> implements ValueProcessor<T, V> {
 
     protected final Class<Holder> holderClass;
 
@@ -167,7 +167,7 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
     @Override
     public Optional<V> getApiValueFromContainer(ValueContainer<?> container) {
         final Optional<T> optionalValue = getValueFromContainer(container);
-        if(optionalValue.isPresent()) {
+        if (optionalValue.isPresent()) {
             return Optional.of(constructValue(optionalValue.get()));
         } else {
             return Optional.empty();

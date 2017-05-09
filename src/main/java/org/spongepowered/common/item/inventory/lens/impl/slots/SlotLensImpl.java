@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.slots;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -44,7 +44,6 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-
 
 public class SlotLensImpl extends MinecraftLens implements SlotLens<IInventory, ItemStack> {
 

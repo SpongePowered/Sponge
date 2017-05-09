@@ -46,9 +46,12 @@ import java.util.Random;
 import java.util.function.Function;
 
 /*
- * This is a bit of a work around to not have to change the height on Mushroom to a SeededVariableAmount
- * seeded by the height. Ideally in the future I can create a kind of GenerationContext object that these
- * varying amounts can be based off of holding things like the random object, the chunk, the heightmap, etc.
+ * This is a bit of a work around to not have to change the
+ * height on Mushroom to a SeededVariableAmount seeded by the
+ * height. Ideally in the future I can create a kind of
+ * GenerationContext object that these varying amounts can be
+ * based off of holding things like the random object,
+ * the chunk, the height map, etc.
  */
 public class HellMushroomPopulator implements Mushroom {
 

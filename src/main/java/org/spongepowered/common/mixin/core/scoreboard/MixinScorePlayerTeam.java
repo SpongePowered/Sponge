@@ -29,7 +29,6 @@ import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.text.Text;
@@ -49,7 +48,6 @@ import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,7 +76,8 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     private Text suffix;
     private TextColor color;
 
-    private static final String TEAM_UPDATE_SIGNATURE = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
+    private static final String TEAM_UPDATE_SIGNATURE =
+            "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
 
     // Minecraft doesn't do a null check on theScoreboard, so we redirect
     // the call and do it ourselves.
@@ -185,7 +184,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     }
 
     public void team$setDeathMessageVisibility(Visibility visibility) {
-        this.deathMessageVisibility= (EnumVisible) (Object) visibility;
+        this.deathMessageVisibility = (EnumVisible) (Object) visibility;
         this.doTeamUpdate();
     }
 

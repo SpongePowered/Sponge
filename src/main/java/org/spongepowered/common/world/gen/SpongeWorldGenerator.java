@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.IChunkGenerator;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.gen.BiomeGenerator;
@@ -38,7 +37,6 @@ import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
-import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
 import java.util.List;

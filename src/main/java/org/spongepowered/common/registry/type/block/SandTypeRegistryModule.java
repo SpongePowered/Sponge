@@ -30,8 +30,6 @@ import org.spongepowered.api.data.type.SandTypes;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.type.MinecraftEnumBasedCatalogTypeModule;
 
-import java.util.Map;
-
 @RegisterCatalog(SandTypes.class)
 public final class SandTypeRegistryModule extends MinecraftEnumBasedCatalogTypeModule<BlockSand.EnumType, SandType> {
 

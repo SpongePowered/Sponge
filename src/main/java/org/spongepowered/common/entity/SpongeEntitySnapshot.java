@@ -117,7 +117,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         this.rotation = builder.rotation == null ? Vector3d.ZERO : builder.rotation;
         this.scale = builder.scale == null ? Vector3d.ZERO : builder.scale;
         this.entityReference = builder.entityReference;
-        if(this.compound != null) {
+        if (this.compound != null) {
             this.compound.setTag("Pos", NbtDataUtil.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
             // TODO should ensure other elements are within the compound as well
         }
@@ -431,7 +431,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         Entity newEntity = world.get().createEntity(getType(), this.position);
         if (newEntity != null) {
             net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity;
-            if(this.compound != null) {
+            if (this.compound != null) {
                 nmsEntity.readFromNBT(this.compound);
             }
 

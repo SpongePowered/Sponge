@@ -59,16 +59,16 @@ public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockabl
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
         this.slots = new SlotCollection.Builder().add(5)
-                .add(InputSlotAdapter.class, (i) -> new InputSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s), t
-                        -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
-                .add(InputSlotAdapter.class, (i) -> new InputSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s), t
-                        -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
-                .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s), t
-                        -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
-                .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s), t
-                        -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
-                .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s), t
-                        -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
+                .add(InputSlotAdapter.class, (i) -> new InputSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s),
+                        t -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
+                .add(InputSlotAdapter.class, (i) -> new InputSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s),
+                        t -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
+                .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s),
+                        t -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
+                .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s),
+                        t -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
+                .add(FilteringSlotAdapter.class, (i) -> new FilteringSlotLensImpl(i, (s) -> this.isItemValidForSlot(i, (ItemStack) s),
+                        t -> this.isItemValidForSlot(i, (ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(t, 1))))
                 .build();
         this.lens = new BrewingStandInventoryLens((InventoryAdapter<IInventory, ItemStack>) this, this.slots);
     }

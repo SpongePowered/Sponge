@@ -47,7 +47,8 @@ public class SpongeUserStorageService implements UserStorageService {
     @Override
     public Optional<User> get(UUID uniqueId) {
         try {
-            return Optional.ofNullable(UserDiscoverer.findByProfile(Sponge.getServer().getGameProfileManager().get(checkNotNull(uniqueId, "uniqueId")).get()));
+            return Optional.ofNullable(UserDiscoverer.findByProfile(Sponge.getServer().getGameProfileManager().get(
+                    checkNotNull(uniqueId, "uniqueId")).get()));
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Error looking up GameProfile!", e);
         }

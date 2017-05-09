@@ -32,9 +32,7 @@ import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.ArrayList;

@@ -78,7 +78,7 @@ public abstract class MixinServerStatusResponsePlayers implements ClientPingServ
     /**
      * @author minecrell - January 18th, 2015
      * @reason Use our game profile objects in the collection
-     * instead of vanilla.
+     *     instead of vanilla.
      *
      * @return The profiles
      */

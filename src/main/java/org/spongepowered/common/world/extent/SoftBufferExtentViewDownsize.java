@@ -468,7 +468,7 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
     @Override
     public Optional<Entity> getEntity(UUID uuid) {
         // TODO 1.9 gabizou this is for you
-        return null;
+        return Optional.empty();
     }
 
     @Override

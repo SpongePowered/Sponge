@@ -28,12 +28,12 @@ import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.server.management.UserListOpsEntry;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.service.permission.base.SingleParentMemorySubjectData;
 import org.spongepowered.common.service.permission.base.SpongeSubject;
@@ -45,6 +45,7 @@ import java.util.Set;
  * An implementation of vanilla minecraft's 4 op groups.
  */
 public class UserSubject extends SpongeSubject {
+
     private final GameProfile player;
     private final MemorySubjectData data;
     private final UserCollection collection;

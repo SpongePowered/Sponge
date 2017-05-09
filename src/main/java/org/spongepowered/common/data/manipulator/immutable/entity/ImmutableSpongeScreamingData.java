@@ -31,7 +31,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeScreamingData;
 
-public class ImmutableSpongeScreamingData extends AbstractImmutableBooleanData<ImmutableScreamingData, ScreamingData> implements ImmutableScreamingData {
+public class ImmutableSpongeScreamingData extends AbstractImmutableBooleanData<ImmutableScreamingData, ScreamingData>
+        implements ImmutableScreamingData {
 
     public ImmutableSpongeScreamingData(boolean value) {
         super(ImmutableScreamingData.class, value, Keys.IS_SCREAMING, SpongeScreamingData.class, false);

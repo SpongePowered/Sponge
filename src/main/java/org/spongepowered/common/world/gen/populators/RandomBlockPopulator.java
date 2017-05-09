@@ -84,7 +84,7 @@ public class RandomBlockPopulator implements RandomBlock {
                 // Liquids force a block update tick so they may flow during world gen
                 try {
                     ((WorldServer) world).immediateBlockTick(((IMixinLocation) (Object) pos).getBlockPos(), (IBlockState) this.state, random);
-                } catch(IllegalArgumentException e) {
+                } catch (IllegalArgumentException ignored) {
                     // ignore
                 }
             }

@@ -28,8 +28,10 @@ import org.spongepowered.api.entity.ai.task.builtin.creature.target.TargetAITask
 
 public abstract class SpongeTargetAIBuilder<A extends TargetAITask<A>, B extends TargetAITask.Builder<A, B>> implements TargetAITask.Builder<A, B> {
 
-    protected boolean checkSight, onlyNearby;
-    protected int searchDelay, interruptTargetUnseenTicks;
+    boolean checkSight;
+    boolean onlyNearby;
+    int searchDelay;
+    int interruptTargetUnseenTicks;
 
     @SuppressWarnings("unchecked")
     @Override

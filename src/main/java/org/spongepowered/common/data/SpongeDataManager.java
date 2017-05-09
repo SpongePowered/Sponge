@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.CaseFormat;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
@@ -36,7 +35,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
-import org.apache.logging.log4j.Level;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataRegistration;
@@ -52,14 +50,12 @@ import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataManipulatorBuilder;
 import org.spongepowered.common.data.persistence.DataTranslatorTypeSerializer;
 import org.spongepowered.common.data.util.ComparatorUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 
 import java.util.ArrayList;
@@ -111,7 +107,9 @@ public final class SpongeDataManager implements DataManager {
         checkNotNull(clazz);
         checkNotNull(builder);
         if (!this.builders.containsKey(clazz)) {
-            if (!(builder instanceof AbstractDataBuilder || builder instanceof SpongeDataManipulatorBuilder || builder instanceof SpongeImmutableDataManipulatorBuilder)) {
+            if (!(builder instanceof AbstractDataBuilder
+                    || builder instanceof SpongeDataManipulatorBuilder
+                    || builder instanceof SpongeImmutableDataManipulatorBuilder)) {
                 SpongeImpl.getLogger().warn("A custom DataBuilder is not extending AbstractDataBuilder! It is recommended that "
                                             + "the custom data builder does extend it to gain automated content versioning updates and maintain "
                                             + "simplicity. The offending builder's class is: {}", builder.getClass());
@@ -131,7 +129,7 @@ public final class SpongeDataManager implements DataManager {
         }
         final List<DataContentUpdater> updaters = this.updatersMap.get(clazz);
         updaters.add(updater);
-        Collections.sort(updaters, ComparatorUtil.DATA_CONTENT_UPDATER_COMPARATOR);
+        updaters.sort(ComparatorUtil.DATA_CONTENT_UPDATER_COMPARATOR);
     }
 
     @Override
@@ -156,8 +154,8 @@ public final class SpongeDataManager implements DataManager {
         }
         if (version < toVersion || version > toVersion) { // There wasn't a registered updater for the version being requested
             Exception e = new IllegalStateException("The requested content version for: " + clazz.getSimpleName() + " was requested, "
-                                                    + "\nhowever, the versions supplied: from "+ fromVersion + " to " + toVersion + " is impossible"
-                                                    + "\nas the latest version registered is: " + version+". Please notify the developer of"
+                                                    + "\nhowever, the versions supplied: from " + fromVersion + " to " + toVersion + " is impossible"
+                                                    + "\nas the latest version registered is: " + version + ". Please notify the developer of"
                                                     + "\nthe requested consumed DataSerializable of this error.");
             e.printStackTrace();
             return Optional.empty();
@@ -233,14 +231,14 @@ public final class SpongeDataManager implements DataManager {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>>
-    getManipulatorBuilder(Class<T> manipulatorClass) {
+        getManipulatorBuilder(Class<T> manipulatorClass) {
         return Optional.ofNullable((DataManipulatorBuilder<T, I>) this.builderMap.get(checkNotNull(manipulatorClass)));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>>
-    getImmutableManipulatorBuilder(Class<I> immutableManipulatorClass) {
+        getImmutableManipulatorBuilder(Class<I> immutableManipulatorClass) {
         return Optional.ofNullable((DataManipulatorBuilder<T, I>) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
     }
 
@@ -249,7 +247,8 @@ public final class SpongeDataManager implements DataManager {
         checkState(allowRegistrations, "Registrations are no longer allowed");
         checkNotNull(objectClass, "Target object class cannot be null!");
         checkNotNull(translator, "DataTranslator for : " + objectClass + " cannot be null!");
-        checkArgument(translator.getToken().isAssignableFrom(objectClass), "DataTranslator is not compatible with the target object class: " + objectClass);
+        checkArgument(translator.getToken().isAssignableFrom(objectClass),
+                "DataTranslator is not compatible with the target object class: " + objectClass);
         if (!this.dataSerializerMap.containsKey(checkNotNull(objectClass, "Target class cannot be null!"))) {
             this.dataSerializerMap.put(objectClass, translator);
             DataTranslatorRegistryModule.getInstance().registerAdditionalCatalog(translator);
@@ -264,7 +263,8 @@ public final class SpongeDataManager implements DataManager {
     @SuppressWarnings("unchecked")
     @Override
     public <T> Optional<DataTranslator<T>> getTranslator(Class<T> objectclass) {
-        return Optional.ofNullable((DataTranslator<T>) this.dataSerializerMap.get(checkNotNull(objectclass, "Target class cannot be null!")));
+        return Optional.ofNullable((DataTranslator<T>)
+                this.dataSerializerMap.get(checkNotNull(objectclass, "Target class cannot be null!")));
     }
 
     @Override

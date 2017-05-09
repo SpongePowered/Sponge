@@ -48,9 +48,11 @@ public abstract class MinecraftLens extends AbstractLens<IInventory, ItemStack> 
     @Override
     protected Constructor<InventoryAdapter<IInventory, ItemStack>> getAdapterCtor() throws NoSuchMethodException {
         try {
-            return (Constructor<InventoryAdapter<IInventory, ItemStack>>) this.adapterType.getConstructor(Fabric.class, this.getClass(), Inventory.class);
+            return (Constructor<InventoryAdapter<IInventory, ItemStack>>)
+                    this.adapterType.getConstructor(Fabric.class, this.getClass(), Inventory.class);
         } catch (Exception ex1) {
-            return (Constructor<InventoryAdapter<IInventory, ItemStack>>) this.adapterType.getConstructor(Fabric.class, Lens.class, Inventory.class);
+            return (Constructor<InventoryAdapter<IInventory, ItemStack>>)
+                    this.adapterType.getConstructor(Fabric.class, Lens.class, Inventory.class);
         }
     }
 

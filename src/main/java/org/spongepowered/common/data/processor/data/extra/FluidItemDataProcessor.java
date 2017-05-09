@@ -31,9 +31,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
-import org.spongepowered.api.extra.fluid.FluidType;
 import org.spongepowered.api.extra.fluid.FluidTypes;
 import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidItemData;
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
@@ -46,14 +44,17 @@ import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshot;
 
 import java.util.Optional;
 
-public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<FluidStackSnapshot, Value<FluidStackSnapshot>, FluidItemData,
-        ImmutableFluidItemData> {
+public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<FluidStackSnapshot, Value<FluidStackSnapshot>,
+        FluidItemData, ImmutableFluidItemData> {
 
     private static final FluidStackSnapshot WATER = new SpongeFluidStackBuilder().fluid(FluidTypes.WATER).volume(1000).build().createSnapshot();
     private static final FluidStackSnapshot LAVA = new SpongeFluidStackBuilder().fluid(FluidTypes.LAVA).volume(1000).build().createSnapshot();
 
     public FluidItemDataProcessor() {
-        super((item) -> item.getItem() == Items.BUCKET || item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.LAVA_BUCKET, Keys.FLUID_ITEM_STACK);
+        super((item) -> item.getItem() == Items.BUCKET
+                || item.getItem() == Items.WATER_BUCKET
+                || item.getItem() == Items.LAVA_BUCKET,
+                Keys.FLUID_ITEM_STACK);
     }
 
     @SuppressWarnings("deprecation")

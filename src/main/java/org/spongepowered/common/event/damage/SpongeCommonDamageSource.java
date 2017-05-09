@@ -25,9 +25,7 @@
 package org.spongepowered.common.event.damage;
 
 import net.minecraft.util.DamageSource;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
-import org.spongepowered.api.world.difficulty.Difficulty;
 
 /*
 To summarize, the way this works is that DamageSource isn't directly created, but
@@ -49,7 +47,7 @@ public abstract class SpongeCommonDamageSource extends DamageSource implements o
      * Purely for use with {@link AbstractDamageSource} such that
      * the damage type is set after the super constructor is called.
      *
-     * @param type The damgae type id
+     * @param type The damage type id
      */
     public void setDamageType(String type) {
         this.damageType = type;

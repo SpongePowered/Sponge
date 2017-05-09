@@ -84,7 +84,9 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
         Vector3i size = extent.getBlockSize();
         World world = (World) worldIn;
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
-        int x, y, z;
+        int x;
+        int y;
+        int z;
         int n = (int) Math.ceil(this.count.getFlooredAmount(random) / 8f);
 
         for (int i = 0; i < n; ++i) {
@@ -109,8 +111,9 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
     }
 
     private int nextInt(Random rand, int i) {
-        if (i <= 1)
+        if (i <= 1) {
             return 0;
+        }
         return rand.nextInt(i);
     }
 

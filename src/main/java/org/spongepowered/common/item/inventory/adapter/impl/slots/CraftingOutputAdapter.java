@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.item.inventory.adapter.impl.slots;
 
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
-
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
-
 
 public class CraftingOutputAdapter extends OutputSlotAdapter implements CraftingOutput {
 

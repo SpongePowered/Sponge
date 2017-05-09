@@ -55,7 +55,8 @@ public abstract class MixinCommandTeleport extends CommandBase {
 
     /**
      * @author Aaron1011 - August 15, 2016
-     * @reason Prevent 'notifyCommandListener' from being called the event is cancelled
+     * @reason Prevent 'notifyCommandListener' from being
+     *     called the event is cancelled
      */
     @Overwrite
     @Override

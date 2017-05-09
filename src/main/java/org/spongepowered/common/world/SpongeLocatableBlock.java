@@ -234,10 +234,10 @@ public class SpongeLocatableBlock implements LocatableBlock {
             return false;
         }
         SpongeLocatableBlock that = (SpongeLocatableBlock) o;
-        return Objects.equal(this.blockState, that.blockState) &&
-               Objects.equal(this.position, that.position) &&
-               Objects.equal(this.worldId, that.worldId) &&
-               Objects.equal(this.worldReference, that.worldReference);
+        return Objects.equal(this.blockState, that.blockState)
+                && Objects.equal(this.position, that.position)
+                && Objects.equal(this.worldId, that.worldId)
+                && Objects.equal(this.worldReference, that.worldReference);
     }
 
     @Override

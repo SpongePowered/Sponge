@@ -46,15 +46,15 @@ public abstract class MixinStateImplementation extends BlockStateBase {
     /**
      * @author gabizou - April 8th, 2016
      *
-     * @reason This is done to improve the performance of the method by removing an
-     * unnecessary hash lookup. The same logic can be computed with 1 hash
-     * lookup instead of 2.
+     * @reason This is done to improve the performance of the method by
+     *     removing an unnecessary hash lookup. The same logic can be
+     *     computed with 1 hash lookup instead of 2.
      *
-     * <p>Normally, all lookups are with proper properties anyways, the only corner
-     * cases that they fail will result in null block states. Throwing exceptions
-     * is an option, however, for the sake of speed, these methods are otherwise
-     * patched for speed. If issues arrise, disabling this mixin is easily done
-     * in the sponge global config.</p>
+     * <p>Normally, all lookups are with proper properties anyways, the
+     * only corner cases that they fail will result in null block states.
+     * Throwing exceptions is an option, however, for the sake of speed,
+     * these methods are otherwise patched for speed. If issues arise,
+     * disabling this mixin is easily done in the sponge global config.</p>
      *
      * <p>This is partially contributed code from Aikar in PaperSpigot.</p>
      *
@@ -74,7 +74,8 @@ public abstract class MixinStateImplementation extends BlockStateBase {
         } else {
             final IBlockState blockState = this.propertyValueTable.get(property, value);
             if (blockState == null) {
-                throw new IllegalArgumentException("No mapping found for the blockstate: " + Block.REGISTRY.getNameForObject(this.block) + " of property: " + property.getName() + " and value: " + value);
+                throw new IllegalArgumentException("No mapping found for the blockstate: "
+                        + Block.REGISTRY.getNameForObject(this.block) + " of property: " + property.getName() + " and value: " + value);
             }
             return blockState;
         }

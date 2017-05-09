@@ -27,7 +27,6 @@ package org.spongepowered.common.data;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import com.google.inject.Inject;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.Archetype;
@@ -49,7 +48,6 @@ import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.nbt.NbtDataType;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.util.DataUtil;
 
 import java.util.Collection;
@@ -111,7 +109,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
 
     @Override
     public boolean supports(Class<? extends DataManipulator<?, ?>> holderClass) {
-        // By default, if there is a processor, we can check compatibilty with that
+        // By default, if there is a processor, we can check compatibility with that
         // Otherwise, it's true because of custom data.
         return DataUtil.getRawNbtProcessor(this.getDataType(), holderClass)
                 .map(processor -> processor.isCompatible(this.data))

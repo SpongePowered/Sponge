@@ -77,8 +77,8 @@ public class MixinWorldGenReed implements Reed {
     /**
      * @author Deamon - December 12th, 2015
      * 
-     * @reason This is overwritten to use our custom attempt counts and reed
-     * heights.
+     * @reason This is overwritten to use our custom attempt counts
+     *     and reed heights.
      */
     @Overwrite
     public boolean generate(World worldIn, Random rand, BlockPos position) {
@@ -86,7 +86,8 @@ public class MixinWorldGenReed implements Reed {
         int n = this.count.getFlooredAmount(rand);
         // Sponge end
         for (int i = 0; i < n; ++i) {
-            BlockPos blockpos1 = position.add(rand.nextInt(4) - rand.nextInt(4), 0, rand.nextInt(4) - rand.nextInt(4));
+            BlockPos blockpos1 =
+                    position.add(rand.nextInt(4) - rand.nextInt(4), 0, rand.nextInt(4) - rand.nextInt(4));
 
             if (worldIn.isAirBlock(blockpos1)) {
                 BlockPos blockpos2 = blockpos1.down();

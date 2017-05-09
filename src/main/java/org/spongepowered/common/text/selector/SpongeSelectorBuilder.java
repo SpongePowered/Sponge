@@ -31,14 +31,12 @@ import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorType;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 public class SpongeSelectorBuilder implements Selector.Builder {
 
     @Nullable  private SelectorType type;

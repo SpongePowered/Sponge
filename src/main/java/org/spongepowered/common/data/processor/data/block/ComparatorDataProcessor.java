@@ -34,8 +34,8 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeComparatorD
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class ComparatorDataProcessor extends
-        AbstractBlockOnlyDataProcessor<ComparatorType, Value<ComparatorType>, ComparatorData, ImmutableComparatorData> {
+public class ComparatorDataProcessor extends AbstractBlockOnlyDataProcessor<ComparatorType, Value<ComparatorType>,
+        ComparatorData, ImmutableComparatorData> {
 
     public ComparatorDataProcessor() {
         super(Keys.COMPARATOR_TYPE);

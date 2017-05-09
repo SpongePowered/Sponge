@@ -199,10 +199,10 @@ public class DirectedGraph<D> {
 
         @Override
         public boolean equals(Object o) {
-            if(o == this) {
+            if (o == this) {
                 return true;
             }
-            if(!(o instanceof DataNode)) {
+            if (!(o instanceof DataNode)) {
                 return false;
             }
             DataNode<?> d = (DataNode<?>) o;

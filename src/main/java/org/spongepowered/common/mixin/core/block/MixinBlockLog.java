@@ -56,9 +56,9 @@ public abstract class MixinBlockLog extends MixinBlock {
 
     protected ImmutableTreeData getTreeData(IBlockState blockState) {
         BlockPlanks.EnumType type;
-        if(blockState.getBlock() instanceof BlockOldLog) {
+        if (blockState.getBlock() instanceof BlockOldLog) {
             type = blockState.getValue(BlockOldLog.VARIANT);
-        } else if(blockState.getBlock() instanceof BlockNewLog) {
+        } else if (blockState.getBlock() instanceof BlockNewLog) {
             type = blockState.getValue(BlockNewLog.VARIANT);
         } else {
             type = BlockPlanks.EnumType.OAK;
@@ -107,10 +107,10 @@ public abstract class MixinBlockLog extends MixinBlock {
 
     private Optional<BlockState> processLogType(IBlockState blockState, BlockPlanks.EnumType type, TreeType treeType) {
         if (blockState.getBlock() instanceof BlockOldLog) {
-            if (treeType.equals(TreeTypes.OAK) ||
-                treeType.equals(TreeTypes.BIRCH) ||
-                treeType.equals(TreeTypes.SPRUCE) ||
-                treeType.equals(TreeTypes.JUNGLE)) {
+            if (treeType.equals(TreeTypes.OAK)
+                    || treeType.equals(TreeTypes.BIRCH)
+                    || treeType.equals(TreeTypes.SPRUCE)
+                    || treeType.equals(TreeTypes.JUNGLE)) {
                 return Optional.of((BlockState) blockState.withProperty(BlockOldLog.VARIANT, type));
             }
         } else if (blockState.getBlock() instanceof BlockNewLog) {

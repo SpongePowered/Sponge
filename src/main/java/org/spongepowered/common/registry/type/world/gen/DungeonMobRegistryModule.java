@@ -40,7 +40,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @RegistrationDependency(EntityTypeRegistryModule.class)
@@ -60,9 +59,8 @@ public class DungeonMobRegistryModule implements RegistryModule {
         Map<String, Long> types = Arrays.stream(WorldGenDungeons.SPAWNERTYPES)
                 .collect(Collectors.groupingBy(ResourceLocation::toString, Collectors.counting()));
 
-        for(String mob : types.keySet()) {
-            put(EntityUtil.fromNameToType(mob).get(),
-                    types.get(mob).intValue() * 100); // times 100 to fit with forge's format
+        for (String mob : types.keySet()) {
+            put(EntityUtil.fromNameToType(mob).get(), types.get(mob).intValue() * 100); // times 100 to fit with forge's format
         }
     }
 
@@ -71,6 +69,7 @@ public class DungeonMobRegistryModule implements RegistryModule {
      * with the given weight.</p>
      *
      * <p>If a given type already exists, the old weight will be overridden.</p>
+     *
      * @param type Type to add
      * @param weight Weight of the type
      */

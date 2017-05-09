@@ -71,9 +71,10 @@ public abstract class MixinLegacyPingHandler extends ChannelInboundHandlerAdapte
 
     /**
      * @author Minecrell - January 18th, 2015
-     * @reason Implements our Ping Status Response API for legacy clients
-     *     (Minecraft 1.6.4 or older). Also attempts to fix several issues with
-     *     the packet deserialization.
+     * @reason Implements our Ping Status Response API for
+     *     legacy clients (Minecraft 1.6.4 or older). Also
+     *     attempts to fix several issues with the packet
+     *     deserialization.
      *
      * @param ctx The context
      * @param msg The message

@@ -33,7 +33,6 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.EquipmentInventory
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
-import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
 import java.util.Arrays;
 
@@ -55,7 +54,8 @@ public class ContainerPlayerInventoryLens extends ContainerLens {
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
         int base = CRAFTING_OUTPUT; // 1
-        final CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl(0, base, CRAFTING_GRID, CRAFTING_GRID, CRAFTING_GRID, slots);
+        final CraftingInventoryLensImpl crafting = new CraftingInventoryLensImpl(0, base, CRAFTING_GRID, CRAFTING_GRID,
+                CRAFTING_GRID, slots);
         base += CRAFTING_GRID * CRAFTING_GRID; // 4
         // TODO pass player for carrier to EquipmentInventory
         final EquipmentInventoryLensImpl armor = new EquipmentInventoryLensImpl(null, base, EQUIPMENT, 1, slots);

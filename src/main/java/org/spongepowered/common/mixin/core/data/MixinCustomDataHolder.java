@@ -110,10 +110,7 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
 
     @Override
     public boolean supportsCustom(Key<?> key) {
-        return this.manipulators.stream()
-                .filter(manipulator -> manipulator.supports(key))
-                .findFirst()
-                .isPresent();
+        return this.manipulators.stream().anyMatch(manipulator -> manipulator.supports(key));
     }
 
     @Override

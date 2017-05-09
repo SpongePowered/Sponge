@@ -43,13 +43,12 @@ public abstract class MixinBlockStateContainer {
     /**
      * @author barteks2x
      *
-     * Attempts to fix invalid block metadata instead of completely throwing away the block.
-     * When block state lookup returns null - gets block by ID and attempts to use the default state.
+     * Attempts to fix invalid block metadata instead of completely
+     * throwing away the block. When block state lookup returns null
+     * - gets block by ID and attempts to use the default state.
      */
-    @Redirect(
-            method = "setDataFromNBT",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/BlockStateContainer;set(ILnet/minecraft/block/state/IBlockState;)V")
-    )
+    @Redirect(method = "setDataFromNBT",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/BlockStateContainer;set(ILnet/minecraft/block/state/IBlockState;)V"))
     private void setFixedBlockState(BlockStateContainer this_, int i, IBlockState state, byte[] id, NibbleArray meta, @Nullable NibbleArray add) {
         IBlockState newState;
 

@@ -34,8 +34,8 @@ import org.spongepowered.common.data.manipulator.mutable.block.SpongeRailDirecti
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class RailDirectionDataProcessor extends
-        AbstractBlockOnlyDataProcessor<RailDirection, Value<RailDirection>, RailDirectionData, ImmutableRailDirectionData> {
+public class RailDirectionDataProcessor extends AbstractBlockOnlyDataProcessor<RailDirection, Value<RailDirection>,
+        RailDirectionData, ImmutableRailDirectionData> {
 
     public RailDirectionDataProcessor() {
         super(Keys.RAIL_DIRECTION);

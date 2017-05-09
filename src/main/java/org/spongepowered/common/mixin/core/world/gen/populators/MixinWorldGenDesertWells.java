@@ -115,8 +115,7 @@ public abstract class MixinWorldGenDesertWells extends WorldGenerator implements
     public boolean canPlaceAt(org.spongepowered.api.world.World world, int x, int y, int z) {
         World worldIn = (World) world;
         BlockPos position = new BlockPos(x, y, z);
-        while (worldIn.isAirBlock(position) && position.getY() > 2)
-        {
+        while (worldIn.isAirBlock(position) && position.getY() > 2) {
             position = position.down();
         }
         if (!IS_SAND.apply(worldIn.getBlockState(position))) {

@@ -28,9 +28,10 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
 /**
- * Entered into on all worlds *except* the one in which we're currently ticking a te/block
- * It indicates that the cross-world modification is expected, meaning we shouldn't log
- * a message
+ * Entered into on all worlds *except* the one in which
+ * we're currently ticking a tile entity or block.
+ * It indicates that the cross-world modification is
+ * expected, meaning we shouldn't log a message.
  */
 public class MarkerCrossWorld extends GeneralState {
 

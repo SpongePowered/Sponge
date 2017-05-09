@@ -28,16 +28,15 @@ import org.spongepowered.api.item.inventory.InventoryProperty;
 
 import java.util.Collection;
 
-
 public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInventory, TStack>> {
     
     /**
-     * Gets the lens at the specified index in this collection
+     * Gets the lens at the specified index in this collection.
      * 
      * @param index
      * @return
      */
-    public abstract Lens<TInventory, TStack> getLens(int index);
+    Lens<TInventory, TStack> getLens(int index);
     
     /**
      * Get all the properties for the specified target slot.
@@ -46,25 +45,25 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
      * @return collection of properties for the specified slot when viewed
      *      through this lens
      */
-    public abstract Collection<InventoryProperty<?, ?>> getProperties(int index);
+    Collection<InventoryProperty<?, ?>> getProperties(int index);
     
     /**
      * Get all the properties for the specified lens (if contained in this
      * collection).
      * 
-     * @param index the lens index to fetch
+     * @param lens The lens to fetch
      * @return collection of properties for the specified slot when viewed
      *      through this lens
      */
-    public abstract Collection<InventoryProperty<?, ?>> getProperties(Lens<TInventory, TStack> lens);
+    Collection<InventoryProperty<?, ?>> getProperties(Lens<TInventory, TStack> lens);
 
     /**
      * A strongly-typed {@link java.util.Collection#contains}.
      * 
-     * @param lens
-     * @return
+     * @param lens The lens to check for
+     * @return If the collection contains the lens
      */
-    public abstract boolean has(Lens<TInventory, TStack> lens);
+    boolean has(Lens<TInventory, TStack> lens);
 
     /**
      * Somewhat the inverse of {@link java.util.Collection#containsAll} in
@@ -73,8 +72,8 @@ public interface LensCollection<TInventory, TStack> extends Iterable<Lens<TInven
      * of the supplied collection).
      * 
      * @param c Collection to inspect
-     * @return
+     * @return If the collection contains all members of the lens
      */
-    public abstract boolean isSubsetOf(Collection<Lens<TInventory, TStack>> c);
+    boolean isSubsetOf(Collection<Lens<TInventory, TStack>> c);
     
 }

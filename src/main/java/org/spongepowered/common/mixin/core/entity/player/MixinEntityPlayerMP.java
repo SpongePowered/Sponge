@@ -213,7 +213,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     // Used to restore original item received in a packet after canceling an event
     private ItemStack packetItem;
 
-    private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
+    private final User user =
+            SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -279,9 +280,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
             if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
                 if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
-                    this.mcServer.getPlayerList().sendMessageToAllTeamMembers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
+                    this.mcServer.getPlayerList().sendMessageToAllTeamMembers((EntityPlayerMP) (Object) this,
+                            this.getCombatTracker().getDeathMessage());
                 } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
-                    this.mcServer.getPlayerList().sendMessageToTeamOrAllPlayers((EntityPlayerMP) (Object) this, this.getCombatTracker().getDeathMessage());
+                    this.mcServer.getPlayerList().sendMessageToTeamOrAllPlayers((EntityPlayerMP) (Object) this,
+                            this.getCombatTracker().getDeathMessage());
                 }
             } else {
                 this.mcServer.getPlayerList().sendMessage(this.getCombatTracker().getDeathMessage());
@@ -545,7 +548,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public boolean closeInventory(Cause cause) throws IllegalArgumentException {
         ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
-        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, this.openContainer, (EntityPlayerMP) (Object) this, cursor, cursor, false).isCancelled();
+        return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(cause, this.openContainer,
+                (EntityPlayerMP) (Object) this, cursor, cursor, false).isCancelled();
     }
 
     @Override
@@ -709,7 +713,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
      * assigns the {@link #pendingGameType} returned by the event to the actual
      * local variable in the method.
      */
-    @ModifyVariable(method = "Lnet/minecraft/entity/player/EntityPlayerMP;setGameType(Lnet/minecraft/world/GameType;)V", at = @At(value = "HEAD", remap = false), argsOnly = true)
+    @ModifyVariable(method = "Lnet/minecraft/entity/player/EntityPlayerMP;setGameType(Lnet/minecraft/world/GameType;)V",
+            at = @At(value = "HEAD", remap = false), argsOnly = true)
     private GameType assignPendingGameType(GameType gameType) {
         return this.pendingGameType;
     }
@@ -820,7 +825,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         //final Cause cause = Cause.source(SpawnCause.builder().type(InternalSpawnTypes.DROPPED_ITEM).build()).named(NamedCause.OWNER, this).build();
         // ASK MUMFREY HOW TO GET THE FRIGGING SLOT FOR THE EVENT?!
 
-        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.getCount() : 1), false, true);
+        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.getCount() : 1),
+                false, true);
     }
 
     @Override
@@ -858,10 +864,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
     }
 
-    @Inject(method = "displayGUIChest", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;openContainer:Lnet/minecraft/inventory/Container;", opcode = Opcodes.PUTFIELD, ordinal = 1, shift = At.Shift.AFTER))
+    @Inject(method = "displayGUIChest", at = @At(value = "FIELD",
+            target = "Lnet/minecraft/entity/player/EntityPlayerMP;openContainer:Lnet/minecraft/inventory/Container;",
+            opcode = Opcodes.PUTFIELD, ordinal = 1, shift = At.Shift.AFTER))
     public void onSetContainer(IInventory chestInventory, CallbackInfo ci) {
         if (!(chestInventory instanceof IInteractionObject) && this.openContainer instanceof ContainerChest && this.isSpectator()) {
-            SpongeImpl.getLogger().warn("Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
+            SpongeImpl.getLogger().warn(
+                    "Opening fallback ContainerChest for inventory '{}'. Most API inventory methods will not be supported", chestInventory);
             ((IMixinContainer) this.openContainer).setSpectatorChest(true);
         }
     }

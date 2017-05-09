@@ -31,7 +31,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.event.cause.Cause;
@@ -45,12 +44,13 @@ import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.Validations;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.data.util.DataVersions;
+import org.spongepowered.common.data.util.DataVersions.TileEntityArchetype;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 
-public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType, BlockSnapshot, org.spongepowered.api.block.tileentity.TileEntity> implements TileEntityArchetype {
+public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType, BlockSnapshot, org.spongepowered.api.block.tileentity.TileEntity>
+        implements org.spongepowered.api.block.tileentity.TileEntityArchetype {
 
     final BlockState blockState;
 
@@ -111,7 +111,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
 
     @Override
     public int getContentVersion() {
-        return DataVersions.TileEntitArchetype.BASE_VERSION;
+        return TileEntityArchetype.BASE_VERSION;
     }
 
     @Override
@@ -134,7 +134,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     }
 
     @Override
-    public TileEntityArchetype copy() {
+    public org.spongepowered.api.block.tileentity.TileEntityArchetype copy() {
         final SpongeTileEntityArchetypeBuilder builder = new SpongeTileEntityArchetypeBuilder();
         builder.tileEntityType = this.type;
         builder.tileData = NbtTranslator.getInstance().translate(this.data);

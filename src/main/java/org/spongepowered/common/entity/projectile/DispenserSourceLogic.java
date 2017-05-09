@@ -60,11 +60,6 @@ public class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
         return projectile;
     }
 
-    public static EnumFacing getFacing(TileEntityDispenser dispenser) {
-        IBlockState state = dispenser.getWorld().getBlockState(dispenser.getPos());
-        return state.getValue(BlockDispenser.FACING);
-    }
-
     @SuppressWarnings("unchecked")
     private <P extends Projectile> Optional<P> launch(TileEntityDispenser dispenser, Class<P> projectileClass, Item item) {
         BehaviorDefaultDispenseItem behavior = (BehaviorDefaultDispenseItem) BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(item);
@@ -79,4 +74,10 @@ public class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
         }
         return Optional.empty();
     }
+
+    public static EnumFacing getFacing(TileEntityDispenser dispenser) {
+        IBlockState state = dispenser.getWorld().getBlockState(dispenser.getPos());
+        return state.getValue(BlockDispenser.FACING);
+    }
+
 }

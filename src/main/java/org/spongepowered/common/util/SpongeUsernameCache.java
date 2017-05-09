@@ -26,6 +26,16 @@ package org.spongepowered.common.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import com.google.common.io.Files;
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
+import org.spongepowered.common.SpongeImpl;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -36,29 +46,23 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
 
-import org.spongepowered.common.SpongeImpl;
-import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-import com.google.common.io.Files;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-
 /**
- * Caches player's last known usernames
- * <p>
- * Modders should use {@link #getLastKnownUsername(UUID)} to determine a players
- * last known username.<br>
- * For convenience, {@link #getMap()} is provided to get an immutable copy of
- * the caches underlying map.
+ * Caches players last known usernames.
+ *
+ * <p>Modders should use {@link #getLastKnownUsername(UUID)} to determine
+ * a players last known username.</p>
+ *
+ * <br>
+ *
+ * <p>For convenience, {@link #getMap()} is provided to get an immutable copy of
+ * the caches underlying map.</p>
  * 
- * Note: This class represents Forge's UsernameCache. It is used merely used
+ * <p>Note: This class represents Forge's UsernameCache. It is used merely used
  * to support both SpongeForge and SpongeVanilla. Original code can be found
  * here :
  * 
  * https://github.com/MinecraftForge/MinecraftForge/blob/1.8.9/src/main/java/net/minecraftforge/common/UsernameCache.java
+ * </p>
  */
 public final class SpongeUsernameCache {
 
@@ -73,12 +77,10 @@ public final class SpongeUsernameCache {
     private static boolean loaded = false;
 
     /**
-     * Set a player's current username
+     * Set a player's current username.
      *
-     * @param uuid
-     *            the player's {@link java.util.UUID UUID}
-     * @param username
-     *            the player's username
+     * @param uuid The player's {@link java.util.UUID UUID}
+     * @param username The player's username
      */
     public static void setUsername(UUID uuid, String username) {
         checkNotNull(uuid);
@@ -95,11 +97,10 @@ public final class SpongeUsernameCache {
     }
 
     /**
-     * Remove a player's username from the cache
+     * Remove a player's username from the cache.
      *
-     * @param uuid
-     *            the player's {@link java.util.UUID UUID}
-     * @return if the cache contained the user
+     * @param uuid The player's {@link java.util.UUID UUID}
+     * @return If the cache contained the user
      */
     public static boolean removeUsername(UUID uuid) {
         checkNotNull(uuid);
@@ -115,14 +116,13 @@ public final class SpongeUsernameCache {
     }
 
     /**
-     * Get the player's last known username
-     * <p>
-     * <b>May be <code>null</code></b>
+     * Get the player's last known username.
      *
-     * @param uuid
-     *            the player's {@link java.util.UUID UUID}
-     * @return the player's last known username, or <code>null</code> if the
-     *         cache doesn't have a record of the last username
+     * <p></p><b>May be <code>null</code></b></p>
+     *
+     * @param uuid The player's {@link java.util.UUID UUID}
+     * @return The player's last known username, or <code>null</code> if the
+     *     cache doesn't have a record of the last username
      */
     @Nullable
     public static String getLastKnownUsername(UUID uuid) {
@@ -135,14 +135,13 @@ public final class SpongeUsernameCache {
     }
 
     /**
-     * Get the player's last known {@link java.util.UUID UUID}
-     * <p>
-     * <b>May be <code>null</code></b>
+     * Get the player's last known {@link java.util.UUID UUID}.
      *
-     * @param username
-     *            the player's username
+     * <p><b>May be <code>null</code></b></p>
+     *
+     * @param username The player's username
      * @return the player's last known uuid, or <code>null</code> if the
-     *         cache doesn't have a record of the username
+     *     cache doesn't have a record of the username
      */
     @Nullable
     public static UUID getLastKnownUUID(String username) {
@@ -161,11 +160,10 @@ public final class SpongeUsernameCache {
     }
 
     /**
-     * Check if the cache contains the given player's username
+     * Check if the cache contains the given player's username.
      *
-     * @param uuid
-     *            the player's {@link java.util.UUID UUID}
-     * @return if the cache contains a username for the given player
+     * @param uuid The player's {@link java.util.UUID UUID}
+     * @return If the cache contains a username for the given player
      */
     public static boolean containsUUID(UUID uuid) {
         checkNotNull(uuid);
@@ -177,9 +175,9 @@ public final class SpongeUsernameCache {
     }
 
     /**
-     * Get an immutable copy of the cache's underlying map
+     * Get an immutable copy of the cache's underlying map.
      *
-     * @return the map
+     * @return The map
      */
     public static Map<UUID, String> getMap() {
         if (!loaded) {
@@ -190,7 +188,7 @@ public final class SpongeUsernameCache {
     }
 
     /**
-     * Save the cache to file
+     * Save the cache to file.
      */
     public static void save() {
         if (!loaded) {
@@ -206,16 +204,19 @@ public final class SpongeUsernameCache {
     }
 
     /**
-     * Load the cache from file
+     * Load the cache from file.
      */
     public static void load() {
         loaded = true;
-        if (!saveFile.exists()) return;
+        if (!saveFile.exists()) {
+            return;
+        }
 
         try {
-
             String json = Files.toString(saveFile, charset);
-            Type type = new TypeToken<Map<UUID, String>>() { private static final long serialVersionUID = 1L; }.getType();
+            Type type = new TypeToken<Map<UUID, String>>() {
+                private static final long serialVersionUID = 1L;
+            }.getType();
 
             map = gson.fromJson(json, type);
         } catch (JsonSyntaxException e) {

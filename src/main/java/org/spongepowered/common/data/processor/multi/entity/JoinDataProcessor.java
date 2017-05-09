@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-public class JoinDataProcessor extends AbstractEntityDataProcessor<EntityPlayer, JoinData, ImmutableJoinData>{
+public class JoinDataProcessor extends AbstractEntityDataProcessor<EntityPlayer, JoinData, ImmutableJoinData> {
 
     public JoinDataProcessor() {
         super(EntityPlayer.class);

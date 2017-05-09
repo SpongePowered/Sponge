@@ -57,8 +57,7 @@ import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 public abstract class MixinMobSpawnerBaseLogic {
 
     private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z";
-    private static final String
-            ANVIL_CHUNK_LOADER_READ_ENTITY =
+    private static final String ANVIL_CHUNK_LOADER_READ_ENTITY =
             "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;";
 
     @Shadow private int spawnRange;
@@ -73,9 +72,11 @@ public abstract class MixinMobSpawnerBaseLogic {
 
     /**
      * @author gabizou - January 30th, 2016
-     * @author gabizou - Updated April 10th, 2016 - Update for 1.9 since it's passed to the AnvilChunkLoader
+     * @author gabizou - Updated April 10th, 2016 - Update for 1.9 since
+     *     it's passed to the AnvilChunkLoader
      *
      * Redirects to throw a ConstructEntityEvent.PRE
+     *
      * @param world
      * @return
      */
@@ -89,7 +90,8 @@ public abstract class MixinMobSpawnerBaseLogic {
      * @author gabizou - April 10th, 2016
      *
      * This is close to a verbatim copy of {@link AnvilChunkLoader#readWorldEntityPos(NBTTagCompound, World, double, double, double, boolean)}
-     * with the added bonus of throwing events before entities are constructed with appropriate causes.
+     * with the added bonus of throwing events before entities are
+     * constructed with appropriate causes.
      *
      * @param compound The compound of the entity to spawn with
      * @param world The world to spawn at

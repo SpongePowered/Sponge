@@ -37,7 +37,6 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDespawnD
 import org.spongepowered.api.data.manipulator.mutable.entity.DespawnDelayData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDespawnDelayData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
 import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 
 import java.util.Map;
@@ -65,7 +64,7 @@ public final class DespawnDelayDataProcessor extends AbstractEntityDataProcessor
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityItem container) {
-        return ImmutableMap.<Key<?>, Object> builder()
+        return ImmutableMap.<Key<?>, Object>builder()
                 .put(Keys.DESPAWN_DELAY, ((IMixinEntityItem) container).getDespawnDelay())
                 .put(Keys.INFINITE_DESPAWN_DELAY, ((IMixinEntityItem) container).infiniteDespawnDelay())
                 .build();

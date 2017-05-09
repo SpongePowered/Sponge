@@ -41,7 +41,8 @@ public class SpongeExpirableData extends AbstractBoundedComparableData<Integer, 
     }
 
     public SpongeExpirableData(Integer value, Integer upperBound) {
-        super(ExpirableData.class, value, Keys.EXPIRATION_TICKS, intComparator(), ImmutableSpongeExpirableData.class, 0, upperBound, 0);
+        super(ExpirableData.class, value, Keys.EXPIRATION_TICKS, intComparator(), ImmutableSpongeExpirableData.class,
+                0, upperBound, 0);
     }
 
     @Override

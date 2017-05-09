@@ -46,8 +46,8 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import java.util.List;
 import java.util.Optional;
 
-public class StoredEnchantmentDataProcessor extends
-        AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, StoredEnchantmentData, ImmutableStoredEnchantmentData> {
+public class StoredEnchantmentDataProcessor extends AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>,
+        StoredEnchantmentData, ImmutableStoredEnchantmentData> {
 
     public StoredEnchantmentDataProcessor() {
         super(stack -> stack.getItem().equals(Items.ENCHANTED_BOOK), Keys.STORED_ENCHANTMENTS);
@@ -66,7 +66,8 @@ public class StoredEnchantmentDataProcessor extends
         NBTTagList list = new NBTTagList();
         for (ItemEnchantment enchantment : value) {
             NBTTagCompound tag = new NBTTagCompound();
-            tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) enchantment.getEnchantment()));
+            tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment
+                    .getEnchantmentID((net.minecraft.enchantment.Enchantment) enchantment.getEnchantment()));
             tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, (short) enchantment.getLevel());
             list.appendTag(tag);
         }

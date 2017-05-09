@@ -70,4 +70,5 @@ public class CauseTrackerCategory extends ConfigCategory {
     public void setReportWorldTickDifferentWorlds(boolean reportWorldTickDifferentWorlds) {
         this.reportWorldTickDifferentWorlds = reportWorldTickDifferentWorlds;
     }
+
 }

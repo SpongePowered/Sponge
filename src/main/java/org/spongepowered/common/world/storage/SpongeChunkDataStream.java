@@ -43,7 +43,7 @@ public class SpongeChunkDataStream implements ChunkDataStream {
         private final RegionFile file;
         public int index;
 
-        public RegionFileItr(RegionFile regionFile) {
+        RegionFileItr(RegionFile regionFile) {
             this.file = regionFile;
         }
 

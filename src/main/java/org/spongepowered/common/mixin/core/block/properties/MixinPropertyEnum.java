@@ -27,12 +27,6 @@ package org.spongepowered.common.mixin.core.block.properties;
 import net.minecraft.block.properties.PropertyEnum;
 import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
-import java.util.Collection;
 
 @Mixin(value = PropertyEnum.class)
 public abstract class MixinPropertyEnum<E extends Enum<E>> extends MixinPropertyHelper<E> implements EnumTrait<E> {

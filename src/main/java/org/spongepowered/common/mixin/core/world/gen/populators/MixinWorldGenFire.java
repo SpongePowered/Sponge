@@ -83,12 +83,12 @@ public class MixinWorldGenFire implements NetherFire {
      */
     @Overwrite
     public boolean generate(World worldIn, Random rand, BlockPos pos) {
-    	//BEGIN sponge
+        //BEGIN sponge
         int n = this.cluster.getFlooredAmount(rand);
         //END sponge
         for (int i = 0; i < n; ++i) {
-            BlockPos blockpos1 =
-                    pos.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
+            BlockPos blockpos1 = pos.add(rand.nextInt(8) - rand.nextInt(8),
+                            rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
             if (worldIn.isAirBlock(blockpos1) && worldIn.getBlockState(blockpos1.down()).getBlock() == Blocks.NETHERRACK) {
                 worldIn.setBlockState(blockpos1, Blocks.FIRE.getDefaultState(), 2);
             }
@@ -119,11 +119,11 @@ public class MixinWorldGenFire implements NetherFire {
     
     @Override
     public String toString() {
-    	return Objects.toStringHelper(this)
-    			.add("Type", "NetherFire")
-    			.add("PerChunk", this.count)
-    			.add("PerCluster", this.cluster)
-    			.toString();
+        return Objects.toStringHelper(this)
+                .add("Type", "NetherFire")
+                .add("PerChunk", this.count)
+                .add("PerCluster", this.cluster)
+                .toString();
     }
 
 }

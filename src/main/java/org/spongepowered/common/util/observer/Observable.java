@@ -25,54 +25,55 @@
 package org.spongepowered.common.util.observer;
 
 /**
- * Observer pattern for Sponge. Java's observer pattern classes use a concrete
- * class for Observer which means we can't mix in to target classes. This
- * implementation of Observer pattern uses interfaces so we can mix in to
- * targets, we also make the notification payload generic to avoid some explicit
- * casting in observers.
+ * Observer pattern for Sponge. Java's observer pattern classes
+ * use a concrete class for Observer which means we can't mix in
+ * to target classes. This implementation of Observer pattern uses
+ * interfaces so we can mix in to targets, we also make the
+ * notification payload generic to avoid some explicit casting in
+ * observers.
  * 
  * @param <E> Event arg payload type
  */
 public interface Observable<E extends EventArgs> {
     
     /**
-     * Add an observer for this object
+     * Add an observer for this object.
      * 
      * @param observer Observer to add, the observer will not be added if it
      *      already exists in this observer
      * @return fluent
      */
-    public abstract Observable<E> addObserver(Observer<E> observer);
+    Observable<E> addObserver(Observer<E> observer);
 
     /**
-     * Remove an observer from this object, removing an observer which is not
-     * in the observer list is not an error.
+     * Remove an observer from this object, removing an observer which
+     * is not in the observer list is not an error.
      * 
      * @param observer Observer to remove
      * @return fluent
      */
-    public abstract Observable<E> removeObserver(Observer<E> observer);
+    Observable<E> removeObserver(Observer<E> observer);
     
     /**
-     * Remove all observers from this object
+     * Remove all observers from this object.
      * 
      * @return fluent
      */
-    public abstract Observable<E> clearObservers();
+    Observable<E> clearObservers();
     
     /**
-     * Get all the observers on this object
+     * Get all the observers on this object.
      * 
      * @return all observers
      */
-    public abstract Iterable<Observer<E>> getObservers();
+    Iterable<Observer<E>> getObservers();
     
     /**
-     * Raise E against all observers 
+     * Raise E against all observers.
      * 
      * @param eventArgs argument payload
      * @return fluent
      */
-    public abstract Observable<E> raise(E eventArgs);
+    Observable<E> raise(E eventArgs);
 
 }

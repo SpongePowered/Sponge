@@ -73,8 +73,8 @@ public abstract class AbstractBlockViewTransform<V extends BlockVolume> implemen
 
     @Override
     public boolean containsBlock(int x, int y, int z) {
-        return this.volume.containsBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
-            .transformZ(x, y, z));
+        return this.volume.containsBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+                this.inverseTransform.transformZ(x, y, z));
     }
 
     @Override
@@ -84,8 +84,8 @@ public abstract class AbstractBlockViewTransform<V extends BlockVolume> implemen
 
     @Override
     public BlockState getBlock(int x, int y, int z) {
-        return this.volume.getBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
-            .transformZ(x, y, z));
+        return this.volume.getBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z),
+                this.inverseTransform.transformZ(x, y, z));
     }
 
     @Override

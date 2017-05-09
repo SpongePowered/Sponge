@@ -34,7 +34,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
-public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<Lens<TInventory, TStack>> implements DynamicLensCollection<TInventory, TStack> {
+public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<Lens<TInventory, TStack>>
+        implements DynamicLensCollection<TInventory, TStack> {
 
     protected final Lens<TInventory, TStack>[] lenses;
     

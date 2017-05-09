@@ -32,7 +32,8 @@ import org.spongepowered.api.data.type.CookedFishes;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeCookedFishData;
 
-public class ImmutableSpongeCookedFishData extends AbstractImmutableSingleCatalogData<CookedFish, ImmutableCookedFishData, CookedFishData> implements ImmutableCookedFishData {
+public class ImmutableSpongeCookedFishData extends AbstractImmutableSingleCatalogData<CookedFish, ImmutableCookedFishData, CookedFishData>
+        implements ImmutableCookedFishData {
 
     public ImmutableSpongeCookedFishData() {
         this(CookedFishes.COD);

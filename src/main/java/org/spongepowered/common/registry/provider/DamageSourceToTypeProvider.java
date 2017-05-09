@@ -44,7 +44,6 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
     private final Map<String, DamageType> damageSourceToTypeMappings = new HashMap<>();
 
     DamageSourceToTypeProvider() {
-
         this.damageSourceToTypeMappings.put("anvil", DamageTypes.CONTACT);
         this.damageSourceToTypeMappings.put("arrow", DamageTypes.ATTACK);
         this.damageSourceToTypeMappings.put("cactus", DamageTypes.CONTACT);

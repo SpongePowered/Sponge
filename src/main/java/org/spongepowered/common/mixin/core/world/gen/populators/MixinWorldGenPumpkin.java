@@ -85,8 +85,8 @@ public class MixinWorldGenPumpkin implements Pumpkin {
     public boolean generate(World worldIn, Random rand, BlockPos p_180709_3_) {
         int n = this.count.getFlooredAmount(rand);
         for (int i = 0; i < n; ++i) {
-            BlockPos blockpos1 =
-                    p_180709_3_.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
+            BlockPos blockpos1 = p_180709_3_.add(rand.nextInt(8) - rand.nextInt(8),
+                            rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
 
             if (worldIn.isAirBlock(blockpos1) && worldIn.getBlockState(blockpos1.down()).getBlock() == Blocks.GRASS
                     && Blocks.PUMPKIN.canPlaceBlockAt(worldIn, blockpos1)) {

@@ -42,9 +42,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 @RegisterCatalog(BiomeTypes.class)
-public final class BiomeTypeRegistryModule
-    extends AbstractPrefixAlternateCatalogTypeRegistryModule<BiomeType>
-    implements AdditionalCatalogRegistryModule<BiomeType> {
+public final class BiomeTypeRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<BiomeType>
+        implements AdditionalCatalogRegistryModule<BiomeType> {
 
     private final List<BiomeType> biomeTypes = new ArrayList<>();
 

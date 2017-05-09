@@ -26,27 +26,18 @@ package org.spongepowered.common.registry.type.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.api.block.trait.BooleanTraits;
-import org.spongepowered.api.block.trait.EnumTrait;
-import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
-import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
 
 @RegisterCatalog(BooleanTraits.class)
-public final class BooleanTraitRegistryModule
-        extends AbstractPrefixAlternateCatalogTypeRegistryModule<BooleanTrait>
-        implements SpongeAdditionalCatalogRegistryModule<BooleanTrait>{
+public final class BooleanTraitRegistryModule extends AbstractPrefixAlternateCatalogTypeRegistryModule<BooleanTrait>
+        implements SpongeAdditionalCatalogRegistryModule<BooleanTrait> {
 
     public static BooleanTraitRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -75,6 +66,6 @@ public final class BooleanTraitRegistryModule
     }
 
     private static final class Holder {
-        final static BooleanTraitRegistryModule INSTANCE = new BooleanTraitRegistryModule();
+        static final BooleanTraitRegistryModule INSTANCE = new BooleanTraitRegistryModule();
     }
 }

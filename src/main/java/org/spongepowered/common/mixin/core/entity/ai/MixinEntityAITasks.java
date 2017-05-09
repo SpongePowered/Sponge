@@ -139,8 +139,9 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
 
     /**
      * @author gabizou - February 1st, 2016
-     * Purpose: Rewrites the overwrite to use a redirect when an entry is being added
-     * to the task entries. We throw an event for plugins to potentially cancel.
+     * @reason Rewrites the overwrite to use a redirect when an
+     *     entry is being added to the task entries. We throw an
+     *     event for plugins to potentially cancel.
      *
      * @param entry
      * @param priority

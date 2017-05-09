@@ -34,7 +34,8 @@ import org.spongepowered.api.data.type.ComparatorTypes;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeComparatorData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
 
-public class SpongeComparatorData extends AbstractSingleCatalogData<ComparatorType, ComparatorData, ImmutableComparatorData> implements ComparatorData {
+public class SpongeComparatorData extends AbstractSingleCatalogData<ComparatorType, ComparatorData, ImmutableComparatorData>
+        implements ComparatorData {
 
     public SpongeComparatorData(ComparatorType comparatorType) {
         super(ComparatorData.class, checkNotNull(comparatorType), Keys.COMPARATOR_TYPE, ImmutableSpongeComparatorData.class);

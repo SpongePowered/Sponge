@@ -31,7 +31,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePigSaddleData;
 
-public class ImmutableSpongePigSaddleData extends AbstractImmutableBooleanData<ImmutablePigSaddleData, PigSaddleData> implements ImmutablePigSaddleData {
+public class ImmutableSpongePigSaddleData extends AbstractImmutableBooleanData<ImmutablePigSaddleData, PigSaddleData>
+        implements ImmutablePigSaddleData {
 
     public ImmutableSpongePigSaddleData(boolean value) {
         super(ImmutablePigSaddleData.class, value, Keys.PIG_SADDLE, SpongePigSaddleData.class, false);

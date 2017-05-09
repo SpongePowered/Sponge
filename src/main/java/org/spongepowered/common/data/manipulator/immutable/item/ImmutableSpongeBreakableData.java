@@ -37,7 +37,8 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeBreakableDat
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ImmutableSpongeBreakableData extends AbstractImmutableSingleSetData<BlockType, ImmutableBreakableData, BreakableData> implements ImmutableBreakableData {
+public class ImmutableSpongeBreakableData extends AbstractImmutableSingleSetData<BlockType, ImmutableBreakableData, BreakableData>
+        implements ImmutableBreakableData {
 
     public ImmutableSpongeBreakableData() {
         this(ImmutableSet.<BlockType>of());

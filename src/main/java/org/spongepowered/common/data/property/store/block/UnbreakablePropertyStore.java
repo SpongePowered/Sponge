@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.UnbreakableProperty;
 import org.spongepowered.api.world.Location;

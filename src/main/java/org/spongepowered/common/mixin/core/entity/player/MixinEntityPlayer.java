@@ -78,7 +78,6 @@ import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -90,8 +89,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.interfaces.ITargetedLocation;
@@ -107,7 +106,6 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -117,8 +115,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     private static final String WORLD_PLAY_SOUND_AT =
             "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
-    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z";
-    private static final String PLAYER_COLLIDE_ENTITY = "Lnet/minecraft/entity/Entity;onCollideWithPlayer(Lnet/minecraft/entity/player/EntityPlayer;)V";
+    private static final String WORLD_SPAWN_ENTITY =
+            "Lnet/minecraft/world/World;spawnEntity(Lnet/minecraft/entity/Entity;)Z";
+    private static final String PLAYER_COLLIDE_ENTITY =
+            "Lnet/minecraft/entity/Entity;onCollideWithPlayer(Lnet/minecraft/entity/player/EntityPlayer;)V";
 
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
@@ -268,9 +268,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     public boolean onIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
             if (!this.world.isRemote) {
-                SpongeImpl.postEvent(SpongeEventFactory.
-                        createSleepingEventTick(Cause.of(NamedCause.source(this)),
-                                                this.getWorld().createSnapshot(VecHelper.toVector3i(this.bedLocation)), this));
+                SpongeImpl.postEvent(SpongeEventFactory.createSleepingEventTick(Cause.of(NamedCause.source(this)),
+                        this.getWorld().createSnapshot(VecHelper.toVector3i(this.bedLocation)), this));
             }
             return true;
         }
@@ -280,7 +279,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     /**
      * @author gabizou - January 4th, 2016
      *
-     * This prevents sounds from being sent to the server by players who are vanish.
+     * This prevents sounds from being sent to the server
+     * by players who are vanish.
      */
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
     public void playSound(World world, EntityPlayer player, double d1, double d2, double d3, SoundEvent sound, SoundCategory category, float volume, float pitch) {
@@ -314,9 +314,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     /**
      * @author gabizou - June 13th, 2016
-     * @reason Reverts the method to flow through our systems, Forge patches
-     * this to throw an ItemTossEvent, but we'll be throwing it regardless in
-     * SpongeForge's handling.
+     * @reason Reverts the method to flow through our systems, Forge
+     * patches this to throw an ItemTossEvent, but we'll be throwing it
+     * regardless in SpongeForge's handling.
      *
      * @param itemStackIn
      * @param unused
@@ -498,7 +498,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 final EnumCreatureAttribute creatureAttribute = targetEntity instanceof EntityLivingBase
                                                                 ? ((EntityLivingBase) targetEntity).getCreatureAttribute()
                                                                 : EnumCreatureAttribute.UNDEFINED;
-                final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchamntmentFunction(this.getHeldItemMainhand(), creatureAttribute, attackStrength);
+                final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchantmentFunction(this.getHeldItemMainhand(), creatureAttribute, attackStrength);
                 // This is kept for the post-damage event handling
                 final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream()
                         .map(ModifierFunction::getModifier)
@@ -531,7 +531,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         isSprintingAttack = true;
                     }
 
-                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.isInWater() && !this.isPotionActive(MobEffects.BLINDNESS) && !this.isRiding() && targetEntity instanceof EntityLivingBase;
+                    isCriticalAttack = isStrongAttack && this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.isInWater()
+                            && !this.isPotionActive(MobEffects.BLINDNESS) && !this.isRiding() && targetEntity instanceof EntityLivingBase;
                     isCriticalAttack = isCriticalAttack && !this.isSprinting();
 
                     if (isCriticalAttack) {
@@ -545,7 +546,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     double distanceWalkedDelta = (double) (this.distanceWalkedModified - this.prevDistanceWalkedModified);
 
                     final ItemStack heldItem = this.getHeldItem(EnumHand.MAIN_HAND);
-                    if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.onGround && distanceWalkedDelta < (double) this.getAIMoveSpeed()) {
+                    if (isStrongAttack && !isCriticalAttack && !isSprintingAttack && this.onGround
+                            && distanceWalkedDelta < (double) this.getAIMoveSpeed()) {
                         ItemStack itemstack = heldItem;
 
                         if (itemstack.getItem() instanceof ItemSword) {
@@ -556,7 +558,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                     // Sponge Start - Create the event and throw it
                     final DamageSource damageSource = DamageSource.causePlayerDamage((EntityPlayer) (Object) this);
                     final Cause cause = Cause.source(damageSource).build();
-                    final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(cause, originalFunctions, EntityUtil.fromNative(targetEntity), knockbackModifier, originalBaseDamage);
+                    final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(cause, originalFunctions,
+                            EntityUtil.fromNative(targetEntity), knockbackModifier, originalBaseDamage);
                     SpongeImpl.postEvent(event);
 
                     if (event.isCancelled()) {
@@ -687,9 +690,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             }
                         }
 
-                        if(!itemstack1.isEmpty() && targetEntity instanceof EntityLivingBase) {
+                        if (!itemstack1.isEmpty() && targetEntity instanceof EntityLivingBase) {
                             itemstack1.hitEntity((EntityLivingBase)targetEntity, (EntityPlayer) (Object) this);
-                            if(itemstack1.isEmpty()) {
+                            if (itemstack1.isEmpty()) {
                                 this.setHeldItem(EnumHand.MAIN_HAND, ItemStack.EMPTY);
                             }
                         }
@@ -704,13 +707,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
                             if (this.world instanceof WorldServer && f5 > 2.0F) {
                                 int k = (int) ((double) f5 * 0.5D);
-                                ((WorldServer) this.world).spawnParticle(EnumParticleTypes.DAMAGE_INDICATOR, targetEntity.posX, targetEntity.posY + (double) (targetEntity.height * 0.5F), targetEntity.posZ, k, 0.1D, 0.0D, 0.1D, 0.2D, new int[0]);
+                                ((WorldServer) this.world).spawnParticle(EnumParticleTypes.DAMAGE_INDICATOR, targetEntity.posX,
+                                        targetEntity.posY + (double) (targetEntity.height * 0.5F), targetEntity.posZ, k, 0.1D, 0.0D, 0.1D, 0.2D, new int[0]);
                             }
                         }
 
                         this.addExhaustion(0.3F);
                     } else {
-                        this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE, this.getSoundCategory(), 1.0F, 1.0F);
+                        this.world.playSound((EntityPlayer) null, this.posX, this.posY, this.posZ, SoundEvents.ENTITY_PLAYER_ATTACK_NODAMAGE,
+                                this.getSoundCategory(), 1.0F, 1.0F);
 
                         if (litEntityOnFire) {
                             targetEntity.extinguish();

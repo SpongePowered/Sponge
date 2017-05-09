@@ -28,8 +28,8 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableWeightedCollectionValue;
 import org.spongepowered.api.data.value.mutable.WeightedCollectionValue;
-import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.util.weighted.TableEntry;
+import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeWeightedCollectionValue;
 
 import java.util.List;
@@ -39,8 +39,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-public class SpongeWeightedCollectionValue<E> extends SpongeCollectionValue<TableEntry<E>,
-    WeightedTable<E>, WeightedCollectionValue<E>, ImmutableWeightedCollectionValue<E>> implements WeightedCollectionValue<E> {
+public class SpongeWeightedCollectionValue<E> extends SpongeCollectionValue<TableEntry<E>, WeightedTable<E>, WeightedCollectionValue<E>,
+        ImmutableWeightedCollectionValue<E>> implements WeightedCollectionValue<E> {
 
     public SpongeWeightedCollectionValue(Key<? extends BaseValue<WeightedTable<E>>> key, WeightedTable<E> actualValue) {
         super(key, new WeightedTable<>(), actualValue.stream().collect(Collectors.toCollection(WeightedTable<E>::new)));

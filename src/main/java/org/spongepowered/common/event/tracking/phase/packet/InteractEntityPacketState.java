@@ -41,6 +41,7 @@ final class InteractEntityPacketState extends BasicPacketState {
     public boolean ignoresItemPreMerges() {
         return true;
     }
+
     @Override
     public boolean isPacketIgnored(Packet<?> packetIn, EntityPlayerMP packetPlayer) {
         final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packetIn;

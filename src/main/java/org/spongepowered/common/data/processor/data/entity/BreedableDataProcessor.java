@@ -39,7 +39,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class BreedableDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityAgeable, Boolean, Value<Boolean>, BreedableData, ImmutableBreedableData> {
+public class BreedableDataProcessor
+        extends AbstractSingleDataSingleTargetProcessor<EntityAgeable, Boolean, Value<Boolean>, BreedableData, ImmutableBreedableData> {
 
     public BreedableDataProcessor() {
         super(Keys.CAN_BREED, EntityAgeable.class);
@@ -49,8 +50,7 @@ public class BreedableDataProcessor extends AbstractSingleDataSingleTargetProces
     protected boolean set(EntityAgeable entity, Boolean value) {
         if (entity.getGrowingAge() < 0) {
             return false;
-        }
-        else if (value) {
+        } else if (value) {
             entity.setGrowingAge(0);
         } else {
             entity.setGrowingAge(6000);

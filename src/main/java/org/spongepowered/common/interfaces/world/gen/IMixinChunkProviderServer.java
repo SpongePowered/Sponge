@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.interfaces.world.gen;
 
-import javax.annotation.Nullable;
-
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
+
+import javax.annotation.Nullable;
 
 public interface IMixinChunkProviderServer {
 
@@ -42,4 +42,5 @@ public interface IMixinChunkProviderServer {
     long getChunkUnloadDelay();
 
     WorldServer getWorld();
+
 }

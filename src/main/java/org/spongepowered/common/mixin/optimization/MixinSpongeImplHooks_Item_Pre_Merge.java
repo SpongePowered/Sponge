@@ -36,7 +36,8 @@ public class MixinSpongeImplHooks_Item_Pre_Merge {
 
     /**
      * @author gabizou - April 7th, 2016
-     * @reason Iterates over the collection to find possible matches for any merges that can take place.
+     * @reason Iterates over the collection to find possible matches
+     *     for any merges that can take place.
      *
      * @param itemStacks The collection of item stacks to add on to
      * @param data The item stack being merged in

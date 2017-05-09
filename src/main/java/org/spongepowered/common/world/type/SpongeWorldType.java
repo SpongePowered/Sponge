@@ -34,10 +34,10 @@ import java.util.Arrays;
 public abstract class SpongeWorldType extends WorldType {
 
     protected SpongeWorldType(String name) {
-        super(getNextID(), name);
+        super(getNextId(), name);
     }
 
-    private static int getNextID() {
+    private static int getNextId() {
         for (int x = 0; x < WORLD_TYPES.length; x++) {
             if (WORLD_TYPES[x] == null) {
                 return x;

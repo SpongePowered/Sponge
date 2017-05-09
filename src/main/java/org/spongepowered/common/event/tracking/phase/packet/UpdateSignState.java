@@ -36,6 +36,5 @@ final class UpdateSignState extends BasicPacketState {
                 .addBlockCaptures()
                 .addEntityCaptures()
                 .addEntityDropCaptures();
-
     }
 }

@@ -81,7 +81,9 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
         }
     }
 
-    @Inject(method = "openInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"), cancellable = true)
+    @Inject(method = "openInventory", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"),
+            cancellable = true)
     public void onOpenInventory(EntityPlayer player, CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
@@ -111,7 +113,9 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
         }
     }
 
-    @Inject(method = "closeInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"), cancellable = true)
+    @Inject(method = "closeInventory", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;addBlockEvent(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/Block;II)V"),
+            cancellable = true)
     public void onCloseInventory(EntityPlayer player, CallbackInfo ci) {
         // Moved out of tick loop
         if (this.world == null) {
@@ -143,7 +147,8 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
                 posZ += 0.5D;
             }
 
-            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS, 0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
+            this.world.playSound(null, posX, posY, posZ, SoundEvents.BLOCK_CHEST_CLOSE, SoundCategory.BLOCKS,
+                    0.5F, this.world.rand.nextFloat() * 0.1F + 0.9F);
         }
     }
 
