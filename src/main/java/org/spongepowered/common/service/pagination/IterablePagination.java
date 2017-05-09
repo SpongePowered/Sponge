@@ -37,6 +37,8 @@ import org.spongepowered.api.text.channel.MessageReceiver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -48,8 +50,8 @@ class IterablePagination extends ActivePagination {
     private final PeekingIterator<Map.Entry<Text, Integer>> countIterator;
     private int lastPage;
 
-    public IterablePagination(MessageReceiver src, PaginationCalculator calc, Iterable<Map.Entry<Text, Integer>> counts, Text title,
-            Text header, Text footer, Text padding) {
+    public IterablePagination(Supplier<Optional<MessageReceiver>> src, PaginationCalculator calc, Iterable<Map.Entry<Text, Integer>> counts,
+            @Nullable Text title, @Nullable Text header, @Nullable Text footer, Text padding) {
         super(src, calc, title, header, footer, padding);
         this.countIterator = Iterators.peekingIterator(counts.iterator());
     }
