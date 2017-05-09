@@ -29,17 +29,25 @@ import static org.spongepowered.api.command.CommandMessageFormatting.error;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.source.ProxySource;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
+import org.spongepowered.common.SpongeImpl;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import javax.annotation.Nullable;
 
 public class SpongePaginationList implements PaginationList {
 
@@ -51,7 +59,8 @@ public class SpongePaginationList implements PaginationList {
     private Text paginationSpacer;
     private int linesPerPage;
 
-    public SpongePaginationList(SpongePaginationService service, Iterable<Text> contents, Text title, Text header, Text footer, Text paginationSpacer, int linesPerPage) {
+    public SpongePaginationList(SpongePaginationService service, Iterable<Text> contents, @Nullable Text title, @Nullable Text header,
+            @Nullable Text footer, Text paginationSpacer, int linesPerPage) {
         this.service = service;
         this.contents = contents;
         this.title = Optional.ofNullable(title);
@@ -114,11 +123,24 @@ public class SpongePaginationList implements PaginationList {
             title = calculator.center(title, this.paginationSpacer);
         }
 
+        // If the MessageReceiver is a Player, then upon death, they will become a different MessageReceiver object.
+        // Thus, we use a supplier to supply the player from the server, if required.
+        Supplier<Optional<MessageReceiver>> messageReceiverSupplier;
+        if (receiver instanceof Player) {
+            final UUID playerUuid = ((Player) receiver).getUniqueId();
+            messageReceiverSupplier = () -> Sponge.getServer().getPlayer(playerUuid).map(x -> (MessageReceiver) x);
+        } else {
+            WeakReference<MessageReceiver> srcReference = new WeakReference<>(receiver);
+            messageReceiverSupplier = () -> Optional.ofNullable(srcReference.get());
+        }
+
         ActivePagination pagination;
         if (this.contents instanceof List) { // If it started out as a list, it's probably reasonable to copy it to another list
-            pagination = new ListPagination(receiver, calculator, ImmutableList.copyOf(counts), title, this.header.orElse(null), this.footer.orElse(null), this.paginationSpacer);
+            pagination = new ListPagination(messageReceiverSupplier, calculator, ImmutableList.copyOf(counts), title, this.header.orElse(null),
+                    this.footer.orElse(null), this.paginationSpacer);
         } else {
-            pagination = new IterablePagination(receiver, calculator, counts, title, this.header.orElse(null), this.footer.orElse(null), this.paginationSpacer);
+            pagination = new IterablePagination(messageReceiverSupplier, calculator, counts, title, this.header.orElse(null),
+                    this.footer.orElse(null), this.paginationSpacer);
         }
 
         this.service.getPaginationState(receiver, true).put(pagination);
