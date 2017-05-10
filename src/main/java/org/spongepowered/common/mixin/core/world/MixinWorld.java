@@ -1191,6 +1191,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     /**
      * @author gabizou - August 4th, 2016
+     * @author bloodmc - May 10th, 2017 - Added async check
      * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
      *
      * @param pos The position
@@ -1200,10 +1201,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Nullable
     public net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos) {
         // Sponge - Replace with inlined method
+        // If this method is called async, return null to avoid any possible issues
         //  if (this.isOutsideBuildHeight(pos)) // Vanilla
-        if (((IMixinBlockPos) pos).isInvalidYPosition()) {
-            // Sponge End
+        if (((IMixinBlockPos) pos).isInvalidYPosition() || (!this.isRemote && !SpongeImpl.getServer().isCallingFromMinecraftThread())) {
             return null;
+            // Sponge End
         } else {
             net.minecraft.tileentity.TileEntity tileentity = null;
 
