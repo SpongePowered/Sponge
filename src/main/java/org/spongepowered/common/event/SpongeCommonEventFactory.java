@@ -590,7 +590,7 @@ public class SpongeCommonEventFactory {
             ArrayList<Entity> entityList = new ArrayList<>();
             entityList.add((Entity) movingObjectPosition.entityHit);
             CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(builder.build(), entityList, impactPoint, impactPoint.getExtent());
-            return SpongeImpl.postEvent(event);
+            cancelled = SpongeImpl.postEvent(event);
         }
 
         if (cancelled) {

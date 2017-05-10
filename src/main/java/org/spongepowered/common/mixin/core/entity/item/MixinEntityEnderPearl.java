@@ -49,7 +49,7 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable impleme
         return (float) this.damageAmount;
     }
 
-    @Redirect(method = "onImpact", at = @At(value = "INVOKE", args="log=true", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isPlayerSleeping()Z"))
+    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isPlayerSleeping()Z"))
     private boolean onEnderPearlImpact(EntityPlayerMP player) {
         if (player.isPlayerSleeping()) {
             return true;
