@@ -26,6 +26,7 @@ package org.spongepowered.common.command.conversation;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.command.conversation.ConversationArchetype;
 import org.spongepowered.api.command.conversation.ConversationArchetype.Builder;
@@ -35,8 +36,9 @@ import org.spongepowered.api.command.conversation.ExternalChatHandlers;
 import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.text.Text;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -51,6 +53,7 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
     @Nullable private Text startingMessage;
     @Nullable private Text title;
     @Nullable private Text padding;
+    @Nullable private Text header;
     private boolean catchesOutput = true;
     private boolean allowCommands = false;
 
@@ -65,6 +68,7 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
         this.startingMessage = value.getStartingMessage().orElse(null);
         this.title = value.getTitle().orElse(null);
         this.padding = value.getTitle().orElse(null);
+        this.header = value.getBanner().orElse(null);
         return this;
     }
 
@@ -117,6 +121,12 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
     }
 
     @Override
+    public Builder header(@Nullable Text header) {
+        this.header = header;
+        return this;
+    }
+
+    @Override
     public Builder firstQuestion(Question question) {
         this.firstQuestion = checkNotNull(question, "The first question cannot be null!");
         return this;
@@ -129,8 +139,16 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
     }
 
     @Override
-    public Builder endingHandlers(List<EndingHandler> endingHandlers) {
-        this.endingHandlers.addAll(checkNotNull(endingHandlers, "The ending handlers list cannot be null."));
+    public Builder endingHandlers(EndingHandler... endingHandlers) {
+        this.endingHandlers.addAll(Arrays.asList(endingHandlers));
+        return this;
+    }
+
+    @Override
+    public Builder endingHandlers(Collection<EndingHandler> endingHandlers) {
+        checkNotNull(endingHandlers, "The ending handlers collection cannot be null.");
+        checkState(endingHandlers.size() > 0, "You must specify at least one ending handler.");
+        this.endingHandlers.addAll(endingHandlers);
         return this;
     }
 
@@ -163,7 +181,7 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
         checkNotNull(this.id, "You must specify an id for this archetype!");
         checkNotNull(this.firstQuestion, "You must specify a proper first question!");
         return new SpongeConversationArchetype(this.firstQuestion, this.catchesOutput, this.allowCommands, this.defaultHandler,
-            this.endingHandlers, this.startingMessage, this.id, this.exit, this.title, this.padding);
+            this.endingHandlers, this.startingMessage, this.id, this.exit, this.title, this.padding, this.header);
     }
 
 }

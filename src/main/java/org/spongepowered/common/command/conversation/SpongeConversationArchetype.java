@@ -44,6 +44,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SpongeConversationArchetype implements ConversationArchetype {
 
     private final Question question;
@@ -51,10 +52,11 @@ public class SpongeConversationArchetype implements ConversationArchetype {
     private final ExternalChatHandler defaultChatHandler;
     private final String id;
     private final String exit;
-    @Nullable private final Text header;
-    @Nullable private final Text title;
-    @Nullable private final Text padding;
-    @Nullable private final Text startingMessage;
+    private final Optional<Text> banner;
+    private final Optional<Text> title;
+    private final Optional<Text> padding;
+    private final Optional<Text> header;
+    private final Optional<Text> startingMessage;
     private boolean catchesOutput = true;
     private boolean allowCommands = false;
 
@@ -72,26 +74,31 @@ public class SpongeConversationArchetype implements ConversationArchetype {
      * @param exit The exit keyword
      * @param title The title of the conversation
      * @param padding The padding for the title
+     * @param header The header for after the banner
      */
     SpongeConversationArchetype(Question firstQuestion, boolean catchesOutput, boolean allowCommands, ExternalChatHandler defaultHandler,
-        Set<EndingHandler> endingHandlers, @Nullable Text startingMessage, String id, String exit, @Nullable Text title, @Nullable Text padding) {
+            Set<EndingHandler> endingHandlers, @Nullable Text startingMessage, String id, String exit,
+            @Nullable Text title, @Nullable Text padding, @Nullable Text header) {
         this.question = firstQuestion;
         this.endingHandlers = endingHandlers;
         this.catchesOutput = catchesOutput;
         this.allowCommands = allowCommands;
         this.defaultChatHandler = defaultHandler;
-        this.startingMessage = startingMessage;
+        this.startingMessage = Optional.ofNullable(startingMessage);
         this.id = id.toLowerCase();
         this.exit = exit.toLowerCase();
-        this.title = title;
-        this.padding = padding;
+        this.title = Optional.ofNullable(title);
         if (title != null && padding != null) {
-            this.header = new PaginationCalculator(10).center(title, padding);
+            this.padding = Optional.of(padding);
+            this.banner = Optional.of(new PaginationCalculator(10).center(title, padding));
         } else if (title != null) {
-            this.header = new PaginationCalculator(10).center(title, Text.of("="));
+            this.padding = Optional.of(Text.of("="));
+            this.banner = Optional.of(new PaginationCalculator(10).center(title, Text.of("=")));
         } else {
-            this.header = null;
+            this.padding = Optional.empty();
+            this.banner = Optional.empty();
         }
+        this.header = Optional.ofNullable(header);
     }
 
     @Override
@@ -101,7 +108,7 @@ public class SpongeConversationArchetype implements ConversationArchetype {
 
     @Override
     public Optional<Text> getStartingMessage() {
-        return Optional.ofNullable(this.startingMessage);
+        return this.startingMessage;
     }
 
     @Override
@@ -135,18 +142,23 @@ public class SpongeConversationArchetype implements ConversationArchetype {
     }
 
     @Override
+    public Optional<Text> getBanner() {
+        return this.banner;
+    }
+
+    @Override
     public Optional<Text> getHeader() {
-        return Optional.ofNullable(this.header);
+        return this.header;
     }
 
     @Override
     public Optional<Text> getTitle() {
-        return Optional.ofNullable(this.title);
+        return this.title;
     }
 
     @Override
     public Optional<Text> getPadding() {
-        return Optional.ofNullable(this.padding);
+        return this.padding;
     }
 
     @Override

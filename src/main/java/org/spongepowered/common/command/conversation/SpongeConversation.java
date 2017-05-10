@@ -28,8 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.MapMaker;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.cause.conversation.ConversationEndTypes;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.command.conversation.Conversant;
 import org.spongepowered.api.command.conversation.Conversation;
 import org.spongepowered.api.command.conversation.ConversationArchetype;
@@ -42,8 +40,10 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.conversation.ConversationEndCause;
 import org.spongepowered.api.event.cause.conversation.ConversationEndType;
+import org.spongepowered.api.event.cause.conversation.ConversationEndTypes;
 import org.spongepowered.api.event.conversation.ConversationCloseEvent;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Collection;
@@ -131,7 +131,8 @@ public class SpongeConversation implements Conversation {
         if (question != null) {
             synchronized (this.externalChatHandlers) {
                 final Set<Conversant> conversants = this.externalChatHandlers.keySet();
-                this.archetype.getHeader().ifPresent(text -> conversants.forEach(c -> c.sendThroughMessage(text)));
+                this.archetype.getBanner().ifPresent(b -> conversants.forEach(c -> c.sendThroughMessage(b)));
+                this.archetype.getHeader().ifPresent(h -> conversants.forEach(c -> c.sendThroughMessage(h)));
                 conversants.forEach(c -> c.sendThroughMessage(question.getPromptHandler().handle(this, this.context)));
             }
         }
@@ -171,6 +172,7 @@ public class SpongeConversation implements Conversation {
         this.externalChatHandlers.put(checkNotNull(conversant, "The conversant you specify cannot be null!"),
             checkNotNull(externalChatHandler, "The external chat handler you specify for this conversant cannot be null!"));
         if (this.currentQuestion != null) {
+            this.archetype.getBanner().ifPresent(conversant::sendThroughMessage);
             this.archetype.getHeader().ifPresent(conversant::sendThroughMessage);
             conversant.sendThroughMessage(this.currentQuestion.getPromptHandler().handle(this, this.context));
         }
