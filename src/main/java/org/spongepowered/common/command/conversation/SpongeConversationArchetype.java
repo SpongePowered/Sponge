@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.command.conversation;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.conversation.Conversant;
@@ -148,12 +150,15 @@ public class SpongeConversationArchetype implements ConversationArchetype {
     }
 
     @Override
-    public Optional<Conversation> start(PluginContainer plugin, Conversant... conversants) {
-        return Sponge.getConversationManager().start(this, plugin, conversants);
+    public Optional<Conversation> start(Object plugin, Conversant... conversants) {
+        PluginContainer pluginContainer = Sponge.getPluginManager().fromInstance(checkNotNull(plugin, "Plugin object cannot be null!"))
+                .orElseThrow(() -> new IllegalArgumentException("The provided plugin object is not a proper plugin instance!"));
+        return Sponge.getConversationManager().start(this, pluginContainer, conversants);
     }
 
     @Override
     public Builder toBuilder() {
         return ConversationArchetype.builder().from(this);
     }
+
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.command.conversation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.MapMaker;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.conversation.ConversationEndTypes;
 import org.spongepowered.api.scheduler.Task;
@@ -45,15 +46,12 @@ import org.spongepowered.api.event.conversation.ConversationCloseEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 
-import java.lang.ref.WeakReference;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.Map;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-import java.util.WeakHashMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
@@ -63,8 +61,8 @@ public class SpongeConversation implements Conversation {
     private final PluginContainer creator;
     private final ConversationArchetype archetype;
 
-    private final Map<WeakReference<Conversant>, ExternalChatHandler> handlers = new ConcurrentHashMap<>();
-    private final Map<Conversant, ExternalChatHandler> externalChatHandlers;
+    private final ConcurrentMap<Conversant, ExternalChatHandler> externalChatHandlers = new MapMaker().weakKeys().initialCapacity(8).makeMap();
+
     private final DataContainer context = DataContainer.createNew();
     private final Set<EndingHandler> endingHandlers;
     @Nullable private Question currentQuestion;
@@ -87,8 +85,6 @@ public class SpongeConversation implements Conversation {
         this.catchesOutput = archetype.catchesOutput();
         this.allowCommands = archetype.allowsCommands();
         this.currentQuestion = archetype.getFirstQuestion();
-        this.externalChatHandlers = Collections.synchronizedMap(new WeakHashMap<>());
-
         conversants.forEach(c -> this.externalChatHandlers.put(c, archetype.getDefaultChatHandler()));
 
         Task.builder()
@@ -96,8 +92,8 @@ public class SpongeConversation implements Conversation {
                 .interval(5, TimeUnit.MINUTES)
                 .execute(() -> {
                     if (this.externalChatHandlers.size() == 0) {
-                        SpongeImpl.getLogger().error("A " + creator.getId() + ":" + getId().toLowerCase() + " conversation has ended due to being "
-                                + "empty for an extended period of time.");
+                        SpongeImpl.getLogger().error("A " + creator.getId() + ":" + getId().toLowerCase(Locale.ENGLISH) +
+                                " conversation has ended due to being empty for an extended period of time.");
                     }
                     end(ConversationEndTypes.TIMED_OUT, SpongeImpl.getImplementationCause());
                 })
@@ -136,7 +132,7 @@ public class SpongeConversation implements Conversation {
             synchronized (this.externalChatHandlers) {
                 final Set<Conversant> conversants = this.externalChatHandlers.keySet();
                 this.archetype.getHeader().ifPresent(text -> conversants.forEach(c -> c.sendThroughMessage(text)));
-                conversants.forEach(c -> c.sendThroughMessage(question.getPrompt()));
+                conversants.forEach(c -> c.sendThroughMessage(question.getPromptHandler().handle(this, this.context)));
             }
         }
     }
@@ -176,7 +172,7 @@ public class SpongeConversation implements Conversation {
             checkNotNull(externalChatHandler, "The external chat handler you specify for this conversant cannot be null!"));
         if (this.currentQuestion != null) {
             this.archetype.getHeader().ifPresent(conversant::sendThroughMessage);
-            conversant.sendThroughMessage(this.currentQuestion.getPrompt());
+            conversant.sendThroughMessage(this.currentQuestion.getPromptHandler().handle(this, this.context));
         }
     }
 
@@ -252,4 +248,5 @@ public class SpongeConversation implements Conversation {
     public boolean removeEndingHandler(EndingHandler endingHandler) {
         return this.endingHandlers.remove(endingHandler);
     }
+
 }

@@ -129,8 +129,8 @@ public class SpongeConversationManager implements ConversationManager {
                     } catch (ArgumentParseException e) {
                         conversant.sendThroughMessage(Text.of("Failed to parse your specified arguments. Restarting question."));
                         conversation.setQuestion(question);
-                        this.logger.error(
-                                "Failed to parse the arguments passed into {}'s conversation. Sending them the same question again.", conversant.getName(), e);
+                        this.logger.error("Failed to parse the arguments passed into {}'s conversation. Sending them the same question again.",
+                                conversant.getName(), e);
                         e.printStackTrace();
                     }
                 }
@@ -196,4 +196,5 @@ public class SpongeConversationManager implements ConversationManager {
             c.end(endType, cause);
         }
     }
+
 }

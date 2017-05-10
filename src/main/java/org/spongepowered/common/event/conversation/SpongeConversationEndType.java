@@ -41,13 +41,10 @@ public class SpongeConversationEndType implements ConversationEndType {
         this.id = id.toLowerCase(Locale.ENGLISH);
     }
 
-    @Nonnull
     @Override
     public String getId() {
         return this.id;
     }
-
-    @Nonnull
     @Override
     public String getName() {
         return this.name;

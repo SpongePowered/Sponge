@@ -35,7 +35,6 @@ import javax.annotation.Nonnull;
 public class SpongeConversationEndCauseBuilder extends AbstractConversationEndCauseBuilder<ConversationEndCause, Builder>
     implements ConversationEndCause.Builder {
 
-    @Nonnull
     @Override
     public ConversationEndCause build() {
         checkNotNull(this.endType, "ConversationEndType must not be null!");

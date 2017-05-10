@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
 import org.spongepowered.api.command.conversation.AnswerHandler;
+import org.spongepowered.api.command.conversation.PromptHandler;
 import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.command.conversation.Question.Builder;
 import org.spongepowered.api.text.Text;
@@ -38,14 +39,14 @@ import javax.annotation.Nullable;
 public class SpongeQuestionBuilder implements Question.Builder {
 
     @Nullable private String id;
-    private Text prompt = Text.EMPTY;
+    @Nullable private PromptHandler promptHandler;
     @Nullable private AnswerHandler answerHandler;
     @Nullable private CommandElement arguments = GenericArguments.remainingJoinedStrings(Text.of("answer"));
     
     @Override
     public Builder from(Question value) {
         this.id = value.getId();
-        this.prompt = value.getPrompt();
+        this.promptHandler = value.getPromptHandler();
         this.answerHandler = value.getHandler();
         this.arguments = value.getArguments();
         return this;
@@ -54,7 +55,7 @@ public class SpongeQuestionBuilder implements Question.Builder {
     @Override
     public Builder reset() {
         this.id = null;
-        this.prompt = Text.EMPTY;
+        this.promptHandler = null;
         this.answerHandler = null;
         this.arguments = GenericArguments.remainingJoinedStrings(Text.of("answer"));
         return this;
@@ -67,8 +68,8 @@ public class SpongeQuestionBuilder implements Question.Builder {
     }
 
     @Override
-    public Builder prompt(Text prompt) {
-        this.prompt = checkNotNull(prompt, "The text prompt cannot be null!");
+    public Builder prompt(PromptHandler promptHandler) {
+        this.promptHandler = checkNotNull(promptHandler, "The prompt handler cannot be null!");
         return this;
     }
 
@@ -94,11 +95,12 @@ public class SpongeQuestionBuilder implements Question.Builder {
     @Override
     public Question build() {
         checkNotNull(this.id, "The id for this question cannot be null!");
-        checkNotNull(this.prompt, "The text prompt cannot be null!");
+        checkNotNull(this.promptHandler, "The prompt handler cannot be null!");
         checkNotNull(this.answerHandler, "The answer handler for this question cannot be null!");
         if (this.arguments == null) {
             this.arguments = GenericArguments.remainingJoinedStrings(Text.of("answer"));
         }
-        return new SpongeQuestion(this.id, this.prompt, this.answerHandler, this.arguments);
+        return new SpongeQuestion(this.id, this.promptHandler, this.answerHandler, this.arguments);
     }
+
 }

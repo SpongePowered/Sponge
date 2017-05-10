@@ -26,15 +26,13 @@ package org.spongepowered.common.command.conversation;
 
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.conversation.AnswerHandler;
+import org.spongepowered.api.command.conversation.PromptHandler;
 import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.text.Text;
-
-import javax.annotation.Nonnull;
-
 public class SpongeQuestion implements Question {
 
     private final String id;
-    private final Text prompt;
+    private final PromptHandler promptHandler;
     private final AnswerHandler handler;
     private final CommandElement arguments;
 
@@ -42,36 +40,32 @@ public class SpongeQuestion implements Question {
      * Creates a new {@link Question} to be used within a conversation.
      *
      * @param id The id of the question
-     * @param prompt The prompt of the question
+     * @param promptHandler The prompt handler for the question
      * @param handler The answer handler
      * @param arguments The arguments of the question
      */
-    SpongeQuestion(String id, Text prompt, AnswerHandler handler, CommandElement arguments) {
+    SpongeQuestion(String id, PromptHandler promptHandler, AnswerHandler handler, CommandElement arguments) {
         this.id = id;
-        this.prompt = prompt;
+        this.promptHandler = promptHandler;
         this.handler = handler;
         this.arguments = arguments;
     }
 
-    @Nonnull
     @Override
     public String getId() {
         return this.id;
     }
 
-    @Nonnull
     @Override
     public AnswerHandler getHandler() {
         return this.handler;
     }
 
-    @Nonnull
     @Override
-    public Text getPrompt() {
-        return this.prompt;
+    public PromptHandler getPromptHandler() {
+        return this.promptHandler;
     }
 
-    @Nonnull
     @Override
     public CommandElement getArguments() {
         return this.arguments;
@@ -82,9 +76,4 @@ public class SpongeQuestion implements Question {
         return Question.builder().from(this);
     }
 
-    @Nonnull
-    @Override
-    public Text toText() {
-        return this.prompt;
-    }
 }
