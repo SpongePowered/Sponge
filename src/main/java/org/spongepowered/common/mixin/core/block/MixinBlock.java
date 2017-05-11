@@ -39,9 +39,11 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
@@ -92,6 +94,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(value = Block.class, priority = 999)
 @Implements(@Interface(iface = BlockType.class, prefix = "block$"))
@@ -102,6 +106,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private boolean hasCollideWithStateLogic;
     // Only needed for blocks that do not fire ChangeBlockEvent.Pre
     private boolean requiresBlockCapture = true;
+    private static boolean canCaptureItems = true;
     private Timing timing;
 
     @Shadow private boolean needsRandomTick;
@@ -234,6 +239,22 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return getDefaultBlockState().getTrait(blockTrait);
     }
 
+    @Inject(method = "harvestBlock", at = @At(value = "HEAD"))
+    public void onHarvestBlockHead(net.minecraft.world.World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack, CallbackInfo ci) {
+        // ExtraUtilities 2 uses a fake player to mine blocks for its Quantum Quarry and captures all block drops.
+        // It also expects block drops to trigger an event during the quarry TE tick. As our captures are processed
+        // post tick, we must avoid capturing to ensure the quarry can capture items properly.
+        // If a fake player is detected with an item in hand, avoid captures
+        if (stack != null && SpongeImplHooks.isFakePlayer(player) && player.getHeldItemMainhand() != null) {
+            canCaptureItems = false;
+        }
+    }
+
+    @Inject(method = "harvestBlock", at = @At(value = "RETURN"))
+    public void onHarvestBlockReturn(net.minecraft.world.World worldIn, EntityPlayer player, BlockPos pos, IBlockState state, @Nullable TileEntity te, @Nullable ItemStack stack, CallbackInfo ci) {
+        canCaptureItems = true;
+    }
+
     @Inject(method = "spawnAsEntity", at = @At(value = "NEW", args = {"class=net/minecraft/entity/item/EntityItem"}), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     private static void checkSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack, CallbackInfo callbackInfo, float chance, double x, double y, double z) {
         Transform<World> position = new Transform<>((World) worldIn, new Vector3d(x, y, z));
@@ -309,7 +330,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         if (allowTileDrops && worldIn instanceof IMixinWorldServer) {
             final PhaseData currentPhase = CauseTracker.getInstance().getCurrentPhaseData();
             final IPhaseState currentState = currentPhase.state;
-            if (currentState.tracksBlockSpecificDrops()) {
+            if (canCaptureItems && currentState.tracksBlockSpecificDrops()) {
                 final PhaseContext context = currentPhase.context;
                 final Multimap<BlockPos, ItemDropData> multimap = context.getCapturedBlockDrops();
                 final Collection<ItemDropData> itemStacks = multimap.get(pos);
