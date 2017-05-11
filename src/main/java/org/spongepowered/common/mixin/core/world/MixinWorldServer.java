@@ -1663,6 +1663,37 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     /**
      * @author gabizou - August 4th, 2016
+     * @author blood - May 11th, 2017 - Forces chunk requests if TE is ticking.
+     * @reason Rewrites the check to be inlined to {@link IMixinBlockPos}.
+     *
+     * @param pos The position
+     * @return The block state at the desired position
+     */
+    @Override
+    public IBlockState getBlockState(BlockPos pos) {
+        // Sponge - Replace with inlined method
+        // if (this.isOutsideBuildHeight(pos)) // Vanilla
+        if (((IMixinBlockPos) pos).isInvalidYPosition()) {
+            // Sponge end
+            return Blocks.AIR.getDefaultState();
+        } else {
+            // ExtraUtilities 2 expects to get the proper chunk while mining or it gets stuck in infinite loop
+            // TODO add TE config to disable/enable chunk loads
+            final IMixinChunkProviderServer chunkProviderServer = (IMixinChunkProviderServer) this.getChunkProvider();
+            final boolean forceChunkRequests = chunkProviderServer.getForceChunkRequests();
+            final CauseTracker causeTracker = CauseTracker.getInstance();
+            final IPhaseState currentState = causeTracker.getCurrentState();
+            if (currentState == TickPhase.Tick.TILE_ENTITY) {
+                ((IMixinChunkProviderServer) this.getChunkProvider()).setForceChunkRequests(true);
+            }
+            net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(pos);
+            chunkProviderServer.setForceChunkRequests(forceChunkRequests);
+            return chunk.getBlockState(pos);
+        }
+    }
+
+    /**
+     * @author gabizou - August 4th, 2016
      * @reason Overrides the same method from MixinWorld_Lighting that redirects
      * {@link #isAreaLoaded(BlockPos, int, boolean)} to simplify the check to
      * whether the chunk's neighbors are loaded. Since the passed radius is always
