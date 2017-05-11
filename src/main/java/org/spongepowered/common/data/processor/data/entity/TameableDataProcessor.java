@@ -70,6 +70,7 @@ public class TameableDataProcessor
     @Override
     protected boolean set(EntityTameable tameable, Optional<UUID> uuidOptional) {
         tameable.setOwnerId(uuidOptional.orElse(null));
+        tameable.setTamed(uuidOptional.isPresent());
         return true;
     }
 
