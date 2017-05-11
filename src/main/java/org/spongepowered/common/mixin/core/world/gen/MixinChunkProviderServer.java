@@ -250,6 +250,11 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
     }
 
     @Override
+    public boolean getForceChunkRequests() {
+        return this.forceChunkRequests;
+    }
+
+    @Override
     public void setMaxChunkUnloads(int maxUnloads) {
         this.maxChunkUnloads = maxUnloads;
     }

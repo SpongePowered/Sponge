@@ -31,6 +31,8 @@ import net.minecraft.world.chunk.Chunk;
 
 public interface IMixinChunkProviderServer {
 
+    boolean getForceChunkRequests();
+
     void setMaxChunkUnloads(int maxUnloads);
 
     void setDenyChunkRequests(boolean flag);
