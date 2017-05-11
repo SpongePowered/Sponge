@@ -68,6 +68,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.DimensionConfig;
 import org.spongepowered.common.config.type.WorldConfig;
@@ -144,7 +145,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private Integer dimensionId;
     private DimensionType dimensionType = DimensionTypes.OVERWORLD;
     private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
-    private boolean isMod, generateBonusChest, isValid = true;
+    private boolean isMod = false;
+    private boolean generateBonusChest, isValid = true;
     private NBTTagCompound spongeRootLevelNbt = new NBTTagCompound(), spongeNbt = new NBTTagCompound();
     private NBTTagList playerUniqueIdNbt = new NBTTagList();
     private BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
@@ -214,7 +216,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         // TODO Zidane needs to fix this
         MixinWorldInfo info = (MixinWorldInfo) (Object) worldInformation;
         this.portalAgentType = info.portalAgentType;
-        this.dimensionType = info.dimensionType;
+        this.setDimensionType(info.dimensionType);
     }
 
     @Inject(method = "updateTagCompound", at = @At("HEAD"))
@@ -304,6 +306,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setDimensionType(DimensionType type) {
         this.dimensionType = type;
+        String modId = SpongeImplHooks.getModIdFromClass(this.dimensionType.getDimensionClass());
+        if (!modId.equals("minecraft")) {
+            this.isMod = true;
+        }
     }
 
     @Override
@@ -583,10 +589,13 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             loadOnStartup = this.getOrCreateWorldConfig().getConfig().getWorld().loadOnStartup();
         }
         if (loadOnStartup == null) {
-            if (this.dimensionId != null) {
-                return ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+           loadOnStartup = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+           this.setLoadOnStartup(loadOnStartup);
+        } else if (this.isMod && !loadOnStartup) { // If disabled and a mod dimension, validate
+            if (this.dimensionId == ((net.minecraft.world.DimensionType)(Object) this.dimensionType).getId()) {
+                loadOnStartup = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+                this.setLoadOnStartup(loadOnStartup);
             }
-            return false;
         }
         return loadOnStartup;
     }
@@ -594,6 +603,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setLoadOnStartup(boolean state) {
         this.getOrCreateWorldConfig().getConfig().getWorld().setLoadOnStartup(state);
+        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
+            this.getOrCreateWorldConfig().save();
+        }
     }
 
     @Override
@@ -610,7 +622,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             keepSpawnLoaded = this.getOrCreateWorldConfig().getConfig().getWorld().getKeepSpawnLoaded();
         }
         if (keepSpawnLoaded == null) {
-            return ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+            keepSpawnLoaded = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+            this.setKeepSpawnLoaded(keepSpawnLoaded);
         }
         return keepSpawnLoaded;
     }
@@ -618,6 +631,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setKeepSpawnLoaded(boolean loaded) {
         this.getOrCreateWorldConfig().getConfig().getWorld().setKeepSpawnLoaded(loaded);
+        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
+            this.getOrCreateWorldConfig().save();
+        }
     }
 
     @Override
@@ -634,7 +650,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             shouldGenerateSpawn = this.getOrCreateWorldConfig().getConfig().getWorld().getGenerateSpawnOnLoad();
         }
         if (shouldGenerateSpawn == null) {
-            return ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+            shouldGenerateSpawn = ((IMixinDimensionType) this.dimensionType).shouldGenerateSpawnOnLoad();
+            this.setGenerateSpawnOnLoad(shouldGenerateSpawn);
         }
         return shouldGenerateSpawn;
     }
@@ -642,6 +659,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setGenerateSpawnOnLoad(boolean state) {
         this.getOrCreateWorldConfig().getConfig().getWorld().setGenerateSpawnOnLoad(state);
+        if (!this.getOrCreateWorldConfig().getConfig().isConfigEnabled()) {
+            this.getOrCreateWorldConfig().save();
+        }
     }
 
     @Override
@@ -783,9 +803,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.uuid = nbtUniqueId;
         this.dimensionId = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
         final String dimensionTypeId = nbt.getString(NbtDataUtil.DIMENSION_TYPE);
-        this.dimensionType = DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)
-                .orElseThrow(FunctionalUtil.invalidArgument("Could not find a DimensionType by id: " + dimensionTypeId));
-        this.isMod = nbt.getBoolean(NbtDataUtil.IS_MOD);
+        this.setDimensionType(DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)
+                .orElseThrow(FunctionalUtil.invalidArgument("Could not find a DimensionType by id: " + dimensionTypeId)));
         this.generateBonusChest = nbt.getBoolean(NbtDataUtil.GENERATE_BONUS_CHEST);
         this.portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(nbt.getString(NbtDataUtil.PORTAL_AGENT_TYPE), this.levelName);
         this.trackedUniqueIdCount = 0;
@@ -822,8 +841,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
             this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimensionId);
             this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
-
-            this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, this.isMod);
             this.spongeNbt.setBoolean(NbtDataUtil.GENERATE_BONUS_CHEST, this.generateBonusChest);
             if (this.portalAgentType == null) {
                 this.portalAgentType = PortalAgentTypes.DEFAULT;
