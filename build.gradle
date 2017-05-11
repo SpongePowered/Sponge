@@ -1,6 +1,7 @@
 // Gradle plugins
 buildscript {
     repositories {
+        mavenLocal()
         maven {
             name = 'gradle-plugins'
             url = 'https://plugins.gradle.org/m2'

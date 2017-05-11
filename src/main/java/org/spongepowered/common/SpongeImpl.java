@@ -69,7 +69,7 @@ public final class SpongeImpl {
     public static final String ECOSYSTEM_NAME = "Sponge";
 
     // TODO: Keep up to date
-    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.11.2", 316);
+    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.12-pre2", 329);
 
     private static final Logger logger = LogManager.getLogger(ECOSYSTEM_NAME);
     public static final Random random = new Random();
