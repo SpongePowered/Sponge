@@ -1232,7 +1232,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 // Sponge - Don't create tileentity async, simply check if TE exists in chunk
                 // Mods such as pixelmon call this method async, so this is a temporary workaround until fixed
                 if (!this.isRemote && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
-                    tileentity = this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
+                    return this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.CHECK);
                 } else {
                     tileentity = this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.IMMEDIATE);
                 }
