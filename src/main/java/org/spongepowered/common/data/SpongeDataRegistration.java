@@ -26,6 +26,7 @@ package org.spongepowered.common.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -106,7 +107,7 @@ public final class SpongeDataRegistration<M extends DataManipulator<M, I>, I ext
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
             .add("id", this.id)
             .add("name", this.name)
             .add("manipulatorClass", this.manipulatorClass)

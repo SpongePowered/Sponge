@@ -137,6 +137,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private String motd;
     @Shadow public WorldServer[] worlds;
     @Shadow private Thread serverThread;
+    @Shadow @Final private DataFixer dataFixer;
 
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void sendMessage(ITextComponent message);
@@ -156,7 +157,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
     @Shadow public abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
     @Shadow public abstract boolean getAllowNether();
-    @Shadow public abstract DataFixer getDataFixer();
     @Shadow public abstract int getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
     @Shadow public abstract boolean isDedicatedServer();
@@ -791,4 +791,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     private Object onRun(FutureTask<?> task, Logger logger) {
         return SpongeImplHooks.onUtilRunTask(task, logger);
     }
+
+    @Override
+    public DataFixer getDataFixer() {
+        return this.dataFixer;
+    }
+
 }

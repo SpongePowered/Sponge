@@ -31,6 +31,7 @@ import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.datafix.DataFixer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.GameState;
@@ -46,6 +47,7 @@ import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.event.SpongeEventManager;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.SpongeScheduler;
@@ -124,6 +126,10 @@ public final class SpongeImpl {
 
     public static MinecraftServer getServer() {
         return (MinecraftServer) Sponge.getServer();
+    }
+
+    public static DataFixer getDataFixer() {
+        return ((IMixinMinecraftServer) Sponge.getServer()).getDataFixer();
     }
 
     public static SpongeGameRegistry getRegistry() {
