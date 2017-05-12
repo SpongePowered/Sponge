@@ -423,6 +423,7 @@
         "tileentity.MixinTileEntitySkull",
         "tileentity.MixinTileEntityStructure",
         "tileentity.MixinTileEntityStructureMode",
+        "util.MixinChatType",
         "util.MixinClassInheritanceMultiMap",
         "util.MixinDamageSource",
         "util.MixinEntityDamageSource",

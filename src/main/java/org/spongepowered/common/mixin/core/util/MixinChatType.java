@@ -22,34 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.chat;
+package org.spongepowered.common.mixin.core.util;
 
-import org.spongepowered.api.text.chat.ChatType;
+import net.minecraft.util.ChatType;
+import org.spongepowered.asm.mixin.Mixin;
 
-public class SpongeChatType implements ChatType {
+import java.util.Locale;
 
-    private final String id;
-    private final String name;
-    private final byte byteId;
-
-    public SpongeChatType(String id, String name, byte byteId) {
-        this.id = id;
-        this.name = name;
-        this.byteId = byteId;
-    }
+@Mixin(ChatType.class)
+public class MixinChatType implements org.spongepowered.api.text.chat.ChatType {
 
     @Override
     public String getId() {
-        return this.id;
+        return "minecraft:" + ((ChatType) (Object) this).name().toLowerCase(Locale.ENGLISH);
     }
 
     @Override
     public String getName() {
-        return this.name;
-    }
-
-    public byte getByteId() {
-        return this.byteId;
+        return ((ChatType) (Object) this).name();
     }
 
 }

@@ -60,7 +60,6 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.stats.Achievement;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.stats.StatisticsManagerServer;
@@ -157,7 +156,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.ChatUtil;
-import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
@@ -195,7 +193,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract void sendPlayerAbilities();
     @Shadow @Override public abstract void takeStat(StatBase stat);
     @Shadow public abstract StatisticsManagerServer getStatFile();
-    @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
     @Shadow public abstract void displayGUIChest(IInventory chestInventory);
     @Shadow public abstract void displayGui(IInteractionObject guiOwner);
     @Shadow public abstract void openGuiHorseInventory(AbstractHorse horse, IInventory horseInventory);
@@ -307,7 +304,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 this.addStat(entitylist$entityegginfo.entityKilledByStat);
             }
 
-            entitylivingbase.addToPlayerScore((EntityPlayerMP) (Object) this, this.scoreValue);
+            entitylivingbase.addToPlayerScore((EntityPlayerMP) (Object) this, this.scoreValue, cause);
         }
 
         this.addStat(StatList.DEATHS);
@@ -413,7 +410,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             component = SpongeTexts.fixActionBarFormatting(component);
         }
 
-        this.connection.sendPacket(new SPacketChat(component, ((SpongeChatType) type).getByteId()));
+        this.connection.sendPacket(new SPacketChat(component, (net.minecraft.util.ChatType) (Object) type));
     }
 
     /**
