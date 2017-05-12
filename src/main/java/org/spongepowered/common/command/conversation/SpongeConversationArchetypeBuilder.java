@@ -35,6 +35,7 @@ import org.spongepowered.api.command.conversation.ExternalChatHandler;
 import org.spongepowered.api.command.conversation.ExternalChatHandlers;
 import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -45,15 +46,19 @@ import javax.annotation.Nullable;
 
 public class SpongeConversationArchetypeBuilder implements ConversationArchetype.Builder {
 
-    @Nullable private String id;
-    private String exit = "exit";
-    @Nullable private Question firstQuestion;
+    private static final Text defaultCommandUsageMethod = Text.of(TextColors.RED, "You must exit this conversation before you can use commands!");
+    private static final String defaultExitKeyword = "exit";
+
     private Set<EndingHandler> endingHandlers = new HashSet<>();
-    private ExternalChatHandler defaultHandler = ExternalChatHandlers.deleteAll();
+    @Nullable private String id;
+    @Nullable private String exit;
+    @Nullable private Question firstQuestion;
+    @Nullable private ExternalChatHandler defaultHandler;
     @Nullable private Text startingMessage;
     @Nullable private Text title;
     @Nullable private Text padding;
     @Nullable private Text header;
+    @Nullable private Text commandUsageMessage;
     private boolean catchesOutput = true;
     private boolean allowCommands = false;
 
@@ -69,20 +74,22 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
         this.title = value.getTitle().orElse(null);
         this.padding = value.getTitle().orElse(null);
         this.header = value.getBanner().orElse(null);
+        this.commandUsageMessage = value.getNoCommandUsageMessage();
         return this;
     }
 
     @Override
     public Builder reset() {
-        this.id = null;
-        this.exit = "exit";
-        this.firstQuestion = null;
         this.endingHandlers.clear();
-        this.defaultHandler = ExternalChatHandlers.deleteAll();
+        this.id = null;
+        this.exit = null;
+        this.firstQuestion = null;
+        this.defaultHandler = null;
         this.startingMessage = null;
         this.title = null;
         this.padding = null;
         this.catchesOutput = true;
+        this.commandUsageMessage = null;
         return this;
     }
 
@@ -177,11 +184,26 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
     }
 
     @Override
+    public Builder noCommandUsageMessage(Text message) {
+        this.commandUsageMessage = checkNotNull(message, "The no command usage method cannot be null!");
+        return this;
+    }
+
+    @Override
     public ConversationArchetype build() {
         checkNotNull(this.id, "You must specify an id for this archetype!");
         checkNotNull(this.firstQuestion, "You must specify a proper first question!");
+        if (this.commandUsageMessage == null) {
+            this.commandUsageMessage = defaultCommandUsageMethod;
+        }
+        if (this.exit == null) {
+            this.exit = defaultExitKeyword;
+        }
+        if (this.defaultHandler == null) {
+            this.defaultHandler = ExternalChatHandlers.deleteAll();
+        }
         return new SpongeConversationArchetype(this.firstQuestion, this.catchesOutput, this.allowCommands, this.defaultHandler,
-            this.endingHandlers, this.startingMessage, this.id, this.exit, this.title, this.padding, this.header);
+            this.endingHandlers, this.startingMessage, this.id, this.exit, this.title, this.padding, this.header, this.commandUsageMessage);
     }
 
 }

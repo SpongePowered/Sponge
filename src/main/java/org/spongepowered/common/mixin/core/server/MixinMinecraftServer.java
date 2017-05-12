@@ -597,6 +597,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         if (event != null) {
             if (Sponge.getEventManager().post(event)) {
+                // If the event is cancelled, make sure completions is empty
                 completions.clear();
             } else if (command || hasTargetBlock) {
                 // We have to modify the completion if they are typing the command portion

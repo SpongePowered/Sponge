@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.args.GenericArguments;
+import org.spongepowered.api.command.args.parsing.InputTokenizer;
 import org.spongepowered.api.command.conversation.AnswerHandler;
 import org.spongepowered.api.command.conversation.PromptHandler;
 import org.spongepowered.api.command.conversation.Question;
@@ -41,7 +42,8 @@ public class SpongeQuestionBuilder implements Question.Builder {
     @Nullable private String id;
     @Nullable private PromptHandler promptHandler;
     @Nullable private AnswerHandler answerHandler;
-    @Nullable private CommandElement arguments = GenericArguments.remainingJoinedStrings(Text.of("answer"));
+    @Nullable private InputTokenizer inputTokenizer;
+    @Nullable private CommandElement arguments;
     
     @Override
     public Builder from(Question value) {
@@ -49,6 +51,7 @@ public class SpongeQuestionBuilder implements Question.Builder {
         this.promptHandler = value.getPromptHandler();
         this.answerHandler = value.getHandler();
         this.arguments = value.getArguments();
+        this.inputTokenizer = value.getInputTokenizer();
         return this;
     }
 
@@ -57,7 +60,8 @@ public class SpongeQuestionBuilder implements Question.Builder {
         this.id = null;
         this.promptHandler = null;
         this.answerHandler = null;
-        this.arguments = GenericArguments.remainingJoinedStrings(Text.of("answer"));
+        this.inputTokenizer = null;
+        this.arguments = null;
         return this;
     }
 
@@ -87,8 +91,13 @@ public class SpongeQuestionBuilder implements Question.Builder {
 
     @Override
     public Builder arguments(CommandElement... elements) {
-        checkNotNull(elements, "The arguments you specify cannot be null!");
-        this.arguments = GenericArguments.seq(elements);
+        this.arguments = GenericArguments.seq(checkNotNull(elements, "The arguments you specify cannot be null!"));
+        return this;
+    }
+
+    @Override
+    public Builder inputTokenizer(InputTokenizer inputTokenizer) {
+        this.inputTokenizer = checkNotNull(inputTokenizer, "The input tokenizer cannot be null!");
         return this;
     }
 
@@ -100,7 +109,10 @@ public class SpongeQuestionBuilder implements Question.Builder {
         if (this.arguments == null) {
             this.arguments = GenericArguments.remainingJoinedStrings(Text.of("answer"));
         }
-        return new SpongeQuestion(this.id, this.promptHandler, this.answerHandler, this.arguments);
+        if (this.inputTokenizer == null) {
+            this.inputTokenizer = InputTokenizer.quotedStrings(false);
+        }
+        return new SpongeQuestion(this.id, this.promptHandler, this.answerHandler, this.arguments, this.inputTokenizer);
     }
 
 }

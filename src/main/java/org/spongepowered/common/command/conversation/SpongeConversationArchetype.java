@@ -57,6 +57,7 @@ public class SpongeConversationArchetype implements ConversationArchetype {
     private final Optional<Text> padding;
     private final Optional<Text> header;
     private final Optional<Text> startingMessage;
+    private final Text commandUsageMessage;
     private boolean catchesOutput = true;
     private boolean allowCommands = false;
 
@@ -78,7 +79,7 @@ public class SpongeConversationArchetype implements ConversationArchetype {
      */
     SpongeConversationArchetype(Question firstQuestion, boolean catchesOutput, boolean allowCommands, ExternalChatHandler defaultHandler,
             Set<EndingHandler> endingHandlers, @Nullable Text startingMessage, String id, String exit,
-            @Nullable Text title, @Nullable Text padding, @Nullable Text header) {
+            @Nullable Text title, @Nullable Text padding, @Nullable Text header, Text commandUsageMessage) {
         this.question = firstQuestion;
         this.endingHandlers = endingHandlers;
         this.catchesOutput = catchesOutput;
@@ -99,6 +100,7 @@ public class SpongeConversationArchetype implements ConversationArchetype {
             this.banner = Optional.empty();
         }
         this.header = Optional.ofNullable(header);
+        this.commandUsageMessage = commandUsageMessage;
     }
 
     @Override
@@ -159,6 +161,11 @@ public class SpongeConversationArchetype implements ConversationArchetype {
     @Override
     public Optional<Text> getPadding() {
         return this.padding;
+    }
+
+    @Override
+    public Text getNoCommandUsageMessage() {
+        return this.commandUsageMessage;
     }
 
     @Override

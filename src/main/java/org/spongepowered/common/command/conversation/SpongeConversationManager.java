@@ -25,7 +25,6 @@
 package org.spongepowered.common.command.conversation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
@@ -106,14 +105,14 @@ public class SpongeConversationManager implements ConversationManager {
     @Nullable
     public TabCompleteEvent.Conversation getInternalSuggestions(Conversant conversant, String arguments, @Nullable Location<World> targetPosition) {
         Optional<Conversation> conversation = conversant.getConversation();
-        if (!conversation.isPresent() || !conversant.getConversation().get().getCurrentQuestion().isPresent()) {
+        if (!conversation.isPresent() || !conversation.get().getCurrentQuestion().isPresent()) {
             this.logger.warn("The conversant must be in a current conversation with a current question to get their tab completions");
             return null;
         }
         try {
             final Question question;
-            question = conversation.get().getCurrentQuestion().orElseThrow(RuntimeException::new);
-            CommandArgs args = new CommandArgs(arguments, InputTokenizer.quotedStrings(false).tokenize(arguments, true));
+            question = conversation.get().getCurrentQuestion().get();
+            CommandArgs args = new CommandArgs(arguments, question.getInputTokenizer().tokenize(arguments, true));
             CommandContext context = new CommandContext();
             if (targetPosition != null) {
                 context.putArg(CommandContext.TARGET_BLOCK_ARG, targetPosition);
@@ -145,7 +144,7 @@ public class SpongeConversationManager implements ConversationManager {
                     final Question question = optionalQuestion.get();
                     try {
                         question.getArguments()
-                            .parse(conversant, new CommandArgs(message, InputTokenizer.quotedStrings(false).tokenize(message, false)), context);
+                            .parse(conversant, new CommandArgs(message, question.getInputTokenizer().tokenize(message, false)), context);
                         final QuestionResult questionResult = question.getHandler().handle(conversation, conversant, question, context);
                         switch (questionResult.getType()) {
                             case NEXT:

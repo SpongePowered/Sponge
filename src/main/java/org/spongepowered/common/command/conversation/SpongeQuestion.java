@@ -25,6 +25,7 @@
 package org.spongepowered.common.command.conversation;
 
 import org.spongepowered.api.command.args.CommandElement;
+import org.spongepowered.api.command.args.parsing.InputTokenizer;
 import org.spongepowered.api.command.conversation.AnswerHandler;
 import org.spongepowered.api.command.conversation.PromptHandler;
 import org.spongepowered.api.command.conversation.Question;
@@ -34,6 +35,7 @@ public class SpongeQuestion implements Question {
     private final PromptHandler promptHandler;
     private final AnswerHandler handler;
     private final CommandElement arguments;
+    private final InputTokenizer inputTokenizer;
 
     /**
      * Creates a new {@link Question} to be used within a conversation.
@@ -42,12 +44,14 @@ public class SpongeQuestion implements Question {
      * @param promptHandler The prompt handler for the question
      * @param handler The answer handler
      * @param arguments The arguments of the question
+     * @param inputTokenizer The input tokenizer to use for parsing
      */
-    SpongeQuestion(String id, PromptHandler promptHandler, AnswerHandler handler, CommandElement arguments) {
+    SpongeQuestion(String id, PromptHandler promptHandler, AnswerHandler handler, CommandElement arguments, InputTokenizer inputTokenizer) {
         this.id = id;
         this.promptHandler = promptHandler;
         this.handler = handler;
         this.arguments = arguments;
+        this.inputTokenizer = inputTokenizer;
     }
 
     @Override
@@ -68,6 +72,11 @@ public class SpongeQuestion implements Question {
     @Override
     public CommandElement getArguments() {
         return this.arguments;
+    }
+
+    @Override
+    public InputTokenizer getInputTokenizer() {
+        return this.inputTokenizer;
     }
 
     @Override

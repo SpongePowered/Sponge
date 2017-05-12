@@ -271,7 +271,7 @@ public class SpongeCommandManager implements CommandManager {
             if (optionalConversation.isPresent()) {
                 final Conversation conversation = optionalConversation.get();
                 if (!conversation.allowsCommands()) {
-                    ((Conversant) source).sendThroughMessage(Text.of("You must exit this conversation before you can use commands!"));
+                    ((Conversant) source).sendThroughMessage(conversation.getArchetype().getNoCommandUsageMessage());
                     return CommandResult.empty();
                 }
             }
