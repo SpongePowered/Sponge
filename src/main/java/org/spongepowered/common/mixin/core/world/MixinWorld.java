@@ -1217,9 +1217,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Nullable
     public net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos) {
         // Sponge - Replace with inlined method
-        // If this method is called async, return null to avoid any possible issues
         //  if (this.isOutsideBuildHeight(pos)) // Vanilla
-        if (((IMixinBlockPos) pos).isInvalidYPosition() || (!this.isRemote && !SpongeImpl.getServer().isCallingFromMinecraftThread())) {
+        if (((IMixinBlockPos) pos).isInvalidYPosition()) {
             return null;
             // Sponge End
         } else {
@@ -1230,6 +1229,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             if (tileentity == null) {
+                // Sponge - Don't create tileentity async
+                // Mods such as pixelmon call this method async, so this is a temporary workaround until fixed
+                if (!this.isRemote && !SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+                    return tileentity;
+                }
+                // Sponge end
                 tileentity = this.getChunkFromBlockCoords(pos).getTileEntity(pos, net.minecraft.world.chunk.Chunk.EnumCreateEntityType.IMMEDIATE);
             }
 
