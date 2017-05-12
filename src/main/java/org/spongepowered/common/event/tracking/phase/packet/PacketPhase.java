@@ -485,9 +485,7 @@ public final class PacketPhase extends TrackingPhase {
         this.packetTranslationMap.put(CPacketClientStatus.class, packet -> {
             final CPacketClientStatus clientStatus = (CPacketClientStatus) packet;
             final CPacketClientStatus.State status = clientStatus.getStatus();
-            if ( status == CPacketClientStatus.State.OPEN_INVENTORY_ACHIEVEMENT) {
-                return Inventory.OPEN_INVENTORY;
-            } else if ( status == CPacketClientStatus.State.PERFORM_RESPAWN) {
+            if ( status == CPacketClientStatus.State.PERFORM_RESPAWN) {
                 return General.REQUEST_RESPAWN;
             } else {
                 return General.IGNORED;

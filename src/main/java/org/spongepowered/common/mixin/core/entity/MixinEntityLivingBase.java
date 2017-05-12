@@ -287,7 +287,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
         if (this.scoreValue >= 0 && entitylivingbase != null) {
-            entitylivingbase.addToPlayerScore((EntityLivingBase) (Object) this, this.scoreValue);
+            entitylivingbase.addToPlayerScore((EntityLivingBase) (Object) this, this.scoreValue, cause);
         }
 
         if (entity != null) {

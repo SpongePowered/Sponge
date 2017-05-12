@@ -215,7 +215,7 @@ public abstract class MixinWorldEntitySpawner {
                     int i2 = blockpos.getZ();
                     IBlockState iblockstate = worldServerIn.getBlockState(blockpos);
 
-                    if (!iblockstate.isNormalCube()) {
+                    if (!iblockstate.mth_0217_m()) { // @1.12-pre2 isNormalCube
                         int spawnCount = 0;
                         for (int spawnLimit = 0; spawnLimit < 3; ++spawnLimit) {
                             int l2 = k1;

@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.data.types;
 
+import com.flowpowered.math.GenericMath;
 import net.minecraft.item.EnumDyeColor;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -55,7 +55,11 @@ public abstract class MixinEnumDyeColor implements DyeColor {
     }
 
     public Color dye$getColor() {
-        return Color.ofRgb(((EnumDyeColor) (Object) this).getMapColor().colorValue);
+        float[] color = ((EnumDyeColor) (Object) this).mth_0748_f(); // @1.12-pre2 getColor
+        int r = GenericMath.floor(color[0] * 255);
+        int g = GenericMath.floor(color[1] * 255);
+        int b = GenericMath.floor(color[2] * 255);
+        return Color.ofRgb(r, g, b);
     }
 
     public Translation dye$getTranslation() {

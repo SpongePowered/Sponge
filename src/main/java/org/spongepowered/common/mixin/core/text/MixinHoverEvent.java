@@ -32,7 +32,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.asm.mixin.Final;
@@ -64,7 +63,7 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
                     case SHOW_TEXT:
                         setHandle(TextActions.showText(((IMixinTextComponent) this.value).toText()));
                         break;
-                    case SHOW_ITEM:
+                    case SHOW_ACHIEVEMENT: // @1.12-pre2 SHOW_ITEM
                         setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(new net.minecraft.item.ItemStack(loadNbt()))));
                         break;
                     case SHOW_ENTITY:

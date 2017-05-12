@@ -48,7 +48,6 @@ import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
@@ -63,7 +62,6 @@ import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldProviderEnd;
 import net.minecraft.world.WorldProviderHell;
-import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -210,12 +208,8 @@ public final class EntityUtil {
             fromWorldServer.removeEntity(entityPlayerMP);
             if (!entityPlayerMP.queuedEndExit) {
                 entityPlayerMP.queuedEndExit = true;
-                if (entityPlayerMP.hasAchievement(AchievementList.THE_END2)) {
-                    entityPlayerMP.connection.sendPacket(new SPacketChangeGameState(4, 0.0F));
-                } else {
-                    entityPlayerMP.addStat(AchievementList.THE_END2);
-                    entityPlayerMP.connection.sendPacket(new SPacketChangeGameState(4, 1.0F));
-                }
+                entityPlayerMP.connection.sendPacket(new SPacketChangeGameState(4, entityPlayerMP.fld_1677_cr ? 0.0F : 1.0F));
+                entityPlayerMP.fld_1677_cr = true;
             }
             return entityPlayerMP;
         } // else { // Sponge - Remove unecessary
@@ -227,18 +221,6 @@ public final class EntityUtil {
             return entityPlayerMP;
         }
         int targetDimensionId = ((IMixinWorldServer) toWorldServer).getDimensionId();
-
-        // Sponge Start - Rewrite for vanilla mechanics since multiworlds can change world providers and
-        // dimension id's
-        if (fromWorldServer.provider instanceof WorldProviderSurface) {
-            if (targetDimensionId == 1) {
-                entityPlayerMP.addStat(AchievementList.THE_END);
-            } else if (targetDimensionId == -1) {
-                entityPlayerMP.addStat(AchievementList.PORTAL);
-            }
-        }
-        // Sponge End
-
 
         ((IMixinPlayerList) entityPlayerMP.mcServer.getPlayerList()).transferPlayerToDimension(entityPlayerMP, targetDimensionId, toWorldServer.getDefaultTeleporter());
         entityPlayerMP.connection.sendPacket(new SPacketEffect(1032, BlockPos.ORIGIN, 0, false));

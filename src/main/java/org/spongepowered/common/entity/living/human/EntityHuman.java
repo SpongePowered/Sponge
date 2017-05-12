@@ -530,4 +530,9 @@ public class EntityHuman extends EntityCreature implements TeamMember, IRangedAt
         this.playSound(SoundEvents.ENTITY_ARROW_SHOOT, 1.0F, 1.0F / (this.getRNG().nextFloat() * 0.4F + 0.8F));
         this.world.spawnEntity(entitytippedarrow);
     }
+
+    @Override
+    public void setSwingingArms(boolean var1) {
+        // TODO 1.12-pre2 Can we support this
+    }
 }
