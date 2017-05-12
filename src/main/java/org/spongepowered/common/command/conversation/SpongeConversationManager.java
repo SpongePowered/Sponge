@@ -25,11 +25,15 @@
 package org.spongepowered.common.command.conversation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
@@ -45,14 +49,19 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.conversation.ConversationEndType;
 import org.spongepowered.api.event.cause.conversation.ConversationEndTypes;
+import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.event.conversation.ConversationOpenEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -82,6 +91,40 @@ public class SpongeConversationManager implements ConversationManager {
     @Override
     public Collection<Conversation> getConversations() {
         return this.conversations.values();
+    }
+
+    @Override
+    public List<String> getSuggestions(Conversant conversant, String arguments, @Nullable Location<World> targetPosition) {
+        final TabCompleteEvent.Conversation event = getInternalSuggestions(conversant, arguments, targetPosition);
+
+        if (event != null && !Sponge.getEventManager().post(event)) {
+            return ImmutableList.copyOf(event.getTabCompletions());
+        }
+        return ImmutableList.of();
+    }
+
+    @Nullable
+    public TabCompleteEvent.Conversation getInternalSuggestions(Conversant conversant, String arguments, @Nullable Location<World> targetPosition) {
+        Optional<Conversation> conversation = conversant.getConversation();
+        if (!conversation.isPresent() || !conversant.getConversation().get().getCurrentQuestion().isPresent()) {
+            this.logger.warn("The conversant must be in a current conversation with a current question to get their tab completions");
+            return null;
+        }
+        try {
+            final Question question;
+            question = conversation.get().getCurrentQuestion().orElseThrow(RuntimeException::new);
+            CommandArgs args = new CommandArgs(arguments, InputTokenizer.quotedStrings(false).tokenize(arguments, true));
+            CommandContext context = new CommandContext();
+            if (targetPosition != null) {
+                context.putArg(CommandContext.TARGET_BLOCK_ARG, targetPosition);
+            }
+            List<String> completions = question.getArguments().complete(conversant, args, context);
+            return SpongeEventFactory.createTabCompleteEventConversation(Cause.source(conversant).build(), ImmutableList.copyOf(completions),
+                    completions, conversation.get(), question, arguments, Optional.ofNullable(targetPosition), false);
+        } catch (Exception e) {
+            this.logger.error("There was a problem getting the tab completions for {}", conversant.getName(), e);
+            return null;
+        }
     }
 
     @Override

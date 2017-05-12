@@ -53,6 +53,7 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.conversation.Conversant;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -92,6 +93,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.command.SpongeCommandManager;
+import org.spongepowered.common.command.conversation.SpongeConversationManager;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -162,7 +164,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
     @Shadow public abstract boolean isDedicatedServer();
 
-    @Nullable private List<String> currentTabCompletionOptions;
+    @Shadow private PlayerList playerList;
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
     private GameProfileManager profileManager;
@@ -549,34 +551,68 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return WorldManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.getScoreboard());
     }
 
-    @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE",
-            target = "Lcom/google/common/collect/Lists;newArrayList()Ljava/util/ArrayList;", remap = false))
-    private ArrayList<String> onGetTabCompletionCreateList() {
-        ArrayList<String> list = new ArrayList<>();
-        this.currentTabCompletionOptions = list;
-        return list;
-    }
+    /**
+     * Gets the tab completions for a command sender sending
+     * input to the server.
+     *
+     * @author Meronat 5/10/2017
+     * @reason We essentially completely re-do this method with player list,
+     *     commands, and conversations so for our use it works better to
+     *     simply overwrite it.
+     */
+    @Overwrite
+    public List<String> getTabCompletions(ICommandSender sender, String input, @Nullable BlockPos pos, boolean hasTargetBlock) {
+        List<String> completions = new ArrayList<>();
 
-    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 0))
-    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean usingBlock,
-            CallbackInfoReturnable<List<String>> cir) {
+        final TabCompleteEvent event;
 
-        List<String> completions = checkNotNull(this.currentTabCompletionOptions, "currentTabCompletionOptions");
-        this.currentTabCompletionOptions = null;
+        boolean command = input.startsWith("/");
 
-        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.source(sender).build(),
-                ImmutableList.copyOf(completions), completions, input, Optional.ofNullable(getTarget(sender, pos)), usingBlock);
-        Sponge.getEventManager().post(event);
+        // The sender is using a command or is editing a command block
+        if (command || hasTargetBlock) {
+            if (command) {
+                input = input.substring(1);
+            }
+            event = ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager())
+                    .getInternalSuggestions((CommandSource) sender, input, getTarget(sender, pos), hasTargetBlock);
+        } else {
+            // The sender is in a conversation
+            if (sender instanceof Conversant && ((Conversant) sender).isConversing()) {
+                event = ((SpongeConversationManager) Sponge.getConversationManager())
+                        .getInternalSuggestions((Conversant) sender, input, getTarget(sender, pos));
+            } else {
+                // The sender is try to tab complete a player name
+                String[] args = input.split(" ", -1);
+                String last = args[args.length - 1];
 
-        if (event.isCancelled()) {
-            completions.clear();
+                for (String name : this.playerList.getOnlinePlayerNames()) {
+                    if (name.regionMatches(true, 0, last, 0, last.length())) {
+                        completions.add(name);
+                    }
+                }
+                event = SpongeEventFactory.createTabCompleteEventChat(Cause.source(sender).build(),
+                        ImmutableList.copyOf(completions), completions, input, Optional.ofNullable(getTarget(sender, pos)), hasTargetBlock);
+            }
         }
-    }
 
-    @Redirect(method = "getTabCompletions", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandManager;getTabCompletions"
-            + "(Lnet/minecraft/command/ICommandSender;Ljava/lang/String;Lnet/minecraft/util/math/BlockPos;)Ljava/util/List;"))
-    public List<String> onGetTabCompletionOptions(ICommandManager manager, ICommandSender sender, String input, @Nullable BlockPos pos, ICommandSender sender_, String input_, BlockPos pos_, boolean hasTargetBlock) {
-        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, getTarget(sender, pos), hasTargetBlock);
+        if (event != null) {
+            if (Sponge.getEventManager().post(event)) {
+                completions.clear();
+            } else if (command || hasTargetBlock) {
+                // We have to modify the completion if they are typing the command portion
+                for (String completion : event.getTabCompletions()) {
+                    if (input.contains(" ")) {
+                        completions.add(completion);
+                    } else {
+                        completions.add("/" + completion);
+                    }
+                }
+            } else {
+                completions = event.getTabCompletions();
+            }
+        }
+
+        return completions;
     }
 
     @Nullable

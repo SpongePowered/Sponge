@@ -356,28 +356,30 @@ public class SpongeCommandManager implements CommandManager {
     }
 
     @Override
-    public List<String> getSuggestions(CommandSource src, String arguments, @Nullable Location<World> targetPosition) {
-        return this.getSuggestions(src, arguments, targetPosition, false);
+    public List<String> getSuggestions(CommandSource src, String arguments, @Nullable Location<World> targetPosition, boolean modifyingCommandBlock) {
+        final TabCompleteEvent.Command event = getInternalSuggestions(src, arguments, targetPosition, modifyingCommandBlock);
+
+        if (event != null && !Sponge.getEventManager().post(event)) {
+            return ImmutableList.copyOf(event.getTabCompletions());
+        }
+        return ImmutableList.of();
     }
 
-    public List<String> getSuggestions(CommandSource src, String arguments, @Nullable Location<World> targetPosition, boolean usingBlock) {
+    @Nullable
+    public TabCompleteEvent.Command getInternalSuggestions(CommandSource src, String arguments, @Nullable Location<World> targetPosition, boolean usingBlock) {
         try {
             final String[] argSplit = arguments.split(" ", 2);
-            List<String> suggestions = new ArrayList<>(this.dispatcher.getSuggestions(src, arguments, targetPosition));
-            final TabCompleteEvent.Command event = SpongeEventFactory.createTabCompleteEventCommand(Cause.source(src).build(),
-                    ImmutableList.copyOf(suggestions), suggestions, argSplit.length > 1 ? argSplit[1] : "", argSplit[0], arguments, Optional.ofNullable(targetPosition), usingBlock); // TODO zml: Should this be exposed in the API?
-            Sponge.getGame().getEventManager().post(event);
-            if (event.isCancelled()) {
-                return ImmutableList.of();
-            } else {
-                return ImmutableList.copyOf(event.getTabCompletions());
+            List<String> suggestions;
+            try {
+                suggestions = new ArrayList<>(this.dispatcher.getSuggestions(src, arguments, targetPosition));
+            } catch (CommandException e) {
+                src.sendMessage(error(t("Error getting suggestions: %s", e.getText())));
+                return null;
             }
+            return SpongeEventFactory.createTabCompleteEventCommand(Cause.source(src).build(), ImmutableList.copyOf(suggestions), suggestions,
+                    argSplit.length > 1 ? argSplit[1] : "", argSplit[0], arguments, Optional.ofNullable(targetPosition), usingBlock);
         } catch (Exception e) {
-            if (e instanceof CommandException) {
-                src.sendMessage(error(t("Error getting suggestions: %s", ((CommandException) e).getText())));
-                return Collections.emptyList();
-            }
-            throw new RuntimeException(String.format("Error occured while tab completing '%s'", arguments), e);
+            throw new RuntimeException(String.format("Error occurred while tab completing '%s'", arguments), e);
         }
     }
 

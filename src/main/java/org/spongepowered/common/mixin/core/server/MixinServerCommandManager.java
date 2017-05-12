@@ -32,6 +32,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.ServerCommandManager;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -168,6 +169,6 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
         if (pos != null) {
             targetPos = new Location<>((org.spongepowered.api.world.World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
         }
-        return ((SpongeCommandManager) SpongeImpl.getGame().getCommandManager()).getSuggestions((CommandSource) sender, input, targetPos, false);
+        return Sponge.getCommandManager().getSuggestions((CommandSource) sender, input, targetPos);
     }
 }
