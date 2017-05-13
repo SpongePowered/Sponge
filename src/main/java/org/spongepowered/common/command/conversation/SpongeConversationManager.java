@@ -25,13 +25,20 @@
 package org.spongepowered.common.command.conversation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.api.command.args.GenericArguments.onlyOne;
+import static org.spongepowered.api.command.args.GenericArguments.optional;
+import static org.spongepowered.api.command.args.GenericArguments.remainingRawJoinedStrings;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
+import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
@@ -41,6 +48,7 @@ import org.spongepowered.api.command.conversation.ConversationArchetype;
 import org.spongepowered.api.command.conversation.ConversationManager;
 import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.command.conversation.QuestionResult;
+import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -50,11 +58,14 @@ import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.event.conversation.ConversationOpenEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,13 +80,15 @@ import javax.inject.Singleton;
 @Singleton
 public class SpongeConversationManager implements ConversationManager {
 
+    // Note this is synchronized
     private final Multimap<String, Conversation> conversations;
     private final Logger logger;
 
     @Inject
     public SpongeConversationManager(Logger logger) {
         this.logger = logger;
-        this.conversations = HashMultimap.create();
+        this.conversations = Multimaps.synchronizedMultimap(HashMultimap.create());
+        registerCommand();
     }
 
     @Override
@@ -87,7 +100,7 @@ public class SpongeConversationManager implements ConversationManager {
 
     @Override
     public Collection<Conversation> getConversations() {
-        return this.conversations.values();
+        return Collections.unmodifiableCollection(this.conversations.values());
     }
 
     @Override
@@ -232,9 +245,39 @@ public class SpongeConversationManager implements ConversationManager {
 
     @Override
     public void endAll(ConversationEndType endType, Cause cause) {
-        for (Conversation c : this.conversations.values()) {
-            c.end(endType, cause);
+        synchronized (this.conversations) {
+            Iterator<Conversation> conversationIterator = this.conversations.values().iterator();
+            while (conversationIterator.hasNext()) {
+                conversationIterator.next().end(endType, cause);
+            }
         }
+    }
+
+    private void registerCommand() {
+        final CommandSpec command = CommandSpec.builder()
+                .description(Text.of("Allows you to add to a conversation with a command."))
+                .arguments(optional(onlyOne(remainingRawJoinedStrings(Text.of("message")))))
+                .executor((src, args) -> {
+                    if (src instanceof Conversant) {
+                        Conversant conversant = (Conversant) src;
+                        if (!conversant.isConversing()) {
+                            throw new CommandException(Text.of(TextColors.RED, "You must be in a conversation to use this command!"));
+                        }
+                        Optional<String> message = args.getOne("message");
+                        if (message.isPresent() && !message.get().isEmpty()) {
+                            Sponge.getConversationManager().process((Conversant) src, message.get());
+                            return CommandResult.success();
+                        } else {
+                            throw new CommandException(Text.of(TextColors.RED, "You must specify a message for your conversation's current question."
+                                    + "\nFor example: /conversation Spongie is cool"));
+                        }
+                    } else {
+                        throw new CommandException(Text.of(TextColors.RED, "You must be a conversant to use this command."));
+                    }
+                })
+                .build();
+
+        Sponge.getCommandManager().register(SpongeImpl.getPlugin(), command, "conversation", "conv");
     }
 
 }

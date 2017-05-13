@@ -274,7 +274,10 @@ public class SpongeCommandManager implements CommandManager {
                 if (conversation.getCancellingHandler().process(conversation, (Conversant) source, commandLine, true)) {
                     conversation.end(ConversationEndTypes.QUIT, Cause.of(NamedCause.source(source)));
                     return CommandResult.success();
-                } else if (!conversation.allowsCommands()) {
+                }
+                final Optional<CommandMapping> optionalCommandMapping = get(commandLine.split(" ")[0]);
+                if (!(optionalCommandMapping.isPresent() && optionalCommandMapping.get().getPrimaryAlias().equalsIgnoreCase("conversation"))
+                        && !conversation.allowsCommands()) {
                     ((Conversant) source).sendThroughMessage(conversation.getArchetype().getNoCommandUsageMessage());
                     return CommandResult.empty();
                 }
