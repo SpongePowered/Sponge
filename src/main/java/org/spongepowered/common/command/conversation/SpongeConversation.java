@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.MapMaker;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.conversation.CancellingHandler;
 import org.spongepowered.api.command.conversation.Conversant;
 import org.spongepowered.api.command.conversation.Conversation;
 import org.spongepowered.api.command.conversation.ConversationArchetype;
@@ -134,7 +133,7 @@ public class SpongeConversation implements Conversation {
                 final Set<Conversant> conversants = this.externalChatHandlers.keySet();
                 this.archetype.getBanner().ifPresent(b -> conversants.forEach(c -> c.sendThroughMessage(b)));
                 this.archetype.getHeader().ifPresent(h -> conversants.forEach(c -> c.sendThroughMessage(h)));
-                conversants.forEach(c -> c.sendThroughMessage(question.getPromptHandler().handle(this, this.context)));
+                conversants.forEach(c -> c.sendThroughMessage(question.getPromptHandler().getPrompt(this, this.context)));
             }
         }
     }
@@ -151,7 +150,7 @@ public class SpongeConversation implements Conversation {
         this.ended = true;
 
         for (EndingHandler e : this.endingHandlers) {
-            e.handle(this, this.context, endType);
+            e.handle(this, this.context, endType, cause);
         }
 
         if (!endType.equals(ConversationEndTypes.TIMED_OUT)) {
@@ -175,7 +174,7 @@ public class SpongeConversation implements Conversation {
         if (this.currentQuestion != null) {
             this.archetype.getBanner().ifPresent(conversant::sendThroughMessage);
             this.archetype.getHeader().ifPresent(conversant::sendThroughMessage);
-            conversant.sendThroughMessage(this.currentQuestion.getPromptHandler().handle(this, this.context));
+            conversant.sendThroughMessage(this.currentQuestion.getPromptHandler().getPrompt(this, this.context));
         }
     }
 

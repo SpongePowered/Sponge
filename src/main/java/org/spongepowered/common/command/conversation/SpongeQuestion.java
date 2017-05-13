@@ -29,6 +29,7 @@ import org.spongepowered.api.command.args.parsing.InputTokenizer;
 import org.spongepowered.api.command.conversation.AnswerHandler;
 import org.spongepowered.api.command.conversation.PromptHandler;
 import org.spongepowered.api.command.conversation.Question;
+
 public class SpongeQuestion implements Question {
 
     private final String id;
