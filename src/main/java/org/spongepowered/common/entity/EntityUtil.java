@@ -208,8 +208,8 @@ public final class EntityUtil {
             fromWorldServer.removeEntity(entityPlayerMP);
             if (!entityPlayerMP.queuedEndExit) {
                 entityPlayerMP.queuedEndExit = true;
-                entityPlayerMP.connection.sendPacket(new SPacketChangeGameState(4, entityPlayerMP.fld_1677_cr ? 0.0F : 1.0F));
-                entityPlayerMP.fld_1677_cr = true;
+                entityPlayerMP.connection.sendPacket(new SPacketChangeGameState(4, entityPlayerMP.fld_1672_cr ? 0.0F : 1.0F));
+                entityPlayerMP.fld_1672_cr = true;
             }
             return entityPlayerMP;
         } // else { // Sponge - Remove unecessary

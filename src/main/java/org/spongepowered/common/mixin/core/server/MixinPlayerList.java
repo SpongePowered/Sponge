@@ -338,7 +338,7 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         handler.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
         this.updatePermissionLevel(playerIn);
         playerIn.getStatFile().markAllDirty();
-        playerIn.mth_1687_F().mth_1790_a(playerIn);
+        playerIn.mth_1681_F().mth_1784_a(playerIn);
         this.mcServer.refreshStatusNextTick();
 
         handler.setPlayerLocation(x, y, z, yaw, pitch);

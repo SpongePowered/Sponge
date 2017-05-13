@@ -63,7 +63,7 @@ public abstract class MixinHoverEvent implements IMixinHoverEvent {
                     case SHOW_TEXT:
                         setHandle(TextActions.showText(((IMixinTextComponent) this.value).toText()));
                         break;
-                    case SHOW_ACHIEVEMENT: // @1.12-pre2 SHOW_ITEM
+                    case SHOW_ITEM:
                         setHandle(TextActions.showItem(ItemStackUtil.snapshotOf(new net.minecraft.item.ItemStack(loadNbt()))));
                         break;
                     case SHOW_ENTITY:

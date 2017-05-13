@@ -55,7 +55,7 @@ public abstract class MixinEnumDyeColor implements DyeColor {
     }
 
     public Color dye$getColor() {
-        float[] color = ((EnumDyeColor) (Object) this).mth_0748_f(); // @1.12-pre2 getColor
+        float[] color = ((EnumDyeColor) (Object) this).mth_0745_f(); // @1.12-pre2 getColor
         int r = GenericMath.floor(color[0] * 255);
         int g = GenericMath.floor(color[1] * 255);
         int b = GenericMath.floor(color[2] * 255);

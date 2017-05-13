@@ -464,7 +464,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     }
 
     @Override
-    public boolean mth_0946_a(World worldIn, String structureName, BlockPos position) {
+    public boolean mth_0941_a(World worldIn, String structureName, BlockPos position) {
         Class<? extends MapGenStructure> target = null;
         if ("Stronghold".equals(structureName)) {
             target = MapGenStronghold.class;
@@ -488,7 +488,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             }
         }
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
-            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).mth_0946_a(worldIn, structureName, position);
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).mth_0941_a(worldIn, structureName, position);
         }
         return false;
 }

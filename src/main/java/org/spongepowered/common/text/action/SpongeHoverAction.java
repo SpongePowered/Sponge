@@ -46,7 +46,7 @@ public class SpongeHoverAction {
         if (action instanceof HoverAction.ShowEntity) {
             return HoverEvent.Action.SHOW_ENTITY;
         } else if (action instanceof HoverAction.ShowItem) {
-            return HoverEvent.Action.SHOW_ACHIEVEMENT; // @1.12-pre2 SHOW_ITEM
+            return HoverEvent.Action.SHOW_ITEM;
         } else if (action instanceof HoverAction.ShowText) {
             return HoverEvent.Action.SHOW_TEXT;
         }
@@ -73,7 +73,7 @@ public class SpongeHoverAction {
                 component = new TextComponentString(nbt.toString());
                 break;
             }
-            case SHOW_ACHIEVEMENT: { // @1.12-pre2 SHOW_ITEM
+            case SHOW_ITEM: {
                 ItemStack item = (ItemStack) ((ItemStackSnapshot) action.getResult()).createStack();
                 NBTTagCompound nbt = new NBTTagCompound();
                 item.writeToNBT(nbt);
