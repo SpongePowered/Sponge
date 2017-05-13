@@ -135,10 +135,6 @@ public final class WorldManager {
 
     private static boolean isVanillaRegistered = false;
 
-    static {
-        WorldManager.registerVanillaTypesAndDimensions();
-    }
-
     public static void registerVanillaTypesAndDimensions() {
         if (!isVanillaRegistered) {
             WorldManager.registerDimensionType(0, DimensionType.OVERWORLD);
