@@ -107,11 +107,6 @@ public class SpongeConversation implements Conversation {
     }
 
     @Override
-    public CancellingHandler getCancellingHandler() {
-        return null;
-    }
-
-    @Override
     public PluginContainer getCreator() {
         return this.creator;
     }
