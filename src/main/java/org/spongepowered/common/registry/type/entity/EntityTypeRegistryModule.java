@@ -186,6 +186,9 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("complex_part", new SpongeEntityType(-6, "ComplexPart", EntityDragonPart.class, null));
         this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "human", "Human", 300, null)); // TODO: Figure out what id to use, as negative ids no longer work
         //this.entityClassToTypeMappings.put("human", new SpongeEntityType(-6))
+
+        this.entityTypeMappings.put("parrot", newEntityTypeFromName("parrot"));
+        this.entityTypeMappings.put("illusion_illager", newEntityTypeFromName("illusion_illager"));
     }
 
     private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
