@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.MapMaker;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.conversation.CancellingHandler;
 import org.spongepowered.api.command.conversation.Conversant;
 import org.spongepowered.api.command.conversation.Conversation;
 import org.spongepowered.api.command.conversation.ConversationArchetype;
@@ -103,6 +104,11 @@ public class SpongeConversation implements Conversation {
     @Override
     public DataContainer getContext() {
         return this.context;
+    }
+
+    @Override
+    public CancellingHandler getCancellingHandler() {
+        return null;
     }
 
     @Override

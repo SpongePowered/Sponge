@@ -32,11 +32,9 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ArgumentParseException;
 import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.parsing.InputTokenizer;
 import org.spongepowered.api.command.conversation.Conversant;
 import org.spongepowered.api.command.conversation.Conversation;
 import org.spongepowered.api.command.conversation.ConversationArchetype;
@@ -133,7 +131,7 @@ public class SpongeConversationManager implements ConversationManager {
         final Optional<Conversation> optionalConversation = conversant.getConversation();
         if (optionalConversation.isPresent()) {
             final Conversation conversation = optionalConversation.get();
-            if (message.equalsIgnoreCase(conversation.getExitString())) {
+            if (conversation.getCancellingHandler().process(conversation, conversant, message, false)) {
                 conversation.end(ConversationEndTypes.QUIT, Cause.of(NamedCause.source(conversant)));
             } else if (!conversation.hasEnded()) {
                 final Optional<Question> optionalQuestion = conversation.getCurrentQuestion();

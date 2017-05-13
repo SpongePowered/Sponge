@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.conversation.CancellingHandler;
 import org.spongepowered.api.command.conversation.Conversant;
 import org.spongepowered.api.command.conversation.Conversation;
 import org.spongepowered.api.command.conversation.ConversationArchetype;
@@ -50,8 +51,8 @@ public class SpongeConversationArchetype implements ConversationArchetype {
     private final Question question;
     private Set<EndingHandler> endingHandlers = new HashSet<>();
     private final ExternalChatHandler defaultChatHandler;
+    private final CancellingHandler cancellingHandler;
     private final String id;
-    private final String exit;
     private final Optional<Text> banner;
     private final Optional<Text> title;
     private final Optional<Text> padding;
@@ -72,14 +73,15 @@ public class SpongeConversationArchetype implements ConversationArchetype {
      * @param startingMessage The message sent to conversants at the start of
      *     the conversation
      * @param id The id of the archetype
-     * @param exit The exit keyword
      * @param title The title of the conversation
      * @param padding The padding for the title
      * @param header The header for after the banner
+     * @param commandUsageMessage The no command usage message
+     * @param cancellingHandler The cancelling handler
      */
     SpongeConversationArchetype(Question firstQuestion, boolean catchesOutput, boolean allowCommands, ExternalChatHandler defaultHandler,
-            Set<EndingHandler> endingHandlers, @Nullable Text startingMessage, String id, String exit,
-            @Nullable Text title, @Nullable Text padding, @Nullable Text header, Text commandUsageMessage) {
+            Set<EndingHandler> endingHandlers, @Nullable Text startingMessage, String id, @Nullable Text title, @Nullable Text padding,
+            @Nullable Text header, Text commandUsageMessage, CancellingHandler cancellingHandler) {
         this.question = firstQuestion;
         this.endingHandlers = endingHandlers;
         this.catchesOutput = catchesOutput;
@@ -87,7 +89,6 @@ public class SpongeConversationArchetype implements ConversationArchetype {
         this.defaultChatHandler = defaultHandler;
         this.startingMessage = Optional.ofNullable(startingMessage);
         this.id = id.toLowerCase();
-        this.exit = exit.toLowerCase();
         this.title = Optional.ofNullable(title);
         if (title != null && padding != null) {
             this.padding = Optional.of(padding);
@@ -101,6 +102,7 @@ public class SpongeConversationArchetype implements ConversationArchetype {
         }
         this.header = Optional.ofNullable(header);
         this.commandUsageMessage = commandUsageMessage;
+        this.cancellingHandler = cancellingHandler;
     }
 
     @Override
@@ -111,11 +113,6 @@ public class SpongeConversationArchetype implements ConversationArchetype {
     @Override
     public Optional<Text> getStartingMessage() {
         return this.startingMessage;
-    }
-
-    @Override
-    public String getExitString() {
-        return this.exit;
     }
 
     @Override
@@ -166,6 +163,11 @@ public class SpongeConversationArchetype implements ConversationArchetype {
     @Override
     public Text getNoCommandUsageMessage() {
         return this.commandUsageMessage;
+    }
+
+    @Override
+    public CancellingHandler getCancellingHandler() {
+        return this.cancellingHandler;
     }
 
     @Override

@@ -50,6 +50,7 @@ import org.spongepowered.api.command.conversation.Conversation;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.conversation.ConversationEndTypes;
 import org.spongepowered.api.event.command.SendCommandEvent;
 import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -270,7 +271,10 @@ public class SpongeCommandManager implements CommandManager {
             final Optional<Conversation> optionalConversation = ((Conversant) source).getConversation();
             if (optionalConversation.isPresent()) {
                 final Conversation conversation = optionalConversation.get();
-                if (!conversation.allowsCommands()) {
+                if (conversation.getCancellingHandler().process(conversation, (Conversant) source, commandLine, true)) {
+                    conversation.end(ConversationEndTypes.QUIT, Cause.of(NamedCause.source(source)));
+                    return CommandResult.success();
+                } else if (!conversation.allowsCommands()) {
                     ((Conversant) source).sendThroughMessage(conversation.getArchetype().getNoCommandUsageMessage());
                     return CommandResult.empty();
                 }
