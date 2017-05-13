@@ -36,7 +36,9 @@ import org.spongepowered.common.mixin.plugin.tileentityactivation.TileEntityActi
 @Mixin(value = WorldServer.class, priority = 1300)
 public abstract class MixinWorldServer_TileEntityActivation {
 
-    @Inject(method = "updateTileEntity", at = @At("HEAD"), cancellable = true, remap = false)
+    // TODO 1.12-pre2 I have no fucking clue what this injection is trying to target
+    // updateTileEntity doesn't exist, and it didn't exist in 1.11 either
+    //@Inject(method = "updateTileEntity", at = @At("HEAD"), cancellable = true, remap = false)
     public void onUpdateTileEntityHead(ITickable tile, CallbackInfo ci) {
         final net.minecraft.tileentity.TileEntity tileEntity = (net.minecraft.tileentity.TileEntity) tile;
         final boolean canUpdate = TileEntityActivation.checkIfActive(tileEntity);

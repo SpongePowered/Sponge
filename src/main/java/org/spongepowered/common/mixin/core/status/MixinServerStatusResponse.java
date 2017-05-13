@@ -50,10 +50,10 @@ import javax.annotation.Nullable;
 @Mixin(ServerStatusResponse.class)
 public abstract class MixinServerStatusResponse implements ClientPingServerEvent.Response {
 
-    @Shadow @Nullable private ITextComponent description;
+    @Shadow @Nullable private ITextComponent fld_1605_a; // @1.12-pre2 description
     @Shadow @Nullable private ServerStatusResponse.Players players;
     @Shadow private ServerStatusResponse.Version version;
-    @Shadow @Nullable private String favicon;
+    @Shadow @Nullable private String fld_1606_d; // @1.12-pre2 favicon
 
     private Text descriptionText = Text.of();
     @Nullable private ServerStatusResponse.Players playerBackup;
@@ -72,7 +72,7 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
     @Override
     public void setDescription(Text description) {
         this.descriptionText = checkNotNull(description, "description");
-        this.description = SpongeTexts.toComponent(description);
+        this.fld_1605_a = SpongeTexts.toComponent(description);
     }
 
     /**
@@ -84,10 +84,10 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
     @Overwrite
     public void setServerDescription(@Nullable ITextComponent motd) {
         if (motd != null) {
-            this.description = motd;
+            this.fld_1605_a = motd;
             this.descriptionText = SpongeTexts.toText(motd);
         } else {
-            this.description = new TextComponentString("");
+            this.fld_1605_a = new TextComponentString("");
             this.descriptionText = Text.of();
         }
     }
@@ -124,9 +124,9 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
     public void setFavicon(@Nullable Favicon favicon) {
         this.faviconHandle = favicon;
         if (this.faviconHandle != null) {
-            this.favicon = ((SpongeFavicon) this.faviconHandle).getEncoded();
+            this.fld_1606_d = ((SpongeFavicon) this.faviconHandle).getEncoded();
         } else {
-            this.favicon = null;
+            this.fld_1606_d = null;
         }
     }
 
@@ -139,12 +139,12 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
     @Overwrite
     public void setFavicon(@Nullable String faviconBlob) {
         if (faviconBlob == null) {
-            this.favicon = null;
+            this.fld_1606_d = null;
             this.faviconHandle = null;
         } else {
             try {
                 this.faviconHandle = new SpongeFavicon(faviconBlob);
-                this.favicon = faviconBlob;
+                this.fld_1606_d = faviconBlob;
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }

@@ -79,7 +79,9 @@ public abstract class MixinDragonFightManager {
     @Shadow private void findAliveCrystals() { }
     @Shadow private void loadChunks() { }
     @Shadow private void generatePortal(boolean flag) { }
-    @Shadow private void spawnDragon() { }
+    @Shadow private EntityDragon spawnDragon() {
+        return null; // Shadowed
+    }
 
     /**
      * @author gabizou - January 22nd, 2017

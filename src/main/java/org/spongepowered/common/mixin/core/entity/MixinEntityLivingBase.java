@@ -114,11 +114,11 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
-    @Shadow public int maxHurtTime;
+    @Shadow public int fld_1847_az; // @1.12-pre2 maxHurtTime
     @Shadow public int deathTime;
     @Shadow protected int scoreValue;
     @Shadow public float attackedAtYaw;
-    @Shadow public float limbSwingAmount;
+    @Shadow public float limbSwing; // @1.12-pre2 limbSwingAmount
     @Shadow public boolean potionsNeedUpdate;
     @Shadow public boolean dead;
     @Shadow public CombatTracker _combatTracker;
@@ -126,7 +126,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected AbstractAttributeMap attributeMap;
     @Shadow protected int idleTime;
     @Shadow protected int recentlyHit;
-    @Shadow protected float lastDamage;
+    @Shadow protected float fld_1849_bc; // @1.12-pre2 lastDamage
     @Shadow @Nullable protected EntityPlayer attackingPlayer;
     @Shadow protected ItemStack activeItemStack;
     @Shadow private DamageSource lastDamageSource;
@@ -140,7 +140,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract SoundEvent getDeathSound();
     @Shadow protected abstract float getSoundVolume();
     @Shadow protected abstract float getSoundPitch();
-    @Shadow protected abstract SoundEvent getHurtSound();
+    @Shadow protected abstract SoundEvent getHurtSound(DamageSource cause);
     @Shadow public abstract void setHealth(float health);
     @Shadow public abstract void addPotionEffect(net.minecraft.potion.PotionEffect potionEffect);
     @Shadow protected abstract void markPotionsDirty(); // markPotionsDirty
@@ -206,12 +206,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Override
     public double getLastDamage() {
-        return this.lastDamage;
+        return this.fld_1849_bc;
     }
 
     @Override
     public void setLastDamage(double damage) {
-        this.lastDamage = (float) damage;
+        this.fld_1849_bc = (float) damage;
     }
 
     @Override
@@ -416,32 +416,32 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }*/
                 // Sponge end
 
-                this.limbSwingAmount = 1.5F;
+                this.limbSwing = 1.5F;
                 boolean flag1 = true;
 
                 if ((float) this.hurtResistantTime > (float) this.maxHurtResistantTime / 2.0F) {
-                    if (amount <= this.lastDamage) { // Technically, this is wrong since 'amount' won't be 0 if a shield is used. However, we need damageEntityHook so that we process the shield, so we leave it as-is
+                    if (amount <= this.fld_1849_bc) { // Technically, this is wrong since 'amount' won't be 0 if a shield is used. However, we need damageEntityHook so that we process the shield, so we leave it as-is
                         return false;
                     }
 
                     // Sponge start - reroute to our damage hook
-                    if (!this.damageEntityHook(source, amount - this.lastDamage)) {
+                    if (!this.damageEntityHook(source, amount - this.fld_1849_bc)) {
                         return false;
                     }
                     // Sponge end
 
-                    this.lastDamage = amount;
+                    this.fld_1849_bc = amount;
                     flag1 = false;
                 } else {
                     // Sponge start - reroute to our damage hook
                     if (!this.damageEntityHook(source, amount)) {
                         return false;
                     }
-                    this.lastDamage = amount;
+                    this.fld_1849_bc = amount;
                     this.hurtResistantTime = this.maxHurtResistantTime;
                     // this.damageEntity(source, amount); // handled above
                     // Sponge end
-                    this.hurtTime = this.maxHurtTime = 10;
+                    this.hurtTime = this.fld_1847_az = 10;
                 }
 
                 this.attackedAtYaw = 0.0F;
@@ -890,7 +890,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Override
     public OptionalValue<Double> lastDamage() {
-        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.getLastAttackedEntity() == null ? null : (double) this.lastDamage));
+        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.getLastAttackedEntity() == null ? null : (double) this.fld_1849_bc));
     }
 
     @Override

@@ -46,6 +46,7 @@ import org.spongepowered.common.item.inventory.adapter.impl.slots.InputSlotAdapt
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.slots.InputSlotLensImpl;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 @NonnullByDefault
@@ -81,6 +82,7 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
      * prevented any non-vanilla beacon defined potions from being applied
      * to a beacon. This method is used for both setfield and when reading from nbt.
      */
+    @Nullable
     @Overwrite
     private static Potion isBeaconEffect(int p_184279_0_) {
         return Potion.getPotionById(p_184279_0_);

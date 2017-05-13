@@ -166,18 +166,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         ci.setReturnValue(LegacyTexts.parseComponent(component, SpongeTexts.COLOR_CHAR));
     }
 
-    @Inject(method = "clonePlayer", at = @At("HEAD"))
-    public void onClonePlayer(EntityPlayer oldPlayer, boolean respawnFromEnd, CallbackInfo ci) {
-        // Copy over sponge data from the old player.
-        // Allows plugins to specify data that persists after players respawn.
-        IMixinEntity oldEntity = (IMixinEntity) oldPlayer;
-        NBTTagCompound old = oldEntity.getEntityData();
-        if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
-            this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
-            this.readFromNbt(this.getSpongeData());
-        }
-    }
-
     // utility method for getting the total experience at an arbitrary level
     // the formulas here are basically (slightly modified) integrals of those of EntityPlayer#xpBarCap()
     private int xpAtLevel(int level) {

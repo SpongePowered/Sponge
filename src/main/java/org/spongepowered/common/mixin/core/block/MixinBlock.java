@@ -157,7 +157,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         }
     }
 
-    @Inject(method = "registerBlock", at = @At("RETURN"))
+    @Inject(method = "registerBlock(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/block/Block;)V", at = @At("RETURN"))
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
         BlockTypeRegistryModule.getInstance().registerFromGameData(location.toString(), (BlockType) block);
     }

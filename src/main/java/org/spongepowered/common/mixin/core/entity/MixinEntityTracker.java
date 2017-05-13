@@ -51,7 +51,7 @@ public abstract class MixinEntityTracker {
     @Shadow
     public abstract void track(Entity entityIn, int trackingRange, int updateFrequency);
 
-    @Inject(method = "track", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "track(Lnet/minecraft/entity/Entity;)V", at = @At("HEAD"), cancellable = true)
     public void onTrackEntity(Entity entityIn, CallbackInfo ci) {
         if (entityIn instanceof EntityHuman) {
             this.track(entityIn, 512, 2);
