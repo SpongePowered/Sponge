@@ -25,6 +25,7 @@
 package org.spongepowered.common.registry.type.text;
 
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.util.text.EnumChatType;
 import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.chat.ChatType;
@@ -34,9 +35,9 @@ public final class ChatTypeRegistryModule implements RegistryModule {
 
     @RegisterCatalog(ChatTypes.class)
     public static final ImmutableMap<String, ChatType> chatTypeMappings = ImmutableMap.of(
-            "chat", (ChatType) (Object) net.minecraft.util.ChatType.CHAT,
-            "system", (ChatType) (Object) net.minecraft.util.ChatType.SYSTEM,
-            "action_bar", (ChatType) (Object) net.minecraft.util.ChatType.GAME_INFO
+            "chat", (ChatType) (Object) EnumChatType.CHAT,
+            "system", (ChatType) (Object) EnumChatType.SYSTEM,
+            "action_bar", (ChatType) (Object) EnumChatType.GAME_INFO
     );
 
 }

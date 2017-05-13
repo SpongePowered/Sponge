@@ -68,6 +68,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.EnumChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.GameRules;
@@ -425,7 +426,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             component = SpongeTexts.fixActionBarFormatting(component);
         }
 
-        this.connection.sendPacket(new SPacketChat(component, (net.minecraft.util.ChatType) (Object) type));
+        this.connection.sendPacket(new SPacketChat(component, (EnumChatType) (Object) type));
     }
 
     /**
