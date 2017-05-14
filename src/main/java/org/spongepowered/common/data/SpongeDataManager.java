@@ -37,6 +37,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataRegistration;
@@ -72,8 +73,16 @@ import java.util.Optional;
 
 @Singleton
 public final class SpongeDataManager implements DataManager {
+
+    private static final TypeToken<CatalogType> catalogTypeToken = TypeToken.of(CatalogType.class);
+    private static final TypeToken<DataSerializable> dataSerializableTypeToken = TypeToken.of(DataSerializable.class);
+
     static {
-        TypeSerializers.getDefaultSerializers().registerType(TypeToken.of(DataSerializable.class), new DataSerializableTypeSerializer());
+        TypeSerializers.getDefaultSerializers().registerPredicate(
+            // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
+            // See https://github.com/SpongePowered/SpongeCommon/issues/1348
+            x -> dataSerializableTypeToken.isAssignableFrom(x) && !catalogTypeToken.isAssignableFrom(x), new DataSerializableTypeSerializer()
+        );
     }
 
     // Builders
