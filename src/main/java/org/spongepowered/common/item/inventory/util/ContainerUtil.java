@@ -43,6 +43,7 @@ import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryBasic;
 import net.minecraft.inventory.InventoryCraftResult;
 import net.minecraft.inventory.InventoryCrafting;
 import net.minecraft.inventory.InventoryHelper;
@@ -57,6 +58,7 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.InventoryArchetype;
 import org.spongepowered.api.item.inventory.InventoryArchetypes;
+import org.spongepowered.api.item.inventory.slot.InputSlot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -85,13 +87,13 @@ import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensI
 import org.spongepowered.common.item.inventory.lens.impl.comp.HotbarLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.Inventory2DLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.comp.OrderedInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.minecraft.BrewingStandInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.FurnaceInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.mixin.core.inventory.MixinInventoryHelper;
-import org.spongepowered.common.mixin.core.item.inventory.MixinContainer;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
@@ -270,9 +272,9 @@ public final class ContainerUtil {
                     Slot slot = entry.getValue().get(0);
                     lens = new CraftingOutputSlotLensImpl(index, item -> slot.isItemValid(((ItemStack) item)),
                             itemType -> (slot.isItemValid((ItemStack) org.spongepowered.api.item.inventory.ItemStack.of(itemType, 1))));
-                } else if (subInventory instanceof InventoryCrafting) { // InventoryCrafting has width and height
+                } else if (subInventory instanceof InventoryCrafting) { // InventoryCrafting has width and height and is Input
                     InventoryCrafting craftGrid = (InventoryCrafting) subInventory;
-                    lens = new GridInventoryLensImpl(index, craftGrid.getWidth(), craftGrid.getHeight(), craftGrid.getWidth(), slots);
+                    lens = new GridInventoryLensImpl(index, craftGrid.getWidth(), craftGrid.getHeight(), craftGrid.getWidth(), InputSlot.class, slots);
                 } else if (slotCount == 1) { // Unknown - A single Slot
                     lens = new SlotLensImpl(index);
                 } else if ((lens instanceof PlayerInventoryLens || playerLens) && slotCount == 36) { // Player
@@ -280,7 +282,20 @@ public final class ContainerUtil {
                     lenses.add(new GridInventoryLensImpl(index, 9, 3, 9, slots));
                     lenses.add(new HotbarLensImpl(index + 27, 9, slots));
                     lens = null;
-                } else { // Unknown - fallback to OrderedInventory
+                }
+                else if (subInventory instanceof InventoryBasic && subInventory.getClass().isAnonymousClass()) {
+                    // Anonymous InventoryBasic -> Check for Vanilla Containers:
+                    switch (subInventory.getName()) {
+                        case "Enchant": // Container InputSlots
+                        case "Repair": // Container InputSlots
+                            lens = new OrderedInventoryLensImpl(index, slotCount, 1, InputSlot.class, slots);
+                            break;
+                        default: // Unknown
+                            lens = new OrderedInventoryLensImpl(index, slotCount, 1, slots);
+                    }
+                }
+                else {
+                    // Unknown - fallback to OrderedInventory
                     lens = new OrderedInventoryLensImpl(index, slotCount, 1, slots);
                 }
             }
@@ -297,6 +312,9 @@ public final class ContainerUtil {
     {
         if (lens instanceof FurnaceInventoryLens) {
             return new FurnaceInventoryLens(base, adapter, slots);
+        }
+        if (lens instanceof BrewingStandInventoryLens) {
+            return new BrewingStandInventoryLens(base, adapter, slots);
         }
         if (lens instanceof CraftingInventoryLens) {
             return new CraftingInventoryLensImpl(base,
