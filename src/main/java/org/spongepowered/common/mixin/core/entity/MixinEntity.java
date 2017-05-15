@@ -1017,7 +1017,7 @@ public abstract class MixinEntity implements IMixinEntity {
             .getContainer()
             .set(DataQueries.ENTITY_TYPE, this.entityType.getId())
             .set(DataQueries.UNSAFE_NBT, unsafeNbt);
-        final Collection<DataManipulator<?, ?>> manipulators = getContainers();
+        final Collection<DataManipulator<?, ?>> manipulators = ((IMixinCustomDataHolder) this).getCustomManipulators();
         if (!manipulators.isEmpty()) {
             container.set(DataQueries.DATA_MANIPULATORS, DataUtil.getSerializedManipulatorList(manipulators));
         }

@@ -53,6 +53,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -132,8 +133,8 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.entityType = entity.getType();
         this.entityId = entity.getUniqueId();
         this.manipulators = Lists.newArrayList();
-        for (DataManipulator<?, ?> manipulator : entity.getContainers()) {
-            addManipulator((ImmutableDataManipulator) manipulator.asImmutable());
+        for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) entity).getCustomManipulators()) {
+            addManipulator(manipulator.asImmutable());
         }
         this.compound = new NBTTagCompound();
         ((net.minecraft.entity.Entity) entity).writeToNBT(this.compound);
@@ -224,7 +225,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.rotation = transform.getRotation();
         this.scale = transform.getScale();
         this.manipulators = Lists.newArrayList();
-        for (DataManipulator<?, ?> manipulator : ((Entity) minecraftEntity).getContainers()) {
+        for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) minecraftEntity).getCustomManipulators()) {
             addManipulator(manipulator.asImmutable());
         }
         this.compound = new NBTTagCompound();
