@@ -167,7 +167,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(Vector3i.ONE);
     private static final Vector3i BLOCK_SIZE = BLOCK_MAX.sub(BLOCK_MIN).add(Vector3i.ONE);
     private static final Vector3i BIOME_MIN = new Vector3i(BLOCK_MIN.getX(), 0, BLOCK_MIN.getZ());
-    private static final Vector3i BIOME_MAX = new Vector3i(BLOCK_MAX.getX(), 0, BLOCK_MAX.getZ());
+    private static final Vector3i BIOME_MAX = new Vector3i(BLOCK_MAX.getX(), 256, BLOCK_MAX.getZ());
     private static final Vector3i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(Vector3i.ONE);
     private static final String
             CHECK_NO_ENTITY_COLLISION =
@@ -1152,7 +1152,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * @reason Optimizes several blockstate lookups for getting raw light.
      *
      * @param pos The position to get the light for
-     * @param lightType The light type
+     * @param enumSkyBlock The light type
      * @return The raw light
      */
     @Inject(method = "getRawLight", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getBlockState" +
