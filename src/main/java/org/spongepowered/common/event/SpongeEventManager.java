@@ -27,6 +27,7 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.TimingsManager;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
@@ -34,8 +35,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
-import org.spongepowered.api.Sponge;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
@@ -48,7 +49,6 @@ import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
-import org.spongepowered.common.event.tracking.CauseTracker;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -369,7 +369,6 @@ public class SpongeEventManager implements EventManager {
                 this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
             } finally {
                 handler.getTimingsHandler().stopTimingIfSync();
-                CauseTracker.getInstance().getCurrentContext().activeContainer(null);
             }
             Sponge.getCauseStackManager().popCauseFrame(frame);
             Sponge.getCauseStackManager().popCause();

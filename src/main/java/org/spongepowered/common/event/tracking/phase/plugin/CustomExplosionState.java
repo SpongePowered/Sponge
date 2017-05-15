@@ -91,7 +91,7 @@ final class CustomExplosionState extends PluginPhaseState {
         context.getCapturedEntitySupplier()
                 .ifPresentAndNotEmpty(entities -> {
                     final User user = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
-                    TrackingUtil.splitAndSpawnEntities(Sponge.getCauseStackManager().getCurrentCause(), entities,  entity ->entity.setCreator(user.getUniqueId()));
+                    TrackingUtil.splitAndSpawnEntities(entities,  entity -> entity.setCreator(user.getUniqueId()));
 
 
 

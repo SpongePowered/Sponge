@@ -67,6 +67,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.ModifierFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
@@ -669,10 +671,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                                     final EntityDamageSource sweepingAttackSource = EntityDamageSource.builder().entity(this).type(DamageTypes.SWEEPING_ATTACK).build();
                                     Object frame = Sponge.getCauseStackManager().pushCauseFrame();
                                     Sponge.getCauseStackManager().pushCause(sweepingAttackSource);
-                                    Sponge.getCauseStackManager().addContext(EventContextKeys.WEAPON, ItemStackUtil.snapshotOf(this.getHeldItem(EnumHand.MAIN_HAND)));
                                     final ItemStackSnapshot heldSnapshot = ItemStackUtil.snapshotOf(heldItem);
+                                    Sponge.getCauseStackManager().addContext(EventContextKeys.WEAPON, heldSnapshot);
                                     final DamageFunction sweapingFunction = DamageFunction.of(DamageModifier.builder()
-                                                    .cause(sweapingCause)
+                                                    .cause(Cause.of(EventContext.empty(), heldSnapshot))
                                                     .item(heldSnapshot)
                                                     .type(DamageModifierTypes.SWEAPING)
                                                     .build(),

@@ -33,7 +33,6 @@ import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.storage.ChunkDataStream;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -189,7 +188,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
             final CauseTracker causeTracker = CauseTracker.getInstance();
             causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                     .addCaptures()
-                    .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, this.world))
+                    .addExtra(InternalNamedCauses.WorldGeneration.WORLD, this.world)
                     .complete());
         }
     }

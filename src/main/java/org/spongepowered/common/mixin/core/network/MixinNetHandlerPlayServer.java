@@ -520,7 +520,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         Location<World> to = new Location<>(spongeEntity.getWorld(), packetIn.getX(), packetIn.getY(), packetIn.getZ());
         Transform<World> fromTransform = spongeEntity.getTransform().setLocation(from).setRotation(fromrot);
         Transform<World> toTransform = spongeEntity.getTransform().setLocation(to).setRotation(torot);
-        MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Cause.of(NamedCause.source(ridingEntity)), fromTransform, toTransform, this.getPlayer());
+        MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), fromTransform, toTransform, this.getPlayer());
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             // There is no need to change the current riding entity position as it hasn't changed yet.

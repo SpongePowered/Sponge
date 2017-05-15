@@ -42,11 +42,6 @@ final class PostServerTickListenerState extends ListenerPhaseState {
     }
 
     @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
-        context.getCapturedPlayer().ifPresent(player -> builder.named(NamedCause.notifier(player)));
-    }
-
-    @Override
     public void processPostTick(PhaseContext phaseContext) {
         final Object listener = phaseContext.getSource(Object.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a ServerTickEvent listener!", phaseContext));

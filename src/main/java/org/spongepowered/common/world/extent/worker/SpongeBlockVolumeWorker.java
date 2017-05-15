@@ -140,6 +140,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int xMax = this.volume.getBlockMax().getX();
         final int yMax = this.volume.getBlockMax().getY();
         final int zMax = this.volume.getBlockMax().getZ();
+        Object frame = Sponge.getCauseStackManager().pushCauseFrame();
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().switchToPhase(PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
                 .source(this)

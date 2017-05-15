@@ -193,9 +193,6 @@ abstract class SchedulerBase {
                 Sponge.getCauseStackManager().popCause();
             }
             task.getTimingsHandler().stopTimingIfSync();
-            if (!task.isAsynchronous()) {
-                CauseTracker.getInstance().getCurrentContext().activeContainer(null);
-            }
         });
     }
 

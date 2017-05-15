@@ -69,9 +69,6 @@ abstract class TickPhaseState implements IPhaseState {
 
     public void processPostTick(PhaseContext phaseContext) { }
 
-    public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
-
-    }
 
     public void associateNeighborBlockNotifier(PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
             WorldServer minecraftWorld, PlayerTracker.Type notifier) {

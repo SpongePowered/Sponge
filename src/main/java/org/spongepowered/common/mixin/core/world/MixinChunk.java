@@ -855,7 +855,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         if (CauseTracker.ENABLED && !this.world.isRemote) {
             final CauseTracker causeTracker = CauseTracker.getInstance();
             causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                    .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, this.world))
+                    .addExtra(InternalNamedCauses.WorldGeneration.WORLD, this.world)
                     .addCaptures()
                     .complete());
         }

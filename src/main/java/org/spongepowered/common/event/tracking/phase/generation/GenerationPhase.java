@@ -25,6 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -135,7 +137,7 @@ public final class GenerationPhase extends TrackingPhase {
             int chunkZ) {
         final ArrayList<Entity> entities = new ArrayList<>(1);
         entities.add(entity);
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(InternalSpawnTypes.CauseImpl.WORLD_SPAWNER,
+        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEventSpawner(Sponge.getCauseStackManager().getCurrentCause(),
                 entities);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled() && event.getEntities().size() > 0) {
@@ -148,19 +150,9 @@ public final class GenerationPhase extends TrackingPhase {
     }
 
     @Override
-    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext phaseContext,
-        ArrayList<Entity> entities) {
-        super.processPostEntitySpawns(unwindingState, phaseContext, entities);
-    }
-
-    @Override
     public boolean isWorldGeneration(IPhaseState state) {
         return true;
     }
 
-    @Override
-    public boolean appendPreBlockProtectedCheck(Cause.Builder builder, IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker) {
-        return false;
-    }
 
 }

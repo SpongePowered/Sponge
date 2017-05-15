@@ -46,6 +46,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.type.GlobalConfig;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
+import org.spongepowered.common.event.SpongeCauseStackManager;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.launch.SpongeLaunch;
@@ -91,7 +92,6 @@ public final class SpongeImpl {
     @Inject private static SpongeCauseStackManager causeStackManager;
 
     private static final List<PluginContainer> internalPlugins = new ArrayList<>();
-    private static Cause implementationCause;
 
     private SpongeImpl() {
     }
@@ -103,7 +103,7 @@ public final class SpongeImpl {
         }
 
         for (Platform.Component component : Platform.Component.values()) {
-            this.internalPlugins.add(platform.getContainer(component));
+            internalPlugins.add(platform.getContainer(component));
         }
     }
 
@@ -188,10 +188,6 @@ public final class SpongeImpl {
 
     public static List<PluginContainer> getInternalPlugins() {
         return internalPlugins;
-    }
-
-    public static Cause getImplementationCause() {
-        return implementationCause;
     }
 
     public static boolean postEvent(Event event) {

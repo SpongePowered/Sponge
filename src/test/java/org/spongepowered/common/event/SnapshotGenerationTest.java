@@ -26,6 +26,7 @@ package org.spongepowered.common.event;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
 
 import co.aikar.timings.Timings;
@@ -33,9 +34,10 @@ import co.aikar.timings.TimingsFactory;
 import com.google.common.collect.Lists;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventManager;
@@ -45,15 +47,16 @@ import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.util.test.TestHooks;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.InjectedTest;
 import org.spongepowered.common.event.listener.NonPreListener;
+import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Optional;
 
+@RunWith(LaunchWrapperTestRunner.class)
 public class SnapshotGenerationTest extends InjectedTest {
 
     private Entity entity;
@@ -91,7 +94,6 @@ public class SnapshotGenerationTest extends InjectedTest {
         Game game = mock(Game.class);
         CauseStackManager csm = mock(CauseStackManager.class);
         Mockito.when(game.getCauseStackManager()).thenReturn(csm);
-        TestHooks.setGame(game);
     }
 
     @Test

@@ -48,11 +48,6 @@ class PlayerTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void associateBlockEventNotifier(PhaseContext context, BlockPos pos, IMixinBlockEventData blockEvent) {
-        blockEvent.setSourceUser(context.getSource(Player.class).get());
-    }
-
-    @Override
     public void processPostTick(PhaseContext phaseContext) {
         final Player player = phaseContext.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a Player!", phaseContext));
@@ -89,11 +84,6 @@ class PlayerTickPhaseState extends TickPhaseState {
             TrackingUtil.processBlockCaptures(blockSnapshots, this, phaseContext);
         });
         Sponge.getCauseStackManager().popCauseFrame(frame);
-    }
-
-    @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
-        builder.named(NamedCause.OWNER, context.getSource(Player.class).get());
     }
 
     @Override

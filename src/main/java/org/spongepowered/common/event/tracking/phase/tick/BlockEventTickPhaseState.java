@@ -152,16 +152,6 @@ class BlockEventTickPhaseState extends TickPhaseState {
     }
 
     @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
-        LocatableBlock locatable =  context.getSource(LocatableBlock.class).orElse(null);
-        if (locatable == null) {
-            TileEntity tileEntity = context.getSource(TileEntity.class).orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a TileEntity!", context));
-            locatable = tileEntity.getLocatableBlock();
-        }
-        builder.named(NamedCause.notifier(locatable));
-    }
-
-    @Override
     public String toString() {
         return "BlockEventTickPhase";
     }

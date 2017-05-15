@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.Cause;
@@ -42,11 +44,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+@Singleton
 public class SpongeCauseStackManager implements CauseStackManager {
 
     public static final boolean DEBUG_CAUSE_FRAMES = Boolean.valueOf(System.getProperty("sponge.debugcauseframes", "false"));
-
-    public static final SpongeCauseStackManager instance = new SpongeCauseStackManager();
 
     private final Deque<Object> cause = Queues.newArrayDeque();
     private final Deque<CauseStackFrame> frames = Queues.newArrayDeque();
@@ -56,9 +57,8 @@ public class SpongeCauseStackManager implements CauseStackManager {
     private Cause cached_cause;
     private EventContext cached_ctx;
 
-    private SpongeCauseStackManager() {
-
-    }
+    @Inject
+    private SpongeCauseStackManager() { }
 
     private void enforceMainThread() {
         if (!Sponge.getServer().isMainThread()) {
@@ -311,7 +311,7 @@ public class SpongeCauseStackManager implements CauseStackManager {
 
         @Override
         public void close() {
-            SpongeCauseStackManager.instance.popCauseFrame(this);
+            Sponge.getCauseStackManager().popCauseFrame(this);
         }
 
     }

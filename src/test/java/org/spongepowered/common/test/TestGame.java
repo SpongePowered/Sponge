@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.test;
 
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Server;
 import org.spongepowered.common.SpongeGame;
@@ -34,6 +35,13 @@ import java.util.NoSuchElementException;
 @Singleton
 public class TestGame extends SpongeGame {
 
+    private TestServer server;
+
+    @Inject
+    public TestGame(TestServer server) {
+        this.server = server;
+    }
+
     @Override
     public boolean isServerAvailable() {
         return false;
@@ -41,7 +49,7 @@ public class TestGame extends SpongeGame {
 
     @Override
     public Server getServer() {
-        throw new NoSuchElementException();
+        return this.server;
     }
 
     @Override

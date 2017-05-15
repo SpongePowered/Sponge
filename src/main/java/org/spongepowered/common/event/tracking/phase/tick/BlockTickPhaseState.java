@@ -81,7 +81,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState {
         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, InternalSpawnTypes.DROPPED_ITEM);
         final User entityCreator = context.getNotifier().orElseGet(() -> context.getOwner().orElse(null));
         context.getCapturedBlockSupplier()
-                .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, causeTracker, this, context));
+                .ifPresentAndNotEmpty(blockSnapshots -> TrackingUtil.processBlockCaptures(blockSnapshots, this, context));
         context.getCapturedItemsSupplier()
                 .ifPresentAndNotEmpty(items -> {
                     final ArrayList<Entity> capturedEntities = new ArrayList<>();
@@ -100,24 +100,6 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState {
                     }
                 });
         Sponge.getCauseStackManager().popCauseFrame(frame);
-    }
-
-    @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
-        builder.named(NamedCause.notifier(getLocatableBlockSourceFromContext(context)));
-    }
-
-    @Override
-    public void associateBlockEventNotifier(PhaseContext context, BlockPos pos, IMixinBlockEventData blockEvent) {
-        final LocatableBlock locatableBlock = getLocatableBlockSourceFromContext(context);
-        blockEvent.setTickBlock(locatableBlock);
-        final Location<World> location = locatableBlock.getLocation();
-        final WorldServer worldServer = (WorldServer)  location.getExtent();
-        final Vector3d blockPosition =  location.getPosition();
-        final BlockPos blockPos = VecHelper.toBlockPos(blockPosition);
-        final IMixinChunk mixinChunk = (IMixinChunk) worldServer.getChunkFromBlockCoords(blockPos);
-        mixinChunk.getBlockNotifier(blockPos).ifPresent(blockEvent::setSourceUser);
-        context.getNotifier().ifPresent(blockEvent::setSourceUser);
     }
 
     @Override

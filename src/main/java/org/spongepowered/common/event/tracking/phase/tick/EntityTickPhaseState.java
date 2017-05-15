@@ -318,16 +318,6 @@ class EntityTickPhaseState extends TickPhaseState {
         }
     }
 
-
-    @Override
-    public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder) {
-        final Entity tickingEntity = context.getSource(Entity.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
-        builder.named(NamedCause.owner(tickingEntity));
-        context.getNotifier().ifPresent(builder::notifier);
-    }
-
-
     @Override
     public void processPostSpawns(PhaseContext phaseContext, ArrayList<Entity> entities) {
         super.processPostSpawns(phaseContext, entities);

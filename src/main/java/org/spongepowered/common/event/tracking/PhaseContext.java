@@ -28,13 +28,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.Sponge;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -42,16 +41,11 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -85,7 +79,6 @@ public class PhaseContext {
     @Nullable protected User notifier;
     protected final Map<String, Object> extraContext = Maps.newHashMap();
     protected boolean processImmediately;
-    @Nullable protected PluginContainer activeContainer;
 
     private Object source;
 

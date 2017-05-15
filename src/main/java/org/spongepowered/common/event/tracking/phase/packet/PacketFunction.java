@@ -895,24 +895,24 @@ public interface PacketFunction {
             default:
                 throw new AssertionError();
         }
-        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(Cause.source(player).build(), pack, (Player) player, status));
+        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(Sponge.getCauseStackManager().getCurrentCause(), pack, (Player) player, status));
         if (status.wasSuccessful().isPresent()) {
             mixinHandler.getPendingResourcePackQueue().remove();
 
             if (!mixinHandler.getPendingResourcePackQueue().isEmpty()) {
-                Cause supersededCause = Cause.source(player).named(InternalNamedCauses.Packet.RESPONDED_RESOURCE_PACK, pack).build();
+
                 while (mixinHandler.getPendingResourcePackQueue().size() > 1) {
                     // Fire events so other plugins know what happened to their resource packs.
                     pack = ((IMixinPacketResourcePackSend) mixinHandler.getPendingResourcePackQueue().remove()).getResourcePack();
                     if (status == ResourcePackStatusEvent.ResourcePackStatus.DECLINED) {
-                        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(supersededCause, pack, (Player) player,
+                        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(Sponge.getCauseStackManager().getCurrentCause(), pack, (Player) player,
                                 ResourcePackStatusEvent.ResourcePackStatus.DECLINED));
                     } else {
                         // Say it was successful even if it wasn't. Minecraft makes no guarantees, and I don't want to change the API.
                         // In addition, I would assume this would result in the expected behavior from plugins.
-                        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(supersededCause, pack, (Player) player,
+                        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(Sponge.getCauseStackManager().getCurrentCause(), pack, (Player) player,
                                 ResourcePackStatusEvent.ResourcePackStatus.ACCEPTED));
-                        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(supersededCause, pack, (Player) player,
+                        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(Sponge.getCauseStackManager().getCurrentCause(), pack, (Player) player,
                                 ResourcePackStatusEvent.ResourcePackStatus.SUCCESSFULLY_LOADED));
                     }
                 }

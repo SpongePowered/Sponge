@@ -114,20 +114,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState {
     }
 
     @Override
-    public void associateBlockEventNotifier(PhaseContext context, BlockPos pos, IMixinBlockEventData blockEvent) {
-        final TileEntity tickingTile = context.getSource(TileEntity.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking a block, but found none!", context));
-        blockEvent.setTickTileEntity(tickingTile);
-        final Location<World> blockLocation = tickingTile.getLocation();
-        final WorldServer worldServer = (WorldServer) blockLocation.getExtent();
-        final Vector3d blockPosition = blockLocation.getPosition();
-        final BlockPos blockPos = VecHelper.toBlockPos(blockPosition);
-        final IMixinChunk mixinChunk = (IMixinChunk) worldServer.getChunkFromBlockCoords(blockPos);
-        mixinChunk.getBlockNotifier(blockPos).ifPresent(blockEvent::setSourceUser);
-        context.getNotifier().ifPresent(blockEvent::setSourceUser);
-    }
-
-    @Override
     public void appendExplosionContext(PhaseContext explosionContext, PhaseContext context) {
         context.getOwner().ifPresent(explosionContext::owner);
         context.getNotifier().ifPresent(explosionContext::notifier);

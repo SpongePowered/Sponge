@@ -107,20 +107,19 @@ public abstract class TrackingPhase {
     }
 
     public void processPostItemSpawns(IPhaseState unwindingState, ArrayList<Entity> items) {
-        TrackingUtil.splitAndSpawnEntities(Sponge.getCauseStackManager().getCurrentCause(), items);
+        TrackingUtil.splitAndSpawnEntities(items);
     }
 
-    public void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext phaseContext,
+    public void processPostEntitySpawns(IPhaseState unwindingState, PhaseContext phaseContext,
             ArrayList<Entity> entities) {
-        final SpawnEntityEvent
-                event =
-                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities, causeTracker.getWorld());
         final User creator = phaseContext.getNotifier().orElseGet(() -> phaseContext.getOwner().orElse(null));
-        TrackingUtil.splitAndSpawnEntities(InternalSpawnTypes.UNKNOWN_CAUSE,
+        TrackingUtil.splitAndSpawnEntities(
                 entities,
-                entity -> creator
-                        .map(User::getUniqueId)
-                        .ifPresent(entity::setCreator)
+                entity -> {
+                    if (creator != null) {
+                        entity.setCreator(creator.getUniqueId());
+                    }
+                }
         );
     }
 

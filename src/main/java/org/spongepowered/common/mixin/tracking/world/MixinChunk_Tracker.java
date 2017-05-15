@@ -343,7 +343,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         if (CauseTracker.ENABLED && !this.world.isRemote) {
             CauseTracker.getInstance().switchToPhase(GenerationPhase.State.CHUNK_LOADING, PhaseContext.start()
                 .source(this)
-                .add(NamedCause.of(InternalNamedCauses.WorldGeneration.WORLD, this.world))
+                .addExtra(InternalNamedCauses.WorldGeneration.WORLD, this.world)
                 .addCaptures()
                 .complete());
         }

@@ -81,12 +81,12 @@ public interface IPacketState extends IPhaseState {
         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
         Sponge.getCauseStackManager().pushCause(player);
         final SpawnEntityEvent event =
-                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities, causeTracker.getWorld());
+                SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
             for (Entity entity : event.getEntities()) {
                 EntityUtil.toMixin(entity).setCreator(player.getUniqueId());
-                EntityUtil.toNative(entity).
+                EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
             }
         }
         Sponge.getCauseStackManager().popCauseFrame(frame);

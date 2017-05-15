@@ -826,16 +826,10 @@ public final class TrackingUtil {
         final List<Entity> entitiesSpawned = entities.stream()
             .map(EntityUtil::fromNative)
             .collect(Collectors.toList());
-        final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
-            .block(newBlockSnapshot)
-            .type(InternalSpawnTypes.BLOCK_SPAWNING)
-            .build());
         final Optional<User> owner = phaseContext.getOwner();
         final Optional<User> notifier = phaseContext.getNotifier();
-        notifier.ifPresent(builder::notifier);
         final User entityCreator = notifier.orElseGet(() -> owner.orElse(null));
-        final Cause spawnCauses = builder.build();
-        final SpawnEntityEvent destruct = SpongeEventFactory.createSpawnEntityEvent(spawnCauses, entitiesSpawned);
+        final SpawnEntityEvent destruct = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entitiesSpawned);
         SpongeImpl.postEvent(destruct);
         if (!destruct.isCancelled()) {
             for (Entity entity : destruct.getEntities()) {
@@ -865,11 +859,11 @@ public final class TrackingUtil {
         return null;
     }
 
-    public static void splitAndSpawnEntities(Cause cause, List<Entity> entities) {
-        splitAndSpawnEntities(cause, entities, (entity) -> {});
+    public static void splitAndSpawnEntities(List<Entity> entities) {
+        splitAndSpawnEntities(entities, (entity) -> {});
     }
 
-    public static void splitAndSpawnEntities(Cause cause, List<Entity> entities, Consumer<IMixinEntity> mixinEntityConsumer) {
+    public static void splitAndSpawnEntities(List<Entity> entities, Consumer<IMixinEntity> mixinEntityConsumer) {
 
         if (entities.size() > 1) {
             final HashMultimap<World, Entity> entityListMap = HashMultimap.create();
@@ -880,7 +874,7 @@ public final class TrackingUtil {
                 final World world = entry.getKey();
                 final ArrayList<Entity> worldEntities = new ArrayList<>(entry.getValue());
                 final SpawnEntityEvent event =
-                    SpongeEventFactory.createSpawnEntityEvent(cause, worldEntities);
+                    SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), worldEntities);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     for (Entity entity : event.getEntities()) {
@@ -896,7 +890,7 @@ public final class TrackingUtil {
 
         final World world = singleEntity.getWorld();
 
-        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, entities);
+        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(Sponge.getCauseStackManager().getCurrentCause(), entities);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
             for (Entity entity : event.getEntities()) {

@@ -63,7 +63,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ItemDropData;
 import org.spongepowered.common.item.inventory.util.InventoryUtil;
@@ -261,7 +260,7 @@ public final class SpongeImplHooks {
     public static Object onUtilRunTask(FutureTask<?> task, Logger logger) {
         final CauseTracker causeTracker = CauseTracker.getInstance();
         causeTracker.switchToPhase(PluginPhase.State.SCHEDULED_TASK, PhaseContext.start()
-            .add(NamedCause.source(task))
+            .source(task)
             .addCaptures()
             .complete()
         );
