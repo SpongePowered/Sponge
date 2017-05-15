@@ -125,6 +125,8 @@ final class DeathPhase extends EntityPhaseState {
                     EntityUtil.getMixinWorld(entity).forceSpawnEntity(entity);
                 }
             }
+            // If we're returning, we need to pop the frame.
+            Sponge.getCauseStackManager().popCauseFrame(frame);
             return;
         }
         context.getCapturedEntityItemDropSupplier().ifPresentAndNotEmpty(map -> {

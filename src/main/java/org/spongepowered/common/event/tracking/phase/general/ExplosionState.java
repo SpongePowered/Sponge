@@ -144,7 +144,9 @@ final class ExplosionState extends GeneralState {
         // Copied from TrackingUtil#throwMultiEventsAndCreatePost
         for (BlockChange blockChange : BlockChange.values()) {
             final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
-            Sponge.getCauseStackManager().pushCause(mainEvent);
+            if (mainEvent != null) {
+                Sponge.getCauseStackManager().pushCause(mainEvent);
+            }
         }
         final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[TrackingUtil.MULTI_CHANGE_INDEX];
 
