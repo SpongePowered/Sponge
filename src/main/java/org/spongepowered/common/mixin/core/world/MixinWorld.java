@@ -128,6 +128,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
@@ -740,7 +741,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
         if (te.isPresent()) {
             final TileEntity tileEntity = te.get();
-            for (DataManipulator<?, ?> manipulator : tileEntity.getContainers()) {
+            for (DataManipulator<?, ?> manipulator : ((IMixinCustomDataHolder) tileEntity).getCustomManipulators()) {
                 builder.add(manipulator);
             }
             final NBTTagCompound compound = new NBTTagCompound();
