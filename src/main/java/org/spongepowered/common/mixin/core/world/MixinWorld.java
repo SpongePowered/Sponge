@@ -301,8 +301,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         WorldInfo worldInfo = this.getWorldInfo();
         if (worldInfo == null) {
             SpongeImpl.getLogger().warn("World initialized without a WorldInfo! This is likely to cause problems. Substituting dummy info!", new RuntimeException("stack"));
-            worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAUT
-            ), "sponge$dummy_World");
+            worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT), "sponge$dummy_World");
         }
         this.worldContext = new Context(Context.WORLD_KEY, worldInfo.getWorldName());
     }
