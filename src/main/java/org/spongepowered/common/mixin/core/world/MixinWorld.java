@@ -173,7 +173,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             GET_ENTITIES_WITHIN_AABB =
             "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;";
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-    private Context worldContext;
+    @Nullable private Context worldContext;
     protected boolean processingExplosion = false;
 
     // @formatter:off
@@ -294,16 +294,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         // Mods such as FuturePack replace worldInfo with a custom one for separate world time.
         // This change is not needed as all worlds use separate save handlers.
         this.worldInfo = info;
-    }
-
-    @Inject(method = "init", at = @At("RETURN"))
-    private void onSpongeInit(CallbackInfoReturnable<net.minecraft.world.World> cir) {
-        WorldInfo worldInfo = this.getWorldInfo();
-        if (worldInfo == null) {
-            SpongeImpl.getLogger().warn("World initialized without a WorldInfo! This is likely to cause problems. Substituting dummy info!", new RuntimeException("stack"));
-            worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT), "sponge$dummy_World");
-        }
-        this.worldContext = new Context(Context.WORLD_KEY, worldInfo.getWorldName());
     }
 
     @SuppressWarnings("rawtypes")
@@ -531,6 +521,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Context getContext() {
+        if (this.worldContext == null) {
+            this.worldContext = new Context(Context.WORLD_KEY, this.worldInfo.getWorldName());
+        }
         return this.worldContext;
     }
 
