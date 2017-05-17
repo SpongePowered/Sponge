@@ -46,6 +46,7 @@ import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemSword;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
@@ -84,10 +85,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.processor.common.ExperienceHolderUtils;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.interfaces.ITargetedLocation;
@@ -131,7 +132,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract int xpBarCap();
     @Shadow public abstract float getCooledAttackStrength(float adjustTicks);
     @Shadow public abstract float getAIMoveSpeed();
-    @Shadow public abstract void addExperience(int amount);
     @Shadow public abstract void onCriticalHit(net.minecraft.entity.Entity entityHit);
     @Shadow public abstract void onEnchantmentCritical(net.minecraft.entity.Entity entityHit); // onEnchantmentCritical
     @Shadow public abstract void addExhaustion(float p_71020_1_);
@@ -148,10 +148,13 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract Scoreboard getWorldScoreboard();
     @Shadow public abstract String getName();
     @Shadow @Nullable public abstract Team getTeam();
+    @Shadow public abstract void addExperienceLevel(int levels);
+    @Shadow public abstract void addScore(int scoreIn);
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
     private Vector3d targetedLocation;
+    private boolean dontRecalculateExperience;
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;Lcom/mojang/authlib/GameProfile;)V", at = @At("RETURN"))
     public void construct(World worldIn, GameProfile gameProfileIn, CallbackInfo ci) {
@@ -201,6 +204,79 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     public void setTotalExperience(int exp) {
         this.experienceTotal = exp;
+    }
+
+    /**
+     * {@link EntityPlayer#addExperienceLevel(int)} doesn't update the total
+     * experience. This recalculates it for plugins to properly make use of it.
+     */
+    private void recalculateTotalExperience() {
+        if (!this.dontRecalculateExperience) {
+            int newExperienceInLevel = (int) (this.experience * this.xpBarCap());
+            this.experienceTotal = this.xpAtLevel(this.experienceLevel) + newExperienceInLevel;
+            this.experience = (float) newExperienceInLevel / this.xpBarCap();
+        }
+    }
+
+    @Inject(method = "addExperienceLevel", at = @At("RETURN"))
+    private void onAddExperienceLevels(int levels, CallbackInfo ci) {
+        recalculateTotalExperience();
+    }
+
+    /**
+     * @author JBYoshi - May 17, 2017
+     * @reason This makes the experience updating more accurate and disables
+     * the totalExperience recalculation above for this method, which would
+     * otherwise have weird intermediate states.
+     */
+    @Overwrite
+    public void addExperience(int amount) {
+        this.addScore(amount);
+        int i = Integer.MAX_VALUE - this.experienceTotal;
+
+        if (amount > i) {
+            amount = i;
+        }
+
+        // Sponge start - completely rewritten for more accurate calculations
+        // this.experience += (float)amount / (float)this.xpBarCap();
+
+        // for (this.experienceTotal += amount; this.experience >= 1.0F; this.experience /= (float)this.xpBarCap()) {
+            // this.experience = (this.experience - 1.0F) * (float)this.xpBarCap();
+            // this.addExperienceLevel(1);
+        // }
+        this.experienceTotal += amount;
+
+        // Based on recalculateTotalExperience() this should be
+        // approximately a whole number. Round in case of minor errors
+        // (although those are much more minor than those of the original
+        // algorithm).
+        int xpToDistribute = Math.round(this.experience * this.xpBarCap()) + amount;
+        // If this looks confusing, imagine "this.experience = 0;" here.
+        // That XP is incorporated into xpToDistribute.
+
+        int finalLevel = this.experienceLevel;
+        while (xpToDistribute >= ExperienceHolderUtils.getExpBetweenLevels(finalLevel)) {
+            xpToDistribute -= ExperienceHolderUtils.getExpBetweenLevels(finalLevel);
+            finalLevel++;
+        }
+
+        if (finalLevel != this.experienceLevel) {
+            this.dontRecalculateExperience = true;
+            try {
+                addExperienceLevel(finalLevel - this.experienceLevel);
+            } finally {
+                this.dontRecalculateExperience = false;
+            }
+        }
+        this.experience = (float) xpToDistribute / this.xpBarCap();
+        // Sponge end
+    }
+
+    @Inject(method = "readEntityFromNBT", at = @At("RETURN"))
+    private void recalculateXpOnLoad(NBTTagCompound compound, CallbackInfo ci) {
+        // Fix the mistakes of /xp commands past.
+        recalculateTotalExperience();
     }
 
     public boolean isFlying() {
