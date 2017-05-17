@@ -31,13 +31,21 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryEnderChest;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.tileentity.TileEntityLockable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.custom.CustomInventory;
@@ -46,6 +54,7 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Mixin(value = {
         net.minecraft.inventory.Slot.class,
@@ -128,4 +137,33 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
         this.getInventory().clear();
     }
 
+    @Override
+    public PluginContainer getPlugin() {
+        Object base = this;
+        if (this instanceof CarriedInventory) {
+            Optional<?> carrier = ((CarriedInventory<?>) this).getCarrier();
+            if (carrier.isPresent()) {
+                base = carrier.get();
+            }
+        }
+        if (base instanceof TileEntity) {
+            String id = ((TileEntity) base).getBlock().getType().getId();
+            String pluginId = id.substring(0, id.indexOf(":"));
+            return Sponge.getPluginManager().getPlugin(pluginId)
+                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + id));
+        }
+        if (base instanceof Entity) {
+            String id = ((Entity) base).getType().getId();
+            String pluginId = id.substring(0, id.indexOf(":"));
+            return Sponge.getPluginManager().getPlugin(pluginId)
+                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for entity " + id + " (" + getClass().getName() + ")"));
+        }
+        if (base instanceof SpongeUser) {
+            return SpongeImpl.getMinecraftPlugin();
+        }
+        return Sponge.getPluginManager().getPlugin(SpongeImplHooks.getModIdFromClass(this.getClass())).orElseGet(() -> {
+            SpongeImpl.getLogger().warn("Unknown plugin for " + this);
+            return SpongeImpl.getMinecraftPlugin();
+        });
+    }
 }

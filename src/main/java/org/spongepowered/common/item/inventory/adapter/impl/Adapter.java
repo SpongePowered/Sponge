@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
@@ -361,19 +362,26 @@ public class Adapter implements MinecraftInventoryAdapter {
     protected final List<Inventory> children = new ArrayList<Inventory>();
     protected Iterable<Slot> slotIterator;
 
-    public Adapter(Fabric<IInventory> inventory) {
-        this(inventory, null, null);
-    }
+    /**
+     * Used to calculate {@link #getPlugin()}.
+     */
+    private final Container rootContainer;
 
-    public Adapter(Fabric<IInventory> inventory, Lens<IInventory, net.minecraft.item.ItemStack> root) {
-        this(inventory, root, null);
+    public Adapter(Fabric<IInventory> inventory, net.minecraft.inventory.Container container) {
+        this.inventory = inventory;
+        this.parent = this;
+        this.slots = this.initSlots(inventory, null, this);
+        this.lens = checkNotNull(this.initRootLens(), "root lens");
+        this.rootContainer = (Container) container;
     }
 
     public Adapter(Fabric<IInventory> inventory, Lens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
         this.inventory = inventory;
-        this.parent = parent != null ? parent : this;
+        this.parent = checkNotNull(parent, "parent");
+        checkNotNull(root, "root");
         this.slots = this.initSlots(inventory, root, parent);
-        this.lens = root != null ? root : checkNotNull(this.initRootLens(), "root lens");
+        this.lens = checkNotNull(this.initRootLens(), "root lens");
+        this.rootContainer = null;
     }
 
     protected SlotCollection initSlots(Fabric<IInventory> inventory, Lens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
@@ -492,6 +500,9 @@ public class Adapter implements MinecraftInventoryAdapter {
 
     @Override
     public PluginContainer getPlugin() {
-        return null; // TODO
+        if (this.parent != this) {
+            return this.parent.getPlugin();
+        }
+        return this.rootContainer.getPlugin();
     }
 }

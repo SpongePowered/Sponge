@@ -42,6 +42,7 @@ import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.property.InventoryCapacity;
 import org.spongepowered.api.item.inventory.property.InventoryDimension;
 import org.spongepowered.api.item.inventory.property.InventoryTitle;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.serializer.TextSerializers;
 
@@ -68,7 +69,7 @@ public class CustomInventory implements IInventory, IInteractionObject {
 
     @SuppressWarnings("deprecation")
     public CustomInventory(InventoryArchetype archetype, Map<String, InventoryProperty<?, ?>> properties, Carrier carrier,
-            Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, Object plugin) {
+            Map<Class<? extends InteractInventoryEvent>, List<Consumer<? extends InteractInventoryEvent>>> listeners, PluginContainer plugin) {
         this.archetype = archetype;
         this.properties = properties;
         this.carrier = carrier;
