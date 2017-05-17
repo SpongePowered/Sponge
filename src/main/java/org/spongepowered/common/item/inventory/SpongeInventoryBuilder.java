@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory;
 
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -81,7 +82,8 @@ public class SpongeInventoryBuilder implements Inventory.Builder {
 
     @Override
     public Inventory build(Object plugin) {
-        return (Inventory) new CustomInventory(this.archetype, this.properties, this.carrier, this.listeners, plugin);
+        return (Inventory) new CustomInventory(this.archetype, this.properties, this.carrier, this.listeners,
+                Sponge.getPluginManager().fromInstance(plugin).orElseThrow(() -> new IllegalArgumentException(plugin + " is not a plugin")));
     }
 
     @Override

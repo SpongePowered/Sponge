@@ -22,33 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.test;
 
-import net.minecraft.entity.player.EntityPlayer;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
+import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.text.Text;
 
-import java.util.List;
-import java.util.function.Predicate;
+@Plugin(id = "inventoryplugintest", description = "A plugin to test the owner of an inventory.")
+public class InventoryPluginTest {
 
-import javax.annotation.Nullable;
-
-public interface IMixinContainer {
-
-    List<SlotTransaction> getCapturedTransactions();
-
-    boolean capturingInventory();
-
-    void setCaptureInventory(boolean flag);
-
-    void detectAndSendChanges(boolean captureOnly);
-
-    void setCanInteractWith(@Nullable Predicate<EntityPlayer> predicate);
-    
-    void setSpectatorChest(boolean spectatorChest);
-
-    SlotAdapter getSlotAdapter(int slot);
-
-    void setPlugin(PluginContainer plugin);
+    @Listener
+    public void onInventoryClose(InteractInventoryEvent.Close event, @First Player player) {
+        player.sendMessage(Text.of("This inventory was brought to you by ", event.getTargetInventory().getPlugin().getName(), "."));
+    }
 }
