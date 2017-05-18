@@ -547,7 +547,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Context getContext() {
         if (this.worldContext == null) {
-            this.worldContext = new Context(Context.WORLD_KEY, this.worldInfo.getWorldName());
+            WorldInfo worldInfo = getWorldInfo();
+            if (worldInfo == null) {
+                // We still have to consider some mods are making dummy worlds that
+                // override getWorldInfo with a null, or submit a null value.
+                worldInfo = new WorldInfo(new WorldSettings(0, GameType.NOT_SET, false, false, WorldType.DEFAULT), "sponge$dummy_World");
+            }
+            this.worldContext = new Context(Context.WORLD_KEY, worldInfo.getWorldName());
         }
         return this.worldContext;
     }
