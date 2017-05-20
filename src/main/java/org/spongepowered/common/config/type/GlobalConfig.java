@@ -39,6 +39,7 @@ import org.spongepowered.common.config.category.GlobalWorldCategory;
 import org.spongepowered.common.config.category.ModuleCategory;
 import org.spongepowered.common.config.category.OptimizationCategory;
 import org.spongepowered.common.config.category.SqlCategory;
+import org.spongepowered.common.config.category.TeleportHelperCategory;
 import org.spongepowered.common.util.IpSet;
 
 import java.net.InetAddress;
@@ -79,6 +80,9 @@ public class GlobalConfig extends ConfigBase {
 
     @Setting(value = "cause-tracker")
     protected CauseTrackerCategory causeTracker = new CauseTrackerCategory();
+
+    @Setting(value = "teleport-helper", comment = "Blocks to blacklist for safe teleportation.")
+    private TeleportHelperCategory teleportHelper = new TeleportHelperCategory();
 
     public GlobalConfig() {
         super();
@@ -141,6 +145,10 @@ public class GlobalConfig extends ConfigBase {
 
     public CauseTrackerCategory getCauseTracker() {
         return causeTracker;
+    }
+
+    public TeleportHelperCategory getTeleportHelper() {
+        return this.teleportHelper;
     }
 
 }
