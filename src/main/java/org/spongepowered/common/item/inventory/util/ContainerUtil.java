@@ -243,7 +243,7 @@ public final class ContainerUtil {
     private static Lens<IInventory, ItemStack> generateLens(net.minecraft.inventory.Container container, SlotCollection slots) {
         // Get all inventories viewed in the Container & count slots & retain order
         Map<Optional<IInventory>, List<Slot>> viewed = container.inventorySlots.stream()
-                .collect(Collectors.groupingBy(i -> Optional.ofNullable(i.inventory), LinkedHashMap::new, Collectors.toList()));
+                .collect(Collectors.groupingBy(i -> Optional.<IInventory>ofNullable(i.inventory), LinkedHashMap::new, Collectors.toList()));
         int index = 0; // Count the index
         List<Lens<IInventory, ItemStack>> lenses = new ArrayList<>();
         for (Map.Entry<Optional<IInventory>, List<Slot>> entry : viewed.entrySet()) {
