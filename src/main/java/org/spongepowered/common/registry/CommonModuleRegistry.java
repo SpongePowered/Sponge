@@ -132,6 +132,7 @@ import org.spongepowered.api.world.gen.type.BiomeTreeType;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.schematic.BlockPaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
+import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.ban.SpongeBanBuilder;
@@ -427,6 +428,7 @@ public final class CommonModuleRegistry {
             .registerModule(SoundCategory.class, new SoundCategoryRegistryModule())
             .registerModule(StairShape.class, new StairShapeRegistryModule())
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
+            .registerModule(TeleportHelperFilter.class, new TeleportHelperFilterRegistryModule())
             .registerModule(TeleportType.class, TeleportTypeRegistryModule.getInstance())
             .registerModule(TextColor.class, new TextColorRegistryModule())
             .registerModule(TextSerializer.class, new TextSerializerRegistryModule())
