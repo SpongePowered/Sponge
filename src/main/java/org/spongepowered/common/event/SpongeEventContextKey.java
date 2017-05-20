@@ -26,16 +26,19 @@ package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Objects;
 import org.spongepowered.api.event.cause.EventContextKey;
 
 public class SpongeEventContextKey<T> implements EventContextKey<T> {
 
     private final String id;
     private final Class<T> allowed;
+    private final String name;
 
-    public SpongeEventContextKey(String id, Class<T> allowed) {
+    public SpongeEventContextKey(String id, String name, Class<T> allowed) {
         this.id = checkNotNull(id, "Id");
         this.allowed = checkNotNull(allowed, "Allowed");
+        this.name = checkNotNull(name, "Name");
     }
 
     @Override
@@ -45,7 +48,7 @@ public class SpongeEventContextKey<T> implements EventContextKey<T> {
 
     @Override
     public String getName() {
-        return this.id;
+        return this.name;
     }
 
     @Override
@@ -55,7 +58,9 @@ public class SpongeEventContextKey<T> implements EventContextKey<T> {
 
     @Override
     public String toString() {
-        return this.id;
+        return Objects.toStringHelper(this)
+            .add("id", this.id)
+            .toString();
     }
 
     @Override

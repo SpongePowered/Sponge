@@ -45,6 +45,8 @@ import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.common.event.SpongeEventContextKey;
+import org.spongepowered.common.registry.type.AbstractPrefixAlternateCatalogTypeRegistryModule;
+import org.spongepowered.common.registry.type.AbstractPrefixCheckCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,25 +56,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("rawtypes")
-public final class EventContextKeysModule implements AlternateCatalogRegistryModule<EventContextKey>, AdditionalCatalogRegistryModule<EventContextKey> {
+@RegisterCatalog(EventContextKeys.class)
+public final class EventContextKeysModule
+    extends AbstractPrefixAlternateCatalogTypeRegistryModule<EventContextKey>
+    implements AdditionalCatalogRegistryModule<EventContextKey> {
 
     private static final EventContextKeysModule INSTANCE = new EventContextKeysModule();
 
     public static EventContextKeysModule getInstance() {
         return INSTANCE;
-    }
-
-    @RegisterCatalog(EventContextKeys.class)
-    private final Map<String, EventContextKey> keyMappings = new HashMap<>();
-
-    @Override
-    public Optional<EventContextKey> getById(String id) {
-        return Optional.ofNullable(this.keyMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<EventContextKey> getAll() {
-        return ImmutableList.copyOf(this.keyMappings.values());
     }
 
     @Override
@@ -81,39 +73,31 @@ public final class EventContextKeysModule implements AlternateCatalogRegistryMod
         final String key = id.toLowerCase(Locale.ENGLISH);
         checkArgument(!key.contains("sponge:"), "Cannot register spoofed event context key!");
         checkArgument(!key.contains("minecraft:"), "Cannot register spoofed event context key!");
-        checkArgument(!this.keyMappings.containsKey(key), "Cannot register an already registered EventContextKey: %s", key);
-        this.keyMappings.put(key, extraCatalog);
+        checkArgument(!this.catalogTypeMap.containsKey(key), "Cannot register an already registered EventContextKey: %s", key);
+        this.catalogTypeMap.put(key, extraCatalog);
 
     }
 
     @Override
     public void registerDefaults() {
-        this.keyMappings.put("sponge:creator", new SpongeEventContextKey<>("sponge:creator", UUID.class));
-        this.keyMappings.put("sponge:damage_type", new SpongeEventContextKey<>("sponge:damage_type", DamageType.class));
-        this.keyMappings.put("sponge:dismount_type", new SpongeEventContextKey<>("sponge:dismount_type", DismountType.class));
-        this.keyMappings.put("sponge:igniter", new SpongeEventContextKey<>("sponge:igniter", User.class));
-        this.keyMappings.put("sponge:last_damage_source", new SpongeEventContextKey<>("sponge:last_damage_source", DamageSource.class));
-        this.keyMappings.put("sponge:notifier", new SpongeEventContextKey<>("sponge:notifier", User.class));
-        this.keyMappings.put("sponge:owner", new SpongeEventContextKey<>("sponge:owner", User.class));
-        this.keyMappings.put("sponge:player", new SpongeEventContextKey<>("sponge:player", Player.class));
-        this.keyMappings.put("sponge:player_simulated", new SpongeEventContextKey<>("sponge:player_simulated", GameProfile.class));
-        this.keyMappings.put("sponge:projectile_source", new SpongeEventContextKey<>("sponge:projectile_source", ProjectileSource.class));
-        this.keyMappings.put("sponge:service_manager", new SpongeEventContextKey<>("sponge:service_manager", ServiceManager.class));
-        this.keyMappings.put("sponge:spawn_type", new SpongeEventContextKey<>("sponge:spawn_type", SpawnType.class));
-        this.keyMappings.put("sponge:teleport_type", new SpongeEventContextKey<>("sponge:teleport_type", TeleportType.class));
-        this.keyMappings.put("sponge:thrower", new SpongeEventContextKey<>("sponge:thrower", User.class));
-        this.keyMappings.put("sponge:weapon", new SpongeEventContextKey<>("sponge:weapon", ItemStackSnapshot.class));
+        this.catalogTypeMap.put("sponge:creator", new SpongeEventContextKey<>("sponge:creator", "Creator", UUID.class));
+        this.catalogTypeMap.put("sponge:damage_type", new SpongeEventContextKey<>("sponge:damage_type", "Damage Type", DamageType.class));
+        this.catalogTypeMap.put("sponge:dismount_type", new SpongeEventContextKey<>("sponge:dismount_type", "Dimension Type", DismountType.class));
+        this.catalogTypeMap.put("sponge:igniter", new SpongeEventContextKey<>("sponge:igniter", "Igniter", User.class));
+        this.catalogTypeMap.put("sponge:last_damage_source", new SpongeEventContextKey<>("sponge:last_damage_source", "Last Damage Source", DamageSource.class));
+        this.catalogTypeMap.put("sponge:notifier", new SpongeEventContextKey<>("sponge:notifier", "Notifier", User.class));
+        this.catalogTypeMap.put("sponge:owner", new SpongeEventContextKey<>("sponge:owner", "Owner", User.class));
+        this.catalogTypeMap.put("sponge:player", new SpongeEventContextKey<>("sponge:player", "Player", Player.class));
+        this.catalogTypeMap.put("sponge:player_simulated", new SpongeEventContextKey<>("sponge:player_simulated", "Game Profile", GameProfile.class));
+        this.catalogTypeMap.put("sponge:projectile_source", new SpongeEventContextKey<>("sponge:projectile_source", "Projectile Source", ProjectileSource.class));
+        this.catalogTypeMap.put("sponge:service_manager", new SpongeEventContextKey<>("sponge:service_manager", "Service Manager", ServiceManager.class));
+        this.catalogTypeMap.put("sponge:spawn_type", new SpongeEventContextKey<>("sponge:spawn_type", "Spawn Type", SpawnType.class));
+        this.catalogTypeMap.put("sponge:teleport_type", new SpongeEventContextKey<>("sponge:teleport_type", "Teleport Type", TeleportType.class));
+        this.catalogTypeMap.put("sponge:thrower", new SpongeEventContextKey<>("sponge:thrower", "Thrower", User.class));
+        this.catalogTypeMap.put("sponge:weapon", new SpongeEventContextKey<>("sponge:weapon", "Weapon", ItemStackSnapshot.class));
     }
 
-    @Override
-    public Map<String, EventContextKey> provideCatalogMap() {
-        final HashMap<String, EventContextKey> map = new HashMap<>();
-        for (Map.Entry<String, EventContextKey> entry : this.keyMappings.entrySet()) {
-            map.put(entry.getKey().replace("minecraft:", "").replace("sponge:", ""), entry.getValue());
-        }
-        return map;
-    }
-
-    EventContextKeysModule() {
+    private EventContextKeysModule() {
+        super("sponge");
     }
 }
