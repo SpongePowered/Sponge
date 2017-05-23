@@ -33,6 +33,7 @@ import org.spongepowered.api.command.conversation.Conversation;
 import org.spongepowered.api.command.conversation.ConversationArchetype;
 import org.spongepowered.api.command.conversation.EndingHandler;
 import org.spongepowered.api.command.conversation.ExternalChatHandler;
+import org.spongepowered.api.command.conversation.ExternalChatHandlerType;
 import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -85,7 +86,7 @@ public class SpongeConversation implements Conversation {
         this.catchesOutput = archetype.catchesOutput();
         this.allowCommands = archetype.allowsCommands();
         this.currentQuestion = archetype.getFirstQuestion();
-        conversants.forEach(c -> this.externalChatHandlers.put(c, archetype.getDefaultChatHandler()));
+        conversants.forEach(c -> this.externalChatHandlers.put(c, archetype.getDefaultChatHandlerType().createFor(this, c)));
 
         Task.builder()
                 .async()
@@ -168,9 +169,10 @@ public class SpongeConversation implements Conversation {
     }
 
     @Override
-    public void addConversant(Conversant conversant, ExternalChatHandler externalChatHandler) {
+    public void addConversant(Conversant conversant, ExternalChatHandlerType externalChatHandlerType) {
         this.externalChatHandlers.put(checkNotNull(conversant, "The conversant you specify cannot be null!"),
-            checkNotNull(externalChatHandler, "The external chat handler you specify for this conversant cannot be null!"));
+            checkNotNull(externalChatHandlerType, "The external chat handler type you specify for this conversant cannot be null!")
+                    .createFor(this, conversant));
         if (this.currentQuestion != null) {
             this.archetype.getBanner().ifPresent(conversant::sendThroughMessage);
             this.archetype.getHeader().ifPresent(conversant::sendThroughMessage);
@@ -183,7 +185,7 @@ public class SpongeConversation implements Conversation {
         checkNotNull(conversant, "The conversant you input to remove cannot be null!");
         synchronized (this.externalChatHandlers) {
             if (this.externalChatHandlers.containsKey(conversant)) {
-                this.externalChatHandlers.remove(conversant).finish(conversant);
+                this.externalChatHandlers.remove(conversant).finish();
                 conversant.removeFromConversation();
             }
         }
@@ -195,14 +197,16 @@ public class SpongeConversation implements Conversation {
     }
 
     @Override
-    public void setChatHandler(Conversant conversant, ExternalChatHandler externalChatHandler) {
-        checkNotNull(externalChatHandler, "The external chat handler you specify cannot be null!");
+    public void setChatHandler(Conversant conversant, ExternalChatHandlerType externalChatHandlerType) {
+        checkNotNull(externalChatHandlerType, "The external chat handler type you specify cannot be null!");
         synchronized (this.externalChatHandlers) {
             if (!this.externalChatHandlers.containsKey(conversant)) {
                 SpongeImpl.getLogger().error("A conversant must be in the conversation for you to modify their external chat handler!");
                 return;
             }
-            this.externalChatHandlers.put(conversant, externalChatHandler);
+            ExternalChatHandler newHandler = externalChatHandlerType.createFor(this, conversant);
+            this.externalChatHandlers.remove(conversant).drainTo(newHandler);
+            this.externalChatHandlers.put(conversant, newHandler);
         }
     }
 

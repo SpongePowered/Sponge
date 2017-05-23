@@ -33,7 +33,7 @@ import org.spongepowered.api.command.conversation.Conversant;
 import org.spongepowered.api.command.conversation.Conversation;
 import org.spongepowered.api.command.conversation.ConversationArchetype;
 import org.spongepowered.api.command.conversation.EndingHandler;
-import org.spongepowered.api.command.conversation.ExternalChatHandler;
+import org.spongepowered.api.command.conversation.ExternalChatHandlerType;
 import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
@@ -50,7 +50,7 @@ public class SpongeConversationArchetype implements ConversationArchetype {
 
     private final Question question;
     private Set<EndingHandler> endingHandlers = new HashSet<>();
-    private final ExternalChatHandler defaultChatHandler;
+    private final ExternalChatHandlerType defaultChatHandlerType;
     private final CancellingHandler cancellingHandler;
     private final String id;
     private final Optional<Text> banner;
@@ -68,7 +68,7 @@ public class SpongeConversationArchetype implements ConversationArchetype {
      *
      * @param firstQuestion The first question
      * @param catchesOutput Whether or not to catch conversant output
-     * @param defaultHandler The default handler applied to conversants
+     * @param defaultChatHandlerType The default chat handler type applied to conversants
      * @param endingHandlers The ending handlers for the conversation
      * @param startingMessage The message sent to conversants at the start of
      *     the conversation
@@ -79,14 +79,14 @@ public class SpongeConversationArchetype implements ConversationArchetype {
      * @param commandUsageMessage The no command usage message
      * @param cancellingHandler The cancelling handler
      */
-    SpongeConversationArchetype(Question firstQuestion, boolean catchesOutput, boolean allowCommands, ExternalChatHandler defaultHandler,
+    SpongeConversationArchetype(Question firstQuestion, boolean catchesOutput, boolean allowCommands, ExternalChatHandlerType defaultChatHandlerType,
             Set<EndingHandler> endingHandlers, @Nullable Text startingMessage, String id, @Nullable Text title, @Nullable Text padding,
             @Nullable Text header, Text commandUsageMessage, CancellingHandler cancellingHandler) {
         this.question = firstQuestion;
         this.endingHandlers = endingHandlers;
         this.catchesOutput = catchesOutput;
         this.allowCommands = allowCommands;
-        this.defaultChatHandler = defaultHandler;
+        this.defaultChatHandlerType = defaultChatHandlerType;
         this.startingMessage = Optional.ofNullable(startingMessage);
         this.id = id.toLowerCase();
         this.title = Optional.ofNullable(title);
@@ -131,8 +131,8 @@ public class SpongeConversationArchetype implements ConversationArchetype {
     }
 
     @Override
-    public ExternalChatHandler getDefaultChatHandler() {
-        return this.defaultChatHandler;
+    public ExternalChatHandlerType getDefaultChatHandlerType() {
+        return this.defaultChatHandlerType;
     }
 
     @Override

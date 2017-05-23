@@ -32,10 +32,9 @@ import static org.spongepowered.api.command.args.GenericArguments.remainingRawJo
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
-import org.slf4j.Logger;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -65,7 +64,6 @@ import org.spongepowered.common.SpongeImpl;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,8 +91,8 @@ public class SpongeConversationManager implements ConversationManager {
 
     @Override
     public Collection<Conversation> getConversation(PluginContainer plugin, String id) {
-        checkNotNull("The specified plugin container cannot be null!");
-        checkNotNull("The specified id cannot be null!");
+        checkNotNull(plugin, "The specified plugin container cannot be null!");
+        checkNotNull(id, "The specified id cannot be null!");
         return this.conversations.get(plugin.getId() + ":" + id.toLowerCase());
     }
 
@@ -246,9 +244,8 @@ public class SpongeConversationManager implements ConversationManager {
     @Override
     public void endAll(ConversationEndType endType, Cause cause) {
         synchronized (this.conversations) {
-            Iterator<Conversation> conversationIterator = this.conversations.values().iterator();
-            while (conversationIterator.hasNext()) {
-                conversationIterator.next().end(endType, cause);
+            for (Conversation conversation : this.conversations.values()) {
+                conversation.end(endType, cause);
             }
         }
     }

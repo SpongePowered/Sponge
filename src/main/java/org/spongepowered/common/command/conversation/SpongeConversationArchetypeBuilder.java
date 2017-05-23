@@ -32,8 +32,8 @@ import org.spongepowered.api.command.conversation.CancellingHandler;
 import org.spongepowered.api.command.conversation.ConversationArchetype;
 import org.spongepowered.api.command.conversation.ConversationArchetype.Builder;
 import org.spongepowered.api.command.conversation.EndingHandler;
-import org.spongepowered.api.command.conversation.ExternalChatHandler;
-import org.spongepowered.api.command.conversation.ExternalChatHandlers;
+import org.spongepowered.api.command.conversation.ExternalChatHandlerType;
+import org.spongepowered.api.command.conversation.ExternalChatHandlerTypes;
 import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -61,7 +61,7 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
     private Set<EndingHandler> endingHandlers = new HashSet<>();
     @Nullable private String id;
     @Nullable private Question firstQuestion;
-    @Nullable private ExternalChatHandler defaultHandler;
+    @Nullable private ExternalChatHandlerType defaultChatHandlerType;
     @Nullable private CancellingHandler cancellingHandler;
     @Nullable private Text startingMessage;
     @Nullable private Text title;
@@ -76,7 +76,7 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
         this.id = value.getId();
         this.firstQuestion = value.getFirstQuestion();
         this.endingHandlers = value.getEndingHandlers();
-        this.defaultHandler = value.getDefaultChatHandler();
+        this.defaultChatHandlerType = value.getDefaultChatHandlerType();
         this.cancellingHandler = value.getCancellingHandler();
         this.catchesOutput = value.catchesOutput();
         this.startingMessage = value.getStartingMessage().orElse(null);
@@ -92,7 +92,7 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
         this.endingHandlers.clear();
         this.id = null;
         this.firstQuestion = null;
-        this.defaultHandler = null;
+        this.defaultChatHandlerType = null;
         this.startingMessage = null;
         this.title = null;
         this.padding = null;
@@ -179,20 +179,20 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
     }
 
     @Override
-    public Builder defaultChatHandler(ExternalChatHandler externalChatHandler) {
-        this.defaultHandler = checkNotNull(externalChatHandler, "The external chat handler cannot be null!");
+    public Builder defaultChatHandlerType(ExternalChatHandlerType externalChatHandlerType) {
+        this.defaultChatHandlerType = checkNotNull(externalChatHandlerType, "The external chat handler type cannot be null!");
         return this;
     }
 
     @Override
     public Builder catchesOutput(boolean catches) {
-        this.catchesOutput = checkNotNull(catches, "The catches output boolean cannot be null!");
+        this.catchesOutput = catches;
         return this;
     }
 
     @Override
     public Builder allowCommands(boolean allow) {
-        this.allowCommands = checkNotNull(allow, "The allow commands boolean cannot be null!");
+        this.allowCommands = allow;
         return this;
     }
 
@@ -209,14 +209,15 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
         if (this.commandUsageMessage == null) {
             this.commandUsageMessage = defaultCommandUsageMethod;
         }
-        if (this.defaultHandler == null) {
-            this.defaultHandler = ExternalChatHandlers.deleteAll();
+        if (this.defaultChatHandlerType == null) {
+            this.defaultChatHandlerType = ExternalChatHandlerTypes.DISCARD;
         }
         if (this.cancellingHandler == null) {
             this.cancellingHandler = defaultCancellingHandler;
         }
-        return new SpongeConversationArchetype(this.firstQuestion, this.catchesOutput, this.allowCommands, this.defaultHandler, this.endingHandlers,
-                this.startingMessage, this.id, this.title, this.padding, this.header, this.commandUsageMessage, this.cancellingHandler);
+        return new SpongeConversationArchetype(this.firstQuestion, this.catchesOutput, this.allowCommands,
+                this.defaultChatHandlerType, this.endingHandlers, this.startingMessage, this.id, this.title,
+                this.padding, this.header, this.commandUsageMessage, this.cancellingHandler);
     }
 
 }

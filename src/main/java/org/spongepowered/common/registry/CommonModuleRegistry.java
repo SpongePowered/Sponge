@@ -37,6 +37,7 @@ import org.spongepowered.api.boss.BossBarColor;
 import org.spongepowered.api.boss.BossBarOverlay;
 import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.command.conversation.ConversationArchetype;
+import org.spongepowered.api.command.conversation.ExternalChatHandlerType;
 import org.spongepowered.api.command.conversation.Question;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
@@ -169,6 +170,7 @@ import org.spongepowered.common.registry.type.*;
 import org.spongepowered.common.registry.type.block.*;
 import org.spongepowered.common.registry.type.boss.BossBarColorRegistryModule;
 import org.spongepowered.common.registry.type.boss.BossBarOverlayRegistryModule;
+import org.spongepowered.common.registry.type.conversation.ExternalChatHandlerTypeRegistryModule;
 import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
 import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 import org.spongepowered.common.registry.type.data.HandTypeRegistryModule;
@@ -450,6 +452,7 @@ public final class CommonModuleRegistry {
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
             .registerModule(StructureMode.class, new StructureModeRegistryModule())
             .registerModule(ConversationEndType.class, new ConversationEndTypeRegistryModule())
+            .registerModule(ExternalChatHandlerType.class, new ExternalChatHandlerTypeRegistryModule())
 
             // Miscellaneous Registries
             .registerModule(DungeonMobRegistryModule.getInstance())

@@ -22,42 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.conversation;
+package org.spongepowered.common.command.conversation;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.event.cause.conversation.ConversationEndType;
+import org.spongepowered.api.command.conversation.ExternalChatHandlerType;
 
-import java.util.Locale;
+public abstract class SpongeExternalChatHandlerType implements ExternalChatHandlerType {
 
-public class SpongeConversationEndType implements ConversationEndType {
-
-    private final String name;
     private final String id;
+    private final String name;
 
-    public SpongeConversationEndType(String id, String name) {
+    public SpongeExternalChatHandlerType(String id, String name) {
+        this.id = id;
         this.name = name;
-        this.id = id.toLowerCase(Locale.ENGLISH);
     }
 
     @Override
     public String getId() {
         return this.id;
     }
+
     @Override
     public String getName() {
         return this.name;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SpongeConversationEndType other = (SpongeConversationEndType) obj;
-        return this.id.equals(other.id);
     }
 
     @Override
@@ -68,9 +55,9 @@ public class SpongeConversationEndType implements ConversationEndType {
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-            .add("id", this.id)
-            .add("name", this.name)
-            .toString();
+                .add("id", this.id)
+                .add("name", this.name)
+                .toString();
     }
 
 }
