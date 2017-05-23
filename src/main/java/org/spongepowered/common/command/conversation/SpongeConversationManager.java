@@ -82,11 +82,15 @@ public class SpongeConversationManager implements ConversationManager {
     private final Multimap<String, Conversation> conversations;
     private final Logger logger;
 
+    /**
+     * Creates the conversation manager, is injected with Guice.
+     *
+     * @param logger The logger for Sponge
+     */
     @Inject
     public SpongeConversationManager(Logger logger) {
         this.logger = logger;
         this.conversations = Multimaps.synchronizedMultimap(HashMultimap.create());
-        registerCommand();
     }
 
     @Override
@@ -250,8 +254,8 @@ public class SpongeConversationManager implements ConversationManager {
         }
     }
 
-    private void registerCommand() {
-        final CommandSpec command = CommandSpec.builder()
+    public static CommandSpec getCommand() {
+        return CommandSpec.builder()
                 .description(Text.of("Allows you to add to a conversation with a command."))
                 .arguments(optional(onlyOne(remainingRawJoinedStrings(Text.of("message")))))
                 .executor((src, args) -> {
@@ -273,8 +277,6 @@ public class SpongeConversationManager implements ConversationManager {
                     }
                 })
                 .build();
-
-        Sponge.getCommandManager().register(SpongeImpl.getPlugin(), command, "conversation", "conv");
     }
 
 }

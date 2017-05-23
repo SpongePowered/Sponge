@@ -40,6 +40,7 @@ import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.command.SpongeCommand;
 import org.spongepowered.common.command.SpongeHelpCommand;
+import org.spongepowered.common.command.conversation.SpongeConversationManager;
 import org.spongepowered.common.service.ban.SpongeBanService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
@@ -75,6 +76,7 @@ public final class SpongeBootstrap {
         commandManager.register(SpongeImpl.getPlugin(), SpongeCommand.getCommand(), "sponge", "sp");
         commandManager.register(SpongeImpl.getPlugin(), SpongeHelpCommand.create(), "help", "?");
         commandManager.register(SpongeImpl.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
+        commandManager.register(SpongeImpl.getPlugin(), SpongeConversationManager.getCommand(), "conversation", "conv");
     }
 
     private static <T> void registerService(Class<T> serviceClass, T serviceImpl) {

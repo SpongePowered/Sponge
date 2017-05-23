@@ -36,6 +36,7 @@ import org.spongepowered.api.command.conversation.ExternalChatHandlerType;
 import org.spongepowered.api.command.conversation.ExternalChatHandlerTypes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
+import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.command.conversation.SpongeExternalChatHandlerType;
@@ -80,6 +81,7 @@ public class ExternalChatHandlerTypeRegistryModule implements AlternateCatalogRe
         }
     };
 
+    @RegisterCatalog(ExternalChatHandlerTypes.class)
     private final Map<String, ExternalChatHandlerType> chatHandlerTypes = new HashMap<>();
 
     @Override
@@ -200,7 +202,7 @@ public class ExternalChatHandlerTypeRegistryModule implements AlternateCatalogRe
                     public void finish() {
                         Task.builder()
                                 .async()
-                                .interval(4, TimeUnit.SECONDS)
+                                .interval(2, TimeUnit.SECONDS)
                                 .name(Objects.toStringHelper(this)
                                         .add("id", getId())
                                         .add("name", getName())

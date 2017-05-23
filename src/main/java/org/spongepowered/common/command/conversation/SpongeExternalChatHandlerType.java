@@ -32,7 +32,14 @@ public abstract class SpongeExternalChatHandlerType implements ExternalChatHandl
     private final String id;
     private final String name;
 
-    public SpongeExternalChatHandlerType(String id, String name) {
+    /**
+     * Constructs a new external chat handler type, with the specified
+     * id and name.
+     *
+     * @param id The id of the external chat handler type
+     * @param name The name of the external chat handler type
+     */
+    protected SpongeExternalChatHandlerType(String id, String name) {
         this.id = id;
         this.name = name;
     }
