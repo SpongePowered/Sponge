@@ -399,6 +399,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
+    public UUID getUniqueId() {
+        return checkNotNull(this.getProperties().getUniqueId(), "World Properties has a null UUID");
+    }
+
+    @Override
     public void updateWorldGenerator() {
 
         // Get the default generator for the world type

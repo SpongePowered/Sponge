@@ -73,7 +73,6 @@ import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
@@ -131,6 +130,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.util.math.IMixinBlockPos;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.mixin.tileentityactivation.MixinWorldServer_TileEntityActivation;
@@ -313,6 +313,34 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Collection<Player> getPlayers() {
         return ImmutableList.copyOf((Collection<Player>) (Object) this.playerEntities);
+    }
+
+    /**
+     * Specifically verify the {@link UUID} for this world is going to be valid, in
+     * certain cases, there are mod worlds that are extending {@link net.minecraft.world.World}
+     * and have custom {@link WorldInfo}s, which ends up causing issues with
+     * plugins expecting a valid uuid for each world.
+     *
+     * <p>TODO There may be some issues with plugins somehow picking up these "fake"
+     * worlds with regards to their block changes, and therefor cause issues when
+     * those plugins are finding those worlds, instead of traditional
+     * {@link WorldServer} instances.</p>
+     *
+     * @return The world id, verified from the properties
+     */
+    @Override
+    public UUID getUniqueId() {
+        final WorldProperties properties = this.getProperties();
+        final UUID worldId = properties.getUniqueId();
+        if (worldId == null) {
+            // Some mod worlds make their own WorldInfos for "fake" worlds.
+            // Specifically fixes https://github.com/SpongePowered/SpongeForge/issues/1527
+            // and https://github.com/BuildCraft/BuildCraft/issues/3594
+            final IMixinWorldInfo mixinWorldInfo = (IMixinWorldInfo) properties;
+            mixinWorldInfo.setUniqueId(UUID.randomUUID());
+            return properties.getUniqueId();
+        }
+        return worldId;
     }
 
     @Override
