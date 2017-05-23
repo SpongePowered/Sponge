@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.command.conversation.CancellingHandler;
 import org.spongepowered.api.command.conversation.ConversationArchetype;
 import org.spongepowered.api.command.conversation.ConversationArchetype.Builder;
@@ -42,6 +43,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -75,7 +77,7 @@ public class SpongeConversationArchetypeBuilder implements ConversationArchetype
     public Builder from(ConversationArchetype value) {
         this.id = value.getId();
         this.firstQuestion = value.getFirstQuestion();
-        this.endingHandlers = value.getEndingHandlers();
+        this.endingHandlers = new HashSet<>(value.getEndingHandlers());
         this.defaultChatHandlerType = value.getDefaultChatHandlerType();
         this.cancellingHandler = value.getCancellingHandler();
         this.catchesOutput = value.catchesOutput();
