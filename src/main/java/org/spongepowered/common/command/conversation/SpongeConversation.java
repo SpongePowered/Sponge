@@ -201,8 +201,7 @@ public class SpongeConversation implements Conversation {
         checkNotNull(externalChatHandlerType, "The external chat handler type you specify cannot be null!");
         synchronized (this.externalChatHandlers) {
             if (!this.externalChatHandlers.containsKey(conversant)) {
-                SpongeImpl.getLogger().error("A conversant must be in the conversation for you to modify their external chat handler!");
-                return;
+                throw new IllegalArgumentException("A conversant must be in the conversation for you to modify their external chat handler!");
             }
             ExternalChatHandler newHandler = externalChatHandlerType.createFor(this, conversant);
             this.externalChatHandlers.remove(conversant).drainTo(newHandler);
