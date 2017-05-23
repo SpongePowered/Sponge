@@ -88,7 +88,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     private boolean initialized;
     private Map<Integer, SlotAdapter> adapters = new HashMap<>();
     private InventoryArchetype archetype;
-    protected Optional<Carrier> carrier;
+    protected Optional<Carrier> carrier = Optional.empty();
     protected Optional<Predicate<EntityPlayer>> canInteractWithPredicate = Optional.empty();
 
     private void init() {
