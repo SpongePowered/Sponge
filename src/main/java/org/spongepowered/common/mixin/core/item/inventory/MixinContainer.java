@@ -45,6 +45,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -266,7 +267,18 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     @Override
     public SlotAdapter getSlotAdapter(int slot) {
-        return this.adapters.get(slot);
+        SlotAdapter adapter = this.adapters.get(slot);
+        if (adapter == null) // Slot is not in Lens
+        {
+            Slot mcSlot = this.inventorySlots.get(slot); // Try falling back to vanilla slot
+            if (mcSlot == null)
+            {
+                SpongeImpl.getLogger().warn("Could not find slot #%s in Container %s", slot, getClass().getName());
+                return null;
+            }
+            return new SlotAdapter(mcSlot);
+        }
+        return adapter;
     }
 }
 
