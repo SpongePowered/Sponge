@@ -396,6 +396,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
+    public UUID getUniqueId() {
+        return checkNotNull(this.getProperties().getUniqueId(), "World Properties has a null UUID");
+    }
+
+    @Override
     public Path getDirectory() {
         final File worldDirectory = this.saveHandler.getWorldDirectory();
         if (worldDirectory == null) {
