@@ -41,9 +41,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     private Explosive sourceExplosive;
     private float radius;
     private boolean canCauseFire;
-    private boolean shouldBreakBlocks;
+    private boolean shouldBreakBlocks = true;
     private boolean shouldSmoke;
-    private boolean shouldDamageEntities;
+    private boolean shouldDamageEntities = true;
 
     public SpongeExplosionBuilder() {
         reset();
@@ -109,9 +109,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         this.sourceExplosive = null;
         this.radius = 0;
         this.canCauseFire = false;
-        this.shouldBreakBlocks = false;
+        this.shouldBreakBlocks = true;
         this.shouldSmoke = false;
-        this.shouldDamageEntities = false;
+        this.shouldDamageEntities = true;
         return this;
     }
 
