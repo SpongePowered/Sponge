@@ -51,6 +51,7 @@ import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityChest;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -346,7 +347,13 @@ public final class ContainerUtil {
      */
     public static SlotCollection countSlots(net.minecraft.inventory.Container container) {
         if (container instanceof ContainerPlayer) {
-            return new SlotCollection.Builder().add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false)).add(4).add(4, EquipmentSlotAdapter.class).add(36).add(1).build();
+            SlotCollection.Builder builder = new SlotCollection.Builder().add(1, CraftingOutputAdapter.class, (i) -> new CraftingOutputSlotLensImpl(i, (t) -> false, (t) -> false)).add(4).add(4, EquipmentSlotAdapter.class).add(36).add(1);
+            ContainerPlayer containerPlayer = (ContainerPlayer) container;
+            NonNullList<ItemStack> inventory = containerPlayer.getInventory();
+            if(inventory.size() > 46) {
+                builder.add(inventory.size() - 46);
+            }
+            return builder.build();
         }
         return new SlotCollection.Builder().add(((MinecraftInventoryAdapter) container).getInventory().getSize()).build();
     }
