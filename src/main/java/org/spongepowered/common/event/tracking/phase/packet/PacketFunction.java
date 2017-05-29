@@ -576,6 +576,10 @@ public interface PacketFunction {
                 }
             });
         }
+
+        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+        mixinContainer.setCaptureInventory(false);
+        mixinContainer.getCapturedTransactions().clear();
     };
 
     static void processSpawnedEntities(EntityPlayerMP player, SpawnEntityEvent event) {
@@ -786,6 +790,10 @@ public interface PacketFunction {
             }
 
         });
+
+        final IMixinContainer mixinContainer = ContainerUtil.toMixin(player.openContainer);
+        mixinContainer.setCaptureInventory(false);
+        mixinContainer.getCapturedTransactions().clear();
     };
     PacketFunction HELD_ITEM_CHANGE = ((packet, state, player, context) -> {
         final CPacketHeldItemChange itemChange = (CPacketHeldItemChange) packet;
