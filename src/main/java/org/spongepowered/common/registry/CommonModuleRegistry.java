@@ -39,6 +39,7 @@ import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.command.conversation.ConversationArchetype;
 import org.spongepowered.api.command.conversation.ExternalChatHandlerType;
 import org.spongepowered.api.command.conversation.Question;
+import org.spongepowered.api.command.conversation.QuestionResult;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.meta.PatternLayer;
@@ -140,6 +141,7 @@ import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
 import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.command.conversation.SpongeConversationArchetypeBuilder;
 import org.spongepowered.common.command.conversation.SpongeQuestionBuilder;
+import org.spongepowered.common.command.conversation.SpongeQuestionResultBuilder;
 import org.spongepowered.common.data.SpongeDataRegistrationBuilder;
 import org.spongepowered.common.data.builder.data.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
@@ -339,6 +341,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(DataRegistration.Builder.class, SpongeDataRegistrationBuilder::new)
             .registerBuilderSupplier(Question.Builder.class, SpongeQuestionBuilder::new)
             .registerBuilderSupplier(ConversationArchetype.Builder.class, SpongeConversationArchetypeBuilder::new)
+            .registerBuilderSupplier(QuestionResult.Builder.class, SpongeQuestionResultBuilder::new)
         ;
     }
 

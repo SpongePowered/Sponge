@@ -76,7 +76,7 @@ import javax.inject.Singleton;
  * are stored. Conversation creation and processing occurs here as well.
  */
 @Singleton
-public class SpongeConversationManager implements ConversationManager {
+public final class SpongeConversationManager implements ConversationManager {
 
     // Note this is synchronized
     private final Multimap<String, Conversation> conversations;
