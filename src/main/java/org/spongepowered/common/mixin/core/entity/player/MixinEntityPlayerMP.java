@@ -407,9 +407,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void sendThroughMessage(Text message) {
-        checkNotNull(message, "The message text cannot be null!");
-        this.connection.sendPacket(new SPacketChat(SpongeTexts.toComponent(message)));
+    public void sendMessage(Text message, boolean ignoreConversation) {
+        if (ignoreConversation) {
+            checkNotNull(message, "The message text cannot be null!");
+            this.connection.sendPacket(new SPacketChat(SpongeTexts.toComponent(message)));
+        } else {
+            sendMessage(ChatTypes.CHAT, message);
+        }
     }
 
     @Override
@@ -417,8 +421,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         checkNotNull(type, "type");
         checkNotNull(message, "message");
 
-        if (this.conversation != null && this.conversation.getChatHandler(this).isPresent()
-            && !this.conversation.getChatHandler(this).get().process(message)) {
+        if (type != ChatTypes.ACTION_BAR
+                && this.conversation != null
+                && this.conversation.getChatHandler(this).isPresent()
+                && !this.conversation.getChatHandler(this).get().process(message)) {
             return;
         }
 

@@ -127,22 +127,20 @@ public class SpongeConversation implements Conversation {
     }
 
     @Override
-    public void setQuestion(@Nullable Question question) {
-        this.currentQuestion = question;
-        if (question != null) {
-            synchronized (this.externalChatHandlers) {
-                final Set<Conversant> conversants = this.externalChatHandlers.keySet();
-                this.archetype.getBanner().ifPresent(b -> conversants.forEach(c -> c.sendThroughMessage(b)));
-                this.archetype.getHeader().ifPresent(h -> conversants.forEach(c -> c.sendThroughMessage(h)));
-                conversants.forEach(c -> c.sendThroughMessage(question.getPromptHandler().getPrompt(this, this.context)));
-            }
+    public void setQuestion(Question question) {
+        this.currentQuestion = checkNotNull(question, "The question you set cannot be null!");
+        synchronized (this.externalChatHandlers) {
+            final Set<Conversant> conversants = this.externalChatHandlers.keySet();
+            this.archetype.getBanner().ifPresent(b -> conversants.forEach(c -> c.sendMessage(b, true)));
+            this.archetype.getHeader().ifPresent(h -> conversants.forEach(c -> c.sendMessage(h, true)));
+            conversants.forEach(c -> c.sendMessage(question.getPromptHandler().getPrompt(this, this.context), true));
         }
     }
 
     @Override
     public boolean end(ConversationEndType endType, Cause cause) {
         cause = cause.with(NamedCause.of(endType.getName(), ConversationEndCause.builder().type(endType).build()));
-        final ConversationCloseEvent.Ending endingEvent = SpongeEventFactory.createConversationCloseEventEnding(cause, this);
+        final ConversationCloseEvent.Ending endingEvent = SpongeEventFactory.createConversationCloseEventEnding(cause, this, Optional.empty());
 
         if (SpongeImpl.postEvent(endingEvent)) {
             return false;
@@ -174,9 +172,9 @@ public class SpongeConversation implements Conversation {
             checkNotNull(externalChatHandlerType, "The external chat handler type you specify for this conversant cannot be null!")
                     .createFor(this, conversant));
         if (this.currentQuestion != null) {
-            this.archetype.getBanner().ifPresent(conversant::sendThroughMessage);
-            this.archetype.getHeader().ifPresent(conversant::sendThroughMessage);
-            conversant.sendThroughMessage(this.currentQuestion.getPromptHandler().getPrompt(this, this.context));
+            this.archetype.getBanner().ifPresent(message -> conversant.sendMessage(message, true));
+            this.archetype.getHeader().ifPresent(message -> conversant.sendMessage(message, true));
+            conversant.sendMessage(this.currentQuestion.getPromptHandler().getPrompt(this, this.context), true);
         }
     }
 

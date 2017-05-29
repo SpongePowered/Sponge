@@ -136,7 +136,7 @@ public class ExternalChatHandlerTypeRegistryModule implements AlternateCatalogRe
 
                     @Override
                     public void accept(Text text) {
-                        conversant.sendThroughMessage(text);
+                        conversant.sendMessage(text, true);
                     }
                 };
             }
@@ -149,7 +149,7 @@ public class ExternalChatHandlerTypeRegistryModule implements AlternateCatalogRe
             }
         });
         this.chatHandlerTypes.put("sponge:send_on_completion",
-                new SpongeExternalChatHandlerType("sponge:send_on_completion", "Send nn Completion") {
+                new SpongeExternalChatHandlerType("sponge:send_on_completion", "Send on Completion") {
             @Override
             public ExternalChatHandler createFor(Conversation conversation, Conversant conversant) {
                 return new ExternalChatHandler() {
@@ -164,7 +164,7 @@ public class ExternalChatHandlerTypeRegistryModule implements AlternateCatalogRe
 
                     @Override
                     public void finish() {
-                        this.messages.forEach(conversant::sendThroughMessage);
+                        this.messages.forEach(message -> conversant.sendMessage(message, true));
                     }
 
                     @Override
@@ -211,7 +211,7 @@ public class ExternalChatHandlerTypeRegistryModule implements AlternateCatalogRe
                                 .execute(() -> {
                                     // Necessary to check if conversation contains conversant in-case reference is gone
                                     if (!this.messages.isEmpty() && conversation.getConversants().contains(conversant)) {
-                                        conversant.sendThroughMessage(this.messages.poll());
+                                        conversant.sendMessage(this.messages.poll(), true);
                                     }
                                 })
                                 .submit(conversation.getCreator());

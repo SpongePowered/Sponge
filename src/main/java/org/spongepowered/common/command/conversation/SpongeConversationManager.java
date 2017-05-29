@@ -151,7 +151,7 @@ public final class SpongeConversationManager implements ConversationManager {
             } else if (!conversation.hasEnded()) {
                 final Optional<Question> optionalQuestion = conversation.getCurrentQuestion();
                 if (!optionalQuestion.isPresent()) {
-                    conversant.sendThroughMessage(Text.of("Your current conversation has no current question. Feel free to attempt to leave it."));
+                    conversant.sendMessage(Text.of("Your current conversation has no current question. Feel free to attempt to leave it."), true);
                 } else {
                     final CommandContext context = new CommandContext();
                     final Question question = optionalQuestion.get();
@@ -164,7 +164,7 @@ public final class SpongeConversationManager implements ConversationManager {
                                 Optional<Question> nextQuestion = questionResult.getNextQuestion();
                                 if (!nextQuestion.isPresent()) {
                                     this.logger.error(conversant.getName() + "'s next question was missing. Their conversation is ending.");
-                                    conversant.sendThroughMessage(Text.of("Your next question is missing, ending conversation."));
+                                    conversant.sendMessage(Text.of("Your next question is missing, ending conversation."), true);
                                     conversation.end(ConversationEndTypes.ERROR, Cause.of(NamedCause.source(conversation.getCreator())));
                                     return true;
                                 }
@@ -182,7 +182,7 @@ public final class SpongeConversationManager implements ConversationManager {
                                 conversation.end(ConversationEndTypes.ERROR, Cause.of(NamedCause.source(SpongeImpl.getPlugin())));
                         }
                     } catch (ArgumentParseException e) {
-                        conversant.sendThroughMessage(Text.of("Failed to parse your specified arguments. Restarting question."));
+                        conversant.sendMessage(Text.of("Failed to parse your specified arguments. Restarting question."), true);
                         conversation.setQuestion(question);
                         this.logger.error("Failed to parse the arguments passed into {}'s conversation. Sending them the same question again.",
                                 conversant.getName(), e);
@@ -205,6 +205,11 @@ public final class SpongeConversationManager implements ConversationManager {
             return Optional.empty();
         }
 
+        if (startingEvent.getConversants().isEmpty()) {
+            // Do not start the conversation if there are no conversants
+            return Optional.empty();
+        }
+
         final Conversation conversation = new SpongeConversation(startingEvent.getArchetype(), startingEvent.getConversants(), plugin);
 
         for (Conversant c : startingEvent.getConversants()) {
@@ -223,7 +228,7 @@ public final class SpongeConversationManager implements ConversationManager {
             this.logger.error("A conversation with the id " + fullId + "'s first question was missing. The conversation is ending.");
             conversation.end(ConversationEndTypes.ERROR, Cause.of(NamedCause.source(conversation.getCreator())));
             for (Conversant conversant : conversation.getConversants()) {
-                conversant.sendThroughMessage(Text.of("Your first question is missing, forcing the conversation to end."));
+                conversant.sendMessage(Text.of("Your first question is missing, forcing the conversation to end."), true);
             }
             return Optional.empty();
         }
@@ -231,7 +236,7 @@ public final class SpongeConversationManager implements ConversationManager {
         final Optional<Text> startingMessage = conversation.getArchetype().getStartingMessage();
 
         // Send the initial message if one was set
-        startingMessage.ifPresent(s -> conversation.getConversants().forEach(c -> c.sendThroughMessage(s)));
+        startingMessage.ifPresent(s -> conversation.getConversants().forEach(c -> c.sendMessage(s, true)));
 
         conversation.setQuestion(archetype.getFirstQuestion());
 
@@ -254,7 +259,7 @@ public final class SpongeConversationManager implements ConversationManager {
         }
     }
 
-    public static CommandSpec getCommand() {
+    public static CommandSpec createCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Allows you to add to a conversation with a command."))
                 .arguments(optional(onlyOne(remainingRawJoinedStrings(Text.of("message")))))

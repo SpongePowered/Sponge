@@ -70,7 +70,6 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -278,7 +277,7 @@ public class SpongeCommandManager implements CommandManager {
                 final Optional<CommandMapping> optionalCommandMapping = get(commandLine.split(" ")[0]);
                 if (!(optionalCommandMapping.isPresent() && optionalCommandMapping.get().getPrimaryAlias().equalsIgnoreCase("conversation"))
                         && !conversation.allowsCommands()) {
-                    ((Conversant) source).sendThroughMessage(conversation.getArchetype().getNoCommandUsageMessage());
+                    ((Conversant) source).sendMessage(conversation.getArchetype().getNoCommandUsageMessage(), true);
                     return CommandResult.empty();
                 }
             }
