@@ -112,6 +112,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.LegacyCustomDataClassContentUpdater;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
+import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
@@ -153,7 +154,7 @@ public class DataRegistrar {
         dataManager.registerBuilder(EntitySnapshot.class, new SpongeEntitySnapshotBuilder());
 
         // ItemStack stuff
-        dataManager.registerBuilder(ItemStack.class, new SpongeItemStackDataBuilder());
+        dataManager.registerBuilder(ItemStack.class, new SpongeItemStackBuilder());
         dataManager.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotBuilder());
         dataManager.registerBuilder(ItemEnchantment.class, new SpongeItemEnchantmentBuilder());
         dataManager.registerBuilderAndImpl(ImmutableEnchantmentData.class, ImmutableSpongeEnchantmentData.class,
