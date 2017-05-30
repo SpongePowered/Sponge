@@ -99,14 +99,14 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
 
     @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
                 at = @At(value = "FIELD", ordinal = 0, target = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z"))
-    public void onHealFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
+    private void onHealFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
         SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventHealing(Cause.of(NamedCause.source(player)),
                 Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this));
     }
 
     @Inject(method = "processInteract", locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "FIELD", ordinal = 2, target = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z"))
-    public void onTameFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
+    private void onTameFeed(EntityPlayer player, EnumHand hand, CallbackInfoReturnable<Boolean> cir, ItemStack itemStack) {
         SpongeImpl.postEvent(SpongeEventFactory.createFeedAnimalEventTaming(Cause.of(NamedCause.source(player)),
                 Optional.of(this.getLocation()), ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot(), this));
     }
