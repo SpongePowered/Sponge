@@ -311,6 +311,7 @@ public class SpongeEventManager implements EventManager {
                     itr.remove();
                     changed = true;
                     this.checker.unregisterListenerFor(handler.getEventClass());
+                    this.registeredListeners.remove(handler.getHandle());
                 }
             }
         }
@@ -324,7 +325,6 @@ public class SpongeEventManager implements EventManager {
     public void unregisterListeners(final Object listener) {
         checkNotNull(listener, "listener");
         unregister(handler -> listener.equals(handler.getHandle()));
-        this.registeredListeners.remove(listener);
     }
 
     @Override
