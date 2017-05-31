@@ -29,6 +29,9 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportCause;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -47,6 +50,7 @@ public final class PluginPhase extends TrackingPhase {
         public static final IPhaseState CUSTOM_SPAWN = new PluginPhaseState();
         public static final IPhaseState CUSTOM_EXPLOSION = new CustomExplosionState();
         public static final IPhaseState SCHEDULED_TASK = new ScheduledTaskPhaseState();
+        public static final IPhaseState TELEPORT = new PluginPhaseState();
 
         private State() {
         }
@@ -109,6 +113,11 @@ public final class PluginPhase extends TrackingPhase {
         if (state instanceof ListenerPhaseState) {
             ((ListenerPhaseState) state).capturePlayerUsingStackToBreakBlocks(context, playerMP, itemStack);
         }
+    }
+
+    @Override
+    public Cause generateTeleportCause(IPhaseState state, PhaseContext context) {
+        return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.PLUGIN).build()));
     }
 
     @Override
