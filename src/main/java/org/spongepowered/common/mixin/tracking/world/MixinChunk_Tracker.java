@@ -55,7 +55,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.SpongeUsernameCache;
@@ -95,7 +94,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Final // need this constructor to never be overwritten by anything.
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
     public void onConstructedTracker(World world, int x, int z, CallbackInfo ci) {
-        if (((org.spongepowered.api.world.World)world).getUniqueId() != null) { // Client worlds have no UUID
+        if (!world.isRemote) {
             this.spongeProfileManager = ((SpongeProfileManager) Sponge.getServer().getGameProfileManager());
             this.userStorageService = SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get();
         }
