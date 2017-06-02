@@ -27,12 +27,15 @@ package org.spongepowered.common.item.inventory.lens.impl.minecraft;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
+import net.minecraft.world.ILockableContainer;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.mixin.core.inventory.MixinInventoryLargeChest;
 
 /**
  * This class is only used as an adapter when explicitly requested from the API, tyhough
@@ -44,7 +47,7 @@ public class LargeChestInventoryLens extends MinecraftLens {
     private IInventory lowerChest;
 
     public LargeChestInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super(0, adapter.getInventory().getSize(), adapter, slots);
+        super(0, adapter.getInventory().getSize(), adapter.getClass(), slots);
         InventoryLargeChest inventory = (InventoryLargeChest) adapter.getInventory().get(0);
         this.upperChest = inventory.upperChest;
         this.lowerChest = inventory.lowerChest;
@@ -60,5 +63,29 @@ public class LargeChestInventoryLens extends MinecraftLens {
     @Override
     protected boolean isDelayedInit() {
         return true;
+    }
+
+    // Reusable Lens
+    private static LargeChestInventoryLens defaultLens = null;
+    private static SlotCollection defaultSlots = null;
+    public static LargeChestInventoryLens of(InventoryAdapter<IInventory, ItemStack> adapter, SlotCollection slots)
+    {
+        if (slots != defaultSlots)
+        {
+            return new LargeChestInventoryLens(adapter, slots);
+        }
+        if (defaultLens == null)
+        {
+            defaultLens = new LargeChestInventoryLens(adapter, slots);
+        }
+        return defaultLens;
+    }
+
+    public static SlotCollection slots(ILockableContainer upperChest, ILockableContainer lowerChest) {
+        if (defaultSlots == null)
+        {
+            defaultSlots = new SlotCollection.Builder().add(upperChest.getSizeInventory() + lowerChest.getSizeInventory()).build();
+        }
+        return defaultSlots;
     }
 }

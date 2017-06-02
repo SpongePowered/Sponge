@@ -56,8 +56,8 @@ public abstract class MixinInventoryLargeChest implements MinecraftInventoryAdap
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     private void onConstructed(CallbackInfo ci) {
         this.inventory = new DefaultInventoryFabric((IInventory) this);
-        this.slots = new SlotCollection.Builder().add(this.upperChest.getSizeInventory() + this.lowerChest.getSizeInventory()).build();
-        this.lens = new LargeChestInventoryLens(this, this.slots);
+        this.slots = LargeChestInventoryLens.slots(this.upperChest, this.lowerChest);
+        this.lens = LargeChestInventoryLens.of(this, this.slots);
     }
 
     @Override
