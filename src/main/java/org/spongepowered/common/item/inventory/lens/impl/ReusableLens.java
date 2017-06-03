@@ -32,8 +32,8 @@ import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollect
 
 import java.util.function.Function;
 
-public class ReusableLens<T extends Lens<IInventory, ItemStack>>
-{
+public class ReusableLens<T extends Lens<IInventory, ItemStack>> {
+
     private final SlotCollection slots;
     private final T lens;
     private final Class<? extends MinecraftInventoryAdapter> adapter;
