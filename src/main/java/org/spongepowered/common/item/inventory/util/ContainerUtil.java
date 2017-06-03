@@ -399,7 +399,7 @@ public final class ContainerUtil {
             if (inventory instanceof TileEntityChest) {
                 return (Carrier) inventory;
             } else if (inventory instanceof InventoryLargeChest) {
-                return null;
+                return ((Carrier) ((InventoryLargeChest) inventory).lowerChest);
                 // TODO: Decide what the carrier should be (wrapper of 2 Block-based carriers including info which block is the upper inventory)
             } else {
                 return inventory instanceof Carrier ? ((Carrier) inventory) : null;
