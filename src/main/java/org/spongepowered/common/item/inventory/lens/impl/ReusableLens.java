@@ -22,12 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item.inventory.lens;
+package org.spongepowered.common.item.inventory.lens.impl;
 
-import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 
-public interface SlotProvider<TInventory, TStack> {
-    
-    SlotLens<TInventory, TStack> getSlot(int index);
+import java.util.function.Function;
 
+public class ReusableLens<T extends MinecraftLens>
+{
+    private SlotCollection slots;
+    private T lens;
+
+    public ReusableLens(SlotCollection slots, Function<SlotCollection, T> lens) {
+        this.slots = slots;
+        this.lens = lens.apply(slots);
+    }
+
+    public SlotCollection getSlots() {
+        return slots;
+    }
+
+    public T getLens() {
+        return lens;
+    }
 }

@@ -31,10 +31,25 @@ import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
+import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+
+import javax.inject.Provider;
 
 public abstract class MinecraftLens extends AbstractLens<IInventory, ItemStack> {
+
+    private static Map<Class, Map<Integer, ReusableLens>> reusableLenses = new HashMap<>();
+
+    @SuppressWarnings("unchecked")
+    public static <T extends MinecraftLens> ReusableLens<T> getLens(Class<T> lensType, InventoryAdapter<IInventory, ItemStack> adapter, Function<SlotCollection, T> lens, Provider<SlotCollection> slots)
+    {
+        Map<Integer, ReusableLens> reusableLens = reusableLenses.computeIfAbsent(lensType, k -> new HashMap<>());
+        return reusableLens.computeIfAbsent(adapter.getInventory().getSize(), k -> new ReusableLens(slots.get(), lens));
+    }
 
     public MinecraftLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
         super(base, size, adapterType, slots);
