@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -41,13 +43,14 @@ import java.util.function.Supplier;
 
 public abstract class MinecraftLens extends AbstractLens<IInventory, ItemStack> {
 
-    private static Map<Class, Map<Integer, ReusableLens>> reusableLenses = new HashMap<>();
+    // InventoryAdapterClass -> LensClass -> Size -> ReusableLens
+    private static Map<Class<? extends InventoryAdapter>, Map<Class<? extends Lens<IInventory, ItemStack>>, Int2ObjectMap<ReusableLens>>> reusableLenses = new HashMap<>();
 
     @SuppressWarnings("unchecked")
-    public static <T extends MinecraftLens> ReusableLens<T> getLens(Class<T> lensType, InventoryAdapter<IInventory, ItemStack> adapter, Function<SlotCollection, T> lens, Supplier<SlotCollection> slots)
-    {
-        Map<Integer, ReusableLens> reusableLens = reusableLenses.computeIfAbsent(lensType, k -> new HashMap<>());
-        return reusableLens.computeIfAbsent(adapter.getInventory().getSize(), k -> new ReusableLens(slots.get(), lens));
+    public static <T extends Lens<IInventory, ItemStack>> ReusableLens<T> getLens(Class<T> lensType, InventoryAdapter<IInventory, ItemStack> adapter, Function<SlotCollection, T> lens, Supplier<SlotCollection> slots) {
+        Map<Class<? extends Lens<IInventory, ItemStack>>, Int2ObjectMap<ReusableLens>> adapterLenses = reusableLenses.computeIfAbsent(adapter.getClass(), k -> new HashMap<>());
+        Int2ObjectMap<ReusableLens> lenses = adapterLenses.computeIfAbsent(lensType, k -> new Int2ObjectOpenHashMap<>());
+        return lenses.computeIfAbsent(adapter.getInventory().getSize(), k -> new ReusableLens(slots.get(), lens, adapter.getClass()));
     }
 
     public MinecraftLens(int base, int size, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {

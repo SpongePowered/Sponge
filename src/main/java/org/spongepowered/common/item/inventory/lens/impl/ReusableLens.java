@@ -24,17 +24,23 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
+import net.minecraft.inventory.IInventory;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 
 import java.util.function.Function;
 
-public class ReusableLens<T extends MinecraftLens>
+public class ReusableLens<T extends Lens<IInventory, ItemStack>>
 {
-    private SlotCollection slots;
-    private T lens;
+    private final SlotCollection slots;
+    private final T lens;
+    private final Class<? extends MinecraftInventoryAdapter> adapter;
 
-    public ReusableLens(SlotCollection slots, Function<SlotCollection, T> lens) {
+    public ReusableLens(SlotCollection slots, Function<SlotCollection, T> lens, Class<? extends MinecraftInventoryAdapter> adapter) {
         this.slots = slots;
+        this.adapter = adapter;
         this.lens = lens.apply(slots);
     }
 
@@ -44,5 +50,9 @@ public class ReusableLens<T extends MinecraftLens>
 
     public T getLens() {
         return this.lens;
+    }
+
+    public Class<? extends MinecraftInventoryAdapter> getAdapter() {
+        return this.adapter;
     }
 }
