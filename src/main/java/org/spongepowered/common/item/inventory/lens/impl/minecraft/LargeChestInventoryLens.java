@@ -28,33 +28,41 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.block.tileentity.carrier.Chest;
-import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.property.SlotIndex;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
+import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 
 /**
- * This class is only used as an adapter when explicitly requested from the API, tyhough
+ * This class is only used as an adapter when explicitly requested from the API, trough
  * {@link Chest#getDoubleChestInventory()}
  */
 public class LargeChestInventoryLens extends MinecraftLens {
 
-    private IInventory upperChest;
-    private IInventory lowerChest;
+    private int upperChest;
+    private int lowerChest;
 
     public LargeChestInventoryLens(InventoryAdapter<IInventory, ItemStack> adapter, SlotProvider<IInventory, ItemStack> slots) {
-        super(0, adapter.getInventory().getSize(), adapter, slots);
+        super(0, adapter.getInventory().getSize(), adapter.getClass(), slots);
         InventoryLargeChest inventory = (InventoryLargeChest) adapter.getInventory().get(0);
-        this.upperChest = inventory.upperChest;
-        this.lowerChest = inventory.lowerChest;
+        this.upperChest = inventory.upperChest.getSizeInventory();
+        this.lowerChest = inventory.lowerChest.getSizeInventory();
         this.init(slots);
     }
 
     @Override
     protected void init(SlotProvider<IInventory, ItemStack> slots) {
-        this.addSpanningChild(new GridInventoryLensImpl(0, 9, this.upperChest.getSizeInventory() / 9, 9, slots));
-        this.addSpanningChild(new GridInventoryLensImpl(this.upperChest.getSizeInventory(), 9, this.lowerChest.getSizeInventory() / 9, 9, slots));
+        int base = 0;
+        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.upperChest / 9, 9, slots));
+        base += this.upperChest;
+        this.addSpanningChild(new GridInventoryLensImpl(base, 9, this.lowerChest / 9, 9, slots));
+        base += this.lowerChest;
+        // possible extension by mods:
+        for (int i = base; i < this.slotCount(); i++) {
+            this.addSpanningChild(new SlotLensImpl(i), SlotIndex.of(i));
+        }
     }
 
     @Override
