@@ -26,7 +26,9 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.InventoryLargeChest;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.util.EnumFacing;
@@ -43,6 +45,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.MinecraftLens;
+import org.spongepowered.common.item.inventory.lens.impl.ReusableLens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.comp.GridInventoryLensImpl;
 
@@ -64,8 +71,12 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
-        this.slots = new SlotCollection.Builder().add(27).build();
-        this.lens = new GridInventoryLensImpl(0, 9, 3, 9, this.slots);
+        ReusableLens<? extends Lens<IInventory, ItemStack>> reusableLens = MinecraftLens.getLens(GridInventoryLens.class,
+                ((InventoryAdapter) this),
+                s -> new GridInventoryLensImpl(0, 9, 3, 9, s),
+                () -> new SlotCollection.Builder().add(27).build());
+        this.slots = reusableLens.getSlots();
+        this.lens = reusableLens.getLens();
     }
 
     /**
@@ -158,6 +169,7 @@ public abstract class MixinTileEntityChest extends MixinTileEntityLockableLoot i
 
     @Override
     public Optional<Inventory> getDoubleChestInventory() {
+        // BlockChest#getContainer(World, BlockPos, boolean) without isBlocked() check
         for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL) {
             BlockPos blockpos = this.pos.offset(enumfacing);
 
