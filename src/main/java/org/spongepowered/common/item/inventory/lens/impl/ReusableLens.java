@@ -39,10 +39,10 @@ public class ReusableLens<T extends MinecraftLens>
     }
 
     public SlotCollection getSlots() {
-        return slots;
+        return this.slots;
     }
 
     public T getLens() {
-        return lens;
+        return this.lens;
     }
 }

@@ -37,15 +37,14 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-
-import javax.inject.Provider;
+import java.util.function.Supplier;
 
 public abstract class MinecraftLens extends AbstractLens<IInventory, ItemStack> {
 
     private static Map<Class, Map<Integer, ReusableLens>> reusableLenses = new HashMap<>();
 
     @SuppressWarnings("unchecked")
-    public static <T extends MinecraftLens> ReusableLens<T> getLens(Class<T> lensType, InventoryAdapter<IInventory, ItemStack> adapter, Function<SlotCollection, T> lens, Provider<SlotCollection> slots)
+    public static <T extends MinecraftLens> ReusableLens<T> getLens(Class<T> lensType, InventoryAdapter<IInventory, ItemStack> adapter, Function<SlotCollection, T> lens, Supplier<SlotCollection> slots)
     {
         Map<Integer, ReusableLens> reusableLens = reusableLenses.computeIfAbsent(lensType, k -> new HashMap<>());
         return reusableLens.computeIfAbsent(adapter.getInventory().getSize(), k -> new ReusableLens(slots.get(), lens));
