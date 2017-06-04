@@ -626,4 +626,10 @@ public class SoftBufferExtentViewDownsize implements DefaultedExtent {
         return this.extent.getHighestYAt(x, z);
     }
 
+    @Override
+    public int getPrecipitationLevelAt(int x, int z) {
+        checkBlockRange(x, 0, z);
+        return this.extent.getPrecipitationLevelAt(x, z);
+    }
+
 }

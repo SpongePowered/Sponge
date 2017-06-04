@@ -173,6 +173,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     List<T> listToFill, Predicate <? super T > p_177430_4_);
     @Shadow private void propagateSkylightOcclusion(int x, int z) { };
     @Shadow private void relightBlock(int x, int y, int z) { };
+    @Shadow public abstract BlockPos getPrecipitationHeight(BlockPos pos);
     // @formatter:on
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
@@ -379,6 +380,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     public double getHighestYAt(double x, double z) {
         return this.sponge_world.getHighestYAt(this.x << 4 + ((int)x & 15), this.z << 4 + ((int)z & 15));
+    }
+
+    @Override
+    public int getPrecipitationLevelAt(int x, int z) {
+        return this.getPrecipitationHeight(new BlockPos(x, 0, z)).getY();
     }
 
     @Override
