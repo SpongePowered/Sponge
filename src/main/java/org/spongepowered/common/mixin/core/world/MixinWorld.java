@@ -274,7 +274,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return null; // Shadowed
     }
     @Shadow public abstract int getHeight(int x, int z);
-
     // @formatter:on
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
@@ -371,6 +370,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public int getHighestYAt(int x, int z) {
         return this.getHeight(x, z);
+    }
+
+    @Override
+    public int getPrecipitationLevel(int x, int z) {
+        return this.getPrecipitationHeight(new BlockPos(x, 0, z)).getY();
     }
 
     @Override
