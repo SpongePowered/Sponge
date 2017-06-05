@@ -252,7 +252,7 @@ public final class CauseTracker {
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
     }
 
-    private void generateVersionInfo(PrettyPrinter printer) {
+    public void generateVersionInfo(PrettyPrinter printer) {
         for (PluginContainer pluginContainer : SpongeImpl.getInternalPlugins()) {
             pluginContainer.getVersion().ifPresent(version ->
                     printer.add("%s : %s", pluginContainer.getName(), version)
