@@ -34,6 +34,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -48,9 +49,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 @Mixin(MobSpawnerBaseLogic.class)
@@ -101,7 +104,20 @@ public abstract class MixinMobSpawnerBaseLogic {
      */
     private static Entity readEntityFromCompoundAtWorld(NBTTagCompound compound, World world, double x, double y, double z, boolean attemptToSpawn) {
         final String entityTypeString = compound.getString(NbtDataUtil.ENTITY_TYPE_ID);
-        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(SpongeImplHooks.getEntityClass(new ResourceLocation(entityTypeString)));
+        final Class<? extends Entity> clazz = SpongeImplHooks.getEntityClass(new ResourceLocation(entityTypeString));
+        if (clazz == null) {
+            final PrettyPrinter printer = new PrettyPrinter(60).add("Unknown Entity for MobSpawners").centre().hr()
+                .addWrapped(60, "Sponge has found a MobSpawner attempting to locate potentially"
+                                + "a foreign entity type for a MobSpawner, unfortunately, there isn't a"
+                                + "way to get around the deserialization process looking up unregistered"
+                                + "entity types. This may be a bug with a mod or sponge.")
+                .add("%s : %s", "Entity Name", entityTypeString)
+                .add();
+            CauseTracker.getInstance().generateVersionInfo(printer);
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.WARN);
+            return null;
+        }
+        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(clazz);
         if (type == null) {
             return null;
         }
