@@ -676,7 +676,7 @@ public interface PacketFunction {
             inventoryEvent = null;
         }
 
-        if (inventoryEvent != null) {
+        if (inventoryEvent != null && !inventoryEvent.getTransactions().isEmpty()) {
             // The client sends several packets all at once for drag events - we only care about the last one.
             // Therefore, we never add any 'fake' transactions, as the final packet has everything we want.
             if (!(inventoryEvent instanceof ClickInventoryEvent.Drag)) {
