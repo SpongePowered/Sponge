@@ -31,6 +31,9 @@ import co.aikar.timings.TimingsManager;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
@@ -94,6 +97,7 @@ import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
@@ -790,5 +794,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Redirect(method = "updateTimeLightAndEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/Util;runTask(Ljava/util/concurrent/FutureTask;Lorg/apache/logging/log4j/Logger;)Ljava/lang/Object;"))
     private Object onRun(FutureTask<?> task, Logger logger) {
         return SpongeImplHooks.onUtilRunTask(task, logger);
+    }
+
+    @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
+    public void onCrashReport(CrashReport report, CallbackInfoReturnable<CrashReport> cir) {
+        report.makeCategory("Sponge CauseTracker").setDetail("Cause Stack", CauseTrackerCrashHandler.INSTANCE);
+        cir.setReturnValue(report);
     }
 }
