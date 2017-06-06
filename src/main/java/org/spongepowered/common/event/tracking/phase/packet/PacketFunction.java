@@ -676,7 +676,14 @@ public interface PacketFunction {
             inventoryEvent = null;
         }
 
-        if (inventoryEvent != null && !inventoryEvent.getTransactions().isEmpty()) {
+        if (inventoryEvent != null) {
+            // Don't fire inventory drop events when there are no entities
+            if (inventoryEvent instanceof AffectEntityEvent && ((AffectEntityEvent) inventoryEvent).getEntities().isEmpty()) {
+                slotTransactions.clear();
+                mixinContainer.setCaptureInventory(false);
+                return;
+            }
+
             // The client sends several packets all at once for drag events - we only care about the last one.
             // Therefore, we never add any 'fake' transactions, as the final packet has everything we want.
             if (!(inventoryEvent instanceof ClickInventoryEvent.Drag)) {
