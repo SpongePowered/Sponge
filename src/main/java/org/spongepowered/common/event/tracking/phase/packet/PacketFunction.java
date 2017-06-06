@@ -54,6 +54,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.entity.AffectEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -657,6 +658,13 @@ public interface PacketFunction {
         }
 
         if (inventoryEvent != null) {
+            // Don't fire inventory drop events when there are no entities
+            if (inventoryEvent instanceof AffectEntityEvent && ((AffectEntityEvent) inventoryEvent).getEntities().isEmpty()) {
+                slotTransactions.clear();
+                mixinContainer.setCaptureInventory(false);
+                return;
+            }
+
             // The client sends several packets all at once for drag events - we only care about the last one.
             // Therefore, we never add any 'fake' transactions, as the final packet has everything we want.
             if (!(inventoryEvent instanceof ClickInventoryEvent.Drag)) {
