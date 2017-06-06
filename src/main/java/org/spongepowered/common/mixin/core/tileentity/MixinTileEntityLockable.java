@@ -73,7 +73,7 @@ public abstract class MixinTileEntityLockable extends MixinTileEntity implements
     @Nullable protected Lens<IInventory, ItemStack> lens = null; // is set by Mixin further down the line OR fallback in getter
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(CallbackInfo ci) {
+    private void onConstructed(CallbackInfo ci) {
         this.fabric = new DefaultInventoryFabric(this);
     }
 
