@@ -124,7 +124,7 @@ public abstract class MixinWorldEntitySpawner {
         final int mobSpawnRange = Math.min(((IMixinWorldServer) worldServerIn).getActiveConfig().getConfig().getWorld().getMobSpawnRange(),
                 SpongeImpl.getServer().getPlayerList().getViewDistance());
         // Vanilla uses a div count of 289 (17x17) which assumes the view distance is 8.
-        // Since we allow for custom ranges, we need to adjust the div count based on the 
+        // Since we allow for custom ranges, we need to adjust the div count based on the
         // mob spawn range set by server.
         final int MOB_SPAWN_COUNT_DIV = (2 * mobSpawnRange + 1)*(2 * mobSpawnRange + 1);
 
@@ -150,7 +150,7 @@ public abstract class MixinWorldEntitySpawner {
                     ++chunkSpawnCandidates;
                     final ChunkPos chunkPos = chunk.getPos();
                     if (!flag && worldServerIn.getWorldBorder().contains(chunkPos)) {
-                        PlayerChunkMapEntry playerchunkmapentry = worldServerIn.getPlayerChunkMap().getEntry(chunkPos.chunkXPos, chunkPos.chunkZPos);
+                        PlayerChunkMapEntry playerchunkmapentry = worldServerIn.getPlayerChunkMap().getEntry(chunkPos.x, chunkPos.z);
 
                         if (playerchunkmapentry != null && playerchunkmapentry.isSentToPlayers() && !spongeChunk.isSpawning()) {
                             this.eligibleSpawnChunks.add(chunk);
@@ -303,8 +303,8 @@ public abstract class MixinWorldEntitySpawner {
 
     private static BlockPos getRandomChunkPosition(World worldIn, Chunk chunk)
     {
-        int i = chunk.xPosition * 16 + worldIn.rand.nextInt(16);
-        int j = chunk.zPosition * 16 + worldIn.rand.nextInt(16);
+        int i = chunk.x * 16 + worldIn.rand.nextInt(16);
+        int j = chunk.z * 16 + worldIn.rand.nextInt(16);
         int k = MathHelper.roundUp(chunk.getHeight(new BlockPos(i, 0, j)) + 1, 16);
         int l = worldIn.rand.nextInt(k > 0 ? k : chunk.getTopFilledSegment() + 16 - 1);
         return new BlockPos(i, l, j);

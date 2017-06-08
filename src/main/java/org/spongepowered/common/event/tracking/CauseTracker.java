@@ -406,7 +406,7 @@ public final class CauseTracker {
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
-            crashreportcategory.setDetail("Source block type", () -> {
+            crashreportcategory.addDetail("Source block type", () -> {
                 try {
                     return String.format("ID #%d (%s // %s)", Block.getIdFromBlock(sourceBlock),
                             sourceBlock.getUnlocalizedName(), sourceBlock.getClass().getCanonicalName());

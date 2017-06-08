@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.Scoreboard;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,13 +34,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinScore;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
-import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.scoreboard.SpongeScore;
 
 @Mixin(Score.class)
 public abstract class MixinScore implements IMixinScore {
 
-    @Shadow public Scoreboard theScoreboard;
+    @Shadow public Scoreboard scoreboard;
 
     public SpongeScore spongeScore;
 
@@ -57,7 +55,7 @@ public abstract class MixinScore implements IMixinScore {
 
     @Inject(method = "setScorePoints", at = @At("HEAD"), cancellable = true)
     public void onSetScorePoints(int points, CallbackInfo ci) {
-        if (this.theScoreboard != null && ((IMixinScoreboard) this.theScoreboard).isClient()) {
+        if (this.scoreboard != null && ((IMixinScoreboard) this.scoreboard).isClient()) {
             return; // Let the normal logic take over.
         }
         if (this.spongeScore == null) {

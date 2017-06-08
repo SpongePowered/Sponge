@@ -43,7 +43,7 @@ import org.spongepowered.common.text.SpongeTexts;
 @Mixin(ScoreObjective.class)
 public abstract class MixinScoreObjective implements IMixinScoreObjective {
 
-    @Shadow @Final public Scoreboard theScoreboard;
+    @Shadow @Final public Scoreboard scoreboard;
 
     public SpongeObjective spongeObjective;
 
@@ -59,7 +59,7 @@ public abstract class MixinScoreObjective implements IMixinScoreObjective {
 
     @Inject(method = "setDisplayName", at = @At("HEAD"), cancellable = true)
     public void onSetDisplayName(String name, CallbackInfo ci) {
-        if (this.theScoreboard != null && ((IMixinScoreboard) this.theScoreboard).isClient()) {
+        if (this.scoreboard != null && ((IMixinScoreboard) this.scoreboard).isClient()) {
             return; // Let the normal logic take over.
         }
 
@@ -74,7 +74,7 @@ public abstract class MixinScoreObjective implements IMixinScoreObjective {
 
     @Inject(method = "setRenderType", at = @At("HEAD"), cancellable = true)
     public void onSetRenderType(IScoreCriteria.EnumRenderType type, CallbackInfo ci) {
-        if (this.theScoreboard != null && ((IMixinScoreboard) this.theScoreboard).isClient()) {
+        if (this.scoreboard != null && ((IMixinScoreboard) this.scoreboard).isClient()) {
             return; // Let the normal logic take over.
         }
 

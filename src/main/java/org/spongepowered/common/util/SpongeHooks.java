@@ -222,8 +222,7 @@ public class SpongeHooks {
 
         SpongeConfig<?> config = getActiveConfig(world);
         if (config.getConfig().getLogging().chunkGCQueueUnloadLogging()) {
-            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((IMixinWorldServer) world).getDimensionId(), chunk.xPosition,
-                    chunk.zPosition);
+            logInfo("Chunk GC Queued Chunk At [{0}] ({1}, {2} for unload)", ((IMixinWorldServer) world).getDimensionId(), chunk.x, chunk.z);
             logStack(config);
         }
     }

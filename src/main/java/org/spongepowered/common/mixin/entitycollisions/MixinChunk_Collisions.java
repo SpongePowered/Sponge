@@ -64,7 +64,7 @@ public class MixinChunk_Collisions {
         }
     }
 
-    @Inject(method = "getEntitiesOfTypeWithinAAAB",
+    @Inject(method = "getEntitiesOfTypeWithinAABB",
             at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false), cancellable = true)
     public <T extends Entity> void onAddCollisionEntity(Class<? extends T> entityClass, AxisAlignedBB aabb, List<T> listToFill,
             Predicate<? super T> p_177430_4_, CallbackInfo ci) {
@@ -96,7 +96,7 @@ public class MixinChunk_Collisions {
                     spongeBlock.initializeCollisionState(this.world);
                     spongeBlock.requiresCollisionsCacheRefresh(false);
                 }
-    
+
                 return !((spongeBlock.getMaxCollisions() >= 0) && (listToFill.size() >= spongeBlock.getMaxCollisions()));
             } else {
                 IModData_Collisions spongeEntity = phaseContext.getSource(IModData_Collisions.class).orElse(null);

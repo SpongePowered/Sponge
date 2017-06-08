@@ -34,7 +34,7 @@ public abstract class SpongeEntityAICommonSuperclass extends EntityAIBase {
     }
 
     @Override
-    public boolean continueExecuting() {
+    public boolean shouldContinueExecuting() {
         return this.continueUpdating();
     }
 

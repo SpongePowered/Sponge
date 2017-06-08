@@ -93,7 +93,7 @@ public final class VecHelper {
     // === MC ChunkCoordIntPair ---> Flow Vector3i ===
 
     public static Vector3i toVec3i(ChunkPos chunk) {
-        return new Vector3i(chunk.chunkXPos, 0, chunk.chunkZPos);
+        return new Vector3i(chunk.x, 0, chunk.z);
     }
 
     // === Flow Vector3i --> MC ChunkCoordIntPair ===

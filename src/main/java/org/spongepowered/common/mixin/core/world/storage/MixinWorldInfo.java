@@ -120,7 +120,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Shadow private int rainTime;
     @Shadow private boolean thundering;
     @Shadow private int thunderTime;
-    @Shadow private GameType theGameType;
+    @Shadow private GameType gameType;
     @Shadow private boolean mapFeaturesEnabled;
     @Shadow private boolean hardcore;
     @Shadow private boolean allowCommands;
@@ -136,7 +136,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Shadow private double borderDamagePerBlock;
     @Shadow private int borderWarningDistance;
     @Shadow private int borderWarningTime;
-    @Shadow private GameRules theGameRules;
+    @Shadow private GameRules gameRules;
     // TODO 1.9 Clone is an AWFUL NAME for this, its really fillCompound which takes a playerNbtCompound to use or if null, uses the player one
     // TODO 1.9 already in this info. It then populates a returned compound with the worldInfo's properties.
     @Shadow public abstract NBTTagCompound cloneNBTCompound(NBTTagCompound nbt);
@@ -372,12 +372,12 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public GameMode getGameMode() {
-        return (GameMode) (Object) this.theGameType;
+        return (GameMode) (Object) this.gameType;
     }
 
     @Override
     public void setGameMode(GameMode gamemode) {
-        this.theGameType = GameModeRegistryModule.toGameType(gamemode);
+        this.gameType = GameModeRegistryModule.toGameType(gamemode);
     }
 
     @Override
@@ -518,8 +518,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public Optional<String> getGameRule(String gameRule) {
         checkNotNull(gameRule, "The gamerule cannot be null!");
-        if (this.theGameRules.hasRule(gameRule)) {
-            return Optional.of(this.theGameRules.getString(gameRule));
+        if (this.gameRules.hasRule(gameRule)) {
+            return Optional.of(this.gameRules.getString(gameRule));
         }
         return Optional.empty();
     }
@@ -527,8 +527,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public Map<String, String> getGameRules() {
         ImmutableMap.Builder<String, String> ruleMap = ImmutableMap.builder();
-        for (String rule : this.theGameRules.getRules()) {
-            ruleMap.put(rule, this.theGameRules.getString(rule));
+        for (String rule : this.gameRules.getRules()) {
+            ruleMap.put(rule, this.gameRules.getString(rule));
         }
         return ruleMap.build();
     }
@@ -537,13 +537,13 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     public void setGameRule(String gameRule, String value) {
         checkNotNull(gameRule, "The gamerule cannot be null!");
         checkNotNull(value, "The gamerule value cannot be null!");
-        this.theGameRules.setOrCreateGameRule(gameRule, value);
+        this.gameRules.setOrCreateGameRule(gameRule, value);
     }
 
     @Override
     public boolean removeGameRule(String gameRule) {
         checkNotNull(gameRule, "The gamerule cannot be null!");
-        return ((IMixinGameRules) this.theGameRules).removeGameRule(gameRule);
+        return ((IMixinGameRules) this.gameRules).removeGameRule(gameRule);
     }
 
     @Override

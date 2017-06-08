@@ -56,7 +56,7 @@ public abstract class MixinBiomeSnow extends MixinBiome {
             gensettings.getPopulators().add(path);
         }
         super.buildPopulators(world, gensettings);
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
+        BiomeDecorator theBiomeDecorator = this.decorator;
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
         Forest.Builder forest = Forest.builder();
         forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 2, 0.1));

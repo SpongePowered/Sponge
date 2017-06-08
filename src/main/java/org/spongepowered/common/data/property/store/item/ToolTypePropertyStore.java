@@ -49,7 +49,7 @@ public class ToolTypePropertyStore extends AbstractItemStackPropertyStore<ToolTy
             return Optional.of(new ToolTypeProperty((ToolType) (Object) swordMaterial));
         } else if (itemStack.getItem() instanceof ItemHoe) {
             final ItemHoe itemHoe = (ItemHoe) itemStack.getItem();
-            final Item.ToolMaterial hoeMaterial = itemHoe.theToolMaterial;
+            final Item.ToolMaterial hoeMaterial = itemHoe.toolMaterial;
             return Optional.of(new ToolTypeProperty((ToolType) (Object) hoeMaterial));
         }
         return Optional.empty();

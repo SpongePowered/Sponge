@@ -208,8 +208,8 @@ public final class EntityUtil {
         if (fromWorldServer.provider instanceof WorldProviderEnd && suggestedDimensionId == 1) { // if (this.dimension == 1 && dimensionIn == 1)
             // Sponge End
             fromWorldServer.removeEntity(entityPlayerMP);
-            if (!entityPlayerMP.playerConqueredTheEnd) {
-                entityPlayerMP.playerConqueredTheEnd = true;
+            if (!entityPlayerMP.queuedEndExit) {
+                entityPlayerMP.queuedEndExit = true;
                 if (entityPlayerMP.hasAchievement(AchievementList.THE_END2)) {
                     entityPlayerMP.connection.sendPacket(new SPacketChangeGameState(4, 0.0F));
                 } else {
@@ -220,7 +220,7 @@ public final class EntityUtil {
             return entityPlayerMP;
         } // else { // Sponge - Remove unecessary
 
-        final WorldServer toWorldServer = SpongeImpl.getServer().worldServerForDimension(suggestedDimensionId);
+        final WorldServer toWorldServer = SpongeImpl.getServer().getWorld(suggestedDimensionId);
         // If we attempted to travel a new dimension but were denied due to some reason such as world
         // not being loaded then short-circuit to prevent unnecessary logic from running
         if (!sameDimension && fromWorldServer == toWorldServer) {
@@ -312,7 +312,7 @@ public final class EntityUtil {
         if (targetDimensionId == 1 && fromWorld.provider instanceof WorldProviderEnd) {
             targetDimensionId = 0;
         }
-        WorldServer toWorld = mcServer.worldServerForDimension(targetDimensionId);
+        WorldServer toWorld = mcServer.getWorld(targetDimensionId);
         // If we attempted to travel a new dimension but were denied due to some reason such as world
         // not being loaded then short-circuit to prevent unnecessary logic from running
         if (!sameDimension && fromWorld == toWorld) {
@@ -658,7 +658,7 @@ public final class EntityUtil {
         // that world. (Usually overworld unless a mod says otherwise).
         if (!targetDimension.allowsPlayerRespawns()) {
             targetDimensionId = SpongeImplHooks.getRespawnDimension((WorldProvider) targetDimension, playerIn);
-            targetWorld = targetWorld.getMinecraftServer().worldServerForDimension(targetDimensionId);
+            targetWorld = targetWorld.getMinecraftServer().getWorld(targetDimensionId);
         }
 
         Vector3d targetSpawnVec = VecHelper.toVector3d(targetWorld.getSpawnPoint());
@@ -766,8 +766,8 @@ public final class EntityUtil {
 
     public static boolean changeWorld(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim) {
         final MinecraftServer mcServer = SpongeImpl.getServer();
-        final WorldServer fromWorld = mcServer.worldServerForDimension(currentDim);
-        final WorldServer toWorld = mcServer.worldServerForDimension(targetDim);
+        final WorldServer fromWorld = mcServer.getWorld(currentDim);
+        final WorldServer toWorld = mcServer.getWorld(targetDim);
         if (entity instanceof EntityPlayer) {
             fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
             fromWorld.getPlayerChunkMap().removePlayer((EntityPlayerMP) entity);

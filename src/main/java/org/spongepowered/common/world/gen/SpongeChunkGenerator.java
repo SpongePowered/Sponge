@@ -434,7 +434,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Nullable
     @Override
-    public BlockPos getStrongholdGen(World worldIn, String structureName, BlockPos position, boolean p_180513_4_) {
+    public BlockPos getNearestStructurePos(World worldIn, String structureName, BlockPos position, boolean p_180513_4_) {
         Class<? extends MapGenStructure> target = null;
         if("Stronghold".equals(structureName)) {
             target = MapGenStronghold.class;
@@ -454,11 +454,11 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         }
         for (GenerationPopulator gen : this.genpop) {
             if (target.isInstance(gen)) {
-                return ((MapGenStructure) gen).getClosestStrongholdPos(worldIn, position, p_180513_4_);
+                return ((MapGenStructure) gen).getNearestStructurePos(worldIn, position, p_180513_4_);
             }
         }
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
-            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).getStrongholdGen(worldIn, structureName, position,
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).getNearestStructurePos(worldIn, structureName, position,
                     p_180513_4_);
         }
         return null;

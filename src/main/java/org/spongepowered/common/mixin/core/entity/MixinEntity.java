@@ -1160,7 +1160,7 @@ public abstract class MixinEntity implements IMixinEntity {
         return entity.noClip || ((IMixinEntity) entity).isVanished();
     }
 
-    @Redirect(method = "resetHeight", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    @Redirect(method = "doWaterSplashEffect", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
     public void spawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
             double xOffset, double yOffset, double zOffset, int ... p_175688_14_) {
         if (!this.isVanished) {

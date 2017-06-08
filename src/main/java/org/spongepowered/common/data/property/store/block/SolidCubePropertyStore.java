@@ -52,7 +52,8 @@ public class SolidCubePropertyStore extends AbstractBlockPropertyStore<SolidCube
     protected Optional<SolidCubeProperty> getForDirection(World world, int x, int y, int z, EnumFacing facing) {
         BlockPos pos = new BlockPos(x, y, z);
         Block block = world.getBlockState(pos).getBlock();
-        return Optional.of(block.isBlockSolid(world, pos, facing) ? TRUE : FALSE);
+        // TODO: Is causesDownwardCurrent correct here?
+        return Optional.of(block.causesDownwardCurrent(world, pos, facing) ? TRUE : FALSE);
     }
 
 }

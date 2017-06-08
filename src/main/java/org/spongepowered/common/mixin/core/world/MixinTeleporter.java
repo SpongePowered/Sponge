@@ -65,7 +65,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     private boolean createNetherPortal = true;
     private PortalAgentType portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent((Teleporter) (Object) this);
 
-    @Shadow @Final private WorldServer worldServerInstance;
+    @Shadow @Final private WorldServer world;
     @Shadow @Final private Random random;
     @Shadow @Final private Long2ObjectMap<Teleporter.PortalPosition> destinationCoordinateCache;
 
@@ -129,7 +129,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                     int y = yTarget + l1;
                     int z = zTarget + k1 * i1 - j1 * l;
                     boolean flag = l1 < 0;
-                    this.worldServerInstance.setBlockState(new BlockPos(x, y, z),
+                    this.world.setBlockState(new BlockPos(x, y, z),
                             flag ? Blocks.OBSIDIAN.getDefaultState() : Blocks.AIR.getDefaultState());
                 }
             }
@@ -188,7 +188,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
             Teleporter.PortalPosition teleporter$portalposition = this.destinationCoordinateCache.get(targetPosition);
             closest = 0.0D;
             portalPosition = teleporter$portalposition;
-            teleporter$portalposition.lastUpdateTime = this.worldServerInstance.getTotalWorldTime();
+            teleporter$portalposition.lastUpdateTime = this.world.getTotalWorldTime();
             addToCache = false;
         } else {
             BlockPos blockSearchPosition = ((IMixinLocation) (Object) searchLocation).getBlockPos();
@@ -198,12 +198,12 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
                 for (int j1 = -this.searchRadius; j1 <= this.searchRadius; ++j1) {
                     for (BlockPos blockpos1 =
-                            blockSearchPosition.add(i1, this.worldServerInstance.getActualHeight() - 1 - blockSearchPosition.getY(), j1); blockpos1
+                         blockSearchPosition.add(i1, this.world.getActualHeight() - 1 - blockSearchPosition.getY(), j1); blockpos1
                                     .getY() >= 0; blockpos1 = blockpos2) {
                         blockpos2 = blockpos1.down();
 
-                        if (this.worldServerInstance.getBlockState(blockpos1).getBlock() == Blocks.PORTAL) {
-                            while (this.worldServerInstance.getBlockState(blockpos2 = blockpos1.down()).getBlock() == Blocks.PORTAL) {
+                        if (this.world.getBlockState(blockpos1).getBlock() == Blocks.PORTAL) {
+                            while (this.world.getBlockState(blockpos2 = blockpos1.down()).getBlock() == Blocks.PORTAL) {
                                 blockpos1 = blockpos2;
                             }
 
@@ -222,7 +222,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         if (closest >= 0.0D) {
             if (addToCache) {
                 this.destinationCoordinateCache.put(targetPosition,
-                        ((Teleporter) (Object) this).new PortalPosition(portalPosition, this.worldServerInstance.getTotalWorldTime()));
+                        ((Teleporter) (Object) this).new PortalPosition(portalPosition, this.world.getTotalWorldTime()));
             }
 
             return Optional.of(new Location<World>(searchLocation.getExtent(), VecHelper.toVector3d(portalPosition)));
@@ -236,7 +236,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         double xTarget = portalLocation.getX() + 0.5D;
         double yTarget = portalLocation.getY() + 0.5D;
         double zTarget = portalLocation.getZ() + 0.5D;
-        BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.PORTAL.createPatternHelper(this.worldServerInstance, blockPos);
+        BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.PORTAL.createPatternHelper(this.world, blockPos);
         boolean flag1 = blockpattern$patternhelper.getForwards().rotateY().getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE;
         double d2 = blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X ? (double) blockpattern$patternhelper.getFrontTopLeft().getZ()
                 : (double) blockpattern$patternhelper.getFrontTopLeft().getX();
@@ -334,9 +334,9 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                 double d2 = (double) l2 + 0.5D - nearLocation.getBlockZ();
                 label142:
 
-                for (int j3 = this.worldServerInstance.getActualHeight() - 1; j3 >= 0; --j3) {
-                    if (this.worldServerInstance.isAirBlock(blockpos$mutableblockpos.setPos(j2, j3, l2))) {
-                        while (j3 > 0 && this.worldServerInstance.isAirBlock(blockpos$mutableblockpos.setPos(j2, j3 - 1, l2))) {
+                for (int j3 = this.world.getActualHeight() - 1; j3 >= 0; --j3) {
+                    if (this.world.isAirBlock(blockpos$mutableblockpos.setPos(j2, j3, l2))) {
+                        while (j3 > 0 && this.world.isAirBlock(blockpos$mutableblockpos.setPos(j2, j3 - 1, l2))) {
                             --j3;
                         }
 
@@ -357,8 +357,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                                         int k5 = l2 + (k4 - 1) * i4 - j4 * l3;
                                         blockpos$mutableblockpos.setPos(i5, j5, k5);
 
-                                        if (l4 < 0 && !this.worldServerInstance.getBlockState(blockpos$mutableblockpos).getMaterial()
-                                                .isSolid() || l4 >= 0 && !this.worldServerInstance.isAirBlock(blockpos$mutableblockpos)) {
+                                        if (l4 < 0 && !this.world.getBlockState(blockpos$mutableblockpos).getMaterial()
+                                                .isSolid() || l4 >= 0 && !this.world.isAirBlock(blockpos$mutableblockpos)) {
                                             continue label142;
                                         }
                                     }
@@ -389,9 +389,9 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                     double d4 = (double) j6 + 0.5D - nearLocation.getBlockZ();
                     label562:
 
-                    for (int i7 = this.worldServerInstance.getActualHeight() - 1; i7 >= 0; --i7) {
-                        if (this.worldServerInstance.isAirBlock(blockpos$mutableblockpos.setPos(l5, i7, j6))) {
-                            while (i7 > 0 && this.worldServerInstance.isAirBlock(blockpos$mutableblockpos.setPos(l5, i7 - 1, j6))) {
+                    for (int i7 = this.world.getActualHeight() - 1; i7 >= 0; --i7) {
+                        if (this.world.isAirBlock(blockpos$mutableblockpos.setPos(l5, i7, j6))) {
+                            while (i7 > 0 && this.world.isAirBlock(blockpos$mutableblockpos.setPos(l5, i7 - 1, j6))) {
                                 --i7;
                             }
 
@@ -406,8 +406,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                                         int j13 = j6 + (j10 - 1) * j9;
                                         blockpos$mutableblockpos.setPos(j12, i13, j13);
 
-                                        if (j11 < 0 && !this.worldServerInstance.getBlockState(blockpos$mutableblockpos).getMaterial()
-                                                .isSolid() || j11 >= 0 && !this.worldServerInstance.isAirBlock(blockpos$mutableblockpos)) {
+                                        if (j11 < 0 && !this.world.getBlockState(blockpos$mutableblockpos).getMaterial()
+                                                .isSolid() || j11 >= 0 && !this.world.isAirBlock(blockpos$mutableblockpos)) {
                                             continue label562;
                                         }
                                     }
@@ -442,7 +442,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         }
 
         if (closest < 0.0D) {
-            yAdjustedTarget = MathHelper.clamp(yAdjustedTarget, 70, this.worldServerInstance.getActualHeight() - 10);
+            yAdjustedTarget = MathHelper.clamp(yAdjustedTarget, 70, this.world.getActualHeight() - 10);
             yFinalTarget = yAdjustedTarget;
 
             for (int j7 = -1; j7 <= 1; ++j7) {
@@ -452,7 +452,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                         int k10 = yFinalTarget + k8;
                         int k11 = zFinalTarget + (l7 - 1) * targetDirOffset - j7 * targetDirection;
                         boolean flag = k8 < 0;
-                        this.worldServerInstance.setBlockState(new BlockPos(k9, k10, k11),
+                        this.world.setBlockState(new BlockPos(k9, k10, k11),
                                 flag ? Blocks.OBSIDIAN.getDefaultState() : Blocks.AIR.getDefaultState());
                     }
                 }
@@ -468,7 +468,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                     int l11 = yFinalTarget + l9;
                     int k12 = zFinalTarget + (l8 - 1) * targetDirOffset;
                     boolean flag1 = l8 == 0 || l8 == 3 || l9 == -1 || l9 == 3;
-                    this.worldServerInstance.setBlockState(new BlockPos(l10, l11, k12), flag1 ? Blocks.OBSIDIAN.getDefaultState() : iblockstate, 2);
+                    this.world.setBlockState(new BlockPos(l10, l11, k12), flag1 ? Blocks.OBSIDIAN.getDefaultState() : iblockstate, 2);
                 }
             }
 
@@ -478,7 +478,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                     int i12 = yFinalTarget + i10;
                     int l12 = zFinalTarget + (i9 - 1) * targetDirOffset;
                     BlockPos blockpos = new BlockPos(i11, i12, l12);
-                    this.worldServerInstance.neighborChanged(blockpos, this.worldServerInstance.getBlockState(blockpos).getBlock(), blockpos);
+                    this.world.neighborChanged(blockpos, this.world.getBlockState(blockpos).getBlock(), blockpos);
                 }
             }
         }
@@ -491,7 +491,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 //                causeTracker.handleSpawnedEntities();
 //                causeTracker.removeCurrentCause();
 //                causeTracker.setSpecificCapture(false);
-//                return Optional.of(new Location<World>((World) this.worldServerInstance, new Vector3i(xFinalTarget, yFinalTarget, zFinalTarget)));
+//                return Optional.of(new Location<World>((World) this.world, new Vector3i(xFinalTarget, yFinalTarget, zFinalTarget)));
 //            } else { // portal ChangeBlockEvent was cancelled
 //                causeTracker.getCapturedSpawnedEntities().clear();
 //                causeTracker.getCapturedSpawnedEntityItems().clear();
@@ -503,7 +503,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 //            }
         }
 
-        return Optional.of(new Location<World>((World) this.worldServerInstance, new Vector3i(xFinalTarget, yFinalTarget, zFinalTarget)));
+        return Optional.of(new Location<World>((World) this.world, new Vector3i(xFinalTarget, yFinalTarget, zFinalTarget)));
     }
 
     @Override
@@ -536,8 +536,8 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
                 .add("PortalAgentType", this.portalAgentType)
                 .add("SearchRadius", this.searchRadius)
                 .add("CreationRadius", this.creationRadius)
-                .add("World", this.worldServerInstance.getWorldInfo().getWorldName())
-                .add("DimensionId", ((IMixinWorldServer) this.worldServerInstance).getDimensionId())
+                .add("World", this.world.getWorldInfo().getWorldName())
+                .add("DimensionId", ((IMixinWorldServer) this.world).getDimensionId())
                 .toString();
     }
 }

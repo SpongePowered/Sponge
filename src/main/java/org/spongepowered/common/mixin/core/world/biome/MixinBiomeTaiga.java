@@ -86,7 +86,7 @@ public abstract class MixinBiomeTaiga extends MixinBiome {
             gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) this.fillerBlock, WorldGenConstants.GROUND_COVER_DEPTH));
 
         }
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
+        BiomeDecorator theBiomeDecorator = this.decorator;
         for (Iterator<Shrub> it = gensettings.getPopulators(Shrub.class).iterator(); it.hasNext();) {
             Shrub next = it.next();
             if (next.getTypes().size() == 1) {

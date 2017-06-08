@@ -378,7 +378,7 @@ public final class ContainerUtil {
         } else if (container instanceof ContainerBeacon) {
             return InventoryArchetypes.BEACON;
         } else if (container instanceof ContainerHorseInventory) {
-            AbstractHorse horse = ((ContainerHorseInventory) container).theHorse;
+            AbstractHorse horse = ((ContainerHorseInventory) container).horse;
             if (horse instanceof AbstractChestHorse && ((AbstractChestHorse) horse).hasChest()) {
                 return InventoryArchetypes.HORSE_WITH_CHEST;
             }
@@ -424,9 +424,9 @@ public final class ContainerUtil {
         } else if (container instanceof ContainerBeacon) {
             return carrierOrNull(((ContainerBeacon) container).getTileEntity());
         } else if (container instanceof ContainerHorseInventory) {
-            return (Carrier) ((ContainerHorseInventory) container).theHorse;
-        } else if (container instanceof ContainerMerchant && ((ContainerMerchant) container).theMerchant instanceof Carrier) {
-            return (Carrier) ((ContainerMerchant) container).theMerchant;
+            return (Carrier) ((ContainerHorseInventory) container).horse;
+        } else if (container instanceof ContainerMerchant && ((ContainerMerchant) container).merchant instanceof Carrier) {
+            return (Carrier) ((ContainerMerchant) container).merchant;
         } else if (container instanceof ContainerPlayer) {
             EntityPlayer player = ((ContainerPlayer) container).player;
             if (player instanceof EntityPlayerMP) {

@@ -762,7 +762,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @return The world server, or else the overworld.
      */
     @Overwrite
-    public WorldServer worldServerForDimension(int dimensionId) {
+    public WorldServer getWorld(int dimensionId) {
         return WorldManager.getWorldByDimensionId(dimensionId)
                 .orElse(WorldManager.getWorldByDimensionId(0)
                         .orElseThrow(() -> new RuntimeException("Attempt made to get world before overworld is loaded!")

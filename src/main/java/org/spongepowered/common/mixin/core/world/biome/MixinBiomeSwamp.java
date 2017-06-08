@@ -41,7 +41,7 @@ public abstract class MixinBiomeSwamp extends MixinBiome {
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
 //        gensettings.getGenerationPopulators().add(new SwampLilyPopulator());
         super.buildPopulators(world, gensettings);
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
+        BiomeDecorator theBiomeDecorator = this.decorator;
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
         Forest.Builder forest = Forest.builder();
         forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
