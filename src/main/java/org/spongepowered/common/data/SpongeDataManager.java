@@ -81,7 +81,7 @@ public final class SpongeDataManager implements DataManager {
         TypeSerializers.getDefaultSerializers().registerPredicate(
             // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
             // See https://github.com/SpongePowered/SpongeCommon/issues/1348
-            x -> dataSerializableTypeToken.isAssignableFrom(x) && !catalogTypeToken.isAssignableFrom(x), new DataSerializableTypeSerializer()
+            x -> dataSerializableTypeToken.isSupertypeOf(x) && !catalogTypeToken.isSupertypeOf(x), new DataSerializableTypeSerializer()
         );
     }
 

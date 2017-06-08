@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen;
 import com.flowpowered.math.GenericMath;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderEnd;
+import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.structure.MapGenEndCity;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.ImmutableBiomeVolume;
@@ -43,8 +43,8 @@ import org.spongepowered.common.util.gen.ChunkBufferPrimer;
 
 import java.util.Random;
 
-@Mixin(ChunkProviderEnd.class)
-public abstract class MixinChunkProviderEnd implements IChunkProvider, GenerationPopulator, IPopulatorProvider {
+@Mixin(ChunkGeneratorEnd.class)
+public abstract class MixinChunkGeneratorEnd implements IChunkProvider, GenerationPopulator, IPopulatorProvider {
 
     @Shadow @Final public Random rand;
 

@@ -30,6 +30,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.village.MerchantRecipe;
@@ -53,7 +54,7 @@ public class MixinEntityVillagerListEnchantedBookForEmeralds implements TradeOff
         checkNotNull(random, "Random cannot be null!");
         Enchantment enchantment = Enchantment.REGISTRY.getRandomObject(random);
         int enchantmentLevel = MathHelper.getInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
-        ItemStack itemstack = Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, enchantmentLevel));
+        ItemStack itemstack = ItemEnchantedBook.getEnchantedItemStack(new EnchantmentData(enchantment, enchantmentLevel));
         int emeraldCount = 2 + random.nextInt(5 + enchantmentLevel * 10) + 3 * enchantmentLevel;
 
         if (enchantment.isTreasureEnchantment()) {

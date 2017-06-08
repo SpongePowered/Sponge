@@ -30,7 +30,7 @@ import com.google.common.base.CaseFormat;
 import com.google.common.base.MoreObjects;
 import com.google.gson.JsonParseException;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.gen.ChunkProviderSettings;
+import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.FlatGeneratorInfo;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -87,7 +87,7 @@ public abstract class MixinWorldType implements GeneratorType {
         if ((Object) this == WorldType.CUSTOMIZED) {
             // They easiest way to go from ChunkProviderSettings to DataContainer is via json and NBT
             try {
-                return JsonDataFormat.serialize(ChunkProviderSettings.Factory.JSON_ADAPTER, new ChunkProviderSettings.Factory());
+                return JsonDataFormat.serialize(ChunkGeneratorSettings.Factory.JSON_ADAPTER, new ChunkGeneratorSettings.Factory());
             } catch (JsonParseException | IOException e) {
                 throw new AssertionError("Failed to serialize default settings of CUSTOMIZED world type", e);
             }

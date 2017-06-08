@@ -86,7 +86,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
             "Lnet/minecraft/entity/EntityList;createEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;";
 
     @Shadow @Final private static Logger LOGGER;
-    @Shadow @Final private Set<ChunkPos> pendingAnvilChunksCoordinates;
+    @Shadow @Final private Set<ChunkPos> field_193415_c;
     @Shadow @Final private Map<ChunkPos, NBTTagCompound> chunksToRemove;
     @Shadow @Final private File chunkSaveLocation;
     @Shadow private boolean flushing;
@@ -208,7 +208,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
         ChunkPos chunkcoordintpair = new ChunkPos(x, z);
 
         // Sponge start - Chunk queue improvements
-        // if (this.pendingAnvilChunksCoordinates.contains(chunkcoordintpair)) {
+        // if (this.field_193415_c.contains(chunkcoordintpair)) {
         //     for (ChunkPos pendingChunkCoord : this.chunksToRemove.keySet()) { 
         //         if (pendingChunkCoord.equals(chunkcoordintpair)) {
         //             return true;
@@ -259,7 +259,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
             boolean lvt_3_1_;
 
             try {
-                // this.pendingAnvilChunksCoordinates.add(chunkpos);
+                // this.field_193415_c.add(chunkpos);
                 NBTTagCompound nbttagcompound = chunk.compound;
 
                 if (nbttagcompound != null) {
@@ -295,7 +295,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
                 // pending
                 lvt_3_1_ = true;
             } finally {
-                // this.pendingAnvilChunksCoordinates.remove(chunkpos);
+                // this.field_193415_c.remove(chunkpos);
             }
 
             return lvt_3_1_;

@@ -24,23 +24,22 @@
  */
 package org.spongepowered.common.mixin.core.util;
 
-import net.minecraft.util.text.EnumChatType;
-import org.spongepowered.api.text.chat.ChatType;
+import net.minecraft.util.text.ChatType;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Locale;
 
-@Mixin(EnumChatType.class)
-public class MixinChatType implements ChatType {
+@Mixin(ChatType.class)
+public class MixinChatType implements org.spongepowered.api.text.chat.ChatType {
 
     @Override
     public String getId() {
-        return "minecraft:" + ((EnumChatType) (Object) this).name().toLowerCase(Locale.ENGLISH);
+        return "minecraft:" + ((ChatType) (Object) this).name().toLowerCase(Locale.ENGLISH);
     }
 
     @Override
     public String getName() {
-        return ((EnumChatType) (Object) this).name();
+        return ((ChatType) (Object) this).name();
     }
 
 }

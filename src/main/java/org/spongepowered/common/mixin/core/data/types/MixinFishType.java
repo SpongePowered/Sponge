@@ -40,7 +40,7 @@ import java.util.Optional;
 public abstract class MixinFishType implements Fish {
 
     @Shadow @Final private String unlocalizedName;
-    @Shadow private boolean cookable;
+    @Final @Shadow private boolean cookable;
 
     private Translation translation;
 

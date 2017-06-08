@@ -33,7 +33,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.IRangedAttackMob;
 import net.minecraft.entity.boss.EntityDragon;
-import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.boss.EntityWither;
 import net.minecraft.entity.effect.EntityWeatherEffect;
 import net.minecraft.entity.item.EntityEnderCrystal;
@@ -139,7 +139,7 @@ public class EntityActivationRange {
         if (entity instanceof EntityPlayer && !SpongeImplHooks.isFakePlayer(entity)
             || entity instanceof EntityThrowable
             || entity instanceof EntityDragon
-            || entity instanceof EntityDragonPart
+            || entity instanceof MultiPartEntityPart
             || entity instanceof EntityWither
             || entity instanceof EntityFireball
             || entity instanceof EntityWeatherEffect

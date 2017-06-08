@@ -114,7 +114,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
-    @Shadow public int fld_1841_az; // @1.12-pre2 maxHurtTime
+    @Shadow public int maxHurtTime;
     @Shadow public int deathTime;
     @Shadow protected int scoreValue;
     @Shadow public float attackedAtYaw;
@@ -126,7 +126,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected AbstractAttributeMap attributeMap;
     @Shadow protected int idleTime;
     @Shadow protected int recentlyHit;
-    @Shadow protected float fld_1843_bc; // @1.12-pre2 lastDamage
+    @Shadow protected float lastDamage;
     @Shadow @Nullable protected EntityPlayer attackingPlayer;
     @Shadow protected ItemStack activeItemStack;
     @Shadow private DamageSource lastDamageSource;
@@ -206,12 +206,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Override
     public double getLastDamage() {
-        return this.fld_1843_bc;
+        return this.lastDamage;
     }
 
     @Override
     public void setLastDamage(double damage) {
-        this.fld_1843_bc = (float) damage;
+        this.lastDamage = (float) damage;
     }
 
     @Override
@@ -287,7 +287,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
         if (this.scoreValue >= 0 && entitylivingbase != null) {
-            entitylivingbase.addToPlayerScore((EntityLivingBase) (Object) this, this.scoreValue, cause);
+            entitylivingbase.func_191956_a((EntityLivingBase) (Object) this, this.scoreValue, cause);
         }
 
         if (entity != null) {
@@ -420,28 +420,28 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 boolean flag1 = true;
 
                 if ((float) this.hurtResistantTime > (float) this.maxHurtResistantTime / 2.0F) {
-                    if (amount <= this.fld_1843_bc) { // Technically, this is wrong since 'amount' won't be 0 if a shield is used. However, we need damageEntityHook so that we process the shield, so we leave it as-is
+                    if (amount <= this.lastDamage) { // Technically, this is wrong since 'amount' won't be 0 if a shield is used. However, we need damageEntityHook so that we process the shield, so we leave it as-is
                         return false;
                     }
 
                     // Sponge start - reroute to our damage hook
-                    if (!this.damageEntityHook(source, amount - this.fld_1843_bc)) {
+                    if (!this.damageEntityHook(source, amount - this.lastDamage)) {
                         return false;
                     }
                     // Sponge end
 
-                    this.fld_1843_bc = amount;
+                    this.lastDamage = amount;
                     flag1 = false;
                 } else {
                     // Sponge start - reroute to our damage hook
                     if (!this.damageEntityHook(source, amount)) {
                         return false;
                     }
-                    this.fld_1843_bc = amount;
+                    this.lastDamage = amount;
                     this.hurtResistantTime = this.maxHurtResistantTime;
                     // this.damageEntity(source, amount); // handled above
                     // Sponge end
-                    this.hurtTime = this.fld_1841_az = 10;
+                    this.hurtTime = this.maxHurtTime = 10;
                 }
 
                 this.attackedAtYaw = 0.0F;
@@ -890,7 +890,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Override
     public OptionalValue<Double> lastDamage() {
-        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.getLastAttackedEntity() == null ? null : (double) this.fld_1843_bc));
+        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.getLastAttackedEntity() == null ? null : (double) this.lastDamage));
     }
 
     @Override

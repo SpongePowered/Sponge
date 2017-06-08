@@ -29,7 +29,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.data.DataContainer;
@@ -194,7 +194,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         }
     }
 
-    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", shift = Shift.AFTER))
+    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V", shift = Shift.AFTER))
     public void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);

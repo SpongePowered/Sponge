@@ -31,10 +31,10 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderOverworld;
-import net.minecraft.world.gen.ChunkProviderSettings;
+import net.minecraft.world.gen.ChunkGeneratorOverworld;
+import net.minecraft.world.gen.ChunkGeneratorSettings;
 import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenScatteredFeature;
@@ -75,13 +75,13 @@ import org.spongepowered.common.world.gen.populators.SnowPopulator;
 
 import java.util.Random;
 
-@Mixin(ChunkProviderOverworld.class)
-public abstract class MixinChunkProviderOverworld implements IChunkProvider, GenerationPopulator, IPopulatorProvider, IChunkProviderOverworld {
+@Mixin(ChunkGeneratorOverworld.class)
+public abstract class MixinChunkGeneratorOverworld implements IChunkProvider, GenerationPopulator, IPopulatorProvider, IChunkProviderOverworld {
 
     @Shadow @Final private double[] heightMap;
     @Shadow @Final private boolean mapFeaturesEnabled;
     @Shadow @Final private net.minecraft.world.World world;
-    @Shadow private ChunkProviderSettings settings;
+    @Shadow private ChunkGeneratorSettings settings;
     @Shadow @Final private Random rand;
 
     @Shadow @Final private MapGenBase caveGenerator;
@@ -103,7 +103,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(net.minecraft.world.World worldIn, long p_i45636_2_, boolean p_i45636_4_, String p_i45636_5_, CallbackInfo ci) {
         if (this.settings == null) {
-            this.settings = new ChunkProviderSettings.Factory().build();
+            this.settings = new ChunkGeneratorSettings.Factory().build();
         }
         this.isVanilla = WorldGenConstants.isValid((IChunkGenerator) (Object) this, GenerationPopulator.class);
     }

@@ -22,10 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.boss;
+package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.IEntityMultiPart;
-import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.MultiPartEntityPart;
 import org.spongepowered.api.entity.living.complex.EnderDragon;
 import org.spongepowered.api.entity.living.complex.EnderDragonPart;
 import org.spongepowered.asm.mixin.Final;
@@ -33,8 +33,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
-@Mixin(EntityDragonPart.class)
-public abstract class MixinEntityDragonPart extends MixinEntity implements EnderDragonPart {
+@Mixin(MultiPartEntityPart.class)
+public abstract class MixinMultiPartEntityPart extends MixinEntity implements EnderDragonPart {
 
     @Shadow @Final public IEntityMultiPart parent;
 

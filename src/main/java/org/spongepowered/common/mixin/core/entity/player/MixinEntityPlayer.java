@@ -32,7 +32,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -659,8 +659,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         ItemStack itemstack1 = this.getHeldItemMainhand();
                         Entity entity = targetEntity;
 
-                        if (targetEntity instanceof EntityDragonPart) {
-                            IEntityMultiPart ientitymultipart = ((EntityDragonPart) targetEntity).parent;
+                        if (targetEntity instanceof MultiPartEntityPart) {
+                            IEntityMultiPart ientitymultipart = ((MultiPartEntityPart) targetEntity).parent;
 
                             if (ientitymultipart instanceof EntityLivingBase) {
                                 entity = (EntityLivingBase) ientitymultipart;

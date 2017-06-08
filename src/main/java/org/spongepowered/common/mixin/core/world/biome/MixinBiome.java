@@ -32,7 +32,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.ChunkProviderSettings;
+import net.minecraft.world.gen.ChunkGeneratorSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.data.type.ShrubTypes;
@@ -110,11 +110,11 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) this.fillerBlock, WorldGenConstants.GROUND_COVER_DEPTH));
 
         String s = world.getWorldInfo().getGeneratorOptions();
-        ChunkProviderSettings settings;
+        ChunkGeneratorSettings settings;
         if (s != null) {
-            settings = ChunkProviderSettings.Factory.jsonToFactory(s).build();
+            settings = ChunkGeneratorSettings.Factory.jsonToFactory(s).build();
         } else {
-            settings = ChunkProviderSettings.Factory.jsonToFactory("").build();
+            settings = ChunkGeneratorSettings.Factory.jsonToFactory("").build();
         }
 
         Ore dirt = Ore.builder()

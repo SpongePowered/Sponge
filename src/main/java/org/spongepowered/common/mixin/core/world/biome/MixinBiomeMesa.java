@@ -29,7 +29,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomeMesa;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.gen.ChunkProviderSettings;
+import net.minecraft.world.gen.ChunkGeneratorSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Cactus;
@@ -58,11 +58,11 @@ public abstract class MixinBiomeMesa extends MixinBiome {
         gensettings.getGenerationPopulators().add(new MesaBiomeGenerationPopulator(this.brycePillars, this.hasForest));
         super.buildPopulators(world, gensettings);
         String s = world.getWorldInfo().getGeneratorOptions();
-        ChunkProviderSettings settings;
+        ChunkGeneratorSettings settings;
         if (s != null) {
-            settings = ChunkProviderSettings.Factory.jsonToFactory(s).build();
+            settings = ChunkGeneratorSettings.Factory.jsonToFactory(s).build();
         } else {
-            settings = ChunkProviderSettings.Factory.jsonToFactory("").build();
+            settings = ChunkGeneratorSettings.Factory.jsonToFactory("").build();
         }
 
         // Extra gold is generated in mesa biomes

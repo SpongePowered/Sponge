@@ -26,8 +26,8 @@ package org.spongepowered.common.world.type;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.chunk.IChunkGenerator;
-import net.minecraft.world.gen.ChunkProviderOverworld;
+import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraft.world.gen.ChunkGeneratorOverworld;
 
 public class SpongeWorldTypeOverworld extends SpongeWorldType {
 
@@ -43,6 +43,6 @@ public class SpongeWorldTypeOverworld extends SpongeWorldType {
 
     @Override
     public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
-        return new ChunkProviderOverworld(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
+        return new ChunkGeneratorOverworld(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
     }
 }

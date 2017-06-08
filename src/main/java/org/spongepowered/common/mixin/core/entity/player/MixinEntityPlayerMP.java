@@ -68,7 +68,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.EnumChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.GameRules;
@@ -308,7 +307,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 this.addStat(entitylist$entityegginfo.entityKilledByStat);
             }
 
-            entitylivingbase.addToPlayerScore((EntityPlayerMP) (Object) this, this.scoreValue, cause);
+            entitylivingbase.func_191956_a((EntityPlayerMP) (Object) this, this.scoreValue, cause);
         }
 
         this.addStat(StatList.DEATHS);
@@ -323,7 +322,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // Sponge end
     }
 
-    @Inject(method = "clonePlayer", at = @At("HEAD"))
+    @Inject(method = "func_193104_a", at = @At("HEAD"))
     public void onClonePlayer(EntityPlayerMP oldPlayer, boolean respawnFromEnd, CallbackInfo ci) {
         // Copy over sponge data from the old player.
         // Allows plugins to specify data that persists after players respawn.
@@ -426,7 +425,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             component = SpongeTexts.fixActionBarFormatting(component);
         }
 
-        this.connection.sendPacket(new SPacketChat(component, (EnumChatType) (Object) type));
+        this.connection.sendPacket(new SPacketChat(component, (net.minecraft.util.text.ChatType) (Object) type));
     }
 
     /**

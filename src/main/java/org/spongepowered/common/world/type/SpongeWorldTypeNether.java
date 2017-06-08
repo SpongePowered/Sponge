@@ -28,8 +28,8 @@ import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.biome.BiomeProviderSingle;
-import net.minecraft.world.chunk.IChunkGenerator;
-import net.minecraft.world.gen.ChunkProviderHell;
+import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraft.world.gen.ChunkGeneratorHell;
 
 public class SpongeWorldTypeNether extends SpongeWorldType {
 
@@ -45,6 +45,6 @@ public class SpongeWorldTypeNether extends SpongeWorldType {
 
     @Override
     public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
-        return new ChunkProviderHell(world, world.getWorldInfo().isMapFeaturesEnabled(), world.getSeed());
+        return new ChunkGeneratorHell(world, world.getWorldInfo().isMapFeaturesEnabled(), world.getSeed());
     }
 }
