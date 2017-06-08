@@ -26,11 +26,9 @@ package org.spongepowered.common.mixin.core.tileentity;
 
 import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -58,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeTileEntityArchetypeBuilder;
+import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -231,26 +230,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      */
     @Override
     public void readFromNbt(NBTTagCompound compound) {
-        if (this instanceof IMixinCustomDataHolder) {
-            if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
-                final NBTTagList list = compound.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
-                final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
-                if (list != null && list.tagCount() != 0) {
-                    for (int i = 0; i < list.tagCount(); i++) {
-                        final NBTTagCompound internal = list.getCompoundTagAt(i);
-                        builder.add(NbtTranslator.getInstance().translateFrom(internal));
-                    }
-                }
-                try {
-                    final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(builder.build());
-                    for (DataManipulator<?, ?> manipulator : manipulators) {
-                        offer(manipulator);
-                    }
-                } catch (InvalidDataException e) {
-                    SpongeImpl.getLogger().error("Could not translate custom plugin data! ", e);
-                }
-            }
-        }
+        CustomDataNbtUtil.readCustomData(compound, this);
     }
 
     /**
@@ -260,14 +240,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      */
     @Override
     public void writeToNbt(NBTTagCompound compound) {
-        if (this instanceof IMixinCustomDataHolder) {
-            final List<DataView> manipulatorViews = DataUtil.getSerializedManipulatorList(((IMixinCustomDataHolder) this).getCustomManipulators());
-            final NBTTagList manipulatorTagList = new NBTTagList();
-            for (DataView dataView : manipulatorViews) {
-                manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
-            }
-            compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
-        }
+        CustomDataNbtUtil.writeCustomData(compound, this);
     }
 
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {

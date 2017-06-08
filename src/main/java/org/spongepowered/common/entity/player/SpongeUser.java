@@ -34,6 +34,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
@@ -48,6 +49,7 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.world.WorldManager;
@@ -96,6 +98,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
         // See EntityPlayer#readEntityFromNBT
         final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA).getCompoundTag(NbtDataUtil.SPONGE_DATA);
+        CustomDataNbtUtil.readCustomData(spongeCompound, ((DataHolder) this));
         if (!spongeCompound.hasNoTags()) {
             final NBTTagList spawnList = spongeCompound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
 
@@ -147,6 +150,8 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             forgeCompound.setTag(NbtDataUtil.SPONGE_DATA, spongeCompound);
             compound.setTag(NbtDataUtil.FORGE_DATA, forgeCompound);
         }
+
+        CustomDataNbtUtil.writeCustomData(spongeCompound, ((DataHolder) this));
     }
 
     @Override
