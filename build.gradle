@@ -1,7 +1,6 @@
 // Gradle plugins
 buildscript {
     repositories {
-        mavenLocal()
         maven {
             name = 'gradle-plugins'
             url = 'https://plugins.gradle.org/m2'
@@ -19,7 +18,7 @@ buildscript {
     dependencies {
         // VanillaGradle contains a custom ForgeGradle extension for SpongeCommon (see below)
         classpath 'gradle.plugin.net.minecrell:vanillagradle:2.2-5'
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
         classpath 'gradle.plugin.net.minecrell:licenser:0.3'
         classpath 'gradle.plugin.org.spongepowered:spongegradle:0.8.1'
         classpath 'org.spongepowered:mixingradle:0.4-SNAPSHOT'
