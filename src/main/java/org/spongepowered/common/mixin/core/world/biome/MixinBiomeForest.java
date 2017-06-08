@@ -47,7 +47,7 @@ public abstract class MixinBiomeForest extends MixinBiome {
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
+        BiomeDecorator theBiomeDecorator = this.decorator;
         int base = -3;
         if (this.type == BiomeForest.Type.FLOWER) {
             base = -1;

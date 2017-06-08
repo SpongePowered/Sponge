@@ -37,7 +37,7 @@ public abstract class MixinGameRules implements IMixinGameRules {
 
     private static final GameRules DEFAULT_GAME_RULES = new GameRules();
 
-    @Shadow @Final private TreeMap<String, ?> theGameRules;
+    @Shadow @Final private TreeMap<String, ?> rules;
 
     @Shadow public abstract void setOrCreateGameRule(String key, String ruleValue);
 
@@ -49,6 +49,6 @@ public abstract class MixinGameRules implements IMixinGameRules {
             return true;
         }
 
-        return this.theGameRules.remove(gameRule) != null;
+        return this.rules.remove(gameRule) != null;
     }
 }

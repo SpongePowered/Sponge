@@ -55,7 +55,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.SpongeUsernameCache;
@@ -82,8 +81,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     private UserStorageService userStorageService;
 
     @Shadow @Final private World world;
-    @Shadow @Final public int xPosition;
-    @Shadow @Final public int zPosition;
+    @Shadow @Final public int x;
+    @Shadow @Final public int z;
     @Shadow @Final private ExtendedBlockStorage[] storageArrays;
     @Shadow @Final private int[] precipitationHeightMap;
     @Shadow @Final private int[] heightMap;
@@ -373,9 +372,9 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
      * Create a BlockPos from a serialized chunk position
      */
     private BlockPos blockPosFromShort(short serialized) {
-        int x = this.xPosition * 16 + (serialized & XZ_MASK);
+        int x = this.x * 16 + (serialized & XZ_MASK);
         int y = (serialized >> Y_SHIFT) & Y_SHORT_MASK;
-        int z = this.zPosition * 16 + ((serialized >> Z_SHORT_SHIFT) & XZ_MASK);
+        int z = this.z * 16 + ((serialized >> Z_SHORT_SHIFT) & XZ_MASK);
         return new BlockPos(x, y, z);
     }
 
@@ -393,9 +392,9 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
      * Create a BlockPos from a serialized chunk position
      */
     private BlockPos blockPosFromInt(int serialized) {
-        int x = this.xPosition * 16 + (serialized & XZ_MASK);
+        int x = this.x * 16 + (serialized & XZ_MASK);
         int y = (serialized >> Y_SHIFT) & Y_INT_MASK;
-        int z = this.zPosition * 16 + ((serialized >> Z_INT_SHIFT) & XZ_MASK);
+        int z = this.z * 16 + ((serialized >> Z_INT_SHIFT) & XZ_MASK);
         return new BlockPos(x, y, z);
     }
 

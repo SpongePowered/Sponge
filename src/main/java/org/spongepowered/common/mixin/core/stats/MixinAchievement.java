@@ -48,7 +48,7 @@ import java.util.Set;
 public abstract class MixinAchievement extends MixinStatBase implements Achievement, IMixinAchievement {
 
     @Shadow @Final public net.minecraft.stats.Achievement parentAchievement;
-    @Shadow @Final public net.minecraft.item.ItemStack theItemStack;
+    @Shadow @Final public net.minecraft.item.ItemStack icon;
     @Shadow @Final private String achievementDescription;
 
     @Shadow private boolean isSpecial;
@@ -77,7 +77,7 @@ public abstract class MixinAchievement extends MixinStatBase implements Achievem
 
     @Override
     public Optional<ItemStackSnapshot> getItemStackSnapshot() {
-        return Optional.ofNullable(ItemStackUtil.fromNative(this.theItemStack).createSnapshot());
+        return Optional.ofNullable(ItemStackUtil.fromNative(this.icon).createSnapshot());
     }
 
     @Override

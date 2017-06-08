@@ -74,7 +74,7 @@ public abstract class MixinBiomeMesa extends MixinBiome {
                 .build();
         gensettings.getPopulators().add(gold);
 
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
+        BiomeDecorator theBiomeDecorator = this.decorator;
         gensettings.getGroundCoverLayers().clear();
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
         Forest.Builder forest = Forest.builder();

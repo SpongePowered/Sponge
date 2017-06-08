@@ -185,7 +185,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int lastExperience;
     @Shadow private EntityPlayer.EnumChatVisibility chatVisibility = EntityPlayer.EnumChatVisibility.FULL;
     @Shadow private boolean chatColours;
-    @Shadow public boolean playerConqueredTheEnd;
+    @Shadow public boolean queuedEndExit;
     @Shadow private float lastHealth;
     @Shadow private int lastFoodLevel;
     @Shadow public boolean isChangingQuantityOnly;
@@ -836,7 +836,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Inventory getEnderChestInventory() {
-        return (Inventory) this.theInventoryEnderChest;
+        return (Inventory) this.enderChest;
     }
 
     @Override

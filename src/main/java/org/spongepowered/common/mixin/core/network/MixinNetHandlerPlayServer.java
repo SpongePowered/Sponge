@@ -408,14 +408,14 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
      * no clear way to go about it with the target position being null and the last position update checks.
      * @param packetIn
      */
-    @Redirect(method = "processPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;playerConqueredTheEnd:Z"))
+    @Redirect(method = "processPlayer", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;queuedEndExit:Z"))
     private boolean throwMoveEvent(EntityPlayerMP playerMP, CPacketPlayer packetIn) {
-        if (!playerMP.playerConqueredTheEnd) {
+        if (!playerMP.queuedEndExit) {
 
             // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
             // We don't fire an event to avoid confusing plugins.
             if (!packetIn.moving && !packetIn.rotating) {
-                return playerMP.playerConqueredTheEnd;
+                return playerMP.queuedEndExit;
             }
 
             // Sponge Start - Movement event
@@ -483,7 +483,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 this.resendLatestResourcePackRequest();
             }
         }
-        return playerMP.playerConqueredTheEnd;
+        return playerMP.queuedEndExit;
     }
 
     /**
@@ -620,7 +620,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
             }
         }
 
-        WorldServer worldserver = this.serverController.worldServerForDimension(this.player.dimension);
+        WorldServer worldserver = this.serverController.getWorld(this.player.dimension);
         Entity entity = packetIn.getEntityFromWorld(worldserver);
         this.player.markPlayerActive();
 

@@ -41,7 +41,7 @@ public abstract class MixinBiomePlains extends MixinBiome implements IMixinBiome
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         gensettings.getPopulators().add(new PlainsGrassPopulator(this.sunflowers));
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
+        BiomeDecorator theBiomeDecorator = this.decorator;
         // set flowers and grass to zero as they are handles by the plains grass
         // populator
         theBiomeDecorator.flowersPerChunk = 0;

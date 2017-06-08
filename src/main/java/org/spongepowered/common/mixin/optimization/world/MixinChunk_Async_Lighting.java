@@ -52,8 +52,8 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isLightPopulated;
     @Shadow private boolean chunkTicked;
-    @Shadow @Final public int xPosition;
-    @Shadow @Final public int zPosition;
+    @Shadow @Final public int x;
+    @Shadow @Final public int z;
     @Shadow @Final private boolean[] updateSkylightColumns;
     @Shadow private boolean isGapLightingUpdated;
 
@@ -99,7 +99,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
     private void recheckGapsAsync(boolean p_150803_1_) {
         //this.worldObj.theProfiler.startSection("recheckGaps"); Sponge - don't use profiler off of main thread
 
-        if (this.world.isAreaLoaded(new BlockPos(this.xPosition * 16 + 8, 0, this.zPosition * 16 + 8), 16))
+        if (this.world.isAreaLoaded(new BlockPos(this.x * 16 + 8, 0, this.z * 16 + 8), 16))
         {
             for (int i = 0; i < 16; ++i)
             {
@@ -109,8 +109,8 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
                     {
                         this.updateSkylightColumns[i + j * 16] = false;
                         int k = this.getHeightValue(i, j);
-                        int l = this.xPosition * 16 + i;
-                        int i1 = this.zPosition * 16 + j;
+                        int l = this.x * 16 + i;
+                        int i1 = this.z * 16 + j;
                         int j1 = Integer.MAX_VALUE;
 
                         for (EnumFacing enumfacing : EnumFacing.Plane.HORIZONTAL)

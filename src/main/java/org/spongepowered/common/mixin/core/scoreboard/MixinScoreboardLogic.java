@@ -240,15 +240,15 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
             throw new IllegalArgumentException("A team with the name \'" +spongeTeam.getName() + "\' already exists!");
         }
 
-        if (team.theScoreboard != null) {
+        if (team.scoreboard != null) {
             throw new IllegalArgumentException("The passed in team is already registered to a scoreboard!");
         }
 
-        team.theScoreboard = this;
-        this.teams.put(team.getRegisteredName(), team);
+        team.scoreboard = this;
+        this.teams.put(team.getName(), team);
 
         for (String entry: team.getMembershipCollection()) {
-            this.addPlayerToTeam(entry, team.getRegisteredName());
+            this.addPlayerToTeam(entry, team.getName());
         }
         this.broadcastTeamCreated(team);
     }
@@ -258,7 +258,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     @Override
     public void removeTeam(ScorePlayerTeam team) {
         super.removeTeam(team);
-        team.theScoreboard = null;
+        team.scoreboard = null;
     }
 
     // Scores

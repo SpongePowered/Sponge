@@ -78,7 +78,6 @@ import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -107,7 +106,6 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -130,7 +128,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow private BlockPos spawnChunk;
     @Shadow private BlockPos bedLocation;
     @Shadow protected FoodStats foodStats;
-    @Shadow public InventoryEnderChest theInventoryEnderChest;
+    @Shadow public InventoryEnderChest enderChest;
 
     @Shadow public abstract int xpBarCap();
     @Shadow public abstract GameProfile getGameProfile();
@@ -669,7 +667,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             this.addStat(AchievementList.OVERKILL);
                         }
 
-                        this.setLastAttacker(targetEntity);
+                        this.setLastAttackedEntity(targetEntity);
 
                         if (targetEntity instanceof EntityLivingBase) {
                             EnchantmentHelper.applyThornEnchantments((EntityLivingBase) targetEntity, (EntityPlayer) (Object) this);
@@ -680,7 +678,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         Entity entity = targetEntity;
 
                         if (targetEntity instanceof EntityDragonPart) {
-                            IEntityMultiPart ientitymultipart = ((EntityDragonPart) targetEntity).entityDragonObj;
+                            IEntityMultiPart ientitymultipart = ((EntityDragonPart) targetEntity).parent;
 
                             if (ientitymultipart instanceof EntityLivingBase) {
                                 entity = (EntityLivingBase) ientitymultipart;

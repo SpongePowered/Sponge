@@ -122,7 +122,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public boolean potionsNeedUpdate;
     @Shadow public boolean dead;
     @Shadow public CombatTracker _combatTracker;
-    @Shadow public EntityLivingBase entityLivingToAttack;
+    @Shadow public EntityLivingBase revengeTarget;
     @Shadow protected AbstractAttributeMap attributeMap;
     @Shadow protected int entityAge;
     @Shadow protected int recentlyHit;
@@ -146,14 +146,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract void markPotionsDirty(); // markPotionsDirty
     @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
     @Shadow public abstract void clearActivePotions();
-    @Shadow public abstract void setLastAttacker(net.minecraft.entity.Entity entity);
+    @Shadow public abstract void setLastAttackedEntity(net.minecraft.entity.Entity entity);
     @Shadow public abstract boolean isPotionActive(Potion potion);
     @Shadow public abstract float getHealth();
     @Shadow public abstract float getMaxHealth();
     @Shadow public abstract float getRotationYawHead();
     @Shadow public abstract void setRotationYawHead(float rotation);
     @Shadow public abstract Collection getActivePotionEffects();
-    @Shadow @Nullable public abstract EntityLivingBase getLastAttacker(); // getLastAttacker
+    @Shadow @Nullable public abstract EntityLivingBase getLastAttackedEntity();
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow protected abstract void applyEntityAttributes();
@@ -885,12 +885,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Override
     public OptionalValue<Living> lastAttacker() {
-        return new SpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable((Living) this.getLastAttacker()));
+        return new SpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable((Living) this.getLastAttackedEntity()));
     }
 
     @Override
     public OptionalValue<Double> lastDamage() {
-        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.getLastAttacker() == null ? null : (double) this.lastDamage));
+        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.getLastAttackedEntity() == null ? null : (double) this.lastDamage));
     }
 
     @Override

@@ -552,8 +552,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         {
             // this.profiler.startSection("getChunk"); // Sponge - Don't use the profiler
             net.minecraft.world.chunk.Chunk chunk = iterator.next();
-            int j = chunk.xPosition * 16;
-            int k = chunk.zPosition * 16;
+            int j = chunk.x * 16;
+            int k = chunk.z * 16;
             // this.profiler.endStartSection("checkNextLight"); // Sponge - Don't use the profiler
             this.timings.updateBlocksCheckNextLight.startTiming(); // Sponge - Timings
             chunk.enqueueRelightChecks();
@@ -884,12 +884,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         for (net.minecraft.world.chunk.Chunk chunk : chunkProviderServer.getLoadedChunks()) {
             IMixinChunk spongeChunk = (IMixinChunk) chunk;
-            if (chunk.unloadQueued || spongeChunk.isPersistedChunk() || !this.provider.canDropChunk(chunk.xPosition, chunk.zPosition)) {
+            if (chunk.unloadQueued || spongeChunk.isPersistedChunk() || !this.provider.canDropChunk(chunk.x, chunk.z)) {
                 continue;
             }
 
             // If a player is currently using the chunk, skip it
-            if (((IMixinPlayerChunkMap) this.getPlayerChunkMap()).isChunkInUse(chunk.xPosition, chunk.zPosition)) {
+            if (((IMixinPlayerChunkMap) this.getPlayerChunkMap()).isChunkInUse(chunk.x, chunk.z)) {
                 continue;
             }
 

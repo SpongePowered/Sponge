@@ -51,7 +51,7 @@ public abstract class MixinPlayerChunkMapEntry implements IMixinPlayerChunkMapEn
 
     @Inject(method = "update", at = @At("HEAD"), cancellable = true)
     public void resendUpdatedBiomes(CallbackInfo ci) {
-        final Chunk chunk = this.playerChunkMap.getWorldServer().getChunkFromChunkCoords(this.pos.chunkXPos, this.pos.chunkZPos);
+        final Chunk chunk = this.playerChunkMap.getWorldServer().getChunkFromChunkCoords(this.pos.x, this.pos.z);
         if (this.updateBiomes) {
             this.sendPacket(new SPacketChunkData(chunk, 65535));
             this.changes = 0;

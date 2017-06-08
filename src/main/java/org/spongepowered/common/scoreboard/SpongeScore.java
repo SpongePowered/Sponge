@@ -95,7 +95,7 @@ public class SpongeScore implements Score {
         if (this.scores.containsKey(objective)) {
             return this.scores.get(objective);
         }
-        net.minecraft.scoreboard.Score score = new net.minecraft.scoreboard.Score(objective.theScoreboard, objective, this.legacyName);
+        net.minecraft.scoreboard.Score score = new net.minecraft.scoreboard.Score(objective.scoreboard, objective, this.legacyName);
 
         // We deliberately set the fields here instead of using the methods.
         // Since a new score is being created here, we want to avoid

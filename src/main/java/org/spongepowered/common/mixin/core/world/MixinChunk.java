@@ -100,7 +100,6 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.interfaces.IMixinCachable;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerChunkMapEntry;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -146,8 +145,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     private Vector3i biomeMax;
 
     @Shadow @Final private World world;
-    @Shadow @Final public int xPosition;
-    @Shadow @Final public int zPosition;
+    @Shadow @Final public int x;
+    @Shadow @Final public int z;
     @Shadow @Final private ExtendedBlockStorage[] storageArrays;
     @Shadow @Final private int[] precipitationHeightMap;
     @Shadow @Final private int[] heightMap;
@@ -169,7 +168,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Shadow public abstract byte[] getBiomeArray();
     @Shadow public abstract void setBiomeArray(byte[] biomeArray);
     @Shadow public abstract void checkLight();
-    @Shadow public abstract <T extends Entity> void getEntitiesOfTypeWithinAAAB(Class <? extends T > entityClass, AxisAlignedBB aabb,
+    @Shadow public abstract <T extends Entity> void getEntitiesOfTypeWithinAABB(Class <? extends T > entityClass, AxisAlignedBB aabb,
     List<T> listToFill, Predicate <? super T > p_177430_4_);
     @Shadow private void propagateSkylightOcclusion(int x, int z) { };
     @Shadow private void relightBlock(int x, int y, int z) { };
@@ -187,7 +186,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             this.uuid = new UUID(this.sponge_world.getUniqueId().getMostSignificantBits() ^ (x * 2 + 1),
                     this.sponge_world.getUniqueId().getLeastSignificantBits() ^ (z * 2 + 1));
         }
-        this.cacheKey = ChunkPos.asLong(this.xPosition, this.zPosition);
+        this.cacheKey = ChunkPos.asLong(this.x, this.z);
     }
 
     @Override
@@ -274,8 +273,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     public boolean loadChunk(boolean generate) {
         WorldServer worldserver = (WorldServer) this.world;
         net.minecraft.world.chunk.Chunk chunk = null;
-        if (worldserver.getChunkProvider().chunkExists(this.xPosition, this.zPosition) || generate) {
-            chunk = worldserver.getChunkProvider().loadChunk(this.xPosition, this.zPosition);
+        if (worldserver.getChunkProvider().chunkExists(this.x, this.z) || generate) {
+            chunk = worldserver.getChunkProvider().loadChunk(this.x, this.z);
         }
 
         return chunk != null;
@@ -331,7 +330,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         setBiomeArray(biomeArray);
 
         if (this.world instanceof WorldServer) {
-            final PlayerChunkMapEntry entry = ((WorldServer) this.world).getPlayerChunkMap().getEntry(this.xPosition, this.zPosition);
+            final PlayerChunkMapEntry entry = ((WorldServer) this.world).getPlayerChunkMap().getEntry(this.x, this.z);
             if (entry != null) {
                 ((IMixinPlayerChunkMapEntry) entry).markBiomesForUpdate();
             }
@@ -352,7 +351,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public boolean setBlock(int x, int y, int z, BlockState block, BlockChangeFlag flag, Cause cause) {
-        return BlockUtil.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, (this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15),
+        return BlockUtil.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, (this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15),
                 block, flag.updateNeighbors());
     }
 
@@ -364,7 +363,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public BlockSnapshot createSnapshot(int x, int y, int z) {
-        return this.sponge_world.createSnapshot((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15));
+        return this.sponge_world.createSnapshot((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15));
     }
 
     @Override
@@ -374,11 +373,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag, Cause cause) {
-        return this.sponge_world.restoreSnapshot((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), snapshot, force, flag, cause);
+        return this.sponge_world.restoreSnapshot((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), snapshot, force, flag, cause);
     }
 
     public double getHighestYAt(double x, double z) {
-        return this.sponge_world.getHighestYAt(this.xPosition << 4 + ((int)x & 15), this.zPosition << 4 + ((int)z & 15));
+        return this.sponge_world.getHighestYAt(this.x << 4 + ((int)x & 15), this.z << 4 + ((int)z & 15));
     }
 
     @Override
@@ -473,7 +472,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"))
+    @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At(value = "RETURN"))
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
             CallbackInfo ci) {
         if (this.world.isRemote || CauseTracker.getInstance().getCurrentPhaseData().state.ignoresEntityCollisions()) {
@@ -782,7 +781,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public Optional<org.spongepowered.api.block.tileentity.TileEntity> getTileEntity(int x, int y, int z) {
         return Optional.ofNullable((org.spongepowered.api.block.tileentity.TileEntity) this.getTileEntity(
-                new BlockPos((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15)), EnumCreateEntityType.CHECK));
+                new BlockPos((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15)), EnumCreateEntityType.CHECK));
     }
 
     @Override
@@ -792,52 +791,52 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public Collection<ScheduledBlockUpdate> getScheduledUpdates(int x, int y, int z) {
-        return this.sponge_world.getScheduledUpdates((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15));
+        return this.sponge_world.getScheduledUpdates((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15));
     }
 
     @Override
     public ScheduledBlockUpdate addScheduledUpdate(int x, int y, int z, int priority, int ticks) {
-        return this.sponge_world.addScheduledUpdate((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), priority, ticks);
+        return this.sponge_world.addScheduledUpdate((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), priority, ticks);
     }
 
     @Override
     public void removeScheduledUpdate(int x, int y, int z, ScheduledBlockUpdate update) {
-        this.sponge_world.removeScheduledUpdate((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), update);
+        this.sponge_world.removeScheduledUpdate((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), update);
     }
 
     @Override
     public boolean hitBlock(int x, int y, int z, Direction side, Cause cause) {
-        return this.sponge_world.hitBlock((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), side, cause);
+        return this.sponge_world.hitBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), side, cause);
     }
 
     @Override
     public boolean interactBlock(int x, int y, int z, Direction side, Cause cause) {
-        return this.sponge_world.interactBlock((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), side, cause);
+        return this.sponge_world.interactBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), side, cause);
     }
 
     @Override
     public boolean placeBlock(int x, int y, int z, BlockState block, Direction side, Cause cause) {
-        return this.sponge_world.placeBlock((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), block, side, cause);
+        return this.sponge_world.placeBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), block, side, cause);
     }
 
     @Override
     public boolean interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side, Cause cause) {
-        return this.sponge_world.interactBlockWith((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), itemStack, side, cause);
+        return this.sponge_world.interactBlockWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, side, cause);
     }
 
     @Override
     public boolean digBlock(int x, int y, int z, Cause cause) {
-        return this.sponge_world.digBlock((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), cause);
+        return this.sponge_world.digBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), cause);
     }
 
     @Override
     public boolean digBlockWith(int x, int y, int z, ItemStack itemStack, Cause cause) {
-        return this.sponge_world.digBlockWith((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), itemStack, cause);
+        return this.sponge_world.digBlockWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, cause);
     }
 
     @Override
     public int getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack, Cause cause) {
-        return this.sponge_world.getBlockDigTimeWith((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15), itemStack, cause);
+        return this.sponge_world.getBlockDigTimeWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, cause);
     }
 
     @Redirect(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;getLoadedChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
@@ -867,7 +866,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Override
     public Optional<AABB> getBlockSelectionBox(int x, int y, int z) {
         checkBlockBounds(x, y, z);
-        return this.sponge_world.getBlockSelectionBox((this.xPosition << 4) + (x & 15), y, (this.zPosition << 4) + (z & 15));
+        return this.sponge_world.getBlockSelectionBox((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15));
     }
 
     @Override
@@ -876,7 +875,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         checkNotNull(box, "box");
         checkNotNull(filter, "filter");
         final List<Entity> entities = new ArrayList<>();
-        getEntitiesOfTypeWithinAAAB(net.minecraft.entity.Entity.class, VecHelper.toMC(box), entities,
+        getEntitiesOfTypeWithinAABB(net.minecraft.entity.Entity.class, VecHelper.toMC(box), entities,
             entity -> filter.test((org.spongepowered.api.entity.Entity) entity));
         return entities.stream().map(entity -> (org.spongepowered.api.entity.Entity) entity).collect(Collectors.toSet());
     }
@@ -1189,7 +1188,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     public String toString() {
         return Objects.toStringHelper(this)
                 .add("World", this.world)
-                .add("Position", this.xPosition + this.zPosition)
+                .add("Position", this.x + this.z)
                 .toString();
     }
 }

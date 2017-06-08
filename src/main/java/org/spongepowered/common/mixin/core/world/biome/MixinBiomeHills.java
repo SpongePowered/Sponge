@@ -72,7 +72,7 @@ public abstract class MixinBiomeHills extends MixinBiome {
             return (BlockState) result;
         } , WorldGenConstants.GROUND_COVER_DEPTH));
 
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
+        BiomeDecorator theBiomeDecorator = this.decorator;
         RandomBlock emerald = RandomBlock.builder()
                 .block((BlockState) Blocks.EMERALD_ORE.getDefaultState())
                 .placementTarget(WorldGenConstants.STONE_LOCATION)

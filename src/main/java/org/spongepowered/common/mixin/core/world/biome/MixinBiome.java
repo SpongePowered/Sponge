@@ -82,7 +82,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
     @Shadow @Final public float rainfall;
     @Shadow public IBlockState topBlock;
     @Shadow public IBlockState fillerBlock;
-    @Shadow public BiomeDecorator theBiomeDecorator;
+    @Shadow public BiomeDecorator decorator;
 
     private String id;
     private String modId;
@@ -96,15 +96,15 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
         buildPopulators((World) world, gensettings);
         if (!getClass().getName().startsWith("net.minecraft")) {
             gensettings.getPopulators().add(new WrappedBiomeDecorator((Biome) (Object) this));
-        } else if (!this.theBiomeDecorator.getClass().getName().startsWith("net.minecraft")) {
-            gensettings.getPopulators().add(new WrappedBiomeDecorator(this.theBiomeDecorator));
+        } else if (!this.decorator.getClass().getName().startsWith("net.minecraft")) {
+            gensettings.getPopulators().add(new WrappedBiomeDecorator(this.decorator));
         }
         return gensettings;
     }
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
+        BiomeDecorator theBiomeDecorator = this.decorator;
 
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) this.topBlock, SeededVariableAmount.fixed(1)));
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) this.fillerBlock, WorldGenConstants.GROUND_COVER_DEPTH));
@@ -205,12 +205,12 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                 .build();
         gensettings.getPopulators().add(lapis);
 
-        if (theBiomeDecorator.sandPerChunk2 > 0) {
+        if (theBiomeDecorator.sandPatchesPerChunk > 0) {
             SeaFloor sand = SeaFloor.builder()
                     .block((BlockState) Blocks.SAND.getDefaultState())
                     .radius(VariableAmount.baseWithRandomAddition(2, 5))
                     .depth(2)
-                    .perChunk(theBiomeDecorator.sandPerChunk2)
+                    .perChunk(theBiomeDecorator.sandPatchesPerChunk)
                     .replace(WorldGenConstants.DIRT_OR_GRASS)
                     .build();
             gensettings.getPopulators().add(sand);
@@ -225,12 +225,12 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                     .build();
             gensettings.getPopulators().add(clay);
         }
-        if (theBiomeDecorator.sandPerChunk > 0) {
+        if (theBiomeDecorator.gravelPatchesPerChunk > 0) {
             SeaFloor gravelSeaFloor = SeaFloor.builder()
                     .block((BlockState) Blocks.GRAVEL.getDefaultState())
                     .radius(VariableAmount.baseWithRandomAddition(2, 4))
                     .depth(2)
-                    .perChunk(theBiomeDecorator.sandPerChunk)
+                    .perChunk(theBiomeDecorator.gravelPatchesPerChunk)
                     .replace(WorldGenConstants.DIRT_OR_GRASS)
                     .build();
             gensettings.getPopulators().add(gravelSeaFloor);

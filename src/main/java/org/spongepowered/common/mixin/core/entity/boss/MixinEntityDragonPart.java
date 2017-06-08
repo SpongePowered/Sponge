@@ -36,11 +36,11 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 @Mixin(EntityDragonPart.class)
 public abstract class MixinEntityDragonPart extends MixinEntity implements EnderDragonPart {
 
-    @Shadow @Final public IEntityMultiPart entityDragonObj;
+    @Shadow @Final public IEntityMultiPart parent;
 
     @Override
     public EnderDragon getParent() {
-        return (EnderDragon) this.entityDragonObj;
+        return (EnderDragon) this.parent;
     }
 
 }
