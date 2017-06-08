@@ -38,6 +38,7 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.Iterator;
@@ -47,7 +48,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-@Mixin({TileEntity.class, Entity.class})
+@Mixin({TileEntity.class, Entity.class, SpongeUser.class})
 public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
 
     private List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
