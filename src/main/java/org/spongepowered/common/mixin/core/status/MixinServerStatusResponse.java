@@ -50,10 +50,10 @@ import javax.annotation.Nullable;
 @Mixin(ServerStatusResponse.class)
 public abstract class MixinServerStatusResponse implements ClientPingServerEvent.Response {
 
-    @Shadow(remap = false, aliases = {"fld_1602_a"}) @Nullable private ITextComponent description; // @1.12-pre2
+    @Shadow @Nullable private ITextComponent description;
     @Shadow @Nullable private ServerStatusResponse.Players players;
     @Shadow private ServerStatusResponse.Version version;
-    @Shadow(remap = false, aliases = {"fld_1603_d"}) @Nullable private String favicon; // @1.12-pre2
+    @Shadow @Nullable private String favicon;
 
     private Text descriptionText = Text.of();
     @Nullable private ServerStatusResponse.Players playerBackup;

@@ -63,10 +63,6 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     private volatile Context context;
     private boolean generateSpawnOnLoad;
 
-    static {
-        WorldManager.registerVanillaTypesAndDimensions();
-    }
-
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class <? extends WorldProvider > clazzIn,
             CallbackInfo ci) {
