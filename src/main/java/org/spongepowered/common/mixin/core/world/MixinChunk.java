@@ -151,11 +151,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @Shadow @Final private int[] precipitationHeightMap;
     @Shadow @Final private int[] heightMap;
     @Shadow @Final private ClassInheritanceMultiMap<Entity>[] entityLists;
-    @Shadow @Final private Map<BlockPos, TileEntity> chunkTileEntityMap;
+    @Shadow @Final private Map<BlockPos, TileEntity> tileEntities;
     @Shadow private long inhabitedTime;
-    @Shadow private boolean isChunkLoaded;
+    @Shadow private boolean loaded;
     @Shadow private boolean isTerrainPopulated;
-    @Shadow private boolean isModified;
+    @Shadow private boolean dirty;
     @Shadow public boolean unloadQueued;
 
     // @formatter:off
@@ -214,8 +214,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         this.isSpawning = spawning;
     }
 
-    @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
-    public void onChunkLoadInject(CallbackInfo ci) {
+    @Inject(method = "onLoad()V", at = @At("RETURN"))
+    public void onLoadInject(CallbackInfo ci) {
         if (!this.world.isRemote) {
             SpongeHooks.logChunkLoad(this.world, this.chunkPos);
         }
@@ -234,8 +234,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
     }
 
-    @Inject(method = "onChunkUnload()V", at = @At("RETURN"))
-    public void onChunkUnloadInject(CallbackInfo ci) {
+    @Inject(method = "onUnload()V", at = @At("RETURN"))
+    public void onUnloadInject(CallbackInfo ci) {
         if (!this.world.isRemote) {
             SpongeHooks.logChunkUnload(this.world, this.chunkPos);
         }
@@ -266,7 +266,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public boolean isLoaded() {
-        return this.isChunkLoaded;
+        return this.loaded;
     }
 
     @Override
@@ -664,7 +664,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
             }
         }
 
-        this.isModified = true;
+        this.dirty = true;
         return currentState;
     }
 
@@ -763,14 +763,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Collection<org.spongepowered.api.block.tileentity.TileEntity> getTileEntities() {
-        return Sets.newHashSet((Collection) this.chunkTileEntityMap.values());
+        return Sets.newHashSet((Collection) this.tileEntities.values());
     }
 
     @Override
     public Collection<org.spongepowered.api.block.tileentity.TileEntity>
     getTileEntities(java.util.function.Predicate<org.spongepowered.api.block.tileentity.TileEntity> filter) {
         Set<org.spongepowered.api.block.tileentity.TileEntity> tiles = Sets.newHashSet();
-        for (Entry<BlockPos, TileEntity> entry : this.chunkTileEntityMap.entrySet()) {
+        for (Entry<BlockPos, TileEntity> entry : this.tileEntities.entrySet()) {
             if (filter.test((org.spongepowered.api.block.tileentity.TileEntity) entry.getValue())) {
                 tiles.add((org.spongepowered.api.block.tileentity.TileEntity) entry.getValue());
             }
@@ -839,14 +839,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         return this.sponge_world.getBlockDigTimeWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, cause);
     }
 
-    @Redirect(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;getLoadedChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
-    public net.minecraft.world.chunk.Chunk onChunkPopulateLoadChunk(IChunkProvider chunkProvider, int x, int z) {
+    @Redirect(method = "populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;getLoadedChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
+    public net.minecraft.world.chunk.Chunk onPopulateLoadChunk(IChunkProvider chunkProvider, int x, int z) {
         // Don't mark chunks as active
         return ((IMixinChunkProviderServer) chunkProvider).getLoadedChunkWithoutMarkingActive(x, z);
     }
 
-    @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkGenerator;populate(II)V"))
-    private void onChunkPopulate(IChunkGenerator generator, CallbackInfo callbackInfo) {
+    @Inject(method = "populate(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkGenerator;populate(II)V"))
+    private void onPopulate(IChunkGenerator generator, CallbackInfo callbackInfo) {
         if (CauseTracker.ENABLED && !this.world.isRemote) {
             final CauseTracker causeTracker = CauseTracker.getInstance();
             causeTracker.switchToPhase(GenerationPhase.State.TERRAIN_GENERATION, PhaseContext.start()
@@ -856,8 +856,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
     }
 
-    @Inject(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;setChunkModified()V"))
-    private void onChunkPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
+    @Inject(method = "populate(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;markDirty()V"))
+    private void onPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
         if (CauseTracker.ENABLED && !this.world.isRemote) {
             CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
         }

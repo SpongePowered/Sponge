@@ -36,7 +36,7 @@ public class SpongeWorldTypeEnd extends SpongeWorldType {
 
     public SpongeWorldTypeEnd() {
         super("the_end");
-        setNotificationData();
+        enableInfoNotice();
     }
 
     @Override

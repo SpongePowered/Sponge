@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(TileEntityStructure.Mode.class)
-@Implements(@Interface(iface = StructureMode.class, prefix = "structure$", unique = true))
+@Implements(@Interface(iface = StructureMode.class, prefix = "structure$"))
 public abstract class MixinTileEntityStructureMode implements StructureMode {
 
     @Shadow @Final private String modeName;

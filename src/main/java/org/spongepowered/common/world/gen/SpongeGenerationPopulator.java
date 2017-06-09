@@ -95,12 +95,12 @@ public class SpongeGenerationPopulator implements GenerationPopulator, IGenerati
 
         WorldGenConstants.disableLighting();
         if (minChunkX == maxChunkX && minChunkZ == maxChunkZ) {
-            this.cachedChunk = this.chunkGenerator.provideChunk(minChunkX, minChunkZ);
+            this.cachedChunk = this.chunkGenerator.generateChunk(minChunkX, minChunkZ);
             placeChunkInBuffer(this.cachedChunk, buffer, minChunkX, minChunkZ);
         } else {
             for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++) {
                 for (int chunkZ = minChunkZ; chunkZ <= maxChunkZ; chunkZ++) {
-                    final Chunk generated = this.chunkGenerator.provideChunk(chunkX, chunkZ);
+                    final Chunk generated = this.chunkGenerator.generateChunk(chunkX, chunkZ);
                     placeChunkInBuffer(generated, buffer, chunkX, chunkZ);
                 }
             }

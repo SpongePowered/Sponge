@@ -131,7 +131,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
             BlockPos next = position.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4),
                     rand.nextInt(8) - rand.nextInt(8));
 
-            if (worldIn.isAirBlock(next) && (!worldIn.provider.hasNoSky() || next.getY() < 254)
+            if (worldIn.isAirBlock(next) && (!worldIn.provider.isNether() || next.getY() < 254)
                     && Blocks.DOUBLE_PLANT.canPlaceBlockAt(worldIn, next)) {
                 DoublePlantType type = getType(VecHelper.toVector3i(next), rand);
                 Blocks.DOUBLE_PLANT.placeAt(worldIn, next,

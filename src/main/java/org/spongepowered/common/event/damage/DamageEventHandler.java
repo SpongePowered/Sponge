@@ -358,7 +358,7 @@ public class DamageEventHandler {
 
     public static Cause generateCauseFor(DamageSource damageSource) {
         if (damageSource instanceof EntityDamageSourceIndirect) {
-            net.minecraft.entity.Entity source = damageSource.getEntity();
+            net.minecraft.entity.Entity source = damageSource.getTrueSource();
             List<NamedCause> causeObjects = new ArrayList<>();
             causeObjects.add(NamedCause.source(damageSource));
             if (!(source instanceof EntityPlayer) && source != null) {
@@ -369,7 +369,7 @@ public class DamageEventHandler {
             }
             return Cause.builder().addAll(causeObjects).build();
         } else if (damageSource instanceof EntityDamageSource) {
-            net.minecraft.entity.Entity source = damageSource.getEntity();
+            net.minecraft.entity.Entity source = damageSource.getTrueSource();
             List<NamedCause> causeObjects = new ArrayList<>();
             causeObjects.add(NamedCause.source(damageSource));
             if (!(source instanceof EntityPlayer) && source != null) {

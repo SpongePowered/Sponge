@@ -131,12 +131,12 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         if (this.listeners.contains(listener)) {
             // Sponge start
             // throw new IllegalArgumentException("Listener already listening");
-            listener.updateCraftingInventory(container, this.getInventory());
+            listener.sendAllContents(container, this.getInventory());
             container.detectAndSendChanges();
             // Sponge end
         } else {
             this.listeners.add(listener);
-            listener.updateCraftingInventory(container, this.getInventory());
+            listener.sendAllContents(container, this.getInventory());
             container.detectAndSendChanges();
         }
     }

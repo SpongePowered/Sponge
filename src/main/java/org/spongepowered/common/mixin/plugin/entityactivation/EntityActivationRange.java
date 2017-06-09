@@ -296,28 +296,28 @@ public class EntityActivationRange {
 
                     switch (((IModData_Activation) entity).getActivationType()) {
                         case 1:
-                            if (monsterBB.intersectsWith(entity.getEntityBoundingBox())) {
+                            if (monsterBB.intersects(entity.getEntityBoundingBox())) {
                                 ((IModData_Activation) entity).setActivatedTick(currentTick);
                             }
                             break;
                         case 2:
-                            if (creatureBB.intersectsWith(entity.getEntityBoundingBox())) {
+                            if (creatureBB.intersects(entity.getEntityBoundingBox())) {
                                 ((IModData_Activation) entity).setActivatedTick(currentTick);
                             }
                             break;
                         case 3:
-                            if (aquaticBB.intersectsWith(entity.getEntityBoundingBox())) {
+                            if (aquaticBB.intersects(entity.getEntityBoundingBox())) {
                                 ((IModData_Activation) entity).setActivatedTick(currentTick);
                             }
                             break;
                         case 4:
-                            if (ambientBB.intersectsWith(entity.getEntityBoundingBox())) {
+                            if (ambientBB.intersects(entity.getEntityBoundingBox())) {
                                 ((IModData_Activation) entity).setActivatedTick(currentTick);
                             }
                             break;
                         case 5:
                         default:
-                            if (miscBB.intersectsWith(entity.getEntityBoundingBox())) {
+                            if (miscBB.intersects(entity.getEntityBoundingBox())) {
                                 ((IModData_Activation) entity).setActivatedTick(currentTick);
                             }
                     }

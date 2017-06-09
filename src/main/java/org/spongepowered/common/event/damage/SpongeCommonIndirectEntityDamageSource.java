@@ -65,7 +65,7 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends EntityDamag
     }
 
     @Override
-    public Entity getEntity() {
+    public Entity getTrueSource() {
         return (Entity) getSource();
     }
 

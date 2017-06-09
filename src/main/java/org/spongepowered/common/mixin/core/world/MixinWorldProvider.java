@@ -49,7 +49,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     @Shadow public abstract int getAverageGroundLevel();
     @Shadow public abstract boolean doesWaterVaporize();
     @Shadow public abstract WorldBorder createWorldBorder();
-    @Shadow public abstract boolean hasNoSky();
+    @Shadow public abstract boolean isNether();
     @Shadow private String generatorSettings;
 
     @Override
@@ -79,7 +79,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
 
     @Override
     public boolean hasSky() {
-        return !hasNoSky();
+        return !isNether();
     }
 
     @Override

@@ -71,7 +71,7 @@ public abstract class MixinWorldServer_Explosion extends MixinWorld {
                 // To replicate this behavior, we manually send a velocity packet. It's critical that we don't simply
                 // add to the 'motion[xyz]' fields, as that will end up using the value set by 'doExplosionB', which must be
                 // ignored.
-                ((EntityPlayerMP) playerEntity).connection.sendPacket(new SPacketEntityVelocity(playerEntity.getEntityId(), knockback.xCoord, knockback.yCoord, knockback.zCoord));
+                ((EntityPlayerMP) playerEntity).connection.sendPacket(new SPacketEntityVelocity(playerEntity.getEntityId(), knockback.x, knockback.y, knockback.z));
             }
         }
     }

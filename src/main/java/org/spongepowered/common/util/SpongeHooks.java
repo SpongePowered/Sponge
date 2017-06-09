@@ -130,7 +130,7 @@ public class SpongeHooks {
 
         String spawnName = entity.getName();
         if (entity instanceof EntityItem) {
-            spawnName = ((EntityItem) entity).getEntityItem().getDisplayName();
+            spawnName = ((EntityItem) entity).getItem().getDisplayName();
         }
 
         Optional<User> user = cause.first(User.class);
@@ -529,7 +529,7 @@ public class SpongeHooks {
             causedBy = user.getName();
         } else if (rootCause instanceof EntityItem) {
             EntityItem item = (EntityItem) rootCause;
-            causedBy = item.getEntityItem().getDisplayName();
+            causedBy = item.getItem().getDisplayName();
         }
         else if (rootCause instanceof Entity) {
             Entity causeEntity = (Entity) rootCause;

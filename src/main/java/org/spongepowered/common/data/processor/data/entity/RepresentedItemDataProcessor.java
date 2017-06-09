@@ -57,7 +57,7 @@ public class RepresentedItemDataProcessor extends
             ((EntityItemFrame) container).setDisplayedItem((ItemStack) value.createStack());
             return true;
         } else if (container instanceof EntityItem) {
-            ((EntityItem) container).setEntityItemStack((ItemStack) value.createStack());
+            ((EntityItem) container).setItem((ItemStack) value.createStack());
             return true;
         }
         return false;

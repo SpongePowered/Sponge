@@ -303,7 +303,7 @@ public abstract class MixinBiome implements BiomeType, IMixinBiome {
                     .build();
             gensettings.getPopulators().add(cactus);
         }
-        if (theBiomeDecorator.generateLakes) {
+        if (theBiomeDecorator.generateFalls) {
             RandomBlock water = RandomBlock.builder()
                     .block((BlockState) Blocks.FLOWING_WATER.getDefaultState())
                     .height(VariableAmount.baseWithRandomAddition(0, VariableAmount.baseWithRandomAddition(8, 248)))

@@ -391,15 +391,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * @reason Overwrites the original logic to simply pass through to the
      * CauseTracker.
      *
-     * @param p_184816_1_ The entity item to spawn
+     * @param entity The entity item to spawn
      * @return The itemstack
      */
     @SuppressWarnings("OverwriteModifiers") // This is a MinecraftDev thing, since forge elevates the modifier to public
     @Overwrite
     @Nullable
-    public ItemStack dropItemAndGetStack(EntityItem p_184816_1_) {
-        this.world.spawnEntity(p_184816_1_);
-        return p_184816_1_.getEntityItem();
+    public ItemStack dropItemAndGetStack(EntityItem entity) {
+        this.world.spawnEntity(entity);
+        return entity.getItem();
     }
 
     @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY)) // collideWithPlayer
@@ -602,7 +602,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
 
                         if (isSweapingAttack) {
-                            for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().expand(1.0D, 0.25D, 1.0D))) {
+                            for (EntityLivingBase entitylivingbase : this.world.getEntitiesWithinAABB(EntityLivingBase.class, targetEntity.getEntityBoundingBox().grow(1.0D, 0.25D, 1.0D))) {
                                 if (entitylivingbase != (EntityPlayer) (Object) this && entitylivingbase != targetEntity && !this.isOnSameTeam(entitylivingbase) && this.getDistanceSqToEntity(entitylivingbase) < 9.0D) {
                                     // Sponge Start - Do a small event for these entities
                                     // entitylivingbase.knockBack(this, 0.4F, (double)MathHelper.sin(this.rotationYaw * 0.017453292F), (double)(-MathHelper.cos(this.rotationYaw * 0.017453292F)));

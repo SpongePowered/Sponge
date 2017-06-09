@@ -526,7 +526,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     protected void updateBlocks() {
         this.playerCheckLight();
 
-        if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD)
+        if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES)
         {
             Iterator<net.minecraft.world.chunk.Chunk> iterator1 = this.playerChunkMap.getChunkIterator();
 
@@ -681,7 +681,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             {
                 for (ExtendedBlockStorage extendedblockstorage : chunk.getBlockStorageArray())
                 {
-                    if (extendedblockstorage != net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE && extendedblockstorage.getNeedsRandomTick())
+                    if (extendedblockstorage != net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE && extendedblockstorage.needsRandomTick())
                     {
                         for (int i1 = 0; i1 < i; ++i1)
                         {
@@ -1197,10 +1197,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     .trace();
             return;
         }
-        final double x = mcExplosion.explosionX;
-        final double y = mcExplosion.explosionY;
-        final double z = mcExplosion.explosionZ;
-        final boolean isSmoking = mcExplosion.isSmoking;
+        final double x = mcExplosion.x;
+        final double y = mcExplosion.y;
+        final double z = mcExplosion.z;
+        final boolean damagesTerrain = mcExplosion.damagesTerrain;
         final float strength = explosion.getRadius();
 
         // Set up the pre event
@@ -1217,7 +1217,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         mcExplosion.doExplosionA();
         mcExplosion.doExplosionB(false);
 
-        if (!isSmoking) {
+        if (!damagesTerrain) {
             mcExplosion.clearAffectedBlockPositions();
         }
 
@@ -1277,7 +1277,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         if (!this.isValid(pos)) {
             return false;
-        } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) { // isRemote is always false since this is WorldServer
+        } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) { // isRemote is always false since this is WorldServer
             return false;
         } else {
             // Sponge - reroute to the CauseTracker
@@ -1289,7 +1289,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public boolean setBlockState(BlockPos pos, IBlockState state, BlockChangeFlag flag) {
         if (!this.isValid(pos)) {
             return false;
-        } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) { // isRemote is always false since this is WorldServer
+        } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_ALL_BLOCK_STATES) { // isRemote is always false since this is WorldServer
             return false;
         } else {
             // Sponge - reroute to the CauseTracker

@@ -55,8 +55,8 @@ import java.io.IOException;
 @Mixin(WorldType.class)
 public abstract class MixinWorldType implements GeneratorType {
 
-    @Shadow @Final private String worldType;
-    @Shadow @Final private int worldTypeId;
+    @Shadow @Final private String name;
+    @Shadow @Final private int id;
 
     @Inject(method = "<init>(ILjava/lang/String;)V", at = @At("RETURN"))
     private void onConstructSpongeRegister(int id, String name, CallbackInfo callbackInfo) {
@@ -67,12 +67,12 @@ public abstract class MixinWorldType implements GeneratorType {
 
     @Override
     public String getId() {
-        return SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.worldType);
+        return SpongeImplHooks.getModIdFromClass(this.getClass()) + ":" + CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, this.name);
     }
 
     @Override
     public String getName() {
-        return this.worldType;
+        return this.name;
     }
 
     @Override
@@ -107,7 +107,7 @@ public abstract class MixinWorldType implements GeneratorType {
         final int prime = 31;
         int result = 1;
         result = prime * result + this.getName().hashCode();
-        result = prime * result + this.worldTypeId;
+        result = prime * result + this.id;
         return result;
     }
 
@@ -118,7 +118,7 @@ public abstract class MixinWorldType implements GeneratorType {
         }
 
         final WorldType other = (WorldType) obj;
-        return this.getName().equals(other.getName()) && this.worldTypeId == other.getWorldTypeID();
+        return this.getName().equals(other.getName()) && this.id == other.getId();
     }
 
     @Override

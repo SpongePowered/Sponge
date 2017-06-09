@@ -506,10 +506,10 @@ public final class EntityUtil {
         Vec3d traceEnd = traceStart.add(lookDir);
 
         for (final Entity entity : EntityUtil.getTraceEntities(source, traceDistance, lookDir, EntityUtil.TRACEABLE)) {
-            AxisAlignedBB entityBB = entity.getEntityBoundingBox().expandXyz(entity.getCollisionBorderSize());
+            AxisAlignedBB entityBB = entity.getEntityBoundingBox().grow(entity.getCollisionBorderSize());
             RayTraceResult entityRay = entityBB.calculateIntercept(traceStart, traceEnd);
 
-            if (entityBB.isVecInside(traceStart)) {
+            if (entityBB.contains(traceStart)) {
                 if (trace.distance >= 0.0D) {
                     trace.entity = entity;
                     trace.location = entityRay == null ? traceStart : entityRay.hitVec;
@@ -543,8 +543,8 @@ public final class EntityUtil {
 
     private static List<Entity> getTraceEntities(Entity source, double traceDistance, Vec3d dir, Predicate<Entity> filter) {
         AxisAlignedBB boundingBox = source.getEntityBoundingBox();
-        AxisAlignedBB traceBox = boundingBox.addCoord(dir.xCoord, dir.yCoord, dir.zCoord);
-        List<Entity> entities = source.world.getEntitiesInAABBexcluding(source, traceBox.expand(1.0F, 1.0F, 1.0F), filter);
+        AxisAlignedBB traceBox = boundingBox.expand(dir.x, dir.y, dir.z);
+        List<Entity> entities = source.world.getEntitiesInAABBexcluding(source, traceBox.grow(1.0F, 1.0F, 1.0F), filter);
         return entities;
     }
 
@@ -612,7 +612,7 @@ public final class EntityUtil {
     }
 
     public static List<EntityHanging> findHangingEntities(WorldServer worldIn, BlockPos pos) {
-        return worldIn.getEntitiesWithinAABB(EntityHanging.class, new AxisAlignedBB(pos, pos).expand(1.1D, 1.1D, 1.1D),
+        return worldIn.getEntitiesWithinAABB(EntityHanging.class, new AxisAlignedBB(pos, pos).grow(1.1D, 1.1D, 1.1D),
                 entityIn -> {
                     if (entityIn == null) {
                         return false;
@@ -1097,7 +1097,7 @@ public final class EntityUtil {
     }
 
     private static ItemStack dropItemAndGetStack(EntityPlayer player, EntityItem item) {
-        final ItemStack stack = item.getEntityItem();
+        final ItemStack stack = item.getItem();
         if (stack != null) {
             player.world.spawnEntity(item);
             return stack;

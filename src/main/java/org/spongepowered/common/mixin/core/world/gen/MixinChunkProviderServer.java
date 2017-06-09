@@ -158,8 +158,8 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         if (chunk != null)
         {
             this.id2ChunkMap.put(ChunkPos.asLong(x, z), chunk);
-            chunk.onChunkLoad();
-            chunk.populateChunk((ChunkProviderServer) (Object) this, this.chunkGenerator);
+            chunk.onLoad();
+            chunk.populate((ChunkProviderServer) (Object) this, this.chunkGenerator);
         }
 
         return chunk;
@@ -194,7 +194,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         }
     }
 
-    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populateChunk(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", shift = Shift.AFTER))
+    @Inject(method = "provideChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", shift = Shift.AFTER))
     public void onProvideChunkEnd(int x, int z, CallbackInfoReturnable<Chunk> ci) {
         if (CauseTracker.ENABLED) {
             CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
@@ -301,7 +301,7 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
                         }
                         spongeChunk.setScheduledForUnload(-1);
                     }
-                    chunk.onChunkUnload();
+                    chunk.onUnload();
                     this.saveChunkData(chunk);
                     this.saveChunkExtraData(chunk);
                     iterator.remove();
@@ -338,8 +338,8 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         }
     }
 
-    @Inject(method = "saveExtraData", at = @At("HEAD"), cancellable = true)
-    public void onSaveExtraData(CallbackInfo ci) {
+    @Inject(method = "flushToDisk", at = @At("HEAD"), cancellable = true)
+    public void onFlushToDisk(CallbackInfo ci) {
         if (((WorldProperties)this.world.getWorldInfo()).getSerializationBehavior() == SerializationBehaviors.NONE) {
             ci.cancel();
         }

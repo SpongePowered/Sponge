@@ -88,15 +88,15 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
     @Shadow @Final private List<BlockPos> affectedBlockPositions;
     @Shadow @Final private Map<EntityPlayer, Vec3d> playerKnockbackMap;
-    @Shadow @Final private Random explosionRNG;
-    @Shadow public boolean isFlaming;
-    @Shadow public boolean isSmoking;
+    @Shadow @Final private Random random;
+    @Shadow public boolean causesFire;
+    @Shadow public boolean damagesTerrain;
     @Shadow public net.minecraft.world.World world;
-    @Shadow public double explosionX;
-    @Shadow public double explosionY;
-    @Shadow public double explosionZ;
+    @Shadow public double x;
+    @Shadow public double y;
+    @Shadow public double z;
     @Shadow public Entity exploder;
-    @Shadow public float explosionSize;
+    @Shadow public float size;
 
     @Shadow @Nullable public abstract EntityLivingBase getExplosivePlacedBy();
 
@@ -104,7 +104,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     public void onConstructed(net.minecraft.world.World world, Entity entity, double originX, double originY,
             double originZ, float radius, boolean isFlaming, boolean isSmoking,
             CallbackInfo ci) {
-        this.origin = new Vector3d(this.explosionX, this.explosionY, this.explosionZ);
+        this.origin = new Vector3d(this.x, this.y, this.z);
         this.shouldBreakBlocks = true; // by default, all explosions do this can be changed by the explosion builder
         this.shouldDamageEntities = true;
     }
@@ -183,10 +183,10 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                             d0 = d0 / d3;
                             d1 = d1 / d3;
                             d2 = d2 / d3;
-                            float f = this.explosionSize * (0.7F + this.world.rand.nextFloat() * 0.6F);
-                            double d4 = this.explosionX;
-                            double d6 = this.explosionY;
-                            double d8 = this.explosionZ;
+                            float f = this.size * (0.7F + this.world.rand.nextFloat() * 0.6F);
+                            double d4 = this.x;
+                            double d6 = this.y;
+                            double d8 = this.z;
 
                             for (float f1 = 0.3F; f > 0.0F; f -= 0.22500001F) {
                                 BlockPos blockpos = new BlockPos(d4, d6, d8);
@@ -201,7 +201,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                                 }
 
                                 if (f > 0.0F && (this.exploder == null || this.exploder
-                                        .verifyExplosion((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate, f))) {
+                                        .canExplosionDestroyBlock((net.minecraft.world.Explosion) (Object) this, this.world, blockpos, iblockstate, f))) {
                                     set.add(blockpos);
                                 }
 
@@ -216,13 +216,13 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
             this.affectedBlockPositions.addAll(set);
         } // Sponge - Finish if statement
-        float f3 = this.explosionSize * 2.0F;
-        int k1 = MathHelper.floor(this.explosionX - (double) f3 - 1.0D);
-        int l1 = MathHelper.floor(this.explosionX + (double) f3 + 1.0D);
-        int i2 = MathHelper.floor(this.explosionY - (double) f3 - 1.0D);
-        int i1 = MathHelper.floor(this.explosionY + (double) f3 + 1.0D);
-        int j2 = MathHelper.floor(this.explosionZ - (double) f3 - 1.0D);
-        int j1 = MathHelper.floor(this.explosionZ + (double) f3 + 1.0D);
+        float f3 = this.size * 2.0F;
+        int k1 = MathHelper.floor(this.x - (double) f3 - 1.0D);
+        int l1 = MathHelper.floor(this.x + (double) f3 + 1.0D);
+        int i2 = MathHelper.floor(this.y - (double) f3 - 1.0D);
+        int i1 = MathHelper.floor(this.y + (double) f3 + 1.0D);
+        int j2 = MathHelper.floor(this.z - (double) f3 - 1.0D);
+        int j1 = MathHelper.floor(this.z + (double) f3 + 1.0D);
 
         // Sponge Start - Check if this explosion should damage entities
         List<Entity> list = this.shouldDamageEntities
@@ -263,18 +263,18 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         }
         // Sponge End
 
-        Vec3d vec3d = new Vec3d(this.explosionX, this.explosionY, this.explosionZ);
+        Vec3d vec3d = new Vec3d(this.x, this.y, this.z);
 
         for (int k2 = 0; k2 < list.size(); ++k2) {
             Entity entity = list.get(k2);
 
             if (!entity.isImmuneToExplosions()) {
-                double d12 = entity.getDistance(this.explosionX, this.explosionY, this.explosionZ) / (double) f3;
+                double d12 = entity.getDistance(this.x, this.y, this.z) / (double) f3;
 
                 if (d12 <= 1.0D) {
-                    double d5 = entity.posX - this.explosionX;
-                    double d7 = entity.posY + (double) entity.getEyeHeight() - this.explosionY;
-                    double d9 = entity.posZ - this.explosionZ;
+                    double d5 = entity.posX - this.x;
+                    double d7 = entity.posY + (double) entity.getEyeHeight() - this.y;
+                    double d9 = entity.posZ - this.z;
                     double d13 = (double) MathHelper.sqrt(d5 * d5 + d7 * d7 + d9 * d9);
 
                     if (d13 != 0.0D) {
@@ -318,36 +318,36 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
      */
     @Overwrite
     public void doExplosionB(boolean spawnParticles) {
-        this.world.playSound((EntityPlayer) null, this.explosionX, this.explosionY, this.explosionZ, SoundEvents.ENTITY_GENERIC_EXPLODE,
+        this.world.playSound((EntityPlayer) null, this.x, this.y, this.z, SoundEvents.ENTITY_GENERIC_EXPLODE,
             SoundCategory.BLOCKS, 4.0F, (1.0F + (this.world.rand.nextFloat() - this.world.rand.nextFloat()) * 0.2F) * 0.7F);
 
-        if (this.explosionSize >= 2.0F && this.isSmoking) {
+        if (this.size >= 2.0F && this.damagesTerrain) {
             if (this.world instanceof WorldServer) {
                 ((WorldServer) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_HUGE,
-                    this.explosionX, this.explosionY, this.explosionZ,
+                    this.x, this.y, this.z,
                     1,
                     0, 0, 0,
                     0.1D);
             } else {
                 this.world.spawnParticle(EnumParticleTypes.EXPLOSION_HUGE,
-                    this.explosionX, this.explosionY, this.explosionZ,
+                    this.x, this.y, this.z,
                     1.0D, 0.0D, 0.0D);
             }
         } else {
             if (this.world instanceof WorldServer) {
                 ((WorldServer) this.world).spawnParticle(EnumParticleTypes.EXPLOSION_LARGE,
-                    this.explosionX, this.explosionY, this.explosionZ,
+                    this.x, this.y, this.z,
                     1,
                     0, 0, 0,
                     0.1D);
             } else {
                 this.world.spawnParticle(EnumParticleTypes.EXPLOSION_LARGE,
-                    this.explosionX, this.explosionY, this.explosionZ,
+                    this.x, this.y, this.z,
                     1.0D, 0.0D, 0.0D);
             }
         }
 
-        if (this.isSmoking) {
+        if (this.damagesTerrain) {
             for (BlockPos blockpos : this.affectedBlockPositions) {
                 IBlockState iblockstate = this.world.getBlockState(blockpos);
                 Block block = iblockstate.getBlock();
@@ -356,26 +356,26 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
                     double d0 = (double) ((float) blockpos.getX() + this.world.rand.nextFloat());
                     double d1 = (double) ((float) blockpos.getY() + this.world.rand.nextFloat());
                     double d2 = (double) ((float) blockpos.getZ() + this.world.rand.nextFloat());
-                    double d3 = d0 - this.explosionX;
-                    double d4 = d1 - this.explosionY;
-                    double d5 = d2 - this.explosionZ;
+                    double d3 = d0 - this.x;
+                    double d4 = d1 - this.y;
+                    double d5 = d2 - this.z;
                     double d6 = (double) MathHelper.sqrt(d3 * d3 + d4 * d4 + d5 * d5);
                     d3 = d3 / d6;
                     d4 = d4 / d6;
                     d5 = d5 / d6;
-                    double d7 = 0.5D / (d6 / (double) this.explosionSize + 0.1D);
+                    double d7 = 0.5D / (d6 / (double) this.size + 0.1D);
                     d7 = d7 * (double) (this.world.rand.nextFloat() * this.world.rand.nextFloat() + 0.3F);
                     d3 = d3 * d7;
                     d4 = d4 * d7;
                     d5 = d5 * d7;
-                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.explosionX) / 2.0D, (d1 + this.explosionY) / 2.0D,
-                        (d2 + this.explosionZ) / 2.0D, d3, d4, d5, new int[0]);
+                    this.world.spawnParticle(EnumParticleTypes.EXPLOSION_NORMAL, (d0 + this.x) / 2.0D, (d1 + this.y) / 2.0D,
+                        (d2 + this.z) / 2.0D, d3, d4, d5, new int[0]);
                     this.world.spawnParticle(EnumParticleTypes.SMOKE_NORMAL, d0, d1, d2, d3, d4, d5, new int[0]);
                 }
 
                 if (iblockstate.getMaterial() != Material.AIR) {
                     if (block.canDropFromExplosion((net.minecraft.world.Explosion) (Object) this)) {
-                        block.dropBlockAsItemWithChance(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.explosionSize, 0);
+                        block.dropBlockAsItemWithChance(this.world, blockpos, this.world.getBlockState(blockpos), 1.0F / this.size, 0);
                     }
 
                     // Sponge Start - Track the block position being destroyed
@@ -396,10 +396,10 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
             }
         }
 
-        if (this.isFlaming) {
+        if (this.causesFire) {
             for (BlockPos blockpos1 : this.affectedBlockPositions) {
                 if (this.world.getBlockState(blockpos1).getMaterial() == Material.AIR && this.world.getBlockState(blockpos1.down()).isFullBlock()
-                    && this.explosionRNG.nextInt(3) == 0) {
+                    && this.random.nextInt(3) == 0) {
                     this.world.setBlockState(blockpos1, Blocks.FIRE.getDefaultState());
                 }
             }
@@ -429,17 +429,17 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
     @Override
     public float getRadius() {
-        return this.explosionSize;
+        return this.size;
     }
 
     @Override
     public boolean canCauseFire() {
-        return this.isFlaming;
+        return this.causesFire;
     }
 
     @Override
     public boolean shouldPlaySmoke() {
-        return this.isSmoking;
+        return this.damagesTerrain;
     }
 
     @Override

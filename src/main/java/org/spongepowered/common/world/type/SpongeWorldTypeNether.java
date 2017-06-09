@@ -35,7 +35,7 @@ public class SpongeWorldTypeNether extends SpongeWorldType {
 
     public SpongeWorldTypeNether() {
         super("nether");
-        setNotificationData();
+        enableInfoNotice();
     }
 
     @Override

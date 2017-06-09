@@ -235,7 +235,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     }
 
     @Override
-    public Chunk provideChunk(int chunkX, int chunkZ) {
+    public Chunk generateChunk(int chunkX, int chunkZ) {
         this.rand.setSeed(chunkX * 341873128712L + chunkZ * 132897987541L);
         this.cachedBiomes.reuse(new Vector3i(chunkX * 16, 0, chunkZ * 16));
         this.biomeGenerator.generateBiomes(this.cachedBiomes);

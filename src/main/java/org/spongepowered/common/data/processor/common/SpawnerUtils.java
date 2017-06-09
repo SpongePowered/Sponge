@@ -52,11 +52,11 @@ import java.util.Set;
 public class SpawnerUtils {
 
     public static WeightedSerializableObject<EntityArchetype> getNextEntity(MobSpawnerBaseLogic logic) {
-        int weight = logic.randomEntity.itemWeight;
+        int weight = logic.spawnData.itemWeight;
 
-        EntityType type = EntityUtil.fromNameToType(logic.randomEntity.getNbt().getString("id")).orElse(EntityTypes.PIG);
+        EntityType type = EntityUtil.fromNameToType(logic.spawnData.getNbt().getString("id")).orElse(EntityTypes.PIG);
 
-        NBTTagCompound data = logic.randomEntity.getNbt();
+        NBTTagCompound data = logic.spawnData.getNbt();
 
         EntityArchetype archetype = EntityArchetype.builder()
                 .type(type)

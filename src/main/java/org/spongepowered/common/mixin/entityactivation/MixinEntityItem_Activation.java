@@ -35,7 +35,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 @Mixin(EntityItem.class)
 public abstract class MixinEntityItem_Activation extends MixinEntity_Activation {
 
-    @Shadow public abstract ItemStack getEntityItem();
+    @Shadow public abstract ItemStack getItem();
 
     @Shadow private int delayBeforeCanPickup;
     @Shadow private int age;

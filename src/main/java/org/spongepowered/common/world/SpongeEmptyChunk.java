@@ -124,15 +124,15 @@ public class SpongeEmptyChunk extends Chunk {
     }
 
     @Override
-    public void onChunkLoad() {
+    public void onLoad() {
     }
 
     @Override
-    public void onChunkUnload() {
+    public void onUnload() {
     }
 
     @Override
-    public void setChunkModified() {
+    public void markDirty() {
     }
 
     @Override
