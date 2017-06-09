@@ -87,7 +87,7 @@ public class ChunkSaveHelper {
                         BlockPos coords = new BlockPos(GenericMath.floor(entity.posX), GenericMath.floor(entity.posY), GenericMath.floor(entity.posZ));
                         if (!collidingCoords.contains(coords)) {
                             collidingCoords.add(coords);
-                            int size = entity.world.getEntitiesWithinAABBExcludingEntity(entity, entity.getCollisionBoundingBox().expand(1, 1, 1)).size();
+                            int size = entity.world.getEntitiesWithinAABBExcludingEntity(entity, entity.getCollisionBoundingBox().grow(1, 1, 1)).size();
                             if (size < 5) {
                                 continue;
                             }
