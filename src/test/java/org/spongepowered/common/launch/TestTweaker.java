@@ -38,6 +38,7 @@ public class TestTweaker extends AbstractTestTweaker {
     @Override
     public void injectIntoClassLoader(LaunchClassLoader loader) {
         super.injectIntoClassLoader(loader);
+        loader.addClassLoaderExclusion("org.slf4j.");
 
         registerAccessTransformer("META-INF/common_at.cfg");
 
