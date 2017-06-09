@@ -124,7 +124,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public CombatTracker _combatTracker;
     @Shadow public EntityLivingBase revengeTarget;
     @Shadow protected AbstractAttributeMap attributeMap;
-    @Shadow protected int entityAge;
+    @Shadow protected int idleTime;
     @Shadow protected int recentlyHit;
     @Shadow protected float lastDamage;
     @Shadow @Nullable protected EntityPlayer attackingPlayer;
@@ -283,7 +283,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             return;
         }
 
-        Entity entity = cause.getEntity();
+        Entity entity = cause.getTrueSource();
         EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
         if (this.scoreValue >= 0 && entitylivingbase != null) {
@@ -374,7 +374,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         } else if (this.world.isRemote) {
             return false;
         } else {
-            this.entityAge = 0;
+            this.idleTime = 0;
 
             // Sponge - if the damage source is ignored, then do not return false here, as the health
             // has already been set to zero if Keys#HEALTH or SpongeHealthData is set to zero.
@@ -445,7 +445,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }
 
                 this.attackedAtYaw = 0.0F;
-                net.minecraft.entity.Entity entity = source.getEntity();
+                net.minecraft.entity.Entity entity = source.getTrueSource();
 
                 if (entity != null) {
                     if (entity instanceof EntityLivingBase) {
@@ -620,7 +620,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             if (shieldFunction.isPresent()) {
                 this.damageShield((float) event.getBaseDamage()); // TODO gabizou: Should this be in the API?
                 if (!damageSource.isProjectile()) {
-                    Entity entity = damageSource.getSourceOfDamage();
+                    Entity entity = damageSource.getImmediateSource();
 
                     if (entity instanceof EntityLivingBase) {
                         this.blockUsingShield((EntityLivingBase) entity);

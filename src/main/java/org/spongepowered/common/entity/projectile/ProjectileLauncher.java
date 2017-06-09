@@ -208,7 +208,7 @@ public class ProjectileLauncher {
             protected Optional<SmallFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
                 Vec3d lookVec = source.getLook(1);
                 SmallFireball fireball = (SmallFireball) new EntitySmallFireball(source.world, source,
-                        lookVec.xCoord * 4, lookVec.yCoord * 4, lookVec.zCoord * 4);
+                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 ((EntitySmallFireball) fireball).posY += source.getEyeHeight();
                 return doLaunch(loc.getExtent(), fireball, createCause(source));
             }
@@ -255,7 +255,7 @@ public class ProjectileLauncher {
             protected Optional<LargeFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
                 Vec3d lookVec = source.getLook(1);
                 LargeFireball fireball = (LargeFireball) new EntityLargeFireball(source.world, source,
-                        lookVec.xCoord * 4, lookVec.yCoord * 4, lookVec.zCoord * 4);
+                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 ((EntityLargeFireball) fireball).posY += source.getEyeHeight();
                 return doLaunch(loc.getExtent(), fireball, createCause(source));
             }
@@ -283,7 +283,7 @@ public class ProjectileLauncher {
             protected Optional<WitherSkull> createProjectile(EntityLivingBase source, Location<?> loc) {
                 Vec3d lookVec = source.getLook(1);
                 WitherSkull skull = (WitherSkull) new EntityWitherSkull(source.world, source,
-                        lookVec.xCoord * 4, lookVec.yCoord * 4, lookVec.zCoord * 4);
+                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 ((EntityWitherSkull) skull).posY += source.getEyeHeight();
                 return doLaunch(loc.getExtent(), skull, createCause(source));
             }
@@ -324,7 +324,7 @@ public class ProjectileLauncher {
                 EntityLlama llama = (EntityLlama) source;
                 LlamaSpit llamaSpit = (LlamaSpit) new EntityLlamaSpit(llama.world, (EntityLlama) source);
                 Vec3d lookVec = llama.getLook(1);
-                ((EntityLlamaSpit) llamaSpit).setThrowableHeading(lookVec.xCoord, lookVec.yCoord, lookVec.zCoord, 1.5F, 0);
+                ((EntityLlamaSpit) llamaSpit).setThrowableHeading(lookVec.x, lookVec.y, lookVec.z, 1.5F, 0);
                 return doLaunch(loc.getExtent(), llamaSpit, createCause(source));
             }
         });
@@ -334,7 +334,7 @@ public class ProjectileLauncher {
             protected Optional<DragonFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
                 Vec3d lookVec = source.getLook(1);
                 DragonFireball fireball = (DragonFireball) new EntityDragonFireball(source.world, source,
-                        lookVec.xCoord * 4, lookVec.yCoord * 4, lookVec.zCoord * 4);
+                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
                 ((EntityDragonFireball) fireball).posY += source.getEyeHeight();
                 return doLaunch(loc.getExtent(), fireball, createCause(source));
             }

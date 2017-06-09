@@ -82,7 +82,7 @@ public class AgeableDataProcessor extends AbstractEntityDataProcessor<EntityAgea
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityAgeable entity) {
-        return ImmutableMap.<Key<?>, Object>of(Keys.AGE, entity.getAge(), Keys.IS_ADULT, entity.isChild());
+        return ImmutableMap.<Key<?>, Object>of(Keys.AGE, entity.getIdleTime(), Keys.IS_ADULT, entity.isChild());
     }
 
     @Override

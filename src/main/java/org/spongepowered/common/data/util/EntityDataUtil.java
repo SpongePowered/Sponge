@@ -41,7 +41,7 @@ public class EntityDataUtil {
                 return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot());
             }
         } else if (entity instanceof EntityItem) {
-            return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) ((EntityItem) entity).getEntityItem()).createSnapshot());
+            return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) ((EntityItem) entity).getItem()).createSnapshot());
         }
         return Optional.empty();
     }

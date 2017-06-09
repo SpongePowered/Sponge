@@ -149,7 +149,7 @@ public class SpongeCommonEventFactory {
     public static WeakReference<EntityPlayerMP> lastAnimationPlayer;
 
     public static boolean callPlayerChangeInventoryPickupEvent(EntityPlayer player, EntityItem itemToPickup, int pickupDelay, UUID creator) {
-        ItemStack itemStack = itemToPickup.getEntityItem();
+        ItemStack itemStack = itemToPickup.getItem();
         int slotId = ((IMixinInventoryPlayer) player.inventory).getFirstAvailableSlot(itemStack);
         Slot slot = null;
         if (slotId != -1) {
@@ -489,7 +489,7 @@ public class SpongeCommonEventFactory {
         }
         if (source instanceof EntityDamageSource) {
             EntityDamageSource damageSource = (EntityDamageSource) source;
-            IMixinEntity spongeEntity = (IMixinEntity) damageSource.getSourceOfDamage();
+            IMixinEntity spongeEntity = (IMixinEntity) damageSource.getImmediateSource();
             if (spongeEntity != null) {
                 sourceCreator = spongeEntity.getCreatorUser();
             }

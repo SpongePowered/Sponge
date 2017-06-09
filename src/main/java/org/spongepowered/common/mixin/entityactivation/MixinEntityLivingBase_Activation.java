@@ -31,11 +31,11 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(EntityLivingBase.class)
 public abstract class MixinEntityLivingBase_Activation extends MixinEntity_Activation {
 
-    @Shadow protected int entityAge;
+    @Shadow protected int idleTime;
 
     @Override
     public void inactiveTick() {
         super.inactiveTick();
-        ++this.entityAge;
+        ++this.idleTime;
     }
 }

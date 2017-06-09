@@ -88,7 +88,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     @Shadow @Final private Set<ChunkPos> pendingAnvilChunksCoordinates;
     @Shadow @Final private Map<ChunkPos, NBTTagCompound> chunksToRemove;
     @Shadow @Final private File chunkSaveLocation;
-    @Shadow private boolean savingExtraData;
+    @Shadow private boolean flushing;
 
     @Shadow
     public abstract void writeChunkData(ChunkPos pos, NBTTagCompound compound);
@@ -248,7 +248,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
     public boolean writeNextIO() {
         QueuedChunk chunk = this.queue.poll();
         if (chunk == null) {
-            if (this.savingExtraData) {
+            if (this.flushing) {
                 LOGGER.info("ThreadedAnvilChunkStorage ({}): All chunks are saved", new Object[] {this.chunkSaveLocation.getName()});
             }
 

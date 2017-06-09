@@ -86,7 +86,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
     @Shadow @Final private ExtendedBlockStorage[] storageArrays;
     @Shadow @Final private int[] precipitationHeightMap;
     @Shadow @Final private int[] heightMap;
-    @Shadow private boolean isModified;
+    @Shadow private boolean dirty;
 
     public Map<Integer, PlayerTracker> trackedIntBlockPositions = new Int2ObjectArrayMap<>();
     public Map<Short, PlayerTracker> trackedShortBlockPositions = new Short2ObjectArrayMap<>();
@@ -340,8 +340,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         return (num & ~(bitsToReplace << (which * 4)) | (data << (which * 4)));
     }
 
-    @Inject(method = "onChunkLoad", at = @At("HEAD"))
-    private void startChunkLoad(CallbackInfo callbackInfo) {
+    @Inject(method = "onLoad", at = @At("HEAD"))
+    private void startLoad(CallbackInfo callbackInfo) {
         if (CauseTracker.ENABLED && !this.world.isRemote) {
             CauseTracker.getInstance().switchToPhase(GenerationPhase.State.CHUNK_LOADING, PhaseContext.start()
                 .add(NamedCause.source(this))
@@ -351,8 +351,8 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         }
     }
 
-    @Inject(method = "onChunkLoad", at = @At("RETURN"))
-    private void endChunkLoad(CallbackInfo callbackInfo) {
+    @Inject(method = "onLoad", at = @At("RETURN"))
+    private void endLoad(CallbackInfo callbackInfo) {
         if (CauseTracker.ENABLED && !this.world.isRemote) {
             CauseTracker.getInstance().completePhase(GenerationPhase.State.CHUNK_LOADING);
         }

@@ -241,17 +241,17 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         double d2 = blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X ? (double) blockpattern$patternhelper.getFrontTopLeft().getZ()
                 : (double) blockpattern$patternhelper.getFrontTopLeft().getX();
         yTarget = (double) (blockpattern$patternhelper.getFrontTopLeft().getY() + 1)
-                - entityIn.getLastPortalVec().yCoord * (double) blockpattern$patternhelper.getHeight();
+                - entityIn.getLastPortalVec().y * (double) blockpattern$patternhelper.getHeight();
 
         if (flag1) {
             ++d2;
         }
 
         if (blockpattern$patternhelper.getForwards().getAxis() == EnumFacing.Axis.X) {
-            zTarget = d2 + (1.0D - entityIn.getLastPortalVec().xCoord) * (double) blockpattern$patternhelper.getWidth()
+            zTarget = d2 + (1.0D - entityIn.getLastPortalVec().x) * (double) blockpattern$patternhelper.getWidth()
                     * (double) blockpattern$patternhelper.getForwards().rotateY().getAxisDirection().getOffset();
         } else {
-            xTarget = d2 + (1.0D - entityIn.getLastPortalVec().xCoord) * (double) blockpattern$patternhelper.getWidth()
+            xTarget = d2 + (1.0D - entityIn.getLastPortalVec().x) * (double) blockpattern$patternhelper.getWidth()
                     * (double) blockpattern$patternhelper.getForwards().rotateY().getAxisDirection().getOffset();
         }
 

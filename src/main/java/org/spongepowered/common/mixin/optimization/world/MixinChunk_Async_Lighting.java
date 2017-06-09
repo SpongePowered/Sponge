@@ -51,7 +51,7 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
     @Shadow @Final private World world;
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isLightPopulated;
-    @Shadow private boolean chunkTicked;
+    @Shadow private boolean ticked;
     @Shadow @Final public int x;
     @Shadow @Final public int z;
     @Shadow @Final private boolean[] updateSkylightColumns;
@@ -145,13 +145,12 @@ public abstract class MixinChunk_Async_Lighting implements IMixinChunk {
      * @author blood - February 20th, 2017
      * @reason Since lighting updates run async, we need to always return true to send client updates.
      *
-     * @param pos The position to get the light for
      * @return Whether block position can see sky
      */
     @Overwrite
     public boolean isPopulated() {
         if (this.world.isRemote) {
-            return this.chunkTicked && this.isTerrainPopulated && this.isLightPopulated;
+            return this.ticked && this.isTerrainPopulated && this.isLightPopulated;
         }
 
         return true;

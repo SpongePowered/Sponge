@@ -28,9 +28,6 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.World;
-import org.apache.logging.log4j.Level;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
@@ -50,15 +47,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -71,7 +65,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
     private static final int MAGIC_PREVIOUS = -1;
     @Shadow private int delayBeforeCanPickup;
     @Shadow private int age;
-    @Shadow public abstract ItemStack getEntityItem();
+    @Shadow public abstract ItemStack getItem();
     /**
      * A simple cached value of the merge radius for this item.
      * Since the value is configurable, the first time searching for
@@ -206,7 +200,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
 
     @Override
     public ItemType getItemType() {
-        return (ItemType) getEntityItem().getItem();
+        return (ItemType) getItem().getItem();
     }
 
     @Inject(method = "combineItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"))
@@ -214,7 +208,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
         this.destructCause = Cause.of(NamedCause.of("CombinedItem", other));
     }
 
-    @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
+    @Inject(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"), cancellable = true)
     public void onPlayerItemPickup(EntityPlayer entityIn, CallbackInfo ci) {
         if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(entityIn, (EntityItem) (Object) this, this.delayBeforeCanPickup, ((Entity) (Object) this).getCreator().orElse(null))) {
             ci.cancel();
@@ -225,12 +219,12 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
 
     @Override
     public RepresentedItemData getItemData() {
-        return new SpongeRepresentedItemData(ItemStackUtil.snapshotOf(getEntityItem()));
+        return new SpongeRepresentedItemData(ItemStackUtil.snapshotOf(getItem()));
     }
 
     @Override
     public Value<ItemStackSnapshot> item() {
-        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(getEntityItem()));
+        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.snapshotOf(getItem()));
     }
 
     @Override
