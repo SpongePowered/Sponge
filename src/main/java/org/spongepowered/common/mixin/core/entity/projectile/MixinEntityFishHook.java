@@ -38,14 +38,11 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTableList;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.action.FishingEvent;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -112,7 +109,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
     private void onSetHookedEntity(CallbackInfo ci) {
-        if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventHookEntity(Cause.of(NamedCause.source(this)), this,
+        if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventHookEntity(Sponge.getCauseStackManager().getCurrentCause(), this,
                 (Entity) this.caughtEntity))) {
             this.caughtEntity = null;
             ci.cancel();
@@ -135,7 +132,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             if (this.ticksCatchable > 0) {
                 // Moved from below
                 LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer) this.world);
-                lootcontext$builder.withLuck((float) this.luck + this.angler.getLuck());
+                lootcontext$builder.withLuck(this.luck + this.angler.getLuck());
                 transactions = this.world.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING)
                         .generateLootForPools(this.rand, lootcontext$builder.build())
                         .stream()
@@ -177,10 +174,10 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                     double d0 = this.angler.posX - this.posX;
                     double d1 = this.angler.posY - this.posY;
                     double d2 = this.angler.posZ - this.posZ;
-                    double d3 = (double) MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                    double d3 = MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                     //double d4 = 0.1D;
                     entityitem.motionX = d0 * 0.1D;
-                    entityitem.motionY = d1 * 0.1D + (double) MathHelper.sqrt(d3) * 0.08D;
+                    entityitem.motionY = d1 * 0.1D + MathHelper.sqrt(d3) * 0.08D;
                     entityitem.motionZ = d2 * 0.1D;
                     this.world.spawnEntity(entityitem);
                     this.angler.world.spawnEntity(new EntityXPOrb(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D,

@@ -374,7 +374,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, BlockChangeFlag flag) {
-        return this.sponge_world.restoreSnapshot((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), snapshot, force, flag, cause);
+        return this.sponge_world.restoreSnapshot((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), snapshot, force, flag);
     }
 
     public double getHighestYAt(double x, double z) {
@@ -810,38 +810,38 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
     }
 
     @Override
-    public boolean hitBlock(int x, int y, int z, Direction side) {
-        return this.sponge_world.hitBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), side);
+    public boolean hitBlock(int x, int y, int z, Direction side, GameProfile profile) {
+        return this.sponge_world.hitBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), side, profile);
     }
 
     @Override
-    public boolean interactBlock(int x, int y, int z, Direction side) {
-        return this.sponge_world.interactBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), side);
+    public boolean interactBlock(int x, int y, int z, Direction side, GameProfile profile) {
+        return this.sponge_world.interactBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), side, profile);
     }
 
     @Override
-    public boolean placeBlock(int x, int y, int z, BlockState block, Direction side) {
-        return this.sponge_world.placeBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), block, side);
+    public boolean placeBlock(int x, int y, int z, BlockState block, Direction side, GameProfile profile) {
+        return this.sponge_world.placeBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), block, side, profile);
     }
 
     @Override
-    public boolean interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side) {
-        return this.sponge_world.interactBlockWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, side);
+    public boolean interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side, GameProfile profile) {
+        return this.sponge_world.interactBlockWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, side, profile);
     }
 
     @Override
-    public boolean digBlock(int x, int y, int z) {
-        return this.sponge_world.digBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15));
+    public boolean digBlock(int x, int y, int z, GameProfile profile) {
+        return this.sponge_world.digBlock((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), profile);
     }
 
     @Override
-    public boolean digBlockWith(int x, int y, int z, ItemStack itemStack) {
-        return this.sponge_world.digBlockWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack);
+    public boolean digBlockWith(int x, int y, int z, ItemStack itemStack, GameProfile profile) {
+        return this.sponge_world.digBlockWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, profile);
     }
 
     @Override
-    public int getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack) {
-        return this.sponge_world.getBlockDigTimeWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack);
+    public int getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack, GameProfile profile) {
+        return this.sponge_world.getBlockDigTimeWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, profile);
     }
 
     @Redirect(method = "populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;getLoadedChunk(II)Lnet/minecraft/world/chunk/Chunk;"))

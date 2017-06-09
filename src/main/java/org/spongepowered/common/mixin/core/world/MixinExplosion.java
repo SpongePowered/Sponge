@@ -238,7 +238,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         for (Entity entity : list) {
             entities.add((org.spongepowered.api.entity.Entity) entity);
         }
-        ExplosionEvent.Detonate detonate = SpongeEventFactory.createExplosionEventDetonate(Sponge.getCauseStackManager().getCurrentCause(), blockPositions, entities, this, spongeWorld);
+        ExplosionEvent.Detonate detonate = SpongeEventFactory.createExplosionEventDetonate(Sponge.getCauseStackManager().getCurrentCause(), blockPositions, entities, this, (World) this.world);
         SpongeImpl.postEvent(detonate);
         if (detonate.isCancelled()) {
             this.affectedBlockPositions.clear();

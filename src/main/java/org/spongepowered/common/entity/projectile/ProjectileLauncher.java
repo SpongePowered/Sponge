@@ -315,7 +315,7 @@ public class ProjectileLauncher {
                 EntityLlama llama = (EntityLlama) source;
                 LlamaSpit llamaSpit = (LlamaSpit) new EntityLlamaSpit(llama.world, (EntityLlama) source);
                 Vec3d lookVec = llama.getLook(1);
-                ((EntityLlamaSpit) llamaSpit).setThrowableHeading(lookVec.xCoord, lookVec.yCoord, lookVec.zCoord, 1.5F, 0);
+                ((EntityLlamaSpit) llamaSpit).setThrowableHeading(lookVec.x, lookVec.y, lookVec.z, 1.5F, 0);
                 return doLaunch(loc.getExtent(), llamaSpit);
             }
         });

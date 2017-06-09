@@ -284,7 +284,6 @@ public interface PacketFunction {
                 for (Map.Entry<UUID, Collection<EntityItem>> entry : map.asMap().entrySet()) {
                     final UUID entityUuid = entry.getKey();
                     final net.minecraft.entity.Entity entityFromUuid = player.getServerWorld().getEntityFromUuid(entityUuid);
-                    final Entity affectedEntity = EntityUtil.fromNative(entityFromUuid);
                     if (entityFromUuid != null) {
                         final List<Entity> entities = entry.getValue()
                                 .stream()
@@ -928,8 +927,6 @@ public interface PacketFunction {
     };
 
     PacketFunction UNKNOWN_PACKET = (packet, state, player, context) -> {
-        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.getServerWorld();
-        final CauseTracker causeTracker = CauseTracker.getInstance();
         Object frame1 = Sponge.getCauseStackManager().pushCauseFrame();
         Sponge.getCauseStackManager().pushCause(player);
         Sponge.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);

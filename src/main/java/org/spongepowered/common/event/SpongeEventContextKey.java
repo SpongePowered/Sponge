@@ -26,7 +26,7 @@ package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.event.cause.EventContextKey;
 
 public class SpongeEventContextKey<T> implements EventContextKey<T> {
@@ -58,7 +58,7 @@ public class SpongeEventContextKey<T> implements EventContextKey<T> {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
             .add("id", this.id)
             .toString();
     }

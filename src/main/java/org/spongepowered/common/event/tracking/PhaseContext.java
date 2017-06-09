@@ -41,7 +41,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -254,17 +253,6 @@ public class PhaseContext {
 
     public Optional<User> getNotifier() {
         return Optional.ofNullable(this.notifier);
-    }
-
-    // This section is added to be able to pinpoint active containers when and wherever they're being used
-    // for various systems. Including when custom Data is being registered.
-    public PhaseContext activeContainer(@Nullable PluginContainer container) {
-        this.activeContainer = container;
-        return this;
-    }
-
-    public Optional<PluginContainer> getActiveContainer() {
-        return Optional.ofNullable(this.activeContainer);
     }
 
     public List<Entity> getCapturedEntities() throws IllegalStateException {

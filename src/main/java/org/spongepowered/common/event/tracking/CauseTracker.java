@@ -111,7 +111,6 @@ public final class CauseTracker {
     public final boolean isVerbose = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().isVerbose();
     public final boolean verboseErrors = SpongeImpl.getGlobalConfig().getConfig().getCauseTracker().verboseErrors();
 
-    @SuppressWarnings("ConstantConditions")
     private CauseTracker() {
         // We cannot have two instances ever. ever ever.
         checkState(INSTANCE == null, "More than one CauseTracker instance is being created!!! Two cannot exist at once!");
@@ -603,7 +602,7 @@ public final class CauseTracker {
 
         if (!isForced && !mixinWorldServer.isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
             return false;
-        } else {
+        }
             if (minecraftEntity instanceof EntityPlayer) {
                 EntityPlayer entityplayer = (EntityPlayer) minecraftEntity;
                 minecraftWorld.playerEntities.add(entityplayer);
@@ -614,9 +613,10 @@ public final class CauseTracker {
                 if (minecraftEntity instanceof IEntityOwnable) {
                     IEntityOwnable ownable = (IEntityOwnable) entity;
                     net.minecraft.entity.Entity owner = ownable.getOwner();
-                    if (owner != null && owner instanceof EntityPlayer) {
-                        context.owner = (User) owner;
-                        entity.setCreator(ownable.getOwnerId());
+                    if (owner != null&&owner instanceof EntityPlayer) {
+                            context. owner = (User) owner;
+
+                            entity.setCreator(ownable.getOwnerId());
                     }
                 } else if (minecraftEntity instanceof EntityThrowable) {
                     EntityThrowable throwable = (EntityThrowable) minecraftEntity;
@@ -663,7 +663,7 @@ public final class CauseTracker {
             minecraftWorld.loadedEntityList.add(minecraftEntity);
             mixinWorldServer.onSpongeEntityAdded(minecraftEntity); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
             return true;
-        }
+
     }
 
     /**

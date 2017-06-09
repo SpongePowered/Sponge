@@ -51,7 +51,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.EventContext;
 import org.spongepowered.api.event.cause.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.damage.DamageFunction;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
@@ -354,14 +353,14 @@ public class DamageEventHandler {
 
     public static void generateCauseFor(DamageSource damageSource) {
         if (damageSource instanceof EntityDamageSourceIndirect) {
-            net.minecraft.entity.Entity source = damageSource.getEntity();
+            net.minecraft.entity.Entity source = damageSource.getTrueSource();
             if (!(source instanceof EntityPlayer) && source != null) {
                 final IMixinEntity mixinEntity = EntityUtil.toMixin(source);
                 mixinEntity.getNotifierUser().ifPresent(notifier -> Sponge.getCauseStackManager().addContext(EventContextKeys.NOTIFIER, notifier));
                 mixinEntity.getCreatorUser().ifPresent(owner -> Sponge.getCauseStackManager().addContext(EventContextKeys.OWNER, owner));
             }
         } else if (damageSource instanceof EntityDamageSource) {
-            net.minecraft.entity.Entity source = damageSource.getEntity();
+            net.minecraft.entity.Entity source = damageSource.getTrueSource();
             if (!(source instanceof EntityPlayer) && source != null) {
                 final IMixinEntity mixinEntity = EntityUtil.toMixin(source);
                 // TODO only have a UUID, want a user
