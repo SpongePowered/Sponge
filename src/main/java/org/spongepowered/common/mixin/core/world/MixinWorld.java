@@ -274,6 +274,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return null; // Shadowed
     }
     @Shadow public abstract int getHeight(int x, int z);
+
     // @formatter:on
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;"
