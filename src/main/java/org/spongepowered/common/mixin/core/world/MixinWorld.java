@@ -1293,7 +1293,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * @return True if the block position is valid
      */
     @Overwrite
-    protected boolean isValid(BlockPos pos) { // isValid
+    public boolean isValid(BlockPos pos) { // isValid
         return ((IMixinBlockPos) pos).isValidPosition();
     }
 
@@ -1305,7 +1305,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * @return True if the block position is outside build height
      */
     @Overwrite
-    private boolean isOutsideBuildHeight(BlockPos pos) { // isOutsideBuildHeight
+    public boolean isOutsideBuildHeight(BlockPos pos) { // isOutsideBuildHeight
         return ((IMixinBlockPos) pos).isInvalidYPosition();
     }
 
