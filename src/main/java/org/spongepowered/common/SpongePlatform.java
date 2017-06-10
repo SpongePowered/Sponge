@@ -27,7 +27,7 @@ package org.spongepowered.common;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.MinecraftVersion;
@@ -116,7 +116,7 @@ public class SpongePlatform implements Platform {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("type", getType())
                 .add("executionType", getExecutionType())
                 .add("api", this.api)

@@ -66,6 +66,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
@@ -147,7 +148,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
 
 
     @Shadow public abstract void sendPacket(final Packet<?> packetIn);
-    @Shadow public abstract void disconnect(String reason);
+    @Shadow public abstract void func_194028_b(ITextComponent reason);
     @Shadow private void captureCurrentPosition() {}
     @Shadow public abstract void setPlayerLocation(double x, double y, double z, float yaw, float pitch);
     @Shadow private static boolean isMovePlayerPacketInvalid(CPacketPlayer packetIn) { return false; } // Shadowed
@@ -662,7 +663,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                     }
 
                     if (entity instanceof EntityItem || entity instanceof EntityXPOrb || entity instanceof EntityArrow || entity == this.player) {
-                        this.disconnect("Attempting to attack an invalid entity");
+                        this.func_194028_b(new TextComponentTranslation("multiplayer.disconnect.invalid_entity_attacked"));
                         this.serverController.logWarning("Player " + this.player.getName() + " tried to attack an invalid entity");
                         return;
                     }
@@ -680,15 +681,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 }
             }
         }
-    }
-
-    // Format disconnection message properly, causes weird messages with our console colors
-    // Also see https://bugs.mojang.com/browse/MC-59535
-    @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
-            target = "Lorg/apache/logging/log4j/Logger;info(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 0, remap = false))
-    private void logDisconnect(Logger logger, String message, Object[] args) {
-        args[1] = SpongeTexts.toLegacy((ITextComponent) args[1]);
-        logger.info(message, args);
     }
 
     @Override

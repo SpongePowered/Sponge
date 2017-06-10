@@ -34,6 +34,7 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.RegionFileCache;
 import net.minecraft.world.storage.ThreadedFileIOBase;
@@ -85,7 +86,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
             "Lnet/minecraft/entity/EntityList;createEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;";
 
     @Shadow @Final private static Logger LOGGER;
-    @Shadow @Final private Set<ChunkPos> pendingAnvilChunksCoordinates;
+    @Shadow @Final private Set<ChunkPos> field_193415_c;
     @Shadow @Final private Map<ChunkPos, NBTTagCompound> chunksToRemove;
     @Shadow @Final private File chunkSaveLocation;
     @Shadow private boolean flushing;
@@ -173,8 +174,8 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
      * @param world
      * @return
      */
-    @Redirect(method = "readChunkFromNBT(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT), require = 0, expect = 0)
-    private Entity onReadEntity(NBTTagCompound compound, World world) {
+    @Redirect(method = "readChunkEntity", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT), require = 0, expect = 0)
+    private static Entity onReadChunkEntity(NBTTagCompound compound, World world, Chunk chunk) {
         if ("Minecart".equals(compound.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
             compound.setString(NbtDataUtil.ENTITY_TYPE_ID,
                     EntityMinecart.Type.values()[compound.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
@@ -207,7 +208,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
         ChunkPos chunkcoordintpair = new ChunkPos(x, z);
 
         // Sponge start - Chunk queue improvements
-        // if (this.pendingAnvilChunksCoordinates.contains(chunkcoordintpair)) {
+        // if (this.field_193415_c.contains(chunkcoordintpair)) {
         //     for (ChunkPos pendingChunkCoord : this.chunksToRemove.keySet()) { 
         //         if (pendingChunkCoord.equals(chunkcoordintpair)) {
         //             return true;
@@ -258,7 +259,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
             boolean lvt_3_1_;
 
             try {
-                // this.pendingAnvilChunksCoordinates.add(chunkpos);
+                // this.field_193415_c.add(chunkpos);
                 NBTTagCompound nbttagcompound = chunk.compound;
 
                 if (nbttagcompound != null) {
@@ -294,7 +295,7 @@ public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
                 // pending
                 lvt_3_1_ = true;
             } finally {
-                // this.pendingAnvilChunksCoordinates.remove(chunkpos);
+                // this.field_193415_c.remove(chunkpos);
             }
 
             return lvt_3_1_;

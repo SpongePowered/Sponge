@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.block.BlockPortal;
 import net.minecraft.block.state.IBlockState;
@@ -532,7 +532,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("PortalAgent")
+        return MoreObjects.toStringHelper("PortalAgent")
                 .add("PortalAgentType", this.portalAgentType)
                 .add("SearchRadius", this.searchRadius)
                 .add("CreationRadius", this.creationRadius)

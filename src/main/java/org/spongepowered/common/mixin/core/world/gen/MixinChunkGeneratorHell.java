@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen;
 import com.flowpowered.math.GenericMath;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderHell;
+import net.minecraft.world.gen.ChunkGeneratorHell;
 import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.structure.MapGenNetherBridge;
 import org.spongepowered.api.world.World;
@@ -44,8 +44,8 @@ import org.spongepowered.common.util.gen.ChunkBufferPrimer;
 
 import java.util.Random;
 
-@Mixin(ChunkProviderHell.class)
-public abstract class MixinChunkProviderHell implements IChunkProvider, GenerationPopulator, IPopulatorProvider {
+@Mixin(ChunkGeneratorHell.class)
+public abstract class MixinChunkGeneratorHell implements IChunkProvider, GenerationPopulator, IPopulatorProvider {
 
     @Shadow @Final private boolean generateStructures;
     @Shadow @Final private Random rand;

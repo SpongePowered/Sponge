@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.network.status;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.minecraft.network.NetworkManager;
 import org.spongepowered.api.MinecraftVersion;
@@ -77,7 +78,7 @@ public class SpongeStatusClient implements StatusClient {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .addValue(this.connection)
                 .toString();
     }

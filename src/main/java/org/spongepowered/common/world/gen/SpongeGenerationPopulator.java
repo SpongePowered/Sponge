@@ -32,7 +32,7 @@ import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.cause.Cause;

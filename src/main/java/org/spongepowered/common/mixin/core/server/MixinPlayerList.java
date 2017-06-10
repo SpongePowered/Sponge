@@ -65,7 +65,7 @@ import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
-import net.minecraft.world.demo.DemoWorldManager;
+import net.minecraft.server.management.DemoPlayerInteractionManager;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
@@ -338,7 +338,6 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         handler.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
         this.updatePermissionLevel(playerIn);
         playerIn.getStatFile().markAllDirty();
-        playerIn.getStatFile().sendAchievements(playerIn);
         this.mcServer.refreshStatusNextTick();
 
         handler.setPlayerLocation(x, y, z, yaw, pitch);
@@ -512,14 +511,14 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         PlayerInteractionManager playerinteractionmanager;
 
         if (this.mcServer.isDemo()) {
-            playerinteractionmanager = new DemoWorldManager(this.mcServer.getWorld(targetDimension));
+            playerinteractionmanager = new DemoPlayerInteractionManager(this.mcServer.getWorld(targetDimension));
         } else {
             playerinteractionmanager = new PlayerInteractionManager(this.mcServer.getWorld(targetDimension));
         }
 
         EntityPlayerMP newPlayer = new EntityPlayerMP(SpongeImpl.getServer(), worldServer, playerIn.getGameProfile(), playerinteractionmanager);
         newPlayer.connection = playerIn.connection;
-        newPlayer.clonePlayer(playerIn, conqueredEnd);
+        newPlayer.func_193104_a(playerIn, conqueredEnd);
         // set player dimension for RespawnPlayerEvent
         newPlayer.dimension = targetDimension;
         newPlayer.setEntityId(playerIn.getEntityId());

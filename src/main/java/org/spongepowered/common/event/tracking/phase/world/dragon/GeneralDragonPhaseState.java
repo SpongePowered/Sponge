@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.world.dragon;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -38,7 +38,7 @@ public class GeneralDragonPhaseState implements IPhaseState {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .toString();
     }
 }

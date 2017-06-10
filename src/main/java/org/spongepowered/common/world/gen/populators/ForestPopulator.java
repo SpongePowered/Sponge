@@ -25,7 +25,7 @@
 package org.spongepowered.common.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedTable;
@@ -118,7 +118,7 @@ public class ForestPopulator implements Forest {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("count", this.count)
                 .add("types", this.types)
                 .toString();

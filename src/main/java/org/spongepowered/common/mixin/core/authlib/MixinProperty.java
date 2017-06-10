@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.authlib;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.mojang.authlib.properties.Property;
 import org.spongepowered.api.profile.property.ProfileProperty;
@@ -71,7 +72,7 @@ public abstract class MixinProperty {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("name", this.getName())
                 .add("value", this.getValue())
                 .add("signature", this.property$getSignature())

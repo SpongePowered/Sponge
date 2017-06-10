@@ -98,7 +98,6 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.api.statistic.StatisticType;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
@@ -188,7 +187,6 @@ import org.spongepowered.common.registry.type.scoreboard.CriteriaRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.ObjectiveDisplayModeRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.VisibilityRegistryModule;
-import org.spongepowered.common.registry.type.statistic.AchievementRegistryModule;
 import org.spongepowered.common.registry.type.statistic.StatisticRegistryModule;
 import org.spongepowered.common.registry.type.statistic.StatisticTypeRegistryModule;
 import org.spongepowered.common.registry.type.text.*;
@@ -421,7 +419,6 @@ public final class CommonModuleRegistry {
             .registerModule(ToolType.class, new ToolTypeRegistryModule())
             .registerModule(TreeType.class, new TreeTypeRegistryModule())
             .registerModule(Visibility.class, new VisibilityRegistryModule())
-            .registerModule(Achievement.class, AchievementRegistryModule.getInstance())
             .registerModule(Statistic.class, StatisticRegistryModule.getInstance())
             .registerModule(StatisticType.class, new StatisticTypeRegistryModule())
             .registerModule(WallType.class, new WallTypeRegistryModule())

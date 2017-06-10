@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.MapMaker;
@@ -135,10 +134,6 @@ public final class WorldManager {
             };
 
     private static boolean isVanillaRegistered = false;
-
-    static {
-        WorldManager.registerVanillaTypesAndDimensions();
-    }
 
     public static void registerVanillaTypesAndDimensions() {
         if (!isVanillaRegistered) {
@@ -399,7 +394,7 @@ public final class WorldManager {
         }
 
         final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true, SpongeImpl
-                .getServer().getDataFixer());
+                .getDataFixer());
         WorldInfo worldInfo = saveHandler.loadWorldInfo();
 
         if (worldInfo == null) {
@@ -443,7 +438,7 @@ public final class WorldManager {
             worldServer.getSaveHandler().saveWorldInfo((WorldInfo) properties);
             worldServer.getSaveHandler().loadWorldInfo();
         } else {
-            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, SpongeImpl.getServer()
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, SpongeImpl
                     .getDataFixer()).saveWorldInfo((WorldInfo) properties);
         }
         ((IMixinWorldInfo) properties).getOrCreateWorldConfig().save();
@@ -574,8 +569,7 @@ public final class WorldManager {
         }
 
         if (saveHandler == null) {
-            saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true, SpongeImpl.getServer()
-                    .getDataFixer());
+            saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true, SpongeImpl.getDataFixer());
         }
 
         // We weren't given a properties, see if one is cached
@@ -685,8 +679,8 @@ public final class WorldManager {
             if (dimensionId == 0) {
                 saveHandler = server.getActiveAnvilConverter().getSaveLoader(server.getFolderName(), true);
             } else {
-                saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true, server
-                        .getDataFixer());
+                saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true,
+                        SpongeImpl.getDataFixer());
             }
 
             WorldInfo worldInfo = saveHandler.loadWorldInfo();
@@ -988,7 +982,7 @@ public final class WorldManager {
             try {
                 saveWorld(worldServer, true);
             } catch (MinecraftException e) {
-                Throwables.propagate(e);
+                throw new RuntimeException(e);
             }
 
             ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(false);
@@ -1023,7 +1017,7 @@ public final class WorldManager {
         final WorldInfo info = new WorldInfo((WorldInfo) worldProperties);
         info.setWorldName(newName);
         ((IMixinWorldInfo) info).createWorldConfig();
-        new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, SpongeImpl.getServer().getDataFixer())
+        new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, SpongeImpl.getDataFixer())
                 .saveWorldInfo(info);
         registerWorldProperties((WorldProperties) info);
         return Optional.of((WorldProperties) info);
@@ -1083,7 +1077,7 @@ public final class WorldManager {
             ((IMixinWorldInfo) info).setUniqueId(UUID.randomUUID());
             ((IMixinWorldInfo) info).createWorldConfig();
             registerWorldProperties((WorldProperties) info);
-            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, SpongeImpl.getServer().getDataFixer())
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, SpongeImpl.getDataFixer())
                     .saveWorldInfo(info);
             return Optional.of((WorldProperties) info);
         }

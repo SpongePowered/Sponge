@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.world.gen.ChunkProviderFlat;
+import net.minecraft.world.gen.ChunkGeneratorFlat;
 import net.minecraft.world.gen.FlatGeneratorInfo;
 import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.structure.MapGenStructure;
@@ -56,8 +56,8 @@ import org.spongepowered.common.world.gen.populators.FilteredPopulator;
 import java.util.List;
 import java.util.Map;
 
-@Mixin(ChunkProviderFlat.class)
-public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorProvider {
+@Mixin(ChunkGeneratorFlat.class)
+public class MixinChunkGeneratorFlat implements GenerationPopulator, IPopulatorProvider {
 
     @Shadow @Final private IBlockState[] cachedBlockIDs;
     @Shadow @Final private Map<String, MapGenStructure> structureGenerators;

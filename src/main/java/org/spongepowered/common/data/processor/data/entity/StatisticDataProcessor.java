@@ -69,7 +69,7 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<En
             Long value = statEntry.getValue();
             StatBase stat = (StatBase) statEntry.getKey();
             int currentValue = stats.readStat(stat);
-            if (value != null && !stat.isAchievement()) {
+            if (value != null) {
                 stats.increaseStat(player, (StatBase) statEntry.getKey(), (int) (value - currentValue));
             }
         }
@@ -83,10 +83,7 @@ public class StatisticDataProcessor extends AbstractEntitySingleDataProcessor<En
         Map<StatBase, TupleIntJsonSerializable> data = ((IMixinStatisticsManager) stats).getStatsData();
         Map<Statistic, Long> statMap = Maps.newHashMap();
         for (Entry<StatBase, TupleIntJsonSerializable> statEntry : data.entrySet()) {
-            StatBase stat = statEntry.getKey();
-            if (!stat.isAchievement()) {
-                statMap.put((Statistic) statEntry.getKey(), (long) statEntry.getValue().getIntegerValue());
-            }
+            statMap.put((Statistic) statEntry.getKey(), (long) statEntry.getValue().getIntegerValue());
         }
         return Optional.of(statMap);
     }

@@ -31,8 +31,7 @@ import co.aikar.timings.TimingHistory;
 import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
-import com.google.common.base.Throwables;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
@@ -74,10 +73,10 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraft.world.gen.ChunkProviderEnd;
+import net.minecraft.world.gen.ChunkGeneratorEnd;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.MapStorage;
@@ -334,7 +333,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             this.createBonusChest();
         }
 
-        if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) || ((((WorldServer) (Object) this)).getChunkProvider().chunkGenerator instanceof ChunkProviderEnd)) {
+        if ((generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) || ((((WorldServer) (Object) this)).getChunkProvider().chunkGenerator instanceof ChunkGeneratorEnd)) {
             this.worldInfo.setSpawn(new BlockPos(100, 50, 0));
             ci.cancel();
         }
@@ -909,7 +908,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         try {
             WorldManager.saveWorld((WorldServer) (Object) this, true);
         } catch (MinecraftException e) {
-            throw Throwables.propagate(e);
+            throw new RuntimeException(e);
         }
         return true;
     }
@@ -1929,8 +1928,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return (PortalAgent) this.worldTeleporter;
     }
 
-    @Redirect(method = "canAddEntity", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;[Ljava/lang/Object;)V", ordinal = 1, remap = false))
-    public void onCanAddEntityLogWarn(Logger logger, String message, Object... params) {
+    @Redirect(method = "canAddEntity", at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;Ljava/lang/Object;)V", remap = false))
+    public void onCanAddEntityLogWarn(Logger logger, String message, Object param1, Object param2) {
         // don't log anything to avoid useless spam
     }
     /**************************** TIMINGS ***************************************/
@@ -2252,7 +2251,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("LevelName", this.worldInfo.getWorldName())
                 .add("DimensionId", this.provider.getDimensionType().getId())
                 .add("DimensionType", ((org.spongepowered.api.world.DimensionType) (Object) this.provider.getDimensionType()).getId())

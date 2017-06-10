@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.util;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
@@ -43,7 +44,7 @@ public abstract class MixinEntityDamageSource extends MixinDamageSource implemen
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("EntityDamageSource")
+        return MoreObjects.toStringHelper("EntityDamageSource")
             .add("Name", this.damageType)
             .add("Type", this.getType().getId())
             .add("Source", getSource())

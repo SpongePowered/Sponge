@@ -81,7 +81,7 @@ public final class SpongeDataManager implements DataManager {
         TypeSerializers.getDefaultSerializers().registerPredicate(
             // We have a separate type serializer for CatalogTypes, so we explicitly discount them here.
             // See https://github.com/SpongePowered/SpongeCommon/issues/1348
-            x -> dataSerializableTypeToken.isAssignableFrom(x) && !catalogTypeToken.isAssignableFrom(x), new DataSerializableTypeSerializer()
+            x -> dataSerializableTypeToken.isSupertypeOf(x) && !catalogTypeToken.isSupertypeOf(x), new DataSerializableTypeSerializer()
         );
     }
 
@@ -258,7 +258,7 @@ public final class SpongeDataManager implements DataManager {
         checkState(allowRegistrations, "Registrations are no longer allowed");
         checkNotNull(objectClass, "Target object class cannot be null!");
         checkNotNull(translator, "DataTranslator for : " + objectClass + " cannot be null!");
-        checkArgument(translator.getToken().isAssignableFrom(objectClass), "DataTranslator is not compatible with the target object class: " + objectClass);
+        checkArgument(translator.getToken().isSupertypeOf(objectClass), "DataTranslator is not compatible with the target object class: " + objectClass);
         if (!this.dataSerializerMap.containsKey(checkNotNull(objectClass, "Target class cannot be null!"))) {
             this.dataSerializerMap.put(objectClass, translator);
             DataTranslatorRegistryModule.getInstance().registerAdditionalCatalog(translator);

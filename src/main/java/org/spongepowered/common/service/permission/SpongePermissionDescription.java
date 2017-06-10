@@ -27,7 +27,7 @@ package org.spongepowered.common.service.permission;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -105,7 +105,7 @@ class SpongePermissionDescription implements PermissionDescription {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("owner", this.owner)
                 .add("id", this.id)
                 .toString();

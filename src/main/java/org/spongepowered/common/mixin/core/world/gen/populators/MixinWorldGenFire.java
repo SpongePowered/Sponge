@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -119,7 +119,7 @@ public class MixinWorldGenFire implements NetherFire {
     
     @Override
     public String toString() {
-    	return Objects.toStringHelper(this)
+    	return MoreObjects.toStringHelper(this)
     			.add("Type", "NetherFire")
     			.add("PerChunk", this.count)
     			.add("PerCluster", this.cluster)

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -208,7 +208,7 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("Type", "BigMushroom")
                 .add("PerChunk", this.mushroomsPerChunk)
                 .toString();

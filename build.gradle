@@ -18,7 +18,7 @@ buildscript {
     dependencies {
         // VanillaGradle contains a custom ForgeGradle extension for SpongeCommon (see below)
         classpath 'gradle.plugin.net.minecrell:vanillagradle:2.2-5'
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.2-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
         classpath 'gradle.plugin.net.minecrell:licenser:0.3'
         classpath 'gradle.plugin.org.spongepowered:spongegradle:0.8.1'
         classpath 'org.spongepowered:mixingradle:0.4-SNAPSHOT'
@@ -27,18 +27,6 @@ buildscript {
 
 // Create task to resolve SpongeAPI revision
 apply from: 'api-revision.gradle'
-
-configurations {
-    fastutil
-    compile {
-        extendsFrom fastutil
-    }
-}
-
-plugins.withType(MavenPlugin) {
-    // Include fastutil in POM
-    conf2ScopeMappings.addMapping(MavenPlugin.COMPILE_PRIORITY, configurations.fastutil, Conf2ScopeMappingContainer.COMPILE)
-}
 
 // Apply shared ForgeGradle configuration
 ext.common = project
@@ -57,10 +45,8 @@ dependencies {
         exclude module: 'launchwrapper'
     }
 
-    fastutil 'it.unimi.dsi:fastutil:7.0.12'
-
     // log4j2 slf4j implementation
-    runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.0-beta9'
+    runtime 'org.apache.logging.log4j:log4j-slf4j-impl:2.8.1'
 
     // Database connectors
     compile 'com.zaxxer:HikariCP:2.5.1'

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.spawn;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
 import org.spongepowered.api.event.cause.entity.spawn.MobSpawnerSpawnCause;
@@ -63,7 +64,7 @@ public class SpongeMobSpawnerSpawnCause extends AbstractSpawnCause implements Mo
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("MobSpawnerSpawnCause")
+        return MoreObjects.toStringHelper("MobSpawnerSpawnCause")
                 .add("SpawnType", this.spawnType)
                 .add("MobSpawnerData", this.mobSpawnerData)
                 .toString();

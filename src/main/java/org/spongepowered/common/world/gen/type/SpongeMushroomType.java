@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.type.MushroomType;
 
@@ -81,7 +81,7 @@ public class SpongeMushroomType implements MushroomType {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("id", this.getId())
                 .add("popobj", this.obj.getClass().getName())
                 .toString();

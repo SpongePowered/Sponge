@@ -32,7 +32,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -50,7 +50,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.play.server.SPacketEntityVelocity;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
-import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.DamageSource;
@@ -89,8 +88,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.interfaces.ITargetedLocation;
@@ -165,18 +164,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     public void onGetDisplayName(CallbackInfoReturnable<ITextComponent> ci, TextComponentString component) {
         ci.setReturnValue(LegacyTexts.parseComponent(component, SpongeTexts.COLOR_CHAR));
-    }
-
-    @Inject(method = "clonePlayer", at = @At("HEAD"))
-    public void onClonePlayer(EntityPlayer oldPlayer, boolean respawnFromEnd, CallbackInfo ci) {
-        // Copy over sponge data from the old player.
-        // Allows plugins to specify data that persists after players respawn.
-        IMixinEntity oldEntity = (IMixinEntity) oldPlayer;
-        NBTTagCompound old = oldEntity.getEntityData();
-        if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
-            this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
-            this.readFromNbt(this.getSpongeData());
-        }
     }
 
     // utility method for getting the total experience at an arbitrary level
@@ -662,11 +649,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                             this.onEnchantmentCritical(targetEntity);
                         }
 
-
-                        if (damage >= 18.0F) {
-                            this.addStat(AchievementList.OVERKILL);
-                        }
-
                         this.setLastAttackedEntity(targetEntity);
 
                         if (targetEntity instanceof EntityLivingBase) {
@@ -677,8 +659,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         ItemStack itemstack1 = this.getHeldItemMainhand();
                         Entity entity = targetEntity;
 
-                        if (targetEntity instanceof EntityDragonPart) {
-                            IEntityMultiPart ientitymultipart = ((EntityDragonPart) targetEntity).parent;
+                        if (targetEntity instanceof MultiPartEntityPart) {
+                            IEntityMultiPart ientitymultipart = ((MultiPartEntityPart) targetEntity).parent;
 
                             if (ientitymultipart instanceof EntityLivingBase) {
                                 entity = (EntityLivingBase) ientitymultipart;

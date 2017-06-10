@@ -29,8 +29,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.biome.BiomeProviderSingle;
-import net.minecraft.world.chunk.IChunkGenerator;
-import net.minecraft.world.gen.ChunkProviderEnd;
+import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraft.world.gen.ChunkGeneratorEnd;
 
 public class SpongeWorldTypeEnd extends SpongeWorldType {
 
@@ -46,6 +46,6 @@ public class SpongeWorldTypeEnd extends SpongeWorldType {
 
     @Override
     public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
-        return new ChunkProviderEnd(world, true, world.getSeed(), new BlockPos(100, 50, 0));
+        return new ChunkGeneratorEnd(world, true, world.getSeed(), new BlockPos(100, 50, 0));
     }
 }

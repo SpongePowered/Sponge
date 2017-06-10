@@ -24,14 +24,17 @@
  */
 package org.spongepowered.common.interfaces;
 
+import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.WorldServer;
-
-import java.util.Hashtable;
 
 public interface IMixinMinecraftServer {
 
+    DataFixer getDataFixer();
+
     long[] getWorldTickTimes(int dimensionId);
+
     void putWorldTickTimes(int dimensionId, long[] tickTimes);
+
     void removeWorldTickTimes(int dimensionId);
 
     void prepareSpawnArea(WorldServer worldServer);

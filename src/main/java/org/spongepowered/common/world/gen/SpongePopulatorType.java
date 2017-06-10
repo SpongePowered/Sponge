@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.world.gen;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.world.gen.PopulatorType;
 
@@ -80,7 +80,7 @@ public class SpongePopulatorType implements PopulatorType {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("id", this.getId())
                 .add("name", this.populatorName)
                 .add("modid", this.modId)

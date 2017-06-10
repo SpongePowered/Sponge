@@ -132,7 +132,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow private DamageSource lastDamageSource;
     @Shadow private long lastDamageStamp;
     // Empty body so that we can call super() in MixinEntityPlayer
-    @Shadow public void stopActiveHand() { // stopActiveHand
+    @Shadow public void stopActiveHand() {
 
     }
 
@@ -140,10 +140,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract SoundEvent getDeathSound();
     @Shadow protected abstract float getSoundVolume();
     @Shadow protected abstract float getSoundPitch();
-    @Shadow protected abstract SoundEvent getHurtSound();
+    @Shadow protected abstract SoundEvent getHurtSound(DamageSource cause);
     @Shadow public abstract void setHealth(float health);
     @Shadow public abstract void addPotionEffect(net.minecraft.potion.PotionEffect potionEffect);
-    @Shadow protected abstract void markPotionsDirty(); // markPotionsDirty
+    @Shadow protected abstract void markPotionsDirty();
     @Shadow public abstract void setItemStackToSlot(EntityEquipmentSlot slotIn, ItemStack stack);
     @Shadow public abstract void clearActivePotions();
     @Shadow public abstract void setLastAttackedEntity(net.minecraft.entity.Entity entity);
@@ -158,8 +158,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow protected abstract void applyEntityAttributes();
     @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
-    @Shadow protected abstract void damageShield(float p_184590_1_); // damageShield
-    @Shadow public abstract void setActiveHand(EnumHand hand); // setActiveHand
+    @Shadow protected abstract void damageShield(float p_184590_1_);
+    @Shadow public abstract void setActiveHand(EnumHand hand);
     @Shadow public abstract ItemStack getHeldItem(EnumHand hand);
     @Shadow public abstract void setHeldItem(EnumHand hand, @Nullable ItemStack stack);
     @Shadow public abstract ItemStack getHeldItemMainhand();
@@ -170,7 +170,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract void setAbsorptionAmount(float amount);
     @Shadow public abstract float getAbsorptionAmount();
     @Shadow public abstract CombatTracker getCombatTracker();
-    @Shadow public abstract void setSprinting(boolean sprinting); // setSprinting
+    @Shadow public abstract void setSprinting(boolean sprinting);
     @Shadow public abstract boolean isOnLadder();
     @Shadow @Nullable public abstract EntityLivingBase getAttackingEntity();
     @Shadow protected abstract void dropLoot(boolean wasRecentlyHit, int lootingModifier, DamageSource source);
@@ -287,7 +287,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         EntityLivingBase entitylivingbase = this.getAttackingEntity();
 
         if (this.scoreValue >= 0 && entitylivingbase != null) {
-            entitylivingbase.addToPlayerScore((EntityLivingBase) (Object) this, this.scoreValue);
+            entitylivingbase.func_191956_a((EntityLivingBase) (Object) this, this.scoreValue, cause);
         }
 
         if (entity != null) {

@@ -27,6 +27,7 @@ package org.spongepowered.common.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -506,7 +507,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("worldUniqueId", this.worldUniqueId)
                 .add("position", this.pos)
                 .add("blockState", this.blockState)

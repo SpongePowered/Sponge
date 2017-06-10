@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
@@ -254,7 +254,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .addValue(getOwner())
                 .addValue(getType())
                 .toString();

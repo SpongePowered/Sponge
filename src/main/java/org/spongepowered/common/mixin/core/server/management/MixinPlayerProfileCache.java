@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.server.management;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -39,7 +40,6 @@ import net.minecraft.server.management.PlayerProfileCache;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -393,7 +393,7 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
     public Collection<GameProfile> getProfiles() {
         return this.usernameToProfileEntryMap.values().stream()
                 .map(entry -> (GameProfile) entry.getGameProfile())
-                .collect(GuavaCollectors.toImmutableSet());
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
@@ -403,7 +403,7 @@ public abstract class MixinPlayerProfileCache implements IMixinPlayerProfileCach
         return this.getProfiles().stream()
                 .filter(profile -> profile.getName().isPresent())
                 .filter(profile -> profile.getName().get().toLowerCase(Locale.ROOT).startsWith(search))
-                .collect(GuavaCollectors.toImmutableSet());
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     @Nullable

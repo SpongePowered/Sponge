@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.scheduler;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 
 import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
@@ -95,7 +95,7 @@ public class ScheduledTask implements Task {
         this.name = taskName;
         this.syncType = syncType;
 
-        this.stringRepresentation = Objects.toStringHelper(this)
+        this.stringRepresentation = MoreObjects.toStringHelper(this)
                 .add("name", this.name)
                 .add("delay", this.offset)
                 .add("interval", this.period)

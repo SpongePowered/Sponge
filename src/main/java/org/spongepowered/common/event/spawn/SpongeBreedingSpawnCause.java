@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.spawn;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.spawn.BreedingSpawnCause;
@@ -65,7 +66,7 @@ public class SpongeBreedingSpawnCause extends AbstractEntitySpawnCause implement
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("BreedingSpawnCause")
+        return MoreObjects.toStringHelper("BreedingSpawnCause")
                 .add("SpawnType", this.spawnType)
                 .add("EntitySnapshot", this.entity)
                 .add("MateSnapshot", this.mate)

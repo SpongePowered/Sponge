@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -188,7 +188,7 @@ public abstract class MixinWorldGenDungeons extends WorldGenerator implements Du
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                       .add("Type", "Dungeon")
                       .add("PerChunk", this.attempts)
                       .add("Data", this.data)

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.common.SpongeCatalogType;
 
@@ -69,7 +69,7 @@ public class SpongeParticleOption<V> extends SpongeCatalogType implements Partic
     }
 
     @Override
-    protected Objects.ToStringHelper toStringHelper() {
+    protected MoreObjects.ToStringHelper toStringHelper() {
         return super.toStringHelper()
                 .omitNullValues()
                 .add("valueType", this.valueType);

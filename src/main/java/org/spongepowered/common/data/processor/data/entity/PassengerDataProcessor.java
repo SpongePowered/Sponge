@@ -34,7 +34,6 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePassengerData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
@@ -102,7 +101,7 @@ public class PassengerDataProcessor extends AbstractEntitySingleDataProcessor<ne
                         .stream()
                         .map(EntityUtil::fromNative)
                         .map(Entity::getUniqueId)
-                        .collect(GuavaCollectors.toImmutableList());
+                        .collect(ImmutableList.toImmutableList());
                 entity.removePassengers();
                 return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).replace(constructImmutableValue(passengers)).build();
             }

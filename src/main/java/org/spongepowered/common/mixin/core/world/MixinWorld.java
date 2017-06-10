@@ -38,7 +38,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.entity.boss.EntityDragonPart;
+import net.minecraft.entity.MultiPartEntityPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityEnderPearl;
@@ -445,7 +445,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         double y = position.getY();
         double z = position.getZ();
 
-        if (entityClass.isAssignableFrom(EntityPlayerMP.class) || entityClass.isAssignableFrom(EntityDragonPart.class)) {
+        if (entityClass.isAssignableFrom(EntityPlayerMP.class) || entityClass.isAssignableFrom(MultiPartEntityPart.class)) {
             // Unable to construct these
             throw new IllegalArgumentException("Cannot construct " + type.getId() + " please look to using entity types correctly!");
         }

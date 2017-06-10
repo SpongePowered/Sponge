@@ -75,8 +75,7 @@ public abstract class MixinEntityAINearestAttackableTarget extends MixinEntityAI
     @SuppressWarnings("unchecked")
     @Override
     public java.util.function.Predicate<Living> getFilter() {
-        return this.targetEntitySelector == null ? Functional.guavaToJava8(Predicates.alwaysTrue())
-                : Functional.<Living>guavaToJava8(this.targetEntitySelector);
+        return this.targetEntitySelector == null ? Predicates.alwaysTrue() : this.targetEntitySelector;
     }
 
 }

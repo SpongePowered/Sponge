@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -136,7 +136,7 @@ public abstract class MixinWorldGenTallGrass extends WorldGenerator implements S
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("Type", "Shrub")
                 .add("PerChunk", this.count)
                 .toString();

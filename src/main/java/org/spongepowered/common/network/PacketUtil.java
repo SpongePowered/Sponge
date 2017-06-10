@@ -61,11 +61,10 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 
@@ -97,9 +96,11 @@ public class PacketUtil {
             //
             // This is done in order to sync client inventory to server and would be fine if the C10 packet
             // included an Enum of some sort that defined what type of sync was happening.
-            if (packetPlayer.interactionManager.isCreative() && (packetIn instanceof CPacketClientStatus && ((CPacketClientStatus) packetIn).getStatus() == CPacketClientStatus.State.OPEN_INVENTORY_ACHIEVEMENT)) {
-                lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
-            } else if (creativeCheck(packetIn, packetPlayer)) {
+            // TODO 1.12-pre2 is something here still needed
+//            if (packetPlayer.interactionManager.isCreative() && (packetIn instanceof CPacketClientStatus && ((CPacketClientStatus) packetIn).getStatus() == CPacketClientStatus.State.OPEN_INVENTORY_ACHIEVEMENT)) {
+//                lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
+//            } else
+            if (creativeCheck(packetIn, packetPlayer)) {
 
                 long packetDiff = System.currentTimeMillis() - lastInventoryOpenPacketTimeStamp;
                 // If the time between packets is small enough, mark the current packet to be ignored for our event handler.

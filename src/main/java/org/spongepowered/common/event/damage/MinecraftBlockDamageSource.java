@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.damage;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.Location;
@@ -43,7 +43,7 @@ public class MinecraftBlockDamageSource extends DamageSource {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("BlockDamageSource")
+        return MoreObjects.toStringHelper("BlockDamageSource")
             .add("Name", this.damageType)
             .add("BlockSnapshot", this.blockSnapshot)
             .add("Location", this.location)

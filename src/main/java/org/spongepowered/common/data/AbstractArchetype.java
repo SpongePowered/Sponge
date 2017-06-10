@@ -26,7 +26,7 @@ package org.spongepowered.common.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.inject.Inject;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.CatalogType;
@@ -245,6 +245,6 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this).add("type", this.type).add("data", this.data).toString();
+        return MoreObjects.toStringHelper(this).add("type", this.type).add("data", this.data).toString();
     }
 }

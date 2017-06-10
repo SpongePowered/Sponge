@@ -26,8 +26,7 @@ package org.spongepowered.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Objects;
-import com.google.common.base.Objects.ToStringHelper;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.text.translation.Translation;
 
@@ -72,8 +71,8 @@ public abstract class SpongeCatalogType implements CatalogType {
         return toStringHelper().toString();
     }
 
-    protected ToStringHelper toStringHelper() {
-        return Objects.toStringHelper(this)
+    protected MoreObjects.ToStringHelper toStringHelper() {
+        return MoreObjects.toStringHelper(this)
                 .add("id", getId())
                 .add("name", getName());
     }
@@ -98,7 +97,7 @@ public abstract class SpongeCatalogType implements CatalogType {
         }
 
         @Override
-        protected ToStringHelper toStringHelper() {
+        protected MoreObjects.ToStringHelper toStringHelper() {
             return super.toStringHelper()
                     .add("translation", getTranslation());
         }

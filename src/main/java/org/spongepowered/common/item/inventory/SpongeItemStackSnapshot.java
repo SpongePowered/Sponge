@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -325,7 +326,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("itemType", this.itemType)
                 .add("count", this.count)
                 .toString();

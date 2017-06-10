@@ -31,7 +31,7 @@ import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector2d;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
@@ -54,7 +54,7 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.gen.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -839,13 +839,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         return this.sponge_world.getBlockDigTimeWith((this.x << 4) + (x & 15), y, (this.z << 4) + (z & 15), itemStack, cause);
     }
 
-    @Redirect(method = "populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;getLoadedChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
+    @Redirect(method = "populate(Lnet/minecraft/world/chunk/IChunkProvider;Lnet/minecraft/world/gen/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;getLoadedChunk(II)Lnet/minecraft/world/chunk/Chunk;"))
     public net.minecraft.world.chunk.Chunk onPopulateLoadChunk(IChunkProvider chunkProvider, int x, int z) {
         // Don't mark chunks as active
         return ((IMixinChunkProviderServer) chunkProvider).getLoadedChunkWithoutMarkingActive(x, z);
     }
 
-    @Inject(method = "populate(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkGenerator;populate(II)V"))
+    @Inject(method = "populate(Lnet/minecraft/world/gen/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/IChunkGenerator;populate(II)V"))
     private void onPopulate(IChunkGenerator generator, CallbackInfo callbackInfo) {
         if (CauseTracker.ENABLED && !this.world.isRemote) {
             final CauseTracker causeTracker = CauseTracker.getInstance();
@@ -856,7 +856,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
         }
     }
 
-    @Inject(method = "populate(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;markDirty()V"))
+    @Inject(method = "populate(Lnet/minecraft/world/gen/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/Chunk;markDirty()V"))
     private void onPopulateFinish(IChunkGenerator generator, CallbackInfo info) {
         if (CauseTracker.ENABLED && !this.world.isRemote) {
             CauseTracker.getInstance().completePhase(GenerationPhase.State.TERRAIN_GENERATION);
@@ -1186,7 +1186,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk, IMixinCachable {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("World", this.world)
                 .add("Position", this.x + this.z)
                 .toString();

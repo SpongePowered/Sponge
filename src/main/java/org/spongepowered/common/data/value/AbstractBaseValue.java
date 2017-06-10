@@ -26,6 +26,7 @@ package org.spongepowered.common.data.value;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
@@ -97,7 +98,7 @@ public abstract class AbstractBaseValue<E> implements BaseValue<E> {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
             .add("key", this.key)
             .add("defaultValue", this.defaultValue)
             .add("actualValue", this.actualValue)

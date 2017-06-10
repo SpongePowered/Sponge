@@ -45,9 +45,8 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.Biome.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.chunk.IChunkGenerator;
-import net.minecraft.world.gen.ChunkProviderOverworld;
-import net.minecraft.world.gen.MapGenBase;
+import net.minecraft.world.gen.IChunkGenerator;
+import net.minecraft.world.gen.ChunkGeneratorOverworld;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
 import net.minecraft.world.gen.structure.MapGenScatteredFeature;
@@ -98,7 +97,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 /**
- * Similar class to {@link ChunkProviderOverworld}, but instead gets its blocks
+ * Similar class to {@link ChunkGeneratorOverworld}, but instead gets its blocks
  * from a custom chunk generator.
  */
 public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
@@ -463,6 +462,36 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         }
         return null;
     }
+
+    @Override
+    public boolean func_193414_a(World worldIn, String structureName, BlockPos position) {
+        Class<? extends MapGenStructure> target = null;
+        if ("Stronghold".equals(structureName)) {
+            target = MapGenStronghold.class;
+        } else if ("Mansion".equals(structureName)) {
+            target = WoodlandMansion.class;
+        } else if ("Monument".equals(structureName)) {
+            target = StructureOceanMonument.class;
+        } else if ("Village".equals(structureName)) {
+            target = MapGenVillage.class;
+        } else if ("Mineshaft".equals(structureName)) {
+            target = MapGenMineshaft.class;
+        } else if ("Temple".equals(structureName)) {
+            target = MapGenScatteredFeature.class;
+        }
+        if (target == null) {
+            return false;
+        }
+        for (GenerationPopulator gen : this.genpop) {
+            if (target.isInstance(gen)) {
+                return ((MapGenStructure) gen).isInsideStructure(position);
+            }
+        }
+        if (this.baseGenerator instanceof SpongeGenerationPopulator) {
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).func_193414_a(worldIn, structureName, position);
+        }
+        return false;
+}
 
     @Override
     public void recreateStructures(Chunk chunkIn, int x, int z) {

@@ -43,6 +43,7 @@ import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketClientSettings;
@@ -60,7 +61,6 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.stats.Achievement;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
 import net.minecraft.stats.StatisticsManagerServer;
@@ -129,6 +129,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
 import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -150,6 +151,7 @@ import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinTeam;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
@@ -157,7 +159,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.ChatUtil;
-import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.NetworkUtil;
@@ -195,7 +196,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract void sendPlayerAbilities();
     @Shadow @Override public abstract void takeStat(StatBase stat);
     @Shadow public abstract StatisticsManagerServer getStatFile();
-    @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
     @Shadow public abstract void displayGUIChest(IInventory chestInventory);
     @Shadow public abstract void displayGui(IInteractionObject guiOwner);
     @Shadow public abstract void openGuiHorseInventory(AbstractHorse horse, IInventory horseInventory);
@@ -307,7 +307,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 this.addStat(entitylist$entityegginfo.entityKilledByStat);
             }
 
-            entitylivingbase.addToPlayerScore((EntityPlayerMP) (Object) this, this.scoreValue);
+            entitylivingbase.func_191956_a((EntityPlayerMP) (Object) this, this.scoreValue, cause);
         }
 
         this.addStat(StatList.DEATHS);
@@ -320,6 +320,18 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             causeTracker.completePhase(EntityPhase.State.DEATH_UPDATE);
         }
         // Sponge end
+    }
+
+    @Inject(method = "func_193104_a", at = @At("HEAD"))
+    public void onClonePlayer(EntityPlayerMP oldPlayer, boolean respawnFromEnd, CallbackInfo ci) {
+        // Copy over sponge data from the old player.
+        // Allows plugins to specify data that persists after players respawn.
+        IMixinEntity oldEntity = (IMixinEntity) oldPlayer;
+        NBTTagCompound old = oldEntity.getEntityData();
+        if (old.hasKey(NbtDataUtil.SPONGE_DATA)) {
+            this.getEntityData().setTag(NbtDataUtil.SPONGE_DATA, old.getCompoundTag(NbtDataUtil.SPONGE_DATA));
+            this.readFromNbt(this.getSpongeData());
+        }
     }
 
     @Override
@@ -413,7 +425,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             component = SpongeTexts.fixActionBarFormatting(component);
         }
 
-        this.connection.sendPacket(new SPacketChat(component, ((SpongeChatType) type).getByteId()));
+        this.connection.sendPacket(new SPacketChat(component, (net.minecraft.util.text.ChatType) (Object) type));
     }
 
     /**

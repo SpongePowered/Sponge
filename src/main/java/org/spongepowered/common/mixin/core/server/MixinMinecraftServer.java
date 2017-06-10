@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import co.aikar.timings.TimingsManager;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.EntityTracker;
@@ -65,7 +66,6 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.Location;
@@ -137,6 +137,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private String motd;
     @Shadow public WorldServer[] worlds;
     @Shadow private Thread serverThread;
+    @Shadow @Final private DataFixer dataFixer;
 
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void sendMessage(ITextComponent message);
@@ -156,7 +157,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
     @Shadow public abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
     @Shadow public abstract boolean getAllowNether();
-    @Shadow public abstract DataFixer getDataFixer();
     @Shadow public abstract int getMaxPlayerIdleMinutes();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
     @Shadow public abstract boolean isDedicatedServer();
@@ -363,7 +363,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * generate spawn on server start. I enforce that here.
      */
     @Overwrite
-    public void initialWorldChunkLoad() {
+    protected void initialWorldChunkLoad() {
         for (WorldServer worldServer: this.worlds) {
             this.prepareSpawnArea(worldServer);
         }
@@ -470,7 +470,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     public Collection<WorldProperties> getUnloadedWorlds() {
         return WorldManager.getAllWorldProperties().stream()
                 .filter(props -> !this.getWorld(props.getUniqueId()).isPresent())
-                .collect(GuavaCollectors.toImmutableSet());
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
@@ -696,7 +696,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @param dontLog Whether to log during saving
      */
     @Overwrite
-    public void saveAllWorlds(boolean dontLog) {
+    protected void saveAllWorlds(boolean dontLog) {
         for (WorldServer worldserver : this.worlds) {
             if (worldserver != null) {
                 // Sponge start - check auto save interval in world config
@@ -791,4 +791,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     private Object onRun(FutureTask<?> task, Logger logger) {
         return SpongeImplHooks.onUtilRunTask(task, logger);
     }
+
+    @Override
+    public DataFixer getDataFixer() {
+        return this.dataFixer;
+    }
+
 }

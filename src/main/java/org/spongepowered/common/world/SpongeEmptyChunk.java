@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.world;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -168,7 +168,7 @@ public class SpongeEmptyChunk extends Chunk {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("empty", true)
                 .add("x", this.x)
                 .add("z", this.z)

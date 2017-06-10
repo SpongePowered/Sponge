@@ -29,15 +29,14 @@ import org.spongepowered.api.registry.RegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.common.text.chat.SpongeChatType;
 
 public final class ChatTypeRegistryModule implements RegistryModule {
 
     @RegisterCatalog(ChatTypes.class)
     public static final ImmutableMap<String, ChatType> chatTypeMappings = ImmutableMap.of(
-            "chat", new SpongeChatType("minecraft:chat", "Chat", (byte) 0),
-            "system", new SpongeChatType("minecraft:system", "System", (byte) 1),
-            "action_bar", new SpongeChatType("minecraft:action_bar", "Action Bar", (byte) 2)
+            "chat", (ChatType) (Object) net.minecraft.util.text.ChatType.CHAT,
+            "system", (ChatType) (Object) net.minecraft.util.text.ChatType.SYSTEM,
+            "action_bar", (ChatType) (Object) net.minecraft.util.text.ChatType.GAME_INFO
     );
 
 }

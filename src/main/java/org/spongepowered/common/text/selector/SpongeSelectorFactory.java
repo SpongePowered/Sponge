@@ -26,7 +26,6 @@ package org.spongepowered.common.text.selector;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -42,7 +41,6 @@ import org.spongepowered.api.text.selector.ArgumentTypes;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorFactory;
 import org.spongepowered.api.text.selector.SelectorType;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 
@@ -96,7 +94,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
                             .debug(m + " failed with paramter " + input, e);
                     return null;
                 } catch (InvocationTargetException e) {
-                    throw Throwables.propagate(e.getCause());
+                    throw new RuntimeException(e.getCause());
                 }
             };
         } else {
@@ -111,7 +109,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
                             .debug(m + " failed with paramter " + input, e);
                     return null;
                 } catch (InvocationTargetException e) {
-                    throw Throwables.propagate(e.getCause());
+                    throw new RuntimeException(e.getCause());
                 }
             };
         }
@@ -343,7 +341,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
             }
             choices = choices.map(input -> prefix + input);
         }
-        return choices.filter(choice -> choice.startsWith(selector)).collect(GuavaCollectors.toImmutableList());
+        return choices.filter(choice -> choice.startsWith(selector)).collect(ImmutableList.toImmutableList());
     }
 
 }

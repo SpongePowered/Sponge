@@ -27,6 +27,7 @@ package org.spongepowered.common.entity.player.tab;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -145,7 +146,7 @@ public final class SpongeTabListEntry implements TabListEntry {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("profile", this.profile)
                 .add("latency", this.latency)
                 .add("displayName", this.displayName)

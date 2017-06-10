@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.inject.provider.config;
 
-import com.google.common.base.Objects;
+import com.google.common.base.MoreObjects;
 import org.spongepowered.api.config.DefaultConfig;
 
 import java.lang.annotation.Annotation;
@@ -70,7 +70,7 @@ public class DefaultConfigAnnotation implements DefaultConfig {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper('@' + getClass().getName())
+        return MoreObjects.toStringHelper('@' + getClass().getName())
                 .add("shared", this.shared)
                 .toString();
     }

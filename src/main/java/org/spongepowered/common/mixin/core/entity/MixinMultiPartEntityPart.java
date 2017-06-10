@@ -22,34 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.chat;
+package org.spongepowered.common.mixin.core.entity;
 
-import org.spongepowered.api.text.chat.ChatType;
+import net.minecraft.entity.IEntityMultiPart;
+import net.minecraft.entity.MultiPartEntityPart;
+import org.spongepowered.api.entity.living.complex.EnderDragon;
+import org.spongepowered.api.entity.living.complex.EnderDragonPart;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
-public class SpongeChatType implements ChatType {
+@Mixin(MultiPartEntityPart.class)
+public abstract class MixinMultiPartEntityPart extends MixinEntity implements EnderDragonPart {
 
-    private final String id;
-    private final String name;
-    private final byte byteId;
-
-    public SpongeChatType(String id, String name, byte byteId) {
-        this.id = id;
-        this.name = name;
-        this.byteId = byteId;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
-    }
+    @Shadow @Final public IEntityMultiPart parent;
 
     @Override
-    public String getName() {
-        return this.name;
-    }
-
-    public byte getByteId() {
-        return this.byteId;
+    public EnderDragon getParent() {
+        return (EnderDragon) this.parent;
     }
 
 }
