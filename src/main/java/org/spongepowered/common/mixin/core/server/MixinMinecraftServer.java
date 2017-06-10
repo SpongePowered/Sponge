@@ -32,6 +32,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.command.ICommandManager;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.crash.ICrashReportDetail;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
@@ -94,6 +97,7 @@ import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
@@ -797,4 +801,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return this.dataFixer;
     }
 
+    @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
+    private void onCrashReport(CrashReport report, CallbackInfoReturnable<CrashReport> cir) {
+        report.makeCategory("Sponge CauseTracker").addDetail("Cause Stack", CauseTrackerCrashHandler.INSTANCE);
+        cir.setReturnValue(report);
+    }
 }

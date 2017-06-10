@@ -63,6 +63,8 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -341,6 +343,20 @@ public final class CauseTracker {
         printer.add();
         generateVersionInfo(printer);
         printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+    }
+
+    public String dumpStack() {
+        if (this.stack.isEmpty()) {
+            return "[Empty stack]";
+        }
+
+        final PrettyPrinter printer = new PrettyPrinter(40);
+        this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        printer.print(new PrintStream(stream));
+
+        return stream.toString();
     }
 
     // ----------------- SIMPLE GETTERS --------------------------------------
