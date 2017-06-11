@@ -71,7 +71,6 @@ public final class GeneralPhase extends TrackingPhase {
         public static final IPhaseState COMMAND = new CommandState();
         public static final IPhaseState EXPLOSION = new ExplosionState();
         public static final IPhaseState COMPLETE = new CompletePhase();
-        public static final IPhaseState MARKER_CROSS_WORLD = new MarkerCrossWorld();
 
         private State() { }
     }
@@ -327,7 +326,7 @@ public final class GeneralPhase extends TrackingPhase {
 
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return currentState != State.COMPLETE && currentState != State.MARKER_CROSS_WORLD;
+        return currentState != State.COMPLETE;
     }
 
     @Override
