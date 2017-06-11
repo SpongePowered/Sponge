@@ -367,7 +367,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * generate spawn on server start. I enforce that here.
      */
     @Overwrite
-    protected void initialWorldChunkLoad() {
+    public void initialWorldChunkLoad() {
         for (WorldServer worldServer: this.worlds) {
             this.prepareSpawnArea(worldServer);
         }
@@ -700,7 +700,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      * @param dontLog Whether to log during saving
      */
     @Overwrite
-    protected void saveAllWorlds(boolean dontLog) {
+    public void saveAllWorlds(boolean dontLog) {
         for (WorldServer worldserver : this.worlds) {
             if (worldserver != null) {
                 // Sponge start - check auto save interval in world config
