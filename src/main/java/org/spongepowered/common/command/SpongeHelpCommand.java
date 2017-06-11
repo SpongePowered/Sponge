@@ -96,7 +96,7 @@ public class SpongeHelpCommand {
                 optional(
                     GenericArguments.firstParsing(
                         GenericArguments.integer(PAGE_KEY),
-                            COMMAND_ARGUMENT,
+                        COMMAND_ARGUMENT,
                         GenericArguments.string(NOT_FOUND)
                     )
                 )
