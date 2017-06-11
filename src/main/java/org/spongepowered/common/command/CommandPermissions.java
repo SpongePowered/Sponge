@@ -24,15 +24,16 @@
  */
 package org.spongepowered.common.command;
 
-import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeImpl;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.StringJoiner;
 import java.util.function.BiFunction;
+import java.util.stream.Collectors;
 
 public final class CommandPermissions {
 
@@ -53,15 +54,28 @@ public final class CommandPermissions {
         if (commandName.equals(CommandPermissions.COMMAND_BLOCK_COMMAND)) {
             return source.hasPermission(CommandPermissions.COMMAND_BLOCK_PERMISSION);
         }
-        Optional<? extends CommandMapping> mapping = SpongeImpl.getGame().getCommandManager().get(commandName);
-        if (mapping.isPresent()) {
-            CommandCallable callable = mapping.get().getCallable();
-            if (callable instanceof MinecraftCommandWrapper) {
-                return source.hasPermission(((MinecraftCommandWrapper) callable).getCommandPermission());
-            } else {
-                return callable.testPermission(source);
-            }
+        //This method is only called for Minecraft/Modded commands, so don't look at commands provided by plugins.
+        final List<? extends CommandMapping> nativeMappings = SpongeImpl.getGame().getCommandManager().getAll(commandName).stream()
+                .filter(m -> m.getCallable() instanceof MinecraftCommandWrapper)
+                .collect(Collectors.toList());
+        //Forge rules for clashing commands is whatever registers last wins, but secondary aliases never override primary.
+        //thus we never expect there to be more then one native mapping for a given alias.
+        //Possible I guess, if some plugin (not mod) intentionally re-registers a minecraft/mod command under a clashing alias...
+        if (nativeMappings.size() > 1) {
+            final int size = nativeMappings.size();
+            final StringJoiner commaSeparated = new StringJoiner(", ");
+            nativeMappings.stream()
+                    .map(m -> ((MinecraftCommandWrapper) m).getOwner().getName() + ':' + m.getPrimaryAlias())
+                    .forEach(commaSeparated::add);
+
+            throw new IllegalStateException("Only one native mapping expected for /" + commandName + "found " + size + "(" + commaSeparated + ")");
         }
+        final CommandMapping mapping = nativeMappings.isEmpty() ? null : nativeMappings.get(0);
+        if (mapping != null) {
+            MinecraftCommandWrapper callable = (MinecraftCommandWrapper) mapping.getCallable();
+            return source.hasPermission(callable.getCommandPermission());
+        }
+        //Fallback for non-command mod permissions
         return source.hasPermission(commandName);
     }
 
