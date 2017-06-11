@@ -40,7 +40,6 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandResult;
@@ -65,11 +64,11 @@ public class SpongeHelpCommand {
 
     private static final Comparator<CommandMapping> COMMAND_COMPARATOR = Comparator.comparing(CommandMapping::getPrimaryAlias);
 
-    private static final Text pageKey = Text.of("page");
-    private static final Text commandKey = Text.of("command");
-    private static final Text notFound = Text.of("notFound");
+    private static final Text PAGE_KEY = Text.of("page");
+    private static final Text COMMAND_KEY = Text.of("command");
+    private static final Text NOT_FOUND = Text.of("notFound");
 
-    private static final CommandElement commandArgument = new CommandElement(commandKey){
+    private static final CommandElement COMMAND_ARGUMENT = new CommandElement(COMMAND_KEY){
 
         @Nullable @Override protected Object parseValue(CommandSource source, CommandArgs args) throws ArgumentParseException {
             String input = args.next();
@@ -96,9 +95,9 @@ public class SpongeHelpCommand {
             .arguments(
                 optional(
                     GenericArguments.firstParsing(
-                        GenericArguments.integer(pageKey),
-                        commandArgument,
-                        GenericArguments.string(notFound)
+                        GenericArguments.integer(PAGE_KEY),
+                            COMMAND_ARGUMENT,
+                        GenericArguments.string(NOT_FOUND)
                     )
                 )
             )
@@ -108,12 +107,12 @@ public class SpongeHelpCommand {
                          + " a command to insert it into your chat bar."))
             .executor((src, args) -> {
 
-                if(args.getOne(notFound).isPresent()){
-                    throw new CommandException(Text.of("No such command: ", args.getOne(notFound).get()));
+                if(args.getOne(NOT_FOUND).isPresent()){
+                    throw new CommandException(Text.of("No such command: ", args.getOne(NOT_FOUND).get()));
                 }
 
-                Optional<CommandMapping> command = args.getOne(commandKey);
-                Optional<Integer> page = args.getOne(pageKey);
+                Optional<CommandMapping> command = args.getOne(COMMAND_KEY);
+                Optional<Integer> page = args.getOne(PAGE_KEY);
 
                 if (command.isPresent()) {
                     CommandCallable callable = command.get().getCallable();
@@ -155,7 +154,6 @@ public class SpongeHelpCommand {
         final Optional<Text> description = mapping.getCallable().getShortDescription(source);
         Text.Builder text = Text.builder("/" + mapping.getPrimaryAlias());
         text.color(TextColors.GREEN);
-        text.style(TextStyles.UNDERLINE);
         //End with a space, so tab completion works immediately.
         text.onClick(TextActions.suggestCommand("/" + mapping.getPrimaryAlias() + " "));
         Optional<? extends Text> longDescription = mapping.getCallable().getHelp(source);
