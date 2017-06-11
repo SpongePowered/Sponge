@@ -154,7 +154,7 @@ public final class DataUtil {
         checkNotNull(containers);
         final SerializedDataTransaction.Builder builder = SerializedDataTransaction.builder();
         for (DataView view : containers) {
-            updateDataViewForDataManipulator(view);
+            view = updateDataViewForDataManipulator(view);
             final String dataId = view.getString(DataQueries.DATA_ID).get();
             final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).get();
             try {
@@ -193,14 +193,15 @@ public final class DataUtil {
         return builder.build();
     }
 
-    private static void updateDataViewForDataManipulator(DataView dataView) {
+    private static DataView updateDataViewForDataManipulator(DataView dataView) {
         final int version = dataView.getInt(Queries.CONTENT_VERSION).orElse(1);
         if (version != DataVersions.Data.CURRENT_CUSTOM_DATA) {
             final DataContentUpdater contentUpdater = SpongeDataManager.getInstance()
                 .getWrappedContentUpdater(DataManipulator.class, version, DataVersions.Data.CURRENT_CUSTOM_DATA)
                 .orElseThrow(() -> new IllegalArgumentException("Could not find a content updater for DataManipulator information with version: " +version));
-            contentUpdater.update(dataView);
+            return contentUpdater.update(dataView);
         }
+        return dataView;
     }
 
     @SuppressWarnings("rawtypes")
@@ -208,7 +209,7 @@ public final class DataUtil {
         checkNotNull(containers);
         final ImmutableList.Builder<ImmutableDataManipulator<?, ?>> builder = ImmutableList.builder();
         for (DataView view : containers) {
-            updateDataViewForDataManipulator(view);
+            view = updateDataViewForDataManipulator(view);
             final String dataId = view.getString(DataQueries.DATA_ID).get();
             final DataView manipulatorView = view.getView(DataQueries.INTERNAL_DATA).get();
             try {
