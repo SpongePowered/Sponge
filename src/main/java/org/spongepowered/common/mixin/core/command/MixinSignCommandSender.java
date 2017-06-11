@@ -29,6 +29,8 @@ import net.minecraft.tileentity.TileEntitySign;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.SignSource;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -63,4 +65,13 @@ public abstract class MixinSignCommandSender implements ICommandSender, IMixinCo
         return (Sign) this.field_174795_a;
     }
 
+    @Override
+    public World getWorld() {
+        return (World) this.field_174795_a.getWorld();
+    }
+
+    @Override
+    public Location<World> getLocation() {
+        return ((Sign) this.field_174795_a).getLocation();
+    }
 }
