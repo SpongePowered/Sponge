@@ -36,6 +36,9 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.Locatable;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,7 +52,7 @@ import java.util.Set;
 
 @Mixin(targets = IMixinCommandSender.EXECUTE_COMMAND_SENDER)
 @NonnullByDefault
-public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixinCommandSource, IMixinCommandSender {
+public abstract class MixinCommandExecuteAtSender implements ProxySource, Locatable, IMixinCommandSource, IMixinCommandSender {
 
     @Shadow(aliases = {"field_174804_a", "val$entity", "a"}) @Final private Entity field_174804_a;
     @Shadow(aliases = {"field_189650_b", "val$sender", "b"}) @Final private ICommandSender field_189650_b;
@@ -162,6 +165,16 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
     @Override
     public ICommandSender asICommandSender() {
         return (ICommandSender) this;
+    }
+
+    @Override
+    public Location<World> getLocation() {
+        return ((org.spongepowered.api.entity.Entity) field_174804_a).getLocation();
+    }
+
+    @Override
+    public World getWorld() {
+        return ((org.spongepowered.api.entity.Entity) field_174804_a).getWorld();
     }
 
 }

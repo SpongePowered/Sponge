@@ -126,7 +126,6 @@
         "command.MixinCommandSendCommandFeedback",
         "command.MixinCommandSource",
         "command.MixinICommandSender",
-        "command.MixinLocatedSource",
         "command.MixinMinecartCommandBlockSender",
         "command.MixinSignCommandSender",
         "command.MixinSubject",
