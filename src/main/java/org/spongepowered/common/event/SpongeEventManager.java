@@ -168,19 +168,19 @@ public class SpongeEventManager implements EventManager {
     }
 
     private void register(List<RegisteredListener<? extends Event>> handlers) {
-        synchronized (this.lock) {
-            boolean changed = false;
+        boolean changed = false;
 
+        synchronized (this.lock) {
             for (RegisteredListener<?> handler : handlers) {
                 if (this.handlersByEvent.put(handler.getEventClass(), handler)) {
                     changed = true;
                     this.checker.registerListenerFor(handler.getEventClass());
                 }
             }
+        }
 
-            if (changed) {
-                this.handlersCache.invalidateAll();
-            }
+        if (changed) {
+            this.handlersCache.invalidateAll();
         }
     }
 
@@ -301,9 +301,9 @@ public class SpongeEventManager implements EventManager {
     }
 
     private void unregister(Predicate<RegisteredListener<?>> unregister) {
-        synchronized (this.lock) {
-            boolean changed = false;
+        boolean changed = false;
 
+        synchronized (this.lock) {
             Iterator<RegisteredListener<?>> itr = this.handlersByEvent.values().iterator();
             while (itr.hasNext()) {
                 RegisteredListener<?> handler = itr.next();
@@ -313,10 +313,10 @@ public class SpongeEventManager implements EventManager {
                     this.checker.unregisterListenerFor(handler.getEventClass());
                 }
             }
+        }
 
-            if (changed) {
-                this.handlersCache.invalidateAll();
-            }
+        if (changed) {
+            this.handlersCache.invalidateAll();
         }
     }
 
