@@ -120,7 +120,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
         k = p_180622_5_;
         l = p_180622_4_;
-        int seaLevel = ((net.minecraft.world.World) world).getSeaLevel();
+        int seaLevel = world.getSeaLevel();
         IBlockState iblockstate = Blocks.STAINED_HARDENED_CLAY.getDefaultState();
         IBlockState iblockstate3 = Blocks.STAINED_HARDENED_CLAY.getDefaultState();
         int i1 = (int) (p_180622_6_ / 3.0D + 3.0D + p_180622_2_.nextDouble() * 0.25D);
