@@ -64,6 +64,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
@@ -89,6 +90,8 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -476,8 +479,16 @@ public class SpongeCommand {
 
                             appendPluginMeta(builder, "ID", container.getId());
                             appendPluginMeta(builder, "Description", container.getDescription());
-                            appendPluginMeta(builder, "URL", container.getUrl());
-
+                            appendPluginMeta(builder, "URL", container.getUrl().map(url -> {
+                                ClickAction.OpenUrl action = null;
+                                try {
+                                    // make the url clickable
+                                    action = TextActions.openUrl(new URL(url));
+                                } catch (MalformedURLException e) {
+                                    // or not
+                                }
+                                return Text.builder(url).onClick(action);
+                            }));
                             if (!container.getAuthors().isEmpty()) {
                                 appendPluginMeta(builder, "Authors", String.join(", ", container.getAuthors()));
                             }
@@ -510,13 +521,13 @@ public class SpongeCommand {
                 }).build();
     }
 
-    private static void appendPluginMeta(Text.Builder builder, String key, Optional<String> value) {
+    private static void appendPluginMeta(Text.Builder builder, String key, Optional<?> value) {
         if (value.isPresent()) {
             appendPluginMeta(builder, key, value.get());
         }
     }
 
-    private static void appendPluginMeta(Text.Builder builder, String key, String value) {
+    private static void appendPluginMeta(Text.Builder builder, String key, Object value) {
         builder.append(NEWLINE_TEXT, INDENT_TEXT, title(key + ": "), Text.of(value));
     }
 
