@@ -25,7 +25,6 @@
 package org.spongepowered.common.test;
 
 import com.google.inject.Singleton;
-import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.Server;
 import org.spongepowered.common.SpongeGame;
 
@@ -43,11 +42,6 @@ public class TestGame extends SpongeGame {
     @Override
     public Server getServer() {
         throw new NoSuchElementException();
-    }
-
-    @Override
-    public GameDictionary getGameDictionary() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
