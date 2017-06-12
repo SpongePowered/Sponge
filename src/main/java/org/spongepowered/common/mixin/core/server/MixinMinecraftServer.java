@@ -801,7 +801,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Inject(method = "addServerInfoToCrashReport", at = @At("RETURN"), cancellable = true)
     private void onCrashReport(CrashReport report, CallbackInfoReturnable<CrashReport> cir) {
-        report.makeCategory("Sponge CauseTracker").setDetail("Cause Stack", CauseTrackerCrashHandler.INSTANCE);
+        report.makeCategory("Sponge CauseTracker").addDetail("Cause Stack", CauseTrackerCrashHandler.INSTANCE);
         cir.setReturnValue(report);
     }
 }
