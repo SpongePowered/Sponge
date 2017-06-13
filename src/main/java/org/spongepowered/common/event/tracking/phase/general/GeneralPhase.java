@@ -72,6 +72,7 @@ public final class GeneralPhase extends TrackingPhase {
         public static final IPhaseState EXPLOSION = new ExplosionState();
         public static final IPhaseState COMPLETE = new CompletePhase();
         public static final IPhaseState MARKER_CROSS_WORLD = new MarkerCrossWorld();
+        public static final IPhaseState GAME_STATE_EVENTS = new GameStateEventState();
 
         private State() { }
     }
@@ -328,6 +329,11 @@ public final class GeneralPhase extends TrackingPhase {
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
         return currentState != State.COMPLETE && currentState != State.MARKER_CROSS_WORLD;
+    }
+
+    @Override
+    public boolean requiresPost(IPhaseState state) {
+        return ((GeneralState) state).requiresPost();
     }
 
     @Override

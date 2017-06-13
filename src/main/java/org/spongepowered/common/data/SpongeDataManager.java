@@ -264,6 +264,7 @@ public final class SpongeDataManager implements DataManager {
             .dataClass((Class<T>) manipulatorClass)
             .immutableClass((Class<I>) immutableManipulatorClass)
             .manipulatorId(generatedManipulatorId)
+            .dataName(manipulatorSimpleNamePriorToProcessing)
             .builder(builder)
             .buildAndRegister(pluginContainer);
         SpongeManipulatorRegistry.getInstance().registerLegacyId(registration);

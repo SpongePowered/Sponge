@@ -89,4 +89,8 @@ abstract class GeneralState implements IPhaseState {
     public Cause generateTeleportCause(PhaseContext context) {
         return Cause.of(NamedCause.source(TeleportCause.builder().type(TeleportTypes.UNKNOWN).build()));
     }
+
+    public boolean requiresPost() {
+        return true;
+    }
 }

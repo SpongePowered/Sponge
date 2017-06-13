@@ -41,6 +41,11 @@ final class PostState extends GeneralState {
     }
 
     @Override
+    public boolean requiresPost() {
+        return false;
+    }
+
+    @Override
     public boolean tracksBlockRestores() {
         return false; // TODO - check that this really is needed.
     }

@@ -24,22 +24,17 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
-final class CompletePhase extends GeneralState {
+public class GameStateEventState extends GeneralState {
+
     @Override
-    public boolean canSwitchTo(IPhaseState state) {
-        return true;
+    public boolean requiresPost() {
+        return false; // Since nothing affecting the game should happen, there's nothing to track.
     }
 
     @Override
     void unwind(PhaseContext context) {
 
-    }
-
-    @Override
-    public boolean requiresPost() {
-        return false;
     }
 }
