@@ -30,6 +30,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.math.MathHelper;
@@ -38,22 +39,23 @@ import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTableList;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.action.FishingEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -65,15 +67,17 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
     @Shadow @Nullable private EntityPlayer angler;
     @Shadow @Nullable public net.minecraft.entity.Entity caughtEntity;
-    @Shadow private int ticksCatchable;
-    @Shadow private boolean inGround;
+
     @Shadow protected abstract void bringInHookedEntity();
+
+    @Shadow private int ticksCatchable;
     @Shadow private int field_191518_aw;
+    @Shadow private boolean inGround;
+
+    @Shadow public abstract void setDead();
 
     @Nullable
-    public ProjectileSource projectileSource;
-    private double damageAmount;
-    private net.minecraft.item.ItemStack fishingRod;
+    private ProjectileSource projectileSource;
 
     @Override
     public ProjectileSource getShooter() {
@@ -106,59 +110,88 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
         this.caughtEntity = (net.minecraft.entity.Entity) entity;
     }
 
+    @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
+    private void onSetHookedEntity(CallbackInfo ci) {
+        if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventHookEntity(Cause.of(NamedCause.source(this)), this,
+                (Entity) this.caughtEntity))) {
+            this.caughtEntity = null;
+            ci.cancel();
+        }
+    }
+
     /**
      * @author Aaron1011 - February 6th, 2015
      * @author Minecrell - December 24th, 2016 (Updated to Minecraft 1.11.2)
-     * @reason This needs to handle for both cases where a fish and/or an entity is being caught. There's no real good way to do this with
-     * an injection.
+     * @author Minecrell - June 14th, 2017 (Rewritten to handle cases where no items are dropped)
+     * @reason This needs to handle for both cases where a fish and/or an entity is being caught.
      */
     @Overwrite
     public int handleHookRetraction() {
         if (!this.world.isRemote && this.angler != null) {
             int i = 0;
 
-            if (this.caughtEntity != null) {
-                this.bringInHookedEntity();
-                this.world.setEntityState((EntityFishHook) (Object) this, (byte) 31);
-                i = this.caughtEntity instanceof EntityItem ? 3 : 5;
-            } else if (this.ticksCatchable > 0) {
+            // Sponge start
+            List<Transaction<ItemStackSnapshot>> transactions;
+            if (this.ticksCatchable > 0) {
+                // Moved from below
                 LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer) this.world);
                 lootcontext$builder.withLuck((float) this.field_191518_aw + this.angler.getLuck());
-
-                // Sponge start
-                // TODO 1.9: Figure out how we want experience to work here
-                List<net.minecraft.item.ItemStack> itemstacks = this.world.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING).generateLootForPools(this.rand, lootcontext$builder.build());
-                FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.angler)), 0, 0,
-                        this.createSnapshot(), this, itemstacks.stream().map(s -> {
-                            ItemStackSnapshot snapshot = ((ItemStack) s).createSnapshot();
+                transactions = this.world.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING)
+                        .generateLootForPools(this.rand, lootcontext$builder.build())
+                        .stream()
+                        .map(s -> {
+                            ItemStackSnapshot snapshot = ((org.spongepowered.api.item.inventory.ItemStack) s).createSnapshot();
                             return new Transaction<>(snapshot, snapshot);
-                        }).collect(Collectors.toList()), (Player) this.angler);
+                        })
+                        .collect(Collectors.toList());
+            } else {
+                transactions = new ArrayList<>();
+            }
 
+            if (SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.angler)), this, transactions))) {
+                // Event is cancelled
+                return -1;
+            }
 
-                if (!SpongeImpl.postEvent(event)) {
-                    for (net.minecraft.item.ItemStack itemstack : event.getItemStackTransaction().stream().filter(Transaction::isValid).map(t -> (net.minecraft.item.ItemStack) t.getFinal().createStack()).collect(Collectors.toList())) {
-                        // Sponge end
-                        EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack);
-                        double d0 = this.angler.posX - this.posX;
-                        double d1 = this.angler.posY - this.posY;
-                        double d2 = this.angler.posZ - this.posZ;
-                        double d3 = (double) MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
-                        double d4 = 0.1D;
-                        entityitem.motionX = d0 * 0.1D;
-                        entityitem.motionY = d1 * 0.1D + (double) MathHelper.sqrt(d3) * 0.08D;
-                        entityitem.motionZ = d2 * 0.1D;
-                        this.world.spawnEntity(entityitem);
-                        this.angler.world.spawnEntity(new EntityXPOrb(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D, this.rand.nextInt(6) + 1));
-                        Item item = itemstack.getItem();
+            if (this.caughtEntity != null) {
+                this.bringInHookedEntity();
+                this.world.setEntityState((net.minecraft.entity.Entity) (Object) this, (byte) 31);
+                i = this.caughtEntity instanceof EntityItem ? 3 : 5;
+            } // Sponge: Remove else
 
-                        if (item == Items.FISH || item == Items.COOKED_FISH) {
-                            this.angler.addStat(StatList.FISH_CAUGHT, 1);
-                        }
+            // Sponge start - Moved up to event call
+            if (!transactions.isEmpty()) { // Sponge: Check if we have any transactions instead
+                //LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer) this.world);
+                //lootcontext$builder.withLuck((float) this.field_191518_aw + this.angler.getLuck());
+
+                // Use transactions
+                for (Transaction<ItemStackSnapshot> transaction : transactions) {
+                    if (!transaction.isValid()) {
+                        continue;
+                    }
+                    ItemStack itemstack = (ItemStack) transaction.getFinal().createStack();
+                    // Sponge end
+
+                    EntityItem entityitem = new EntityItem(this.world, this.posX, this.posY, this.posZ, itemstack);
+                    double d0 = this.angler.posX - this.posX;
+                    double d1 = this.angler.posY - this.posY;
+                    double d2 = this.angler.posZ - this.posZ;
+                    double d3 = (double) MathHelper.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                    //double d4 = 0.1D;
+                    entityitem.motionX = d0 * 0.1D;
+                    entityitem.motionY = d1 * 0.1D + (double) MathHelper.sqrt(d3) * 0.08D;
+                    entityitem.motionZ = d2 * 0.1D;
+                    this.world.spawnEntity(entityitem);
+                    this.angler.world.spawnEntity(new EntityXPOrb(this.angler.world, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D,
+                            this.rand.nextInt(6) + 1));
+                    Item item = itemstack.getItem();
+
+                    if (item == Items.FISH || item == Items.COOKED_FISH) {
+                        this.angler.addStat(StatList.FISH_CAUGHT, 1);
                     }
                 }
 
-
-                i = 1;
+                i = Math.max(i, 1); // Sponge: Don't lower damage if we've also caught an entity
             }
 
             if (this.inGround) {
